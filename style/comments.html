@@ -34,7 +34,7 @@
 
 
         
-    <div class="book" data-github="aturon/rust-guidelines" data-level="1.2" data-basepath=".." data-revision="1403829983459">
+    <div class="book" data-github="aturon/rust-guidelines" data-level="1.2" data-basepath=".." data-revision="1404166490460">
     <div class="book-header">
     <!-- Actions Left -->
     <a href="#" class="btn pull-left toggle-summary" aria-label="Toggle summary"><i class="fa fa-align-justify"></i></a>
@@ -640,21 +640,28 @@
     
         <li class="chapter " data-level="9.2" >
             
-            <span><b>9.2.</b> Concurrency</span>
+            <span><b>9.2.</b> The visitor pattern</span>
             
             
         </li>
     
         <li class="chapter " data-level="9.3" >
             
-            <span><b>9.3.</b> Documentation</span>
+            <span><b>9.3.</b> Concurrency</span>
             
             
         </li>
     
         <li class="chapter " data-level="9.4" >
             
-            <span><b>9.4.</b> Macros</span>
+            <span><b>9.4.</b> Documentation</span>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="9.5" >
+            
+            <span><b>9.5.</b> Macros</span>
             
             
         </li>
@@ -800,12 +807,44 @@
 <span class="hljs-comment">/// This function is equivalent to `TaskBuilder::new().spawn(f)`.</span>
 <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">spawn</span>(</span>f: proc():Send) { ... }
 </code></pre>
-<h3 id="style-doc-comments-like-sentences-">Style doc comments like sentences.</h3>
-<p>Doc comments should begin with capital letters and end in a period,
-even in the short summary description. Prefer full sentences to
-fragments.</p>
+<h2 id="doc-comments">Doc comments</h2>
+<p>Doc comments are prefixed by three slashes (<code>///</code>) and indicate
+documentation that you would like to be included in Rustdoc&#39;s output.
+They support
+<a href="http://daringfireball.net/projects/markdown/" target="_blank">Markdown syntax</a>
+and are the main way of documenting your public APIs.</p>
+<h3 id="summary-line">Summary line</h3>
+<p>The first line in any doc comment should be a single-line short sentence
+providing a summary of the code. This line is used as a short summary
+description throughout Rustdoc&#39;s output, so it&#39;s a good idea to keep it
+short.</p>
+<h3 id="sentence-structure">Sentence structure</h3>
+<p>All doc comments, including the summary line, should begin with a
+capital letter and ending with a period, question mark, or exclamation
+point. Prefer full sentences to fragments.</p>
+<p>For example:</p>
+<pre><code class="lang-rust"><span class="hljs-comment">/// Set up a default runtime configuration, given compiler-supplied arguments.</span>
+<span class="hljs-comment">///</span>
+<span class="hljs-comment">/// This function will block until the entire pool of M:N schedulers have</span>
+<span class="hljs-comment">/// exited. This function also requires a local task to be available.</span>
+<span class="hljs-comment">///</span>
+<span class="hljs-comment">/// # Arguments</span>
+<span class="hljs-comment">///</span>
+<span class="hljs-comment">/// * `argc` &amp; `argv` - The argument vector. On Unix this information is used</span>
+<span class="hljs-comment">///   by os::args.</span>
+<span class="hljs-comment">/// * `main` - The initial procedure to run inside of the M:N scheduling pool.</span>
+<span class="hljs-comment">///            Once this procedure exits, the scheduling pool will begin to shut</span>
+<span class="hljs-comment">///            down. The entire pool (and this function) will only return once</span>
+<span class="hljs-comment">///            all child tasks have finished executing.</span>
+<span class="hljs-comment">///</span>
+<span class="hljs-comment">/// # Return value</span>
+<span class="hljs-comment">///</span>
+<span class="hljs-comment">/// The return value is used as the process return code. 0 on success, 101 on</span>
+<span class="hljs-comment">/// error.</span>
+</code></pre>
+<h3 id="code-snippets">Code snippets</h3>
 <blockquote>
-<p><strong>[FIXME]</strong> Example.</p>
+<p><strong>[OPEN]</strong></p>
 </blockquote>
 <h3 id="avoid-inner-doc-comments-">Avoid inner doc comments.</h3>
 <p>Use inner doc comments <em>only</em> to document crates and file-level modules:</p>
