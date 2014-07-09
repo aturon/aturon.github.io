@@ -34,7 +34,7 @@
 
 
         
-    <div class="book" data-github="aturon/rust-guidelines" data-level="4.1" data-basepath=".." data-revision="1404790894425">
+    <div class="book" data-github="aturon/rust-guidelines" data-level="4.1" data-basepath=".." data-revision="1404943586850">
     <div class="book-header">
     <!-- Actions Left -->
     <a href="#" class="btn pull-left toggle-summary" aria-label="Toggle summary"><i class="fa fa-align-justify"></i></a>
@@ -797,16 +797,48 @@
                     <section class="normal" id="section-gitbook_29">
                     
                         <h1 id="signaling-errors-rfc-">Signaling errors [RFC]</h1>
-<h3 id="for-unrecoverable-errors-fail-">For unrecoverable errors, <code>fail!</code>.</h3>
-<p>Unrecoverable errors are rare and catastrophic.  Since there is no way
-to cleanly exit the operation that discovered the error, there is no
-sensible return value. Instead, <code>fail</code> unwinds the task&#39;s stack. See
-&quot;Handling Errors&quot; below for guidance on how to use tasks to isolate
-unrecoverable errors.</p>
+<p>Errors fall into one of three categories:</p>
+<ul>
+<li>Catastrophic errors, e.g. out of memory.</li>
+<li>Unpreventable errors, e.g. file not found.</li>
+<li>Preventable errors, e.g. wrong input encoding, index out of bounds.</li>
+</ul>
+<p>The signaling strategy is determined by the error category.</p>
+<h2 id="catastrophic-errors">Catastrophic errors</h2>
+<p>An error is <em>catastrophic</em> if there is no meaningful way for the current task to
+continue after the error occurs.</p>
+<p>Catastrophic errors are <em>extremely</em> rare, especially outside of <code>libstd</code>.</p>
+<p><strong>Canonical examples</strong>: out of memory, stack overflow.</p>
+<blockquote>
+<p><strong>[FIXME]</strong> These are believed to be the <em>only</em> catastrophic errors in
+Rust/libstd at the moment. We should confirm, and say so.</p>
+</blockquote>
+<h3 id="for-catastrophic-errors-use-fail-">For catastrophic errors, use <code>fail!</code>.</h3>
+<p>Invoking <code>fail!</code> causes the current task to fail, which:</p>
+<ul>
+<li>unwinds the task&#39;s stack</li>
+<li>poisons any channels or other synchronization connecting the task to others</li>
+</ul>
 <p>For example,
 <a href="http://static.rust-lang.org/doc/master/std/rt/heap/fn.allocate.html" target="_blank"><code>rt::heap::allocate</code></a>
 fails the task if allocation fails.</p>
-<h3 id="for-recoverable-but-unavoidable-errors-use-result-">For recoverable but unavoidable errors, use <code>Result</code>.</h3>
+<p>Task failure does not mean that the entire program must abort.
+For example, by breaking a program into a parent task that monitors its
+children, the program <em>can</em> meaningfully recover from task failures at the
+global level. See <a href="handling.html">the error handling section</a> for guidance
+on working with task failure.</p>
+<h2 id="unpreventable-errors">Unpreventable errors</h2>
+<p>An error is <em>unpreventable</em> if it is caused by circumstances out of the
+program&#39;s control.</p>
+<p>Unpreventable errors are common for operations that involve I/O or other access
+to shared resources.</p>
+<p><strong>Canonical example</strong>: file not found.</p>
+<h3 id="for-unpreventable-errors-use-result-">For unpreventable errors, use <code>Result</code>.</h3>
+<p>The
+<a href="http://static.rust-lang.org/doc/master/std/result/index.html" target="_blank"><code>Result&lt;T,E&gt;</code> type</a>
+represents either a success (yielding <code>T</code>) or failure (yielding <code>E</code>). By
+returning a <code>Result</code>, a function allows its clients to discover and react to
+external circumstances that are obstructing an operation.</p>
 <p>The <code>E</code> component in <code>Result&lt;T,E&gt;</code> should convey details about the external
 circumstances that caused the error. Use an <code>enum</code> when multiple kinds of errors
 are possible.</p>
@@ -815,65 +847,103 @@ are possible.</p>
 uses the <code>Result</code> type pervasively, with
 <a href="http://static.rust-lang.org/doc/master/std/io/struct.IoError.html" target="_blank"><code>IoError</code></a>
 providing details when an error occurs.</p>
-<h3 id="for-recoverable-and-avoidable-errors-prefer-result-">For recoverable and avoidable errors, prefer <code>Result</code>.</h3>
-<p>Avoidable errors can only arise when a function places additional expectations
-on its input beyond its static type. When the error is also recoverable, there
-are two choices.</p>
-<h4 id="preferred-returning-a-result-">Preferred: returning a <code>Result</code></h4>
+<h2 id="preventable-errors">Preventable errors</h2>
+<p>An error is <em>preventable</em> if its absence can be guaranteed by restricting the
+arguments given to the operation.</p>
+<p>Preventable errors are common for operations that impose constraints on their
+parameters beyond their static type.</p>
+<p><strong>Canonical examples</strong>: wrong input encoding, index out of bounds.</p>
+<h3 id="for-preventable-errors-prefer-result-">For preventable errors, prefer <code>Result</code>.</h3>
+<p>Preventable errors present API designers with a choice:</p>
+<ul>
+<li>Permit erroneous input, return <code>Result</code>, and use the <code>Err</code> variant to inform
+the client of the error.</li>
+<li>Treat erroneous input as a <em>contract violation</em> (i.e., assertion failure) and <code>fail!</code>.</li>
+</ul>
+<p>The right choice depends on the <em>overall design</em> of an API: some APIs make it
+very easy to obtain and work with valid inputs, in which case working with <code>Result</code> would be a needless distraction.</p>
+<p>But when in doubt, prefer <code>Result</code>.</p>
+<h4 id="when-to-return-a-result-">When to return a <code>Result</code></h4>
+<p>For preventable errors in APIs where</p>
+<ul>
+<li>ensuring input validity ahead of time is difficult or expensive, or</li>
+<li>validity checking is a useful byproduct of attempting an operation,</li>
+</ul>
+<p>return a <code>Result</code>.</p>
 <p>Following the principle of
 <a href="../features/functions-and-methods/output.html">returning useful intermediate results</a>,
-the function should return a <code>Result</code> value with an error component saying
-exactly where things went wrong. This information is typically produced when
-validating or consuming input anyway; returning it to the client allows for
-better error reporting and possibly recovery.</p>
+the <code>Result</code>&#39;s error component should give detail about which part of the input
+was invalid -- information that is typically produced during input validation or
+processing anyway.</p>
 <p>For example, a function <code>from_str</code> for parsing into a given type should return a
-<code>Result</code> with error component giving the location or span of parsing
-failure.</p>
-<p>Clients can treat the function&#39;s contract as a kind of assertion by
-calling <code>unwrap</code> on the <code>Result</code>, which will produce a failure <em>in the
-client&#39;s code</em> when the client breaks the contract.</p>
-<h4 id="failing-">Failing.</h4>
-<p>While returning a <code>Result</code> makes for a very clear interface, it can be
-burdensome:</p>
+<code>Result</code> with error component giving the location or span of parsing failure.</p>
+<p>If clients believe they are providing valid input, they can use <code>unwrap</code> on the
+<code>Result</code> to assert as much; this will produce a failure <em>in the client&#39;s
+code</em> if things go wrong.</p>
+<h4 id="when-to-fail-">When to <code>fail!</code></h4>
+<p>For preventable errors in APIs where</p>
 <ul>
-<li>Clients have to <code>unwrap</code> the result to assert that they have
-satisfied the function&#39;s contract.</li>
-<li>The function has to internally propagate the <code>Result</code>, and possibly
-perform extra cleanup.</li>
+<li>input validity can be easily checked, or</li>
+<li>parts of the API naturally produce valid inputs for other parts, or</li>
+<li>invalid inputs clearly represent a logic error,</li>
 </ul>
-<p>Sometimes avoidable, recoverable errors are very rare and clearly
-indicate a logic error rather than bad input. Such errors are also
-likely to cause task failure at some point (usually because clients
-would just <code>unwrap</code>).</p>
-<p>In those rare cases, it is acceptable to invoke <code>fail!</code> when the error
-is discovered. The expectations on the input then become a strong part
-of the function&#39;s contract, and violating them is always a preventable
-bug. The failure conditions should be clearly stated in a <code>Failure</code>
-section of the function&#39;s doc comment.</p>
-<p>For example, slice indexing fails on an out of bounds error, which is
-recoverable and avoidable but nearly always represents a bug (and is
-hopefully rare).</p>
+<p>using <code>fail!</code> is acceptable.</p>
+<p>The expectations on the input then become a <em>contract</em> for the function, and
+violating them is akin to an assertion failure -- a bug. The failure conditions
+should be clearly stated in a <code>Failure</code> section of the function&#39;s doc comment.</p>
+<p>The benefit of using <code>fail!</code> is that the signatures of the API&#39;s functions are
+simpler, and using the API does not require the client to constantly <code>unwrap</code>.</p>
+<p>For example, slice indexing fails on an out of bounds error, which is a
+preventable error and nearly always represents a bug. Moreover, most uses of
+array indexing naturally incorporate a bounds check already, e.g. looping over
+array indices.</p>
 <blockquote>
 <p><strong>[FIXME]</strong> <code>std</code> also contains some more dubious examples, like the
 <a href="http://static.rust-lang.org/doc/master/std/c_str/trait.ToCStr.html#tymethod.to_c_str" target="_blank"><code>to_c_str</code></a>
 method, which fails when the string contains an interior
 <code>null</code>. What do we want to say about those?</p>
 </blockquote>
-<h3 id="fallible-convenience-methods-open-">Fallible convenience methods. [OPEN]</h3>
+<h4 id="do-not-provide-both-result-and-fail-variants-rfc-">Do not provide both <code>Result</code> and <code>fail!</code> variants. [RFC]</h4>
+<p>An API should not provide both <code>Result</code>-producing and <code>fail</code>ing versions of an
+operation. It should provide just the <code>Result</code> version, allowing clients to use
+<code>try!</code> or <code>unwrap</code> instead as needed.</p>
+<p>There is one exception to this rule, however. Some APIs are strongly oriented
+around failure, in the sense that their functions/methods are explicitly
+intended as assertions.  If there is no other way to check in advance for the
+validity of invoking an operation <code>foo</code>, however, the API may provide a
+<code>checked_foo</code> variant that returns a <code>Result</code>.</p>
+<p>The main examples in <code>libstd</code> providing both variants are:</p>
+<ul>
+<li><p>Channels, which are the primary point of failure propagation between tasks. As
+such, calling <code>recv()</code> is an <em>assertion</em> that the other end of the channel is
+still alive, which will propagate failures from the other end of the
+channel. On the other hand, since there is no separate way to atomically test
+whether the other end has hung up, channels provide a <code>recv_opt</code> variant that
+produces a <code>Result</code>.</p>
 <blockquote>
-<p><strong>[OPEN]</strong> This is a big open issue: when should APIs provide
-convenience methods that amount to <code>unwrap</code>ping a <code>Result</code>? E.g.,
-the <code>RefCell</code> type has <code>borrow</code> and <code>try_borrow</code>, with <code>.borrow()</code>
-equivalent to <code>try_borrow().unwrap()</code>.</p>
+<p><strong>[FIXME]</strong> The <code>_opt</code> suffix needs to be replaced by a <code>checked_</code> prefix.</p>
 </blockquote>
-<h3 id="avoid-option-for-error-signaling-">Avoid <code>Option</code> for error signaling.</h3>
+</li>
+</ul>
+<ul>
+<li><p><code>RefCell</code>, which provides a dynamic version of the borrowing rules. Calling
+the <code>borrow()</code> method is intended as an assertion that the cell is in a
+borrowable state, and will <code>fail!</code> otherwise. On the other hand, there is no
+separate way to check the state of the <code>RefCell</code>, so the module provides a
+<code>try_borrow</code> variant that produces a <code>Result</code>.</p>
+<blockquote>
+<p><strong>[FIXME]</strong> The <code>try_</code> prefix needs to be replaced by a <code>checked_</code> prefix.</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="avoid-option-for-error-signaling-rfc-">Avoid <code>Option</code> for error signaling. [RFC]</h3>
 <p>The <code>Option</code> type should be reserved for cases that do not represent errors, but
 rather possible outcomes for well-formed inputs under normal circumstances.</p>
 <p>For example,
 <a href="http://static.rust-lang.org/doc/master/std/vec/struct.Vec.html" target="_blank">the <code>Vec::pop</code> method</a>
 returns an <code>Option</code>, yielding <code>None</code> when the vector is empty.</p>
-<p>Even when there is no interesting error information to return, prefer <code>Result&lt;T,
-()&gt;</code> to <code>Option&lt;T&gt;</code> as a way of signaling that the <code>Err</code> case represents an
+<p>Even when there is no interesting error information to return, prefer
+<code>Result&lt;T,()&gt;</code> to <code>Option&lt;T&gt;</code> as a way of signaling that the <code>Err</code> case represents an
 erroneous outcome, not a normal outcome.</p>
 <p>Rather than providing a <code>try_frob</code> function yielding an <code>Option</code>, provide a
 <code>frob</code> function yielding a <code>Result</code>.</p>
