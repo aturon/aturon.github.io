@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The std library documentation.">
+
+    <title>std::str::StrSlice - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../std/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../index.html'>std</a>&#8203;::<a href='index.html'>str</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='raw/index.html'>raw</a></div><div class='block struct'><h2>Structs</h2><a class='struct ' href='struct.CharOffsets.html'>CharOffsets</a><a class='struct ' href='struct.CharRange.html'>CharRange</a><a class='struct ' href='struct.CharSplits.html'>CharSplits</a><a class='struct ' href='struct.CharSplitsN.html'>CharSplitsN</a><a class='struct ' href='struct.Chars.html'>Chars</a><a class='struct ' href='struct.Decompositions.html'>Decompositions</a><a class='struct ' href='struct.MatchIndices.html'>MatchIndices</a><a class='struct ' href='struct.StrSplits.html'>StrSplits</a><a class='struct ' href='struct.Utf16Items.html'>Utf16Items</a></div><div class='block trait'><h2>Traits</h2><a class='trait ' href='trait.CharEq.html'>CharEq</a><a class='trait ' href='trait.IntoMaybeOwned.html'>IntoMaybeOwned</a><a class='trait ' href='trait.OwnedStr.html'>OwnedStr</a><a class='trait ' href='trait.Str.html'>Str</a><a class='trait ' href='trait.StrAllocating.html'>StrAllocating</a><a class='trait current' href='trait.StrSlice.html'>StrSlice</a><a class='trait ' href='trait.StrVector.html'>StrVector</a></div><div class='block fn'><h2>Functions</h2><a class='fn ' href='fn.eq_slice.html'>eq_slice</a><a class='fn ' href='fn.from_byte.html'>from_byte</a><a class='fn ' href='fn.from_char.html'>from_char</a><a class='fn ' href='fn.from_chars.html'>from_chars</a><a class='fn ' href='fn.from_utf16.html'>from_utf16</a><a class='fn ' href='fn.from_utf16_lossy.html'>from_utf16_lossy</a><a class='fn ' href='fn.from_utf8.html'>from_utf8</a><a class='fn ' href='fn.from_utf8_lossy.html'>from_utf8_lossy</a><a class='fn ' href='fn.from_utf8_owned.html'>from_utf8_owned</a><a class='fn ' href='fn.is_utf16.html'>is_utf16</a><a class='fn ' href='fn.is_utf8.html'>is_utf8</a><a class='fn ' href='fn.replace.html'>replace</a><a class='fn ' href='fn.truncate_utf16_at_nul.html'>truncate_utf16_at_nul</a><a class='fn ' href='fn.utf16_items.html'>utf16_items</a><a class='fn ' href='fn.utf8_char_width.html'>utf8_char_width</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content trait">
+<h1 class='fqn'>Trait <a href='../index.html'>std</a>::<a href='index.html'>str</a>::<a class='trait' href=''>StrSlice</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-109015' href='../../core/str/trait.StrSlice.html?gotosrc=109015'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait StrSlice&lt;'a&gt; {
+    fn <a href='#tymethod.contains' class='fnname'>contains</a>(&amp;self, needle: &amp;'a <a href='../primitive.str.html'>str</a>) -&gt; <a href='../primitive.bool.html'>bool</a>;
+    fn <a href='#tymethod.contains_char' class='fnname'>contains_char</a>(&amp;self, needle: <a href='../primitive.char.html'>char</a>) -&gt; <a href='../primitive.bool.html'>bool</a>;
+    fn <a href='#tymethod.chars' class='fnname'>chars</a>(&amp;self) -&gt; <a class='struct' href='../../std/str/struct.Chars.html' title='std::str::Chars'>Chars</a>&lt;'a&gt;;
+    fn <a href='#tymethod.bytes' class='fnname'>bytes</a>(&amp;self) -&gt; <a class='struct' href='../../std/iter/struct.Map.html' title='std::iter::Map'>Map</a>&lt;'a, &amp;'a <a href='../primitive.u8.html'>u8</a>, <a href='../primitive.u8.html'>u8</a>, <a class='struct' href='../../std/slice/struct.Items.html' title='std::slice::Items'>Items</a>&lt;'a, <a href='../primitive.u8.html'>u8</a>&gt;&gt;;
+    fn <a href='#tymethod.char_indices' class='fnname'>char_indices</a>(&amp;self) -&gt; <a class='struct' href='../../std/str/struct.CharOffsets.html' title='std::str::CharOffsets'>CharOffsets</a>&lt;'a&gt;;
+    fn <a href='#tymethod.split' class='fnname'>split</a>&lt;Sep: <a class='trait' href='../../std/str/trait.CharEq.html' title='std::str::CharEq'>CharEq</a>&gt;(&amp;self, sep: Sep) -&gt; <a class='struct' href='../../std/str/struct.CharSplits.html' title='std::str::CharSplits'>CharSplits</a>&lt;'a, Sep&gt;;
+    fn <a href='#tymethod.splitn' class='fnname'>splitn</a>&lt;Sep: <a class='trait' href='../../std/str/trait.CharEq.html' title='std::str::CharEq'>CharEq</a>&gt;(&amp;self, sep: Sep, count: <a href='../primitive.uint.html'>uint</a>) -&gt; <a class='struct' href='../../std/str/struct.CharSplitsN.html' title='std::str::CharSplitsN'>CharSplitsN</a>&lt;'a, Sep&gt;;
+    fn <a href='#tymethod.split_terminator' class='fnname'>split_terminator</a>&lt;Sep: <a class='trait' href='../../std/str/trait.CharEq.html' title='std::str::CharEq'>CharEq</a>&gt;(&amp;self, sep: Sep) -&gt; <a class='struct' href='../../std/str/struct.CharSplits.html' title='std::str::CharSplits'>CharSplits</a>&lt;'a, Sep&gt;;
+    fn <a href='#tymethod.rsplitn' class='fnname'>rsplitn</a>&lt;Sep: <a class='trait' href='../../std/str/trait.CharEq.html' title='std::str::CharEq'>CharEq</a>&gt;(&amp;self, sep: Sep, count: <a href='../primitive.uint.html'>uint</a>) -&gt; <a class='struct' href='../../std/str/struct.CharSplitsN.html' title='std::str::CharSplitsN'>CharSplitsN</a>&lt;'a, Sep&gt;;
+    fn <a href='#tymethod.match_indices' class='fnname'>match_indices</a>(&amp;self, sep: &amp;'a <a href='../primitive.str.html'>str</a>) -&gt; <a class='struct' href='../../std/str/struct.MatchIndices.html' title='std::str::MatchIndices'>MatchIndices</a>&lt;'a&gt;;
+    fn <a href='#tymethod.split_str' class='fnname'>split_str</a>(&amp;self, &amp;'a <a href='../primitive.str.html'>str</a>) -&gt; <a class='struct' href='../../std/str/struct.StrSplits.html' title='std::str::StrSplits'>StrSplits</a>&lt;'a&gt;;
+    fn <a href='#tymethod.lines' class='fnname'>lines</a>(&amp;self) -&gt; <a class='struct' href='../../std/str/struct.CharSplits.html' title='std::str::CharSplits'>CharSplits</a>&lt;'a, <a href='../primitive.char.html'>char</a>&gt;;
+    fn <a href='#tymethod.lines_any' class='fnname'>lines_any</a>(&amp;self) -&gt; <a class='struct' href='../../std/iter/struct.Map.html' title='std::iter::Map'>Map</a>&lt;'a, &amp;'a <a href='../primitive.str.html'>str</a>, &amp;'a <a href='../primitive.str.html'>str</a>, <a class='struct' href='../../std/str/struct.CharSplits.html' title='std::str::CharSplits'>CharSplits</a>&lt;'a, <a href='../primitive.char.html'>char</a>&gt;&gt;;
+    fn <a href='#tymethod.words' class='fnname'>words</a>(&amp;self) -&gt; <a class='struct' href='../../std/iter/struct.Filter.html' title='std::iter::Filter'>Filter</a>&lt;'a, &amp;'a <a href='../primitive.str.html'>str</a>, <a class='struct' href='../../std/str/struct.CharSplits.html' title='std::str::CharSplits'>CharSplits</a>&lt;'a, fn(<a href='../primitive.char.html'>char</a>) -&gt; <a href='../primitive.bool.html'>bool</a>&gt;&gt;;
+    fn <a href='#tymethod.is_whitespace' class='fnname'>is_whitespace</a>(&amp;self) -&gt; <a href='../primitive.bool.html'>bool</a>;
+    fn <a href='#tymethod.is_alphanumeric' class='fnname'>is_alphanumeric</a>(&amp;self) -&gt; <a href='../primitive.bool.html'>bool</a>;
+    fn <a href='#tymethod.char_len' class='fnname'>char_len</a>(&amp;self) -&gt; <a href='../primitive.uint.html'>uint</a>;
+    fn <a href='#tymethod.slice' class='fnname'>slice</a>(&amp;self, begin: <a href='../primitive.uint.html'>uint</a>, end: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a <a href='../primitive.str.html'>str</a>;
+    fn <a href='#tymethod.slice_from' class='fnname'>slice_from</a>(&amp;self, begin: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a <a href='../primitive.str.html'>str</a>;
+    fn <a href='#tymethod.slice_to' class='fnname'>slice_to</a>(&amp;self, end: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a <a href='../primitive.str.html'>str</a>;
+    fn <a href='#tymethod.slice_chars' class='fnname'>slice_chars</a>(&amp;self, begin: <a href='../primitive.uint.html'>uint</a>, end: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a <a href='../primitive.str.html'>str</a>;
+    fn <a href='#tymethod.starts_with' class='fnname'>starts_with</a>(&amp;self, needle: &amp;<a href='../primitive.str.html'>str</a>) -&gt; <a href='../primitive.bool.html'>bool</a>;
+    fn <a href='#tymethod.ends_with' class='fnname'>ends_with</a>(&amp;self, needle: &amp;<a href='../primitive.str.html'>str</a>) -&gt; <a href='../primitive.bool.html'>bool</a>;
+    fn <a href='#tymethod.trim' class='fnname'>trim</a>(&amp;self) -&gt; &amp;'a <a href='../primitive.str.html'>str</a>;
+    fn <a href='#tymethod.trim_left' class='fnname'>trim_left</a>(&amp;self) -&gt; &amp;'a <a href='../primitive.str.html'>str</a>;
+    fn <a href='#tymethod.trim_right' class='fnname'>trim_right</a>(&amp;self) -&gt; &amp;'a <a href='../primitive.str.html'>str</a>;
+    fn <a href='#tymethod.trim_chars' class='fnname'>trim_chars</a>&lt;C: <a class='trait' href='../../std/str/trait.CharEq.html' title='std::str::CharEq'>CharEq</a>&gt;(&amp;self, to_trim: C) -&gt; &amp;'a <a href='../primitive.str.html'>str</a>;
+    fn <a href='#tymethod.trim_left_chars' class='fnname'>trim_left_chars</a>&lt;C: <a class='trait' href='../../std/str/trait.CharEq.html' title='std::str::CharEq'>CharEq</a>&gt;(&amp;self, to_trim: C) -&gt; &amp;'a <a href='../primitive.str.html'>str</a>;
+    fn <a href='#tymethod.trim_right_chars' class='fnname'>trim_right_chars</a>&lt;C: <a class='trait' href='../../std/str/trait.CharEq.html' title='std::str::CharEq'>CharEq</a>&gt;(&amp;self, to_trim: C) -&gt; &amp;'a <a href='../primitive.str.html'>str</a>;
+    fn <a href='#tymethod.is_char_boundary' class='fnname'>is_char_boundary</a>(&amp;self, index: <a href='../primitive.uint.html'>uint</a>) -&gt; <a href='../primitive.bool.html'>bool</a>;
+    fn <a href='#tymethod.char_range_at' class='fnname'>char_range_at</a>(&amp;self, start: <a href='../primitive.uint.html'>uint</a>) -&gt; <a class='struct' href='../../std/str/struct.CharRange.html' title='std::str::CharRange'>CharRange</a>;
+    fn <a href='#tymethod.char_range_at_reverse' class='fnname'>char_range_at_reverse</a>(&amp;self, start: <a href='../primitive.uint.html'>uint</a>) -&gt; <a class='struct' href='../../std/str/struct.CharRange.html' title='std::str::CharRange'>CharRange</a>;
+    fn <a href='#tymethod.char_at' class='fnname'>char_at</a>(&amp;self, i: <a href='../primitive.uint.html'>uint</a>) -&gt; <a href='../primitive.char.html'>char</a>;
+    fn <a href='#tymethod.char_at_reverse' class='fnname'>char_at_reverse</a>(&amp;self, i: <a href='../primitive.uint.html'>uint</a>) -&gt; <a href='../primitive.char.html'>char</a>;
+    fn <a href='#tymethod.as_bytes' class='fnname'>as_bytes</a>(&amp;self) -&gt; &amp;'a <a href='../primitive.slice.html'>[<a href='../primitive.u8.html'>u8</a>]</a>;
+    fn <a href='#tymethod.find' class='fnname'>find</a>&lt;C: <a class='trait' href='../../std/str/trait.CharEq.html' title='std::str::CharEq'>CharEq</a>&gt;(&amp;self, search: C) -&gt; <a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;<a href='../primitive.uint.html'>uint</a>&gt;;
+    fn <a href='#tymethod.rfind' class='fnname'>rfind</a>&lt;C: <a class='trait' href='../../std/str/trait.CharEq.html' title='std::str::CharEq'>CharEq</a>&gt;(&amp;self, search: C) -&gt; <a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;<a href='../primitive.uint.html'>uint</a>&gt;;
+    fn <a href='#tymethod.find_str' class='fnname'>find_str</a>(&amp;self, &amp;<a href='../primitive.str.html'>str</a>) -&gt; <a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;<a href='../primitive.uint.html'>uint</a>&gt;;
+    fn <a href='#tymethod.slice_shift_char' class='fnname'>slice_shift_char</a>(&amp;self) -&gt; <a href='../primitive.tuple.html'>(<a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;<a href='../primitive.char.html'>char</a>&gt;, &amp;'a <a href='../primitive.str.html'>str</a>)</a>;
+    fn <a href='#tymethod.subslice_offset' class='fnname'>subslice_offset</a>(&amp;self, inner: &amp;<a href='../primitive.str.html'>str</a>) -&gt; <a href='../primitive.uint.html'>uint</a>;
+    fn <a href='#tymethod.as_ptr' class='fnname'>as_ptr</a>(&amp;self) -&gt; *<a href='../primitive.u8.html'>u8</a>;
+    fn <a href='#tymethod.utf16_units' class='fnname'>utf16_units</a>(&amp;self) -&gt; <a class='struct' href='../../core/str/struct.Utf16CodeUnits.html' title='core::str::Utf16CodeUnits'>Utf16CodeUnits</a>&lt;'a&gt;;
+}</pre><div class='docblock'><p>Methods for string slices</p>
+</div>
+            <h2 id='required-methods'>Required Methods</h2>
+            <div class='methods'>
+        <h3 id='tymethod.contains' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.contains' class='fnname'>contains</a>(&amp;self, needle: &amp;'a <a href='../primitive.str.html'>str</a>) -&gt; <a href='../primitive.bool.html'>bool</a></code></h3><div class='docblock'><p>Returns true if one string contains another</p>
+
+<h1 id="arguments" class='section-header'><a
+                           href="#arguments">Arguments</a></h1>
+<ul>
+<li>needle - The string to look for</li>
+</ul>
+</div><h3 id='tymethod.contains_char' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.contains_char' class='fnname'>contains_char</a>(&amp;self, needle: <a href='../primitive.char.html'>char</a>) -&gt; <a href='../primitive.bool.html'>bool</a></code></h3><div class='docblock'><p>Returns true if a string contains a char.</p>
+
+<h1 id="arguments-1" class='section-header'><a
+                           href="#arguments-1">Arguments</a></h1>
+<ul>
+<li>needle - The char to look for</li>
+</ul>
+</div><h3 id='tymethod.chars' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.chars' class='fnname'>chars</a>(&amp;self) -&gt; <a class='struct' href='../../std/str/struct.Chars.html' title='std::str::Chars'>Chars</a>&lt;'a&gt;</code></h3><div class='docblock'><p>An iterator over the characters of <code>self</code>. Note, this iterates
+over unicode code-points, not unicode graphemes.</p>
+
+<h1 id="example" class='section-header'><a
+                           href="#example">Example</a></h1><span id='rust-example-raw-0' class='rusttest'>fn main() {
+    let v: Vec&lt;char&gt; = &quot;abc åäö&quot;.chars().collect();
+    assert_eq!(v, vec![&#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39; &#39;, &#39;å&#39;, &#39;ä&#39;, &#39;ö&#39;]);
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>char</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='string'>&quot;abc åäö&quot;</span>.<span class='ident'>chars</span>().<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&#39;a&#39;</span>, <span class='string'>&#39;b&#39;</span>, <span class='string'>&#39;c&#39;</span>, <span class='string'>&#39; &#39;</span>, <span class='string'>&#39;å&#39;</span>, <span class='string'>&#39;ä&#39;</span>, <span class='string'>&#39;ö&#39;</span>]);
+</pre>
+</div><h3 id='tymethod.bytes' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.bytes' class='fnname'>bytes</a>(&amp;self) -&gt; <a class='struct' href='../../std/iter/struct.Map.html' title='std::iter::Map'>Map</a>&lt;'a, &amp;'a <a href='../primitive.u8.html'>u8</a>, <a href='../primitive.u8.html'>u8</a>, <a class='struct' href='../../std/slice/struct.Items.html' title='std::slice::Items'>Items</a>&lt;'a, <a href='../primitive.u8.html'>u8</a>&gt;&gt;</code></h3><div class='docblock'><p>An iterator over the bytes of <code>self</code></p>
+</div><h3 id='tymethod.char_indices' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.char_indices' class='fnname'>char_indices</a>(&amp;self) -&gt; <a class='struct' href='../../std/str/struct.CharOffsets.html' title='std::str::CharOffsets'>CharOffsets</a>&lt;'a&gt;</code></h3><div class='docblock'><p>An iterator over the characters of <code>self</code> and their byte offsets.</p>
+</div><h3 id='tymethod.split' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.split' class='fnname'>split</a>&lt;Sep: <a class='trait' href='../../std/str/trait.CharEq.html' title='std::str::CharEq'>CharEq</a>&gt;(&amp;self, sep: Sep) -&gt; <a class='struct' href='../../std/str/struct.CharSplits.html' title='std::str::CharSplits'>CharSplits</a>&lt;'a, Sep&gt;</code></h3><div class='docblock'><p>An iterator over substrings of <code>self</code>, separated by characters
+matched by <code>sep</code>.</p>
+
+<h1 id="example-1" class='section-header'><a
+                           href="#example-1">Example</a></h1><span id='rust-example-raw-1' class='rusttest'>fn main() {
+    let v: Vec&lt;&amp;str&gt; = &quot;Mary had a little lamb&quot;.split(&#39; &#39;).collect();
+    assert_eq!(v, vec![&quot;Mary&quot;, &quot;had&quot;, &quot;a&quot;, &quot;little&quot;, &quot;lamb&quot;]);
+    
+    let v: Vec&lt;&amp;str&gt; = &quot;abc1def2ghi&quot;.split(|c: char| c.is_digit()).collect();
+    assert_eq!(v, vec![&quot;abc&quot;, &quot;def&quot;, &quot;ghi&quot;]);
+    
+    let v: Vec&lt;&amp;str&gt; = &quot;lionXXtigerXleopard&quot;.split(&#39;X&#39;).collect();
+    assert_eq!(v, vec![&quot;lion&quot;, &quot;&quot;, &quot;tiger&quot;, &quot;leopard&quot;]);
+    
+    let v: Vec&lt;&amp;str&gt; = &quot;&quot;.split(&#39;X&#39;).collect();
+    assert_eq!(v, vec![&quot;&quot;]);
+}</span><pre id='rust-example-rendered-1' class='rust '>
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='string'>&quot;Mary had a little lamb&quot;</span>.<span class='ident'>split</span>(<span class='string'>&#39; &#39;</span>).<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;Mary&quot;</span>, <span class='string'>&quot;had&quot;</span>, <span class='string'>&quot;a&quot;</span>, <span class='string'>&quot;little&quot;</span>, <span class='string'>&quot;lamb&quot;</span>]);
+
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='string'>&quot;abc1def2ghi&quot;</span>.<span class='ident'>split</span>(<span class='op'>|</span><span class='ident'>c</span>: <span class='ident'>char</span><span class='op'>|</span> <span class='ident'>c</span>.<span class='ident'>is_digit</span>()).<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;abc&quot;</span>, <span class='string'>&quot;def&quot;</span>, <span class='string'>&quot;ghi&quot;</span>]);
+
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='string'>&quot;lionXXtigerXleopard&quot;</span>.<span class='ident'>split</span>(<span class='string'>&#39;X&#39;</span>).<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;lion&quot;</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;tiger&quot;</span>, <span class='string'>&quot;leopard&quot;</span>]);
+
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='string'>&quot;&quot;</span>.<span class='ident'>split</span>(<span class='string'>&#39;X&#39;</span>).<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;&quot;</span>]);
+</pre>
+</div><h3 id='tymethod.splitn' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.splitn' class='fnname'>splitn</a>&lt;Sep: <a class='trait' href='../../std/str/trait.CharEq.html' title='std::str::CharEq'>CharEq</a>&gt;(&amp;self, sep: Sep, count: <a href='../primitive.uint.html'>uint</a>) -&gt; <a class='struct' href='../../std/str/struct.CharSplitsN.html' title='std::str::CharSplitsN'>CharSplitsN</a>&lt;'a, Sep&gt;</code></h3><div class='docblock'><p>An iterator over substrings of <code>self</code>, separated by characters
+matched by <code>sep</code>, restricted to splitting at most <code>count</code>
+times.</p>
+
+<h1 id="example-2" class='section-header'><a
+                           href="#example-2">Example</a></h1><span id='rust-example-raw-2' class='rusttest'>fn main() {
+    let v: Vec&lt;&amp;str&gt; = &quot;Mary had a little lambda&quot;.splitn(&#39; &#39;, 2).collect();
+    assert_eq!(v, vec![&quot;Mary&quot;, &quot;had&quot;, &quot;a little lambda&quot;]);
+    
+    let v: Vec&lt;&amp;str&gt; = &quot;abc1def2ghi&quot;.splitn(|c: char| c.is_digit(), 1).collect();
+    assert_eq!(v, vec![&quot;abc&quot;, &quot;def2ghi&quot;]);
+    
+    let v: Vec&lt;&amp;str&gt; = &quot;lionXXtigerXleopard&quot;.splitn(&#39;X&#39;, 2).collect();
+    assert_eq!(v, vec![&quot;lion&quot;, &quot;&quot;, &quot;tigerXleopard&quot;]);
+    
+    let v: Vec&lt;&amp;str&gt; = &quot;abcXdef&quot;.splitn(&#39;X&#39;, 0).collect();
+    assert_eq!(v, vec![&quot;abcXdef&quot;]);
+    
+    let v: Vec&lt;&amp;str&gt; = &quot;&quot;.splitn(&#39;X&#39;, 1).collect();
+    assert_eq!(v, vec![&quot;&quot;]);
+}</span><pre id='rust-example-rendered-2' class='rust '>
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='string'>&quot;Mary had a little lambda&quot;</span>.<span class='ident'>splitn</span>(<span class='string'>&#39; &#39;</span>, <span class='number'>2</span>).<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;Mary&quot;</span>, <span class='string'>&quot;had&quot;</span>, <span class='string'>&quot;a little lambda&quot;</span>]);
+
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='string'>&quot;abc1def2ghi&quot;</span>.<span class='ident'>splitn</span>(<span class='op'>|</span><span class='ident'>c</span>: <span class='ident'>char</span><span class='op'>|</span> <span class='ident'>c</span>.<span class='ident'>is_digit</span>(), <span class='number'>1</span>).<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;abc&quot;</span>, <span class='string'>&quot;def2ghi&quot;</span>]);
+
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='string'>&quot;lionXXtigerXleopard&quot;</span>.<span class='ident'>splitn</span>(<span class='string'>&#39;X&#39;</span>, <span class='number'>2</span>).<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;lion&quot;</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;tigerXleopard&quot;</span>]);
+
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='string'>&quot;abcXdef&quot;</span>.<span class='ident'>splitn</span>(<span class='string'>&#39;X&#39;</span>, <span class='number'>0</span>).<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;abcXdef&quot;</span>]);
+
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='string'>&quot;&quot;</span>.<span class='ident'>splitn</span>(<span class='string'>&#39;X&#39;</span>, <span class='number'>1</span>).<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;&quot;</span>]);
+</pre>
+</div><h3 id='tymethod.split_terminator' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.split_terminator' class='fnname'>split_terminator</a>&lt;Sep: <a class='trait' href='../../std/str/trait.CharEq.html' title='std::str::CharEq'>CharEq</a>&gt;(&amp;self, sep: Sep) -&gt; <a class='struct' href='../../std/str/struct.CharSplits.html' title='std::str::CharSplits'>CharSplits</a>&lt;'a, Sep&gt;</code></h3><div class='docblock'><p>An iterator over substrings of <code>self</code>, separated by characters
+matched by <code>sep</code>.</p>
+
+<p>Equivalent to <code>split</code>, except that the trailing substring
+is skipped if empty (terminator semantics).</p>
+
+<h1 id="example-3" class='section-header'><a
+                           href="#example-3">Example</a></h1><span id='rust-example-raw-3' class='rusttest'>fn main() {
+    let v: Vec&lt;&amp;str&gt; = &quot;A.B.&quot;.split_terminator(&#39;.&#39;).collect();
+    assert_eq!(v, vec![&quot;A&quot;, &quot;B&quot;]);
+    
+    let v: Vec&lt;&amp;str&gt; = &quot;A..B..&quot;.split_terminator(&#39;.&#39;).collect();
+    assert_eq!(v, vec![&quot;A&quot;, &quot;&quot;, &quot;B&quot;, &quot;&quot;]);
+    
+    let v: Vec&lt;&amp;str&gt; = &quot;Mary had a little lamb&quot;.split(&#39; &#39;).rev().collect();
+    assert_eq!(v, vec![&quot;lamb&quot;, &quot;little&quot;, &quot;a&quot;, &quot;had&quot;, &quot;Mary&quot;]);
+    
+    let v: Vec&lt;&amp;str&gt; = &quot;abc1def2ghi&quot;.split(|c: char| c.is_digit()).rev().collect();
+    assert_eq!(v, vec![&quot;ghi&quot;, &quot;def&quot;, &quot;abc&quot;]);
+    
+    let v: Vec&lt;&amp;str&gt; = &quot;lionXXtigerXleopard&quot;.split(&#39;X&#39;).rev().collect();
+    assert_eq!(v, vec![&quot;leopard&quot;, &quot;tiger&quot;, &quot;&quot;, &quot;lion&quot;]);
+}</span><pre id='rust-example-rendered-3' class='rust '>
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='string'>&quot;A.B.&quot;</span>.<span class='ident'>split_terminator</span>(<span class='string'>&#39;.&#39;</span>).<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;A&quot;</span>, <span class='string'>&quot;B&quot;</span>]);
+
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='string'>&quot;A..B..&quot;</span>.<span class='ident'>split_terminator</span>(<span class='string'>&#39;.&#39;</span>).<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;A&quot;</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;B&quot;</span>, <span class='string'>&quot;&quot;</span>]);
+
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='string'>&quot;Mary had a little lamb&quot;</span>.<span class='ident'>split</span>(<span class='string'>&#39; &#39;</span>).<span class='ident'>rev</span>().<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;lamb&quot;</span>, <span class='string'>&quot;little&quot;</span>, <span class='string'>&quot;a&quot;</span>, <span class='string'>&quot;had&quot;</span>, <span class='string'>&quot;Mary&quot;</span>]);
+
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='string'>&quot;abc1def2ghi&quot;</span>.<span class='ident'>split</span>(<span class='op'>|</span><span class='ident'>c</span>: <span class='ident'>char</span><span class='op'>|</span> <span class='ident'>c</span>.<span class='ident'>is_digit</span>()).<span class='ident'>rev</span>().<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;ghi&quot;</span>, <span class='string'>&quot;def&quot;</span>, <span class='string'>&quot;abc&quot;</span>]);
+
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='string'>&quot;lionXXtigerXleopard&quot;</span>.<span class='ident'>split</span>(<span class='string'>&#39;X&#39;</span>).<span class='ident'>rev</span>().<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;leopard&quot;</span>, <span class='string'>&quot;tiger&quot;</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;lion&quot;</span>]);
+</pre>
+</div><h3 id='tymethod.rsplitn' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.rsplitn' class='fnname'>rsplitn</a>&lt;Sep: <a class='trait' href='../../std/str/trait.CharEq.html' title='std::str::CharEq'>CharEq</a>&gt;(&amp;self, sep: Sep, count: <a href='../primitive.uint.html'>uint</a>) -&gt; <a class='struct' href='../../std/str/struct.CharSplitsN.html' title='std::str::CharSplitsN'>CharSplitsN</a>&lt;'a, Sep&gt;</code></h3><div class='docblock'><p>An iterator over substrings of <code>self</code>, separated by characters
+matched by <code>sep</code>, starting from the end of the string.
+Restricted to splitting at most <code>count</code> times.</p>
+
+<h1 id="example-4" class='section-header'><a
+                           href="#example-4">Example</a></h1><span id='rust-example-raw-4' class='rusttest'>fn main() {
+    let v: Vec&lt;&amp;str&gt; = &quot;Mary had a little lamb&quot;.rsplitn(&#39; &#39;, 2).collect();
+    assert_eq!(v, vec![&quot;lamb&quot;, &quot;little&quot;, &quot;Mary had a&quot;]);
+    
+    let v: Vec&lt;&amp;str&gt; = &quot;abc1def2ghi&quot;.rsplitn(|c: char| c.is_digit(), 1).collect();
+    assert_eq!(v, vec![&quot;ghi&quot;, &quot;abc1def&quot;]);
+    
+    let v: Vec&lt;&amp;str&gt; = &quot;lionXXtigerXleopard&quot;.rsplitn(&#39;X&#39;, 2).collect();
+    assert_eq!(v, vec![&quot;leopard&quot;, &quot;tiger&quot;, &quot;lionX&quot;]);
+}</span><pre id='rust-example-rendered-4' class='rust '>
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='string'>&quot;Mary had a little lamb&quot;</span>.<span class='ident'>rsplitn</span>(<span class='string'>&#39; &#39;</span>, <span class='number'>2</span>).<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;lamb&quot;</span>, <span class='string'>&quot;little&quot;</span>, <span class='string'>&quot;Mary had a&quot;</span>]);
+
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='string'>&quot;abc1def2ghi&quot;</span>.<span class='ident'>rsplitn</span>(<span class='op'>|</span><span class='ident'>c</span>: <span class='ident'>char</span><span class='op'>|</span> <span class='ident'>c</span>.<span class='ident'>is_digit</span>(), <span class='number'>1</span>).<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;ghi&quot;</span>, <span class='string'>&quot;abc1def&quot;</span>]);
+
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='string'>&quot;lionXXtigerXleopard&quot;</span>.<span class='ident'>rsplitn</span>(<span class='string'>&#39;X&#39;</span>, <span class='number'>2</span>).<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;leopard&quot;</span>, <span class='string'>&quot;tiger&quot;</span>, <span class='string'>&quot;lionX&quot;</span>]);
+</pre>
+</div><h3 id='tymethod.match_indices' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.match_indices' class='fnname'>match_indices</a>(&amp;self, sep: &amp;'a <a href='../primitive.str.html'>str</a>) -&gt; <a class='struct' href='../../std/str/struct.MatchIndices.html' title='std::str::MatchIndices'>MatchIndices</a>&lt;'a&gt;</code></h3><div class='docblock'><p>An iterator over the start and end indices of the disjoint
+matches of <code>sep</code> within <code>self</code>.</p>
+
+<p>That is, each returned value <code>(start, end)</code> satisfies
+<code>self.slice(start, end) == sep</code>. For matches of <code>sep</code> within
+<code>self</code> that overlap, only the indices corresponding to the
+first match are returned.</p>
+
+<h1 id="example-5" class='section-header'><a
+                           href="#example-5">Example</a></h1><span id='rust-example-raw-5' class='rusttest'>fn main() {
+    let v: Vec&lt;(uint, uint)&gt; = &quot;abcXXXabcYYYabc&quot;.match_indices(&quot;abc&quot;).collect();
+    assert_eq!(v, vec![(0,3), (6,9), (12,15)]);
+    
+    let v: Vec&lt;(uint, uint)&gt; = &quot;1abcabc2&quot;.match_indices(&quot;abc&quot;).collect();
+    assert_eq!(v, vec![(1,4), (4,7)]);
+    
+    let v: Vec&lt;(uint, uint)&gt; = &quot;ababa&quot;.match_indices(&quot;aba&quot;).collect();
+    assert_eq!(v, vec![(0, 3)]); // only the first `aba`
+}</span><pre id='rust-example-rendered-5' class='rust '>
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span>(<span class='ident'>uint</span>, <span class='ident'>uint</span>)<span class='op'>&gt;</span> <span class='op'>=</span> <span class='string'>&quot;abcXXXabcYYYabc&quot;</span>.<span class='ident'>match_indices</span>(<span class='string'>&quot;abc&quot;</span>).<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[(<span class='number'>0</span>,<span class='number'>3</span>), (<span class='number'>6</span>,<span class='number'>9</span>), (<span class='number'>12</span>,<span class='number'>15</span>)]);
+
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span>(<span class='ident'>uint</span>, <span class='ident'>uint</span>)<span class='op'>&gt;</span> <span class='op'>=</span> <span class='string'>&quot;1abcabc2&quot;</span>.<span class='ident'>match_indices</span>(<span class='string'>&quot;abc&quot;</span>).<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[(<span class='number'>1</span>,<span class='number'>4</span>), (<span class='number'>4</span>,<span class='number'>7</span>)]);
+
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span>(<span class='ident'>uint</span>, <span class='ident'>uint</span>)<span class='op'>&gt;</span> <span class='op'>=</span> <span class='string'>&quot;ababa&quot;</span>.<span class='ident'>match_indices</span>(<span class='string'>&quot;aba&quot;</span>).<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[(<span class='number'>0</span>, <span class='number'>3</span>)]);<span class='comment'> // only the first `aba`
+</span></pre>
+</div><h3 id='tymethod.split_str' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.split_str' class='fnname'>split_str</a>(&amp;self, &amp;'a <a href='../primitive.str.html'>str</a>) -&gt; <a class='struct' href='../../std/str/struct.StrSplits.html' title='std::str::StrSplits'>StrSplits</a>&lt;'a&gt;</code></h3><div class='docblock'><p>An iterator over the substrings of <code>self</code> separated by <code>sep</code>.</p>
+
+<h1 id="example-6" class='section-header'><a
+                           href="#example-6">Example</a></h1><span id='rust-example-raw-6' class='rusttest'>fn main() {
+    let v: Vec&lt;&amp;str&gt; = &quot;abcXXXabcYYYabc&quot;.split_str(&quot;abc&quot;).collect();
+    assert_eq!(v, vec![&quot;&quot;, &quot;XXX&quot;, &quot;YYY&quot;, &quot;&quot;]);
+    
+    let v: Vec&lt;&amp;str&gt; = &quot;1abcabc2&quot;.split_str(&quot;abc&quot;).collect();
+    assert_eq!(v, vec![&quot;1&quot;, &quot;&quot;, &quot;2&quot;]);
+}</span><pre id='rust-example-rendered-6' class='rust '>
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='string'>&quot;abcXXXabcYYYabc&quot;</span>.<span class='ident'>split_str</span>(<span class='string'>&quot;abc&quot;</span>).<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;XXX&quot;</span>, <span class='string'>&quot;YYY&quot;</span>, <span class='string'>&quot;&quot;</span>]);
+
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='string'>&quot;1abcabc2&quot;</span>.<span class='ident'>split_str</span>(<span class='string'>&quot;abc&quot;</span>).<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;1&quot;</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;2&quot;</span>]);
+</pre>
+</div><h3 id='tymethod.lines' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.lines' class='fnname'>lines</a>(&amp;self) -&gt; <a class='struct' href='../../std/str/struct.CharSplits.html' title='std::str::CharSplits'>CharSplits</a>&lt;'a, <a href='../primitive.char.html'>char</a>&gt;</code></h3><div class='docblock'><p>An iterator over the lines of a string (subsequences separated
+by <code>\n</code>). This does not include the empty string after a
+trailing <code>\n</code>.</p>
+
+<h1 id="example-7" class='section-header'><a
+                           href="#example-7">Example</a></h1><span id='rust-example-raw-7' class='rusttest'>fn main() {
+    let four_lines = &quot;foo\nbar\n\nbaz\n&quot;;
+    let v: Vec&lt;&amp;str&gt; = four_lines.lines().collect();
+    assert_eq!(v, vec![&quot;foo&quot;, &quot;bar&quot;, &quot;&quot;, &quot;baz&quot;]);
+}</span><pre id='rust-example-rendered-7' class='rust '>
+<span class='kw'>let</span> <span class='ident'>four_lines</span> <span class='op'>=</span> <span class='string'>&quot;foo\nbar\n\nbaz\n&quot;</span>;
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>four_lines</span>.<span class='ident'>lines</span>().<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;foo&quot;</span>, <span class='string'>&quot;bar&quot;</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;baz&quot;</span>]);
+</pre>
+</div><h3 id='tymethod.lines_any' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.lines_any' class='fnname'>lines_any</a>(&amp;self) -&gt; <a class='struct' href='../../std/iter/struct.Map.html' title='std::iter::Map'>Map</a>&lt;'a, &amp;'a <a href='../primitive.str.html'>str</a>, &amp;'a <a href='../primitive.str.html'>str</a>, <a class='struct' href='../../std/str/struct.CharSplits.html' title='std::str::CharSplits'>CharSplits</a>&lt;'a, <a href='../primitive.char.html'>char</a>&gt;&gt;</code></h3><div class='docblock'><p>An iterator over the lines of a string, separated by either
+<code>\n</code> or <code>\r\n</code>. As with <code>.lines()</code>, this does not include an
+empty trailing line.</p>
+
+<h1 id="example-8" class='section-header'><a
+                           href="#example-8">Example</a></h1><span id='rust-example-raw-8' class='rusttest'>fn main() {
+    let four_lines = &quot;foo\r\nbar\n\r\nbaz\n&quot;;
+    let v: Vec&lt;&amp;str&gt; = four_lines.lines_any().collect();
+    assert_eq!(v, vec![&quot;foo&quot;, &quot;bar&quot;, &quot;&quot;, &quot;baz&quot;]);
+}</span><pre id='rust-example-rendered-8' class='rust '>
+<span class='kw'>let</span> <span class='ident'>four_lines</span> <span class='op'>=</span> <span class='string'>&quot;foo\r\nbar\n\r\nbaz\n&quot;</span>;
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>four_lines</span>.<span class='ident'>lines_any</span>().<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;foo&quot;</span>, <span class='string'>&quot;bar&quot;</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;baz&quot;</span>]);
+</pre>
+</div><h3 id='tymethod.words' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.words' class='fnname'>words</a>(&amp;self) -&gt; <a class='struct' href='../../std/iter/struct.Filter.html' title='std::iter::Filter'>Filter</a>&lt;'a, &amp;'a <a href='../primitive.str.html'>str</a>, <a class='struct' href='../../std/str/struct.CharSplits.html' title='std::str::CharSplits'>CharSplits</a>&lt;'a, fn(<a href='../primitive.char.html'>char</a>) -&gt; <a href='../primitive.bool.html'>bool</a>&gt;&gt;</code></h3><div class='docblock'><p>An iterator over the words of a string (subsequences separated
+by any sequence of whitespace). Sequences of whitespace are
+collapsed, so empty &quot;words&quot; are not included.</p>
+
+<h1 id="example-9" class='section-header'><a
+                           href="#example-9">Example</a></h1><span id='rust-example-raw-9' class='rusttest'>fn main() {
+    let some_words = &quot; Mary   had\ta little  \n\t lamb&quot;;
+    let v: Vec&lt;&amp;str&gt; = some_words.words().collect();
+    assert_eq!(v, vec![&quot;Mary&quot;, &quot;had&quot;, &quot;a&quot;, &quot;little&quot;, &quot;lamb&quot;]);
+}</span><pre id='rust-example-rendered-9' class='rust '>
+<span class='kw'>let</span> <span class='ident'>some_words</span> <span class='op'>=</span> <span class='string'>&quot; Mary   had\ta little  \n\t lamb&quot;</span>;
+<span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>some_words</span>.<span class='ident'>words</span>().<span class='ident'>collect</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;Mary&quot;</span>, <span class='string'>&quot;had&quot;</span>, <span class='string'>&quot;a&quot;</span>, <span class='string'>&quot;little&quot;</span>, <span class='string'>&quot;lamb&quot;</span>]);
+</pre>
+</div><h3 id='tymethod.is_whitespace' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.is_whitespace' class='fnname'>is_whitespace</a>(&amp;self) -&gt; <a href='../primitive.bool.html'>bool</a></code></h3><div class='docblock'><p>Returns true if the string contains only whitespace.</p>
+
+<p>Whitespace characters are determined by <code>char::is_whitespace</code>.</p>
+
+<h1 id="example-10" class='section-header'><a
+                           href="#example-10">Example</a></h1><span id='rust-example-raw-10' class='rusttest'>fn main() {
+    assert!(&quot; \t\n&quot;.is_whitespace());
+    assert!(&quot;&quot;.is_whitespace());
+    
+    assert!( !&quot;abc&quot;.is_whitespace());
+}</span><pre id='rust-example-rendered-10' class='rust '>
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='string'>&quot; \t\n&quot;</span>.<span class='ident'>is_whitespace</span>());
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='string'>&quot;&quot;</span>.<span class='ident'>is_whitespace</span>());
+
+<span class='macro'>assert</span><span class='macro'>!</span>( <span class='op'>!</span><span class='string'>&quot;abc&quot;</span>.<span class='ident'>is_whitespace</span>());
+</pre>
+</div><h3 id='tymethod.is_alphanumeric' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.is_alphanumeric' class='fnname'>is_alphanumeric</a>(&amp;self) -&gt; <a href='../primitive.bool.html'>bool</a></code></h3><div class='docblock'><p>Returns true if the string contains only alphanumeric code
+points.</p>
+
+<p>Alphanumeric characters are determined by <code>char::is_alphanumeric</code>.</p>
+
+<h1 id="example-11" class='section-header'><a
+                           href="#example-11">Example</a></h1><span id='rust-example-raw-11' class='rusttest'>fn main() {
+    assert!(&quot;Löwe老虎Léopard123&quot;.is_alphanumeric());
+    assert!(&quot;&quot;.is_alphanumeric());
+    
+    assert!( !&quot; &amp;*~&quot;.is_alphanumeric());
+}</span><pre id='rust-example-rendered-11' class='rust '>
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='string'>&quot;Löwe老虎Léopard123&quot;</span>.<span class='ident'>is_alphanumeric</span>());
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='string'>&quot;&quot;</span>.<span class='ident'>is_alphanumeric</span>());
+
+<span class='macro'>assert</span><span class='macro'>!</span>( <span class='op'>!</span><span class='string'>&quot; &amp;*~&quot;</span>.<span class='ident'>is_alphanumeric</span>());
+</pre>
+</div><h3 id='tymethod.char_len' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.char_len' class='fnname'>char_len</a>(&amp;self) -&gt; <a href='../primitive.uint.html'>uint</a></code></h3><div class='docblock'><p>Returns the number of Unicode code points (<code>char</code>) that a
+string holds.</p>
+
+<p>This does not perform any normalization, and is <code>O(n)</code>, since
+UTF-8 is a variable width encoding of code points.</p>
+
+<p><em>Warning</em>: The number of code points in a string does not directly
+correspond to the number of visible characters or width of the
+visible text due to composing characters, and double- and
+zero-width ones.</p>
+
+<p>See also <code>.len()</code> for the byte length.</p>
+
+<h1 id="example-12" class='section-header'><a
+                           href="#example-12">Example</a></h1><span id='rust-example-raw-12' class='rusttest'>fn main() {
+    // composed forms of `ö` and `é`
+    let c = &quot;Löwe 老虎 Léopard&quot;; // German, Simplified Chinese, French
+    // decomposed forms of `ö` and `é`
+    let d = &quot;Lo\u0308we 老虎 Le\u0301opard&quot;;
+    
+    assert_eq!(c.char_len(), 15);
+    assert_eq!(d.char_len(), 17);
+    
+    assert_eq!(c.len(), 21);
+    assert_eq!(d.len(), 23);
+    
+    // the two strings *look* the same
+    println!(&quot;{}&quot;, c);
+    println!(&quot;{}&quot;, d);
+}</span><pre id='rust-example-rendered-12' class='rust '>
+<span class='comment'>// composed forms of `ö` and `é`
+</span><span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='string'>&quot;Löwe 老虎 Léopard&quot;</span>;<span class='comment'> // German, Simplified Chinese, French
+// decomposed forms of `ö` and `é`
+</span><span class='kw'>let</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='string'>&quot;Lo\u0308we 老虎 Le\u0301opard&quot;</span>;
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>c</span>.<span class='ident'>char_len</span>(), <span class='number'>15</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>d</span>.<span class='ident'>char_len</span>(), <span class='number'>17</span>);
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>c</span>.<span class='ident'>len</span>(), <span class='number'>21</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>d</span>.<span class='ident'>len</span>(), <span class='number'>23</span>);<span class='comment'>
+
+// the two strings *look* the same
+</span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>c</span>);
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>d</span>);
+</pre>
+</div><h3 id='tymethod.slice' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.slice' class='fnname'>slice</a>(&amp;self, begin: <a href='../primitive.uint.html'>uint</a>, end: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a <a href='../primitive.str.html'>str</a></code></h3><div class='docblock'><p>Returns a slice of the given string from the byte range
+[<code>begin</code>..<code>end</code>).</p>
+
+<p>This operation is <code>O(1)</code>.</p>
+
+<p>Fails when <code>begin</code> and <code>end</code> do not point to valid characters
+or point beyond the last character of the string.</p>
+
+<p>See also <code>slice_to</code> and <code>slice_from</code> for slicing prefixes and
+suffixes of strings, and <code>slice_chars</code> for slicing based on
+code point counts.</p>
+
+<h1 id="example-13" class='section-header'><a
+                           href="#example-13">Example</a></h1><span id='rust-example-raw-13' class='rusttest'>fn main() {
+    let s = &quot;Löwe 老虎 Léopard&quot;;
+    assert_eq!(s.slice(0, 1), &quot;L&quot;);
+    
+    assert_eq!(s.slice(1, 9), &quot;öwe 老&quot;);
+    
+    // these will fail:
+    // byte 2 lies within `ö`:
+    // s.slice(2, 3);
+    
+    // byte 8 lies within `老`
+    // s.slice(1, 8);
+    
+    // byte 100 is outside the string
+    // s.slice(3, 100);
+}</span><pre id='rust-example-rendered-13' class='rust '>
+<span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='string'>&quot;Löwe 老虎 Léopard&quot;</span>;
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>s</span>.<span class='ident'>slice</span>(<span class='number'>0</span>, <span class='number'>1</span>), <span class='string'>&quot;L&quot;</span>);
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>s</span>.<span class='ident'>slice</span>(<span class='number'>1</span>, <span class='number'>9</span>), <span class='string'>&quot;öwe 老&quot;</span>);<span class='comment'>
+
+// these will fail:
+// byte 2 lies within `ö`:
+// s.slice(2, 3);
+
+// byte 8 lies within `老`
+// s.slice(1, 8);
+
+// byte 100 is outside the string
+// s.slice(3, 100);
+</span></pre>
+</div><h3 id='tymethod.slice_from' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.slice_from' class='fnname'>slice_from</a>(&amp;self, begin: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a <a href='../primitive.str.html'>str</a></code></h3><div class='docblock'><p>Returns a slice of the string from <code>begin</code> to its end.</p>
+
+<p>Equivalent to <code>self.slice(begin, self.len())</code>.</p>
+
+<p>Fails when <code>begin</code> does not point to a valid character, or is
+out of bounds.</p>
+
+<p>See also <code>slice</code>, <code>slice_to</code> and <code>slice_chars</code>.</p>
+</div><h3 id='tymethod.slice_to' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.slice_to' class='fnname'>slice_to</a>(&amp;self, end: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a <a href='../primitive.str.html'>str</a></code></h3><div class='docblock'><p>Returns a slice of the string from the beginning to byte
+<code>end</code>.</p>
+
+<p>Equivalent to <code>self.slice(0, end)</code>.</p>
+
+<p>Fails when <code>end</code> does not point to a valid character, or is
+out of bounds.</p>
+
+<p>See also <code>slice</code>, <code>slice_from</code> and <code>slice_chars</code>.</p>
+</div><h3 id='tymethod.slice_chars' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.slice_chars' class='fnname'>slice_chars</a>(&amp;self, begin: <a href='../primitive.uint.html'>uint</a>, end: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a <a href='../primitive.str.html'>str</a></code></h3><div class='docblock'><p>Returns a slice of the string from the character range
+[<code>begin</code>..<code>end</code>).</p>
+
+<p>That is, start at the <code>begin</code>-th code point of the string and
+continue to the <code>end</code>-th code point. This does not detect or
+handle edge cases such as leaving a combining character as the
+first code point of the string.</p>
+
+<p>Due to the design of UTF-8, this operation is <code>O(end)</code>.
+See <code>slice</code>, <code>slice_to</code> and <code>slice_from</code> for <code>O(1)</code>
+variants that use byte indices rather than code point
+indices.</p>
+
+<p>Fails if <code>begin</code> &gt; <code>end</code> or the either <code>begin</code> or <code>end</code> are
+beyond the last character of the string.</p>
+
+<h1 id="example-14" class='section-header'><a
+                           href="#example-14">Example</a></h1><span id='rust-example-raw-14' class='rusttest'>fn main() {
+    let s = &quot;Löwe 老虎 Léopard&quot;;
+    assert_eq!(s.slice_chars(0, 4), &quot;Löwe&quot;);
+    assert_eq!(s.slice_chars(5, 7), &quot;老虎&quot;);
+}</span><pre id='rust-example-rendered-14' class='rust '>
+<span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='string'>&quot;Löwe 老虎 Léopard&quot;</span>;
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>s</span>.<span class='ident'>slice_chars</span>(<span class='number'>0</span>, <span class='number'>4</span>), <span class='string'>&quot;Löwe&quot;</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>s</span>.<span class='ident'>slice_chars</span>(<span class='number'>5</span>, <span class='number'>7</span>), <span class='string'>&quot;老虎&quot;</span>);
+</pre>
+</div><h3 id='tymethod.starts_with' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.starts_with' class='fnname'>starts_with</a>(&amp;self, needle: &amp;<a href='../primitive.str.html'>str</a>) -&gt; <a href='../primitive.bool.html'>bool</a></code></h3><div class='docblock'><p>Returns true if <code>needle</code> is a prefix of the string.</p>
+</div><h3 id='tymethod.ends_with' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.ends_with' class='fnname'>ends_with</a>(&amp;self, needle: &amp;<a href='../primitive.str.html'>str</a>) -&gt; <a href='../primitive.bool.html'>bool</a></code></h3><div class='docblock'><p>Returns true if <code>needle</code> is a suffix of the string.</p>
+</div><h3 id='tymethod.trim' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.trim' class='fnname'>trim</a>(&amp;self) -&gt; &amp;'a <a href='../primitive.str.html'>str</a></code></h3><div class='docblock'><p>Returns a string with leading and trailing whitespace removed.</p>
+</div><h3 id='tymethod.trim_left' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.trim_left' class='fnname'>trim_left</a>(&amp;self) -&gt; &amp;'a <a href='../primitive.str.html'>str</a></code></h3><div class='docblock'><p>Returns a string with leading whitespace removed.</p>
+</div><h3 id='tymethod.trim_right' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.trim_right' class='fnname'>trim_right</a>(&amp;self) -&gt; &amp;'a <a href='../primitive.str.html'>str</a></code></h3><div class='docblock'><p>Returns a string with trailing whitespace removed.</p>
+</div><h3 id='tymethod.trim_chars' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.trim_chars' class='fnname'>trim_chars</a>&lt;C: <a class='trait' href='../../std/str/trait.CharEq.html' title='std::str::CharEq'>CharEq</a>&gt;(&amp;self, to_trim: C) -&gt; &amp;'a <a href='../primitive.str.html'>str</a></code></h3><div class='docblock'><p>Returns a string with characters that match <code>to_trim</code> removed.</p>
+
+<h1 id="arguments-2" class='section-header'><a
+                           href="#arguments-2">Arguments</a></h1>
+<ul>
+<li>to_trim - a character matcher</li>
+</ul>
+
+<h1 id="example-15" class='section-header'><a
+                           href="#example-15">Example</a></h1><span id='rust-example-raw-15' class='rusttest'>fn main() {
+    assert_eq!(&quot;11foo1bar11&quot;.trim_chars(&#39;1&#39;), &quot;foo1bar&quot;)
+    assert_eq!(&quot;12foo1bar12&quot;.trim_chars(&amp;[&#39;1&#39;, &#39;2&#39;]), &quot;foo1bar&quot;)
+    assert_eq!(&quot;123foo1bar123&quot;.trim_chars(|c: char| c.is_digit()), &quot;foo1bar&quot;)
+}</span><pre id='rust-example-rendered-15' class='rust '>
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;11foo1bar11&quot;</span>.<span class='ident'>trim_chars</span>(<span class='string'>&#39;1&#39;</span>), <span class='string'>&quot;foo1bar&quot;</span>)
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;12foo1bar12&quot;</span>.<span class='ident'>trim_chars</span>(<span class='kw-2'>&amp;</span>[<span class='string'>&#39;1&#39;</span>, <span class='string'>&#39;2&#39;</span>]), <span class='string'>&quot;foo1bar&quot;</span>)
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;123foo1bar123&quot;</span>.<span class='ident'>trim_chars</span>(<span class='op'>|</span><span class='ident'>c</span>: <span class='ident'>char</span><span class='op'>|</span> <span class='ident'>c</span>.<span class='ident'>is_digit</span>()), <span class='string'>&quot;foo1bar&quot;</span>)
+</pre>
+</div><h3 id='tymethod.trim_left_chars' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.trim_left_chars' class='fnname'>trim_left_chars</a>&lt;C: <a class='trait' href='../../std/str/trait.CharEq.html' title='std::str::CharEq'>CharEq</a>&gt;(&amp;self, to_trim: C) -&gt; &amp;'a <a href='../primitive.str.html'>str</a></code></h3><div class='docblock'><p>Returns a string with leading <code>chars_to_trim</code> removed.</p>
+
+<h1 id="arguments-3" class='section-header'><a
+                           href="#arguments-3">Arguments</a></h1>
+<ul>
+<li>to_trim - a character matcher</li>
+</ul>
+
+<h1 id="example-16" class='section-header'><a
+                           href="#example-16">Example</a></h1><span id='rust-example-raw-16' class='rusttest'>fn main() {
+    assert_eq!(&quot;11foo1bar11&quot;.trim_left_chars(&#39;1&#39;), &quot;foo1bar11&quot;)
+    assert_eq!(&quot;12foo1bar12&quot;.trim_left_chars(&amp;[&#39;1&#39;, &#39;2&#39;]), &quot;foo1bar12&quot;)
+    assert_eq!(&quot;123foo1bar123&quot;.trim_left_chars(|c: char| c.is_digit()), &quot;foo1bar123&quot;)
+}</span><pre id='rust-example-rendered-16' class='rust '>
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;11foo1bar11&quot;</span>.<span class='ident'>trim_left_chars</span>(<span class='string'>&#39;1&#39;</span>), <span class='string'>&quot;foo1bar11&quot;</span>)
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;12foo1bar12&quot;</span>.<span class='ident'>trim_left_chars</span>(<span class='kw-2'>&amp;</span>[<span class='string'>&#39;1&#39;</span>, <span class='string'>&#39;2&#39;</span>]), <span class='string'>&quot;foo1bar12&quot;</span>)
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;123foo1bar123&quot;</span>.<span class='ident'>trim_left_chars</span>(<span class='op'>|</span><span class='ident'>c</span>: <span class='ident'>char</span><span class='op'>|</span> <span class='ident'>c</span>.<span class='ident'>is_digit</span>()), <span class='string'>&quot;foo1bar123&quot;</span>)
+</pre>
+</div><h3 id='tymethod.trim_right_chars' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.trim_right_chars' class='fnname'>trim_right_chars</a>&lt;C: <a class='trait' href='../../std/str/trait.CharEq.html' title='std::str::CharEq'>CharEq</a>&gt;(&amp;self, to_trim: C) -&gt; &amp;'a <a href='../primitive.str.html'>str</a></code></h3><div class='docblock'><p>Returns a string with trailing <code>chars_to_trim</code> removed.</p>
+
+<h1 id="arguments-4" class='section-header'><a
+                           href="#arguments-4">Arguments</a></h1>
+<ul>
+<li>to_trim - a character matcher</li>
+</ul>
+
+<h1 id="example-17" class='section-header'><a
+                           href="#example-17">Example</a></h1><span id='rust-example-raw-17' class='rusttest'>fn main() {
+    assert_eq!(&quot;11foo1bar11&quot;.trim_right_chars(&#39;1&#39;), &quot;11foo1bar&quot;)
+    assert_eq!(&quot;12foo1bar12&quot;.trim_right_chars(&amp;[&#39;1&#39;, &#39;2&#39;]), &quot;12foo1bar&quot;)
+    assert_eq!(&quot;123foo1bar123&quot;.trim_right_chars(|c: char| c.is_digit()), &quot;123foo1bar&quot;)
+}</span><pre id='rust-example-rendered-17' class='rust '>
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;11foo1bar11&quot;</span>.<span class='ident'>trim_right_chars</span>(<span class='string'>&#39;1&#39;</span>), <span class='string'>&quot;11foo1bar&quot;</span>)
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;12foo1bar12&quot;</span>.<span class='ident'>trim_right_chars</span>(<span class='kw-2'>&amp;</span>[<span class='string'>&#39;1&#39;</span>, <span class='string'>&#39;2&#39;</span>]), <span class='string'>&quot;12foo1bar&quot;</span>)
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;123foo1bar123&quot;</span>.<span class='ident'>trim_right_chars</span>(<span class='op'>|</span><span class='ident'>c</span>: <span class='ident'>char</span><span class='op'>|</span> <span class='ident'>c</span>.<span class='ident'>is_digit</span>()), <span class='string'>&quot;123foo1bar&quot;</span>)
+</pre>
+</div><h3 id='tymethod.is_char_boundary' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.is_char_boundary' class='fnname'>is_char_boundary</a>(&amp;self, index: <a href='../primitive.uint.html'>uint</a>) -&gt; <a href='../primitive.bool.html'>bool</a></code></h3><div class='docblock'><p>Check that <code>index</code>-th byte lies at the start and/or end of a
+UTF-8 code point sequence.</p>
+
+<p>The start and end of the string (when <code>index == self.len()</code>)
+are considered to be boundaries.</p>
+
+<p>Fails if <code>index</code> is greater than <code>self.len()</code>.</p>
+
+<h1 id="example-18" class='section-header'><a
+                           href="#example-18">Example</a></h1><span id='rust-example-raw-18' class='rusttest'>fn main() {
+    let s = &quot;Löwe 老虎 Léopard&quot;;
+    assert!(s.is_char_boundary(0));
+    // start of `老`
+    assert!(s.is_char_boundary(6));
+    assert!(s.is_char_boundary(s.len()));
+    
+    // second byte of `ö`
+    assert!(!s.is_char_boundary(2));
+    
+    // third byte of `老`
+    assert!(!s.is_char_boundary(8));
+}</span><pre id='rust-example-rendered-18' class='rust '>
+<span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='string'>&quot;Löwe 老虎 Léopard&quot;</span>;
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>s</span>.<span class='ident'>is_char_boundary</span>(<span class='number'>0</span>));<span class='comment'>
+// start of `老`
+</span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>s</span>.<span class='ident'>is_char_boundary</span>(<span class='number'>6</span>));
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>s</span>.<span class='ident'>is_char_boundary</span>(<span class='ident'>s</span>.<span class='ident'>len</span>()));<span class='comment'>
+
+// second byte of `ö`
+</span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>s</span>.<span class='ident'>is_char_boundary</span>(<span class='number'>2</span>));<span class='comment'>
+
+// third byte of `老`
+</span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>s</span>.<span class='ident'>is_char_boundary</span>(<span class='number'>8</span>));
+</pre>
+</div><h3 id='tymethod.char_range_at' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.char_range_at' class='fnname'>char_range_at</a>(&amp;self, start: <a href='../primitive.uint.html'>uint</a>) -&gt; <a class='struct' href='../../std/str/struct.CharRange.html' title='std::str::CharRange'>CharRange</a></code></h3><div class='docblock'><p>Pluck a character out of a string and return the index of the next
+character.</p>
+
+<p>This function can be used to iterate over the unicode characters of a
+string.</p>
+
+<h1 id="example-19" class='section-header'><a
+                           href="#example-19">Example</a></h1>
+<p>This example manually iterate through the characters of a
+string; this should normally by done by <code>.chars()</code> or
+<code>.char_indices</code>.</p>
+<span id='rust-example-raw-19' class='rusttest'>fn main() {
+    use std::str::CharRange;
+    
+    let s = &quot;中华Việt Nam&quot;;
+    let mut i = 0u;
+    while i &lt; s.len() {
+        let CharRange {ch, next} = s.char_range_at(i);
+        println!(&quot;{}: {}&quot;, i, ch);
+        i = next;
+    }
+}</span><pre id='rust-example-rendered-19' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>str</span>::<span class='ident'>CharRange</span>;
+
+<span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='string'>&quot;中华Việt Nam&quot;</span>;
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='number'>0u</span>;
+<span class='kw'>while</span> <span class='ident'>i</span> <span class='op'>&lt;</span> <span class='ident'>s</span>.<span class='ident'>len</span>() {
+    <span class='kw'>let</span> <span class='ident'>CharRange</span> {<span class='ident'>ch</span>, <span class='ident'>next</span>} <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>char_range_at</span>(<span class='ident'>i</span>);
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}: {}&quot;</span>, <span class='ident'>i</span>, <span class='ident'>ch</span>);
+    <span class='ident'>i</span> <span class='op'>=</span> <span class='ident'>next</span>;
+}
+</pre>
+
+<h2 id="output" class='section-header'><a
+                           href="#output">Output</a></h2><span id='rust-example-raw-20' class='rusttest'>fn main() {
+    0: 中
+    3: 华
+    6: V
+    7: i
+    8: ệ
+    11: t
+    12:
+    13: N
+    14: a
+    15: m
+}</span><pre id='rust-example-rendered-20' class='rust '>
+<span class='number'>0</span>: <span class='ident'>中</span>
+<span class='number'>3</span>: <span class='ident'>华</span>
+<span class='number'>6</span>: <span class='ident'>V</span>
+<span class='number'>7</span>: <span class='ident'>i</span>
+<span class='number'>8</span>: <span class='ident'>ệ</span>
+<span class='number'>11</span>: <span class='ident'>t</span>
+<span class='number'>12</span>:
+<span class='number'>13</span>: <span class='ident'>N</span>
+<span class='number'>14</span>: <span class='ident'>a</span>
+<span class='number'>15</span>: <span class='ident'>m</span>
+</pre>
+
+<h1 id="arguments-5" class='section-header'><a
+                           href="#arguments-5">Arguments</a></h1>
+<ul>
+<li>s - The string</li>
+<li>i - The byte offset of the char to extract</li>
+</ul>
+
+<h1 id="return-value" class='section-header'><a
+                           href="#return-value">Return value</a></h1>
+<p>A record {ch: char, next: uint} containing the char value and the byte
+index of the next unicode character.</p>
+
+<h1 id="failure" class='section-header'><a
+                           href="#failure">Failure</a></h1>
+<p>If <code>i</code> is greater than or equal to the length of the string.
+If <code>i</code> is not the index of the beginning of a valid UTF-8 character.</p>
+</div><h3 id='tymethod.char_range_at_reverse' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.char_range_at_reverse' class='fnname'>char_range_at_reverse</a>(&amp;self, start: <a href='../primitive.uint.html'>uint</a>) -&gt; <a class='struct' href='../../std/str/struct.CharRange.html' title='std::str::CharRange'>CharRange</a></code></h3><div class='docblock'><p>Given a byte position and a str, return the previous char and its position.</p>
+
+<p>This function can be used to iterate over a unicode string in reverse.</p>
+
+<p>Returns 0 for next index if called on start index 0.</p>
+
+<h1 id="failure-1" class='section-header'><a
+                           href="#failure-1">Failure</a></h1>
+<p>If <code>i</code> is greater than the length of the string.
+If <code>i</code> is not an index following a valid UTF-8 character.</p>
+</div><h3 id='tymethod.char_at' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.char_at' class='fnname'>char_at</a>(&amp;self, i: <a href='../primitive.uint.html'>uint</a>) -&gt; <a href='../primitive.char.html'>char</a></code></h3><div class='docblock'><p>Plucks the character starting at the <code>i</code>th byte of a string.</p>
+
+<h1 id="failure-2" class='section-header'><a
+                           href="#failure-2">Failure</a></h1>
+<p>If <code>i</code> is greater than or equal to the length of the string.
+If <code>i</code> is not the index of the beginning of a valid UTF-8 character.</p>
+</div><h3 id='tymethod.char_at_reverse' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.char_at_reverse' class='fnname'>char_at_reverse</a>(&amp;self, i: <a href='../primitive.uint.html'>uint</a>) -&gt; <a href='../primitive.char.html'>char</a></code></h3><div class='docblock'><p>Plucks the character ending at the <code>i</code>th byte of a string.</p>
+
+<h1 id="failure-3" class='section-header'><a
+                           href="#failure-3">Failure</a></h1>
+<p>If <code>i</code> is greater than the length of the string.
+If <code>i</code> is not an index following a valid UTF-8 character.</p>
+</div><h3 id='tymethod.as_bytes' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.as_bytes' class='fnname'>as_bytes</a>(&amp;self) -&gt; &amp;'a <a href='../primitive.slice.html'>[<a href='../primitive.u8.html'>u8</a>]</a></code></h3><div class='docblock'><p>Work with the byte buffer of a string as a byte slice.</p>
+</div><h3 id='tymethod.find' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.find' class='fnname'>find</a>&lt;C: <a class='trait' href='../../std/str/trait.CharEq.html' title='std::str::CharEq'>CharEq</a>&gt;(&amp;self, search: C) -&gt; <a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;<a href='../primitive.uint.html'>uint</a>&gt;</code></h3><div class='docblock'><p>Returns the byte index of the first character of <code>self</code> that
+matches <code>search</code>.</p>
+
+<h1 id="return-value-1" class='section-header'><a
+                           href="#return-value-1">Return value</a></h1>
+<p><code>Some</code> containing the byte index of the last matching character
+or <code>None</code> if there is no match</p>
+
+<h1 id="example-20" class='section-header'><a
+                           href="#example-20">Example</a></h1><span id='rust-example-raw-21' class='rusttest'>fn main() {
+    let s = &quot;Löwe 老虎 Léopard&quot;;
+    
+    assert_eq!(s.find(&#39;L&#39;), Some(0));
+    assert_eq!(s.find(&#39;é&#39;), Some(14));
+    
+    // the first space
+    assert_eq!(s.find(|c: char| c.is_whitespace()), Some(5));
+    
+    // neither are found
+    assert_eq!(s.find(&amp;[&#39;1&#39;, &#39;2&#39;]), None);
+}</span><pre id='rust-example-rendered-21' class='rust '>
+<span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='string'>&quot;Löwe 老虎 Léopard&quot;</span>;
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>s</span>.<span class='ident'>find</span>(<span class='string'>&#39;L&#39;</span>), <span class='prelude-val'>Some</span>(<span class='number'>0</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>s</span>.<span class='ident'>find</span>(<span class='string'>&#39;é&#39;</span>), <span class='prelude-val'>Some</span>(<span class='number'>14</span>));<span class='comment'>
+
+// the first space
+</span><span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>s</span>.<span class='ident'>find</span>(<span class='op'>|</span><span class='ident'>c</span>: <span class='ident'>char</span><span class='op'>|</span> <span class='ident'>c</span>.<span class='ident'>is_whitespace</span>()), <span class='prelude-val'>Some</span>(<span class='number'>5</span>));<span class='comment'>
+
+// neither are found
+</span><span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>s</span>.<span class='ident'>find</span>(<span class='kw-2'>&amp;</span>[<span class='string'>&#39;1&#39;</span>, <span class='string'>&#39;2&#39;</span>]), <span class='prelude-val'>None</span>);
+</pre>
+</div><h3 id='tymethod.rfind' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.rfind' class='fnname'>rfind</a>&lt;C: <a class='trait' href='../../std/str/trait.CharEq.html' title='std::str::CharEq'>CharEq</a>&gt;(&amp;self, search: C) -&gt; <a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;<a href='../primitive.uint.html'>uint</a>&gt;</code></h3><div class='docblock'><p>Returns the byte index of the last character of <code>self</code> that
+matches <code>search</code>.</p>
+
+<h1 id="return-value-2" class='section-header'><a
+                           href="#return-value-2">Return value</a></h1>
+<p><code>Some</code> containing the byte index of the last matching character
+or <code>None</code> if there is no match.</p>
+
+<h1 id="example-21" class='section-header'><a
+                           href="#example-21">Example</a></h1><span id='rust-example-raw-22' class='rusttest'>fn main() {
+    let s = &quot;Löwe 老虎 Léopard&quot;;
+    
+    assert_eq!(s.rfind(&#39;L&#39;), Some(13));
+    assert_eq!(s.rfind(&#39;é&#39;), Some(14));
+    
+    // the second space
+    assert_eq!(s.rfind(|c: char| c.is_whitespace()), Some(12));
+    
+    // searches for an occurrence of either `1` or `2`, but neither are found
+    assert_eq!(s.rfind(&amp;[&#39;1&#39;, &#39;2&#39;]), None);
+}</span><pre id='rust-example-rendered-22' class='rust '>
+<span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='string'>&quot;Löwe 老虎 Léopard&quot;</span>;
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>s</span>.<span class='ident'>rfind</span>(<span class='string'>&#39;L&#39;</span>), <span class='prelude-val'>Some</span>(<span class='number'>13</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>s</span>.<span class='ident'>rfind</span>(<span class='string'>&#39;é&#39;</span>), <span class='prelude-val'>Some</span>(<span class='number'>14</span>));<span class='comment'>
+
+// the second space
+</span><span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>s</span>.<span class='ident'>rfind</span>(<span class='op'>|</span><span class='ident'>c</span>: <span class='ident'>char</span><span class='op'>|</span> <span class='ident'>c</span>.<span class='ident'>is_whitespace</span>()), <span class='prelude-val'>Some</span>(<span class='number'>12</span>));<span class='comment'>
+
+// searches for an occurrence of either `1` or `2`, but neither are found
+</span><span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>s</span>.<span class='ident'>rfind</span>(<span class='kw-2'>&amp;</span>[<span class='string'>&#39;1&#39;</span>, <span class='string'>&#39;2&#39;</span>]), <span class='prelude-val'>None</span>);
+</pre>
+</div><h3 id='tymethod.find_str' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.find_str' class='fnname'>find_str</a>(&amp;self, &amp;<a href='../primitive.str.html'>str</a>) -&gt; <a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;<a href='../primitive.uint.html'>uint</a>&gt;</code></h3><div class='docblock'><p>Returns the byte index of the first matching substring</p>
+
+<h1 id="arguments-6" class='section-header'><a
+                           href="#arguments-6">Arguments</a></h1>
+<ul>
+<li><code>needle</code> - The string to search for</li>
+</ul>
+
+<h1 id="return-value-3" class='section-header'><a
+                           href="#return-value-3">Return value</a></h1>
+<p><code>Some</code> containing the byte index of the first matching substring
+or <code>None</code> if there is no match.</p>
+
+<h1 id="example-22" class='section-header'><a
+                           href="#example-22">Example</a></h1><span id='rust-example-raw-23' class='rusttest'>fn main() {
+    let s = &quot;Löwe 老虎 Léopard&quot;;
+    
+    assert_eq!(s.find_str(&quot;老虎 L&quot;), Some(6));
+    assert_eq!(s.find_str(&quot;muffin man&quot;), None);
+}</span><pre id='rust-example-rendered-23' class='rust '>
+<span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='string'>&quot;Löwe 老虎 Léopard&quot;</span>;
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>s</span>.<span class='ident'>find_str</span>(<span class='string'>&quot;老虎 L&quot;</span>), <span class='prelude-val'>Some</span>(<span class='number'>6</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>s</span>.<span class='ident'>find_str</span>(<span class='string'>&quot;muffin man&quot;</span>), <span class='prelude-val'>None</span>);
+</pre>
+</div><h3 id='tymethod.slice_shift_char' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.slice_shift_char' class='fnname'>slice_shift_char</a>(&amp;self) -&gt; <a href='../primitive.tuple.html'>(<a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;<a href='../primitive.char.html'>char</a>&gt;, &amp;'a <a href='../primitive.str.html'>str</a>)</a></code></h3><div class='docblock'><p>Retrieves the first character from a string slice and returns
+it. This does not allocate a new string; instead, it returns a
+slice that point one character beyond the character that was
+shifted. If the string does not contain any characters,
+a tuple of None and an empty string is returned instead.</p>
+
+<h1 id="example-23" class='section-header'><a
+                           href="#example-23">Example</a></h1><span id='rust-example-raw-24' class='rusttest'>fn main() {
+    let s = &quot;Löwe 老虎 Léopard&quot;;
+    let (c, s1) = s.slice_shift_char();
+    assert_eq!(c, Some(&#39;L&#39;));
+    assert_eq!(s1, &quot;öwe 老虎 Léopard&quot;);
+    
+    let (c, s2) = s1.slice_shift_char();
+    assert_eq!(c, Some(&#39;ö&#39;));
+    assert_eq!(s2, &quot;we 老虎 Léopard&quot;);
+}</span><pre id='rust-example-rendered-24' class='rust '>
+<span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='string'>&quot;Löwe 老虎 Léopard&quot;</span>;
+<span class='kw'>let</span> (<span class='ident'>c</span>, <span class='ident'>s1</span>) <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>slice_shift_char</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>c</span>, <span class='prelude-val'>Some</span>(<span class='string'>&#39;L&#39;</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>s1</span>, <span class='string'>&quot;öwe 老虎 Léopard&quot;</span>);
+
+<span class='kw'>let</span> (<span class='ident'>c</span>, <span class='ident'>s2</span>) <span class='op'>=</span> <span class='ident'>s1</span>.<span class='ident'>slice_shift_char</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>c</span>, <span class='prelude-val'>Some</span>(<span class='string'>&#39;ö&#39;</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>s2</span>, <span class='string'>&quot;we 老虎 Léopard&quot;</span>);
+</pre>
+</div><h3 id='tymethod.subslice_offset' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.subslice_offset' class='fnname'>subslice_offset</a>(&amp;self, inner: &amp;<a href='../primitive.str.html'>str</a>) -&gt; <a href='../primitive.uint.html'>uint</a></code></h3><div class='docblock'><p>Returns the byte offset of an inner slice relative to an enclosing outer slice.</p>
+
+<p>Fails if <code>inner</code> is not a direct slice contained within self.</p>
+
+<h1 id="example-24" class='section-header'><a
+                           href="#example-24">Example</a></h1><span id='rust-example-raw-25' class='rusttest'>fn main() {
+    let string = &quot;a\nb\nc&quot;;
+    let lines: Vec&lt;&amp;str&gt; = string.lines().collect();
+    let lines = lines.as_slice();
+    
+    assert!(string.subslice_offset(lines[0]) == 0); // &amp;&quot;a&quot;
+    assert!(string.subslice_offset(lines[1]) == 2); // &amp;&quot;b&quot;
+    assert!(string.subslice_offset(lines[2]) == 4); // &amp;&quot;c&quot;
+}</span><pre id='rust-example-rendered-25' class='rust '>
+<span class='kw'>let</span> <span class='ident'>string</span> <span class='op'>=</span> <span class='string'>&quot;a\nb\nc&quot;</span>;
+<span class='kw'>let</span> <span class='ident'>lines</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>string</span>.<span class='ident'>lines</span>().<span class='ident'>collect</span>();
+<span class='kw'>let</span> <span class='ident'>lines</span> <span class='op'>=</span> <span class='ident'>lines</span>.<span class='ident'>as_slice</span>();
+
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>string</span>.<span class='ident'>subslice_offset</span>(<span class='ident'>lines</span>[<span class='number'>0</span>]) <span class='op'>==</span> <span class='number'>0</span>);<span class='comment'> // &amp;&quot;a&quot;
+</span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>string</span>.<span class='ident'>subslice_offset</span>(<span class='ident'>lines</span>[<span class='number'>1</span>]) <span class='op'>==</span> <span class='number'>2</span>);<span class='comment'> // &amp;&quot;b&quot;
+</span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>string</span>.<span class='ident'>subslice_offset</span>(<span class='ident'>lines</span>[<span class='number'>2</span>]) <span class='op'>==</span> <span class='number'>4</span>);<span class='comment'> // &amp;&quot;c&quot;
+</span></pre>
+</div><h3 id='tymethod.as_ptr' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.as_ptr' class='fnname'>as_ptr</a>(&amp;self) -&gt; *<a href='../primitive.u8.html'>u8</a></code></h3><div class='docblock'><p>Return an unsafe pointer to the strings buffer.</p>
+
+<p>The caller must ensure that the string outlives this pointer,
+and that it is not reallocated (e.g. by pushing to the
+string).</p>
+</div><h3 id='tymethod.utf16_units' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.utf16_units' class='fnname'>utf16_units</a>(&amp;self) -&gt; <a class='struct' href='../../core/str/struct.Utf16CodeUnits.html' title='core::str::Utf16CodeUnits'>Utf16CodeUnits</a>&lt;'a&gt;</code></h3><div class='docblock'><p>Return an iterator of <code>u16</code> over the string encoded as UTF-16.</p>
+</div></div>
+        <h2 id='implementors'>Implementors</h2>
+        <ul class='item-list' id='implementors-list'>
+    <li><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a&gt; <a class='trait' href='../../std/str/trait.StrSlice.html' title='std::str::StrSlice'>StrSlice</a>&lt;'a&gt; for &amp;'a <a href='../primitive.str.html'>str</a></code></li>
+</ul><script type="text/javascript" async
+                              src="../../implementors/core/str/trait.StrSlice.js">
+                      </script></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "std";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script src="../../playpen.js"></script>
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The std library documentation.">
+
+    <title>std::bitflags::bitflags! - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../std/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../index.html'>std</a>&#8203;::<a href='index.html'>bitflags</a></p><div class='block macro'><h2>Macros</h2><a class='macro current' href='macro.bitflags!.html'>bitflags!</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content macro">
+<h1 class='fqn'><a href='../index.html'>std</a>::<a href='index.html'>bitflags</a>::<a class='macro' href=''>bitflags!</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-70' href='../../src/std/Users/aturon/moz/working/stability-dashboard/src/libstd/bitflags.rs.html#112-219'>[src]</a></span></h1>
+<pre class='rust macro'>
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>bitflags</span>(
+    ($(<span class='attribute'>#[<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>attr</span>:<span class='ident'>meta</span>]</span>)<span class='op'>*</span> <span class='ident'>flags</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span>:<span class='ident'>ident</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>:<span class='ident'>ty</span> {
+        $($(<span class='attribute'>#[<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>Flag_attr</span>:<span class='ident'>meta</span>]</span>)<span class='op'>*</span> <span class='kw'>static</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>Flag</span>:<span class='ident'>ident</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>value</span>:<span class='ident'>expr</span>),<span class='op'>+</span>
+    }) <span class='op'>=&gt;</span> (
+        <span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>PartialEq</span>, <span class='ident'>Eq</span>, <span class='ident'>Clone</span>)]</span>
+        $(<span class='attribute'>#[<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>attr</span>]</span>)<span class='op'>*</span>
+        <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span> {
+            <span class='ident'>bits</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>,
+        }
+
+        $($(<span class='attribute'>#[<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>Flag_attr</span>]</span>)<span class='op'>*</span> <span class='kw'>pub</span> <span class='kw'>static</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>Flag</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span> { <span class='ident'>bits</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>value</span> };)<span class='op'>+</span>
+
+        <span class='kw'>impl</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span> {
+            <span class='doccomment'>/// Returns an empty set of flags.</span>
+            <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>empty</span>() <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span> {
+                <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span> { <span class='ident'>bits</span>: <span class='number'>0</span> }
+            }
+
+            <span class='doccomment'>/// Returns the set containing all flags.</span>
+            <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>all</span>() <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span> {
+                <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span> { <span class='ident'>bits</span>: $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>value</span>)<span class='op'>|</span><span class='op'>+</span> }
+            }
+
+            <span class='doccomment'>/// Returns the raw value of the flags currently stored.</span>
+            <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>bits</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span> {
+                <span class='self'>self</span>.<span class='ident'>bits</span>
+            }
+
+            <span class='doccomment'>/// Convert from underlying bit representation, unless that</span>
+            <span class='doccomment'>/// representation contains bits that do not correspond to a flag.</span>
+            <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_bits</span>(<span class='ident'>bits</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>) <span class='op'>-&gt;</span> ::<span class='ident'>std</span>::<span class='ident'>option</span>::<span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span><span class='op'>&gt;</span> {
+                <span class='kw'>if</span> (<span class='ident'>bits</span> <span class='op'>&amp;</span> <span class='op'>!</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span>::<span class='ident'>all</span>().<span class='ident'>bits</span>()) <span class='op'>!=</span> <span class='number'>0</span> {
+                    ::<span class='ident'>std</span>::<span class='ident'>option</span>::<span class='prelude-val'>None</span>
+                } <span class='kw'>else</span> {
+                    ::<span class='ident'>std</span>::<span class='ident'>option</span>::<span class='prelude-val'>Some</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span> { <span class='ident'>bits</span>: <span class='ident'>bits</span> })
+                }
+            }
+
+            <span class='doccomment'>/// Convert from underlying bit representation, dropping any bits</span>
+            <span class='doccomment'>/// that do not correspond to flags.</span>
+            <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_bits_truncate</span>(<span class='ident'>bits</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span> {
+                <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span> { <span class='ident'>bits</span>: <span class='ident'>bits</span> } <span class='op'>&amp;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span>::<span class='ident'>all</span>()
+            }
+
+            <span class='doccomment'>/// Returns `true` if no flags are currently stored.</span>
+            <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>is_empty</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+                <span class='op'>*</span><span class='self'>self</span> <span class='op'>==</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span>::<span class='ident'>empty</span>()
+            }
+
+            <span class='doccomment'>/// Returns `true` if all flags are currently set.</span>
+            <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>is_all</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+                <span class='op'>*</span><span class='self'>self</span> <span class='op'>==</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span>::<span class='ident'>all</span>()
+            }
+
+            <span class='doccomment'>/// Returns `true` if there are flags common to both `self` and `other`.</span>
+            <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>intersects</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+                <span class='op'>!</span>(<span class='self'>self</span> <span class='op'>&amp;</span> <span class='ident'>other</span>).<span class='ident'>is_empty</span>()
+            }
+
+            <span class='doccomment'>/// Returns `true` all of the flags in `other` are contained within `self`.</span>
+            <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>contains</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+                (<span class='self'>self</span> <span class='op'>&amp;</span> <span class='ident'>other</span>) <span class='op'>==</span> <span class='ident'>other</span>
+            }
+
+            <span class='doccomment'>/// Inserts the specified flags in-place.</span>
+            <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>insert</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>other</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span>) {
+                <span class='self'>self</span>.<span class='ident'>bits</span> <span class='op'>|=</span> <span class='ident'>other</span>.<span class='ident'>bits</span>;
+            }
+
+            <span class='doccomment'>/// Removes the specified flags in-place.</span>
+            <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>remove</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>other</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span>) {
+                <span class='self'>self</span>.<span class='ident'>bits</span> <span class='op'>&amp;=</span> <span class='op'>!</span><span class='ident'>other</span>.<span class='ident'>bits</span>;
+            }
+        }
+
+        <span class='kw'>impl</span> <span class='ident'>BitOr</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span> {
+            <span class='doccomment'>/// Returns the union of the two sets of flags.</span>
+            <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+            <span class='kw'>fn</span> <span class='ident'>bitor</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span>) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span> {
+                <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span> { <span class='ident'>bits</span>: <span class='self'>self</span>.<span class='ident'>bits</span> <span class='op'>|</span> <span class='ident'>other</span>.<span class='ident'>bits</span> }
+            }
+        }
+
+        <span class='kw'>impl</span> <span class='ident'>BitAnd</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span> {
+            <span class='doccomment'>/// Returns the intersection between the two sets of flags.</span>
+            <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+            <span class='kw'>fn</span> <span class='ident'>bitand</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span>) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span> {
+                <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span> { <span class='ident'>bits</span>: <span class='self'>self</span>.<span class='ident'>bits</span> <span class='op'>&amp;</span> <span class='ident'>other</span>.<span class='ident'>bits</span> }
+            }
+        }
+
+        <span class='kw'>impl</span> <span class='ident'>Sub</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span> {
+            <span class='doccomment'>/// Returns the set difference of the two sets of flags.</span>
+            <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+            <span class='kw'>fn</span> <span class='ident'>sub</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span>) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span> {
+                <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span> { <span class='ident'>bits</span>: <span class='self'>self</span>.<span class='ident'>bits</span> <span class='op'>&amp;</span> <span class='op'>!</span><span class='ident'>other</span>.<span class='ident'>bits</span> }
+            }
+        }
+
+        <span class='kw'>impl</span> <span class='ident'>Not</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span> {
+            <span class='doccomment'>/// Returns the complement of this set of flags.</span>
+            <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+            <span class='kw'>fn</span> <span class='ident'>not</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span> {
+                <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span> { <span class='ident'>bits</span>: <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>bits</span> } <span class='op'>&amp;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>BitFlags</span>::<span class='ident'>all</span>()
+            }
+        }
+    )
+)
+</pre>
+</section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "std";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script src="../../playpen.js"></script>
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

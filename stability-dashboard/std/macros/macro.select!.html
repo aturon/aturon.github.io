@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The std library documentation.">
+
+    <title>std::macros::select! - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../std/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../index.html'>std</a>&#8203;::<a href='index.html'>macros</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='builtin/index.html'>builtin</a></div><div class='block macro'><h2>Macros</h2><a class='macro ' href='macro.assert!.html'>assert!</a><a class='macro ' href='macro.assert_eq!.html'>assert_eq!</a><a class='macro ' href='macro.debug_assert!.html'>debug_assert!</a><a class='macro ' href='macro.debug_assert_eq!.html'>debug_assert_eq!</a><a class='macro ' href='macro.fail!.html'>fail!</a><a class='macro ' href='macro.format!.html'>format!</a><a class='macro ' href='macro.local_data_key!.html'>local_data_key!</a><a class='macro ' href='macro.print!.html'>print!</a><a class='macro ' href='macro.println!.html'>println!</a><a class='macro current' href='macro.select!.html'>select!</a><a class='macro ' href='macro.try!.html'>try!</a><a class='macro ' href='macro.unimplemented!.html'>unimplemented!</a><a class='macro ' href='macro.unreachable!.html'>unreachable!</a><a class='macro ' href='macro.vec!.html'>vec!</a><a class='macro ' href='macro.write!.html'>write!</a><a class='macro ' href='macro.writeln!.html'>writeln!</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content macro">
+<h1 class='fqn'><a href='../index.html'>std</a>::<a href='index.html'>macros</a>::<a class='macro' href=''>select!</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-53' href='../../src/std/Users/aturon/moz/working/stability-dashboard/src/libstd/macros.rs.html#355-369'>[src]</a></span></h1>
+<pre class='rust macro'>
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>select</span> {
+    (
+        $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>name</span>:<span class='ident'>pat</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rx</span>:<span class='ident'>ident</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>meth</span>:<span class='ident'>ident</span>() <span class='op'>=&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>code</span>:<span class='ident'>expr</span>),<span class='op'>+</span>
+    ) <span class='op'>=&gt;</span> ({
+        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>comm</span>::<span class='ident'>Select</span>;
+        <span class='kw'>let</span> <span class='ident'>sel</span> <span class='op'>=</span> <span class='ident'>Select</span>::<span class='ident'>new</span>();
+        $( <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rx</span> <span class='op'>=</span> <span class='ident'>sel</span>.<span class='ident'>handle</span>(<span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rx</span>); )<span class='op'>+</span>
+        <span class='kw'>unsafe</span> {
+            $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rx</span>.<span class='ident'>add</span>(); )<span class='op'>+</span>
+        }
+        <span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='ident'>sel</span>.<span class='ident'>wait</span>();
+        $( <span class='kw'>if</span> <span class='ident'>ret</span> <span class='op'>==</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rx</span>.<span class='ident'>id</span>() { <span class='kw'>let</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>name</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rx</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>meth</span>(); <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>code</span> } <span class='kw'>else</span> )<span class='op'>+</span>
+        { <span class='macro'>unreachable</span><span class='macro'>!</span>() }
+    })
+}
+</pre>
+<div class='docblock'><p>A macro to select an event from a number of receivers.</p>
+
+<p>This macro is used to wait for the first event to occur on a number of
+receivers. It places no restrictions on the types of receivers given to
+this macro, this can be viewed as a heterogeneous select.</p>
+
+<h1 id="example" class='section-header'><a
+                           href="#example">Example</a></h1><span id='rust-example-raw-0' class='rusttest'>fn main() {
+    let (tx1, rx1) = channel();
+    let (tx2, rx2) = channel();
+    fn long_running_task() {}
+    fn calculate_the_answer() -&gt; int { 42i }
+    
+    spawn(proc() { long_running_task(); tx1.send(()) });
+    spawn(proc() { tx2.send(calculate_the_answer()) });
+    
+    select! (
+        () = rx1.recv() =&gt; println!(&quot;the long running task finished first&quot;),
+        answer = rx2.recv() =&gt; {
+            println!(&quot;the answer was: {}&quot;, answer);
+        }
+    )
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='kw'>let</span> (<span class='ident'>tx1</span>, <span class='ident'>rx1</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
+<span class='kw'>let</span> (<span class='ident'>tx2</span>, <span class='ident'>rx2</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
+
+<span class='ident'>spawn</span>(<span class='kw'>proc</span>() { <span class='ident'>long_running_task</span>(); <span class='ident'>tx1</span>.<span class='ident'>send</span>(()) });
+<span class='ident'>spawn</span>(<span class='kw'>proc</span>() { <span class='ident'>tx2</span>.<span class='ident'>send</span>(<span class='ident'>calculate_the_answer</span>()) });
+
+<span class='macro'>select</span><span class='macro'>!</span> (
+    () <span class='op'>=</span> <span class='ident'>rx1</span>.<span class='ident'>recv</span>() <span class='op'>=&gt;</span> <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;the long running task finished first&quot;</span>),
+    <span class='ident'>answer</span> <span class='op'>=</span> <span class='ident'>rx2</span>.<span class='ident'>recv</span>() <span class='op'>=&gt;</span> {
+        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;the answer was: {}&quot;</span>, <span class='ident'>answer</span>);
+    }
+)
+</pre>
+
+<p>For more information about select, see the <code>std::comm::Select</code> structure.</p>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "std";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script src="../../playpen.js"></script>
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

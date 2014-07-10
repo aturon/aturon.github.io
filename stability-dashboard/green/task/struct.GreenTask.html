@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The green library documentation.">
+
+    <title>green::task::GreenTask - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../green/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../index.html'>green</a>&#8203;::<a href='index.html'>task</a></p><div class='block struct'><h2>Structs</h2><a class='struct current' href='struct.GreenTask.html'>GreenTask</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'>Struct <a href='../index.html'>green</a>::<a href='index.html'>task</a>::<a class='struct' href=''>GreenTask</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-7524' href='../../src/green/Users/aturon/moz/working/stability-dashboard/src/libgreen/task.rs.html#39-70'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct GreenTask {
+    pub coroutine: <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../../green/coroutine/struct.Coroutine.html' title='green::coroutine::Coroutine'>Coroutine</a>&gt;,
+    pub handle: <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../../green/sched/struct.SchedHandle.html' title='green::sched::SchedHandle'>SchedHandle</a>&gt;,
+    pub sched: <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../../green/sched/struct.Scheduler.html' title='green::sched::Scheduler'>Scheduler</a>&gt;&gt;,
+    pub task: <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../../rustrt/task/struct.Task.html' title='rustrt::task::Task'>Task</a>&gt;&gt;,
+    pub task_type: <a class='type' href='../../green/task/type.TaskType.html' title='green::task::TaskType'>TaskType</a>,
+    pub pool_id: <a href='../../std/primitive.uint.html'>uint</a>,
+    pub nasty_deschedule_lock: <a class='struct' href='../../rustrt/mutex/struct.NativeMutex.html' title='rustrt::mutex::NativeMutex'>NativeMutex</a>,
+}</pre><div class='docblock'><p>The necessary fields needed to keep track of a green task (as opposed to a
+1:1 task).</p>
+</div><h2 class='fields'>Fields</h2>
+<table><tr><td id='structfield.coroutine'><a class='stability Experimental' title='Experimental'></a><code>coroutine</code></td><td><div class='docblock'><p>Coroutine that this task is running on, otherwise known as the register
+context and the stack that this task owns. This field is optional to
+relinquish ownership back to a scheduler to recycle stacks at a later
+date.</p>
+</div></td></tr><tr><td id='structfield.handle'><a class='stability Experimental' title='Experimental'></a><code>handle</code></td><td><div class='docblock'><p>Optional handle back into the home sched pool of this task. This field
+is lazily initialized.</p>
+</div></td></tr><tr><td id='structfield.sched'><a class='stability Experimental' title='Experimental'></a><code>sched</code></td><td><div class='docblock'><p>Slot for maintaining ownership of a scheduler. If a task is running,
+this value will be Some(sched) where the task is running on &quot;sched&quot;.</p>
+</div></td></tr><tr><td id='structfield.task'><a class='stability Experimental' title='Experimental'></a><code>task</code></td><td><div class='docblock'><p>Temporary ownership slot of a std::rt::task::Task object. This is used
+to squirrel that libstd task away while we&#39;re performing green task
+operations.</p>
+</div></td></tr><tr><td id='structfield.task_type'><a class='stability Experimental' title='Experimental'></a><code>task_type</code></td><td><div class='docblock'><p>Dictates whether this is a sched task or a normal green task</p>
+</div></td></tr><tr><td id='structfield.pool_id'><a class='stability Experimental' title='Experimental'></a><code>pool_id</code></td><td><div class='docblock'><p>Home pool that this task was spawned into. This field is lazily
+initialized until when the task is initially scheduled, and is used to
+make sure that tasks are always woken up in the correct pool of
+schedulers.</p>
+</div></td></tr><tr><td id='structfield.nasty_deschedule_lock'><a class='stability Experimental' title='Experimental'></a><code>nasty_deschedule_lock</code></td><td></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='struct' href='../../green/task/struct.GreenTask.html' title='green::task::GreenTask'>GreenTask</a></code></h3><div class='impl-methods'><h4 id='method.new' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.new' class='fnname'>new</a>(stack_pool: &amp;mut <a class='struct' href='../../green/stack/struct.StackPool.html' title='green::stack::StackPool'>StackPool</a>, stack_size: <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a href='../../std/primitive.uint.html'>uint</a>&gt;, start: proc(): <a class='trait' href='../../core/kinds/trait.Send.html' title='core::kinds::Send'>Send</a>) -&gt; <a class='struct' href='../../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../../green/task/struct.GreenTask.html' title='green::task::GreenTask'>GreenTask</a>&gt;</code></h4>
+<div class='docblock'><p>Creates a new green task which is not homed to any particular scheduler
+and will not have any contained Task structure.</p>
+</div><h4 id='method.new_homed' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.new_homed' class='fnname'>new_homed</a>(stack_pool: &amp;mut <a class='struct' href='../../green/stack/struct.StackPool.html' title='green::stack::StackPool'>StackPool</a>, stack_size: <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a href='../../std/primitive.uint.html'>uint</a>&gt;, home: <a class='type' href='../../green/task/type.Home.html' title='green::task::Home'>Home</a>, start: proc(): <a class='trait' href='../../core/kinds/trait.Send.html' title='core::kinds::Send'>Send</a>) -&gt; <a class='struct' href='../../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../../green/task/struct.GreenTask.html' title='green::task::GreenTask'>GreenTask</a>&gt;</code></h4>
+<div class='docblock'><p>Creates a new task (like <code>new</code>), but specifies the home for new task.</p>
+</div><h4 id='method.new_typed' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.new_typed' class='fnname'>new_typed</a>(coroutine: <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../../green/coroutine/struct.Coroutine.html' title='green::coroutine::Coroutine'>Coroutine</a>&gt;, task_type: <a class='type' href='../../green/task/type.TaskType.html' title='green::task::TaskType'>TaskType</a>) -&gt; <a class='struct' href='../../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../../green/task/struct.GreenTask.html' title='green::task::GreenTask'>GreenTask</a>&gt;</code></h4>
+<div class='docblock'><p>Creates a new green task with the specified coroutine and type, this is
+useful when creating scheduler tasks.</p>
+</div><h4 id='method.configure' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.configure' class='fnname'>configure</a>(pool: &amp;mut <a class='struct' href='../../green/stack/struct.StackPool.html' title='green::stack::StackPool'>StackPool</a>, opts: <a class='struct' href='../../rustrt/task/struct.TaskOpts.html' title='rustrt::task::TaskOpts'>TaskOpts</a>, f: proc(): <a class='trait' href='../../core/kinds/trait.Send.html' title='core::kinds::Send'>Send</a>) -&gt; <a class='struct' href='../../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../../green/task/struct.GreenTask.html' title='green::task::GreenTask'>GreenTask</a>&gt;</code></h4>
+<div class='docblock'><p>Creates a new green task with the given configuration options for the
+contained Task object. The given stack pool is also used to allocate a
+new stack for this task.</p>
+</div><h4 id='method.convert' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.convert' class='fnname'>convert</a>(task: <a class='struct' href='../../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../../rustrt/task/struct.Task.html' title='rustrt::task::Task'>Task</a>&gt;) -&gt; <a class='struct' href='../../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../../green/task/struct.GreenTask.html' title='green::task::GreenTask'>GreenTask</a>&gt;</code></h4>
+<div class='docblock'><p>Just like the <code>maybe_take_runtime</code> function, this function should <em>not</em>
+exist. Usage of this function is <em>strongly</em> discouraged. This is an
+absolute last resort necessary for converting a libstd task to a green
+task.</p>
+
+<p>This function will assert that the task is indeed a green task before
+returning (and will kill the entire process if this is wrong).</p>
+</div><h4 id='method.give_home' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.give_home' class='fnname'>give_home</a>(&amp;mut self, new_home: <a class='type' href='../../green/task/type.Home.html' title='green::task::Home'>Home</a>)</code></h4>
+<h4 id='method.take_unwrap_home' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.take_unwrap_home' class='fnname'>take_unwrap_home</a>(&amp;mut self) -&gt; <a class='type' href='../../green/task/type.Home.html' title='green::task::Home'>Home</a></code></h4>
+<h4 id='method.is_home_no_tls' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.is_home_no_tls' class='fnname'>is_home_no_tls</a>(&amp;self, sched: &amp;<a class='struct' href='../../green/sched/struct.Scheduler.html' title='green::sched::Scheduler'>Scheduler</a>) -&gt; <a href='../../std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.homed' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.homed' class='fnname'>homed</a>(&amp;self) -&gt; <a href='../../std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.is_sched' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.is_sched' class='fnname'>is_sched</a>(&amp;self) -&gt; <a href='../../std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.as_uint' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.as_uint' class='fnname'>as_uint</a>(&amp;self) -&gt; <a href='../../std/primitive.uint.html'>uint</a></code></h4>
+<h4 id='method.from_uint' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#method.from_uint' class='fnname'>from_uint</a>(val: <a href='../../std/primitive.uint.html'>uint</a>) -&gt; <a class='struct' href='../../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../../green/task/struct.GreenTask.html' title='green::task::GreenTask'>GreenTask</a>&gt;</code></h4>
+<h4 id='method.put_with_sched' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.put_with_sched' class='fnname'>put_with_sched</a>(~self, sched: <a class='struct' href='../../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../../green/sched/struct.Scheduler.html' title='green::sched::Scheduler'>Scheduler</a>&gt;)</code></h4>
+<h4 id='method.put_task' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.put_task' class='fnname'>put_task</a>(&amp;mut self, task: <a class='struct' href='../../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../../rustrt/task/struct.Task.html' title='rustrt::task::Task'>Task</a>&gt;)</code></h4>
+<h4 id='method.swap' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.swap' class='fnname'>swap</a>(~self) -&gt; <a class='struct' href='../../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../../rustrt/task/struct.Task.html' title='rustrt::task::Task'>Task</a>&gt;</code></h4>
+<h4 id='method.put' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.put' class='fnname'>put</a>(~self)</code></h4>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../rustrt/trait.Runtime.html' title='rustrt::Runtime'>Runtime</a> for <a class='struct' href='../../green/task/struct.GreenTask.html' title='green::task::GreenTask'>GreenTask</a></code></h3><div class='impl-methods'><h4 id='method.yield_now' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.yield_now' class='fnname'>yield_now</a>(~self, cur_task: <a class='struct' href='../../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../../rustrt/task/struct.Task.html' title='rustrt::task::Task'>Task</a>&gt;)</code></h4>
+<h4 id='method.maybe_yield' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.maybe_yield' class='fnname'>maybe_yield</a>(~self, cur_task: <a class='struct' href='../../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../../rustrt/task/struct.Task.html' title='rustrt::task::Task'>Task</a>&gt;)</code></h4>
+<h4 id='method.deschedule' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.deschedule' class='fnname'>deschedule</a>(~self, times: <a href='../../std/primitive.uint.html'>uint</a>, cur_task: <a class='struct' href='../../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../../rustrt/task/struct.Task.html' title='rustrt::task::Task'>Task</a>&gt;, f: |<a class='type' href='../../rustrt/task/type.BlockedTask.html' title='rustrt::task::BlockedTask'>BlockedTask</a>| -&gt; <a class='type' href='../../core/result/type.Result.html' title='core::result::Result'>Result</a>&lt;(), <a class='type' href='../../rustrt/task/type.BlockedTask.html' title='rustrt::task::BlockedTask'>BlockedTask</a>&gt;)</code></h4>
+<h4 id='method.reawaken' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.reawaken' class='fnname'>reawaken</a>(~self, to_wake: <a class='struct' href='../../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../../rustrt/task/struct.Task.html' title='rustrt::task::Task'>Task</a>&gt;)</code></h4>
+<h4 id='method.spawn_sibling' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.spawn_sibling' class='fnname'>spawn_sibling</a>(~self, cur_task: <a class='struct' href='../../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../../rustrt/task/struct.Task.html' title='rustrt::task::Task'>Task</a>&gt;, opts: <a class='struct' href='../../rustrt/task/struct.TaskOpts.html' title='rustrt::task::TaskOpts'>TaskOpts</a>, f: proc(): <a class='trait' href='../../core/kinds/trait.Send.html' title='core::kinds::Send'>Send</a>)</code></h4>
+<h4 id='method.local_io' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.local_io' class='fnname'>local_io</a>&lt;'a&gt;(&amp;'a mut self) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../../rustrt/rtio/struct.LocalIo.html' title='rustrt::rtio::LocalIo'>LocalIo</a>&lt;'a&gt;&gt;</code></h4>
+<h4 id='method.stack_bounds' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.stack_bounds' class='fnname'>stack_bounds</a>(&amp;self) -&gt; <a href='../../std/primitive.tuple.html'>(<a href='../../std/primitive.uint.html'>uint</a>, <a href='../../std/primitive.uint.html'>uint</a>)</a></code></h4>
+<h4 id='method.can_block' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.can_block' class='fnname'>can_block</a>(&amp;self) -&gt; <a href='../../std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.wrap' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.wrap' class='fnname'>wrap</a>(~self) -&gt; <a class='struct' href='../../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='trait' href='../../core/any/trait.Any.html' title='core::any::Any'>Any</a>&gt;</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "green";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script src="../../playpen.js"></script>
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The rustrt library documentation.">
+
+    <title>rustrt::thread::Thread - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../rustrt/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../index.html'>rustrt</a>&#8203;::<a href='index.html'>thread</a></p><div class='block struct'><h2>Structs</h2><a class='struct current' href='struct.Thread.html'>Thread</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'>Struct <a href='../index.html'>rustrt</a>::<a href='index.html'>thread</a>::<a class='struct' href=''>Thread</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-12030' href='../../src/rustrt/Users/aturon/moz/working/stability-dashboard/src/librustrt/thread.rs.html#32-36'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Thread&lt;T&gt; {
+    // some fields omitted
+}</pre><div class='docblock'><p>This struct represents a native thread&#39;s state. This is used to join on an
+existing thread created in the join-able state.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='struct' href='../../rustrt/thread/struct.Thread.html' title='rustrt::thread::Thread'>Thread</a>&lt;()&gt;</code></h3><div class='impl-methods'><h4 id='method.start' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.start' class='fnname'>start</a>&lt;T: <a class='trait' href='../../core/kinds/trait.Send.html' title='core::kinds::Send'>Send</a>&gt;(main: proc(): <a class='trait' href='../../core/kinds/trait.Send.html' title='core::kinds::Send'>Send</a> -&gt; T) -&gt; <a class='struct' href='../../rustrt/thread/struct.Thread.html' title='rustrt::thread::Thread'>Thread</a>&lt;T&gt;</code></h4>
+<div class='docblock'><p>Starts execution of a new OS thread.</p>
+
+<p>This function will not wait for the thread to join, but a handle to the
+thread will be returned.</p>
+
+<p>Note that the handle returned is used to acquire the return value of the
+procedure <code>main</code>. The <code>join</code> function will wait for the thread to finish
+and return the value that <code>main</code> generated.</p>
+
+<p>Also note that the <code>Thread</code> returned will <em>always</em> wait for the thread
+to finish executing. This means that even if <code>join</code> is not explicitly
+called, when the <code>Thread</code> falls out of scope its destructor will block
+waiting for the OS thread.</p>
+</div><h4 id='method.start_stack' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.start_stack' class='fnname'>start_stack</a>&lt;T: <a class='trait' href='../../core/kinds/trait.Send.html' title='core::kinds::Send'>Send</a>&gt;(stack: <a href='../../core/primitive.uint.html'>uint</a>, main: proc(): <a class='trait' href='../../core/kinds/trait.Send.html' title='core::kinds::Send'>Send</a> -&gt; T) -&gt; <a class='struct' href='../../rustrt/thread/struct.Thread.html' title='rustrt::thread::Thread'>Thread</a>&lt;T&gt;</code></h4>
+<div class='docblock'><p>Performs the same functionality as <code>start</code>, but specifies an explicit
+stack size for the new thread.</p>
+</div><h4 id='method.spawn' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.spawn' class='fnname'>spawn</a>(main: proc(): <a class='trait' href='../../core/kinds/trait.Send.html' title='core::kinds::Send'>Send</a>)</code></h4>
+<div class='docblock'><p>This will spawn a new thread, but it will not wait for the thread to
+finish, nor is it possible to wait for the thread to finish.</p>
+
+<p>This corresponds to creating threads in the &#39;detached&#39; state on unix
+systems. Note that platforms may not keep the main program alive even if
+there are detached thread still running around.</p>
+</div><h4 id='method.spawn_stack' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.spawn_stack' class='fnname'>spawn_stack</a>(stack: <a href='../../core/primitive.uint.html'>uint</a>, main: proc(): <a class='trait' href='../../core/kinds/trait.Send.html' title='core::kinds::Send'>Send</a>)</code></h4>
+<div class='docblock'><p>Performs the same functionality as <code>spawn</code>, but explicitly specifies a
+stack size for the new thread.</p>
+</div><h4 id='method.yield_now' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.yield_now' class='fnname'>yield_now</a>()</code></h4>
+<div class='docblock'><p>Relinquishes the CPU slot that this OS-thread is currently using,
+allowing another thread to run for awhile.</p>
+</div></div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../core/kinds/trait.Send.html' title='core::kinds::Send'>Send</a>&gt; <a class='struct' href='../../rustrt/thread/struct.Thread.html' title='rustrt::thread::Thread'>Thread</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.join' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.join' class='fnname'>join</a>(self) -&gt; T</code></h4>
+<div class='docblock'><p>Wait for this thread to finish, returning the result of the thread&#39;s
+calculation.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../core/kinds/trait.Send.html' title='core::kinds::Send'>Send</a>&gt; <a class='trait' href='../../core/ops/trait.Drop.html' title='core::ops::Drop'>Drop</a> for <a class='struct' href='../../rustrt/thread/struct.Thread.html' title='rustrt::thread::Thread'>Thread</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.drop' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.drop' class='fnname'>drop</a>(&amp;mut self)</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "rustrt";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

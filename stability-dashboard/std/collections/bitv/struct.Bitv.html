@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The std library documentation.">
+
+    <title>std::collections::bitv::Bitv - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../../std/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../../index.html'>std</a>&#8203;::<a href='../index.html'>collections</a>&#8203;::<a href='index.html'>bitv</a></p><div class='block struct'><h2>Structs</h2><a class='struct ' href='struct.BitPositions.html'>BitPositions</a><a class='struct ' href='struct.Bits.html'>Bits</a><a class='struct current' href='struct.Bitv.html'>Bitv</a><a class='struct ' href='struct.BitvSet.html'>BitvSet</a></div><div class='block fn'><h2>Functions</h2><a class='fn ' href='fn.from_bools.html'>from_bools</a><a class='fn ' href='fn.from_bytes.html'>from_bytes</a><a class='fn ' href='fn.from_fn.html'>from_fn</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'>Struct <a href='../../index.html'>std</a>::<a href='../index.html'>collections</a>::<a href='index.html'>bitv</a>::<a class='struct' href=''>Bitv</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-1186' href='../../../collections/bitv/struct.Bitv.html?gotosrc=1186'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Bitv {
+    // some fields omitted
+}</pre><div class='docblock'><p>The bitvector type</p>
+
+<h1 id="example" class='section-header'><a
+                           href="#example">Example</a></h1><span id='rust-example-raw-0' class='rusttest'>fn main() {
+    use collections::bitv::Bitv;
+    
+    let mut bv = Bitv::new(10, false);
+    
+    // insert all primes less than 10
+    bv.set(2, true);
+    bv.set(3, true);
+    bv.set(5, true);
+    bv.set(7, true);
+    println!(&quot;{}&quot;, bv.to_str());
+    println!(&quot;total bits set to true: {}&quot;, bv.iter().filter(|x| *x).count());
+    
+    // flip all values in bitvector, producing non-primes less than 10
+    bv.negate();
+    println!(&quot;{}&quot;, bv.to_str());
+    println!(&quot;total bits set to true: {}&quot;, bv.iter().filter(|x| *x).count());
+    
+    // reset bitvector to empty
+    bv.clear();
+    println!(&quot;{}&quot;, bv.to_str());
+    println!(&quot;total bits set to true: {}&quot;, bv.iter().filter(|x| *x).count());
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='kw'>use</span> <span class='ident'>collections</span>::<span class='ident'>bitv</span>::<span class='ident'>Bitv</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>bv</span> <span class='op'>=</span> <span class='ident'>Bitv</span>::<span class='ident'>new</span>(<span class='number'>10</span>, <span class='boolval'>false</span>);<span class='comment'>
+
+// insert all primes less than 10
+</span><span class='ident'>bv</span>.<span class='ident'>set</span>(<span class='number'>2</span>, <span class='boolval'>true</span>);
+<span class='ident'>bv</span>.<span class='ident'>set</span>(<span class='number'>3</span>, <span class='boolval'>true</span>);
+<span class='ident'>bv</span>.<span class='ident'>set</span>(<span class='number'>5</span>, <span class='boolval'>true</span>);
+<span class='ident'>bv</span>.<span class='ident'>set</span>(<span class='number'>7</span>, <span class='boolval'>true</span>);
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>bv</span>.<span class='ident'>to_str</span>());
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;total bits set to true: {}&quot;</span>, <span class='ident'>bv</span>.<span class='ident'>iter</span>().<span class='ident'>filter</span>(<span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='op'>*</span><span class='ident'>x</span>).<span class='ident'>count</span>());<span class='comment'>
+
+// flip all values in bitvector, producing non-primes less than 10
+</span><span class='ident'>bv</span>.<span class='ident'>negate</span>();
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>bv</span>.<span class='ident'>to_str</span>());
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;total bits set to true: {}&quot;</span>, <span class='ident'>bv</span>.<span class='ident'>iter</span>().<span class='ident'>filter</span>(<span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='op'>*</span><span class='ident'>x</span>).<span class='ident'>count</span>());<span class='comment'>
+
+// reset bitvector to empty
+</span><span class='ident'>bv</span>.<span class='ident'>clear</span>();
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>bv</span>.<span class='ident'>to_str</span>());
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;total bits set to true: {}&quot;</span>, <span class='ident'>bv</span>.<span class='ident'>iter</span>().<span class='ident'>filter</span>(<span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='op'>*</span><span class='ident'>x</span>).<span class='ident'>count</span>());
+</pre>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='struct' href='../../../std/collections/bitv/struct.Bitv.html' title='std::collections::bitv::Bitv'>Bitv</a></code></h3><div class='impl-methods'><h4 id='method.new' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.new' class='fnname'>new</a>(nbits: <a href='../../primitive.uint.html'>uint</a>, init: <a href='../../primitive.bool.html'>bool</a>) -&gt; <a class='struct' href='../../../std/collections/bitv/struct.Bitv.html' title='std::collections::bitv::Bitv'>Bitv</a></code></h4>
+<div class='docblock'><p>Creates an empty Bitv that holds <code>nbits</code> elements, setting each element
+to <code>init</code>.</p>
+</div><h4 id='method.union' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.union' class='fnname'>union</a>(&amp;mut self, v1: &amp;<a class='struct' href='../../../std/collections/bitv/struct.Bitv.html' title='std::collections::bitv::Bitv'>Bitv</a>) -&gt; <a href='../../primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Calculates the union of two bitvectors</p>
+
+<p>Sets <code>self</code> to the union of <code>self</code> and <code>v1</code>. Both bitvectors must be
+the same length. Returns <code>true</code> if <code>self</code> changed.</p>
+</div><h4 id='method.intersect' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.intersect' class='fnname'>intersect</a>(&amp;mut self, v1: &amp;<a class='struct' href='../../../std/collections/bitv/struct.Bitv.html' title='std::collections::bitv::Bitv'>Bitv</a>) -&gt; <a href='../../primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Calculates the intersection of two bitvectors</p>
+
+<p>Sets <code>self</code> to the intersection of <code>self</code> and <code>v1</code>. Both bitvectors
+must be the same length. Returns <code>true</code> if <code>self</code> changed.</p>
+</div><h4 id='method.assign' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.assign' class='fnname'>assign</a>(&amp;mut self, v: &amp;<a class='struct' href='../../../std/collections/bitv/struct.Bitv.html' title='std::collections::bitv::Bitv'>Bitv</a>) -&gt; <a href='../../primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Assigns the value of <code>v1</code> to <code>self</code></p>
+
+<p>Both bitvectors must be the same length. Returns <code>true</code> if <code>self</code> was
+changed</p>
+</div><h4 id='method.get' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.get' class='fnname'>get</a>(&amp;self, i: <a href='../../primitive.uint.html'>uint</a>) -&gt; <a href='../../primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Retrieve the value at index <code>i</code></p>
+</div><h4 id='method.set' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.set' class='fnname'>set</a>(&amp;mut self, i: <a href='../../primitive.uint.html'>uint</a>, x: <a href='../../primitive.bool.html'>bool</a>)</code></h4>
+<div class='docblock'><p>Set the value of a bit at a given index</p>
+
+<p><code>i</code> must be less than the length of the bitvector.</p>
+</div><h4 id='method.clear' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.clear' class='fnname'>clear</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Set all bits to 0</p>
+</div><h4 id='method.set_all' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.set_all' class='fnname'>set_all</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Set all bits to 1</p>
+</div><h4 id='method.negate' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.negate' class='fnname'>negate</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Flip all bits</p>
+</div><h4 id='method.difference' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.difference' class='fnname'>difference</a>(&amp;mut self, v: &amp;<a class='struct' href='../../../std/collections/bitv/struct.Bitv.html' title='std::collections::bitv::Bitv'>Bitv</a>) -&gt; <a href='../../primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Calculate the difference between two bitvectors</p>
+
+<p>Sets each element of <code>v0</code> to the value of that element minus the
+element of <code>v1</code> at the same index. Both bitvectors must be the same
+length.</p>
+
+<p>Returns <code>true</code> if <code>v0</code> was changed.</p>
+</div><h4 id='method.all' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.all' class='fnname'>all</a>(&amp;self) -&gt; <a href='../../primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Returns <code>true</code> if all bits are 1</p>
+</div><h4 id='method.iter' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.iter' class='fnname'>iter</a>(&amp;'a self) -&gt; <a class='struct' href='../../../std/collections/bitv/struct.Bits.html' title='std::collections::bitv::Bits'>Bits</a>&lt;'a&gt;</code></h4>
+<div class='docblock'><p>Returns an iterator over the elements of the vector in order.</p>
+
+<h1 id="example-1" class='section-header'><a
+                           href="#example-1">Example</a></h1><span id='rust-example-raw-1' class='rusttest'>fn main() {
+    use collections::bitv::Bitv;
+    let mut bv = Bitv::new(10, false);
+    bv.set(1, true);
+    bv.set(2, true);
+    bv.set(3, true);
+    bv.set(5, true);
+    bv.set(8, true);
+    // Count bits set to 1; result should be 5
+    println!(&quot;{}&quot;, bv.iter().filter(|x| *x).count());
+}</span><pre id='rust-example-rendered-1' class='rust '>
+<span class='kw'>use</span> <span class='ident'>collections</span>::<span class='ident'>bitv</span>::<span class='ident'>Bitv</span>;
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>bv</span> <span class='op'>=</span> <span class='ident'>Bitv</span>::<span class='ident'>new</span>(<span class='number'>10</span>, <span class='boolval'>false</span>);
+<span class='ident'>bv</span>.<span class='ident'>set</span>(<span class='number'>1</span>, <span class='boolval'>true</span>);
+<span class='ident'>bv</span>.<span class='ident'>set</span>(<span class='number'>2</span>, <span class='boolval'>true</span>);
+<span class='ident'>bv</span>.<span class='ident'>set</span>(<span class='number'>3</span>, <span class='boolval'>true</span>);
+<span class='ident'>bv</span>.<span class='ident'>set</span>(<span class='number'>5</span>, <span class='boolval'>true</span>);
+<span class='ident'>bv</span>.<span class='ident'>set</span>(<span class='number'>8</span>, <span class='boolval'>true</span>);<span class='comment'>
+// Count bits set to 1; result should be 5
+</span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>bv</span>.<span class='ident'>iter</span>().<span class='ident'>filter</span>(<span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='op'>*</span><span class='ident'>x</span>).<span class='ident'>count</span>());
+</pre>
+</div><h4 id='method.none' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.none' class='fnname'>none</a>(&amp;self) -&gt; <a href='../../primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Returns <code>true</code> if all bits are 0</p>
+</div><h4 id='method.any' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.any' class='fnname'>any</a>(&amp;self) -&gt; <a href='../../primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Returns <code>true</code> if any bit is 1</p>
+</div><h4 id='method.to_vec' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.to_vec' class='fnname'>to_vec</a>(&amp;self) -&gt; <a class='struct' href='../../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;<a href='../../primitive.uint.html'>uint</a>&gt;</code></h4>
+<div class='docblock'><p>Converts <code>self</code> to a vector of <code>uint</code> with the same length.</p>
+
+<p>Each <code>uint</code> in the resulting vector has either value <code>0u</code> or <code>1u</code>.</p>
+</div><h4 id='method.to_bytes' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.to_bytes' class='fnname'>to_bytes</a>(&amp;self) -&gt; <a class='struct' href='../../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;<a href='../../primitive.u8.html'>u8</a>&gt;</code></h4>
+<div class='docblock'><p>Organise the bits into bytes, such that the first bit in the
+<code>Bitv</code> becomes the high-order bit of the first byte. If the
+size of the <code>Bitv</code> is not a multiple of 8 then trailing bits
+will be filled-in with false/0</p>
+</div><h4 id='method.to_bools' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.to_bools' class='fnname'>to_bools</a>(&amp;self) -&gt; <a class='struct' href='../../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;<a href='../../primitive.bool.html'>bool</a>&gt;</code></h4>
+<div class='docblock'><p>Transform <code>self</code> into a <code>Vec&lt;bool&gt;</code> by turning each bit into a <code>bool</code>.</p>
+</div><h4 id='method.eq_vec' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.eq_vec' class='fnname'>eq_vec</a>(&amp;self, v: &amp;<a href='../../primitive.slice.html'>[<a href='../../primitive.bool.html'>bool</a>]</a>) -&gt; <a href='../../primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Compare a bitvector to a vector of <code>bool</code>.</p>
+
+<p>Both the bitvector and vector must have the same length.</p>
+</div><h4 id='method.ones' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.ones' class='fnname'>ones</a>(&amp;self, f: |<a href='../../primitive.uint.html'>uint</a>| -&gt; <a href='../../primitive.bool.html'>bool</a>) -&gt; <a href='../../primitive.bool.html'>bool</a></code></h4>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../../std/ops/trait.Index.html' title='std::ops::Index'>Index</a>&lt;<a href='../../primitive.uint.html'>uint</a>, <a href='../../primitive.bool.html'>bool</a>&gt; for <a class='struct' href='../../../std/collections/bitv/struct.Bitv.html' title='std::collections::bitv::Bitv'>Bitv</a></code></h3><div class='impl-methods'><h4 id='method.index' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.index' class='fnname'>index</a>(&amp;self, i: &amp;<a href='../../primitive.uint.html'>uint</a>) -&gt; <a href='../../primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../../std/fmt/trait.Show.html' title='std::fmt::Show'>Show</a> for <a class='struct' href='../../../std/collections/bitv/struct.Bitv.html' title='std::collections::bitv::Bitv'>Bitv</a></code></h3><div class='impl-methods'><h4 id='method.fmt' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.fmt' class='fnname'>fmt</a>(&amp;self, fmt: &amp;mut <a class='struct' href='../../../std/fmt/struct.Formatter.html' title='std::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='../../../std/result/type.Result.html' title='std::result::Result'>Result</a>&lt;(), <a class='type' href='../../../std/fmt/type.FormatError.html' title='std::fmt::FormatError'>FormatError</a>&gt;</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;S: <a class='trait' href='../../../std/hash/trait.Writer.html' title='std::hash::Writer'>Writer</a>&gt; <a class='trait' href='../../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a>&lt;S&gt; for <a class='struct' href='../../../std/collections/bitv/struct.Bitv.html' title='std::collections::bitv::Bitv'>Bitv</a></code></h3><div class='impl-methods'><h4 id='method.hash' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.hash' class='fnname'>hash</a>&lt;S: <a class='trait' href='../../../std/hash/trait.Writer.html' title='std::hash::Writer'>Writer</a>&gt;(&amp;self, state: &amp;mut S)</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../../std/cmp/trait.PartialEq.html' title='std::cmp::PartialEq'>PartialEq</a> for <a class='struct' href='../../../std/collections/bitv/struct.Bitv.html' title='std::collections::bitv::Bitv'>Bitv</a></code></h3><div class='impl-methods'><h4 id='method.eq' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.eq' class='fnname'>eq</a>(&amp;self, other: &amp;<a class='struct' href='../../../std/collections/bitv/struct.Bitv.html' title='std::collections::bitv::Bitv'>Bitv</a>) -&gt; <a href='../../primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.ne' class='fnname'>ne</a>(&amp;self, &amp;<a class='struct' href='../../../std/collections/bitv/struct.Bitv.html' title='std::collections::bitv::Bitv'>Bitv</a>) -&gt; <a href='../../primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a> for <a class='struct' href='../../../std/collections/bitv/struct.Bitv.html' title='std::collections::bitv::Bitv'>Bitv</a></code></h3><div class='impl-methods'><h4 id='method.assert_receiver_is_total_eq' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.assert_receiver_is_total_eq' class='fnname'>assert_receiver_is_total_eq</a>(&amp;self)</code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a> for <a class='struct' href='../../../std/collections/bitv/struct.Bitv.html' title='std::collections::bitv::Bitv'>Bitv</a></code></h3><div class='impl-methods'><h4 id='method.clone' class='method'><a class='stability Unstable' title='Unstable'></a><code>fn <a href='#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../../std/collections/bitv/struct.Bitv.html' title='std::collections::bitv::Bitv'>Bitv</a></code></h4>
+<h4 id='method.clone_from' class='method'><a class='stability Experimental' title='Experimental: this function is mostly unused'></a><code>fn <a href='#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, &amp;<a class='struct' href='../../../std/collections/bitv/struct.Bitv.html' title='std::collections::bitv::Bitv'>Bitv</a>)</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "std";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    <script src="../../../playpen.js"></script>
+    <script async src="../../../search-index.js"></script>
+</body>
+</html>

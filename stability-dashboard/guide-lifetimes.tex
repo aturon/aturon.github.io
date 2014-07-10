@@ -1,0 +1,679 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+    \usepackage{xltxtra,xunicode}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
+  \newcommand{\euro}{€}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{\usepackage{microtype}}{}
+\ifxetex
+  \usepackage[setpagesize=false, % page size defined by xetex
+              unicode=false, % unicode breaks when used with xetex
+              xetex]{hyperref}
+\else
+  \usepackage[unicode=true]{hyperref}
+\fi
+\hypersetup{breaklinks=true,
+            bookmarks=true,
+            pdfauthor={},
+            pdftitle={The Rust References and Lifetimes Guide},
+            colorlinks=true,
+            citecolor=blue,
+            urlcolor=blue,
+            linkcolor=magenta,
+            pdfborder={0 0 0}}
+\urlstyle{same}  % don't use monospace font for urls
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\setcounter{secnumdepth}{5}
+
+\title{The Rust References and Lifetimes Guide}
+
+\begin{document}
+\maketitle
+
+0.11.0-pre (169c988d09a9d4e46de2b7fead9489e94964c7c7 2014-07-02 18:41:38 +0000)
+
+Copyright © 2011-2014 The Rust Project Developers. Licensed under the
+\href{http://www.apache.org/licenses/LICENSE-2.0}{Apache License,
+Version 2.0} or the \href{http://opensource.org/licenses/MIT}{MIT
+license}, at your option.
+
+This file may not be copied, modified, or distributed except according
+to those terms.
+
+{
+\hypersetup{linkcolor=black}
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+\section{Introduction}\label{introduction}
+
+References are one of the more flexible and powerful tools available in
+Rust. They can point anywhere: into the heap, stack, and even into the
+interior of another data structure. A reference is as flexible as a C
+pointer or C++ reference.
+
+Unlike C and C++ compilers, the Rust compiler includes special static
+checks that ensure that programs use references safely.
+
+Despite their complete safety, a reference's representation at runtime
+is the same as that of an ordinary pointer in a C program. They
+introduce zero overhead. The compiler does all safety checks at compile
+time.
+
+Although references have rather elaborate theoretical underpinnings
+(e.g.~region pointers), the core concepts will be familiar to anyone who
+has worked with C or C++. The best way to explain how they are
+used---and their limitations---is probably just to work through several
+examples.
+
+\section{By example}\label{by-example}
+
+References, sometimes known as \emph{borrowed pointers}, are only valid
+for a limited duration. References never claim any kind of ownership
+over the data that they point to. Instead, they are used for cases where
+you would like to use data for a short time.
+
+Consider a simple struct type \texttt{Point}:
+
+\begin{verbatim}
+struct Point {x: f64, y: f64}
+\end{verbatim}
+
+We can use this simple definition to allocate points in many different
+ways. For example, in this code, each of these local variables contains
+a point, but allocated in a different place:
+
+\begin{verbatim}
+# struct Point {x: f64, y: f64}
+let on_the_stack : Point      =     Point {x: 3.0, y: 4.0};
+let on_the_heap  : Box<Point> = box Point {x: 7.0, y: 9.0};
+\end{verbatim}
+
+Suppose we wanted to write a procedure that computed the distance
+between any two points, no matter where they were stored. One option is
+to define a function that takes two arguments of type
+\texttt{Point}---that is, it takes the points by value. But if we define
+it this way, calling the function will cause the points to be copied.
+For points, this is probably not so bad, but often copies are expensive.
+So we'd like to define a function that takes the points just as a
+reference.
+
+\begin{verbatim}
+# struct Point {x: f64, y: f64}
+# fn sqrt(f: f64) -> f64 { 0.0 }
+fn compute_distance(p1: &Point, p2: &Point) -> f64 {
+    let x_d = p1.x - p2.x;
+    let y_d = p1.y - p2.y;
+    sqrt(x_d * x_d + y_d * y_d)
+}
+\end{verbatim}
+
+Now we can call \texttt{compute\_distance()}:
+
+\begin{verbatim}
+# struct Point {x: f64, y: f64}
+# let on_the_stack :     Point  =     Point{x: 3.0, y: 4.0};
+# let on_the_heap  : Box<Point> = box Point{x: 7.0, y: 9.0};
+# fn compute_distance(p1: &Point, p2: &Point) -> f64 { 0.0 }
+compute_distance(&on_the_stack, on_the_heap);
+\end{verbatim}
+
+Here, the \texttt{\&} operator takes the address of the variable
+\texttt{on\_the\_stack}; this is because \texttt{on\_the\_stack} has the
+type \texttt{Point} (that is, a struct value) and we have to take its
+address to get a value. We also call this \emph{borrowing} the local
+variable \texttt{on\_the\_stack}, because we have created an alias: that
+is, another name for the same data.
+
+In the case of \texttt{on\_the\_heap}, however, no explicit action is
+necessary. The compiler will automatically convert a box point to a
+reference like \&point. This is another form of borrowing; in this case,
+the contents of the owned box are being lent out.
+
+Whenever a caller lends data to a callee, there are some limitations on
+what the caller can do with the original. For example, if the contents
+of a variable have been lent out, you cannot send that variable to
+another task. In addition, the compiler will reject any code that might
+cause the borrowed value to be freed or overwrite its component fields
+with values of different types (I'll get into what kinds of actions
+those are shortly). This rule should make intuitive sense: you must wait
+for a borrower to return the value that you lent it (that is, wait for
+the reference to go out of scope) before you can make full use of it
+again.
+
+\section{Other uses for the \&
+operator}\label{other-uses-for-the-operator}
+
+In the previous example, the value \texttt{on\_the\_stack} was defined
+like so:
+
+\begin{verbatim}
+# struct Point {x: f64, y: f64}
+let on_the_stack: Point = Point {x: 3.0, y: 4.0};
+\end{verbatim}
+
+This declaration means that code can only pass \texttt{Point} by value
+to other functions. As a consequence, we had to explicitly take the
+address of \texttt{on\_the\_stack} to get a reference. Sometimes however
+it is more convenient to move the \& operator into the definition of
+\texttt{on\_the\_stack}:
+
+\begin{verbatim}
+# struct Point {x: f64, y: f64}
+let on_the_stack2: &Point = &Point {x: 3.0, y: 4.0};
+\end{verbatim}
+
+Applying \texttt{\&} to an rvalue (non-assignable location) is just a
+convenient shorthand for creating a temporary and taking its address. A
+more verbose way to write the same code is:
+
+\begin{verbatim}
+# struct Point {x: f64, y: f64}
+let tmp = Point {x: 3.0, y: 4.0};
+let on_the_stack2 : &Point = &tmp;
+\end{verbatim}
+
+\section{Taking the address of
+fields}\label{taking-the-address-of-fields}
+
+The \texttt{\&} operator is not limited to taking the address of local
+variables. It can also take the address of fields or individual array
+elements. For example, consider this type definition for
+\texttt{Rectangle}:
+
+\begin{verbatim}
+struct Point {x: f64, y: f64} // as before
+struct Size {w: f64, h: f64} // as before
+struct Rectangle {origin: Point, size: Size}
+\end{verbatim}
+
+Now, as before, we can define rectangles in a few different ways:
+
+\begin{verbatim}
+# struct Point {x: f64, y: f64}
+# struct Size {w: f64, h: f64} // as before
+# struct Rectangle {origin: Point, size: Size}
+let rect_stack   =    &Rectangle {origin: Point {x: 1.0, y: 2.0},
+                                  size: Size {w: 3.0, h: 4.0}};
+let rect_heap    = box Rectangle {origin: Point {x: 5.0, y: 6.0},
+                                  size: Size {w: 3.0, h: 4.0}};
+\end{verbatim}
+
+In each case, we can extract out individual subcomponents with the
+\texttt{\&} operator. For example, I could write:
+
+\begin{verbatim}
+# struct Point {x: f64, y: f64} // as before
+# struct Size {w: f64, h: f64} // as before
+# struct Rectangle {origin: Point, size: Size}
+# let rect_stack  = &Rectangle {origin: Point {x: 1.0, y: 2.0}, size: Size {w: 3.0, h: 4.0}};
+# let rect_heap   = box Rectangle {origin: Point {x: 5.0, y: 6.0}, size: Size {w: 3.0, h: 4.0}};
+# fn compute_distance(p1: &Point, p2: &Point) -> f64 { 0.0 }
+compute_distance(&rect_stack.origin, &rect_heap.origin);
+\end{verbatim}
+
+which would borrow the field \texttt{origin} from the rectangle on the
+stack as well as from the owned box, and then compute the distance
+between them.
+
+\section{Lifetimes}\label{lifetimes}
+
+We've seen a few examples of borrowing data. To this point, we've
+glossed over issues of safety. As stated in the introduction, at runtime
+a reference is simply a pointer, nothing more. Therefore, avoiding C's
+problems with dangling pointers requires a compile-time safety check.
+
+The basis for the check is the notion of \emph{lifetimes}. A lifetime is
+a static approximation of the span of execution during which the pointer
+is valid: it always corresponds to some expression or block within the
+program.
+
+The compiler will only allow a borrow \emph{if it can guarantee that the
+data will not be reassigned or moved for the lifetime of the pointer}.
+This does not necessarily mean that the data is stored in immutable
+memory. For example, the following function is legal:
+
+\begin{verbatim}
+# fn some_condition() -> bool { true }
+# struct Foo { f: int }
+fn example3() -> int {
+    let mut x = box Foo {f: 3};
+    if some_condition() {
+        let y = &x.f;      // -+ L
+        return *y;         //  |
+    }                      // -+
+    x = box Foo {f: 4};
+    // ...
+# return 0;
+}
+\end{verbatim}
+
+Here, the interior of the variable \texttt{x} is being borrowed and
+\texttt{x} is declared as mutable. However, the compiler can prove that
+\texttt{x} is not assigned anywhere in the lifetime L of the variable
+\texttt{y}. Therefore, it accepts the function, even though \texttt{x}
+is mutable and in fact is mutated later in the function.
+
+It may not be clear why we are so concerned about mutating a borrowed
+variable. The reason is that the runtime system frees any box \emph{as
+soon as its owning reference changes or goes out of scope}. Therefore, a
+program like this is illegal (and would be rejected by the compiler):
+
+\begin{verbatim}
+fn example3() -> int {
+    let mut x = box X {f: 3};
+    let y = &x.f;
+    x = box X {f: 4};  // Error reported here.
+    *y
+}
+\end{verbatim}
+
+To make this clearer, consider this diagram showing the state of memory
+immediately before the re-assignment of \texttt{x}:
+
+\begin{verbatim}
+    Stack               Exchange Heap
+
+  x +-------------+
+    | box {f:int} | ----+
+  y +-------------+     |
+    | &int        | ----+
+    +-------------+     |    +---------+
+                        +--> |  f: 3   |
+                             +---------+
+\end{verbatim}
+
+Once the reassignment occurs, the memory will look like this:
+
+\begin{verbatim}
+    Stack               Exchange Heap
+
+  x +-------------+          +---------+
+    | box {f:int} | -------> |  f: 4   |
+  y +-------------+          +---------+
+    | &int        | ----+
+    +-------------+     |    +---------+
+                        +--> | (freed) |
+                             +---------+
+\end{verbatim}
+
+Here you can see that the variable \texttt{y} still points at the old
+\texttt{f} property of Foo, which has been freed.
+
+In fact, the compiler can apply the same kind of reasoning to any memory
+that is (uniquely) owned by the stack frame. So we could modify the
+previous example to introduce additional owned pointers and structs, and
+the compiler will still be able to detect possible mutations. This time,
+we'll use an analogy to illustrate the concept.
+
+\begin{verbatim}
+fn example3() -> int {
+    struct House { owner: Box<Person> }
+    struct Person { age: int }
+
+    let mut house = box House {
+        owner: box Person {age: 30}
+    };
+
+    let owner_age = &house.owner.age;
+    house = box House {owner: box Person {age: 40}};  // Error reported here.
+    house.owner = box Person {age: 50};               // Error reported here.
+    *owner_age
+}
+\end{verbatim}
+
+In this case, two errors are reported, one when the variable
+\texttt{house} is modified and another when \texttt{house.owner} is
+modified. Either modification would invalidate the pointer
+\texttt{owner\_age}.
+
+\section{Borrowing and enums}\label{borrowing-and-enums}
+
+The previous example showed that the type system forbids any mutations
+of owned boxed values while they are being borrowed. In general, the
+type system also forbids borrowing a value as mutable if it is already
+being borrowed - either as a mutable reference or an immutable one. This
+restriction prevents pointers from pointing into freed memory. There is
+one other case where the compiler must be very careful to ensure that
+pointers remain valid: pointers into the interior of an \texttt{enum}.
+
+Let's look at the following \texttt{shape} type that can represent both
+rectangles and circles:
+
+\begin{verbatim}
+struct Point {x: f64, y: f64}; // as before
+struct Size {w: f64, h: f64}; // as before
+enum Shape {
+    Circle(Point, f64),   // origin, radius
+    Rectangle(Point, Size)  // upper-left, dimensions
+}
+\end{verbatim}
+
+Now we might write a function to compute the area of a shape. This
+function takes a reference to a shape, to avoid the need for copying.
+
+\begin{verbatim}
+# struct Point {x: f64, y: f64}; // as before
+# struct Size {w: f64, h: f64}; // as before
+# enum Shape {
+#     Circle(Point, f64),   // origin, radius
+#     Rectangle(Point, Size)  // upper-left, dimensions
+# }
+# static tau: f64 = 6.28;
+fn compute_area(shape: &Shape) -> f64 {
+    match *shape {
+        Circle(_, radius) => 0.5 * tau * radius * radius,
+        Rectangle(_, ref size) => size.w * size.h
+    }
+}
+\end{verbatim}
+
+The first case matches against circles. Here, the pattern extracts the
+radius from the shape variant and the action uses it to compute the area
+of the circle. (Like any up-to-date engineer, we use the
+\href{http://www.math.utah.edu/~palais/pi.html}{tau circle constant} and
+not that dreadfully outdated notion of pi).
+
+The second match is more interesting. Here we match against a rectangle
+and extract its size: but rather than copy the \texttt{size} struct, we
+use a by-reference binding to create a pointer to it. In other words, a
+pattern binding like \texttt{ref size} binds the name \texttt{size} to a
+pointer of type \texttt{\&size} into the \emph{interior of the enum}.
+
+To make this more clear, let's look at a diagram of memory layout in the
+case where \texttt{shape} points at a rectangle:
+
+\begin{verbatim}
+Stack             Memory
+
++-------+         +---------------+
+| shape | ------> | rectangle(    |
++-------+         |   {x: f64,    |
+| size  | -+      |    y: f64},   |
++-------+  +----> |   {w: f64,    |
+                  |    h: f64})   |
+                  +---------------+
+\end{verbatim}
+
+Here you can see that rectangular shapes are composed of five words of
+memory. The first is a tag indicating which variant this enum is
+(\texttt{rectangle}, in this case). The next two words are the
+\texttt{x} and \texttt{y} fields for the point and the remaining two are
+the \texttt{w} and \texttt{h} fields for the size. The binding
+\texttt{size} is then a pointer into the inside of the shape.
+
+Perhaps you can see where the danger lies: if the shape were somehow to
+be reassigned, perhaps to a circle, then although the memory used to
+store that shape value would still be valid, \emph{it would have a
+different type}! The following diagram shows what memory would look like
+if code overwrote \texttt{shape} with a circle:
+
+\begin{verbatim}
+Stack             Memory
+
++-------+         +---------------+
+| shape | ------> | circle(       |
++-------+         |   {x: f64,    |
+| size  | -+      |    y: f64},   |
++-------+  +----> |   f64)        |
+                  |               |
+                  +---------------+
+\end{verbatim}
+
+As you can see, the \texttt{size} pointer would be pointing at a
+\texttt{f64} instead of a struct. This is not good: dereferencing the
+second field of a \texttt{f64} as if it were a struct with two fields
+would be a memory safety violation.
+
+So, in fact, for every \texttt{ref} binding, the compiler will impose
+the same rules as the ones we saw for borrowing the interior of an owned
+box: it must be able to guarantee that the \texttt{enum} will not be
+overwritten for the duration of the borrow. In fact, the compiler would
+accept the example we gave earlier. The example is safe because the
+shape pointer has type \texttt{\&Shape}, which means ``reference to
+immutable memory containing a \texttt{shape}''. If, however, the type of
+that pointer were \texttt{\&mut Shape}, then the ref binding would be
+ill-typed. Just as with owned boxes, the compiler will permit
+\texttt{ref} bindings into data owned by the stack frame even if the
+data are mutable, but otherwise it requires that the data reside in
+immutable memory.
+
+\section{Returning references}\label{returning-references}
+
+So far, all of the examples we have looked at, use references in a
+``downward'' direction. That is, a method or code block creates a
+reference, then uses it within the same scope. It is also possible to
+return references as the result of a function, but as we'll see, doing
+so requires some explicit annotation.
+
+We could write a subroutine like this:
+
+\begin{verbatim}
+struct Point {x: f64, y: f64}
+fn get_x<'r>(p: &'r Point) -> &'r f64 { &p.x }
+\end{verbatim}
+
+Here, the function \texttt{get\_x()} returns a pointer into the
+structure it was given. The type of the parameter (\texttt{\&'r Point})
+and return type (\texttt{\&'r f64}) both use a new syntactic form that
+we have not seen so far. Here the identifier \texttt{r} names the
+lifetime of the pointer explicitly. So in effect, this function declares
+that it takes a pointer with lifetime \texttt{r} and returns a pointer
+with that same lifetime.
+
+In general, it is only possible to return references if they are derived
+from a parameter to the procedure. In that case, the pointer result will
+always have the same lifetime as one of the parameters; named lifetimes
+indicate which parameter that is.
+
+In the previous code samples, function parameter types did not include a
+lifetime name. The compiler simply creates a fresh name for the lifetime
+automatically: that is, the lifetime name is guaranteed to refer to a
+distinct lifetime from the lifetimes of all other parameters.
+
+Named lifetimes that appear in function signatures are conceptually the
+same as the other lifetimes we have seen before, but they are a bit
+abstract: they don't refer to a specific expression within
+\texttt{get\_x()}, but rather to some expression within the \emph{caller
+of \texttt{get\_x()}}. The lifetime \texttt{r} is actually a kind of
+\emph{lifetime parameter}: it is defined by the caller to
+\texttt{get\_x()}, just as the value for the parameter \texttt{p} is
+defined by that caller.
+
+In any case, whatever the lifetime of \texttt{r} is, the pointer
+produced by \texttt{\&p.x} always has the same lifetime as \texttt{p}
+itself: a pointer to a field of a struct is valid as long as the struct
+is valid. Therefore, the compiler accepts the function
+\texttt{get\_x()}.
+
+To emphasize this point, let's look at a variation on the example, this
+time one that does not compile:
+
+\begin{verbatim}
+struct Point {x: f64, y: f64}
+fn get_x_sh(p: &Point) -> &f64 {
+    &p.x // Error reported here
+}
+\end{verbatim}
+
+Here, the function \texttt{get\_x\_sh()} takes a reference as input and
+returns a reference. As before, the lifetime of the reference that will
+be returned is a parameter (specified by the caller). That means that
+\texttt{get\_x\_sh()} promises to return a reference that is valid for
+as long as the caller would like: this is subtly different from the
+first example, which promised to return a pointer that was valid for as
+long as its pointer argument was valid.
+
+Within \texttt{get\_x\_sh()}, we see the expression \texttt{\&p.x} which
+takes the address of a field of a Point. The presence of this expression
+implies that the compiler must guarantee that , so long as the resulting
+pointer is valid, the original Point won't be moved or changed.
+
+But recall that \texttt{get\_x\_sh()} also promised to return a pointer
+that was valid for as long as the caller wanted it to be. Clearly,
+\texttt{get\_x\_sh()} is not in a position to make both of these
+guarantees; in fact, it cannot guarantee that the pointer will remain
+valid at all once it returns, as the parameter \texttt{p} may or may not
+be live in the caller. Therefore, the compiler will report an error
+here.
+
+In general, if you borrow a struct or box to create a reference, it will
+only be valid within the function and cannot be returned. This is why
+the typical way to return references is to take references as input (the
+only other case in which it can be legal to return a reference is if it
+points at a static constant).
+
+\section{Named lifetimes}\label{named-lifetimes}
+
+Lifetimes can be named and referenced. For example, the special lifetime
+\texttt{'static}, which does not go out of scope, can be used to create
+global variables and communicate between tasks (see the manual for use
+cases).
+
+\subsection{Parameter Lifetimes}\label{parameter-lifetimes}
+
+Named lifetimes allow for grouping of parameters by lifetime. For
+example, consider this function:
+
+\begin{verbatim}
+# struct Point {x: f64, y: f64}; // as before
+# struct Size {w: f64, h: f64}; // as before
+# enum Shape {
+#     Circle(Point, f64),   // origin, radius
+#     Rectangle(Point, Size)  // upper-left, dimensions
+# }
+# fn compute_area(shape: &Shape) -> f64 { 0.0 }
+fn select<'r, T>(shape: &'r Shape, threshold: f64,
+                 a: &'r T, b: &'r T) -> &'r T {
+    if compute_area(shape) > threshold {a} else {b}
+}
+\end{verbatim}
+
+This function takes three references and assigns each the same lifetime
+\texttt{r}. In practice, this means that, in the caller, the lifetime
+\texttt{r} will be the \emph{intersection of the lifetime of the three
+region parameters}. This may be overly conservative, as in this example:
+
+\begin{verbatim}
+# struct Point {x: f64, y: f64}; // as before
+# struct Size {w: f64, h: f64}; // as before
+# enum Shape {
+#     Circle(Point, f64),   // origin, radius
+#     Rectangle(Point, Size)  // upper-left, dimensions
+# }
+# fn compute_area(shape: &Shape) -> f64 { 0.0 }
+# fn select<'r, T>(shape: &Shape, threshold: f64,
+#                  a: &'r T, b: &'r T) -> &'r T {
+#     if compute_area(shape) > threshold {a} else {b}
+# }
+                                                     // -+ r
+fn select_based_on_unit_circle<'r, T>(               //  |-+ B
+    threshold: f64, a: &'r T, b: &'r T) -> &'r T {   //  | |
+                                                     //  | |
+    let shape = Circle(Point {x: 0., y: 0.}, 1.);    //  | |
+    select(&shape, threshold, a, b)                  //  | |
+}                                                    //  |-+
+                                                     // -+
+\end{verbatim}
+
+In this call to \texttt{select()}, the lifetime of the first parameter
+shape is B, the function body. Both of the second two parameters
+\texttt{a} and \texttt{b} share the same lifetime, \texttt{r}, which is
+a lifetime parameter of \texttt{select\_based\_on\_unit\_circle()}. The
+caller will infer the intersection of these two lifetimes as the
+lifetime of the returned value, and hence the return value of
+\texttt{select()} will be assigned a lifetime of B. This will in turn
+lead to a compilation error, because
+\texttt{select\_based\_on\_unit\_circle()} is supposed to return a value
+with the lifetime \texttt{r}.
+
+To address this, we can modify the definition of \texttt{select()} to
+distinguish the lifetime of the first parameter from the lifetime of the
+latter two. After all, the first parameter is not being returned. Here
+is how the new \texttt{select()} might look:
+
+\begin{verbatim}
+# struct Point {x: f64, y: f64}; // as before
+# struct Size {w: f64, h: f64}; // as before
+# enum Shape {
+#     Circle(Point, f64),   // origin, radius
+#     Rectangle(Point, Size)  // upper-left, dimensions
+# }
+# fn compute_area(shape: &Shape) -> f64 { 0.0 }
+fn select<'r, 'tmp, T>(shape: &'tmp Shape, threshold: f64,
+                       a: &'r T, b: &'r T) -> &'r T {
+    if compute_area(shape) > threshold {a} else {b}
+}
+\end{verbatim}
+
+Here you can see that \texttt{shape}'s lifetime is now named
+\texttt{tmp}. The parameters \texttt{a}, \texttt{b}, and the return
+value all have the lifetime \texttt{r}. However, since the lifetime
+\texttt{tmp} is not returned, it would be more concise to just omit the
+named lifetime for \texttt{shape} altogether:
+
+\begin{verbatim}
+# struct Point {x: f64, y: f64}; // as before
+# struct Size {w: f64, h: f64}; // as before
+# enum Shape {
+#     Circle(Point, f64),   // origin, radius
+#     Rectangle(Point, Size)  // upper-left, dimensions
+# }
+# fn compute_area(shape: &Shape) -> f64 { 0.0 }
+fn select<'r, T>(shape: &Shape, threshold: f64,
+                 a: &'r T, b: &'r T) -> &'r T {
+    if compute_area(shape) > threshold {a} else {b}
+}
+\end{verbatim}
+
+This is equivalent to the previous definition.
+
+\subsection{Labeled Control
+Structures}\label{labeled-control-structures}
+
+Named lifetime notation can also be used to control the flow of
+execution:
+
+\begin{verbatim}
+'h: for i in range(0u, 10) {
+    'g: loop {
+        if i % 2 == 0 { continue 'h; }
+        if i == 9 { break 'h; }
+        break 'g;
+    }
+}
+\end{verbatim}
+
+\begin{quote}
+\emph{Note:} Labelled breaks are not currently supported within
+\texttt{while} loops.
+\end{quote}
+
+Named labels are hygienic and can be used safely within macros. See the
+macros guide section on hygiene for more details.
+
+\section{Conclusion}\label{conclusion}
+
+So there you have it: a (relatively) brief tour of the lifetime system.
+For more details, we refer to the (yet to be written) reference document
+on references, which will explain the full notation and give more
+examples.
+
+\end{document}

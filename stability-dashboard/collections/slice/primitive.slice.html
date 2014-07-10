@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The collections library documentation.">
+
+    <title>collections::slice::slice - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../collections/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../index.html'>collections</a>&#8203;::<a href='index.html'>slice</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='bytes/index.html'>bytes</a><a class='mod ' href='raw/index.html'>raw</a></div><div class='block struct'><h2>Structs</h2><a class='struct ' href='struct.Chunks.html'>Chunks</a><a class='struct ' href='struct.ElementSwaps.html'>ElementSwaps</a><a class='struct ' href='struct.Items.html'>Items</a><a class='struct ' href='struct.MutChunks.html'>MutChunks</a><a class='struct ' href='struct.MutItems.html'>MutItems</a><a class='struct ' href='struct.MutSplits.html'>MutSplits</a><a class='struct ' href='struct.Permutations.html'>Permutations</a><a class='struct ' href='struct.Splits.html'>Splits</a><a class='struct ' href='struct.Windows.html'>Windows</a></div><div class='block trait'><h2>Traits</h2><a class='trait ' href='trait.CloneableVector.html'>CloneableVector</a><a class='trait ' href='trait.ImmutableCloneableVector.html'>ImmutableCloneableVector</a><a class='trait ' href='trait.ImmutableEqVector.html'>ImmutableEqVector</a><a class='trait ' href='trait.ImmutableOrdVector.html'>ImmutableOrdVector</a><a class='trait ' href='trait.ImmutableVector.html'>ImmutableVector</a><a class='trait ' href='trait.MutableCloneableVector.html'>MutableCloneableVector</a><a class='trait ' href='trait.MutableOrdVector.html'>MutableOrdVector</a><a class='trait ' href='trait.MutableVector.html'>MutableVector</a><a class='trait ' href='trait.MutableVectorAllocating.html'>MutableVectorAllocating</a><a class='trait ' href='trait.Vector.html'>Vector</a><a class='trait ' href='trait.VectorVector.html'>VectorVector</a></div><div class='block fn'><h2>Functions</h2><a class='fn ' href='fn.mut_ref_slice.html'>mut_ref_slice</a><a class='fn ' href='fn.ref_slice.html'>ref_slice</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content primitive">
+<h1 class='fqn'>Primitive Type <a class='primitive' href=''>slice</a><span class='out-of-band'></span></h1>
+<div class='docblock'><p>Utilities for vector manipulation</p>
+
+<p>The <code>vec</code> module contains useful code to help work with vector values.
+Vectors are Rust&#39;s list type. Vectors contain zero or more values of
+homogeneous types:</p>
+<span id='rust-example-raw-0' class='rusttest'>fn main() {
+    let int_vector = [1i, 2i, 3i];
+    let str_vector = [&quot;one&quot;, &quot;two&quot;, &quot;three&quot;];
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='kw'>let</span> <span class='ident'>int_vector</span> <span class='op'>=</span> [<span class='number'>1i</span>, <span class='number'>2i</span>, <span class='number'>3i</span>];
+<span class='kw'>let</span> <span class='ident'>str_vector</span> <span class='op'>=</span> [<span class='string'>&quot;one&quot;</span>, <span class='string'>&quot;two&quot;</span>, <span class='string'>&quot;three&quot;</span>];
+</pre>
+
+<p>This is a big module, but for a high-level overview:</p>
+
+<h2 id="structs" class='section-header'><a
+                           href="#structs">Structs</a></h2>
+<p>Several structs that are useful for vectors, such as <code>Items</code>, which
+represents iteration over a vector.</p>
+
+<h2 id="traits" class='section-header'><a
+                           href="#traits">Traits</a></h2>
+<p>A number of traits add methods that allow you to accomplish tasks with vectors.</p>
+
+<p>Traits defined for the <code>&amp;[T]</code> type (a vector slice), have methods that can be
+called on either owned vectors, denoted <code>~[T]</code>, or on vector slices themselves.
+These traits include <code>ImmutableVector</code>, and <code>MutableVector</code> for the <code>&amp;mut [T]</code>
+case.</p>
+
+<p>An example is the method <code>.slice(a, b)</code> that returns an immutable &quot;view&quot; into
+a vector or a vector slice from the index interval <code>[a, b)</code>:</p>
+<span id='rust-example-raw-1' class='rusttest'>fn main() {
+    let numbers = [0i, 1i, 2i];
+    let last_numbers = numbers.slice(1, 3);
+    // last_numbers is now &amp;[1i, 2i]
+}</span><pre id='rust-example-rendered-1' class='rust '>
+<span class='kw'>let</span> <span class='ident'>numbers</span> <span class='op'>=</span> [<span class='number'>0i</span>, <span class='number'>1i</span>, <span class='number'>2i</span>];
+<span class='kw'>let</span> <span class='ident'>last_numbers</span> <span class='op'>=</span> <span class='ident'>numbers</span>.<span class='ident'>slice</span>(<span class='number'>1</span>, <span class='number'>3</span>);<span class='comment'>
+// last_numbers is now &amp;[1i, 2i]
+</span></pre>
+
+<p>Traits defined for the <code>~[T]</code> type, like <code>OwnedVector</code>, can only be called
+on such vectors. These methods deal with adding elements or otherwise changing
+the allocation of the vector.</p>
+
+<p>An example is the method <code>.push(element)</code> that will add an element at the end
+of the vector:</p>
+<span id='rust-example-raw-2' class='rusttest'>fn main() {
+    let mut numbers = vec![0i, 1i, 2i];
+    numbers.push(7);
+    // numbers is now vec![0i, 1i, 2i, 7i];
+}</span><pre id='rust-example-rendered-2' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>numbers</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0i</span>, <span class='number'>1i</span>, <span class='number'>2i</span>];
+<span class='ident'>numbers</span>.<span class='ident'>push</span>(<span class='number'>7</span>);<span class='comment'>
+// numbers is now vec![0i, 1i, 2i, 7i];
+</span></pre>
+
+<h2 id="implementations-of-other-traits" class='section-header'><a
+                           href="#implementations-of-other-traits">Implementations of other traits</a></h2>
+<p>Vectors are a very useful type, and so there&#39;s several implementations of
+traits from other modules. Some notable examples:</p>
+
+<ul>
+<li><code>Clone</code></li>
+<li><code>Eq</code>, <code>Ord</code>, <code>Eq</code>, <code>Ord</code> -- vectors can be compared,
+if the element type defines the corresponding trait.</li>
+</ul>
+
+<h2 id="iteration" class='section-header'><a
+                           href="#iteration">Iteration</a></h2>
+<p>The method <code>iter()</code> returns an iteration value for a vector or a vector slice.
+The iterator yields references to the vector&#39;s elements, so if the element
+type of the vector is <code>int</code>, the element type of the iterator is <code>&amp;int</code>.</p>
+<span id='rust-example-raw-3' class='rusttest'>fn main() {
+    let numbers = [0i, 1i, 2i];
+    for &amp;x in numbers.iter() {
+        println!(&quot;{} is a number!&quot;, x);
+    }
+}</span><pre id='rust-example-rendered-3' class='rust '>
+<span class='kw'>let</span> <span class='ident'>numbers</span> <span class='op'>=</span> [<span class='number'>0i</span>, <span class='number'>1i</span>, <span class='number'>2i</span>];
+<span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='ident'>x</span> <span class='kw'>in</span> <span class='ident'>numbers</span>.<span class='ident'>iter</span>() {
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{} is a number!&quot;</span>, <span class='ident'>x</span>);
+}
+</pre>
+
+<ul>
+<li><code>.mut_iter()</code> returns an iterator that allows modifying each value.</li>
+<li><code>.move_iter()</code> converts an owned vector into an iterator that
+moves out a value from the vector each iteration.</li>
+<li>Further iterators exist that split, chunk or permute the vector.</li>
+</ul>
+
+<h2 id="function-definitions" class='section-header'><a
+                           href="#function-definitions">Function definitions</a></h2>
+<p>There are a number of free functions that create or take vectors, for example:</p>
+
+<ul>
+<li>Creating a vector, like <code>from_elem</code> and <code>from_fn</code></li>
+<li>Creating a vector with a given size: <code>with_capacity</code></li>
+<li>Modifying a vector and returning it, like <code>append</code></li>
+<li>Operations on paired elements, like <code>unzip</code>.</li>
+</ul>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, T: <a class='trait' href='../../core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a>, V: <a class='trait' href='../../collections/slice/trait.Vector.html' title='collections::slice::Vector'>Vector</a>&lt;T&gt;&gt; <a class='trait' href='../../collections/slice/trait.VectorVector.html' title='collections::slice::VectorVector'>VectorVector</a>&lt;T&gt; for &amp;'a <a href='../primitive.slice.html'>[V]</a></code></h3><div class='impl-methods'><h4 id='method.concat_vec' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.concat_vec' class='fnname'>concat_vec</a>(&amp;self) -&gt; <a class='struct' href='../../collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
+<h4 id='method.connect_vec' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.connect_vec' class='fnname'>connect_vec</a>(&amp;self, sep: &amp;T) -&gt; <a class='struct' href='../../collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, T: <a class='trait' href='../../core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a>&gt; <a class='trait' href='../../collections/slice/trait.CloneableVector.html' title='collections::slice::CloneableVector'>CloneableVector</a>&lt;T&gt; for &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h3><div class='docblock'><p>Extension methods for vector slices</p>
+</div><div class='impl-methods'><h4 id='method.to_owned' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.to_owned' class='fnname'>to_owned</a>(&amp;self) -&gt; <a class='struct' href='../../collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
+<div class='docblock'><p>Returns a copy of <code>v</code>.</p>
+</div><h4 id='method.into_owned' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.into_owned' class='fnname'>into_owned</a>(self) -&gt; <a class='struct' href='../../collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, T: <a class='trait' href='../../core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a>&gt; <a class='trait' href='../../collections/slice/trait.ImmutableCloneableVector.html' title='collections::slice::ImmutableCloneableVector'>ImmutableCloneableVector</a>&lt;T&gt; for &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h3><div class='impl-methods'><h4 id='method.partitioned' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.partitioned' class='fnname'>partitioned</a>(&amp;self, f: |&amp;T| -&gt; <a href='../../core/primitive.bool.html'>bool</a>) -&gt; <a href='../../core/primitive.tuple.html'>(<a class='struct' href='../../collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;, <a class='struct' href='../../collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;)</a></code></h4>
+<h4 id='method.permutations' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.permutations' class='fnname'>permutations</a>(self) -&gt; <a class='struct' href='../../collections/slice/struct.Permutations.html' title='collections::slice::Permutations'>Permutations</a>&lt;T&gt;</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, T&gt; <a class='trait' href='../../collections/slice/trait.MutableVectorAllocating.html' title='collections::slice::MutableVectorAllocating'>MutableVectorAllocating</a>&lt;'a, T&gt; for &amp;'a mut <a href='../primitive.slice.html'>[T]</a></code></h3><div class='impl-methods'><h4 id='method.sort_by' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.sort_by' class='fnname'>sort_by</a>(self, compare: |&amp;T, &amp;T| -&gt; <a class='type' href='../../core/cmp/type.Ordering.html' title='core::cmp::Ordering'>Ordering</a>)</code></h4>
+<h4 id='method.move_from' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.move_from' class='fnname'>move_from</a>(self, src: <a class='struct' href='../../collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;, start: <a href='../../core/primitive.uint.html'>uint</a>, end: <a href='../../core/primitive.uint.html'>uint</a>) -&gt; <a href='../../core/primitive.uint.html'>uint</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, T: <a class='trait' href='../../core/cmp/trait.Ord.html' title='core::cmp::Ord'>Ord</a>&gt; <a class='trait' href='../../collections/slice/trait.MutableOrdVector.html' title='collections::slice::MutableOrdVector'>MutableOrdVector</a>&lt;T&gt; for &amp;'a mut <a href='../primitive.slice.html'>[T]</a></code></h3><div class='impl-methods'><h4 id='method.sort' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.sort' class='fnname'>sort</a>(self)</code></h4>
+<h4 id='method.next_permutation' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.next_permutation' class='fnname'>next_permutation</a>(self) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.prev_permutation' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.prev_permutation' class='fnname'>prev_permutation</a>(self) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Unstable' title='Unstable'></a><code>impl&lt;'a, T&gt; <a class='trait' href='../../core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h3><div class='impl-methods'><h4 id='method.clone' class='method'><a class='stability Unstable' title='Unstable'></a><code>fn <a href='#method.clone' class='fnname'>clone</a>&lt;'a, T&gt;(&amp;self) -&gt; &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h4>
+<div class='docblock'><p>Return a shallow copy of the slice.</p>
+</div><h4 id='method.clone_from' class='method'><a class='stability Experimental' title='Experimental: this function is mostly unused'></a><code>fn <a href='#method.clone_from' class='fnname'>clone_from</a>&lt;'a, T&gt;(&amp;mut self, &amp;&amp;'a <a href='../primitive.slice.html'>[T]</a>)</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, T&gt; <a class='trait' href='../../core/raw/trait.Repr.html' title='core::raw::Repr'>Repr</a>&lt;<a class='struct' href='../../core/raw/struct.Slice.html' title='core::raw::Slice'>Slice</a>&lt;T&gt;&gt; for &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h3><div class='impl-methods'><h4 id='method.repr' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.repr' class='fnname'>repr</a>&lt;'a, T&gt;(&amp;self) -&gt; <a class='struct' href='../../core/raw/struct.Slice.html' title='core::raw::Slice'>Slice</a>&lt;T&gt;</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, T&gt; <a class='trait' href='../../collections/slice/trait.ImmutableVector.html' title='collections::slice::ImmutableVector'>ImmutableVector</a>&lt;'a, T&gt; for &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h3><div class='impl-methods'><h4 id='method.slice' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.slice' class='fnname'>slice</a>&lt;'a, T&gt;(&amp;self, start: <a href='../../core/primitive.uint.html'>uint</a>, end: <a href='../../core/primitive.uint.html'>uint</a>) -&gt; &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h4>
+<h4 id='method.slice_from' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.slice_from' class='fnname'>slice_from</a>&lt;'a, T&gt;(&amp;self, start: <a href='../../core/primitive.uint.html'>uint</a>) -&gt; &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h4>
+<h4 id='method.slice_to' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.slice_to' class='fnname'>slice_to</a>&lt;'a, T&gt;(&amp;self, end: <a href='../../core/primitive.uint.html'>uint</a>) -&gt; &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h4>
+<h4 id='method.iter' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.iter' class='fnname'>iter</a>&lt;'a, T&gt;(self) -&gt; <a class='struct' href='../../collections/slice/struct.Items.html' title='collections::slice::Items'>Items</a>&lt;'a, T&gt;</code></h4>
+<h4 id='method.split' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.split' class='fnname'>split</a>&lt;'a, T&gt;(self, pred: |&amp;T|: 'a -&gt; <a href='../../core/primitive.bool.html'>bool</a>) -&gt; <a class='struct' href='../../collections/slice/struct.Splits.html' title='collections::slice::Splits'>Splits</a>&lt;'a, T&gt;</code></h4>
+<h4 id='method.splitn' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.splitn' class='fnname'>splitn</a>&lt;'a, T&gt;(self, n: <a href='../../core/primitive.uint.html'>uint</a>, pred: |&amp;T|: 'a -&gt; <a href='../../core/primitive.bool.html'>bool</a>) -&gt; <a class='struct' href='../../core/slice/struct.SplitsN.html' title='core::slice::SplitsN'>SplitsN</a>&lt;'a, T&gt;</code></h4>
+<h4 id='method.rsplitn' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.rsplitn' class='fnname'>rsplitn</a>&lt;'a, T&gt;(self, n: <a href='../../core/primitive.uint.html'>uint</a>, pred: |&amp;T|: 'a -&gt; <a href='../../core/primitive.bool.html'>bool</a>) -&gt; <a class='struct' href='../../core/slice/struct.SplitsN.html' title='core::slice::SplitsN'>SplitsN</a>&lt;'a, T&gt;</code></h4>
+<h4 id='method.windows' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.windows' class='fnname'>windows</a>&lt;'a, T&gt;(self, size: <a href='../../core/primitive.uint.html'>uint</a>) -&gt; <a class='struct' href='../../collections/slice/struct.Windows.html' title='collections::slice::Windows'>Windows</a>&lt;'a, T&gt;</code></h4>
+<h4 id='method.chunks' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.chunks' class='fnname'>chunks</a>&lt;'a, T&gt;(self, size: <a href='../../core/primitive.uint.html'>uint</a>) -&gt; <a class='struct' href='../../collections/slice/struct.Chunks.html' title='collections::slice::Chunks'>Chunks</a>&lt;'a, T&gt;</code></h4>
+<h4 id='method.get' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.get' class='fnname'>get</a>&lt;'a, T&gt;(&amp;self, index: <a href='../../core/primitive.uint.html'>uint</a>) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;&amp;'a T&gt;</code></h4>
+<h4 id='method.head' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.head' class='fnname'>head</a>&lt;'a, T&gt;(&amp;self) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;&amp;'a T&gt;</code></h4>
+<h4 id='method.tail' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.tail' class='fnname'>tail</a>&lt;'a, T&gt;(&amp;self) -&gt; &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h4>
+<h4 id='method.tailn' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.tailn' class='fnname'>tailn</a>&lt;'a, T&gt;(&amp;self, n: <a href='../../core/primitive.uint.html'>uint</a>) -&gt; &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h4>
+<h4 id='method.init' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.init' class='fnname'>init</a>&lt;'a, T&gt;(&amp;self) -&gt; &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h4>
+<h4 id='method.initn' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.initn' class='fnname'>initn</a>&lt;'a, T&gt;(&amp;self, n: <a href='../../core/primitive.uint.html'>uint</a>) -&gt; &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h4>
+<h4 id='method.last' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.last' class='fnname'>last</a>&lt;'a, T&gt;(&amp;self) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;&amp;'a T&gt;</code></h4>
+<h4 id='method.unsafe_ref' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#method.unsafe_ref' class='fnname'>unsafe_ref</a>&lt;'a, T&gt;(self, index: <a href='../../core/primitive.uint.html'>uint</a>) -&gt; &amp;'a T</code></h4>
+<h4 id='method.as_ptr' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.as_ptr' class='fnname'>as_ptr</a>&lt;'a, T&gt;(&amp;self) -&gt; *T</code></h4>
+<h4 id='method.bsearch' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.bsearch' class='fnname'>bsearch</a>&lt;'a, T&gt;(&amp;self, f: |&amp;T| -&gt; <a class='type' href='../../core/cmp/type.Ordering.html' title='core::cmp::Ordering'>Ordering</a>) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a href='../../core/primitive.uint.html'>uint</a>&gt;</code></h4>
+<h4 id='method.shift_ref' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.shift_ref' class='fnname'>shift_ref</a>&lt;'a, T&gt;(&amp;mut self) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;&amp;'a T&gt;</code></h4>
+<h4 id='method.pop_ref' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.pop_ref' class='fnname'>pop_ref</a>&lt;'a, T&gt;(&amp;mut self) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;&amp;'a T&gt;</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, T&gt; <a class='trait' href='../../collections/slice/trait.MutableVector.html' title='collections::slice::MutableVector'>MutableVector</a>&lt;'a, T&gt; for &amp;'a mut <a href='../primitive.slice.html'>[T]</a></code></h3><div class='impl-methods'><h4 id='method.get_mut' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.get_mut' class='fnname'>get_mut</a>&lt;'a, T&gt;(self, index: <a href='../../core/primitive.uint.html'>uint</a>) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;&amp;'a mut T&gt;</code></h4>
+<h4 id='method.as_mut_slice' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.as_mut_slice' class='fnname'>as_mut_slice</a>&lt;'a, T&gt;(self) -&gt; &amp;'a mut <a href='../primitive.slice.html'>[T]</a></code></h4>
+<h4 id='method.mut_slice' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.mut_slice' class='fnname'>mut_slice</a>&lt;'a, T&gt;(self, start: <a href='../../core/primitive.uint.html'>uint</a>, end: <a href='../../core/primitive.uint.html'>uint</a>) -&gt; &amp;'a mut <a href='../primitive.slice.html'>[T]</a></code></h4>
+<h4 id='method.mut_slice_from' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.mut_slice_from' class='fnname'>mut_slice_from</a>&lt;'a, T&gt;(self, start: <a href='../../core/primitive.uint.html'>uint</a>) -&gt; &amp;'a mut <a href='../primitive.slice.html'>[T]</a></code></h4>
+<h4 id='method.mut_slice_to' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.mut_slice_to' class='fnname'>mut_slice_to</a>&lt;'a, T&gt;(self, end: <a href='../../core/primitive.uint.html'>uint</a>) -&gt; &amp;'a mut <a href='../primitive.slice.html'>[T]</a></code></h4>
+<h4 id='method.mut_split_at' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.mut_split_at' class='fnname'>mut_split_at</a>&lt;'a, T&gt;(self, mid: <a href='../../core/primitive.uint.html'>uint</a>) -&gt; <a href='../../core/primitive.tuple.html'>(&amp;'a mut <a href='../primitive.slice.html'>[T]</a>, &amp;'a mut <a href='../primitive.slice.html'>[T]</a>)</a></code></h4>
+<h4 id='method.mut_iter' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.mut_iter' class='fnname'>mut_iter</a>&lt;'a, T&gt;(self) -&gt; <a class='struct' href='../../collections/slice/struct.MutItems.html' title='collections::slice::MutItems'>MutItems</a>&lt;'a, T&gt;</code></h4>
+<h4 id='method.mut_last' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.mut_last' class='fnname'>mut_last</a>&lt;'a, T&gt;(self) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;&amp;'a mut T&gt;</code></h4>
+<h4 id='method.mut_split' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.mut_split' class='fnname'>mut_split</a>&lt;'a, T&gt;(self, pred: |&amp;T|: 'a -&gt; <a href='../../core/primitive.bool.html'>bool</a>) -&gt; <a class='struct' href='../../collections/slice/struct.MutSplits.html' title='collections::slice::MutSplits'>MutSplits</a>&lt;'a, T&gt;</code></h4>
+<h4 id='method.mut_chunks' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.mut_chunks' class='fnname'>mut_chunks</a>&lt;'a, T&gt;(self, chunk_size: <a href='../../core/primitive.uint.html'>uint</a>) -&gt; <a class='struct' href='../../collections/slice/struct.MutChunks.html' title='collections::slice::MutChunks'>MutChunks</a>&lt;'a, T&gt;</code></h4>
+<h4 id='method.mut_shift_ref' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.mut_shift_ref' class='fnname'>mut_shift_ref</a>&lt;'a, T&gt;(&amp;mut self) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;&amp;'a mut T&gt;</code></h4>
+<h4 id='method.mut_pop_ref' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.mut_pop_ref' class='fnname'>mut_pop_ref</a>&lt;'a, T&gt;(&amp;mut self) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;&amp;'a mut T&gt;</code></h4>
+<h4 id='method.swap' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.swap' class='fnname'>swap</a>&lt;'a, T&gt;(self, a: <a href='../../core/primitive.uint.html'>uint</a>, b: <a href='../../core/primitive.uint.html'>uint</a>)</code></h4>
+<h4 id='method.reverse' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.reverse' class='fnname'>reverse</a>&lt;'a, T&gt;(self)</code></h4>
+<h4 id='method.unsafe_mut_ref' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#method.unsafe_mut_ref' class='fnname'>unsafe_mut_ref</a>&lt;'a, T&gt;(self, index: <a href='../../core/primitive.uint.html'>uint</a>) -&gt; &amp;'a mut T</code></h4>
+<h4 id='method.as_mut_ptr' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.as_mut_ptr' class='fnname'>as_mut_ptr</a>&lt;'a, T&gt;(self) -&gt; *mut T</code></h4>
+<h4 id='method.unsafe_set' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#method.unsafe_set' class='fnname'>unsafe_set</a>&lt;'a, T&gt;(self, index: <a href='../../core/primitive.uint.html'>uint</a>, val: T)</code></h4>
+<h4 id='method.init_elem' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#method.init_elem' class='fnname'>init_elem</a>&lt;'a, T&gt;(self, i: <a href='../../core/primitive.uint.html'>uint</a>, val: T)</code></h4>
+<h4 id='method.copy_memory' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#method.copy_memory' class='fnname'>copy_memory</a>&lt;'a, T&gt;(self, src: &amp;<a href='../primitive.slice.html'>[T]</a>)</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, T: <a class='trait' href='../../core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a>&gt; <a class='trait' href='../../collections/slice/trait.ImmutableEqVector.html' title='collections::slice::ImmutableEqVector'>ImmutableEqVector</a>&lt;T&gt; for &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h3><div class='impl-methods'><h4 id='method.position_elem' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.position_elem' class='fnname'>position_elem</a>&lt;'a, T: <a class='trait' href='../../core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a>&gt;(&amp;self, x: &amp;T) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a href='../../core/primitive.uint.html'>uint</a>&gt;</code></h4>
+<h4 id='method.rposition_elem' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.rposition_elem' class='fnname'>rposition_elem</a>&lt;'a, T: <a class='trait' href='../../core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a>&gt;(&amp;self, t: &amp;T) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a href='../../core/primitive.uint.html'>uint</a>&gt;</code></h4>
+<h4 id='method.contains' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.contains' class='fnname'>contains</a>&lt;'a, T: <a class='trait' href='../../core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a>&gt;(&amp;self, x: &amp;T) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.starts_with' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.starts_with' class='fnname'>starts_with</a>&lt;'a, T: <a class='trait' href='../../core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a>&gt;(&amp;self, needle: &amp;<a href='../primitive.slice.html'>[T]</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ends_with' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.ends_with' class='fnname'>ends_with</a>&lt;'a, T: <a class='trait' href='../../core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a>&gt;(&amp;self, needle: &amp;<a href='../primitive.slice.html'>[T]</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, T: <a class='trait' href='../../core/cmp/trait.Ord.html' title='core::cmp::Ord'>Ord</a>&gt; <a class='trait' href='../../collections/slice/trait.ImmutableOrdVector.html' title='collections::slice::ImmutableOrdVector'>ImmutableOrdVector</a>&lt;T&gt; for &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h3><div class='impl-methods'><h4 id='method.bsearch_elem' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.bsearch_elem' class='fnname'>bsearch_elem</a>&lt;'a, T: <a class='trait' href='../../core/cmp/trait.Ord.html' title='core::cmp::Ord'>Ord</a>&gt;(&amp;self, x: &amp;T) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a href='../../core/primitive.uint.html'>uint</a>&gt;</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, T: <a class='trait' href='../../core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a>&gt; <a class='trait' href='../../collections/slice/trait.MutableCloneableVector.html' title='collections::slice::MutableCloneableVector'>MutableCloneableVector</a>&lt;T&gt; for &amp;'a mut <a href='../primitive.slice.html'>[T]</a></code></h3><div class='impl-methods'><h4 id='method.copy_from' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.copy_from' class='fnname'>copy_from</a>&lt;'a, T: <a class='trait' href='../../core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a>&gt;(self, src: &amp;<a href='../primitive.slice.html'>[T]</a>) -&gt; <a href='../../core/primitive.uint.html'>uint</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, T&gt; <a class='trait' href='../../collections/slice/trait.Vector.html' title='collections::slice::Vector'>Vector</a>&lt;T&gt; for &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h3><div class='impl-methods'><h4 id='method.as_slice' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.as_slice' class='fnname'>as_slice</a>&lt;'a, T&gt;(&amp;'a self) -&gt; &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, T&gt; <a class='trait' href='../../collections/trait.Collection.html' title='collections::Collection'>Collection</a> for &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h3><div class='impl-methods'><h4 id='method.len' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.len' class='fnname'>len</a>&lt;'a, T&gt;(&amp;self) -&gt; <a href='../../core/primitive.uint.html'>uint</a></code></h4>
+<div class='docblock'><p>Returns the length of a vector</p>
+</div><h4 id='method.is_empty' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.is_empty' class='fnname'>is_empty</a>&lt;'a, T&gt;(&amp;self) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, T&gt; <a class='trait' href='../../core/default/trait.Default.html' title='core::default::Default'>Default</a> for &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h3><div class='impl-methods'><h4 id='method.default' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.default' class='fnname'>default</a>&lt;'a, T&gt;() -&gt; &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a&gt; <a class='trait' href='../../collections/slice/bytes/trait.MutableByteVector.html' title='collections::slice::bytes::MutableByteVector'>MutableByteVector</a> for &amp;'a mut <a href='../primitive.slice.html'>[<a href='../../core/primitive.u8.html'>u8</a>]</a></code></h3><div class='impl-methods'><h4 id='method.set_memory' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.set_memory' class='fnname'>set_memory</a>&lt;'a&gt;(self, value: <a href='../../core/primitive.u8.html'>u8</a>)</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, T: <a class='trait' href='../../core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a>&gt; <a class='trait' href='../../core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h3><div class='impl-methods'><h4 id='method.eq' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.eq' class='fnname'>eq</a>&lt;'a, T: <a class='trait' href='../../core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a>&gt;(&amp;self, other: &amp;&amp;'a <a href='../primitive.slice.html'>[T]</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.ne' class='fnname'>ne</a>&lt;'a, T: <a class='trait' href='../../core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a>&gt;(&amp;self, other: &amp;&amp;'a <a href='../primitive.slice.html'>[T]</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.ne' class='fnname'>ne</a>&lt;'a, T: <a class='trait' href='../../core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a>&gt;(&amp;self, &amp;&amp;'a <a href='../primitive.slice.html'>[T]</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, T: <a class='trait' href='../../core/cmp/trait.Eq.html' title='core::cmp::Eq'>Eq</a>&gt; <a class='trait' href='../../core/cmp/trait.Eq.html' title='core::cmp::Eq'>Eq</a> for &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h3><div class='impl-methods'><h4 id='method.assert_receiver_is_total_eq' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.assert_receiver_is_total_eq' class='fnname'>assert_receiver_is_total_eq</a>&lt;'a, T: <a class='trait' href='../../core/cmp/trait.Eq.html' title='core::cmp::Eq'>Eq</a>&gt;(&amp;self)</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, T: <a class='trait' href='../../core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a>, V: <a class='trait' href='../../collections/slice/trait.Vector.html' title='collections::slice::Vector'>Vector</a>&lt;T&gt;&gt; <a class='trait' href='../../core/cmp/trait.Equiv.html' title='core::cmp::Equiv'>Equiv</a>&lt;V&gt; for &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h3><div class='impl-methods'><h4 id='method.equiv' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.equiv' class='fnname'>equiv</a>&lt;'a, T: <a class='trait' href='../../core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a>, V: <a class='trait' href='../../collections/slice/trait.Vector.html' title='collections::slice::Vector'>Vector</a>&lt;T&gt;&gt;(&amp;self, other: &amp;V) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, T: <a class='trait' href='../../core/cmp/trait.Ord.html' title='core::cmp::Ord'>Ord</a>&gt; <a class='trait' href='../../core/cmp/trait.Ord.html' title='core::cmp::Ord'>Ord</a> for &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h3><div class='impl-methods'><h4 id='method.cmp' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.cmp' class='fnname'>cmp</a>&lt;'a, T: <a class='trait' href='../../core/cmp/trait.Ord.html' title='core::cmp::Ord'>Ord</a>&gt;(&amp;self, other: &amp;&amp;'a <a href='../primitive.slice.html'>[T]</a>) -&gt; <a class='type' href='../../core/cmp/type.Ordering.html' title='core::cmp::Ordering'>Ordering</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, T: <a class='trait' href='../../core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a>&gt; <a class='trait' href='../../core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a> for &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h3><div class='impl-methods'><h4 id='method.partial_cmp' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.partial_cmp' class='fnname'>partial_cmp</a>&lt;'a, T: <a class='trait' href='../../core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a>&gt;(&amp;self, other: &amp;&amp;'a <a href='../primitive.slice.html'>[T]</a>) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='type' href='../../core/cmp/type.Ordering.html' title='core::cmp::Ordering'>Ordering</a>&gt;</code></h4>
+<h4 id='method.lt' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.lt' class='fnname'>lt</a>&lt;'a, T: <a class='trait' href='../../core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a>&gt;(&amp;self, other: &amp;&amp;'a <a href='../primitive.slice.html'>[T]</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.le' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.le' class='fnname'>le</a>&lt;'a, T: <a class='trait' href='../../core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a>&gt;(&amp;self, other: &amp;&amp;'a <a href='../primitive.slice.html'>[T]</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ge' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.ge' class='fnname'>ge</a>&lt;'a, T: <a class='trait' href='../../core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a>&gt;(&amp;self, other: &amp;&amp;'a <a href='../primitive.slice.html'>[T]</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.gt' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.gt' class='fnname'>gt</a>&lt;'a, T: <a class='trait' href='../../core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a>&gt;(&amp;self, other: &amp;&amp;'a <a href='../primitive.slice.html'>[T]</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.lt' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.lt' class='fnname'>lt</a>&lt;'a, T: <a class='trait' href='../../core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a>&gt;(&amp;self, &amp;&amp;'a <a href='../primitive.slice.html'>[T]</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.le' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.le' class='fnname'>le</a>&lt;'a, T: <a class='trait' href='../../core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a>&gt;(&amp;self, &amp;&amp;'a <a href='../primitive.slice.html'>[T]</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.gt' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.gt' class='fnname'>gt</a>&lt;'a, T: <a class='trait' href='../../core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a>&gt;(&amp;self, &amp;&amp;'a <a href='../primitive.slice.html'>[T]</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ge' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.ge' class='fnname'>ge</a>&lt;'a, T: <a class='trait' href='../../core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a>&gt;(&amp;self, &amp;&amp;'a <a href='../primitive.slice.html'>[T]</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a&gt; <a class='trait' href='../../collections/str/trait.CharEq.html' title='collections::str::CharEq'>CharEq</a> for &amp;'a <a href='../primitive.slice.html'>[<a href='../../core/primitive.char.html'>char</a>]</a></code></h3><div class='impl-methods'><h4 id='method.matches' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.matches' class='fnname'>matches</a>&lt;'a&gt;(&amp;mut self, c: <a href='../../core/primitive.char.html'>char</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.only_ascii' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.only_ascii' class='fnname'>only_ascii</a>&lt;'a&gt;(&amp;self) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, T: <a class='trait' href='../../core/fmt/trait.Show.html' title='core::fmt::Show'>Show</a>&gt; <a class='trait' href='../../core/fmt/trait.Show.html' title='core::fmt::Show'>Show</a> for &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h3><div class='impl-methods'><h4 id='method.fmt' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.fmt' class='fnname'>fmt</a>&lt;'a, T: <a class='trait' href='../../core/fmt/trait.Show.html' title='core::fmt::Show'>Show</a>&gt;(&amp;self, f: &amp;mut <a class='struct' href='../../core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='../../core/result/type.Result.html' title='core::result::Result'>Result</a>&lt;(), <a class='type' href='../../core/fmt/type.FormatError.html' title='core::fmt::FormatError'>FormatError</a>&gt;</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, T: <a class='trait' href='../../core/fmt/trait.Show.html' title='core::fmt::Show'>Show</a>&gt; <a class='trait' href='../../core/fmt/trait.Show.html' title='core::fmt::Show'>Show</a> for &amp;'a mut <a href='../primitive.slice.html'>[T]</a></code></h3><div class='impl-methods'><h4 id='method.fmt' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.fmt' class='fnname'>fmt</a>&lt;'a, T: <a class='trait' href='../../core/fmt/trait.Show.html' title='core::fmt::Show'>Show</a>&gt;(&amp;self, f: &amp;mut <a class='struct' href='../../core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='../../core/result/type.Result.html' title='core::result::Result'>Result</a>&lt;(), <a class='type' href='../../core/fmt/type.FormatError.html' title='core::fmt::FormatError'>FormatError</a>&gt;</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, S: <a class='trait' href='../../collections/str/trait.Str.html' title='collections::str::Str'>Str</a>&gt; <a class='trait' href='../../collections/str/trait.StrVector.html' title='collections::str::StrVector'>StrVector</a> for &amp;'a <a href='../primitive.slice.html'>[S]</a></code></h3><div class='impl-methods'><h4 id='method.concat' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.concat' class='fnname'>concat</a>(&amp;self) -&gt; <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h4>
+<h4 id='method.connect' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.connect' class='fnname'>connect</a>(&amp;self, sep: &amp;<a href='../primitive.str.html'>str</a>) -&gt; <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, S: <a class='trait' href='../../collections/hash/trait.Writer.html' title='collections::hash::Writer'>Writer</a>, T: <a class='trait' href='../../collections/hash/trait.Hash.html' title='collections::hash::Hash'>Hash</a>&lt;S&gt;&gt; <a class='trait' href='../../collections/hash/trait.Hash.html' title='collections::hash::Hash'>Hash</a>&lt;S&gt; for &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h3><div class='impl-methods'><h4 id='method.hash' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.hash' class='fnname'>hash</a>(&amp;self, state: &amp;mut S)</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, S: <a class='trait' href='../../collections/hash/trait.Writer.html' title='collections::hash::Writer'>Writer</a>, T: <a class='trait' href='../../collections/hash/trait.Hash.html' title='collections::hash::Hash'>Hash</a>&lt;S&gt;&gt; <a class='trait' href='../../collections/hash/trait.Hash.html' title='collections::hash::Hash'>Hash</a>&lt;S&gt; for &amp;'a mut <a href='../primitive.slice.html'>[T]</a></code></h3><div class='impl-methods'><h4 id='method.hash' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.hash' class='fnname'>hash</a>(&amp;self, state: &amp;mut S)</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "collections";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script src="../../playpen.js"></script>
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

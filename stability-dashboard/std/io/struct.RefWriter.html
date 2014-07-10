@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The std library documentation.">
+
+    <title>std::io::RefWriter - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../std/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../index.html'>std</a>&#8203;::<a href='index.html'>io</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='extensions/index.html'>extensions</a><a class='mod ' href='fs/index.html'>fs</a><a class='mod ' href='net/index.html'>net</a><a class='mod ' href='pipe/index.html'>pipe</a><a class='mod ' href='process/index.html'>process</a><a class='mod ' href='signal/index.html'>signal</a><a class='mod ' href='stdio/index.html'>stdio</a><a class='mod ' href='test/index.html'>test</a><a class='mod ' href='timer/index.html'>timer</a><a class='mod ' href='util/index.html'>util</a></div><div class='block struct'><h2>Structs</h2><a class='struct ' href='struct.BufReader.html'>BufReader</a><a class='struct ' href='struct.BufWriter.html'>BufWriter</a><a class='struct ' href='struct.BufferedReader.html'>BufferedReader</a><a class='struct ' href='struct.BufferedStream.html'>BufferedStream</a><a class='struct ' href='struct.BufferedWriter.html'>BufferedWriter</a><a class='struct ' href='struct.ChanReader.html'>ChanReader</a><a class='struct ' href='struct.ChanWriter.html'>ChanWriter</a><a class='struct ' href='struct.Chars.html'>Chars</a><a class='struct ' href='struct.FilePermission.html'>FilePermission</a><a class='struct ' href='struct.FileStat.html'>FileStat</a><a class='struct ' href='struct.IncomingConnections.html'>IncomingConnections</a><a class='struct ' href='struct.IoError.html'>IoError</a><a class='struct ' href='struct.LineBufferedWriter.html'>LineBufferedWriter</a><a class='struct ' href='struct.Lines.html'>Lines</a><a class='struct ' href='struct.MemReader.html'>MemReader</a><a class='struct ' href='struct.MemWriter.html'>MemWriter</a><a class='struct ' href='struct.RefReader.html'>RefReader</a><a class='struct current' href='struct.RefWriter.html'>RefWriter</a><a class='struct ' href='struct.TempDir.html'>TempDir</a><a class='struct ' href='struct.UnstableFileStat.html'>UnstableFileStat</a></div><div class='block trait'><h2>Traits</h2><a class='trait ' href='trait.Acceptor.html'>Acceptor</a><a class='trait ' href='trait.Buffer.html'>Buffer</a><a class='trait ' href='trait.Listener.html'>Listener</a><a class='trait ' href='trait.Reader.html'>Reader</a><a class='trait ' href='trait.Seek.html'>Seek</a><a class='trait ' href='trait.Stream.html'>Stream</a><a class='trait ' href='trait.UpdateIoError.html'>UpdateIoError</a><a class='trait ' href='trait.Writer.html'>Writer</a></div><div class='block fn'><h2>Functions</h2><a class='fn ' href='fn.standard_error.html'>standard_error</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'>Struct <a href='../index.html'>std</a>::<a href='index.html'>io</a>::<a class='struct' href=''>RefWriter</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-49481' href='../../src/std/Users/aturon/moz/working/stability-dashboard/src/libstd/io/mod.rs.html#1317-1320'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct RefWriter&lt;'a, W&gt; {
+    // some fields omitted
+}</pre><div class='docblock'><p>A <code>RefWriter</code> is a struct implementing <code>Writer</code> which contains a reference
+to another writer. This is often useful when composing streams.</p>
+
+<h1 id="example" class='section-header'><a
+                           href="#example">Example</a></h1><span id='rust-example-raw-0' class='rusttest'>fn main() {}
+fn process_input&lt;R: Reader&gt;(r: R) {}
+fn foo () {
+use std::io::util::TeeReader;
+use std::io::{stdin, MemWriter};
+
+let mut output = MemWriter::new();
+
+{
+    // Don&#39;t give ownership of &#39;output&#39; to the &#39;tee&#39;. Instead we keep a
+    // handle to it in the outer scope
+    let mut tee = TeeReader::new(stdin(), output.by_ref());
+    process_input(tee);
+}
+
+println!(&quot;input processed: {}&quot;, output.unwrap());
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>util</span>::<span class='ident'>TeeReader</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>stdin</span>, <span class='ident'>MemWriter</span>};
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>output</span> <span class='op'>=</span> <span class='ident'>MemWriter</span>::<span class='ident'>new</span>();
+
+{<span class='comment'>
+    // Don&#39;t give ownership of &#39;output&#39; to the &#39;tee&#39;. Instead we keep a
+    // handle to it in the outer scope
+    </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>tee</span> <span class='op'>=</span> <span class='ident'>TeeReader</span>::<span class='ident'>new</span>(<span class='ident'>stdin</span>(), <span class='ident'>output</span>.<span class='ident'>by_ref</span>());
+    <span class='ident'>process_input</span>(<span class='ident'>tee</span>);
+}
+
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;input processed: {}&quot;</span>, <span class='ident'>output</span>.<span class='ident'>unwrap</span>());
+</pre>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, W: <a class='trait' href='../../std/io/trait.Writer.html' title='std::io::Writer'>Writer</a>&gt; <a class='trait' href='../../std/io/trait.Writer.html' title='std::io::Writer'>Writer</a> for <a class='struct' href='../../std/io/struct.RefWriter.html' title='std::io::RefWriter'>RefWriter</a>&lt;'a, W&gt;</code></h3><div class='impl-methods'><h4 id='method.write' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write' class='fnname'>write</a>(&amp;mut self, buf: &amp;<a href='../primitive.slice.html'>[<a href='../primitive.u8.html'>u8</a>]</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.flush' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.flush' class='fnname'>flush</a>(&amp;mut self) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_fmt' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_fmt' class='fnname'>write_fmt</a>(&amp;mut self, fmt: &amp;<a class='struct' href='../../std/fmt/struct.Arguments.html' title='std::fmt::Arguments'>Arguments</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_str' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_str' class='fnname'>write_str</a>(&amp;mut self, s: &amp;<a href='../primitive.str.html'>str</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_line' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_line' class='fnname'>write_line</a>(&amp;mut self, s: &amp;<a href='../primitive.str.html'>str</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_char' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_char' class='fnname'>write_char</a>(&amp;mut self, c: <a href='../primitive.char.html'>char</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_int' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_int' class='fnname'>write_int</a>(&amp;mut self, n: <a href='../primitive.int.html'>int</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_uint' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_uint' class='fnname'>write_uint</a>(&amp;mut self, n: <a href='../primitive.uint.html'>uint</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_le_uint' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_le_uint' class='fnname'>write_le_uint</a>(&amp;mut self, n: <a href='../primitive.uint.html'>uint</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_le_int' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_le_int' class='fnname'>write_le_int</a>(&amp;mut self, n: <a href='../primitive.int.html'>int</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_be_uint' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_be_uint' class='fnname'>write_be_uint</a>(&amp;mut self, n: <a href='../primitive.uint.html'>uint</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_be_int' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_be_int' class='fnname'>write_be_int</a>(&amp;mut self, n: <a href='../primitive.int.html'>int</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_be_u64' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_be_u64' class='fnname'>write_be_u64</a>(&amp;mut self, n: <a href='../primitive.u64.html'>u64</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_be_u32' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_be_u32' class='fnname'>write_be_u32</a>(&amp;mut self, n: <a href='../primitive.u32.html'>u32</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_be_u16' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_be_u16' class='fnname'>write_be_u16</a>(&amp;mut self, n: <a href='../primitive.u16.html'>u16</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_be_i64' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_be_i64' class='fnname'>write_be_i64</a>(&amp;mut self, n: <a href='../primitive.i64.html'>i64</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_be_i32' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_be_i32' class='fnname'>write_be_i32</a>(&amp;mut self, n: <a href='../primitive.i32.html'>i32</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_be_i16' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_be_i16' class='fnname'>write_be_i16</a>(&amp;mut self, n: <a href='../primitive.i16.html'>i16</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_be_f64' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_be_f64' class='fnname'>write_be_f64</a>(&amp;mut self, f: <a href='../primitive.f64.html'>f64</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_be_f32' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_be_f32' class='fnname'>write_be_f32</a>(&amp;mut self, f: <a href='../primitive.f32.html'>f32</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_le_u64' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_le_u64' class='fnname'>write_le_u64</a>(&amp;mut self, n: <a href='../primitive.u64.html'>u64</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_le_u32' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_le_u32' class='fnname'>write_le_u32</a>(&amp;mut self, n: <a href='../primitive.u32.html'>u32</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_le_u16' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_le_u16' class='fnname'>write_le_u16</a>(&amp;mut self, n: <a href='../primitive.u16.html'>u16</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_le_i64' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_le_i64' class='fnname'>write_le_i64</a>(&amp;mut self, n: <a href='../primitive.i64.html'>i64</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_le_i32' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_le_i32' class='fnname'>write_le_i32</a>(&amp;mut self, n: <a href='../primitive.i32.html'>i32</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_le_i16' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_le_i16' class='fnname'>write_le_i16</a>(&amp;mut self, n: <a href='../primitive.i16.html'>i16</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_le_f64' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_le_f64' class='fnname'>write_le_f64</a>(&amp;mut self, f: <a href='../primitive.f64.html'>f64</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_le_f32' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_le_f32' class='fnname'>write_le_f32</a>(&amp;mut self, f: <a href='../primitive.f32.html'>f32</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_u8' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_u8' class='fnname'>write_u8</a>(&amp;mut self, n: <a href='../primitive.u8.html'>u8</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.write_i8' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.write_i8' class='fnname'>write_i8</a>(&amp;mut self, n: <a href='../primitive.i8.html'>i8</a>) -&gt; <a class='type' href='../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<h4 id='method.by_ref' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.by_ref' class='fnname'>by_ref</a>&lt;'a&gt;(&amp;'a mut self) -&gt; <a class='struct' href='../../std/io/struct.RefWriter.html' title='std::io::RefWriter'>RefWriter</a>&lt;'a, Self&gt;</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "std";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script src="../../playpen.js"></script>
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

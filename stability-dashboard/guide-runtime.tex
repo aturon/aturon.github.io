@@ -1,0 +1,432 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+    \usepackage{xltxtra,xunicode}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
+  \newcommand{\euro}{€}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{\usepackage{microtype}}{}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\newenvironment{Shaded}{}{}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{{#1}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{{#1}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
+\ifxetex
+  \usepackage[setpagesize=false, % page size defined by xetex
+              unicode=false, % unicode breaks when used with xetex
+              xetex]{hyperref}
+\else
+  \usepackage[unicode=true]{hyperref}
+\fi
+\hypersetup{breaklinks=true,
+            bookmarks=true,
+            pdfauthor={},
+            pdftitle={A Guide to the Rust Runtime},
+            colorlinks=true,
+            citecolor=blue,
+            urlcolor=blue,
+            linkcolor=magenta,
+            pdfborder={0 0 0}}
+\urlstyle{same}  % don't use monospace font for urls
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\setcounter{secnumdepth}{5}
+
+\title{A Guide to the Rust Runtime}
+
+\begin{document}
+\maketitle
+
+0.11.0-pre (169c988d09a9d4e46de2b7fead9489e94964c7c7 2014-07-02 18:41:38 +0000)
+
+Copyright © 2011-2014 The Rust Project Developers. Licensed under the
+\href{http://www.apache.org/licenses/LICENSE-2.0}{Apache License,
+Version 2.0} or the \href{http://opensource.org/licenses/MIT}{MIT
+license}, at your option.
+
+This file may not be copied, modified, or distributed except according
+to those terms.
+
+{
+\hypersetup{linkcolor=black}
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+Rust includes two runtime libraries in the standard distribution, which
+provide a unified interface to primitives such as I/O, but the language
+itself does not require a runtime. The compiler is capable of generating
+code that works in all environments, even kernel environments. Neither
+does the Rust language need a runtime to provide memory safety; the type
+system itself is sufficient to write safe code, verified statically at
+compile time. The runtime merely uses the safety features of the
+language to build a number of convenient and safe high-level
+abstractions.
+
+That being said, code without a runtime is often very limited in what it
+can do. As a result, Rust's standard libraries supply a set of
+functionality that is normally considered the Rust runtime. This guide
+will discuss Rust's user-space runtime, how to use it, and what it can
+do.
+
+\section{What is the runtime?}\label{what-is-the-runtime}
+
+The Rust runtime can be viewed as a collection of code which enables
+services like I/O, task spawning, TLS, etc. It's essentially an
+ephemeral collection of objects which enable programs to perform common
+tasks more easily. The actual implementation of the runtime itself is
+mostly a sparse set of opt-in primitives that are all self-contained and
+avoid leaking their abstractions into libraries.
+
+The current runtime is the engine behind these features (not a
+comprehensive list):
+
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  I/O
+\item
+  Task spawning
+\item
+  Message passing
+\item
+  Task synchronization
+\item
+  Task-local storage
+\item
+  Logging
+\item
+  Local heaps (GC heaps)
+\item
+  Task unwinding
+\end{itemize}
+
+\subsection{What is the runtime
+accomplishing?}\label{what-is-the-runtime-accomplishing}
+
+The runtime is designed with a few goals in mind:
+
+\begin{itemize}
+\item
+  Rust libraries should work in a number of environments without having
+  to worry about the exact details of the environment itself. Two
+  commonly referred to environments are the M:N and 1:1 environments.
+  Since the Rust runtime was first designed, it has supported M:N
+  threading, and it has since gained 1:1 support as well.
+\item
+  The runtime should not enforce separate ``modes of compilation'' in
+  order to work in multiple circumstances. It is an explicit goal that
+  you compile a Rust library once and use it forever (in all
+  environments).
+\item
+  The runtime should be fast. There should be no architectural design
+  barrier which is preventing programs from running at optimal speeds.
+  It is not a goal for the runtime to be written ``as fast as can be''
+  at every moment in time. For example, no claims will be made that the
+  current implementation of the runtime is the fastest it will ever be.
+  This goal is simply to prevent any architectural roadblock from
+  hindering performance.
+\item
+  The runtime should be nearly invisible. The design of the runtime
+  should not encourage direct interaction with it, and using the runtime
+  should be essentially transparent to libraries. This does not mean it
+  should be impossible to query the runtime, but rather it should be
+  unconventional.
+\end{itemize}
+
+\section{Architecture of the runtime}\label{architecture-of-the-runtime}
+
+This section explains the current architecture of the Rust runtime. It
+has evolved over the development of Rust through many iterations, and
+this is simply the documentation of the current iteration.
+
+\subsection{A local task}\label{a-local-task}
+
+The core abstraction of the Rust runtime is the task. A task represents
+a ``thread'' of execution of Rust code, but it does not necessarily
+correspond to an OS thread. Most runtime services are accessed through
+the local task, allowing for runtime policy decisions to be made on a
+per-task basis.
+
+A consequence of this decision is to require all Rust code using the
+standard library to have a local \texttt{Task} structure available to
+them. This \texttt{Task} is stored in the OS's thread local storage (OS
+TLS) to allow for efficient access to it.
+
+It has also been decided that the presence or non-presence of a local
+\texttt{Task} is essentially the \emph{only} assumption that the runtime
+can make. Almost all runtime services are routed through this local
+structure.
+
+This requirement of a local task is a core assumption on behalf of
+\emph{all} code using the standard library, hence it is defined in the
+standard library itself.
+
+\subsection{I/O}\label{io}
+
+When dealing with I/O in general, there are a few flavors by which it
+can be dealt with, and not all flavors are right for all situations. I/O
+is also a tricky topic that is nearly impossible to get consistent
+across all environments. As a result, a Rust task is not guaranteed to
+have access to I/O, and it is not even guaranteed what the
+implementation of the I/O will be.
+
+This conclusion implies that I/O \emph{cannot} be defined in the
+standard library. The standard library does, however, provide the
+interface to I/O that all Rust tasks are able to consume.
+
+This interface is implemented differently for various flavors of tasks,
+and is designed with a focus around synchronous I/O calls. This
+architecture does not fundamentally prevent other forms of I/O from
+being defined, but it is not done at this time.
+
+The I/O interface that the runtime must provide can be found in the
+\href{std/rt/rtio/trait.IoFactory.html}{std::rt::rtio} module. Note that
+this interface is \emph{unstable}, and likely always will be.
+
+\subsection{Task Spawning}\label{task-spawning}
+
+A frequent operation performed by tasks is to spawn a child task to
+perform some work. This is the means by which parallelism is enabled in
+Rust. This decision of how to spawn a task is not a general decision,
+and is hence a local decision to the task (not defined in the standard
+library).
+
+Task spawning is interpreted as ``spawning a sibling'' and is enabled
+through the high level interface in \texttt{std::task}. The child task
+can be configured accordingly, and runtime implementations must respect
+these options when spawning a new task.
+
+Another local task operation is dealing with the runnable state of the
+task itself. This frequently comes up when the question is ``how do I
+block a task?'' or ``how do I wake up a task?''. These decisions are
+inherently local to the task itself, yet again implying that they are
+not defined in the standard library.
+
+\subsection{The \texttt{Runtime} trait and the \texttt{Task}
+structure}\label{the-runtime-trait-and-the-task-structure}
+
+The full complement of runtime features is defined by the
+\href{std/rt/trait.Runtime.html}{\texttt{Runtime} trait} and the
+\href{std/rt/task/struct.Task.html}{\texttt{Task} struct}. A
+\texttt{Task} is constant among all runtime implementations, but each
+runtime implements has its own implementation of the \texttt{Runtime}
+trait.
+
+The local \texttt{Task} stores the runtime value inside of itself, and
+then ownership dances ensue to invoke methods on the runtime.
+
+\section{Implementations of the
+runtime}\label{implementations-of-the-runtime}
+
+The Rust distribution provides two implementations of the runtime. These
+two implementations are generally known as 1:1 threading and M:N
+threading.
+
+As with many problems in computer science, there is no right answer in
+this question of which implementation of the runtime to choose. Each
+implementation has its benefits and each has its drawbacks. The
+descriptions below are meant to inform programmers about what the
+implementation provides and what it doesn't provide in order to make an
+informed decision about which to choose.
+
+\subsection{1:1 - using \texttt{libnative}}\label{using-libnative}
+
+The library \texttt{libnative} is an implementation of the runtime built
+upon native OS threads plus libc blocking I/O calls. This is called 1:1
+threading because each user-space thread corresponds to exactly one
+kernel thread.
+
+In this model, each Rust task corresponds to one OS thread, and each I/O
+object essentially corresponds to a file descriptor (or the equivalent
+of the platform you're running on).
+
+Some benefits to using libnative are:
+
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  Guaranteed interop with FFI bindings. If a C library you are using
+  blocks the thread to do I/O (such as a database driver), then this
+  will not interfere with other Rust tasks (because only the OS thread
+  will be blocked).
+\item
+  Less I/O overhead as opposed to M:N in some cases. Not all M:N I/O is
+  guaranteed to be ``as fast as can be'', and some things (like
+  filesystem APIs) are not truly asynchronous on all platforms, meaning
+  that the M:N implementation may incur more overhead than a 1:1
+  implementation.
+\end{itemize}
+
+\subsection{M:N - using \texttt{libgreen}}\label{mn---using-libgreen}
+
+The library \texttt{libgreen} implements the runtime with ``green
+threads'' on top of the asynchronous I/O framework
+\href{https://github.com/joyent/libuv/}{libuv}. The M in M:N threading
+is the number of OS threads that a process has, and the N is the number
+of Rust tasks. In this model, N Rust tasks are multiplexed among M OS
+threads, and context switching is implemented in user-space.
+
+The primary concern of an M:N runtime is that a Rust task cannot block
+itself in a syscall. If this happens, then the entire OS thread is
+frozen and unavailable for running more Rust tasks, making this a
+(M-1):N runtime (and you can see how this can reach 0/deadlock). By
+using asynchronous I/O under the hood (all I/O still looks synchronous
+in terms of code), OS threads are never blocked until the appropriate
+time comes.
+
+Upon reading \texttt{libgreen}, you may notice that there is no I/O
+implementation inside of the library, but rather just the infrastructure
+for maintaining a set of green schedulers which switch among Rust tasks.
+The actual I/O implementation is found in \texttt{librustuv} which are
+the Rust bindings to libuv. This distinction is made to allow for other
+I/O implementations not built on libuv (but none exist at this time).
+
+Some benefits of using libgreen are:
+
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  Fast task spawning. When using M:N threading, spawning a new task can
+  avoid executing a syscall entirely, which can lead to more efficient
+  task spawning times.
+\item
+  Fast task switching. Because context switching is implemented in
+  user-space, all task contention operations (mutexes, channels, etc)
+  never execute syscalls, leading to much faster implementations and
+  runtimes. An efficient context switch also leads to higher throughput
+  servers than 1:1 threading because tasks can be switched out much more
+  efficiently.
+\end{itemize}
+
+\subsubsection{Pools of Schedulers}\label{pools-of-schedulers}
+
+M:N threading is built upon the concept of a pool of M OS threads (which
+libgreen refers to as schedulers), able to run N Rust tasks. This
+abstraction is encompassed in libgreen's
+\href{green/struct.SchedPool.html}{\texttt{SchedPool}} type. This type
+allows for fine-grained control over the pool of schedulers which will
+be used to run Rust tasks.
+
+In addition the \texttt{SchedPool} type is the \emph{only} way through
+which a new M:N task can be spawned. Sibling tasks to Rust tasks
+themselves (created through \texttt{std::task::spawn}) will be spawned
+into the same pool of schedulers that the original task was home to. New
+tasks must previously have some form of handle into the pool of
+schedulers in order to spawn a new task.
+
+\subsection{Which to choose?}\label{which-to-choose}
+
+With two implementations of the runtime available, a choice obviously
+needs to be made to see which will be used. The compiler itself will
+always by-default link to one of these runtimes.
+
+Having a default decision made in the compiler is done out of necessity
+and convenience. The compiler's decision of runtime to link to is
+\emph{not} an endorsement of one over the other. As always, this
+decision can be overridden.
+
+For example, this program will be linked to ``the default runtime''. The
+current default runtime is to use libnative.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{fn} \NormalTok{main() \{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\subsubsection{Force booting with
+libgreen}\label{force-booting-with-libgreen}
+
+In this example, the \texttt{main} function will be booted with I/O
+support powered by libuv. This is done by linking to the \texttt{rustuv}
+crate and specifying the \texttt{rustuv::event\_loop} function as the
+event loop factory.
+
+To create a pool of green tasks which have no I/O support, you may shed
+the \texttt{rustuv} dependency and use the
+\texttt{green::basic::event\_loop} function instead of
+\texttt{rustuv::event\_loop}. All tasks will have no I/O support, but
+they will still be able to deschedule/reschedule (use channels, locks,
+etc).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{extern} \NormalTok{crate green;}
+\KeywordTok{extern} \NormalTok{crate rustuv;}
+
+\OtherTok{#[}\NormalTok{start}\OtherTok{]}
+\KeywordTok{fn} \NormalTok{start(argc: }\KeywordTok{int}\NormalTok{, argv: *const *const }\KeywordTok{u8}\NormalTok{) -> }\KeywordTok{int} \NormalTok{\{}
+    \NormalTok{green::start(argc, argv, rustuv::event_loop, main)}
+\NormalTok{\}}
+
+\KeywordTok{fn} \NormalTok{main() \{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\subsubsection{Force booting with
+libnative}\label{force-booting-with-libnative}
+
+This program's \texttt{main} function will always be booted with
+libnative, running inside of an OS thread.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{extern} \NormalTok{crate native;}
+
+\OtherTok{#[}\NormalTok{start}\OtherTok{]}
+\KeywordTok{fn} \NormalTok{start(argc: }\KeywordTok{int}\NormalTok{, argv: *const *const }\KeywordTok{u8}\NormalTok{) -> }\KeywordTok{int} \NormalTok{\{}
+    \NormalTok{native::start(argc, argv, main)}
+\NormalTok{\}}
+
+\KeywordTok{fn} \NormalTok{main() \{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Finding the runtime}\label{finding-the-runtime}
+
+The actual code for the runtime is spread out among a few locations:
+
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  \href{std/rt/index.html}{std::rt}
+\item
+  \href{native/index.html}{libnative}
+\item
+  \href{green/index.html}{libgreen}
+\item
+  \href{rustuv/index.html}{librustuv}
+\end{itemize}
+
+\end{document}

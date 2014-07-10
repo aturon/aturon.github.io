@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="generator" content="rustdoc">
+    <title>The Rust References and Lifetimes Guide</title>
+
+    <link rel="stylesheet" type="text/css" href="rust.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400'
+        rel='stylesheet' type='text/css'>
+
+
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    <div id="versioninfo">
+  <img src="http://www.rust-lang.org/logos/rust-logo-32x32-blk.png" width="32" height="32" alt><br>
+  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.11.0-pre</span><br>
+  <a href="http://github.com/rust-lang/rust/commit/169c988d09a9d4e46de2b7fead9489e94964c7c7"
+    class="hash white-sticker">169c988d</a>
+</div>
+
+
+    <h1 class="title">The Rust References and Lifetimes Guide</h1>
+    <nav id="TOC"><ul>
+<li><a href="#introduction">1 Introduction</a><ul></ul></li>
+<li><a href="#by-example">2 By example</a><ul></ul></li>
+<li><a href="#other-uses-for-the-&amp;-operator">3 Other uses for the &amp; operator</a><ul></ul></li>
+<li><a href="#taking-the-address-of-fields">4 Taking the address of fields</a><ul></ul></li>
+<li><a href="#lifetimes">5 Lifetimes</a><ul></ul></li>
+<li><a href="#borrowing-and-enums">6 Borrowing and enums</a><ul></ul></li>
+<li><a href="#returning-references">7 Returning references</a><ul></ul></li>
+<li><a href="#named-lifetimes">8 Named lifetimes</a><ul>
+<li><a href="#parameter-lifetimes">8.1 Parameter Lifetimes</a><ul></ul></li>
+<li><a href="#labeled-control-structures">8.2 Labeled Control Structures</a><ul></ul></li></ul></li>
+<li><a href="#conclusion">9 Conclusion</a><ul></ul></li></ul></nav>
+<h1 id="introduction" class='section-header'><a
+                           href="#introduction">1 Introduction</a></h1>
+<p>References are one of the more flexible and powerful tools available in
+Rust. They can point anywhere: into the heap, stack, and even into the
+interior of another data structure. A reference is as flexible as a C pointer
+or C++ reference.</p>
+
+<p>Unlike C and C++ compilers, the Rust compiler includes special static
+checks that ensure that programs use references safely.</p>
+
+<p>Despite their complete safety, a reference&#39;s representation at runtime
+is the same as that of an ordinary pointer in a C program. They introduce zero
+overhead. The compiler does all safety checks at compile time.</p>
+
+<p>Although references have rather elaborate theoretical underpinnings
+(e.g. region pointers), the core concepts will be familiar to anyone
+who has worked with C or C++. The best way to explain how they are
+used—and their limitations—is probably just to work through several examples.</p>
+
+<h1 id="by-example" class='section-header'><a
+                           href="#by-example">2 By example</a></h1>
+<p>References, sometimes known as <em>borrowed pointers</em>, are only valid for
+a limited duration. References never claim any kind of ownership
+over the data that they point to. Instead, they are used for cases
+where you would like to use data for a short time.</p>
+
+<p>Consider a simple struct type <code>Point</code>:</p>
+<span id='rust-example-raw-0' class='rusttest'>fn main() {
+    struct Point {x: f64, y: f64}
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='kw'>struct</span> <span class='ident'>Point</span> {<span class='ident'>x</span>: <span class='ident'>f64</span>, <span class='ident'>y</span>: <span class='ident'>f64</span>}
+</pre>
+
+<p>We can use this simple definition to allocate points in many different ways. For
+example, in this code, each of these local variables contains a point,
+but allocated in a different place:</p>
+<span id='rust-example-raw-1' class='rusttest'>fn main() {
+    struct Point {x: f64, y: f64}
+    let on_the_stack : Point      =     Point {x: 3.0, y: 4.0};
+    let on_the_heap  : Box&lt;Point&gt; = box Point {x: 7.0, y: 9.0};
+}</span><pre id='rust-example-rendered-1' class='rust '>
+<span class='kw'>let</span> <span class='ident'>on_the_stack</span> : <span class='ident'>Point</span>      <span class='op'>=</span>     <span class='ident'>Point</span> {<span class='ident'>x</span>: <span class='number'>3.0</span>, <span class='ident'>y</span>: <span class='number'>4.0</span>};
+<span class='kw'>let</span> <span class='ident'>on_the_heap</span>  : <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Point</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>Point</span> {<span class='ident'>x</span>: <span class='number'>7.0</span>, <span class='ident'>y</span>: <span class='number'>9.0</span>};
+</pre>
+
+<p>Suppose we wanted to write a procedure that computed the distance between any
+two points, no matter where they were stored. One option is to define a function
+that takes two arguments of type <code>Point</code>—that is, it takes the points by value.
+But if we define it this way, calling the function will cause the points to be
+copied. For points, this is probably not so bad, but often copies are
+expensive. So we&#39;d like to define a function that takes the points just as
+a reference.</p>
+<span id='rust-example-raw-2' class='rusttest'>fn main() {
+    struct Point {x: f64, y: f64}
+    fn sqrt(f: f64) -&gt; f64 { 0.0 }
+    fn compute_distance(p1: &amp;Point, p2: &amp;Point) -&gt; f64 {
+        let x_d = p1.x - p2.x;
+        let y_d = p1.y - p2.y;
+        sqrt(x_d * x_d + y_d * y_d)
+    }
+}</span><pre id='rust-example-rendered-2' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>compute_distance</span>(<span class='ident'>p1</span>: <span class='kw-2'>&amp;</span><span class='ident'>Point</span>, <span class='ident'>p2</span>: <span class='kw-2'>&amp;</span><span class='ident'>Point</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span> {
+    <span class='kw'>let</span> <span class='ident'>x_d</span> <span class='op'>=</span> <span class='ident'>p1</span>.<span class='ident'>x</span> <span class='op'>-</span> <span class='ident'>p2</span>.<span class='ident'>x</span>;
+    <span class='kw'>let</span> <span class='ident'>y_d</span> <span class='op'>=</span> <span class='ident'>p1</span>.<span class='ident'>y</span> <span class='op'>-</span> <span class='ident'>p2</span>.<span class='ident'>y</span>;
+    <span class='ident'>sqrt</span>(<span class='ident'>x_d</span> <span class='op'>*</span> <span class='ident'>x_d</span> <span class='op'>+</span> <span class='ident'>y_d</span> <span class='op'>*</span> <span class='ident'>y_d</span>)
+}
+</pre>
+
+<p>Now we can call <code>compute_distance()</code>:</p>
+<span id='rust-example-raw-3' class='rusttest'>fn main() {
+    struct Point {x: f64, y: f64}
+    let on_the_stack :     Point  =     Point{x: 3.0, y: 4.0};
+    let on_the_heap  : Box&lt;Point&gt; = box Point{x: 7.0, y: 9.0};
+    fn compute_distance(p1: &amp;Point, p2: &amp;Point) -&gt; f64 { 0.0 }
+    compute_distance(&amp;on_the_stack, on_the_heap);
+}</span><pre id='rust-example-rendered-3' class='rust '>
+<span class='ident'>compute_distance</span>(<span class='kw-2'>&amp;</span><span class='ident'>on_the_stack</span>, <span class='ident'>on_the_heap</span>);
+</pre>
+
+<p>Here, the <code>&amp;</code> operator takes the address of the variable
+<code>on_the_stack</code>; this is because <code>on_the_stack</code> has the type <code>Point</code>
+(that is, a struct value) and we have to take its address to get a
+value. We also call this <em>borrowing</em> the local variable
+<code>on_the_stack</code>, because we have created an alias: that is, another
+name for the same data.</p>
+
+<p>In the case of <code>on_the_heap</code>, however, no explicit action is necessary. 
+The compiler will automatically convert a box point to a reference like &amp;point. 
+This is another form of borrowing; in this case, the contents of the owned box 
+are being lent out.</p>
+
+<p>Whenever a caller lends data to a callee, there are some limitations on what
+the caller can do with the original. For example, if the contents of a
+variable have been lent out, you cannot send that variable to another task. In
+addition, the compiler will reject any code that might cause the borrowed
+value to be freed or overwrite its component fields with values of different
+types (I&#39;ll get into what kinds of actions those are shortly). This rule
+should make intuitive sense: you must wait for a borrower to return the value
+that you lent it (that is, wait for the reference to go out of scope)
+before you can make full use of it again.</p>
+
+<h1 id="other-uses-for-the-&amp;-operator" class='section-header'><a
+                           href="#other-uses-for-the-&amp;-operator">3 Other uses for the &amp; operator</a></h1>
+<p>In the previous example, the value <code>on_the_stack</code> was defined like so:</p>
+<span id='rust-example-raw-4' class='rusttest'>fn main() {
+    struct Point {x: f64, y: f64}
+    let on_the_stack: Point = Point {x: 3.0, y: 4.0};
+}</span><pre id='rust-example-rendered-4' class='rust '>
+<span class='kw'>let</span> <span class='ident'>on_the_stack</span>: <span class='ident'>Point</span> <span class='op'>=</span> <span class='ident'>Point</span> {<span class='ident'>x</span>: <span class='number'>3.0</span>, <span class='ident'>y</span>: <span class='number'>4.0</span>};
+</pre>
+
+<p>This declaration means that code can only pass <code>Point</code> by value to other
+functions. As a consequence, we had to explicitly take the address of
+<code>on_the_stack</code> to get a reference. Sometimes however it is more
+convenient to move the &amp; operator into the definition of <code>on_the_stack</code>:</p>
+<span id='rust-example-raw-5' class='rusttest'>fn main() {
+    struct Point {x: f64, y: f64}
+    let on_the_stack2: &amp;Point = &amp;Point {x: 3.0, y: 4.0};
+}</span><pre id='rust-example-rendered-5' class='rust '>
+<span class='kw'>let</span> <span class='ident'>on_the_stack2</span>: <span class='kw-2'>&amp;</span><span class='ident'>Point</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>Point</span> {<span class='ident'>x</span>: <span class='number'>3.0</span>, <span class='ident'>y</span>: <span class='number'>4.0</span>};
+</pre>
+
+<p>Applying <code>&amp;</code> to an rvalue (non-assignable location) is just a convenient
+shorthand for creating a temporary and taking its address. A more verbose
+way to write the same code is:</p>
+<span id='rust-example-raw-6' class='rusttest'>fn main() {
+    struct Point {x: f64, y: f64}
+    let tmp = Point {x: 3.0, y: 4.0};
+    let on_the_stack2 : &amp;Point = &amp;tmp;
+}</span><pre id='rust-example-rendered-6' class='rust '>
+<span class='kw'>let</span> <span class='ident'>tmp</span> <span class='op'>=</span> <span class='ident'>Point</span> {<span class='ident'>x</span>: <span class='number'>3.0</span>, <span class='ident'>y</span>: <span class='number'>4.0</span>};
+<span class='kw'>let</span> <span class='ident'>on_the_stack2</span> : <span class='kw-2'>&amp;</span><span class='ident'>Point</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>tmp</span>;
+</pre>
+
+<h1 id="taking-the-address-of-fields" class='section-header'><a
+                           href="#taking-the-address-of-fields">4 Taking the address of fields</a></h1>
+<p>The <code>&amp;</code> operator is not limited to taking the address of
+local variables. It can also take the address of fields or
+individual array elements. For example, consider this type definition
+for <code>Rectangle</code>:</p>
+<span id='rust-example-raw-7' class='rusttest'>fn main() {
+    struct Point {x: f64, y: f64} // as before
+    struct Size {w: f64, h: f64} // as before
+    struct Rectangle {origin: Point, size: Size}
+}</span><pre id='rust-example-rendered-7' class='rust '>
+<span class='kw'>struct</span> <span class='ident'>Point</span> {<span class='ident'>x</span>: <span class='ident'>f64</span>, <span class='ident'>y</span>: <span class='ident'>f64</span>}<span class='comment'> // as before
+</span><span class='kw'>struct</span> <span class='ident'>Size</span> {<span class='ident'>w</span>: <span class='ident'>f64</span>, <span class='ident'>h</span>: <span class='ident'>f64</span>}<span class='comment'> // as before
+</span><span class='kw'>struct</span> <span class='ident'>Rectangle</span> {<span class='ident'>origin</span>: <span class='ident'>Point</span>, <span class='ident'>size</span>: <span class='ident'>Size</span>}
+</pre>
+
+<p>Now, as before, we can define rectangles in a few different ways:</p>
+<span id='rust-example-raw-8' class='rusttest'>fn main() {
+    struct Point {x: f64, y: f64}
+    struct Size {w: f64, h: f64} // as before
+    struct Rectangle {origin: Point, size: Size}
+    let rect_stack   =    &amp;Rectangle {origin: Point {x: 1.0, y: 2.0},
+                                      size: Size {w: 3.0, h: 4.0}};
+    let rect_heap    = box Rectangle {origin: Point {x: 5.0, y: 6.0},
+                                      size: Size {w: 3.0, h: 4.0}};
+}</span><pre id='rust-example-rendered-8' class='rust '>
+<span class='kw'>let</span> <span class='ident'>rect_stack</span>   <span class='op'>=</span>    <span class='kw-2'>&amp;</span><span class='ident'>Rectangle</span> {<span class='ident'>origin</span>: <span class='ident'>Point</span> {<span class='ident'>x</span>: <span class='number'>1.0</span>, <span class='ident'>y</span>: <span class='number'>2.0</span>},
+                                  <span class='ident'>size</span>: <span class='ident'>Size</span> {<span class='ident'>w</span>: <span class='number'>3.0</span>, <span class='ident'>h</span>: <span class='number'>4.0</span>}};
+<span class='kw'>let</span> <span class='ident'>rect_heap</span>    <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>Rectangle</span> {<span class='ident'>origin</span>: <span class='ident'>Point</span> {<span class='ident'>x</span>: <span class='number'>5.0</span>, <span class='ident'>y</span>: <span class='number'>6.0</span>},
+                                  <span class='ident'>size</span>: <span class='ident'>Size</span> {<span class='ident'>w</span>: <span class='number'>3.0</span>, <span class='ident'>h</span>: <span class='number'>4.0</span>}};
+</pre>
+
+<p>In each case, we can extract out individual subcomponents with the <code>&amp;</code>
+operator. For example, I could write:</p>
+<span id='rust-example-raw-9' class='rusttest'>fn main() {
+    struct Point {x: f64, y: f64} // as before
+    struct Size {w: f64, h: f64} // as before
+    struct Rectangle {origin: Point, size: Size}
+    let rect_stack  = &amp;Rectangle {origin: Point {x: 1.0, y: 2.0}, size: Size {w: 3.0, h: 4.0}};
+    let rect_heap   = box Rectangle {origin: Point {x: 5.0, y: 6.0}, size: Size {w: 3.0, h: 4.0}};
+    fn compute_distance(p1: &amp;Point, p2: &amp;Point) -&gt; f64 { 0.0 }
+    compute_distance(&amp;rect_stack.origin, &amp;rect_heap.origin);
+}</span><pre id='rust-example-rendered-9' class='rust '>
+<span class='ident'>compute_distance</span>(<span class='kw-2'>&amp;</span><span class='ident'>rect_stack</span>.<span class='ident'>origin</span>, <span class='kw-2'>&amp;</span><span class='ident'>rect_heap</span>.<span class='ident'>origin</span>);
+</pre>
+
+<p>which would borrow the field <code>origin</code> from the rectangle on the stack
+as well as from the owned box, and then compute the distance between them.</p>
+
+<h1 id="lifetimes" class='section-header'><a
+                           href="#lifetimes">5 Lifetimes</a></h1>
+<p>We’ve seen a few examples of borrowing data. To this point, we’ve glossed
+over issues of safety. As stated in the introduction, at runtime a reference
+is simply a pointer, nothing more. Therefore, avoiding C&#39;s problems with
+dangling pointers requires a compile-time safety check.</p>
+
+<p>The basis for the check is the notion of <em>lifetimes</em>. A lifetime is a
+static approximation of the span of execution during which the pointer
+is valid: it always corresponds to some expression or block within the
+program.</p>
+
+<p>The compiler will only allow a borrow <em>if it can guarantee that the data will
+not be reassigned or moved for the lifetime of the pointer</em>. This does not
+necessarily mean that the data is stored in immutable memory. For example,
+the following function is legal:</p>
+<span id='rust-example-raw-10' class='rusttest'>fn main() {
+    fn some_condition() -&gt; bool { true }
+    struct Foo { f: int }
+    fn example3() -&gt; int {
+        let mut x = box Foo {f: 3};
+        if some_condition() {
+            let y = &amp;x.f;      // -+ L
+            return *y;         //  |
+        }                      // -+
+        x = box Foo {f: 4};
+        // ...
+    return 0;
+    }
+}</span><pre id='rust-example-rendered-10' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>example3</span>() <span class='op'>-&gt;</span> <span class='ident'>int</span> {
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>Foo</span> {<span class='ident'>f</span>: <span class='number'>3</span>};
+    <span class='kw'>if</span> <span class='ident'>some_condition</span>() {
+        <span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>x</span>.<span class='ident'>f</span>;<span class='comment'>      // -+ L
+        </span><span class='kw'>return</span> <span class='op'>*</span><span class='ident'>y</span>;<span class='comment'>         //  |
+    </span>}<span class='comment'>                      // -+
+    </span><span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>Foo</span> {<span class='ident'>f</span>: <span class='number'>4</span>};<span class='comment'>
+    // ...
+</span>}
+</pre>
+
+<p>Here, the interior of the variable <code>x</code> is being borrowed
+and <code>x</code> is declared as mutable. However, the compiler can prove that
+<code>x</code> is not assigned anywhere in the lifetime L of the variable
+<code>y</code>. Therefore, it accepts the function, even though <code>x</code> is mutable
+and in fact is mutated later in the function.</p>
+
+<p>It may not be clear why we are so concerned about mutating a borrowed
+variable. The reason is that the runtime system frees any box
+<em>as soon as its owning reference changes or goes out of
+scope</em>. Therefore, a program like this is illegal (and would be
+rejected by the compiler):</p>
+<span id='rust-example-raw-11' class='rusttest'>fn main() {
+    fn example3() -&gt; int {
+        let mut x = box X {f: 3};
+        let y = &amp;x.f;
+        x = box X {f: 4};  // Error reported here.
+        *y
+    }
+}</span><pre id='rust-example-rendered-11' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>example3</span>() <span class='op'>-&gt;</span> <span class='ident'>int</span> {
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>X</span> {<span class='ident'>f</span>: <span class='number'>3</span>};
+    <span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>x</span>.<span class='ident'>f</span>;
+    <span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>X</span> {<span class='ident'>f</span>: <span class='number'>4</span>};<span class='comment'>  // Error reported here.
+    </span><span class='op'>*</span><span class='ident'>y</span>
+}
+</pre>
+
+<p>To make this clearer, consider this diagram showing the state of
+memory immediately before the re-assignment of <code>x</code>:</p>
+
+<pre><code class="language-{.text}">    Stack               Exchange Heap
+
+  x +-------------+
+    | box {f:int} | ----+
+  y +-------------+     |
+    | &amp;int        | ----+
+    +-------------+     |    +---------+
+                        +--&gt; |  f: 3   |
+                             +---------+</code></pre>
+
+<p>Once the reassignment occurs, the memory will look like this:</p>
+
+<pre><code class="language-{.text}">    Stack               Exchange Heap
+
+  x +-------------+          +---------+
+    | box {f:int} | -------&gt; |  f: 4   |
+  y +-------------+          +---------+
+    | &amp;int        | ----+
+    +-------------+     |    +---------+
+                        +--&gt; | (freed) |
+                             +---------+</code></pre>
+
+<p>Here you can see that the variable <code>y</code> still points at the old <code>f</code>
+property of Foo, which has been freed.</p>
+
+<p>In fact, the compiler can apply the same kind of reasoning to any
+memory that is (uniquely) owned by the stack frame. So we could
+modify the previous example to introduce additional owned pointers
+and structs, and the compiler will still be able to detect possible
+mutations. This time, we&#39;ll use an analogy to illustrate the concept.</p>
+<span id='rust-example-raw-12' class='rusttest'>fn main() {
+    fn example3() -&gt; int {
+        struct House { owner: Box&lt;Person&gt; }
+        struct Person { age: int }
+    
+        let mut house = box House {
+            owner: box Person {age: 30}
+        };
+    
+        let owner_age = &amp;house.owner.age;
+        house = box House {owner: box Person {age: 40}};  // Error reported here.
+        house.owner = box Person {age: 50};               // Error reported here.
+        *owner_age
+    }
+}</span><pre id='rust-example-rendered-12' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>example3</span>() <span class='op'>-&gt;</span> <span class='ident'>int</span> {
+    <span class='kw'>struct</span> <span class='ident'>House</span> { <span class='ident'>owner</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Person</span><span class='op'>&gt;</span> }
+    <span class='kw'>struct</span> <span class='ident'>Person</span> { <span class='ident'>age</span>: <span class='ident'>int</span> }
+
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>house</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>House</span> {
+        <span class='ident'>owner</span>: <span class='kw'>box</span> <span class='ident'>Person</span> {<span class='ident'>age</span>: <span class='number'>30</span>}
+    };
+
+    <span class='kw'>let</span> <span class='ident'>owner_age</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>house</span>.<span class='ident'>owner</span>.<span class='ident'>age</span>;
+    <span class='ident'>house</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>House</span> {<span class='ident'>owner</span>: <span class='kw'>box</span> <span class='ident'>Person</span> {<span class='ident'>age</span>: <span class='number'>40</span>}};<span class='comment'>  // Error reported here.
+    </span><span class='ident'>house</span>.<span class='ident'>owner</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>Person</span> {<span class='ident'>age</span>: <span class='number'>50</span>};<span class='comment'>               // Error reported here.
+    </span><span class='op'>*</span><span class='ident'>owner_age</span>
+}
+</pre>
+
+<p>In this case, two errors are reported, one when the variable <code>house</code> is
+modified and another when <code>house.owner</code> is modified. Either modification would
+invalidate the pointer <code>owner_age</code>.</p>
+
+<h1 id="borrowing-and-enums" class='section-header'><a
+                           href="#borrowing-and-enums">6 Borrowing and enums</a></h1>
+<p>The previous example showed that the type system forbids any mutations
+of owned boxed values while they are being borrowed. In general, the type
+system also forbids borrowing a value as mutable if it is already being
+borrowed - either as a mutable reference or an immutable one. This restriction
+prevents pointers from pointing into freed memory. There is one other
+case where the compiler must be very careful to ensure that pointers
+remain valid: pointers into the interior of an <code>enum</code>.</p>
+
+<p>Let’s look at the following <code>shape</code> type that can represent both rectangles
+and circles:</p>
+<span id='rust-example-raw-13' class='rusttest'>fn main() {
+    struct Point {x: f64, y: f64}; // as before
+    struct Size {w: f64, h: f64}; // as before
+    enum Shape {
+        Circle(Point, f64),   // origin, radius
+        Rectangle(Point, Size)  // upper-left, dimensions
+    }
+}</span><pre id='rust-example-rendered-13' class='rust '>
+<span class='kw'>struct</span> <span class='ident'>Point</span> {<span class='ident'>x</span>: <span class='ident'>f64</span>, <span class='ident'>y</span>: <span class='ident'>f64</span>};<span class='comment'> // as before
+</span><span class='kw'>struct</span> <span class='ident'>Size</span> {<span class='ident'>w</span>: <span class='ident'>f64</span>, <span class='ident'>h</span>: <span class='ident'>f64</span>};<span class='comment'> // as before
+</span><span class='kw'>enum</span> <span class='ident'>Shape</span> {
+    <span class='ident'>Circle</span>(<span class='ident'>Point</span>, <span class='ident'>f64</span>),<span class='comment'>   // origin, radius
+    </span><span class='ident'>Rectangle</span>(<span class='ident'>Point</span>, <span class='ident'>Size</span>)<span class='comment'>  // upper-left, dimensions
+</span>}
+</pre>
+
+<p>Now we might write a function to compute the area of a shape. This
+function takes a reference to a shape, to avoid the need for
+copying.</p>
+<span id='rust-example-raw-14' class='rusttest'>fn main() {
+    struct Point {x: f64, y: f64}; // as before
+    struct Size {w: f64, h: f64}; // as before
+    enum Shape {
+        Circle(Point, f64),   // origin, radius
+        Rectangle(Point, Size)  // upper-left, dimensions
+    }
+    static tau: f64 = 6.28;
+    fn compute_area(shape: &amp;Shape) -&gt; f64 {
+        match *shape {
+            Circle(_, radius) =&gt; 0.5 * tau * radius * radius,
+            Rectangle(_, ref size) =&gt; size.w * size.h
+        }
+    }
+}</span><pre id='rust-example-rendered-14' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>compute_area</span>(<span class='ident'>shape</span>: <span class='kw-2'>&amp;</span><span class='ident'>Shape</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span> {
+    <span class='kw'>match</span> <span class='op'>*</span><span class='ident'>shape</span> {
+        <span class='ident'>Circle</span>(_, <span class='ident'>radius</span>) <span class='op'>=&gt;</span> <span class='number'>0.5</span> <span class='op'>*</span> <span class='ident'>tau</span> <span class='op'>*</span> <span class='ident'>radius</span> <span class='op'>*</span> <span class='ident'>radius</span>,
+        <span class='ident'>Rectangle</span>(_, <span class='kw-2'>ref</span> <span class='ident'>size</span>) <span class='op'>=&gt;</span> <span class='ident'>size</span>.<span class='ident'>w</span> <span class='op'>*</span> <span class='ident'>size</span>.<span class='ident'>h</span>
+    }
+}
+</pre>
+
+<p>The first case matches against circles. Here, the pattern extracts the
+radius from the shape variant and the action uses it to compute the
+area of the circle. (Like any up-to-date engineer, we use the <a href="http://www.math.utah.edu/%7Epalais/pi.html">tau
+circle constant</a> and not that dreadfully outdated notion of pi).</p>
+
+<p>The second match is more interesting. Here we match against a
+rectangle and extract its size: but rather than copy the <code>size</code>
+struct, we use a by-reference binding to create a pointer to it. In
+other words, a pattern binding like <code>ref size</code> binds the name <code>size</code>
+to a pointer of type <code>&amp;size</code> into the <em>interior of the enum</em>.</p>
+
+<p>To make this more clear, let&#39;s look at a diagram of memory layout in
+the case where <code>shape</code> points at a rectangle:</p>
+
+<pre><code class="language-{.text}">Stack             Memory
+
++-------+         +---------------+
+| shape | ------&gt; | rectangle(    |
++-------+         |   {x: f64,    |
+| size  | -+      |    y: f64},   |
++-------+  +----&gt; |   {w: f64,    |
+                  |    h: f64})   |
+                  +---------------+</code></pre>
+
+<p>Here you can see that rectangular shapes are composed of five words of
+memory. The first is a tag indicating which variant this enum is
+(<code>rectangle</code>, in this case). The next two words are the <code>x</code> and <code>y</code>
+fields for the point and the remaining two are the <code>w</code> and <code>h</code> fields
+for the size. The binding <code>size</code> is then a pointer into the inside of
+the shape.</p>
+
+<p>Perhaps you can see where the danger lies: if the shape were somehow
+to be reassigned, perhaps to a circle, then although the memory used
+to store that shape value would still be valid, <em>it would have a
+different type</em>! The following diagram shows what memory would look
+like if code overwrote <code>shape</code> with a circle:</p>
+
+<pre><code class="language-{.text}">Stack             Memory
+
++-------+         +---------------+
+| shape | ------&gt; | circle(       |
++-------+         |   {x: f64,    |
+| size  | -+      |    y: f64},   |
++-------+  +----&gt; |   f64)        |
+                  |               |
+                  +---------------+</code></pre>
+
+<p>As you can see, the <code>size</code> pointer would be pointing at a <code>f64</code>
+instead of a struct. This is not good: dereferencing the second field
+of a <code>f64</code> as if it were a struct with two fields would be a memory
+safety violation.</p>
+
+<p>So, in fact, for every <code>ref</code> binding, the compiler will impose the
+same rules as the ones we saw for borrowing the interior of an owned
+box: it must be able to guarantee that the <code>enum</code> will not be
+overwritten for the duration of the borrow.  In fact, the compiler
+would accept the example we gave earlier. The example is safe because
+the shape pointer has type <code>&amp;Shape</code>, which means &quot;reference to
+immutable memory containing a <code>shape</code>&quot;. If, however, the type of that
+pointer were <code>&amp;mut Shape</code>, then the ref binding would be ill-typed.
+Just as with owned boxes, the compiler will permit <code>ref</code> bindings
+into data owned by the stack frame even if the data are mutable,
+but otherwise it requires that the data reside in immutable memory.</p>
+
+<h1 id="returning-references" class='section-header'><a
+                           href="#returning-references">7 Returning references</a></h1>
+<p>So far, all of the examples we have looked at, use references in a
+“downward” direction. That is, a method or code block creates a
+reference, then uses it within the same scope. It is also
+possible to return references as the result of a function, but
+as we&#39;ll see, doing so requires some explicit annotation.</p>
+
+<p>We could write a subroutine like this:</p>
+<span id='rust-example-raw-15' class='rusttest'>fn main() {
+    struct Point {x: f64, y: f64}
+    fn get_x&lt;&#39;r&gt;(p: &amp;&#39;r Point) -&gt; &amp;&#39;r f64 { &amp;p.x }
+}</span><pre id='rust-example-rendered-15' class='rust '>
+<span class='kw'>struct</span> <span class='ident'>Point</span> {<span class='ident'>x</span>: <span class='ident'>f64</span>, <span class='ident'>y</span>: <span class='ident'>f64</span>}
+<span class='kw'>fn</span> <span class='ident'>get_x</span><span class='op'>&lt;</span><span class='lifetime'>&#39;r</span><span class='op'>&gt;</span>(<span class='ident'>p</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='ident'>Point</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='ident'>f64</span> { <span class='kw-2'>&amp;</span><span class='ident'>p</span>.<span class='ident'>x</span> }
+</pre>
+
+<p>Here, the function <code>get_x()</code> returns a pointer into the structure it
+was given. The type of the parameter (<code>&amp;&#39;r Point</code>) and return type
+(<code>&amp;&#39;r f64</code>) both use a new syntactic form that we have not seen so
+far.  Here the identifier <code>r</code> names the lifetime of the pointer
+explicitly. So in effect, this function declares that it takes a
+pointer with lifetime <code>r</code> and returns a pointer with that same
+lifetime.</p>
+
+<p>In general, it is only possible to return references if they
+are derived from a parameter to the procedure. In that case, the
+pointer result will always have the same lifetime as one of the
+parameters; named lifetimes indicate which parameter that
+is.</p>
+
+<p>In the previous code samples, function parameter types did not include a
+lifetime name. The compiler simply creates a fresh name for the lifetime
+automatically: that is, the lifetime name is guaranteed to refer to a distinct
+lifetime from the lifetimes of all other parameters.</p>
+
+<p>Named lifetimes that appear in function signatures are conceptually
+the same as the other lifetimes we have seen before, but they are a bit
+abstract: they don’t refer to a specific expression within <code>get_x()</code>,
+but rather to some expression within the <em>caller of <code>get_x()</code></em>.  The
+lifetime <code>r</code> is actually a kind of <em>lifetime parameter</em>: it is defined
+by the caller to <code>get_x()</code>, just as the value for the parameter <code>p</code> is
+defined by that caller.</p>
+
+<p>In any case, whatever the lifetime of <code>r</code> is, the pointer produced by
+<code>&amp;p.x</code> always has the same lifetime as <code>p</code> itself: a pointer to a
+field of a struct is valid as long as the struct is valid. Therefore,
+the compiler accepts the function <code>get_x()</code>.</p>
+
+<p>To emphasize this point, let’s look at a variation on the example, this
+time one that does not compile:</p>
+<span id='rust-example-raw-16' class='rusttest'>fn main() {
+    struct Point {x: f64, y: f64}
+    fn get_x_sh(p: &amp;Point) -&gt; &amp;f64 {
+        &amp;p.x // Error reported here
+    }
+}</span><pre id='rust-example-rendered-16' class='rust '>
+<span class='kw'>struct</span> <span class='ident'>Point</span> {<span class='ident'>x</span>: <span class='ident'>f64</span>, <span class='ident'>y</span>: <span class='ident'>f64</span>}
+<span class='kw'>fn</span> <span class='ident'>get_x_sh</span>(<span class='ident'>p</span>: <span class='kw-2'>&amp;</span><span class='ident'>Point</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>f64</span> {
+    <span class='kw-2'>&amp;</span><span class='ident'>p</span>.<span class='ident'>x</span><span class='comment'> // Error reported here
+</span>}
+</pre>
+
+<p>Here, the function <code>get_x_sh()</code> takes a reference as input and
+returns a reference. As before, the lifetime of the reference
+that will be returned is a parameter (specified by the
+caller). That means that <code>get_x_sh()</code> promises to return a reference
+that is valid for as long as the caller would like: this is
+subtly different from the first example, which promised to return a
+pointer that was valid for as long as its pointer argument was valid.</p>
+
+<p>Within <code>get_x_sh()</code>, we see the expression <code>&amp;p.x</code> which takes the
+address of a field of a Point. The presence of this expression
+implies that the compiler must guarantee that , so long as the
+resulting pointer is valid, the original Point won&#39;t be moved or changed.</p>
+
+<p>But recall that <code>get_x_sh()</code> also promised to
+return a pointer that was valid for as long as the caller wanted it to
+be. Clearly, <code>get_x_sh()</code> is not in a position to make both of these
+guarantees; in fact, it cannot guarantee that the pointer will remain
+valid at all once it returns, as the parameter <code>p</code> may or may not be
+live in the caller. Therefore, the compiler will report an error here.</p>
+
+<p>In general, if you borrow a struct or box to create a
+reference, it will only be valid within the function
+and cannot be returned. This is why the typical way to return references
+is to take references as input (the only other case in
+which it can be legal to return a reference is if it
+points at a static constant).</p>
+
+<h1 id="named-lifetimes" class='section-header'><a
+                           href="#named-lifetimes">8 Named lifetimes</a></h1>
+<p>Lifetimes can be named and referenced. For example, the special lifetime
+<code>&#39;static</code>, which does not go out of scope, can be used to create global
+variables and communicate between tasks (see the manual for use cases).</p>
+
+<h2 id="parameter-lifetimes" class='section-header'><a
+                           href="#parameter-lifetimes">8.1 Parameter Lifetimes</a></h2>
+<p>Named lifetimes allow for grouping of parameters by lifetime.
+For example, consider this function:</p>
+<span id='rust-example-raw-17' class='rusttest'>fn main() {
+    struct Point {x: f64, y: f64}; // as before
+    struct Size {w: f64, h: f64}; // as before
+    enum Shape {
+        Circle(Point, f64),   // origin, radius
+        Rectangle(Point, Size)  // upper-left, dimensions
+    }
+    fn compute_area(shape: &amp;Shape) -&gt; f64 { 0.0 }
+    fn select&lt;&#39;r, T&gt;(shape: &amp;&#39;r Shape, threshold: f64,
+                     a: &amp;&#39;r T, b: &amp;&#39;r T) -&gt; &amp;&#39;r T {
+        if compute_area(shape) &gt; threshold {a} else {b}
+    }
+}</span><pre id='rust-example-rendered-17' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>select</span><span class='op'>&lt;</span><span class='lifetime'>&#39;r</span>, <span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>shape</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='ident'>Shape</span>, <span class='ident'>threshold</span>: <span class='ident'>f64</span>,
+                 <span class='ident'>a</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='ident'>T</span>, <span class='ident'>b</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='ident'>T</span> {
+    <span class='kw'>if</span> <span class='ident'>compute_area</span>(<span class='ident'>shape</span>) <span class='op'>&gt;</span> <span class='ident'>threshold</span> {<span class='ident'>a</span>} <span class='kw'>else</span> {<span class='ident'>b</span>}
+}
+</pre>
+
+<p>This function takes three references and assigns each the same
+lifetime <code>r</code>.  In practice, this means that, in the caller, the
+lifetime <code>r</code> will be the <em>intersection of the lifetime of the three
+region parameters</em>. This may be overly conservative, as in this
+example:</p>
+<span id='rust-example-raw-18' class='rusttest'>fn main() {
+    struct Point {x: f64, y: f64}; // as before
+    struct Size {w: f64, h: f64}; // as before
+    enum Shape {
+        Circle(Point, f64),   // origin, radius
+        Rectangle(Point, Size)  // upper-left, dimensions
+    }
+    fn compute_area(shape: &amp;Shape) -&gt; f64 { 0.0 }
+    fn select&lt;&#39;r, T&gt;(shape: &amp;Shape, threshold: f64,
+                     a: &amp;&#39;r T, b: &amp;&#39;r T) -&gt; &amp;&#39;r T {
+        if compute_area(shape) &gt; threshold {a} else {b}
+    }
+                                                         // -+ r
+    fn select_based_on_unit_circle&lt;&#39;r, T&gt;(               //  |-+ B
+        threshold: f64, a: &amp;&#39;r T, b: &amp;&#39;r T) -&gt; &amp;&#39;r T {   //  | |
+                                                         //  | |
+        let shape = Circle(Point {x: 0., y: 0.}, 1.);    //  | |
+        select(&amp;shape, threshold, a, b)                  //  | |
+    }                                                    //  |-+
+                                                         // -+
+}</span><pre id='rust-example-rendered-18' class='rust '>
+<span class='comment'>                                                     // -+ r
+</span><span class='kw'>fn</span> <span class='ident'>select_based_on_unit_circle</span><span class='op'>&lt;</span><span class='lifetime'>&#39;r</span>, <span class='ident'>T</span><span class='op'>&gt;</span>(<span class='comment'>               //  |-+ B
+    </span><span class='ident'>threshold</span>: <span class='ident'>f64</span>, <span class='ident'>a</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='ident'>T</span>, <span class='ident'>b</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='ident'>T</span> {<span class='comment'>   //  | |
+                                                     //  | |
+    </span><span class='kw'>let</span> <span class='ident'>shape</span> <span class='op'>=</span> <span class='ident'>Circle</span>(<span class='ident'>Point</span> {<span class='ident'>x</span>: <span class='number'>0.</span>, <span class='ident'>y</span>: <span class='number'>0.</span>}, <span class='number'>1.</span>);<span class='comment'>    //  | |
+    </span><span class='ident'>select</span>(<span class='kw-2'>&amp;</span><span class='ident'>shape</span>, <span class='ident'>threshold</span>, <span class='ident'>a</span>, <span class='ident'>b</span>)<span class='comment'>                  //  | |
+</span>}<span class='comment'>                                                    //  |-+
+                                                     // -+
+</span></pre>
+
+<p>In this call to <code>select()</code>, the lifetime of the first parameter shape
+is B, the function body. Both of the second two parameters <code>a</code> and <code>b</code>
+share the same lifetime, <code>r</code>, which is a lifetime parameter of
+<code>select_based_on_unit_circle()</code>. The caller will infer the
+intersection of these two lifetimes as the lifetime of the returned
+value, and hence the return value of <code>select()</code> will be assigned a
+lifetime of B. This will in turn lead to a compilation error, because
+<code>select_based_on_unit_circle()</code> is supposed to return a value with the
+lifetime <code>r</code>.</p>
+
+<p>To address this, we can modify the definition of <code>select()</code> to
+distinguish the lifetime of the first parameter from the lifetime of
+the latter two. After all, the first parameter is not being
+returned. Here is how the new <code>select()</code> might look:</p>
+<span id='rust-example-raw-19' class='rusttest'>fn main() {
+    struct Point {x: f64, y: f64}; // as before
+    struct Size {w: f64, h: f64}; // as before
+    enum Shape {
+        Circle(Point, f64),   // origin, radius
+        Rectangle(Point, Size)  // upper-left, dimensions
+    }
+    fn compute_area(shape: &amp;Shape) -&gt; f64 { 0.0 }
+    fn select&lt;&#39;r, &#39;tmp, T&gt;(shape: &amp;&#39;tmp Shape, threshold: f64,
+                           a: &amp;&#39;r T, b: &amp;&#39;r T) -&gt; &amp;&#39;r T {
+        if compute_area(shape) &gt; threshold {a} else {b}
+    }
+}</span><pre id='rust-example-rendered-19' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>select</span><span class='op'>&lt;</span><span class='lifetime'>&#39;r</span>, <span class='lifetime'>&#39;tmp</span>, <span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>shape</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;tmp</span> <span class='ident'>Shape</span>, <span class='ident'>threshold</span>: <span class='ident'>f64</span>,
+                       <span class='ident'>a</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='ident'>T</span>, <span class='ident'>b</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='ident'>T</span> {
+    <span class='kw'>if</span> <span class='ident'>compute_area</span>(<span class='ident'>shape</span>) <span class='op'>&gt;</span> <span class='ident'>threshold</span> {<span class='ident'>a</span>} <span class='kw'>else</span> {<span class='ident'>b</span>}
+}
+</pre>
+
+<p>Here you can see that <code>shape</code>&#39;s lifetime is now named <code>tmp</code>. The
+parameters <code>a</code>, <code>b</code>, and the return value all have the lifetime <code>r</code>.
+However, since the lifetime <code>tmp</code> is not returned, it would be more
+concise to just omit the named lifetime for <code>shape</code> altogether:</p>
+<span id='rust-example-raw-20' class='rusttest'>fn main() {
+    struct Point {x: f64, y: f64}; // as before
+    struct Size {w: f64, h: f64}; // as before
+    enum Shape {
+        Circle(Point, f64),   // origin, radius
+        Rectangle(Point, Size)  // upper-left, dimensions
+    }
+    fn compute_area(shape: &amp;Shape) -&gt; f64 { 0.0 }
+    fn select&lt;&#39;r, T&gt;(shape: &amp;Shape, threshold: f64,
+                     a: &amp;&#39;r T, b: &amp;&#39;r T) -&gt; &amp;&#39;r T {
+        if compute_area(shape) &gt; threshold {a} else {b}
+    }
+}</span><pre id='rust-example-rendered-20' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>select</span><span class='op'>&lt;</span><span class='lifetime'>&#39;r</span>, <span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>shape</span>: <span class='kw-2'>&amp;</span><span class='ident'>Shape</span>, <span class='ident'>threshold</span>: <span class='ident'>f64</span>,
+                 <span class='ident'>a</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='ident'>T</span>, <span class='ident'>b</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='ident'>T</span> {
+    <span class='kw'>if</span> <span class='ident'>compute_area</span>(<span class='ident'>shape</span>) <span class='op'>&gt;</span> <span class='ident'>threshold</span> {<span class='ident'>a</span>} <span class='kw'>else</span> {<span class='ident'>b</span>}
+}
+</pre>
+
+<p>This is equivalent to the previous definition.</p>
+
+<h2 id="labeled-control-structures" class='section-header'><a
+                           href="#labeled-control-structures">8.2 Labeled Control Structures</a></h2>
+<p>Named lifetime notation can also be used to control the flow of execution:</p>
+<span id='rust-example-raw-21' class='rusttest'>fn main() {
+    &#39;h: for i in range(0u, 10) {
+        &#39;g: loop {
+            if i % 2 == 0 { continue &#39;h; }
+            if i == 9 { break &#39;h; }
+            break &#39;g;
+        }
+    }
+}</span><pre id='rust-example-rendered-21' class='rust '>
+<span class='lifetime'>&#39;h</span>: <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>10</span>) {
+    <span class='lifetime'>&#39;g</span>: <span class='kw'>loop</span> {
+        <span class='kw'>if</span> <span class='ident'>i</span> <span class='op'>%</span> <span class='number'>2</span> <span class='op'>==</span> <span class='number'>0</span> { <span class='kw'>continue</span> <span class='lifetime'>&#39;h</span>; }
+        <span class='kw'>if</span> <span class='ident'>i</span> <span class='op'>==</span> <span class='number'>9</span> { <span class='kw'>break</span> <span class='lifetime'>&#39;h</span>; }
+        <span class='kw'>break</span> <span class='lifetime'>&#39;g</span>;
+    }
+}
+</pre>
+
+<blockquote>
+<p><em>Note:</em> Labelled breaks are not currently supported within <code>while</code> loops.</p>
+</blockquote>
+
+<p>Named labels are hygienic and can be used safely within macros.
+See the macros guide section on hygiene for more details.</p>
+
+<h1 id="conclusion" class='section-header'><a
+                           href="#conclusion">9 Conclusion</a></h1>
+<p>So there you have it: a (relatively) brief tour of the lifetime
+system. For more details, we refer to the (yet to be written) reference
+document on references, which will explain the full notation
+and give more examples.</p>
+
+    <script type="text/javascript">
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <footer><p>
+Copyright &copy; 2011-2014 The Rust Project Developers. Licensed under the
+<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>
+or the <a href="http://opensource.org/licenses/MIT">MIT license</a>, at your option.
+</p><p>
+This file may not be copied, modified, or distributed except according to those terms.
+</p></footer>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="playpen.js"></script>
+
+
+</body>
+</html>

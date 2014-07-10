@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The glob library documentation.">
+
+    <title>glob::Pattern - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../glob/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='index.html'>glob</a></p><div class='block struct'><h2>Structs</h2><a class='struct ' href='struct.MatchOptions.html'>MatchOptions</a><a class='struct ' href='struct.Paths.html'>Paths</a><a class='struct current' href='struct.Pattern.html'>Pattern</a></div><div class='block fn'><h2>Functions</h2><a class='fn ' href='fn.glob.html'>glob</a><a class='fn ' href='fn.glob_with.html'>glob_with</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'>Struct <a href='index.html'>glob</a>::<a class='struct' href=''>Pattern</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-454' href='../src/glob/Users/aturon/moz/working/stability-dashboard/src/libglob/lib.rs.html#199-201'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Pattern {
+    // some fields omitted
+}</pre><div class='docblock'><p>A compiled Unix shell style pattern.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='struct' href='../glob/struct.Pattern.html' title='glob::Pattern'>Pattern</a></code></h3><div class='impl-methods'><h4 id='method.new' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.new' class='fnname'>new</a>(pattern: &amp;<a href='../std/primitive.str.html'>str</a>) -&gt; <a class='struct' href='../glob/struct.Pattern.html' title='glob::Pattern'>Pattern</a></code></h4>
+<div class='docblock'><p>This function compiles Unix shell style patterns: <code>?</code> matches any single
+character, <code>*</code> matches any (possibly empty) sequence of characters and
+<code>[...]</code> matches any character inside the brackets, unless the first
+character is <code>!</code> in which case it matches any character except those
+between the <code>!</code> and the <code>]</code>. Character sequences can also specify ranges
+of characters, as ordered by Unicode, so e.g. <code>[0-9]</code> specifies any
+character between 0 and 9 inclusive.</p>
+
+<p>The metacharacters <code>?</code>, <code>*</code>, <code>[</code>, <code>]</code> can be matched by using brackets
+(e.g. <code>[?]</code>).  When a <code>]</code> occurs immediately following <code>[</code> or <code>[!</code> then
+it is interpreted as being part of, rather then ending, the character
+set, so <code>]</code> and NOT <code>]</code> can be matched by <code>[]]</code> and <code>[!]]</code> respectively.
+The <code>-</code> character can be specified inside a character sequence pattern by
+placing it at the start or the end, e.g. <code>[abc-]</code>.</p>
+
+<p>When a <code>[</code> does not have a closing <code>]</code> before the end of the string then
+the <code>[</code> will be treated literally.</p>
+</div><h4 id='method.escape' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.escape' class='fnname'>escape</a>(s: &amp;<a href='../std/primitive.str.html'>str</a>) -&gt; <a class='struct' href='../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h4>
+<div class='docblock'><p>Escape metacharacters within the given string by surrounding them in
+brackets. The resulting string will, when compiled into a <code>Pattern</code>,
+match the input string and nothing else.</p>
+</div><h4 id='method.matches' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.matches' class='fnname'>matches</a>(&amp;self, str: &amp;<a href='../std/primitive.str.html'>str</a>) -&gt; <a href='../std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Return if the given <code>str</code> matches this <code>Pattern</code> using the default
+match options (i.e. <code>MatchOptions::new()</code>).</p>
+
+<h1 id="example" class='section-header'><a
+                           href="#example">Example</a></h1><span id='rust-example-raw-0' class='rusttest'>extern crate glob;
+fn main() {
+    use glob::Pattern;
+    
+    assert!(Pattern::new(&quot;c?t&quot;).matches(&quot;cat&quot;));
+    assert!(Pattern::new(&quot;k[!e]tteh&quot;).matches(&quot;kitteh&quot;));
+    assert!(Pattern::new(&quot;d*g&quot;).matches(&quot;doog&quot;));
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='kw'>use</span> <span class='ident'>glob</span>::<span class='ident'>Pattern</span>;
+
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>Pattern</span>::<span class='ident'>new</span>(<span class='string'>&quot;c?t&quot;</span>).<span class='ident'>matches</span>(<span class='string'>&quot;cat&quot;</span>));
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>Pattern</span>::<span class='ident'>new</span>(<span class='string'>&quot;k[!e]tteh&quot;</span>).<span class='ident'>matches</span>(<span class='string'>&quot;kitteh&quot;</span>));
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>Pattern</span>::<span class='ident'>new</span>(<span class='string'>&quot;d*g&quot;</span>).<span class='ident'>matches</span>(<span class='string'>&quot;doog&quot;</span>));
+</pre>
+</div><h4 id='method.matches_path' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.matches_path' class='fnname'>matches_path</a>(&amp;self, path: &amp;<a class='struct' href='../std/path/posix/struct.Path.html' title='std::path::posix::Path'>Path</a>) -&gt; <a href='../std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Return if the given <code>Path</code>, when converted to a <code>str</code>, matches this <code>Pattern</code>
+using the default match options (i.e. <code>MatchOptions::new()</code>).</p>
+</div><h4 id='method.matches_with' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.matches_with' class='fnname'>matches_with</a>(&amp;self, str: &amp;<a href='../std/primitive.str.html'>str</a>, options: <a class='struct' href='../glob/struct.MatchOptions.html' title='glob::MatchOptions'>MatchOptions</a>) -&gt; <a href='../std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Return if the given <code>str</code> matches this <code>Pattern</code> using the specified match options.</p>
+</div><h4 id='method.matches_path_with' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.matches_path_with' class='fnname'>matches_path_with</a>(&amp;self, path: &amp;<a class='struct' href='../std/path/posix/struct.Path.html' title='std::path::posix::Path'>Path</a>, options: <a class='struct' href='../glob/struct.MatchOptions.html' title='glob::MatchOptions'>MatchOptions</a>) -&gt; <a href='../std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Return if the given <code>Path</code>, when converted to a <code>str</code>, matches this <code>Pattern</code>
+using the specified match options.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../core/default/trait.Default.html' title='core::default::Default'>Default</a> for <a class='struct' href='../glob/struct.Pattern.html' title='glob::Pattern'>Pattern</a></code></h3><div class='impl-methods'><h4 id='method.default' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.default' class='fnname'>default</a>() -&gt; <a class='struct' href='../glob/struct.Pattern.html' title='glob::Pattern'>Pattern</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../collections/hash/trait.Hash.html' title='collections::hash::Hash'>Hash</a> for <a class='struct' href='../glob/struct.Pattern.html' title='glob::Pattern'>Pattern</a></code></h3><div class='impl-methods'><h4 id='method.hash' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.hash' class='fnname'>hash</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='../collections/hash/sip/struct.SipState.html' title='collections::hash::sip::SipState'>SipState</a>)</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../core/cmp/trait.Ord.html' title='core::cmp::Ord'>Ord</a> for <a class='struct' href='../glob/struct.Pattern.html' title='glob::Pattern'>Pattern</a></code></h3><div class='impl-methods'><h4 id='method.cmp' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.cmp' class='fnname'>cmp</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../glob/struct.Pattern.html' title='glob::Pattern'>Pattern</a>) -&gt; <a class='type' href='../core/cmp/type.Ordering.html' title='core::cmp::Ordering'>Ordering</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a> for <a class='struct' href='../glob/struct.Pattern.html' title='glob::Pattern'>Pattern</a></code></h3><div class='impl-methods'><h4 id='method.partial_cmp' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.partial_cmp' class='fnname'>partial_cmp</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../glob/struct.Pattern.html' title='glob::Pattern'>Pattern</a>) -&gt; <a class='type' href='../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='type' href='../core/cmp/type.Ordering.html' title='core::cmp::Ordering'>Ordering</a>&gt;</code></h4>
+<h4 id='method.lt' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.lt' class='fnname'>lt</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../glob/struct.Pattern.html' title='glob::Pattern'>Pattern</a>) -&gt; <a href='../std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.le' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.le' class='fnname'>le</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../glob/struct.Pattern.html' title='glob::Pattern'>Pattern</a>) -&gt; <a href='../std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.gt' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.gt' class='fnname'>gt</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../glob/struct.Pattern.html' title='glob::Pattern'>Pattern</a>) -&gt; <a href='../std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ge' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.ge' class='fnname'>ge</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../glob/struct.Pattern.html' title='glob::Pattern'>Pattern</a>) -&gt; <a href='../std/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../core/cmp/trait.Eq.html' title='core::cmp::Eq'>Eq</a> for <a class='struct' href='../glob/struct.Pattern.html' title='glob::Pattern'>Pattern</a></code></h3><div class='impl-methods'><h4 id='method.assert_receiver_is_total_eq' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.assert_receiver_is_total_eq' class='fnname'>assert_receiver_is_total_eq</a>(&amp;self)</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for <a class='struct' href='../glob/struct.Pattern.html' title='glob::Pattern'>Pattern</a></code></h3><div class='impl-methods'><h4 id='method.eq' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.eq' class='fnname'>eq</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../glob/struct.Pattern.html' title='glob::Pattern'>Pattern</a>) -&gt; <a href='../std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.ne' class='fnname'>ne</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../glob/struct.Pattern.html' title='glob::Pattern'>Pattern</a>) -&gt; <a href='../std/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../glob/struct.Pattern.html' title='glob::Pattern'>Pattern</a></code></h3><div class='impl-methods'><h4 id='method.clone' class='method'><a class='stability Unstable' title='Unstable'></a><code>fn <a href='#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../glob/struct.Pattern.html' title='glob::Pattern'>Pattern</a></code></h4>
+<h4 id='method.clone_from' class='method'><a class='stability Experimental' title='Experimental: this function is mostly unused'></a><code>fn <a href='#tymethod.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "glob";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    <script src="../playpen.js"></script>
+    <script async src="../search-index.js"></script>
+</body>
+</html>

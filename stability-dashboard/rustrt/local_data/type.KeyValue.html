@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The rustrt library documentation.">
+
+    <title>rustrt::local_data::KeyValue - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../rustrt/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../index.html'>rustrt</a>&#8203;::<a href='index.html'>local_data</a></p><div class='block struct'><h2>Structs</h2><a class='struct ' href='struct.Ref.html'>Ref</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content type">
+<h1 class='fqn'>Enum <a href='../index.html'>rustrt</a>::<a href='index.html'>local_data</a>::<a class='type' href=''>KeyValue</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-5005' href='../../src/rustrt/Users/aturon/moz/working/stability-dashboard/src/librustrt/local_data.rs.html#66'>[src]</a></span></h1>
+<pre class='rust enum'>pub enum KeyValue&lt;T&gt; {
+    Key,
+}</pre><h2 class='variants'>Variants</h2>
+<table><tr><td id='variant.Key'><a class='stability Experimental' title='Experimental'></a><code>Key</code></td><td></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: 'static&gt; <a class='type' href='../../rustrt/local_data/type.KeyValue.html' title='rustrt::local_data::KeyValue'>KeyValue</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.replace' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.replace' class='fnname'>replace</a>(&amp;'static self, data: <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;T&gt;) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;T&gt;</code></h4>
+<div class='docblock'><p>Replaces a value in task local storage.</p>
+
+<p>If this key is already present in TLS, then the previous value is
+replaced with the provided data, and then returned.</p>
+
+<h1 id="failure" class='section-header'><a
+                           href="#failure">Failure</a></h1>
+<p>This function will fail if this key is present in TLS and currently on
+loan with the <code>get</code> method.</p>
+
+<h1 id="example" class='section-header'><a
+                           href="#example">Example</a></h1><pre class='rust '>
+<span class='macro'>local_data_key</span><span class='macro'>!</span>(<span class='ident'>foo</span>: <span class='ident'>int</span>)
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>foo</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='number'>10</span>)), <span class='prelude-val'>None</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>foo</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='number'>4</span>)), <span class='prelude-val'>Some</span>(<span class='number'>10</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>foo</span>.<span class='ident'>replace</span>(<span class='prelude-val'>None</span>), <span class='prelude-val'>Some</span>(<span class='number'>4</span>));
+</pre>
+</div><h4 id='method.get' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.get' class='fnname'>get</a>(&amp;'static self) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../../rustrt/local_data/struct.Ref.html' title='rustrt::local_data::Ref'>Ref</a>&lt;T&gt;&gt;</code></h4>
+<div class='docblock'><p>Borrows a value from TLS.</p>
+
+<p>If <code>None</code> is returned, then this key is not present in TLS. If <code>Some</code> is
+returned, then the returned data is a smart pointer representing a new
+loan on this TLS key. While on loan, this key cannot be altered via the
+<code>replace</code> method.</p>
+
+<h1 id="example-1" class='section-header'><a
+                           href="#example-1">Example</a></h1><pre class='rust '>
+<span class='macro'>local_data_key</span><span class='macro'>!</span>(<span class='ident'>key</span>: <span class='ident'>int</span>)
+
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>key</span>.<span class='ident'>get</span>().<span class='ident'>is_none</span>());
+
+<span class='ident'>key</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='number'>3</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>key</span>.<span class='ident'>get</span>().<span class='ident'>unwrap</span>(), <span class='number'>3</span>);
+</pre>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "rustrt";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

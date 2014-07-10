@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The std library documentation.">
+
+    <title>std::num::strconv::from_str_bytes_common - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../../std/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../../index.html'>std</a>&#8203;::<a href='../index.html'>num</a>&#8203;::<a href='index.html'>strconv</a></p><div class='block trait'><h2>Traits</h2><a class='trait ' href='trait.NumStrConv.html'>NumStrConv</a></div><div class='block fn'><h2>Functions</h2><a class='fn ' href='fn.float_to_str_bytes_common.html'>float_to_str_bytes_common</a><a class='fn ' href='fn.float_to_str_common.html'>float_to_str_common</a><a class='fn current' href='fn.from_str_bytes_common.html'>from_str_bytes_common</a><a class='fn ' href='fn.from_str_common.html'>from_str_common</a><a class='fn ' href='fn.int_to_str_bytes_common.html'>int_to_str_bytes_common</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content fn">
+<h1 class='fqn'>Function <a href='../../index.html'>std</a>::<a href='../index.html'>num</a>::<a href='index.html'>strconv</a>::<a class='fn' href=''>from_str_bytes_common</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-10984' href='../../../src/std/Users/aturon/moz/working/stability-dashboard/src/libstd/num/strconv.rs.html#549-749'>[src]</a></span></h1>
+<pre class='rust fn'>pub fn from_str_bytes_common&lt;T: <a class='trait' href='../../../std/num/trait.NumCast.html' title='std::num::NumCast'>NumCast</a> + <a class='trait' href='../../../std/num/trait.Zero.html' title='std::num::Zero'>Zero</a> + <a class='trait' href='../../../std/num/trait.One.html' title='std::num::One'>One</a> + <a class='trait' href='../../../std/cmp/trait.PartialEq.html' title='std::cmp::PartialEq'>PartialEq</a> + <a class='trait' href='../../../std/cmp/trait.PartialOrd.html' title='std::cmp::PartialOrd'>PartialOrd</a> + <a class='trait' href='../../../std/ops/trait.Div.html' title='std::ops::Div'>Div</a>&lt;T, T&gt; + <a class='trait' href='../../../std/ops/trait.Mul.html' title='std::ops::Mul'>Mul</a>&lt;T, T&gt; + <a class='trait' href='../../../std/ops/trait.Sub.html' title='std::ops::Sub'>Sub</a>&lt;T, T&gt; + <a class='trait' href='../../../std/ops/trait.Neg.html' title='std::ops::Neg'>Neg</a>&lt;T&gt; + <a class='trait' href='../../../std/ops/trait.Add.html' title='std::ops::Add'>Add</a>&lt;T, T&gt; + <a class='trait' href='../../../std/num/strconv/trait.NumStrConv.html' title='std::num::strconv::NumStrConv'>NumStrConv</a> + <a class='trait' href='../../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>&gt;(buf: &amp;<a href='../../primitive.slice.html'>[<a href='../../primitive.u8.html'>u8</a>]</a>, radix: <a href='../../primitive.uint.html'>uint</a>, negative: <a href='../../primitive.bool.html'>bool</a>, fractional: <a href='../../primitive.bool.html'>bool</a>, special: <a href='../../primitive.bool.html'>bool</a>, exponent: <a class='type' href='../../../std/num/strconv/type.ExponentFormat.html' title='std::num::strconv::ExponentFormat'>ExponentFormat</a>, empty_zero: <a href='../../primitive.bool.html'>bool</a>, ignore_underscores: <a href='../../primitive.bool.html'>bool</a>) -&gt; <a class='type' href='../../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;T&gt;</pre><div class='docblock'><p>Parses a byte slice as a number. This is meant to
+be a common base implementation for all numeric string conversion
+functions like <code>from_str()</code> or <code>from_str_radix()</code>.</p>
+
+<h1 id="arguments" class='section-header'><a
+                           href="#arguments">Arguments</a></h1>
+<ul>
+<li><code>buf</code>        - The byte slice to parse.</li>
+<li><code>radix</code>      - Which base to parse the number as. Accepts 2-36.</li>
+<li><code>negative</code>   - Whether to accept negative numbers.</li>
+<li><code>fractional</code> - Whether to accept numbers with fractional parts.</li>
+<li><code>special</code>    - Whether to accept special values like <code>inf</code>
+             and <code>NaN</code>. Can conflict with <code>radix</code>, see Failure.</li>
+<li><code>exponent</code>   - Which exponent format to accept. Options are:
+
+<ul>
+<li><code>ExpNone</code>: No Exponent, accepts just plain numbers like <code>42</code> or
+         <code>-8.2</code>.</li>
+<li><code>ExpDec</code>:  Accepts numbers with a decimal exponent like <code>42e5</code> or
+         <code>8.2E-2</code>. The exponent string itself is always base 10.
+         Can conflict with <code>radix</code>, see Failure.</li>
+<li><code>ExpBin</code>:  Accepts numbers with a binary exponent like <code>42P-8</code> or
+         <code>FFp128</code>. The exponent string itself is always base 10.
+         Can conflict with <code>radix</code>, see Failure.</li>
+</ul></li>
+<li><code>empty_zero</code> - Whether to accept an empty <code>buf</code> as a 0 or not.</li>
+<li><code>ignore_underscores</code> - Whether all underscores within the string should
+                     be ignored.</li>
+</ul>
+
+<h1 id="return-value" class='section-header'><a
+                           href="#return-value">Return value</a></h1>
+<p>Returns <code>Some(n)</code> if <code>buf</code> parses to a number n without overflowing, and
+<code>None</code> otherwise, depending on the constraints set by the remaining
+arguments.</p>
+
+<h1 id="failure" class='section-header'><a
+                           href="#failure">Failure</a></h1>
+<ul>
+<li>Fails if <code>radix</code> &lt; 2 or <code>radix</code> &gt; 36.</li>
+<li>Fails if <code>radix</code> &gt; 14 and <code>exponent</code> is <code>ExpDec</code> due to conflict
+between digit and exponent sign <code>&#39;e&#39;</code>.</li>
+<li>Fails if <code>radix</code> &gt; 25 and <code>exponent</code> is <code>ExpBin</code> due to conflict
+between digit and exponent sign <code>&#39;p&#39;</code>.</li>
+<li>Fails if <code>radix</code> &gt; 18 and <code>special == true</code> due to conflict
+between digit and lowest first character in <code>inf</code> and <code>NaN</code>, the <code>&#39;i&#39;</code>.</li>
+</ul>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "std";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    <script src="../../../playpen.js"></script>
+    <script async src="../../../search-index.js"></script>
+</body>
+</html>

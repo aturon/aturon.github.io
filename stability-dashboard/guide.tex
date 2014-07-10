@@ -1,0 +1,690 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+    \usepackage{xltxtra,xunicode}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
+  \newcommand{\euro}{€}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{\usepackage{microtype}}{}
+\ifxetex
+  \usepackage[setpagesize=false, % page size defined by xetex
+              unicode=false, % unicode breaks when used with xetex
+              xetex]{hyperref}
+\else
+  \usepackage[unicode=true]{hyperref}
+\fi
+\hypersetup{breaklinks=true,
+            bookmarks=true,
+            pdfauthor={},
+            pdftitle={The Rust Guide},
+            colorlinks=true,
+            citecolor=blue,
+            urlcolor=blue,
+            linkcolor=magenta,
+            pdfborder={0 0 0}}
+\urlstyle{same}  % don't use monospace font for urls
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\setcounter{secnumdepth}{5}
+
+\title{The Rust Guide}
+
+\begin{document}
+\maketitle
+
+0.11.0-pre (169c988d09a9d4e46de2b7fead9489e94964c7c7 2014-07-02 18:41:38 +0000)
+
+Copyright © 2011-2014 The Rust Project Developers. Licensed under the
+\href{http://www.apache.org/licenses/LICENSE-2.0}{Apache License,
+Version 2.0} or the \href{http://opensource.org/licenses/MIT}{MIT
+license}, at your option.
+
+This file may not be copied, modified, or distributed except according
+to those terms.
+
+{
+\hypersetup{linkcolor=black}
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+This guide is a work in progress. Until it is ready, we highly recommend
+that you read the Tutorial instead. This work-in-progress Guide is being
+displayed here in line with Rust's open development policy. Please open
+any issues you find as usual.
+
+\subsection{Welcome!}\label{welcome}
+
+Hey there! Welcome to the Rust guide. This is the place to be if you'd
+like to learn how to program in Rust. Rust is a systems programming
+language with a focus on ``high-level, bare-metal programming'': the
+lowest level control a programming language can give you, but with
+zero-cost, higher level abstractions, because people aren't computers.
+We really think Rust is something special, and we hope you do too.
+
+To show you how to get going with Rust, we're going to write the
+traditional ``Hello, World!'' program. Next, we'll introduce you to a
+tool that's useful for writing real-world Rust programs and libraries:
+``Cargo.'' Then, we'll show off Rust's features by writing a little
+program together.
+
+Sound good? Let's go!
+
+\subsection{Installing Rust}\label{installing-rust}
+
+The first step to using Rust is to install it! There are a number of
+ways to install Rust, but the easiest is to use the the \texttt{rustup}
+script. If you're on Linux or a Mac, all you need to do is this (note
+that you don't need to type in the \texttt{\$}s, they just indicate the
+start of each command):
+
+\texttt{\{ignore\} \$ curl -s http://www.rust-lang.org/rustup.sh \textbar{} sudo sh}
+
+(If you're concerned about \texttt{curl \textbar{} sudo sh}, please keep
+reading. Disclaimer below.)
+
+If you're on Windows, please
+\href{http://static.rust-lang.org/dist/rust-nightly-install.exe}{download
+this .exe and run it}.
+
+If you decide you don't want Rust anymore, we'll be a bit sad, but
+that's okay. Not every programming language is great for everyone. Just
+pass an argument to the script:
+
+\texttt{\{ignore\} \$ curl -s http://www.rust-lang.org/rustup.sh \textbar{} sudo sh -s -\/- -\/-uninstall}
+
+If you used the Windows installer, just re-run the \texttt{.exe} and it
+will give you an uninstall option.
+
+You can re-run this script any time you want to update Rust. Which, at
+this point, is often. Rust is still pre-1.0, and so people assume that
+you're using a very recent Rust.
+
+This brings me to one other point: some people, and somewhat rightfully
+so, get very upset when we tell you to \texttt{curl \textbar{} sudo sh}.
+And they should be! Basically, when you do this, you are trusting that
+the good people who maintain Rust aren't going to hack your computer and
+do bad things. That's a good instinct! If you're one of those people,
+please check out the documentation on
+\href{https://github.com/rust-lang/rust\#building-from-source}{building
+Rust from Source}, or \href{http://www.rust-lang.org/install.html}{the
+official binary downloads}. And we promise that this method will not be
+the way to install Rust forever: it's just the easiest way to keep
+people updated while Rust is in its alpha state.
+
+Oh, we should also mention the officially supported platforms:
+
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  Windows (7, 8, Server 2008 R2), x86 only
+\item
+  Linux (2.6.18 or later, various distributions), x86 and x86-64
+\item
+  OSX 10.7 (Lion) or greater, x86 and x86-64
+\end{itemize}
+
+We extensively test Rust on these platforms, and a few others, too, like
+Android. But these are the ones most likely to work, as they have the
+most testing.
+
+Finally, a comment about Windows. Rust considers Windows to be a
+first-class platform upon release, but if we're honest, the Windows
+experience isn't as integrated as the Linux/OS X experience is. We're
+working on it! If anything does not work, it is a bug. Please let us
+know if that happens. Each and every commit is tested against Windows
+just like any other platform.
+
+If you've got Rust installed, you can open up a shell, and type this:
+
+\texttt{\{ignore\} \$ rustc -\/-version}
+
+You should see some output that looks something like this:
+
+\texttt{\{ignore\} rustc 0.11.0-pre (443a1cd 2014-06-08 14:56:52 -0700) host: x86\_64-unknown-linux-gnu}
+
+If you did, Rust has been installed successfully! Congrats!
+
+If not, there are a number of places where you can get help. The easiest
+is \href{irc://irc.mozilla.org/\#rust}{the \#rust IRC channel on
+irc.mozilla.org}, which you can access through
+\href{http://chat.mibbit.com/?server=irc.mozilla.org\&channel=\%23rust}{Mibbit}.
+Click that link, and you'll be chatting with other Rustaceans (a silly
+nickname we call ourselves), and we can help you out. Other great
+resources include \href{https://mail.mozilla.org/listinfo/rust-dev}{our
+mailing list}, \href{http://www.reddit.com/r/rust}{the /r/rust
+subreddit}, and
+\href{http://stackoverflow.com/questions/tagged/rust}{Stack Overflow}.
+
+\subsection{Hello, world!}\label{hello-world}
+
+Now that you have Rust installed, let's write your first Rust program.
+It's traditional to make your first program in any new language one that
+prints the text ``Hello, world!'' to the screen. The nice thing about
+starting with such a simple program is that you can verify that your
+compiler isn't just installed, but also working properly. And printing
+information to the screen is a pretty common thing to do.
+
+The first thing that we need to do is make a file to put our code in. I
+like to make a projects directory in my home directory, and keep all my
+projects there. Rust does not care where your code lives.
+
+This actually leads to one other concern we should address: this
+tutorial will assume that you have basic familiarity with the
+command-line. Rust does not require that you know a whole ton about the
+command line, but until the language is in a more finished state, IDE
+support is spotty. Rust makes no specific demands on your editing
+tooling, or where your code lives.
+
+With that said, let's make a directory in our projects directory.
+
+\texttt{\{bash\} \$ mkdir \textasciitilde{}/projects \$ cd \textasciitilde{}/projects \$ mkdir hello\_world \$ cd hello\_world}
+
+If you're on Windows and not using PowerShell, the
+\texttt{\textasciitilde{}} may not work. Consult the documentation for
+your shell for more details.
+
+Let's make a new source file next. I'm going to use the syntax
+\texttt{editor filename} to represent editing a file in these examples,
+but you should use whatever method you want. We'll call our file
+\texttt{hello\_world.rs}:
+
+\texttt{\{bash\} \$ editor hello\_world.rs}
+
+Rust files always end in a \texttt{.rs} extension. If you're using more
+than one word in your file name, use an underscore.
+\texttt{hello\_world.rs} versus \texttt{goodbye.rs}.
+
+Now that you've got your file open, type this in:
+
+\begin{verbatim}
+fn main() {
+    println!("Hello, world");
+}
+\end{verbatim}
+
+Save the file, and then type this into your terminal window:
+
+\texttt{\{bash\} \$ rustc hello\_world.rs \$ ./hello\_world \# or hello\_world.exe on Windows Hello, world}
+
+Success! Let's go over what just happened in detail.
+
+\begin{verbatim}
+fn main() {
+   
+}
+\end{verbatim}
+
+These two lines define a \textbf{function} in Rust. The \texttt{main}
+function is special: it's the beginning of every Rust program. The first
+line says ``I'm declaring a function named \texttt{main}, which takes no
+arguments and returns nothing.'' If there were arguments, they would go
+inside the parentheses (\texttt{(} and \texttt{)}), and because we
+aren't returning anything from this function, we've dropped that
+notation entirely. We'll get to it later.
+
+You'll also note that the function is wrapped in curly braces
+(\texttt{\{} and \texttt{\}}). Rust requires these around all function
+bodies. It is also considered good style to put the opening curly brace
+on the same line as the function declaration, with one space in between.
+
+Next up is this line:
+
+\begin{verbatim}
+    println!("Hello, world");
+\end{verbatim}
+
+This line does all of the work in our little program. There are a number
+of details that are important here. The first is that it's indented with
+four spaces, not tabs. Please configure your editor of choice to insert
+four spaces with the tab key. We provide some sample configurations for
+various editors
+\href{https://github.com/rust-lang/rust/tree/master/src/etc}{here}.
+
+The second point is the \texttt{println!()} part. This is calling a Rust
+\textbf{macro}, which is how metaprogramming is done in Rust. If it were
+a function instead, it would look like this: \texttt{println()}. For our
+purposes, we don't need to worry about this difference. Just know that
+sometimes, you'll see a \texttt{!}, and that means that you're calling a
+macro instead of a normal function. One last thing to mention: Rust's
+macros are significantly different than C macros, if you've used those.
+Don't be scared of using macros. We'll get to the details eventually,
+you'll just have to trust us for now.
+
+Next, \texttt{"Hello, world"} is a \textbf{string}. Strings are a
+surprisingly complicated topic in a systems programming language, and
+this is a \textbf{statically allocated} string. We will talk more about
+different kinds of allocation later. We pass this string as an argument
+to \texttt{println!}, which prints the string to the screen. Easy
+enough!
+
+Finally, the line ends with a semicolon (\texttt{;}). Rust is an
+\textbf{expression oriented} language, which means that most things are
+expressions. The \texttt{;} is used to indicate that this expression is
+over, and the next one is ready to begin. Most lines of Rust code end
+with a \texttt{;}. We will cover this in-depth later in the tutorial.
+
+Finally, actually \textbf{compiling} and \textbf{running} our program.
+We can compile with our compiler, \texttt{rustc}, by passing it the name
+of our source file:
+
+\texttt{\{bash\} \$ rustc hello\_world.rs}
+
+This is similar to \texttt{gcc} or \texttt{clang}, if you come from a C
+or C++ background. Rust will output a binary executable. You can see it
+with \texttt{ls}:
+
+\texttt{\{bash\} \$ ls hello\_world  hello\_world.rs}
+
+Or on Windows:
+
+\texttt{\{bash\} \$ dir hello\_world.exe  hello\_world.rs}
+
+There are now two files: our source code, with the \texttt{.rs}
+extension, and the executable (\texttt{hello\_world.exe} on Windows,
+\texttt{hello\_world} everywhere else)
+
+\texttt{\{bash\} \$ ./hello\_world  \# or hello\_world.exe on Windows}
+
+This prints out our \texttt{Hello, world!} text to our terminal.
+
+If you come from a dynamically typed language like Ruby, Python, or
+JavaScript, you may not be used to these two steps being separate. Rust
+is an \textbf{ahead-of-time compiled language}, which means that you can
+compile a program, give it to someone else, and they don't need to have
+Rust installed. If you give someone a \texttt{.rb} or \texttt{.py} or
+\texttt{.js} file, they need to have Ruby/Python/JavaScript installed,
+but you just need one command to both compile and run your program.
+Everything is a tradeoff in language design, and Rust has made its
+choice.
+
+Congratulations! You have officially written a Rust program. That makes
+you a Rust programmer! Welcome.
+
+Next, I'd like to introduce you to another tool, Cargo, which is used to
+write real-world Rust programs. Just using \texttt{rustc} is nice for
+simple things, but as your project grows, you'll want something to help
+you manage all of the options that it has, and to make it easy to share
+your code with other people and projects.
+
+\subsection{Hello, Cargo!}\label{hello-cargo}
+
+\href{http://crates.io}{Cargo} is a tool that Rustaceans use to help
+manage their Rust projects. Cargo is currently in an alpha state, just
+like Rust, and so it is still a work in progress. However, it is already
+good enough to use for many Rust projects, and so it is assumed that
+Rust projects will use Cargo from the beginning.
+
+Programmers love car analogies, so I've got a good one for you to think
+about the relationship between \texttt{cargo} and \texttt{rustc}:
+\texttt{rustc} is like a car, and \texttt{cargo} is like a robotic
+driver. You can drive your car yourself, of course, but isn't it just
+easier to let a computer drive it for you?
+
+Anyway, Cargo manages three things: building your code, downloading the
+dependencies your code needs, and building the dependencies your code
+needs. At first, your program doesn't have any dependencies, so we'll
+only be using the first part of its functionality. Eventually, we'll add
+more. Since we started off by using Cargo, it'll be easy to add later.
+
+Let's convert Hello World to Cargo. The first thing we need to do to
+begin using Cargo is to install Cargo. To do this, we need to build it
+from source. There are no binaries yet.
+
+First, let's go back to our projects directory. We don't want Cargo to
+live in our project!
+
+\texttt{\{bash\} \$ cd ..}
+
+Next, we need these commands:
+
+\texttt{\{bash\} \$ git clone -\/-recursive https://github.com/rust-lang/cargo \$ cd cargo \$ make \$ make install \# may need sudo or admin permissions}
+
+The \texttt{-\/-recursive} downloads Cargo's own dependencies. You can't
+use Cargo to fetch dependencies until you have Cargo installed! Also,
+you will need to have \texttt{git} installed. Much of the Rust world
+assumes \texttt{git} usage, so it's a good thing to have around. Please
+check out
+\href{http://git-scm.com/book/en/Getting-Started-Installing-Git}{the git
+documentation} for more on installing \texttt{git}.
+
+We hope to give Cargo a binary installer, similar to Rust's own, so that
+this will not be necessary in the future.
+
+Let's see if that worked. Try this:
+
+```\{bash\} \$ cargo Commands: build \# compile the current project
+
+Options (for all commands):
+
+-v, {[}--verbose{]} -h, {[}--help{]} ```
+
+If you see this output when you run \texttt{cargo}, congrats! Cargo is
+working. If not, please
+\href{https://github.com/rust-lang/cargo/issues/new}{open an issue} or
+drop by the Rust IRC, and we can help you out.
+
+Let's move back into our \texttt{hello\_world} directory now:
+
+\texttt{\{bash\} \$ cd ..              \# move back up into projects \$ cd hello\_world     \# move into hello\_world}
+
+To Cargo-ify our project, we need to do two things: Make a
+\texttt{Cargo.toml} configuration file, and put our source file in the
+right place. Let's do that part first:
+
+\texttt{\{bash\} \$ mkdir src \$ mv hello\_world.rs src/hello\_world.rs}
+
+Cargo expects your source files to live inside a \texttt{src} directory.
+That leaves the top level for other things, like READMEs, licence
+information, and anything not related to your code. Cargo helps us keep
+our projects nice and tidy. A place for everything, and everything in
+its place.
+
+Next, our configuration file:
+
+\texttt{\{bash\} \$ editor Cargo.toml}
+
+Make sure to get this name right: you need the capital \texttt{C}!
+
+Put this inside:
+
+```\{ignore\} {[}package{]}
+
+name = ``hello\_world'' version = ``0.1.0'' authors = {[}
+``someone@example.com'' {]}
+
+{[}{[}bin{]}{]}
+
+name = ``hello\_world'' ```
+
+This file is in the \href{https://github.com/toml-lang/toml}{TOML}
+format. Let's let it explain itself to you:
+
+\begin{quote}
+TOML aims to be a minimal configuration file format that's easy to read
+due to obvious semantics. TOML is designed to map unambiguously to a
+hash table. TOML should be easy to parse into data structures in a wide
+variety of languages.
+\end{quote}
+
+TOML is very similar to INI, but with some extra goodies.
+
+Anyway, there are two \textbf{table}s in this file: \texttt{package} and
+\texttt{bin}. The first tells Cargo metadata about your package. The
+second tells Cargo that we're interested in building a binary, not a
+library (though we could do both!), as well as what it is named.
+
+Once you have this file in place, we should be ready to build! Try this:
+
+\texttt{\{bash\} \$ cargo build    Compiling hello\_world v0.1.0 (file:/home/yourname/projects/hello\_world) \$ ./target/hello\_world  Hello, world!}
+
+Bam! We build our project with \texttt{cargo build}, and run it with
+\texttt{./target/hello\_world}. This hasn't bought us a whole lot over
+our simple use of \texttt{rustc}, but think about the future: when our
+project has more than one file, we would need to call \texttt{rustc}
+twice, and pass it a bunch of options to tell it to build everything
+together. With Cargo, as our project grows, we can just
+\texttt{cargo build} and it'll work the right way.
+
+That's it! We've successfully built \texttt{hello\_world} with Cargo.
+Even though our program is simple, it's using much of the real tooling
+that you'll use for the rest of your Rust career.
+
+Next, we'll learn more about Rust itself, by starting to write a more
+complicated program. We hope you want to do more with Rust than just
+print ``Hello, world!''
+
+\subsection{Guessing Game}\label{guessing-game}
+
+Let's write a bigger program in Rust. We could just go through a laundry
+list of Rust features, but that's boring. Instead, we'll learn more
+about how to code in Rust by writing a few example projects.
+
+For our first project, we'll implement a classic beginner programming
+problem: the guessing game. Here's how it works: Our program will
+generate a random integer between one and a hundred. It will then prompt
+us to enter a guess. Upon entering our guess, it will tell us if we're
+too low or too high. Once we guess correctly, it will congratulate us,
+and print the number of guesses we've taken to the screen. Sound good?
+It sounds easy, but it'll end up showing off a number of basic features
+of Rust.
+
+\subsubsection{Set up}\label{set-up}
+
+Let's set up a new project. Go to your projects directory, and make a
+new directory for the project, as well as a \texttt{src} directory for
+our code:
+
+\texttt{\{bash\} \$ cd \textasciitilde{}/projects \$ mkdir guessing\_game \$ cd guessing\_game \$ mkdir src}
+
+Great. Next, let's make a \texttt{Cargo.toml} file so Cargo knows how to
+build our project:
+
+```\{ignore\} {[}package{]}
+
+name = ``guessing\_game'' version = ``0.1.0'' authors = {[}
+``someone@example.com'' {]}
+
+{[}{[}bin{]}{]}
+
+name = ``guessing\_game'' ```
+
+Finally, we need our source file. Let's just make it hello world for
+now, so we can check that our setup works. In
+\texttt{src/guessing\_game.rs}:
+
+\texttt{\{rust\} fn main() \{     println!("Hello world!"); \}}
+
+Let's make sure that worked:
+
+\texttt{\{bash\} \$ cargo build    Compiling guessing\_game v0.1.0 (file:/home/you/projects/guessing\_game) \$}
+
+Excellent! Open up your \texttt{src/guessing\_game.rs} again. We'll be
+writing all of our code in this file. The next section of the tutorial
+will show you how to build multiple-file projects.
+
+\subsection{Variable bindings}\label{variable-bindings}
+
+The first thing we'll learn about are `variable bindings.' They look
+like this:
+
+\texttt{\{rust\} let x = 5i;}
+
+In many languages, this is called a `variable.' But Rust's variable
+bindings have a few tricks up their sleeves. Rust has a very powerful
+feature called `pattern matching' that we'll get into detail with later,
+but the left hand side of a \texttt{let} expression is a full pattern,
+not just a variable name. This means we can do things like:
+
+\texttt{\{rust\} let (x, y) = (1i, 2i);}
+
+After this expression is evaluated, \texttt{x} will be one, and
+\texttt{y} will be two. Patterns are really powerful, but this is about
+all we can do with them so far. So let's just keep this in the back of
+our minds as we go forward.
+
+By the way, in these examples, \texttt{i} indicates that the number is
+an integer.
+
+Rust is a statically typed language, which means that we specify our
+types up front. So why does our first example compile? Well, Rust has
+this thing called
+``\href{http://en.wikipedia.org/wiki/Hindley\%E2\%80\%93Milner_type_system}{Hindley-Milner
+type inference}'', named after some really smart type theorists. If you
+clicked that link, don't be scared: what this means for you is that Rust
+will attempt to infer the types in your program, and it's pretty good at
+it. If it can infer the type, Rust doesn't require you to actually type
+it out.
+
+We can add the type if we want to. Types come after a colon
+(\texttt{:}):
+
+\texttt{\{rust\} let x: int = 5;}
+
+If I asked you to read this out loud to the rest of the class, you'd say
+``\texttt{x} is a binding with the type \texttt{int} and the value
+\texttt{five}.'' Rust requires you to initialize the binding with a
+value before you're allowed to use it. If we try\ldots{}
+
+\texttt{\{ignore\} let x;}
+
+\ldots{}we'll get an error:
+
+\texttt{\{ignore\} src/guessing\_game.rs:2:9: 2:10 error: cannot determine a type for this local variable: unconstrained type src/guessing\_game.rs:2     let x;                                \^{}}
+
+Giving it a type will compile, though:
+
+\texttt{\{ignore\} let x: int;}
+
+Let's try it out. Change your \texttt{src/guessing\_game.rs} file to
+look like this:
+
+```\{rust\} fn main() \{ let x: int;
+
+\begin{verbatim}
+println!("Hello world!");
+\end{verbatim}
+
+\} ```
+
+You can use \texttt{cargo build} on the command line to build it. You'll
+get a warning, but it will still print ``Hello, world!'':
+
+\texttt{\{ignore,notrust\}    Compiling guessing\_game v0.1.0 (file:/home/you/projects/guessing\_game) src/guessing\_game.rs:2:9: 2:10 warning: unused variable: `x`, \#{[}warn(unused\_variable){]} on by default src/guessing\_game.rs:2     let x: int;                                \^{}}
+
+Rust warns us that we never use the variable binding, but since we never
+use it, no harm, no foul. Things change if we try to actually use this
+\texttt{x}, however. Let's do that. Change your program to look like
+this:
+
+```\{rust,ignore\} fn main() \{ let x: int;
+
+\begin{verbatim}
+println!("The value of x is: {}", x);
+\end{verbatim}
+
+\} ```
+
+And try to build it. You'll get an error:
+
+\texttt{\{bash\} \$ cargo build    Compiling guessing\_game v0.1.0 (file:/home/you/projects/guessing\_game) src/guessing\_game.rs:4:39: 4:40 error: use of possibly uninitialized variable: `x` src/guessing\_game.rs:4     println!("The value of x is: \{\}", x);                                                              \^{} note: in expansion of format\_args! \textless{}std macros\textgreater{}:2:23: 2:77 note: expansion site \textless{}std macros\textgreater{}:1:1: 3:2 note: in expansion of println! src/guessing\_game.rs:4:5: 4:42 note: expansion site error: aborting due to previous error Could not execute process `rustc src/guessing\_game.rs -\/-crate-type bin -\/-out-dir /home/you/projects/guessing\_game/target -L /home/you/projects/guessing\_game/target -L /home/you/projects/guessing\_game/target/deps` (status=101)}
+
+Rust will not let us use a value that has not been initialized. So why
+let us declare a binding without initializing it? You'd think our first
+example would have errored. Well, Rust is smarter than that. Before we
+get to that, let's talk about this stuff we've added to
+\texttt{println!}.
+
+If you include two curly braces (\texttt{\{\}}, some call them
+moustaches\ldots{}) in your string to print, Rust will interpret this as
+a request to interpolate some sort of value. \textbf{String
+interpolation} is a computer science term that means ``stick in the
+middle of a string.'' We add a comma, and then \texttt{x}, to indicate
+that we want \texttt{x} to be the value we're interpolating. The comma
+is used to separate arguments we pass to functions and macros, if you're
+passing more than one.
+
+When you just use the double curly braces, Rust will attempt to display
+the value in a meaningful way by checking out its type. If you want to
+specify the format in a more detailed manner, there are a
+\href{/std/fmt/index.html}{wide number of options available}. Fow now,
+we'll just stick to the default: integers aren't very complicated to
+print.
+
+So, we've cleared up all of the confusion around bindings, with one
+exception: why does Rust let us declare a variable binding without an
+initial value if we must initialize the binding before we use it? And
+how does it know that we have or have not initialized the binding? For
+that, we need to learn our next concept: \texttt{if}.
+
+\subsection{If}\label{if}
+
+\subsection{Functions}\label{functions}
+
+return
+
+comments
+
+\subsection{Compound Data Types}\label{compound-data-types}
+
+Tuples
+
+Structs
+
+Enums
+
+\subsection{Match}\label{match}
+
+\subsection{Looping}\label{looping}
+
+for
+
+while
+
+loop
+
+break/continue
+
+\subsection{Guessing Game: complete}\label{guessing-game-complete}
+
+At this point, you have successfully built the Guessing Game!
+Congratulations! For reference,
+\href{https://github.com/steveklabnik/guessing_game}{We've placed the
+sample code on GitHub}.
+
+You've now learned the basic syntax of Rust. All of this is relatively
+close to various other programming languages you have used in the past.
+These fundamental syntactical and semantic elements will form the
+foundation for the rest of your Rust education.
+
+Now that you're an expert at the basics, it's time to learn about some
+of Rust's more unique features.
+
+\subsection{iterators}\label{iterators}
+
+\subsection{Lambdas}\label{lambdas}
+
+\subsection{Testing}\label{testing}
+
+attributes
+
+stability markers
+
+\subsection{Crates and Modules}\label{crates-and-modules}
+
+visibility
+
+\subsection{Generics}\label{generics}
+
+\subsection{Traits}\label{traits}
+
+\subsection{Operators and built-in
+Traits}\label{operators-and-built-in-traits}
+
+\subsection{Ownership and Lifetimes}\label{ownership-and-lifetimes}
+
+Move vs.~Copy
+
+Allocation
+
+\subsection{Tasks}\label{tasks}
+
+\subsection{Macros}\label{macros}
+
+\subsection{Unsafe}\label{unsafe}
+
+\end{document}

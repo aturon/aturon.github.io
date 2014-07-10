@@ -1,0 +1,254 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+    \usepackage{xltxtra,xunicode}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
+  \newcommand{\euro}{€}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{\usepackage{microtype}}{}
+\ifxetex
+  \usepackage[setpagesize=false, % page size defined by xetex
+              unicode=false, % unicode breaks when used with xetex
+              xetex]{hyperref}
+\else
+  \usepackage[unicode=true]{hyperref}
+\fi
+\hypersetup{breaklinks=true,
+            bookmarks=true,
+            pdfauthor={},
+            pdftitle={Rust Design FAQ},
+            colorlinks=true,
+            citecolor=blue,
+            urlcolor=blue,
+            linkcolor=magenta,
+            pdfborder={0 0 0}}
+\urlstyle{same}  % don't use monospace font for urls
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\setcounter{secnumdepth}{5}
+
+\title{Rust Design FAQ}
+
+\begin{document}
+\maketitle
+
+0.11.0-pre (169c988d09a9d4e46de2b7fead9489e94964c7c7 2014-07-02 18:41:38 +0000)
+
+Copyright © 2011-2014 The Rust Project Developers. Licensed under the
+\href{http://www.apache.org/licenses/LICENSE-2.0}{Apache License,
+Version 2.0} or the \href{http://opensource.org/licenses/MIT}{MIT
+license}, at your option.
+
+This file may not be copied, modified, or distributed except according
+to those terms.
+
+{
+\hypersetup{linkcolor=black}
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+This document describes decisions were arrived at after lengthy
+discussion and experimenting with alternatives. Please do not propose
+reversing them unless you have a new, extremely compelling argument.
+Note that this document specifically talks about the \emph{language} and
+not any library or implementation.
+
+A few general guidelines define the philosophy:
+
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  \href{http://en.wikipedia.org/wiki/Memory_safety}{Memory safety} must
+  never be compromised
+\item
+  \href{http://en.wikipedia.org/wiki/Abstraction_\%28computer_science\%29}{Abstraction}
+  should be zero-cost, while still maintaining safety
+\item
+  Practicality is key
+\end{itemize}
+
+\section{Semantics}\label{semantics}
+
+\subsection{Data layout is
+unspecified}\label{data-layout-is-unspecified}
+
+In the general case, \texttt{enum} and \texttt{struct} layout is
+undefined. This allows the compiler to potentially do optimizations like
+re-using padding for the discriminant, compacting variants of nested
+enums, reordering fields to remove padding, etc. \texttt{enum}s which
+carry no data (``C-like'') are eligible to have a defined
+representation. Such \texttt{enum}s are easily distinguished in that
+they are simply a list of names that carry no data:
+
+\begin{verbatim}
+enum CLike {
+    A,
+    B = 32,
+    C = 34,
+    D
+}
+\end{verbatim}
+
+The
+\href{http://doc.rust-lang.org/rust.html\#miscellaneous-attributes}{repr
+attribute} can be applied to such \texttt{enum}s to give them the same
+representation as a primitive. This allows using Rust \texttt{enum}s in
+FFI where C \texttt{enum}s are also used, for most use cases. The
+attribute can also be applied to \texttt{struct}s to get the same layout
+as a C struct would.
+
+\subsection{There is no GC}\label{there-is-no-gc}
+
+A language that requires a GC is a language that opts into a larger,
+more complex runtime than Rust cares for. Rust is usable on bare metal
+with no extra runtime. Additionally, garbage collection is frequently a
+source of non-deterministic behavior. Rust provides the tools to make
+using a GC possible and even pleasant, but it should not be a
+requirement for implementing the language.
+
+\subsection{Non-\texttt{Share} \texttt{static mut} is
+unsafe}\label{non-share-static-mut-is-unsafe}
+
+Types which are
+\href{http://doc.rust-lang.org/core/kinds/trait.Share.html}{\texttt{Share}}
+are thread-safe when multiple shared references to them are used
+concurrently. Types which are not \texttt{Share} are not thread-safe,
+and thus when used in a global require unsafe code to use.
+
+\subsubsection{If mutable static items that implement \texttt{Share} are
+safe, why is taking \&mut SHARABLE
+unsafe?}\label{if-mutable-static-items-that-implement-share-are-safe-why-is-taking-mut-sharable-unsafe}
+
+Having multiple aliasing \texttt{\&mut T}s is never allowed. Due to the
+nature of globals, the borrow checker cannot possibly ensure that a
+static obeys the borrowing rules, so taking a mutable reference to a
+static is always unsafe.
+
+\subsection{There is no life before or after main (no static
+ctors/dtors)}\label{there-is-no-life-before-or-after-main-no-static-ctorsdtors}
+
+Globals can not have a non-constant-expression constructor and cannot
+have a destructor at all. This is an opinion of the language. Static
+constructors are undesirable because they can slow down program startup.
+Life before main is often considered a misfeature, never to be used.
+Rust helps this along by just not having the feature.
+
+See
+\href{https://mail.mozilla.org/pipermail/rust-dev/2013-April/003815.html}{the
+C++ FQA} about the ``static initialization order fiasco'', and
+\href{http://ericlippert.com/2013/02/06/static-constructors-part-one/}{Eric
+Lippert's blog} for the challenges in C\#, which also has this feature.
+
+A nice replacement is the
+\href{https://gist.github.com/Kimundi/8782487}{lazy constructor macro}
+by \href{https://github.com/Kimundi}{Marvin Löbel}.
+
+\subsection{The language does not require a
+runtime}\label{the-language-does-not-require-a-runtime}
+
+See the above entry on GC. Requiring a runtime limits the utility of the
+language, and makes it undeserving of the title ``systems language''.
+All Rust code should need to run is a stack.
+
+\subsection{\texttt{match} must be
+exhaustive}\label{match-must-be-exhaustive}
+
+\texttt{match} being exhaustive has some useful properties. First, if
+every possibility is covered by the \texttt{match}, adding further
+variants to the \texttt{enum} in the future will prompt a compilation
+failure, rather than runtime failure. Second, it makes cost explicit. In
+general, only safe way to have a non-exhaustive match would be to fail
+the task if nothing is matched, though it could fall through if the type
+of the \texttt{match} expression is \texttt{()}. This sort of hidden
+cost and special casing is against the language's philosophy. It's easy
+to ignore certain cases by using the \texttt{\_} wildcard:
+
+\texttt{rust,ignore match val.do\_something() \{     Cat(a) =\textgreater{} \{ /* ... */ \}     \_      =\textgreater{} \{ /* ... */ \} \}}
+
+\href{https://github.com/rust-lang/rust/issues/3101}{\#3101} is the
+issue that proposed making this the only behavior, with rationale and
+discussion.
+
+\subsection{No guaranteed tail-call
+optimization}\label{no-guaranteed-tail-call-optimization}
+
+In general, tail-call optimization is not guaranteed: see
+\href{https://mail.mozilla.org/pipermail/rust-dev/2013-April/003557.html}{here}
+for a detailed explanation with references. There is a
+\href{https://github.com/rust-lang/rfcs/pull/81}{proposed extension}
+that would allow tail-call elimination in certain contexts. The compiler
+is still free to optimize tail-calls
+\href{http://llvm.org/docs/CodeGenerator.html\#sibling-call-optimization}{when
+it pleases}, however.
+
+\subsection{No constructors}\label{no-constructors}
+
+Functions can serve the same purpose as constructors without adding any
+language complexity.
+
+\subsection{No copy constructors}\label{no-copy-constructors}
+
+Types which implement
+\href{http://doc.rust-lang.org/core/kinds/trait.Copy.html}{\texttt{Copy}},
+will do a standard C-like ``shallow copy'' with no extra work (similar
+to ``plain old data'' in C++). It is impossible to implement
+\texttt{Copy} types that require custom copy behavior. Instead, in Rust
+``copy constructors'' are created by implementing the
+\href{http://doc.rust-lang.org/core/clone/trait.Clone.html}{\texttt{Clone}}
+trait, and explicitly calling the \texttt{clone} method. Making
+user-defined copy operators explicit surfaces the underlying complexity,
+forcing the developer to opt-in to potentially expensive operations.
+
+\subsection{No move constructors}\label{no-move-constructors}
+
+Values of all types are moved via \texttt{memcpy}. This makes writing
+generic unsafe code much simpler since assignment, passing and returning
+are known to never have a side effect like unwinding.
+
+\section{Syntax}\label{syntax}
+
+\subsection{Macros require balanced
+delimiters}\label{macros-require-balanced-delimiters}
+
+This is to make the language easier to parse for machines. Since the
+body of a macro can contain arbitrary tokens, some restriction is needed
+to allow simple non-macro-expanding lexers and parsers. This comes in
+the form of requiring that all delimiters be balanced.
+
+\subsection{\texttt{-\textgreater{}} for function return
+type}\label{for-function-return-type}
+
+This is to make the language easier to parse for humans, especially in
+the face of higher-order functions.
+\texttt{fn foo\textless{}T\textgreater{}(f: fn(int): int, fn(T): U): U}
+is not particularly easy to read.
+
+\subsection{\texttt{let} is used to introduce
+variables}\label{let-is-used-to-introduce-variables}
+
+\texttt{let} not only defines variables, but can do pattern matching.
+One can also redeclare immutable variables with \texttt{let}. This is
+useful to avoid unnecessary \texttt{mut} annotations. An interesting
+historical note is that Rust comes, syntactically, most closely from ML,
+which also uses \texttt{let} to introduce bindings.
+
+See also
+\href{https://mail.mozilla.org/pipermail/rust-dev/2014-January/008319.html}{a
+long thread} on renaming \texttt{let mut} to \texttt{var}.
+
+\end{document}

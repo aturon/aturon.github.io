@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="generator" content="rustdoc">
+    <title>The Rust Tasks and Communication Guide</title>
+
+    <link rel="stylesheet" type="text/css" href="rust.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400'
+        rel='stylesheet' type='text/css'>
+
+
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    <div id="versioninfo">
+  <img src="http://www.rust-lang.org/logos/rust-logo-32x32-blk.png" width="32" height="32" alt><br>
+  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.11.0-pre</span><br>
+  <a href="http://github.com/rust-lang/rust/commit/169c988d09a9d4e46de2b7fead9489e94964c7c7"
+    class="hash white-sticker">169c988d</a>
+</div>
+
+
+    <h1 class="title">The Rust Tasks and Communication Guide</h1>
+    <nav id="TOC"><ul>
+<li><a href="#introduction">1 Introduction</a><ul>
+<li><a href="#a-note-about-the-libraries">1.1 A note about the libraries</a><ul></ul></li></ul></li>
+<li><a href="#basics">2 Basics</a><ul>
+<li><a href="#communication">2.1 Communication</a><ul></ul></li>
+<li><a href="#backgrounding-computations:-futures">2.2 Backgrounding computations: Futures</a><ul></ul></li>
+<li><a href="#sharing-immutable-data-without-copy:-arc">2.3 Sharing immutable data without copy: Arc</a><ul></ul></li></ul></li>
+<li><a href="#handling-task-failure">3 Handling task failure</a><ul>
+<li><a href="#creating-a-task-with-a-bi-directional-communication-path">3.1 Creating a task with a bi-directional communication path</a><ul></ul></li></ul></li></ul></nav>
+<h1 id="introduction" class='section-header'><a
+                           href="#introduction">1 Introduction</a></h1>
+<p>Rust provides safe concurrency through a combination
+of lightweight, memory-isolated tasks and message passing.
+This guide will describe the concurrency model in Rust, how it
+relates to the Rust type system, and introduce
+the fundamental library abstractions for constructing concurrent programs.</p>
+
+<p>Rust tasks are not the same as traditional threads: rather,
+they are considered <em>green threads</em>, lightweight units of execution that the Rust
+runtime schedules cooperatively onto a small number of operating system threads.
+On a multi-core system Rust tasks will be scheduled in parallel by default.
+Because tasks are significantly
+cheaper to create than traditional threads, Rust can create hundreds of
+thousands of concurrent tasks on a typical 32-bit system.
+In general, all Rust code executes inside a task, including the <code>main</code> function.</p>
+
+<p>In order to make efficient use of memory Rust tasks have dynamically sized stacks.
+A task begins its life with a small
+amount of stack space (currently in the low thousands of bytes, depending on
+platform), and acquires more stack as needed.
+Unlike in languages such as C, a Rust task cannot accidentally write to
+memory beyond the end of the stack, causing crashes or worse.</p>
+
+<p>Tasks provide failure isolation and recovery. When a fatal error occurs in Rust
+code as a result of an explicit call to <code>fail!()</code>, an assertion failure, or
+another invalid operation, the runtime system destroys the entire
+task. Unlike in languages such as Java and C++, there is no way to <code>catch</code> an
+exception. Instead, tasks may monitor each other for failure.</p>
+
+<p>Tasks use Rust&#39;s type system to provide strong memory safety guarantees. In
+particular, the type system guarantees that tasks cannot share mutable state
+with each other. Tasks communicate with each other by transferring <em>owned</em>
+data through the global <em>exchange heap</em>.</p>
+
+<h2 id="a-note-about-the-libraries" class='section-header'><a
+                           href="#a-note-about-the-libraries">1.1 A note about the libraries</a></h2>
+<p>While Rust&#39;s type system provides the building blocks needed for safe
+and efficient tasks, all of the task functionality itself is implemented
+in the standard and sync libraries, which are still under development
+and do not always present a consistent or complete interface.</p>
+
+<p>For your reference, these are the standard modules involved in Rust
+concurrency at this writing:</p>
+
+<ul>
+<li><a href="std/task/index.html"><code>std::task</code></a> - All code relating to tasks and task scheduling,</li>
+<li><a href="std/comm/index.html"><code>std::comm</code></a> - The message passing interface,</li>
+<li><a href="sync/struct.DuplexStream.html"><code>sync::DuplexStream</code></a> - An extension of <code>pipes::stream</code> that allows both sending and receiving,</li>
+<li><a href="sync/struct.Arc.html"><code>sync::Arc</code></a> - The Arc (atomically reference counted) type, for safely sharing immutable data,</li>
+<li><a href="sync/raw/struct.Semaphore.html"><code>sync::Semaphore</code></a> - A counting, blocking, bounded-waiting semaphore,</li>
+<li><a href="sync/mutex/index.html"><code>sync::Mutex</code></a> - A blocking, bounded-waiting, mutual exclusion lock with an associated
+FIFO condition variable,</li>
+<li><a href="sync/struct.RWLock.html"><code>sync::RWLock</code></a> - A blocking, no-starvation, reader-writer lock with an associated condvar,</li>
+<li><a href="sync/struct.Barrier.html"><code>sync::Barrier</code></a> - A barrier enables multiple tasks to synchronize the beginning
+of some computation,</li>
+<li><a href="sync/struct.TaskPool.html"><code>sync::TaskPool</code></a> - A task pool abstraction,</li>
+<li><a href="sync/struct.Future.html"><code>sync::Future</code></a> - A type encapsulating the result of a computation which may not be complete,</li>
+<li><a href="sync/one/index.html"><code>sync::one</code></a> - A &quot;once initialization&quot; primitive</li>
+<li><a href="sync/mutex/index.html"><code>sync::mutex</code></a> - A proper mutex implementation regardless of the &quot;flavor of task&quot; which is
+acquiring the lock.</li>
+</ul>
+
+<h1 id="basics" class='section-header'><a
+                           href="#basics">2 Basics</a></h1>
+<p>The programming interface for creating and managing tasks lives
+in the <code>task</code> module of the <code>std</code> library, and is thus available to all
+Rust code by default. At its simplest, creating a task is a matter of
+calling the <code>spawn</code> function with a closure argument. <code>spawn</code> executes the
+closure in the new task.</p>
+<span id='rust-example-raw-0' class='rusttest'>fn main() {
+    use std::task::spawn;
+    
+    // Print something profound in a different task using a named function
+    fn print_message() { println!(&quot;I am running in a different task!&quot;); }
+    spawn(print_message);
+    
+    // Print something profound in a different task using a `proc` expression
+    // The `proc` expression evaluates to an (unnamed) owned closure.
+    // That closure will call `println!(...)` when the spawned task runs.
+    
+    spawn(proc() println!(&quot;I am also running in a different task!&quot;) );
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='comment'>
+// Print something profound in a different task using a named function
+</span><span class='kw'>fn</span> <span class='ident'>print_message</span>() { <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;I am running in a different task!&quot;</span>); }
+<span class='ident'>spawn</span>(<span class='ident'>print_message</span>);<span class='comment'>
+
+// Print something profound in a different task using a `proc` expression
+// The `proc` expression evaluates to an (unnamed) owned closure.
+// That closure will call `println!(...)` when the spawned task runs.
+
+</span><span class='ident'>spawn</span>(<span class='kw'>proc</span>() <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;I am also running in a different task!&quot;</span>) );
+</pre>
+
+<p>In Rust, there is nothing special about creating tasks: a task is not a
+concept that appears in the language semantics. Instead, Rust&#39;s type system
+provides all the tools necessary to implement safe concurrency: particularly,
+<em>owned types</em>. The language leaves the implementation details to the standard
+library.</p>
+
+<p>The <code>spawn</code> function has a very simple type signature: <code>fn spawn(f:
+proc())</code>. Because it accepts only owned closures, and owned closures
+contain only owned data, <code>spawn</code> can safely move the entire closure
+and all its associated state into an entirely different task for
+execution. Like any closure, the function passed to <code>spawn</code> may capture
+an environment that it carries across tasks.</p>
+<span id='rust-example-raw-1' class='rusttest'>fn main() {
+    use std::task::spawn;
+    fn generate_task_number() -&gt; int { 0 }
+    // Generate some state locally
+    let child_task_number = generate_task_number();
+    
+    spawn(proc() {
+        // Capture it in the remote task
+        println!(&quot;I am child number {}&quot;, child_task_number);
+    });
+}</span><pre id='rust-example-rendered-1' class='rust '>
+<span class='comment'>// Generate some state locally
+</span><span class='kw'>let</span> <span class='ident'>child_task_number</span> <span class='op'>=</span> <span class='ident'>generate_task_number</span>();
+
+<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {<span class='comment'>
+    // Capture it in the remote task
+    </span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;I am child number {}&quot;</span>, <span class='ident'>child_task_number</span>);
+});
+</pre>
+
+<h2 id="communication" class='section-header'><a
+                           href="#communication">2.1 Communication</a></h2>
+<p>Now that we have spawned a new task, it would be nice if we could
+communicate with it. Recall that Rust does not have shared mutable
+state, so one task may not manipulate variables owned by another task.
+Instead we use <em>pipes</em>.</p>
+
+<p>A pipe is simply a pair of endpoints: one for sending messages and another for
+receiving messages. Pipes are low-level communication building-blocks and so
+come in a variety of forms, each one appropriate for a different use case. In
+what follows, we cover the most commonly used varieties.</p>
+
+<p>The simplest way to create a pipe is to use the <code>channel</code>
+function to create a <code>(Sender, Receiver)</code> pair. In Rust parlance, a <em>sender</em>
+is a sending endpoint of a pipe, and a <em>receiver</em> is the receiving
+endpoint. Consider the following example of calculating two results
+concurrently:</p>
+<span id='rust-example-raw-2' class='rusttest'>fn main() {
+    use std::task::spawn;
+    
+    let (tx, rx): (Sender&lt;int&gt;, Receiver&lt;int&gt;) = channel();
+    
+    spawn(proc() {
+        let result = some_expensive_computation();
+        tx.send(result);
+    });
+    
+    some_other_expensive_computation();
+    let result = rx.recv();
+    fn some_expensive_computation() -&gt; int { 42 }
+    fn some_other_expensive_computation() {}
+}</span><pre id='rust-example-rendered-2' class='rust '>
+
+<span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>): (<span class='ident'>Sender</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>, <span class='ident'>Receiver</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
+
+<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+    <span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>some_expensive_computation</span>();
+    <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='ident'>result</span>);
+});
+
+<span class='ident'>some_other_expensive_computation</span>();
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>();
+</pre>
+
+<p>Let&#39;s examine this example in detail. First, the <code>let</code> statement creates a
+stream for sending and receiving integers (the left-hand side of the <code>let</code>,
+<code>(tx, rx)</code>, is an example of a <em>destructuring let</em>: the pattern separates
+a tuple into its component parts).</p>
+<span id='rust-example-raw-3' class='rusttest'>fn main() {
+    let (tx, rx): (Sender&lt;int&gt;, Receiver&lt;int&gt;) = channel();
+}</span><pre id='rust-example-rendered-3' class='rust '>
+<span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>): (<span class='ident'>Sender</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>, <span class='ident'>Receiver</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
+</pre>
+
+<p>The child task will use the sender to send data to the parent task,
+which will wait to receive the data on the receiver. The next statement
+spawns the child task.</p>
+<span id='rust-example-raw-4' class='rusttest'>fn main() {
+    use std::task::spawn;
+    fn some_expensive_computation() -&gt; int { 42 }
+    let (tx, rx) = channel();
+    spawn(proc() {
+        let result = some_expensive_computation();
+        tx.send(result);
+    });
+}</span><pre id='rust-example-rendered-4' class='rust '>
+<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+    <span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>some_expensive_computation</span>();
+    <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='ident'>result</span>);
+});
+</pre>
+
+<p>Notice that the creation of the task closure transfers <code>tx</code> to the child
+task implicitly: the closure captures <code>tx</code> in its environment. Both <code>Sender</code>
+and <code>Receiver</code> are sendable types and may be captured into tasks or otherwise
+transferred between them. In the example, the child task runs an expensive
+computation, then sends the result over the captured channel.</p>
+
+<p>Finally, the parent continues with some other expensive
+computation, then waits for the child&#39;s result to arrive on the
+receiver:</p>
+<span id='rust-example-raw-5' class='rusttest'>fn main() {
+    fn some_other_expensive_computation() {}
+    let (tx, rx) = channel::&lt;int&gt;();
+    tx.send(0);
+    some_other_expensive_computation();
+    let result = rx.recv();
+}</span><pre id='rust-example-rendered-5' class='rust '>
+<span class='ident'>some_other_expensive_computation</span>();
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>();
+</pre>
+
+<p>The <code>Sender</code> and <code>Receiver</code> pair created by <code>channel</code> enables efficient
+communication between a single sender and a single receiver, but multiple
+senders cannot use a single <code>Sender</code> value, and multiple receivers cannot use a
+single <code>Receiver</code> value.  What if our example needed to compute multiple
+results across a number of tasks? The following program is ill-typed:</p>
+<span id='rust-example-raw-6' class='rusttest'>fn main() {
+    fn some_expensive_computation() -&gt; int { 42 }
+    let (tx, rx) = channel();
+    
+    spawn(proc() {
+        tx.send(some_expensive_computation());
+    });
+    
+    // ERROR! The previous spawn statement already owns the sender,
+    // so the compiler will not allow it to be captured again
+    spawn(proc() {
+        tx.send(some_expensive_computation());
+    });
+}</span><pre id='rust-example-rendered-6' class='rust '>
+<span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
+
+<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+    <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='ident'>some_expensive_computation</span>());
+});<span class='comment'>
+
+// ERROR! The previous spawn statement already owns the sender,
+// so the compiler will not allow it to be captured again
+</span><span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+    <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='ident'>some_expensive_computation</span>());
+});
+</pre>
+
+<p>Instead we can clone the <code>tx</code>, which allows for multiple senders.</p>
+<span id='rust-example-raw-7' class='rusttest'>fn main() {
+    let (tx, rx) = channel();
+    
+    for init_val in range(0u, 3) {
+        // Create a new channel handle to distribute to the child task
+        let child_tx = tx.clone();
+        spawn(proc() {
+            child_tx.send(some_expensive_computation(init_val));
+        });
+    }
+    
+    let result = rx.recv() + rx.recv() + rx.recv();
+    fn some_expensive_computation(_i: uint) -&gt; int { 42 }
+}</span><pre id='rust-example-rendered-7' class='rust '>
+<span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
+
+<span class='kw'>for</span> <span class='ident'>init_val</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>3</span>) {<span class='comment'>
+    // Create a new channel handle to distribute to the child task
+    </span><span class='kw'>let</span> <span class='ident'>child_tx</span> <span class='op'>=</span> <span class='ident'>tx</span>.<span class='ident'>clone</span>();
+    <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+        <span class='ident'>child_tx</span>.<span class='ident'>send</span>(<span class='ident'>some_expensive_computation</span>(<span class='ident'>init_val</span>));
+    });
+}
+
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>() <span class='op'>+</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>() <span class='op'>+</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>();
+</pre>
+
+<p>Cloning a <code>Sender</code> produces a new handle to the same channel, allowing multiple
+tasks to send data to a single receiver. It upgrades the channel internally in
+order to allow this functionality, which means that channels that are not
+cloned can avoid the overhead required to handle multiple senders. But this
+fact has no bearing on the channel&#39;s usage: the upgrade is transparent.</p>
+
+<p>Note that the above cloning example is somewhat contrived since
+you could also simply use three <code>Sender</code> pairs, but it serves to
+illustrate the point. For reference, written with multiple streams, it
+might look like the example below.</p>
+<span id='rust-example-raw-8' class='rusttest'>fn main() {
+    use std::task::spawn;
+    
+    // Create a vector of ports, one for each child task
+    let rxs = Vec::from_fn(3, |init_val| {
+        let (tx, rx) = channel();
+        spawn(proc() {
+            tx.send(some_expensive_computation(init_val));
+        });
+        rx
+    });
+    
+    // Wait on each port, accumulating the results
+    let result = rxs.iter().fold(0, |accum, rx| accum + rx.recv() );
+    fn some_expensive_computation(_i: uint) -&gt; int { 42 }
+}</span><pre id='rust-example-rendered-8' class='rust '>
+<span class='comment'>
+// Create a vector of ports, one for each child task
+</span><span class='kw'>let</span> <span class='ident'>rxs</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>from_fn</span>(<span class='number'>3</span>, <span class='op'>|</span><span class='ident'>init_val</span><span class='op'>|</span> {
+    <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
+    <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+        <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='ident'>some_expensive_computation</span>(<span class='ident'>init_val</span>));
+    });
+    <span class='ident'>rx</span>
+});<span class='comment'>
+
+// Wait on each port, accumulating the results
+</span><span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>rxs</span>.<span class='ident'>iter</span>().<span class='ident'>fold</span>(<span class='number'>0</span>, <span class='op'>|</span><span class='ident'>accum</span>, <span class='ident'>rx</span><span class='op'>|</span> <span class='ident'>accum</span> <span class='op'>+</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>() );
+</pre>
+
+<h2 id="backgrounding-computations:-futures" class='section-header'><a
+                           href="#backgrounding-computations:-futures">2.2 Backgrounding computations: Futures</a></h2>
+<p>With <code>sync::Future</code>, rust has a mechanism for requesting a computation and getting the result
+later.</p>
+
+<p>The basic example below illustrates this.</p>
+<span id='rust-example-raw-9' class='rusttest'>use std::sync::Future;
+
+fn main() {
+fn make_a_sandwich() {};
+fn fib(n: u64) -&gt; u64 {
+    // lengthy computation returning an uint
+    12586269025
+}
+
+let mut delayed_fib = Future::spawn(proc() fib(50));
+make_a_sandwich();
+println!(&quot;fib(50) = {}&quot;, delayed_fib.get())
+}</span><pre id='rust-example-rendered-9' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>Future</span>;
+
+<span class='kw'>fn</span> <span class='ident'>fib</span>(<span class='ident'>n</span>: <span class='ident'>u64</span>) <span class='op'>-&gt;</span> <span class='ident'>u64</span> {<span class='comment'>
+    // lengthy computation returning an uint
+    </span><span class='number'>12586269025</span>
+}
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>delayed_fib</span> <span class='op'>=</span> <span class='ident'>Future</span>::<span class='ident'>spawn</span>(<span class='kw'>proc</span>() <span class='ident'>fib</span>(<span class='number'>50</span>));
+<span class='ident'>make_a_sandwich</span>();
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;fib(50) = {}&quot;</span>, <span class='ident'>delayed_fib</span>.<span class='ident'>get</span>())
+</pre>
+
+<p>The call to <code>future::spawn</code> returns immediately a <code>future</code> object regardless of how long it
+takes to run <code>fib(50)</code>. You can then make yourself a sandwich while the computation of <code>fib</code> is
+running. The result of the execution of the method is obtained by calling <code>get</code> on the future.
+This call will block until the value is available (<em>i.e.</em> the computation is complete). Note that
+the future needs to be mutable so that it can save the result for next time <code>get</code> is called.</p>
+
+<p>Here is another example showing how futures allow you to background computations. The workload will
+be distributed on the available cores.</p>
+<span id='rust-example-raw-10' class='rusttest'>use std::sync::Future;
+fn partial_sum(start: uint) -&gt; f64 {
+    let mut local_sum = 0f64;
+    for num in range(start*100000, (start+1)*100000) {
+        local_sum += (num as f64 + 1.0).powf(-2.0);
+    }
+    local_sum
+}
+
+fn main() {
+    let mut futures = Vec::from_fn(1000, |ind| Future::spawn( proc() { partial_sum(ind) }));
+
+    let mut final_res = 0f64;
+    for ft in futures.mut_iter()  {
+        final_res += ft.get();
+    }
+    println!(&quot;π^2/6 is not far from : {}&quot;, final_res);
+}</span><pre id='rust-example-rendered-10' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>partial_sum</span>(<span class='ident'>start</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span> {
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>local_sum</span> <span class='op'>=</span> <span class='number'>0f64</span>;
+    <span class='kw'>for</span> <span class='ident'>num</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='ident'>start</span><span class='op'>*</span><span class='number'>100000</span>, (<span class='ident'>start</span><span class='op'>+</span><span class='number'>1</span>)<span class='op'>*</span><span class='number'>100000</span>) {
+        <span class='ident'>local_sum</span> <span class='op'>+=</span> (<span class='ident'>num</span> <span class='kw'>as</span> <span class='ident'>f64</span> <span class='op'>+</span> <span class='number'>1.0</span>).<span class='ident'>powf</span>(<span class='op'>-</span><span class='number'>2.0</span>);
+    }
+    <span class='ident'>local_sum</span>
+}
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>futures</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>from_fn</span>(<span class='number'>1000</span>, <span class='op'>|</span><span class='ident'>ind</span><span class='op'>|</span> <span class='ident'>Future</span>::<span class='ident'>spawn</span>( <span class='kw'>proc</span>() { <span class='ident'>partial_sum</span>(<span class='ident'>ind</span>) }));
+
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>final_res</span> <span class='op'>=</span> <span class='number'>0f64</span>;
+    <span class='kw'>for</span> <span class='ident'>ft</span> <span class='kw'>in</span> <span class='ident'>futures</span>.<span class='ident'>mut_iter</span>()  {
+        <span class='ident'>final_res</span> <span class='op'>+=</span> <span class='ident'>ft</span>.<span class='ident'>get</span>();
+    }
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;π^2/6 is not far from : {}&quot;</span>, <span class='ident'>final_res</span>);
+}
+</pre>
+
+<h2 id="sharing-immutable-data-without-copy:-arc" class='section-header'><a
+                           href="#sharing-immutable-data-without-copy:-arc">2.3 Sharing immutable data without copy: Arc</a></h2>
+<p>To share immutable data between tasks, a first approach would be to only use pipes as we have seen
+previously. A copy of the data to share would then be made for each task. In some cases, this would
+add up to a significant amount of wasted memory and would require copying the same data more than
+necessary.</p>
+
+<p>To tackle this issue, one can use an Atomically Reference Counted wrapper (<code>Arc</code>) as implemented in
+the <code>sync</code> library of Rust. With an Arc, the data will no longer be copied for each task. The Arc
+acts as a reference to the shared data and only this reference is shared and cloned.</p>
+
+<p>Here is a small example showing how to use Arcs. We wish to run concurrently several computations on
+a single large vector of floats. Each task needs the full vector to perform its duty.</p>
+<span id='rust-example-raw-11' class='rusttest'>use std::rand;
+use std::sync::Arc;
+
+fn pnorm(nums: &amp;[f64], p: uint) -&gt; f64 {
+    nums.iter().fold(0.0, |a, b| a + b.powf(p as f64)).powf(1.0 / (p as f64))
+}
+
+fn main() {
+    let numbers = Vec::from_fn(1000000, |_| rand::random::&lt;f64&gt;());
+    let numbers_arc = Arc::new(numbers);
+
+    for num in range(1u, 10) {
+        let task_numbers = numbers_arc.clone();
+
+        spawn(proc() {
+            println!(&quot;{}-norm = {}&quot;, num, pnorm(task_numbers.as_slice(), num));
+        });
+    }
+}</span><pre id='rust-example-rendered-11' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rand</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>Arc</span>;
+
+<span class='kw'>fn</span> <span class='ident'>pnorm</span>(<span class='ident'>nums</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>f64</span>], <span class='ident'>p</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span> {
+    <span class='ident'>nums</span>.<span class='ident'>iter</span>().<span class='ident'>fold</span>(<span class='number'>0.0</span>, <span class='op'>|</span><span class='ident'>a</span>, <span class='ident'>b</span><span class='op'>|</span> <span class='ident'>a</span> <span class='op'>+</span> <span class='ident'>b</span>.<span class='ident'>powf</span>(<span class='ident'>p</span> <span class='kw'>as</span> <span class='ident'>f64</span>)).<span class='ident'>powf</span>(<span class='number'>1.0</span> <span class='op'>/</span> (<span class='ident'>p</span> <span class='kw'>as</span> <span class='ident'>f64</span>))
+}
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='ident'>numbers</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>from_fn</span>(<span class='number'>1000000</span>, <span class='op'>|</span>_<span class='op'>|</span> <span class='ident'>rand</span>::<span class='ident'>random</span>::<span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>());
+    <span class='kw'>let</span> <span class='ident'>numbers_arc</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>numbers</span>);
+
+    <span class='kw'>for</span> <span class='ident'>num</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>1u</span>, <span class='number'>10</span>) {
+        <span class='kw'>let</span> <span class='ident'>task_numbers</span> <span class='op'>=</span> <span class='ident'>numbers_arc</span>.<span class='ident'>clone</span>();
+
+        <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}-norm = {}&quot;</span>, <span class='ident'>num</span>, <span class='ident'>pnorm</span>(<span class='ident'>task_numbers</span>.<span class='ident'>as_slice</span>(), <span class='ident'>num</span>));
+        });
+    }
+}
+</pre>
+
+<p>The function <code>pnorm</code> performs a simple computation on the vector (it computes the sum of its items
+at the power given as argument and takes the inverse power of this value). The Arc on the vector is
+created by the line</p>
+<span id='rust-example-raw-12' class='rusttest'>use std::rand;
+use std::sync::Arc;
+fn main() {
+let numbers = Vec::from_fn(1000000, |_| rand::random::&lt;f64&gt;());
+let numbers_arc=Arc::new(numbers);
+}</span><pre id='rust-example-rendered-12' class='rust '>
+<span class='kw'>let</span> <span class='ident'>numbers_arc</span><span class='op'>=</span><span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>numbers</span>);
+</pre>
+
+<p>and a unique clone is captured for each task via a procedure. This only copies the wrapper and not
+it&#39;s contents. Within the task&#39;s procedure, the captured Arc reference can be used as an immutable
+reference to the underlying vector as if it were local.</p>
+<span id='rust-example-raw-13' class='rusttest'>use std::rand;
+use std::sync::Arc;
+fn pnorm(nums: &amp;[f64], p: uint) -&gt; f64 { 4.0 }
+fn main() {
+let numbers=Vec::from_fn(1000000, |_| rand::random::&lt;f64&gt;());
+let numbers_arc = Arc::new(numbers);
+let num = 4;
+let task_numbers = numbers_arc.clone();
+spawn(proc() {
+    // Capture task_numbers and use it as if it was the underlying vector
+    println!(&quot;{}-norm = {}&quot;, num, pnorm(task_numbers.as_slice(), num));
+});
+}</span><pre id='rust-example-rendered-13' class='rust '>
+<span class='kw'>let</span> <span class='ident'>task_numbers</span> <span class='op'>=</span> <span class='ident'>numbers_arc</span>.<span class='ident'>clone</span>();
+<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {<span class='comment'>
+    // Capture task_numbers and use it as if it was the underlying vector
+    </span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}-norm = {}&quot;</span>, <span class='ident'>num</span>, <span class='ident'>pnorm</span>(<span class='ident'>task_numbers</span>.<span class='ident'>as_slice</span>(), <span class='ident'>num</span>));
+});
+</pre>
+
+<p>The <code>arc</code> module also implements Arcs around mutable data that are not covered here.</p>
+
+<h1 id="handling-task-failure" class='section-header'><a
+                           href="#handling-task-failure">3 Handling task failure</a></h1>
+<p>Rust has a built-in mechanism for raising exceptions. The <code>fail!()</code> macro
+(which can also be written with an error string as an argument: <code>fail!(
+~reason)</code>) and the <code>assert!</code> construct (which effectively calls <code>fail!()</code>
+if a boolean expression is false) are both ways to raise exceptions. When a
+task raises an exception the task unwinds its stack---running destructors and
+freeing memory along the way---and then exits. Unlike exceptions in C++,
+exceptions in Rust are unrecoverable within a single task: once a task fails,
+there is no way to &quot;catch&quot; the exception.</p>
+
+<p>While it isn&#39;t possible for a task to recover from failure, tasks may notify
+each other of failure. The simplest way of handling task failure is with the
+<code>try</code> function, which is similar to <code>spawn</code>, but immediately blocks waiting
+for the child task to finish. <code>try</code> returns a value of type <code>Result&lt;T,
+()&gt;</code>. <code>Result</code> is an <code>enum</code> type with two variants: <code>Ok</code> and <code>Err</code>. In this
+case, because the type arguments to <code>Result</code> are <code>int</code> and <code>()</code>, callers can
+pattern-match on a result to check whether it&#39;s an <code>Ok</code> result with an <code>int</code>
+field (representing a successful result) or an <code>Err</code> result (representing
+termination with an error).</p>
+<span id='rust-example-raw-14' class='rusttest'>fn main() {
+    use std::task;
+    fn some_condition() -&gt; bool { false }
+    fn calculate_result() -&gt; int { 0 }
+    let result: Result&lt;int, ()&gt; = task::try(proc() {
+        if some_condition() {
+            calculate_result()
+        } else {
+            fail!(&quot;oops!&quot;);
+        }
+    });
+    assert!(result.is_err());
+}</span><pre id='rust-example-rendered-14' class='rust '>
+<span class='kw'>let</span> <span class='ident'>result</span>: <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>int</span>, ()<span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>task</span>::<span class='ident'>try</span>(<span class='kw'>proc</span>() {
+    <span class='kw'>if</span> <span class='ident'>some_condition</span>() {
+        <span class='ident'>calculate_result</span>()
+    } <span class='kw'>else</span> {
+        <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;oops!&quot;</span>);
+    }
+});
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>result</span>.<span class='ident'>is_err</span>());
+</pre>
+
+<p>Unlike <code>spawn</code>, the function spawned using <code>try</code> may return a value,
+which <code>try</code> will dutifully propagate back to the caller in a <a href="std/result/index.html"><code>Result</code></a>
+enum. If the child task terminates successfully, <code>try</code> will
+return an <code>Ok</code> result; if the child task fails, <code>try</code> will return
+an <code>Error</code> result.</p>
+
+<blockquote>
+<p><em>Note:</em> A failed task does not currently produce a useful error
+value (<code>try</code> always returns <code>Err(())</code>). In the
+future, it may be possible for tasks to intercept the value passed to
+<code>fail!()</code>.</p>
+</blockquote>
+
+<p>TODO: Need discussion of <code>future_result</code> in order to make failure
+modes useful.</p>
+
+<p>But not all failures are created equal. In some cases you might need to
+abort the entire program (perhaps you&#39;re writing an assert which, if
+it trips, indicates an unrecoverable logic error); in other cases you
+might want to contain the failure at a certain boundary (perhaps a
+small piece of input from the outside world, which you happen to be
+processing in parallel, is malformed and its processing task can&#39;t
+proceed).</p>
+
+<h2 id="creating-a-task-with-a-bi-directional-communication-path" class='section-header'><a
+                           href="#creating-a-task-with-a-bi-directional-communication-path">3.1 Creating a task with a bi-directional communication path</a></h2>
+<p>A very common thing to do is to spawn a child task where the parent
+and child both need to exchange messages with each other. The
+function <code>sync::comm::duplex</code> supports this pattern.  We&#39;ll
+look briefly at how to use it.</p>
+
+<p>To see how <code>duplex</code> works, we will create a child task
+that repeatedly receives a <code>uint</code> message, converts it to a string, and sends
+the string in response.  The child terminates when it receives <code>0</code>.
+Here is the function that implements the child task:</p>
+<span id='rust-example-raw-15' class='rusttest'>#![allow(deprecated)]
+
+use std::comm::DuplexStream;
+fn main() {
+fn stringifier(channel: &amp;DuplexStream&lt;String, uint&gt;) {
+    let mut value: uint;
+    loop {
+        value = channel.recv();
+        channel.send(value.to_str());
+        if value == 0 { break; }
+    }
+}
+}</span><pre id='rust-example-rendered-15' class='rust '>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>deprecated</span>)]</span>
+
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>comm</span>::<span class='ident'>DuplexStream</span>;
+<span class='kw'>fn</span> <span class='ident'>stringifier</span>(<span class='ident'>channel</span>: <span class='kw-2'>&amp;</span><span class='ident'>DuplexStream</span><span class='op'>&lt;</span><span class='ident'>String</span>, <span class='ident'>uint</span><span class='op'>&gt;</span>) {
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>value</span>: <span class='ident'>uint</span>;
+    <span class='kw'>loop</span> {
+        <span class='ident'>value</span> <span class='op'>=</span> <span class='ident'>channel</span>.<span class='ident'>recv</span>();
+        <span class='ident'>channel</span>.<span class='ident'>send</span>(<span class='ident'>value</span>.<span class='ident'>to_str</span>());
+        <span class='kw'>if</span> <span class='ident'>value</span> <span class='op'>==</span> <span class='number'>0</span> { <span class='kw'>break</span>; }
+    }
+}
+</pre>
+
+<p>The implementation of <code>DuplexStream</code> supports both sending and
+receiving. The <code>stringifier</code> function takes a <code>DuplexStream</code> that can
+send strings (the first type parameter) and receive <code>uint</code> messages
+(the second type parameter). The body itself simply loops, reading
+from the channel and then sending its response back.  The actual
+response itself is simply the stringified version of the received value,
+<code>uint::to_str(value)</code>.</p>
+
+<p>Here is the code for the parent task:</p>
+<span id='rust-example-raw-16' class='rusttest'>#![allow(deprecated)]
+
+use std::comm::duplex;
+use std::task::spawn;
+use std::comm::DuplexStream;
+fn stringifier(channel: &amp;DuplexStream&lt;String, uint&gt;) {
+    let mut value: uint;
+    loop {
+        value = channel.recv();
+        channel.send(value.to_str());
+        if value == 0u { break; }
+    }
+}
+fn main() {
+
+let (from_child, to_child) = duplex();
+
+spawn(proc() {
+    stringifier(&amp;to_child);
+});
+
+from_child.send(22);
+assert!(from_child.recv().as_slice() == &quot;22&quot;);
+
+from_child.send(23);
+from_child.send(0);
+
+assert!(from_child.recv().as_slice() == &quot;23&quot;);
+assert!(from_child.recv().as_slice() == &quot;0&quot;);
+
+}</span><pre id='rust-example-rendered-16' class='rust '>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>deprecated</span>)]</span>
+
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>comm</span>::<span class='ident'>duplex</span>;
+
+<span class='kw'>let</span> (<span class='ident'>from_child</span>, <span class='ident'>to_child</span>) <span class='op'>=</span> <span class='ident'>duplex</span>();
+
+<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+    <span class='ident'>stringifier</span>(<span class='kw-2'>&amp;</span><span class='ident'>to_child</span>);
+});
+
+<span class='ident'>from_child</span>.<span class='ident'>send</span>(<span class='number'>22</span>);
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>from_child</span>.<span class='ident'>recv</span>().<span class='ident'>as_slice</span>() <span class='op'>==</span> <span class='string'>&quot;22&quot;</span>);
+
+<span class='ident'>from_child</span>.<span class='ident'>send</span>(<span class='number'>23</span>);
+<span class='ident'>from_child</span>.<span class='ident'>send</span>(<span class='number'>0</span>);
+
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>from_child</span>.<span class='ident'>recv</span>().<span class='ident'>as_slice</span>() <span class='op'>==</span> <span class='string'>&quot;23&quot;</span>);
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>from_child</span>.<span class='ident'>recv</span>().<span class='ident'>as_slice</span>() <span class='op'>==</span> <span class='string'>&quot;0&quot;</span>);
+</pre>
+
+<p>The parent task first calls <code>DuplexStream</code> to create a pair of bidirectional
+endpoints. It then uses <code>task::spawn</code> to create the child task, which captures
+one end of the communication channel.  As a result, both parent and child can
+send and receive data to and from the other.</p>
+
+    <script type="text/javascript">
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <footer><p>
+Copyright &copy; 2011-2014 The Rust Project Developers. Licensed under the
+<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>
+or the <a href="http://opensource.org/licenses/MIT">MIT license</a>, at your option.
+</p><p>
+This file may not be copied, modified, or distributed except according to those terms.
+</p></footer>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="playpen.js"></script>
+
+
+</body>
+</html>

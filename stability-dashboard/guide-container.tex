@@ -1,0 +1,511 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+    \usepackage{xltxtra,xunicode}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
+  \newcommand{\euro}{€}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{\usepackage{microtype}}{}
+\ifxetex
+  \usepackage[setpagesize=false, % page size defined by xetex
+              unicode=false, % unicode breaks when used with xetex
+              xetex]{hyperref}
+\else
+  \usepackage[unicode=true]{hyperref}
+\fi
+\hypersetup{breaklinks=true,
+            bookmarks=true,
+            pdfauthor={},
+            pdftitle={The Rust Containers and Iterators Guide},
+            colorlinks=true,
+            citecolor=blue,
+            urlcolor=blue,
+            linkcolor=magenta,
+            pdfborder={0 0 0}}
+\urlstyle{same}  % don't use monospace font for urls
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\setcounter{secnumdepth}{5}
+
+\title{The Rust Containers and Iterators Guide}
+
+\begin{document}
+\maketitle
+
+0.11.0-pre (169c988d09a9d4e46de2b7fead9489e94964c7c7 2014-07-02 18:41:38 +0000)
+
+Copyright © 2011-2014 The Rust Project Developers. Licensed under the
+\href{http://www.apache.org/licenses/LICENSE-2.0}{Apache License,
+Version 2.0} or the \href{http://opensource.org/licenses/MIT}{MIT
+license}, at your option.
+
+This file may not be copied, modified, or distributed except according
+to those terms.
+
+{
+\hypersetup{linkcolor=black}
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+\section{Containers}\label{containers}
+
+The container traits are defined in the \texttt{std::container} module.
+
+\subsection{Unique vectors}\label{unique-vectors}
+
+Vectors have \texttt{O(1)} indexing, push (to the end) and pop (from the
+end). Vectors are the most common container in Rust, and are flexible
+enough to fit many use cases.
+
+Vectors can also be sorted and used as efficient lookup tables with the
+\texttt{bsearch()} method, if all the elements are inserted at one time
+and deletions are unnecessary.
+
+\subsection{Maps and sets}\label{maps-and-sets}
+
+Maps are collections of unique keys with corresponding values, and sets
+are just unique keys without a corresponding value. The \texttt{Map} and
+\texttt{Set} traits in \texttt{std::container} define the basic
+interface.
+
+The standard library provides three owned map/set types:
+
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  \texttt{collections::HashMap} and \texttt{collections::HashSet},
+  requiring the keys to implement \texttt{Eq} and \texttt{Hash}
+\item
+  \texttt{collections::TrieMap} and \texttt{collections::TrieSet},
+  requiring the keys to be \texttt{uint}
+\item
+  \texttt{collections::TreeMap} and \texttt{collections::TreeSet},
+  requiring the keys to implement \texttt{Ord}
+\end{itemize}
+
+These maps do not use managed pointers so they can be sent between tasks
+as long as the key and value types are sendable. Neither the key or
+value type has to be copyable.
+
+The \texttt{TrieMap} and \texttt{TreeMap} maps are ordered, while
+\texttt{HashMap} uses an arbitrary order.
+
+Each \texttt{HashMap} instance has a random 128-bit key to use with a
+keyed hash, making the order of a set of keys in a given hash table
+randomized. Rust provides a \href{https://131002.net/siphash/}{SipHash}
+implementation for any type implementing the \texttt{Hash} trait.
+
+\subsection{Double-ended queues}\label{double-ended-queues}
+
+The \texttt{collections::ringbuf} module implements a double-ended queue
+with \texttt{O(1)} amortized inserts and removals from both ends of the
+container. It also has \texttt{O(1)} indexing like a vector. The
+contained elements are not required to be copyable, and the queue will
+be sendable if the contained type is sendable. Its interface
+\texttt{Deque} is defined in \texttt{collections}.
+
+The \texttt{extra::dlist} module implements a double-ended linked list,
+also implementing the \texttt{Deque} trait, with \texttt{O(1)} removals
+and inserts at either end, and \texttt{O(1)} concatenation.
+
+\subsection{Priority queues}\label{priority-queues}
+
+The \texttt{collections::priority\_queue} module implements a queue
+ordered by a key. The contained elements are not required to be
+copyable, and the queue will be sendable if the contained type is
+sendable.
+
+Insertions have \texttt{O(log n)} time complexity and checking or
+popping the largest element is \texttt{O(1)}. Converting a vector to a
+priority queue can be done in-place, and has \texttt{O(n)} complexity. A
+priority queue can also be converted to a sorted vector in-place,
+allowing it to be used for an \texttt{O(n log n)} in-place heapsort.
+
+\section{Iterators}\label{iterators}
+
+\subsection{Iteration protocol}\label{iteration-protocol}
+
+The iteration protocol is defined by the \texttt{Iterator} trait in the
+\texttt{std::iter} module. The minimal implementation of the trait is a
+\texttt{next} method, yielding the next element from an iterator object:
+
+\begin{verbatim}
+/// An infinite stream of zeroes
+struct ZeroStream;
+
+impl Iterator<int> for ZeroStream {
+    fn next(&mut self) -> Option<int> {
+        Some(0)
+    }
+}
+\end{verbatim}
+
+Reaching the end of the iterator is signalled by returning \texttt{None}
+instead of \texttt{Some(item)}:
+
+\begin{verbatim}
+# fn main() {}
+/// A stream of N zeroes
+struct ZeroStream {
+    remaining: uint
+}
+
+impl ZeroStream {
+    fn new(n: uint) -> ZeroStream {
+        ZeroStream { remaining: n }
+    }
+}
+
+impl Iterator<int> for ZeroStream {
+    fn next(&mut self) -> Option<int> {
+        if self.remaining == 0 {
+            None
+        } else {
+            self.remaining -= 1;
+            Some(0)
+        }
+    }
+}
+\end{verbatim}
+
+In general, you cannot rely on the behavior of the \texttt{next()}
+method after it has returned \texttt{None}. Some iterators may return
+\texttt{None} forever. Others may behave differently.
+
+\subsection{Container iterators}\label{container-iterators}
+
+Containers implement iteration over the contained elements by returning
+an iterator object. For example, vector slices several iterators
+available:
+
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  \texttt{iter()} for immutable references to the elements
+\item
+  \texttt{mut\_iter()} for mutable references to the elements
+\item
+  \texttt{move\_iter()} to move the elements out by-value
+\end{itemize}
+
+A typical mutable container will implement at least \texttt{iter()},
+\texttt{mut\_iter()} and \texttt{move\_iter()}. If it maintains an
+order, the returned iterators will be \texttt{DoubleEndedIterator}s,
+which are described below.
+
+\subsubsection{Freezing}\label{freezing}
+
+Unlike most other languages with external iterators, Rust has no
+\emph{iterator invalidation}. As long as an iterator is still in scope,
+the compiler will prevent modification of the container through another
+handle.
+
+\begin{verbatim}
+let mut xs = [1i, 2, 3];
+{
+    let _it = xs.iter();
+
+    // the vector is frozen for this scope, the compiler will statically
+    // prevent modification
+}
+// the vector becomes unfrozen again at the end of the scope
+\end{verbatim}
+
+These semantics are due to most container iterators being implemented
+with \texttt{\&} and \texttt{\&mut}.
+
+\subsection{Iterator adaptors}\label{iterator-adaptors}
+
+The \texttt{Iterator} trait provides many common algorithms as default
+methods. For example, the \texttt{fold} method will accumulate the items
+yielded by an \texttt{Iterator} into a single value:
+
+\begin{verbatim}
+let xs = [1i, 9, 2, 3, 14, 12];
+let result = xs.iter().fold(0, |accumulator, item| accumulator - *item);
+assert_eq!(result, -41);
+\end{verbatim}
+
+Most adaptors return an adaptor object implementing the
+\texttt{Iterator} trait itself:
+
+\begin{verbatim}
+let xs = [1i, 9, 2, 3, 14, 12];
+let ys = [5i, 2, 1, 8];
+let sum = xs.iter().chain(ys.iter()).fold(0, |a, b| a + *b);
+assert_eq!(sum, 57);
+\end{verbatim}
+
+Some iterator adaptors may return \texttt{None} before exhausting the
+underlying iterator. Additionally, if these iterator adaptors are called
+again after returning \texttt{None}, they may call their underlying
+iterator again even if the adaptor will continue to return \texttt{None}
+forever. This may not be desired if the underlying iterator has
+side-effects.
+
+In order to provide a guarantee about behavior once \texttt{None} has
+been returned, an iterator adaptor named \texttt{fuse()} is provided.
+This returns an iterator that will never call its underlying iterator
+again once \texttt{None} has been returned:
+
+\begin{verbatim}
+let xs = [1i,2,3,4,5];
+let mut calls = 0i;
+
+{
+    let it = xs.iter().scan((), |_, x| {
+        calls += 1;
+        if *x < 3 { Some(x) } else { None }});
+
+    // the iterator will only yield 1 and 2 before returning None
+    // If we were to call it 5 times, calls would end up as 5, despite
+    // only 2 values being yielded (and therefore 3 unique calls being
+    // made). The fuse() adaptor can fix this.
+
+    let mut it = it.fuse();
+    it.next();
+    it.next();
+    it.next();
+    it.next();
+    it.next();
+}
+
+assert_eq!(calls, 3);
+\end{verbatim}
+
+\subsection{For loops}\label{for-loops}
+
+The function \texttt{range} (or \texttt{range\_inclusive}) allows to
+simply iterate through a given range:
+
+\begin{verbatim}
+for i in range(0i, 5) {
+  print!("{} ", i) // prints "0 1 2 3 4"
+}
+
+for i in std::iter::range_inclusive(0i, 5) { // needs explicit import
+  print!("{} ", i) // prints "0 1 2 3 4 5"
+}
+\end{verbatim}
+
+The \texttt{for} keyword can be used as sugar for iterating through any
+iterator:
+
+\begin{verbatim}
+let xs = [2u, 3, 5, 7, 11, 13, 17];
+
+// print out all the elements in the vector
+for x in xs.iter() {
+    println!("{}", *x)
+}
+
+// print out all but the first 3 elements in the vector
+for x in xs.iter().skip(3) {
+    println!("{}", *x)
+}
+\end{verbatim}
+
+For loops are \emph{often} used with a temporary iterator object, as
+above. They can also advance the state of an iterator in a mutable
+location:
+
+\begin{verbatim}
+let xs = [1i, 2, 3, 4, 5];
+let ys = ["foo", "bar", "baz", "foobar"];
+
+// create an iterator yielding tuples of elements from both vectors
+let mut it = xs.iter().zip(ys.iter());
+
+// print out the pairs of elements up to (&3, &"baz")
+for (x, y) in it {
+    println!("{} {}", *x, *y);
+
+    if *x == 3 {
+        break;
+    }
+}
+
+// yield and print the last pair from the iterator
+println!("last: {}", it.next());
+
+// the iterator is now fully consumed
+assert!(it.next().is_none());
+\end{verbatim}
+
+\subsection{Conversion}\label{conversion}
+
+Iterators offer generic conversion to containers with the
+\texttt{collect} adaptor:
+
+\begin{verbatim}
+let xs = [0i, 1, 1, 2, 3, 5, 8];
+let ys = xs.iter().rev().skip(1).map(|&x| x * 2).collect::<Vec<int>>();
+assert_eq!(ys, vec![10, 6, 4, 2, 2, 0]);
+\end{verbatim}
+
+The method requires a type hint for the container type, if the
+surrounding code does not provide sufficient information.
+
+Containers can provide conversion from iterators through
+\texttt{collect} by implementing the \texttt{FromIterator} trait. For
+example, the implementation for vectors is as follows:
+
+\begin{verbatim}
+impl<T> FromIterator<T> for Vec<T> {
+    fn from_iter<I:Iterator<A>>(mut iterator: I) -> Vec<T> {
+        let (lower, _) = iterator.size_hint();
+        let mut vector = Vec::with_capacity(lower);
+        for element in iterator {
+            vector.push(element);
+        }
+        vector
+    }
+}
+\end{verbatim}
+
+\subsubsection{Size hints}\label{size-hints}
+
+The \texttt{Iterator} trait provides a \texttt{size\_hint} default
+method, returning a lower bound and optionally on upper bound on the
+length of the iterator:
+
+\begin{verbatim}
+fn size_hint(&self) -> (uint, Option<uint>) { (0, None) }
+\end{verbatim}
+
+The vector implementation of \texttt{FromIterator} from above uses the
+lower bound to pre-allocate enough space to hold the minimum number of
+elements the iterator will yield.
+
+The default implementation is always correct, but it should be
+overridden if the iterator can provide better information.
+
+The \texttt{ZeroStream} from earlier can provide an exact lower and
+upper bound:
+
+\begin{verbatim}
+# fn main() {}
+/// A stream of N zeroes
+struct ZeroStream {
+    remaining: uint
+}
+
+impl ZeroStream {
+    fn new(n: uint) -> ZeroStream {
+        ZeroStream { remaining: n }
+    }
+
+    fn size_hint(&self) -> (uint, Option<uint>) {
+        (self.remaining, Some(self.remaining))
+    }
+}
+
+impl Iterator<int> for ZeroStream {
+    fn next(&mut self) -> Option<int> {
+        if self.remaining == 0 {
+            None
+        } else {
+            self.remaining -= 1;
+            Some(0)
+        }
+    }
+}
+\end{verbatim}
+
+\subsection{Double-ended iterators}\label{double-ended-iterators}
+
+The \texttt{DoubleEndedIterator} trait represents an iterator able to
+yield elements from either end of a range. It inherits from the
+\texttt{Iterator} trait and extends it with the \texttt{next\_back}
+function.
+
+A \texttt{DoubleEndedIterator} can have its direction changed with the
+\texttt{rev} adaptor, returning another \texttt{DoubleEndedIterator}
+with \texttt{next} and \texttt{next\_back} exchanged.
+
+\begin{verbatim}
+let xs = [1i, 2, 3, 4, 5, 6];
+let mut it = xs.iter();
+println!("{}", it.next()); // prints `Some(1)`
+println!("{}", it.next()); // prints `Some(2)`
+println!("{}", it.next_back()); // prints `Some(6)`
+
+// prints `5`, `4` and `3`
+for &x in it.rev() {
+    println!("{}", x)
+}
+\end{verbatim}
+
+The \texttt{chain}, \texttt{map}, \texttt{filter}, \texttt{filter\_map}
+and \texttt{inspect} adaptors are \texttt{DoubleEndedIterator}
+implementations if the underlying iterators are.
+
+\begin{verbatim}
+let xs = [1i, 2, 3, 4];
+let ys = [5i, 6, 7, 8];
+let mut it = xs.iter().chain(ys.iter()).map(|&x| x * 2);
+
+println!("{}", it.next()); // prints `Some(2)`
+
+// prints `16`, `14`, `12`, `10`, `8`, `6`, `4`
+for x in it.rev() {
+    println!("{}", x);
+}
+\end{verbatim}
+
+The \texttt{reverse\_} method is also available for any double-ended
+iterator yielding mutable references. It can be used to reverse a
+container in-place. Note that the trailing underscore is a workaround
+for issue \#5898 and will be removed.
+
+\begin{verbatim}
+let mut ys = [1i, 2, 3, 4, 5];
+ys.mut_iter().reverse_();
+assert!(ys == [5i, 4, 3, 2, 1]);
+\end{verbatim}
+
+\subsection{Random-access iterators}\label{random-access-iterators}
+
+The \texttt{RandomAccessIterator} trait represents an iterator offering
+random access to the whole range. The \texttt{indexable} method
+retrieves the number of elements accessible with the \texttt{idx}
+method.
+
+The \texttt{chain} adaptor is an implementation of
+\texttt{RandomAccessIterator} if the underlying iterators are.
+
+\begin{verbatim}
+let xs = [1i, 2, 3, 4, 5];
+let ys = [7i, 9, 11];
+let mut it = xs.iter().chain(ys.iter());
+println!("{}", it.idx(0)); // prints `Some(1)`
+println!("{}", it.idx(5)); // prints `Some(7)`
+println!("{}", it.idx(7)); // prints `Some(11)`
+println!("{}", it.idx(8)); // prints `None`
+
+// yield two elements from the beginning, and one from the end
+it.next();
+it.next();
+it.next_back();
+
+println!("{}", it.idx(0)); // prints `Some(3)`
+println!("{}", it.idx(4)); // prints `Some(9)`
+println!("{}", it.idx(6)); // prints `None`
+\end{verbatim}
+
+\end{document}

@@ -1,0 +1,626 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+    \usepackage{xltxtra,xunicode}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
+  \newcommand{\euro}{€}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{\usepackage{microtype}}{}
+\ifxetex
+  \usepackage[setpagesize=false, % page size defined by xetex
+              unicode=false, % unicode breaks when used with xetex
+              xetex]{hyperref}
+\else
+  \usepackage[unicode=true]{hyperref}
+\fi
+\hypersetup{breaklinks=true,
+            bookmarks=true,
+            pdfauthor={},
+            pdftitle={The Rust Tasks and Communication Guide},
+            colorlinks=true,
+            citecolor=blue,
+            urlcolor=blue,
+            linkcolor=magenta,
+            pdfborder={0 0 0}}
+\urlstyle{same}  % don't use monospace font for urls
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\setcounter{secnumdepth}{5}
+
+\title{The Rust Tasks and Communication Guide}
+
+\begin{document}
+\maketitle
+
+0.11.0-pre (169c988d09a9d4e46de2b7fead9489e94964c7c7 2014-07-02 18:41:38 +0000)
+
+Copyright © 2011-2014 The Rust Project Developers. Licensed under the
+\href{http://www.apache.org/licenses/LICENSE-2.0}{Apache License,
+Version 2.0} or the \href{http://opensource.org/licenses/MIT}{MIT
+license}, at your option.
+
+This file may not be copied, modified, or distributed except according
+to those terms.
+
+{
+\hypersetup{linkcolor=black}
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+\section{Introduction}\label{introduction}
+
+Rust provides safe concurrency through a combination of lightweight,
+memory-isolated tasks and message passing. This guide will describe the
+concurrency model in Rust, how it relates to the Rust type system, and
+introduce the fundamental library abstractions for constructing
+concurrent programs.
+
+Rust tasks are not the same as traditional threads: rather, they are
+considered \emph{green threads}, lightweight units of execution that the
+Rust runtime schedules cooperatively onto a small number of operating
+system threads. On a multi-core system Rust tasks will be scheduled in
+parallel by default. Because tasks are significantly cheaper to create
+than traditional threads, Rust can create hundreds of thousands of
+concurrent tasks on a typical 32-bit system. In general, all Rust code
+executes inside a task, including the \texttt{main} function.
+
+In order to make efficient use of memory Rust tasks have dynamically
+sized stacks. A task begins its life with a small amount of stack space
+(currently in the low thousands of bytes, depending on platform), and
+acquires more stack as needed. Unlike in languages such as C, a Rust
+task cannot accidentally write to memory beyond the end of the stack,
+causing crashes or worse.
+
+Tasks provide failure isolation and recovery. When a fatal error occurs
+in Rust code as a result of an explicit call to \texttt{fail!()}, an
+assertion failure, or another invalid operation, the runtime system
+destroys the entire task. Unlike in languages such as Java and C++,
+there is no way to \texttt{catch} an exception. Instead, tasks may
+monitor each other for failure.
+
+Tasks use Rust's type system to provide strong memory safety guarantees.
+In particular, the type system guarantees that tasks cannot share
+mutable state with each other. Tasks communicate with each other by
+transferring \emph{owned} data through the global \emph{exchange heap}.
+
+\subsection{A note about the
+libraries}\label{a-note-about-the-libraries}
+
+While Rust's type system provides the building blocks needed for safe
+and efficient tasks, all of the task functionality itself is implemented
+in the standard and sync libraries, which are still under development
+and do not always present a consistent or complete interface.
+
+For your reference, these are the standard modules involved in Rust
+concurrency at this writing:
+
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  \href{std/task/index.html}{\texttt{std::task}} - All code relating to
+  tasks and task scheduling,
+\item
+  \href{std/comm/index.html}{\texttt{std::comm}} - The message passing
+  interface,
+\item
+  \href{sync/struct.DuplexStream.html}{\texttt{sync::DuplexStream}} - An
+  extension of \texttt{pipes::stream} that allows both sending and
+  receiving,
+\item
+  \href{sync/struct.Arc.html}{\texttt{sync::Arc}} - The Arc (atomically
+  reference counted) type, for safely sharing immutable data,
+\item
+  \href{sync/raw/struct.Semaphore.html}{\texttt{sync::Semaphore}} - A
+  counting, blocking, bounded-waiting semaphore,
+\item
+  \href{sync/mutex/index.html}{\texttt{sync::Mutex}} - A blocking,
+  bounded-waiting, mutual exclusion lock with an associated FIFO
+  condition variable,
+\item
+  \href{sync/struct.RWLock.html}{\texttt{sync::RWLock}} - A blocking,
+  no-starvation, reader-writer lock with an associated condvar,
+\item
+  \href{sync/struct.Barrier.html}{\texttt{sync::Barrier}} - A barrier
+  enables multiple tasks to synchronize the beginning of some
+  computation,
+\item
+  \href{sync/struct.TaskPool.html}{\texttt{sync::TaskPool}} - A task
+  pool abstraction,
+\item
+  \href{sync/struct.Future.html}{\texttt{sync::Future}} - A type
+  encapsulating the result of a computation which may not be complete,
+\item
+  \href{sync/one/index.html}{\texttt{sync::one}} - A ``once
+  initialization'' primitive
+\item
+  \href{sync/mutex/index.html}{\texttt{sync::mutex}} - A proper mutex
+  implementation regardless of the ``flavor of task'' which is acquiring
+  the lock.
+\end{itemize}
+
+\section{Basics}\label{basics}
+
+The programming interface for creating and managing tasks lives in the
+\texttt{task} module of the \texttt{std} library, and is thus available
+to all Rust code by default. At its simplest, creating a task is a
+matter of calling the \texttt{spawn} function with a closure argument.
+\texttt{spawn} executes the closure in the new task.
+
+\begin{verbatim}
+# use std::task::spawn;
+
+// Print something profound in a different task using a named function
+fn print_message() { println!("I am running in a different task!"); }
+spawn(print_message);
+
+// Print something profound in a different task using a `proc` expression
+// The `proc` expression evaluates to an (unnamed) owned closure.
+// That closure will call `println!(...)` when the spawned task runs.
+
+spawn(proc() println!("I am also running in a different task!") );
+\end{verbatim}
+
+In Rust, there is nothing special about creating tasks: a task is not a
+concept that appears in the language semantics. Instead, Rust's type
+system provides all the tools necessary to implement safe concurrency:
+particularly, \emph{owned types}. The language leaves the implementation
+details to the standard library.
+
+The \texttt{spawn} function has a very simple type signature:
+\texttt{fn spawn(f: proc())}. Because it accepts only owned closures,
+and owned closures contain only owned data, \texttt{spawn} can safely
+move the entire closure and all its associated state into an entirely
+different task for execution. Like any closure, the function passed to
+\texttt{spawn} may capture an environment that it carries across tasks.
+
+\begin{verbatim}
+# use std::task::spawn;
+# fn generate_task_number() -> int { 0 }
+// Generate some state locally
+let child_task_number = generate_task_number();
+
+spawn(proc() {
+    // Capture it in the remote task
+    println!("I am child number {}", child_task_number);
+});
+\end{verbatim}
+
+\subsection{Communication}\label{communication}
+
+Now that we have spawned a new task, it would be nice if we could
+communicate with it. Recall that Rust does not have shared mutable
+state, so one task may not manipulate variables owned by another task.
+Instead we use \emph{pipes}.
+
+A pipe is simply a pair of endpoints: one for sending messages and
+another for receiving messages. Pipes are low-level communication
+building-blocks and so come in a variety of forms, each one appropriate
+for a different use case. In what follows, we cover the most commonly
+used varieties.
+
+The simplest way to create a pipe is to use the \texttt{channel}
+function to create a \texttt{(Sender, Receiver)} pair. In Rust parlance,
+a \emph{sender} is a sending endpoint of a pipe, and a \emph{receiver}
+is the receiving endpoint. Consider the following example of calculating
+two results concurrently:
+
+\begin{verbatim}
+# use std::task::spawn;
+
+let (tx, rx): (Sender<int>, Receiver<int>) = channel();
+
+spawn(proc() {
+    let result = some_expensive_computation();
+    tx.send(result);
+});
+
+some_other_expensive_computation();
+let result = rx.recv();
+# fn some_expensive_computation() -> int { 42 }
+# fn some_other_expensive_computation() {}
+\end{verbatim}
+
+Let's examine this example in detail. First, the \texttt{let} statement
+creates a stream for sending and receiving integers (the left-hand side
+of the \texttt{let}, \texttt{(tx, rx)}, is an example of a
+\emph{destructuring let}: the pattern separates a tuple into its
+component parts).
+
+\begin{verbatim}
+let (tx, rx): (Sender<int>, Receiver<int>) = channel();
+\end{verbatim}
+
+The child task will use the sender to send data to the parent task,
+which will wait to receive the data on the receiver. The next statement
+spawns the child task.
+
+\begin{verbatim}
+# use std::task::spawn;
+# fn some_expensive_computation() -> int { 42 }
+# let (tx, rx) = channel();
+spawn(proc() {
+    let result = some_expensive_computation();
+    tx.send(result);
+});
+\end{verbatim}
+
+Notice that the creation of the task closure transfers \texttt{tx} to
+the child task implicitly: the closure captures \texttt{tx} in its
+environment. Both \texttt{Sender} and \texttt{Receiver} are sendable
+types and may be captured into tasks or otherwise transferred between
+them. In the example, the child task runs an expensive computation, then
+sends the result over the captured channel.
+
+Finally, the parent continues with some other expensive computation,
+then waits for the child's result to arrive on the receiver:
+
+\begin{verbatim}
+# fn some_other_expensive_computation() {}
+# let (tx, rx) = channel::<int>();
+# tx.send(0);
+some_other_expensive_computation();
+let result = rx.recv();
+\end{verbatim}
+
+The \texttt{Sender} and \texttt{Receiver} pair created by
+\texttt{channel} enables efficient communication between a single sender
+and a single receiver, but multiple senders cannot use a single
+\texttt{Sender} value, and multiple receivers cannot use a single
+\texttt{Receiver} value. What if our example needed to compute multiple
+results across a number of tasks? The following program is ill-typed:
+
+\begin{verbatim}
+# fn some_expensive_computation() -> int { 42 }
+let (tx, rx) = channel();
+
+spawn(proc() {
+    tx.send(some_expensive_computation());
+});
+
+// ERROR! The previous spawn statement already owns the sender,
+// so the compiler will not allow it to be captured again
+spawn(proc() {
+    tx.send(some_expensive_computation());
+});
+\end{verbatim}
+
+Instead we can clone the \texttt{tx}, which allows for multiple senders.
+
+\begin{verbatim}
+let (tx, rx) = channel();
+
+for init_val in range(0u, 3) {
+    // Create a new channel handle to distribute to the child task
+    let child_tx = tx.clone();
+    spawn(proc() {
+        child_tx.send(some_expensive_computation(init_val));
+    });
+}
+
+let result = rx.recv() + rx.recv() + rx.recv();
+# fn some_expensive_computation(_i: uint) -> int { 42 }
+\end{verbatim}
+
+Cloning a \texttt{Sender} produces a new handle to the same channel,
+allowing multiple tasks to send data to a single receiver. It upgrades
+the channel internally in order to allow this functionality, which means
+that channels that are not cloned can avoid the overhead required to
+handle multiple senders. But this fact has no bearing on the channel's
+usage: the upgrade is transparent.
+
+Note that the above cloning example is somewhat contrived since you
+could also simply use three \texttt{Sender} pairs, but it serves to
+illustrate the point. For reference, written with multiple streams, it
+might look like the example below.
+
+\begin{verbatim}
+# use std::task::spawn;
+
+// Create a vector of ports, one for each child task
+let rxs = Vec::from_fn(3, |init_val| {
+    let (tx, rx) = channel();
+    spawn(proc() {
+        tx.send(some_expensive_computation(init_val));
+    });
+    rx
+});
+
+// Wait on each port, accumulating the results
+let result = rxs.iter().fold(0, |accum, rx| accum + rx.recv() );
+# fn some_expensive_computation(_i: uint) -> int { 42 }
+\end{verbatim}
+
+\subsection{Backgrounding computations:
+Futures}\label{backgrounding-computations-futures}
+
+With \texttt{sync::Future}, rust has a mechanism for requesting a
+computation and getting the result later.
+
+The basic example below illustrates this.
+
+\begin{verbatim}
+use std::sync::Future;
+
+# fn main() {
+# fn make_a_sandwich() {};
+fn fib(n: u64) -> u64 {
+    // lengthy computation returning an uint
+    12586269025
+}
+
+let mut delayed_fib = Future::spawn(proc() fib(50));
+make_a_sandwich();
+println!("fib(50) = {}", delayed_fib.get())
+# }
+\end{verbatim}
+
+The call to \texttt{future::spawn} returns immediately a \texttt{future}
+object regardless of how long it takes to run \texttt{fib(50)}. You can
+then make yourself a sandwich while the computation of \texttt{fib} is
+running. The result of the execution of the method is obtained by
+calling \texttt{get} on the future. This call will block until the value
+is available (\emph{i.e.} the computation is complete). Note that the
+future needs to be mutable so that it can save the result for next time
+\texttt{get} is called.
+
+Here is another example showing how futures allow you to background
+computations. The workload will be distributed on the available cores.
+
+\begin{verbatim}
+# use std::sync::Future;
+fn partial_sum(start: uint) -> f64 {
+    let mut local_sum = 0f64;
+    for num in range(start*100000, (start+1)*100000) {
+        local_sum += (num as f64 + 1.0).powf(-2.0);
+    }
+    local_sum
+}
+
+fn main() {
+    let mut futures = Vec::from_fn(1000, |ind| Future::spawn( proc() { partial_sum(ind) }));
+
+    let mut final_res = 0f64;
+    for ft in futures.mut_iter()  {
+        final_res += ft.get();
+    }
+    println!("π^2/6 is not far from : {}", final_res);
+}
+\end{verbatim}
+
+\subsection{Sharing immutable data without copy:
+Arc}\label{sharing-immutable-data-without-copy-arc}
+
+To share immutable data between tasks, a first approach would be to only
+use pipes as we have seen previously. A copy of the data to share would
+then be made for each task. In some cases, this would add up to a
+significant amount of wasted memory and would require copying the same
+data more than necessary.
+
+To tackle this issue, one can use an Atomically Reference Counted
+wrapper (\texttt{Arc}) as implemented in the \texttt{sync} library of
+Rust. With an Arc, the data will no longer be copied for each task. The
+Arc acts as a reference to the shared data and only this reference is
+shared and cloned.
+
+Here is a small example showing how to use Arcs. We wish to run
+concurrently several computations on a single large vector of floats.
+Each task needs the full vector to perform its duty.
+
+\begin{verbatim}
+use std::rand;
+use std::sync::Arc;
+
+fn pnorm(nums: &[f64], p: uint) -> f64 {
+    nums.iter().fold(0.0, |a, b| a + b.powf(p as f64)).powf(1.0 / (p as f64))
+}
+
+fn main() {
+    let numbers = Vec::from_fn(1000000, |_| rand::random::<f64>());
+    let numbers_arc = Arc::new(numbers);
+
+    for num in range(1u, 10) {
+        let task_numbers = numbers_arc.clone();
+
+        spawn(proc() {
+            println!("{}-norm = {}", num, pnorm(task_numbers.as_slice(), num));
+        });
+    }
+}
+\end{verbatim}
+
+The function \texttt{pnorm} performs a simple computation on the vector
+(it computes the sum of its items at the power given as argument and
+takes the inverse power of this value). The Arc on the vector is created
+by the line
+
+\begin{verbatim}
+# use std::rand;
+# use std::sync::Arc;
+# fn main() {
+# let numbers = Vec::from_fn(1000000, |_| rand::random::<f64>());
+let numbers_arc=Arc::new(numbers);
+# }
+\end{verbatim}
+
+and a unique clone is captured for each task via a procedure. This only
+copies the wrapper and not it's contents. Within the task's procedure,
+the captured Arc reference can be used as an immutable reference to the
+underlying vector as if it were local.
+
+\begin{verbatim}
+# use std::rand;
+# use std::sync::Arc;
+# fn pnorm(nums: &[f64], p: uint) -> f64 { 4.0 }
+# fn main() {
+# let numbers=Vec::from_fn(1000000, |_| rand::random::<f64>());
+# let numbers_arc = Arc::new(numbers);
+# let num = 4;
+let task_numbers = numbers_arc.clone();
+spawn(proc() {
+    // Capture task_numbers and use it as if it was the underlying vector
+    println!("{}-norm = {}", num, pnorm(task_numbers.as_slice(), num));
+});
+# }
+\end{verbatim}
+
+The \texttt{arc} module also implements Arcs around mutable data that
+are not covered here.
+
+\section{Handling task failure}\label{handling-task-failure}
+
+Rust has a built-in mechanism for raising exceptions. The
+\texttt{fail!()} macro (which can also be written with an error string
+as an argument: \texttt{fail!( \textasciitilde{}reason)}) and the
+\texttt{assert!} construct (which effectively calls \texttt{fail!()} if
+a boolean expression is false) are both ways to raise exceptions. When a
+task raises an exception the task unwinds its stack---running
+destructors and freeing memory along the way---and then exits. Unlike
+exceptions in C++, exceptions in Rust are unrecoverable within a single
+task: once a task fails, there is no way to ``catch'' the exception.
+
+While it isn't possible for a task to recover from failure, tasks may
+notify each other of failure. The simplest way of handling task failure
+is with the \texttt{try} function, which is similar to \texttt{spawn},
+but immediately blocks waiting for the child task to finish.
+\texttt{try} returns a value of type
+\texttt{Result\textless{}T, ()\textgreater{}}. \texttt{Result} is an
+\texttt{enum} type with two variants: \texttt{Ok} and \texttt{Err}. In
+this case, because the type arguments to \texttt{Result} are
+\texttt{int} and \texttt{()}, callers can pattern-match on a result to
+check whether it's an \texttt{Ok} result with an \texttt{int} field
+(representing a successful result) or an \texttt{Err} result
+(representing termination with an error).
+
+\begin{verbatim}
+# use std::task;
+# fn some_condition() -> bool { false }
+# fn calculate_result() -> int { 0 }
+let result: Result<int, ()> = task::try(proc() {
+    if some_condition() {
+        calculate_result()
+    } else {
+        fail!("oops!");
+    }
+});
+assert!(result.is_err());
+\end{verbatim}
+
+Unlike \texttt{spawn}, the function spawned using \texttt{try} may
+return a value, which \texttt{try} will dutifully propagate back to the
+caller in a \href{std/result/index.html}{\texttt{Result}} enum. If the
+child task terminates successfully, \texttt{try} will return an
+\texttt{Ok} result; if the child task fails, \texttt{try} will return an
+\texttt{Error} result.
+
+\begin{quote}
+\emph{Note:} A failed task does not currently produce a useful error
+value (\texttt{try} always returns \texttt{Err(())}). In the future, it
+may be possible for tasks to intercept the value passed to
+\texttt{fail!()}.
+\end{quote}
+
+TODO: Need discussion of \texttt{future\_result} in order to make
+failure modes useful.
+
+But not all failures are created equal. In some cases you might need to
+abort the entire program (perhaps you're writing an assert which, if it
+trips, indicates an unrecoverable logic error); in other cases you might
+want to contain the failure at a certain boundary (perhaps a small piece
+of input from the outside world, which you happen to be processing in
+parallel, is malformed and its processing task can't proceed).
+
+\subsection{Creating a task with a bi-directional communication
+path}\label{creating-a-task-with-a-bi-directional-communication-path}
+
+A very common thing to do is to spawn a child task where the parent and
+child both need to exchange messages with each other. The function
+\texttt{sync::comm::duplex} supports this pattern. We'll look briefly at
+how to use it.
+
+To see how \texttt{duplex} works, we will create a child task that
+repeatedly receives a \texttt{uint} message, converts it to a string,
+and sends the string in response. The child terminates when it receives
+\texttt{0}. Here is the function that implements the child task:
+
+\begin{verbatim}
+#![allow(deprecated)]
+
+use std::comm::DuplexStream;
+# fn main() {
+fn stringifier(channel: &DuplexStream<String, uint>) {
+    let mut value: uint;
+    loop {
+        value = channel.recv();
+        channel.send(value.to_str());
+        if value == 0 { break; }
+    }
+}
+# }
+\end{verbatim}
+
+The implementation of \texttt{DuplexStream} supports both sending and
+receiving. The \texttt{stringifier} function takes a
+\texttt{DuplexStream} that can send strings (the first type parameter)
+and receive \texttt{uint} messages (the second type parameter). The body
+itself simply loops, reading from the channel and then sending its
+response back. The actual response itself is simply the stringified
+version of the received value, \texttt{uint::to\_str(value)}.
+
+Here is the code for the parent task:
+
+\begin{verbatim}
+#![allow(deprecated)]
+
+use std::comm::duplex;
+# use std::task::spawn;
+# use std::comm::DuplexStream;
+# fn stringifier(channel: &DuplexStream<String, uint>) {
+#     let mut value: uint;
+#     loop {
+#         value = channel.recv();
+#         channel.send(value.to_str());
+#         if value == 0u { break; }
+#     }
+# }
+# fn main() {
+
+let (from_child, to_child) = duplex();
+
+spawn(proc() {
+    stringifier(&to_child);
+});
+
+from_child.send(22);
+assert!(from_child.recv().as_slice() == "22");
+
+from_child.send(23);
+from_child.send(0);
+
+assert!(from_child.recv().as_slice() == "23");
+assert!(from_child.recv().as_slice() == "0");
+
+# }
+\end{verbatim}
+
+The parent task first calls \texttt{DuplexStream} to create a pair of
+bidirectional endpoints. It then uses \texttt{task::spawn} to create the
+child task, which captures one end of the communication channel. As a
+result, both parent and child can send and receive data to and from the
+other.
+
+\end{document}

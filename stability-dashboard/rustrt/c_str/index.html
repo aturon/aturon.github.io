@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The rustrt library documentation.">
+
+    <title>rustrt::c_str - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../rustrt/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../index.html'>rustrt</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='../args/index.html'>args</a><a class='mod ' href='../bookkeeping/index.html'>bookkeeping</a><a class='mod current' href='../c_str/index.html'>c_str</a><a class='mod ' href='../exclusive/index.html'>exclusive</a><a class='mod ' href='../local/index.html'>local</a><a class='mod ' href='../local_data/index.html'>local_data</a><a class='mod ' href='../local_heap/index.html'>local_heap</a><a class='mod ' href='../mutex/index.html'>mutex</a><a class='mod ' href='../rtio/index.html'>rtio</a><a class='mod ' href='../stack/index.html'>stack</a><a class='mod ' href='../task/index.html'>task</a><a class='mod ' href='../thread/index.html'>thread</a><a class='mod ' href='../unwind/index.html'>unwind</a></div><div class='block struct'><h2>Structs</h2><a class='struct ' href='../struct.Stdio.html'>Stdio</a></div><div class='block trait'><h2>Traits</h2><a class='trait ' href='../trait.Runtime.html'>Runtime</a></div><div class='block fn'><h2>Functions</h2><a class='fn ' href='../fn.at_exit.html'>at_exit</a><a class='fn ' href='../fn.cleanup.html'>cleanup</a><a class='fn ' href='../fn.init.html'>init</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'>Module <a href='../index.html'>rustrt</a>::<a class='mod' href=''>c_str</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-2933' href='../../src/rustrt/Users/aturon/moz/working/stability-dashboard/src/librustrt/c_str.rs.html#11-894'>[src]</a></span></h1>
+<div class='docblock'><p>C-string manipulation and management</p>
+
+<p>This modules provides the basic methods for creating and manipulating
+null-terminated strings for use with FFI calls (back to C). Most C APIs require
+that the string being passed to them is null-terminated, and by default rust&#39;s
+string types are <em>not</em> null terminated.</p>
+
+<p>The other problem with translating Rust strings to C strings is that Rust
+strings can validly contain a null-byte in the middle of the string (0 is a
+valid unicode codepoint). This means that not all Rust strings can actually be
+translated to C strings.</p>
+
+<h1 id="creation-of-a-c-string" class='section-header'><a
+                           href="#creation-of-a-c-string">Creation of a C string</a></h1>
+<p>A C string is managed through the <code>CString</code> type defined in this module. It
+&quot;owns&quot; the internal buffer of characters and will automatically deallocate the
+buffer when the string is dropped. The <code>ToCStr</code> trait is implemented for <code>&amp;str</code>
+and <code>&amp;[u8]</code>, but the conversions can fail due to some of the limitations
+explained above.</p>
+
+<p>This also means that currently whenever a C string is created, an allocation
+must be performed to place the data elsewhere (the lifetime of the C string is
+not tied to the lifetime of the original string/data buffer). If C strings are
+heavily used in applications, then caching may be advisable to prevent
+unnecessary amounts of allocations.</p>
+
+<p>An example of creating and using a C string would be:</p>
+<pre class='rust '>
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>libc</span>;
+
+<span class='kw'>extern</span> {
+    <span class='kw'>fn</span> <span class='ident'>puts</span>(<span class='ident'>s</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span>);
+}
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='ident'>my_string</span> <span class='op'>=</span> <span class='string'>&quot;Hello, world!&quot;</span>;<span class='comment'>
+
+    // Allocate the C string with an explicit local that owns the string. The
+    // `c_buffer` pointer will be deallocated when `my_c_string` goes out of scope.
+    </span><span class='kw'>let</span> <span class='ident'>my_c_string</span> <span class='op'>=</span> <span class='ident'>my_string</span>.<span class='ident'>to_c_str</span>();
+    <span class='kw'>unsafe</span> {
+        <span class='ident'>puts</span>(<span class='ident'>my_c_string</span>.<span class='ident'>as_ptr</span>());
+    }<span class='comment'>
+
+    // Don&#39;t save/return the pointer to the C string, the `c_buffer` will be
+    // deallocated when this block returns!
+    </span><span class='ident'>my_string</span>.<span class='ident'>with_c_str</span>(<span class='op'>|</span><span class='ident'>c_buffer</span><span class='op'>|</span> {
+        <span class='kw'>unsafe</span> { <span class='ident'>puts</span>(<span class='ident'>c_buffer</span>); }
+    });
+}
+</pre>
+</div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.CChars.html'
+                               title='rustrt::c_str::CChars'>CChars</a></td>
+                        <td class='docblock short'><p>External iterator for a CString&#39;s bytes.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.CString.html'
+                               title='rustrt::c_str::CString'>CString</a></td>
+                        <td class='docblock short'><p>The representation of a C String.</p>
+</td>
+                    </tr>
+                </table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.ToCStr.html'
+                               title='rustrt::c_str::ToCStr'>ToCStr</a></td>
+                        <td class='docblock short'><p>A generic trait for converting a value to a CString.</p>
+</td>
+                    </tr>
+                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.from_c_multistring.html'
+                               title='rustrt::c_str::from_c_multistring'>from_c_multistring</a></td>
+                        <td class='docblock short'><p>Parses a C &quot;multistring&quot;, eg windows env values or
+the req-&gt;ptr result in a uv_fs_readdir() call.</p>
+</td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "rustrt";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The std library documentation.">
+
+    <title>std::io::signal::Listener - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../../std/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../../index.html'>std</a>&#8203;::<a href='../index.html'>io</a>&#8203;::<a href='index.html'>signal</a></p><div class='block struct'><h2>Structs</h2><a class='struct current' href='struct.Listener.html'>Listener</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'>Struct <a href='../../index.html'>std</a>::<a href='../index.html'>io</a>::<a href='index.html'>signal</a>::<a class='struct' href=''>Listener</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-42633' href='../../../src/std/Users/aturon/moz/working/stability-dashboard/src/libstd/io/signal.rs.html#83-94'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Listener {
+    pub rx: <a class='struct' href='../../../std/comm/struct.Receiver.html' title='std::comm::Receiver'>Receiver</a>&lt;<a class='type' href='../../../std/io/signal/type.Signum.html' title='std::io::signal::Signum'>Signum</a>&gt;,
+    // some fields omitted
+}</pre><div class='docblock'><p>Listener provides a receiver to listen for registered signals.</p>
+
+<p>Listener automatically unregisters its handles once it is out of scope.
+However, clients can still unregister signums manually.</p>
+
+<h1 id="example" class='section-header'><a
+                           href="#example">Example</a></h1><span id='rust-example-raw-0' class='rusttest'>fn main() {
+    #![allow(unused_must_use)]
+    use std::io::signal::{Listener, Interrupt};
+    
+    let mut listener = Listener::new();
+    listener.register(Interrupt);
+    
+    loop {
+        match listener.rx.recv() {
+            Interrupt =&gt; println!(&quot;Got Interrupt&#39;ed&quot;),
+            _ =&gt; (),
+        }
+    }
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>signal</span>::{<span class='ident'>Listener</span>, <span class='ident'>Interrupt</span>};
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>listener</span> <span class='op'>=</span> <span class='ident'>Listener</span>::<span class='ident'>new</span>();
+<span class='ident'>listener</span>.<span class='ident'>register</span>(<span class='ident'>Interrupt</span>);
+
+<span class='kw'>loop</span> {
+    <span class='kw'>match</span> <span class='ident'>listener</span>.<span class='ident'>rx</span>.<span class='ident'>recv</span>() {
+        <span class='ident'>Interrupt</span> <span class='op'>=&gt;</span> <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Got Interrupt&#39;ed&quot;</span>),
+        _ <span class='op'>=&gt;</span> (),
+    }
+}
+</pre>
+</div><h2 class='fields'>Fields</h2>
+<table><tr><td id='structfield.rx'><a class='stability Experimental' title='Experimental'></a><code>rx</code></td><td><div class='docblock'><p>Clients of Listener can <code>recv()</code> on this receiver. This is exposed to
+allow selection over it as well as manipulation of the receiver
+directly.</p>
+</div></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='struct' href='../../../std/io/signal/struct.Listener.html' title='std::io::signal::Listener'>Listener</a></code></h3><div class='impl-methods'><h4 id='method.new' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class='struct' href='../../../std/io/signal/struct.Listener.html' title='std::io::signal::Listener'>Listener</a></code></h4>
+<div class='docblock'><p>Creates a new listener for signals. Once created, signals are bound via
+the <code>register</code> method (otherwise nothing will ever be received)</p>
+</div><h4 id='method.register' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.register' class='fnname'>register</a>(&amp;mut self, signum: <a class='type' href='../../../std/io/signal/type.Signum.html' title='std::io::signal::Signum'>Signum</a>) -&gt; <a class='type' href='../../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;()&gt;</code></h4>
+<div class='docblock'><p>Listen for a signal, returning true when successfully registered for
+signum. Signals can be received using <code>recv()</code>.</p>
+
+<p>Once a signal is registered, this listener will continue to receive
+notifications of signals until it is unregistered. This occurs
+regardless of the number of other listeners registered in other tasks
+(or on this task).</p>
+
+<p>Signals are still received if there is no task actively waiting for
+a signal, and a later call to <code>recv</code> will return the signal that was
+received while no task was waiting on it.</p>
+
+<h1 id="error" class='section-header'><a
+                           href="#error">Error</a></h1>
+<p>If this function fails to register a signal handler, then an error will
+be returned.</p>
+</div><h4 id='method.unregister' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.unregister' class='fnname'>unregister</a>(&amp;mut self, signum: <a class='type' href='../../../std/io/signal/type.Signum.html' title='std::io::signal::Signum'>Signum</a>)</code></h4>
+<div class='docblock'><p>Unregisters a signal. If this listener currently had a handler
+registered for the signal, then it will stop receiving any more
+notification about the signal. If the signal has already been received,
+it may still be returned by <code>recv</code>.</p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "std";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    <script src="../../../playpen.js"></script>
+    <script async src="../../../search-index.js"></script>
+</body>
+</html>

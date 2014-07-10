@@ -1,0 +1,567 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+    \usepackage{xltxtra,xunicode}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
+  \newcommand{\euro}{€}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{\usepackage{microtype}}{}
+\ifxetex
+  \usepackage[setpagesize=false, % page size defined by xetex
+              unicode=false, % unicode breaks when used with xetex
+              xetex]{hyperref}
+\else
+  \usepackage[unicode=true]{hyperref}
+\fi
+\hypersetup{breaklinks=true,
+            bookmarks=true,
+            pdfauthor={},
+            pdftitle={The Rust Macros Guide},
+            colorlinks=true,
+            citecolor=blue,
+            urlcolor=blue,
+            linkcolor=magenta,
+            pdfborder={0 0 0}}
+\urlstyle{same}  % don't use monospace font for urls
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\setcounter{secnumdepth}{5}
+
+\title{The Rust Macros Guide}
+
+\begin{document}
+\maketitle
+
+0.11.0-pre (169c988d09a9d4e46de2b7fead9489e94964c7c7 2014-07-02 18:41:38 +0000)
+
+Copyright © 2011-2014 The Rust Project Developers. Licensed under the
+\href{http://www.apache.org/licenses/LICENSE-2.0}{Apache License,
+Version 2.0} or the \href{http://opensource.org/licenses/MIT}{MIT
+license}, at your option.
+
+This file may not be copied, modified, or distributed except according
+to those terms.
+
+{
+\hypersetup{linkcolor=black}
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+\section{Introduction}\label{introduction}
+
+Functions are the primary tool that programmers can use to build
+abstractions. Sometimes, however, programmers want to abstract over
+compile-time syntax rather than run-time values. Macros provide
+syntactic abstraction. For an example of how this can be useful,
+consider the following two code fragments, which both pattern-match on
+their input and both return early in one case, doing nothing otherwise:
+
+\begin{verbatim}
+# enum T { SpecialA(uint), SpecialB(uint) }
+# fn f() -> uint {
+# let input_1 = SpecialA(0);
+# let input_2 = SpecialA(0);
+match input_1 {
+    SpecialA(x) => { return x; }
+    _ => {}
+}
+// ...
+match input_2 {
+    SpecialB(x) => { return x; }
+    _ => {}
+}
+# return 0u;
+# }
+\end{verbatim}
+
+This code could become tiresome if repeated many times. However, no
+function can capture its functionality to make it possible to abstract
+the repetition away. Rust's macro system, however, can eliminate the
+repetition. Macros are lightweight custom syntax extensions, themselves
+defined using the \texttt{macro\_rules!} syntax extension. The following
+\texttt{early\_return} macro captures the pattern in the above code:
+
+\begin{verbatim}
+# #![feature(macro_rules)]
+# enum T { SpecialA(uint), SpecialB(uint) }
+# fn f() -> uint {
+# let input_1 = SpecialA(0);
+# let input_2 = SpecialA(0);
+macro_rules! early_return(
+    ($inp:expr $sp:ident) => ( // invoke it like `(input_5 SpecialE)`
+        match $inp {
+            $sp(x) => { return x; }
+            _ => {}
+        }
+    );
+)
+// ...
+early_return!(input_1 SpecialA);
+// ...
+early_return!(input_2 SpecialB);
+# return 0;
+# }
+# fn main() {}
+\end{verbatim}
+
+Macros are defined in pattern-matching style: in the above example, the
+text \texttt{(\$inp:expr \$sp:ident)} that appears on the left-hand side
+of the \texttt{=\textgreater{}} is the \emph{macro invocation syntax}, a
+pattern denoting how to write a call to the macro. The text on the
+right-hand side of the \texttt{=\textgreater{}}, beginning with
+\texttt{match \$inp}, is the \emph{macro transcription syntax}: what the
+macro expands to.
+
+\section{Invocation syntax}\label{invocation-syntax}
+
+The macro invocation syntax specifies the syntax for the arguments to
+the macro. It appears on the left-hand side of the
+\texttt{=\textgreater{}} in a macro definition. It conforms to the
+following rules:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  It must be surrounded by parentheses.
+\item
+  \texttt{\$} has special meaning (described below).
+\item
+  The \texttt{()}s, \texttt{{[}{]}}s, and \texttt{\{\}}s it contains
+  must balance. For example, \texttt{({[})} is forbidden.
+\end{enumerate}
+
+Otherwise, the invocation syntax is free-form.
+
+To take as an argument a fragment of Rust code, write \texttt{\$}
+followed by a name (for use on the right-hand side), followed by a
+\texttt{:}, followed by a \emph{fragment specifier}. The fragment
+specifier denotes the sort of fragment to match. The most common
+fragment specifiers are:
+
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  \texttt{ident} (an identifier, referring to a variable or item.
+  Examples: \texttt{f}, \texttt{x}, \texttt{foo}.)
+\item
+  \texttt{expr} (an expression. Examples: \texttt{2 + 2};
+  \texttt{if true then \{ 1 \} else \{ 2 \}}; \texttt{f(42)}.)
+\item
+  \texttt{ty} (a type. Examples: \texttt{int},
+  \texttt{Vec\textless{}(char, String)\textgreater{}}, \texttt{\&T}.)
+\item
+  \texttt{pat} (a pattern, usually appearing in a \texttt{match} or on
+  the left-hand side of a declaration. Examples: \texttt{Some(t)};
+  \texttt{(17, 'a')}; \texttt{\_}.)
+\item
+  \texttt{block} (a sequence of actions. Example:
+  \texttt{\{ log(error, "hi"); return 12; \}})
+\end{itemize}
+
+The parser interprets any token that's not preceded by a \texttt{\$}
+literally. Rust's usual rules of tokenization apply,
+
+So \texttt{(\$x:ident -\textgreater{} ((\$e:expr)))}, though excessively
+fancy, would designate a macro that could be invoked like:
+\texttt{my\_macro!(i-\textgreater{}(( 2+2 )))}.
+
+\subsection{Invocation location}\label{invocation-location}
+
+A macro invocation may take the place of (and therefore expand to) an
+expression, an item, or a statement. The Rust parser will parse the
+macro invocation as a ``placeholder'' for whichever of those three
+nonterminals is appropriate for the location.
+
+At expansion time, the output of the macro will be parsed as whichever
+of the three nonterminals it stands in for. This means that a single
+macro might, for example, expand to an item or an expression, depending
+on its arguments (and cause a syntax error if it is called with the
+wrong argument for its location). Although this behavior sounds
+excessively dynamic, it is known to be useful under some circumstances.
+
+\section{Transcription syntax}\label{transcription-syntax}
+
+The right-hand side of the \texttt{=\textgreater{}} follows the same
+rules as the left-hand side, except that a \texttt{\$} need only be
+followed by the name of the syntactic fragment to transcribe into the
+macro expansion; its type need not be repeated.
+
+The right-hand side must be enclosed by delimiters, which the
+transcriber ignores. Therefore \texttt{() =\textgreater{} ((1,2,3))} is
+a macro that expands to a tuple expression,
+\texttt{() =\textgreater{} (let \$x=\$val)} is a macro that expands to a
+statement, and \texttt{() =\textgreater{} (1,2,3)} is a macro that
+expands to a syntax error (since the transcriber interprets the
+parentheses on the right-hand-size as delimiters, and \texttt{1,2,3} is
+not a valid Rust expression on its own).
+
+Except for permissibility of \texttt{\$name} (and \texttt{\$(...)*},
+discussed below), the right-hand side of a macro definition is ordinary
+Rust syntax. In particular, macro invocations (including invocations of
+the macro currently being defined) are permitted in expression,
+statement, and item locations. However, nothing else about the code is
+examined or executed by the macro system; execution still has to wait
+until run-time.
+
+\subsection{Interpolation location}\label{interpolation-location}
+
+The interpolation \texttt{\$argument\_name} may appear in any location
+consistent with its fragment specifier (i.e., if it is specified as
+\texttt{ident}, it may be used anywhere an identifier is permitted).
+
+\section{Multiplicity}\label{multiplicity}
+
+\subsection{Invocation}\label{invocation}
+
+Going back to the motivating example, recall that \texttt{early\_return}
+expanded into a \texttt{match} that would \texttt{return} if the
+\texttt{match}'s scrutinee matched the ``special case'' identifier
+provided as the second argument to \texttt{early\_return}, and do
+nothing otherwise. Now suppose that we wanted to write a version of
+\texttt{early\_return} that could handle a variable number of
+``special'' cases.
+
+The syntax \texttt{\$(...)*} on the left-hand side of the
+\texttt{=\textgreater{}} in a macro definition accepts zero or more
+occurrences of its contents. It works much like the \texttt{*} operator
+in regular expressions. It also supports a separator token (a
+comma-separated list could be written \texttt{\$(...),*}), and
+\texttt{+} instead of \texttt{*} to mean ``at least one''.
+
+\begin{verbatim}
+# #![feature(macro_rules)]
+# enum T { SpecialA(uint),SpecialB(uint),SpecialC(uint),SpecialD(uint)}
+# fn f() -> uint {
+# let input_1 = SpecialA(0);
+# let input_2 = SpecialA(0);
+macro_rules! early_return(
+    ($inp:expr, [ $($sp:ident)|+ ]) => (
+        match $inp {
+            $(
+                $sp(x) => { return x; }
+            )+
+            _ => {}
+        }
+    );
+)
+// ...
+early_return!(input_1, [SpecialA|SpecialC|SpecialD]);
+// ...
+early_return!(input_2, [SpecialB]);
+# return 0;
+# }
+# fn main() {}
+\end{verbatim}
+
+\subsubsection{Transcription}\label{transcription}
+
+As the above example demonstrates, \texttt{\$(...)*} is also valid on
+the right-hand side of a macro definition. The behavior of \texttt{*} in
+transcription, especially in cases where multiple \texttt{*}s are
+nested, and multiple different names are involved, can seem somewhat
+magical and intuitive at first. The system that interprets them is
+called ``Macro By Example''. The two rules to keep in mind are (1) the
+behavior of \texttt{\$(...)*} is to walk through one ``layer'' of
+repetitions for all of the \texttt{\$name}s it contains in lockstep, and
+(2) each \texttt{\$name} must be under at least as many
+\texttt{\$(...)*}s as it was matched against. If it is under more, it'll
+be repeated, as appropriate.
+
+\subsection{Parsing limitations}\label{parsing-limitations}
+
+For technical reasons, there are two limitations to the treatment of
+syntax fragments by the macro parser:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  The parser will always parse as much as possible of a Rust syntactic
+  fragment. For example, if the comma were omitted from the syntax of
+  \texttt{early\_return!} above, \texttt{input\_1 {[}} would've been
+  interpreted as the beginning of an array index. In fact, invoking the
+  macro would have been impossible.
+\item
+  The parser must have eliminated all ambiguity by the time it reaches a
+  \texttt{\$name:fragment\_specifier} declaration. This limitation can
+  result in parse errors when declarations occur at the beginning of, or
+  immediately after, a \texttt{\$(...)*}. For example, the grammar
+  \texttt{\$(\$t:ty)* \$e:expr} will always fail to parse because the
+  parser would be forced to choose between parsing \texttt{t} and
+  parsing \texttt{e}. Changing the invocation syntax to require a
+  distinctive token in front can solve the problem. In the above
+  example, \texttt{\$(T \$t:ty)* E \$e:exp} solves the problem.
+\end{enumerate}
+
+\section{Macro argument pattern
+matching}\label{macro-argument-pattern-matching}
+
+\subsection{Motivation}\label{motivation}
+
+Now consider code like the following:
+
+\begin{verbatim}
+# #![feature(macro_rules)]
+# enum T1 { Good1(T2, uint), Bad1}
+# struct T2 { body: T3 }
+# enum T3 { Good2(uint), Bad2}
+# fn f(x: T1) -> uint {
+match x {
+    Good1(g1, val) => {
+        match g1.body {
+            Good2(result) => {
+                // complicated stuff goes here
+                return result + val;
+            },
+            _ => fail!("Didn't get good_2")
+        }
+    }
+    _ => return 0 // default value
+}
+# }
+# fn main() {}
+\end{verbatim}
+
+All the complicated stuff is deeply indented, and the error-handling
+code is separated from matches that fail. We'd like to write a macro
+that performs a match, but with a syntax that suits the problem better.
+The following macro can solve the problem:
+
+\begin{verbatim}
+# #![feature(macro_rules)]
+macro_rules! biased_match (
+    // special case: `let (x) = ...` is illegal, so use `let x = ...` instead
+    ( ($e:expr) ~ ($p:pat) else $err:stmt ;
+      binds $bind_res:ident
+    ) => (
+        let $bind_res = match $e {
+            $p => ( $bind_res ),
+            _ => { $err }
+        };
+    );
+    // more than one name; use a tuple
+    ( ($e:expr) ~ ($p:pat) else $err:stmt ;
+      binds $( $bind_res:ident ),*
+    ) => (
+        let ( $( $bind_res ),* ) = match $e {
+            $p => ( $( $bind_res ),* ),
+            _ => { $err }
+        };
+    )
+)
+
+# enum T1 { Good1(T2, uint), Bad1}
+# struct T2 { body: T3 }
+# enum T3 { Good2(uint), Bad2}
+# fn f(x: T1) -> uint {
+biased_match!((x)       ~ (Good1(g1, val)) else { return 0 };
+              binds g1, val )
+biased_match!((g1.body) ~ (Good2(result) )
+                  else { fail!("Didn't get good_2") };
+              binds result )
+// complicated stuff goes here
+return result + val;
+# }
+# fn main() {}
+\end{verbatim}
+
+This solves the indentation problem. But if we have a lot of chained
+matches like this, we might prefer to write a single macro invocation.
+The input pattern we want is clear:
+
+\begin{verbatim}
+# #![feature(macro_rules)]
+# fn main() {}
+# macro_rules! b(
+    ( $( ($e:expr) ~ ($p:pat) else $err:stmt ; )*
+      binds $( $bind_res:ident ),*
+    )
+# => (0))
+\end{verbatim}
+
+However, it's not possible to directly expand to nested match
+statements. But there is a solution.
+
+\subsection{The recursive approach to macro
+writing}\label{the-recursive-approach-to-macro-writing}
+
+A macro may accept multiple different input grammars. The first one to
+successfully match the actual argument to a macro invocation is the one
+that ``wins''.
+
+In the case of the example above, we want to write a recursive macro to
+process the semicolon-terminated lines, one-by-one. So, we want the
+following input patterns:
+
+\begin{verbatim}
+# #![feature(macro_rules)]
+# macro_rules! b(
+    ( binds $( $bind_res:ident ),* )
+# => (0))
+# fn main() {}
+\end{verbatim}
+
+\ldots{}and:
+
+\begin{verbatim}
+# #![feature(macro_rules)]
+# fn main() {}
+# macro_rules! b(
+    (    ($e     :expr) ~ ($p     :pat) else $err     :stmt ;
+      $( ($e_rest:expr) ~ ($p_rest:pat) else $err_rest:stmt ; )*
+      binds  $( $bind_res:ident ),*
+    )
+# => (0))
+\end{verbatim}
+
+The resulting macro looks like this. Note that the separation into
+\texttt{biased\_match!} and \texttt{biased\_match\_rec!} occurs only
+because we have an outer piece of syntax (the \texttt{let}) which we
+only want to transcribe once.
+
+\begin{verbatim}
+# #![feature(macro_rules)]
+# fn main() {
+
+macro_rules! biased_match_rec (
+    // Handle the first layer
+    (   ($e     :expr) ~ ($p     :pat) else $err     :stmt ;
+     $( ($e_rest:expr) ~ ($p_rest:pat) else $err_rest:stmt ; )*
+     binds $( $bind_res:ident ),*
+    ) => (
+        match $e {
+            $p => {
+                // Recursively handle the next layer
+                biased_match_rec!($( ($e_rest) ~ ($p_rest) else $err_rest ; )*
+                                  binds $( $bind_res ),*
+                )
+            }
+            _ => { $err }
+        }
+    );
+    // Produce the requested values
+    ( binds $( $bind_res:ident ),* ) => ( ($( $bind_res ),*) )
+)
+
+// Wrap the whole thing in a `let`.
+macro_rules! biased_match (
+    // special case: `let (x) = ...` is illegal, so use `let x = ...` instead
+    ( $( ($e:expr) ~ ($p:pat) else $err:stmt ; )*
+      binds $bind_res:ident
+    ) => (
+        let $bind_res = biased_match_rec!(
+            $( ($e) ~ ($p) else $err ; )*
+            binds $bind_res
+        );
+    );
+    // more than one name: use a tuple
+    ( $( ($e:expr) ~ ($p:pat) else $err:stmt ; )*
+      binds  $( $bind_res:ident ),*
+    ) => (
+        let ( $( $bind_res ),* ) = biased_match_rec!(
+            $( ($e) ~ ($p) else $err ; )*
+            binds $( $bind_res ),*
+        );
+    )
+)
+
+
+# enum T1 { Good1(T2, uint), Bad1}
+# struct T2 { body: T3 }
+# enum T3 { Good2(uint), Bad2}
+# fn f(x: T1) -> uint {
+biased_match!(
+    (x)       ~ (Good1(g1, val)) else { return 0 };
+    (g1.body) ~ (Good2(result) ) else { fail!("Didn't get Good2") };
+    binds val, result )
+// complicated stuff goes here
+return result + val;
+# }
+# }
+\end{verbatim}
+
+This technique applies to many cases where transcribing a result all at
+once is not possible. The resulting code resembles ordinary functional
+programming in some respects, but has some important differences from
+functional programming.
+
+The first difference is important, but also easy to forget: the
+transcription (right-hand) side of a \texttt{macro\_rules!} rule is
+literal syntax, which can only be executed at run-time. If a piece of
+transcription syntax does not itself appear inside another macro
+invocation, it will become part of the final program. If it is inside a
+macro invocation (for example, the recursive invocation of
+\texttt{biased\_match\_rec!}), it does have the opportunity to affect
+transcription, but only through the process of attempted pattern
+matching.
+
+The second, related, difference is that the evaluation order of macros
+feels ``backwards'' compared to ordinary programming. Given an
+invocation \texttt{m1!(m2!())}, the expander first expands \texttt{m1!},
+giving it as input the literal syntax \texttt{m2!()}. If it transcribes
+its argument unchanged into an appropriate position (in particular, not
+as an argument to yet another macro invocation), the expander will then
+proceed to evaluate \texttt{m2!()} (along with any other macro
+invocations \texttt{m1!(m2!())} produced).
+
+\section{Hygiene}\label{hygiene}
+
+To prevent clashes, rust implements
+\href{http://en.wikipedia.org/wiki/Hygienic_macro}{hygienic macros}.
+
+As an example, \texttt{loop} and \texttt{for-loop} labels (discussed in
+the lifetimes guide) will not clash. The following code will print
+``Hello!'' only once:
+
+\begin{verbatim}
+#![feature(macro_rules)]
+
+macro_rules! loop_x (
+    ($e: expr) => (
+        // $e will not interact with this 'x
+        'x: loop {
+            println!("Hello!");
+            $e
+        }
+    );
+)
+
+fn main() {
+    'x: loop {
+        loop_x!(break 'x);
+        println!("I am never printed.");
+    }
+}
+\end{verbatim}
+
+The two \texttt{'x} names did not clash, which would have caused the
+loop to print ``I am never printed'' and to run forever.
+
+\section{A final note}\label{a-final-note}
+
+Macros, as currently implemented, are not for the faint of heart. Even
+ordinary syntax errors can be more difficult to debug when they occur
+inside a macro, and errors caused by parse problems in generated code
+can be very tricky. Invoking the \texttt{log\_syntax!} macro can help
+elucidate intermediate states, invoking \texttt{trace\_macros!(true)}
+will automatically print those intermediate states out, and passing the
+flag \texttt{-\/-pretty expanded} as a command-line argument to the
+compiler will show the result of expansion.
+
+\end{document}

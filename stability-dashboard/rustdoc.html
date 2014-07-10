@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="generator" content="rustdoc">
+    <title>Rust Documentation</title>
+
+    <link rel="stylesheet" type="text/css" href="rust.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400'
+        rel='stylesheet' type='text/css'>
+
+
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    <div id="versioninfo">
+  <img src="http://www.rust-lang.org/logos/rust-logo-32x32-blk.png" width="32" height="32" alt><br>
+  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.11.0-pre</span><br>
+  <a href="http://github.com/rust-lang/rust/commit/169c988d09a9d4e46de2b7fead9489e94964c7c7"
+    class="hash white-sticker">169c988d</a>
+</div>
+
+
+    <h1 class="title">Rust Documentation</h1>
+    <nav id="TOC"><ul>
+<li><a href="#creating-documentation">1 Creating Documentation</a><ul></ul></li>
+<li><a href="#using-the-documentation">2 Using the Documentation</a><ul></ul></li>
+<li><a href="#testing-the-documentation">3 Testing the Documentation</a><ul>
+<li><a href="#defining-tests">3.1 Defining tests</a><ul></ul></li>
+<li><a href="#running-tests-(advanced)">3.2 Running tests (advanced)</a><ul></ul></li></ul></li>
+<li><a href="#standalone-markdown-files">4 Standalone Markdown files</a><ul></ul></li></ul></nav><p><code>rustdoc</code> is the built-in tool for generating documentation. It integrates
+with the compiler to provide accurate hyperlinking between usage of types and
+their documentation. Furthermore, by not using a separate parser, it will
+never reject your valid Rust code.</p>
+
+<h1 id="creating-documentation" class='section-header'><a
+                           href="#creating-documentation">1 Creating Documentation</a></h1>
+<p>Documenting Rust APIs is quite simple. To document a given item, we have &quot;doc
+comments&quot;:</p>
+<span id='rust-example-raw-0' class='rusttest'>fn main() {
+    #![allow(unused_attribute)]
+    // the &quot;link&quot; crate attribute is currently required for rustdoc, but normally
+    // isn&#39;t needed.
+    #![crate_id = &quot;universe&quot;]
+    #![crate_type=&quot;lib&quot;]
+    
+    //! Tools for dealing with universes (this is a doc comment, and is shown on
+    //! the crate index page. The ! makes it apply to the parent of the comment,
+    //! rather than what follows).
+    
+    mod workaround_the_outer_function_rustdoc_inserts {
+    /// Widgets are very common (this is a doc comment, and will show up on
+    /// Widget&#39;s documentation).
+    pub struct Widget {
+        /// All widgets have a purpose (this is a doc comment, and will show up
+        /// the field&#39;s documentation).
+        purpose: String,
+        /// Humans are not allowed to understand some widgets
+        understandable: bool
+    }
+    
+    pub fn recalibrate() {
+        //! Recalibrate a pesky universe (this is also a doc comment, like above,
+        //! the documentation will be applied to the *parent* item, so
+        //! `recalibrate`).
+        /* ... */
+    }
+    }
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='comment'>// the &quot;link&quot; crate attribute is currently required for rustdoc, but normally
+// isn&#39;t needed.
+</span><span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_id</span> <span class='op'>=</span> <span class='string'>&quot;universe&quot;</span>]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_type</span><span class='op'>=</span><span class='string'>&quot;lib&quot;</span>]</span>
+
+<span class='doccomment'>//! Tools for dealing with universes (this is a doc comment, and is shown on</span>
+<span class='doccomment'>//! the crate index page. The ! makes it apply to the parent of the comment,</span>
+<span class='doccomment'>//! rather than what follows).</span>
+
+<span class='doccomment'>/// Widgets are very common (this is a doc comment, and will show up on</span>
+<span class='doccomment'>/// Widget&#39;s documentation).</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Widget</span> {
+    <span class='doccomment'>/// All widgets have a purpose (this is a doc comment, and will show up</span>
+    <span class='doccomment'>/// the field&#39;s documentation).</span>
+    <span class='ident'>purpose</span>: <span class='ident'>String</span>,
+    <span class='doccomment'>/// Humans are not allowed to understand some widgets</span>
+    <span class='ident'>understandable</span>: <span class='ident'>bool</span>
+}
+
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>recalibrate</span>() {
+    <span class='doccomment'>//! Recalibrate a pesky universe (this is also a doc comment, like above,</span>
+    <span class='doccomment'>//! the documentation will be applied to the *parent* item, so</span>
+    <span class='doccomment'>//! `recalibrate`).</span><span class='comment'>
+    /* ... */
+</span>}
+</pre>
+
+<p>Documentation can also be controlled via the <code>doc</code> attribute on items. This is
+implicitly done by the compiler when using the above form of doc comments
+(converting the slash-based comments to <code>#[doc]</code> attributes).</p>
+<span id='rust-example-raw-1' class='rusttest'>#[doc = &quot;
+Calculates the factorial of a number.
+
+Given the input integer `n`, this function will calculate `n!` and return it.
+&quot;]
+pub fn factorial(n: int) -&gt; int { if n &lt; 2 {1} else {n * factorial(n)} }
+fn main() {}</span><pre id='rust-example-rendered-1' class='rust '>
+<span class='attribute'>#[<span class='ident'>doc</span> <span class='op'>=</span> <span class='string'>&quot;
+Calculates the factorial of a number.
+
+Given the input integer `n`, this function will calculate `n!` and return it.
+&quot;</span>]</span>
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>factorial</span>(<span class='ident'>n</span>: <span class='ident'>int</span>) <span class='op'>-&gt;</span> <span class='ident'>int</span> { <span class='kw'>if</span> <span class='ident'>n</span> <span class='op'>&lt;</span> <span class='number'>2</span> {<span class='number'>1</span>} <span class='kw'>else</span> {<span class='ident'>n</span> <span class='op'>*</span> <span class='ident'>factorial</span>(<span class='ident'>n</span>)} }
+</pre>
+
+<p>The <code>doc</code> attribute can also be used to control how rustdoc emits documentation
+in some cases.</p>
+<span id='rust-example-raw-2' class='rusttest'>// Rustdoc will inline documentation of a `pub use` into this crate when the
+// `pub use` reaches across crates, but this behavior can also be disabled.
+#[doc(no_inline)]
+pub use std::option::Option;
+fn main() {}</span><pre id='rust-example-rendered-2' class='rust '>
+<span class='comment'>// Rustdoc will inline documentation of a `pub use` into this crate when the
+// `pub use` reaches across crates, but this behavior can also be disabled.
+</span><span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>no_inline</span>)]</span>
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>option</span>::<span class='prelude-ty'>Option</span>;
+</pre>
+
+<p>Doc comments are markdown, and are currently parsed with the
+<a href="https://github.com/vmg/sundown/">sundown</a> library. rustdoc does not yet do any fanciness such as
+referencing other items inline, like javadoc&#39;s <code>@see</code>. One exception to this
+is that the first paragraph will be used as the &quot;summary&quot; of an item in the
+generated documentation:</p>
+<span id='rust-example-raw-3' class='rusttest'>fn main() {
+    /// A whizbang. Does stuff. (this line is the summary)
+    ///
+    /// Whizbangs are ...
+    struct Whizbang;
+}</span><pre id='rust-example-rendered-3' class='rust '>
+<span class='doccomment'>/// A whizbang. Does stuff. (this line is the summary)</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// Whizbangs are ...</span>
+<span class='kw'>struct</span> <span class='ident'>Whizbang</span>;
+</pre>
+
+<p>To generate the docs, run <code>rustdoc universe.rs</code>. By default, it generates a
+directory called <code>doc</code>, with the documentation for <code>universe</code> being in
+<code>doc/universe/index.html</code>. If you are using other crates with <code>extern crate</code>,
+rustdoc will even link to them when you use their types, as long as their
+documentation has already been generated by a previous run of rustdoc, or the
+crate advertises that its documentation is hosted at a given URL.</p>
+
+<p>The generated output can be controlled with the <code>doc</code> crate attribute, which
+is how the above advertisement works. An example from the <code>libstd</code>
+documentation:</p>
+<span id='rust-example-raw-4' class='rusttest'>fn main() {
+    #[doc(html_logo_url = &quot;http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png&quot;,
+          html_favicon_url = &quot;http://www.rust-lang.org/favicon.ico&quot;,
+          html_root_url = &quot;http://doc.rust-lang.org/&quot;)];
+}</span><pre id='rust-example-rendered-4' class='rust '>
+<span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>html_logo_url</span> <span class='op'>=</span> <span class='string'>&quot;http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png&quot;</span>,
+      <span class='ident'>html_favicon_url</span> <span class='op'>=</span> <span class='string'>&quot;http://www.rust-lang.org/favicon.ico&quot;</span>,
+      <span class='ident'>html_root_url</span> <span class='op'>=</span> <span class='string'>&quot;http://doc.rust-lang.org/&quot;</span>)]</span>;
+</pre>
+
+<p>The <code>html_root_url</code> is the prefix that rustdoc will apply to any references to
+that crate&#39;s types etc.</p>
+
+<p>rustdoc can also generate JSON, for consumption by other tools, with
+<code>rustdoc --output-format json</code>, and also consume already-generated JSON with
+<code>rustdoc --input-format json</code>.</p>
+
+<p>rustdoc also supports personalizing the output from crates&#39; documentation,
+similar to markdown options.</p>
+
+<ul>
+<li><code>--html-in-header FILE</code>: includes the contents of <code>FILE</code> at the
+end of the <code>&lt;head&gt;...&lt;/head&gt;</code> section.</li>
+<li><code>--html-before-content FILE</code>: includes the contents of <code>FILE</code>
+directly after <code>&lt;body&gt;</code>, before the rendered content (including the
+search bar).</li>
+<li><code>--html-after-content FILE</code>: includes the contents of <code>FILE</code>
+after all the rendered content.</li>
+</ul>
+
+<h1 id="using-the-documentation" class='section-header'><a
+                           href="#using-the-documentation">2 Using the Documentation</a></h1>
+<p>The web pages generated by rustdoc present the same logical hierarchy that one
+writes a library with. Every kind of item (function, struct, etc) has its own
+color, and one can always click on a colored type to jump to its
+documentation. There is a search bar at the top, which is powered by some
+JavaScript and a statically-generated search index. No special web server is
+required for the search.</p>
+
+<h1 id="testing-the-documentation" class='section-header'><a
+                           href="#testing-the-documentation">3 Testing the Documentation</a></h1>
+<p><code>rustdoc</code> has support for testing code examples which appear in the
+documentation. This is helpful for keeping code examples up to date with the
+source code.</p>
+
+<p>To test documentation, the <code>--test</code> argument is passed to rustdoc:</p>
+
+<pre><code class="language-{.sh}">rustdoc --test crate.rs</code></pre>
+
+<h2 id="defining-tests" class='section-header'><a
+                           href="#defining-tests">3.1 Defining tests</a></h2>
+<p>Rust documentation currently uses the markdown format, and rustdoc treats all
+code blocks as testable-by-default unless they carry a language tag of another
+language. In order to not run a test over a block of code, the <code>ignore</code> string
+can be added to the three-backtick form of markdown code block.</p>
+
+<pre><code class="language-md">```
+// This is a testable code block
+```
+
+```rust{.example}
+// This is rust and also testable
+```
+
+```ignore
+// This is not a testable code block
+```
+
+    // This is a testable code block (4-space indent)
+
+```sh
+```</code></pre>
+
+<p>You can specify that the test&#39;s execution should fail with the <code>should_fail</code>
+directive.</p>
+
+<pre><code class="language-md">```should_fail
+// This code block is expected to generate a failure when run
+```</code></pre>
+
+<p>You can specify that the code block should be compiled but not run with the
+<code>no_run</code> directive.</p>
+
+<pre><code class="language-md">```no_run
+// This code will be compiled but not executed
+```</code></pre>
+
+<p>Lastly, you can specify that a code block be compiled as if <code>--test</code>
+were passed to the compiler using the <code>test_harness</code> directive.</p>
+
+<pre><code class="language-md">```test_harness
+#[test]
+fn foo() {
+    fail!(&quot;oops! (will run &amp; register as failure)&quot;)
+}
+```</code></pre>
+
+<p>Rustdoc also supplies some extra sugar for helping with some tedious
+documentation examples. If a line is prefixed with <code>#</code>, then the line
+will not show up in the HTML documentation, but it will be used when
+testing the code block (NB. the space after the <code>#</code> is required, so
+that one can still write things like <code>#[deriving(Eq)]</code>).</p>
+
+<pre><code class="language-md">```
+# // showing &#39;fib&#39; in this documentation would just be tedious and detracts from
+# // what&#39;s actually being documented.
+# fn fib(n: int) { n + 2 }
+
+spawn(proc() { fib(200); })
+```</code></pre>
+
+<p>The documentation online would look like <code>spawn(proc() { fib(200); })</code>, but when
+testing this code, the <code>fib</code> function will be included (so it can compile).</p>
+
+<h2 id="running-tests-(advanced)" class='section-header'><a
+                           href="#running-tests-(advanced)">3.2 Running tests (advanced)</a></h2>
+<p>Running tests often requires some special configuration to filter tests, find
+libraries, or try running ignored examples. The testing framework that rustdoc
+uses is build on crate <code>test</code>, which is also used when you compile crates with
+rustc&#39;s <code>--test</code> flag. Extra arguments can be passed to rustdoc&#39;s test harness
+with the <code>--test-args</code> flag.</p>
+
+<pre><code class="language-console">$ rustdoc --test lib.rs --test-args &#39;foo&#39;
+
+$ rustdoc --test lib.rs --test-args &#39;--help&#39;</code></pre>
+
+<p>When testing a library, code examples will often show how functions are used,
+and this code often requires <code>use</code>-ing paths from the crate. To accommodate this,
+rustdoc will implicitly add <code>extern crate &lt;crate&gt;;</code> where <code>&lt;crate&gt;</code> is the name of
+the crate being tested to the top of each code example. This means that rustdoc
+must be able to find a compiled version of the library crate being tested. Extra
+search paths may be added via the <code>-L</code> flag to <code>rustdoc</code>.</p>
+
+<h1 id="standalone-markdown-files" class='section-header'><a
+                           href="#standalone-markdown-files">4 Standalone Markdown files</a></h1>
+<p>As well as Rust crates, rustdoc supports rendering pure Markdown files
+into HTML and testing the code snippets from them. A Markdown file is
+detected by a <code>.md</code> or <code>.markdown</code> extension.</p>
+
+<p>There are 4 options to modify the output that Rustdoc creates.</p>
+
+<ul>
+<li><code>--markdown-css PATH</code>: adds a <code>&lt;link rel=&quot;stylesheet&quot;&gt;</code> tag pointing to <code>PATH</code>.</li>
+<li><code>--html-in-header FILE</code>: includes the contents of <code>FILE</code> at the
+end of the <code>&lt;head&gt;...&lt;/head&gt;</code> section.</li>
+<li><code>--html-before-content FILE</code>: includes the contents of <code>FILE</code>
+directly after <code>&lt;body&gt;</code>, before the rendered content (including the
+title).</li>
+<li><code>--html-after-content FILE</code>: includes the contents of <code>FILE</code>
+directly before <code>&lt;/body&gt;</code>, after all the rendered content.</li>
+</ul>
+
+<p>All of these can be specified multiple times, and they are output in
+the order in which they are specified. The first line of the file being rendered must
+be the title, prefixed with <code>%</code> (e.g. this page has <code>% Rust
+Documentation</code> on the first line).</p>
+
+<p>Like with a Rust crate, the <code>--test</code> argument will run the code
+examples to check they compile, and obeys any <code>--test-args</code> flags. The
+tests are named after the last <code>#</code> heading.</p>
+
+    <script type="text/javascript">
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <footer><p>
+Copyright &copy; 2011-2014 The Rust Project Developers. Licensed under the
+<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>
+or the <a href="http://opensource.org/licenses/MIT">MIT license</a>, at your option.
+</p><p>
+This file may not be copied, modified, or distributed except according to those terms.
+</p></footer>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="playpen.js"></script>
+
+
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The std library documentation.">
+
+    <title>std::sync::Mutex - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../std/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../index.html'>std</a>&#8203;::<a href='index.html'>sync</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='atomics/index.html'>atomics</a><a class='mod ' href='deque/index.html'>deque</a><a class='mod ' href='mpmc_bounded_queue/index.html'>mpmc_bounded_queue</a><a class='mod ' href='mpsc_queue/index.html'>mpsc_queue</a><a class='mod ' href='spsc_queue/index.html'>spsc_queue</a></div><div class='block struct'><h2>Structs</h2><a class='struct ' href='struct.Arc.html'>Arc</a><a class='struct ' href='struct.Barrier.html'>Barrier</a><a class='struct ' href='struct.Condvar.html'>Condvar</a><a class='struct ' href='struct.Future.html'>Future</a><a class='struct current' href='struct.Mutex.html'>Mutex</a><a class='struct ' href='struct.MutexGuard.html'>MutexGuard</a><a class='struct ' href='struct.Once.html'>Once</a><a class='struct ' href='struct.RWLock.html'>RWLock</a><a class='struct ' href='struct.RWLockReadGuard.html'>RWLockReadGuard</a><a class='struct ' href='struct.RWLockWriteGuard.html'>RWLockWriteGuard</a><a class='struct ' href='struct.Semaphore.html'>Semaphore</a><a class='struct ' href='struct.SemaphoreGuard.html'>SemaphoreGuard</a><a class='struct ' href='struct.TaskPool.html'>TaskPool</a><a class='struct ' href='struct.Weak.html'>Weak</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'>Struct <a href='../index.html'>std</a>::<a href='index.html'>sync</a>::<a class='struct' href=''>Mutex</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-21793' href='../../sync/lock/struct.Mutex.html?gotosrc=21793'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Mutex&lt;T&gt; {
+    // some fields omitted
+}</pre><div class='docblock'><p>A wrapper type which provides synchronized access to the underlying data, of
+type <code>T</code>. A mutex always provides exclusive access, and concurrent requests
+will block while the mutex is already locked.</p>
+
+<h1 id="example" class='section-header'><a
+                           href="#example">Example</a></h1><span id='rust-example-raw-0' class='rusttest'>fn main() {
+    use sync::{Mutex, Arc};
+    
+    let mutex = Arc::new(Mutex::new(1i));
+    let mutex2 = mutex.clone();
+    
+    spawn(proc() {
+        let mut val = mutex2.lock();
+        *val += 1;
+        val.cond.signal();
+    });
+    
+    let mut value = mutex.lock();
+    while *value != 2 {
+        value.cond.wait();
+    }
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='kw'>use</span> <span class='ident'>sync</span>::{<span class='ident'>Mutex</span>, <span class='ident'>Arc</span>};
+
+<span class='kw'>let</span> <span class='ident'>mutex</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>Mutex</span>::<span class='ident'>new</span>(<span class='number'>1i</span>));
+<span class='kw'>let</span> <span class='ident'>mutex2</span> <span class='op'>=</span> <span class='ident'>mutex</span>.<span class='ident'>clone</span>();
+
+<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>val</span> <span class='op'>=</span> <span class='ident'>mutex2</span>.<span class='ident'>lock</span>();
+    <span class='op'>*</span><span class='ident'>val</span> <span class='op'>+=</span> <span class='number'>1</span>;
+    <span class='ident'>val</span>.<span class='ident'>cond</span>.<span class='ident'>signal</span>();
+});
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>value</span> <span class='op'>=</span> <span class='ident'>mutex</span>.<span class='ident'>lock</span>();
+<span class='kw'>while</span> <span class='op'>*</span><span class='ident'>value</span> <span class='op'>!=</span> <span class='number'>2</span> {
+    <span class='ident'>value</span>.<span class='ident'>cond</span>.<span class='ident'>wait</span>();
+}
+</pre>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../std/kinds/trait.Send.html' title='std::kinds::Send'>Send</a>&gt; <a class='struct' href='../../std/sync/struct.Mutex.html' title='std::sync::Mutex'>Mutex</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.new' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.new' class='fnname'>new</a>&lt;T: <a class='trait' href='../../std/kinds/trait.Send.html' title='std::kinds::Send'>Send</a>&gt;(user_data: T) -&gt; <a class='struct' href='../../std/sync/struct.Mutex.html' title='std::sync::Mutex'>Mutex</a>&lt;T&gt;</code></h4>
+<div class='docblock'><p>Creates a new mutex to protect the user-supplied data.</p>
+</div><h4 id='method.new_with_condvars' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.new_with_condvars' class='fnname'>new_with_condvars</a>&lt;T: <a class='trait' href='../../std/kinds/trait.Send.html' title='std::kinds::Send'>Send</a>&gt;(user_data: T, num_condvars: <a href='../primitive.uint.html'>uint</a>) -&gt; <a class='struct' href='../../std/sync/struct.Mutex.html' title='std::sync::Mutex'>Mutex</a>&lt;T&gt;</code></h4>
+<div class='docblock'><p>Create a new mutex, with a specified number of associated condvars.</p>
+
+<p>This will allow calling wait_on/signal_on/broadcast_on with condvar IDs
+between 0 and num_condvars-1. (If num_condvars is 0, lock_cond will be
+allowed but any operations on the condvar will fail.)</p>
+</div><h4 id='method.lock' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.lock' class='fnname'>lock</a>&lt;T: <a class='trait' href='../../std/kinds/trait.Send.html' title='std::kinds::Send'>Send</a>&gt;(&amp;'a self) -&gt; <a class='struct' href='../../std/sync/struct.MutexGuard.html' title='std::sync::MutexGuard'>MutexGuard</a>&lt;'a, T&gt;</code></h4>
+<div class='docblock'><p>Access the underlying mutable data with mutual exclusion from other
+tasks. The returned value is an RAII guard which will unlock the mutex
+when dropped. All concurrent tasks attempting to lock the mutex will
+block while the returned value is still alive.</p>
+
+<h1 id="failure" class='section-header'><a
+                           href="#failure">Failure</a></h1>
+<p>Failing while inside the Mutex will unlock the Mutex while unwinding, so
+that other tasks won&#39;t block forever. It will also poison the Mutex:
+any tasks that subsequently try to access it (including those already
+blocked on the mutex) will also fail immediately.</p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "std";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script src="../../playpen.js"></script>
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

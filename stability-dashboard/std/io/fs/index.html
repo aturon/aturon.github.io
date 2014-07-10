@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The std library documentation.">
+
+    <title>std::io::fs - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../../std/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../../index.html'>std</a>&#8203;::<a href='../index.html'>io</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='../extensions/index.html'>extensions</a><a class='mod current' href='../fs/index.html'>fs</a><a class='mod ' href='../net/index.html'>net</a><a class='mod ' href='../pipe/index.html'>pipe</a><a class='mod ' href='../process/index.html'>process</a><a class='mod ' href='../signal/index.html'>signal</a><a class='mod ' href='../stdio/index.html'>stdio</a><a class='mod ' href='../test/index.html'>test</a><a class='mod ' href='../timer/index.html'>timer</a><a class='mod ' href='../util/index.html'>util</a></div><div class='block struct'><h2>Structs</h2><a class='struct ' href='../struct.BufReader.html'>BufReader</a><a class='struct ' href='../struct.BufWriter.html'>BufWriter</a><a class='struct ' href='../struct.BufferedReader.html'>BufferedReader</a><a class='struct ' href='../struct.BufferedStream.html'>BufferedStream</a><a class='struct ' href='../struct.BufferedWriter.html'>BufferedWriter</a><a class='struct ' href='../struct.ChanReader.html'>ChanReader</a><a class='struct ' href='../struct.ChanWriter.html'>ChanWriter</a><a class='struct ' href='../struct.Chars.html'>Chars</a><a class='struct ' href='../struct.FilePermission.html'>FilePermission</a><a class='struct ' href='../struct.FileStat.html'>FileStat</a><a class='struct ' href='../struct.IncomingConnections.html'>IncomingConnections</a><a class='struct ' href='../struct.IoError.html'>IoError</a><a class='struct ' href='../struct.LineBufferedWriter.html'>LineBufferedWriter</a><a class='struct ' href='../struct.Lines.html'>Lines</a><a class='struct ' href='../struct.MemReader.html'>MemReader</a><a class='struct ' href='../struct.MemWriter.html'>MemWriter</a><a class='struct ' href='../struct.RefReader.html'>RefReader</a><a class='struct ' href='../struct.RefWriter.html'>RefWriter</a><a class='struct ' href='../struct.TempDir.html'>TempDir</a><a class='struct ' href='../struct.UnstableFileStat.html'>UnstableFileStat</a></div><div class='block trait'><h2>Traits</h2><a class='trait ' href='../trait.Acceptor.html'>Acceptor</a><a class='trait ' href='../trait.Buffer.html'>Buffer</a><a class='trait ' href='../trait.Listener.html'>Listener</a><a class='trait ' href='../trait.Reader.html'>Reader</a><a class='trait ' href='../trait.Seek.html'>Seek</a><a class='trait ' href='../trait.Stream.html'>Stream</a><a class='trait ' href='../trait.UpdateIoError.html'>UpdateIoError</a><a class='trait ' href='../trait.Writer.html'>Writer</a></div><div class='block fn'><h2>Functions</h2><a class='fn ' href='../fn.standard_error.html'>standard_error</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'>Module <a href='../../index.html'>std</a>::<a href='../index.html'>io</a>::<a class='mod' href=''>fs</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-30619' href='../../../src/std/Users/aturon/moz/working/stability-dashboard/src/libstd/io/fs.rs.html#11-1589'>[src]</a></span></h1>
+<div class='docblock'><p>Synchronous File I/O</p>
+
+<p>This module provides a set of functions and traits for working
+with regular files &amp; directories on a filesystem.</p>
+
+<p>At the top-level of the module are a set of freestanding functions, associated
+with various filesystem operations. They all operate on <code>Path</code> objects.</p>
+
+<p>All operations in this module, including those as part of <code>File</code> et al
+block the task during execution. In the event of failure, all functions/methods
+will return an <code>IoResult</code> type with an <code>Err</code> value.</p>
+
+<p>Also included in this module is an implementation block on the <code>Path</code> object
+defined in <code>std::path::Path</code>. The impl adds useful methods about inspecting the
+metadata of a file. This includes getting the <code>stat</code> information, reading off
+particular bits of it, etc.</p>
+
+<h1 id="example" class='section-header'><a
+                           href="#example">Example</a></h1><span id='rust-example-raw-0' class='rusttest'>fn main() {
+    #![allow(unused_must_use)]
+    use std::io::{File, fs};
+    
+    let path = Path::new(&quot;foo.txt&quot;);
+    
+    // create the file, whether it exists or not
+    let mut file = File::create(&amp;path);
+    file.write(b&quot;foobar&quot;);
+    drop(file);
+    
+    // open the file in read-only mode
+    let mut file = File::open(&amp;path);
+    file.read_to_end();
+    
+    println!(&quot;{}&quot;, path.stat().unwrap().size);
+    drop(file);
+    fs::unlink(&amp;path);
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>File</span>, <span class='ident'>fs</span>};
+
+<span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;foo.txt&quot;</span>);<span class='comment'>
+
+// create the file, whether it exists or not
+</span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>File</span>::<span class='ident'>create</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>);
+<span class='ident'>file</span>.<span class='ident'>write</span>(<span class='string'>b&quot;foobar&quot;</span>);<span class='comment'>
+
+// open the file in read-only mode
+</span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>File</span>::<span class='ident'>open</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>);
+<span class='ident'>file</span>.<span class='ident'>read_to_end</span>();
+
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>path</span>.<span class='ident'>stat</span>().<span class='ident'>unwrap</span>().<span class='ident'>size</span>);
+<span class='ident'>fs</span>::<span class='ident'>unlink</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>);
+</pre>
+</div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.Directories.html'
+                               title='std::io::fs::Directories'>Directories</a></td>
+                        <td class='docblock short'><p>An iterator which walks over a directory</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.File.html'
+                               title='std::io::fs::File'>File</a></td>
+                        <td class='docblock short'><p>Unconstrained file access type that exposes read and write operations</p>
+</td>
+                    </tr>
+                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.change_file_times.html'
+                               title='std::io::fs::change_file_times'>change_file_times</a></td>
+                        <td class='docblock short'><p>Changes the timestamps for a file&#39;s last modification and access time.
+The file at the path specified will have its last access time set to
+<code>atime</code> and its modification time set to <code>mtime</code>. The times specified should
+be in milliseconds.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.chmod.html'
+                               title='std::io::fs::chmod'>chmod</a></td>
+                        <td class='docblock short'><p>Changes the permission mode bits found on a file or a directory. This
+function takes a mask from the <code>io</code> module</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.chown.html'
+                               title='std::io::fs::chown'>chown</a></td>
+                        <td class='docblock short'><p>Change the user and group owners of a file at the specified path.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.copy.html'
+                               title='std::io::fs::copy'>copy</a></td>
+                        <td class='docblock short'><p>Copies the contents of one file to another. This function will also
+copy the permission bits of the original file to the destination file.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.link.html'
+                               title='std::io::fs::link'>link</a></td>
+                        <td class='docblock short'><p>Creates a new hard link on the filesystem. The <code>dst</code> path will be a
+link pointing to the <code>src</code> path. Note that systems often require these
+two paths to both be located on the same filesystem.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.lstat.html'
+                               title='std::io::fs::lstat'>lstat</a></td>
+                        <td class='docblock short'><p>Perform the same operation as the <code>stat</code> function, except that this
+function does not traverse through symlinks. This will return
+information about the symlink file instead of the file that it points
+to.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.mkdir.html'
+                               title='std::io::fs::mkdir'>mkdir</a></td>
+                        <td class='docblock short'><p>Create a new, empty directory at the provided path</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.mkdir_recursive.html'
+                               title='std::io::fs::mkdir_recursive'>mkdir_recursive</a></td>
+                        <td class='docblock short'><p>Recursively create a directory and all of its parent components if they
+are missing.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.readdir.html'
+                               title='std::io::fs::readdir'>readdir</a></td>
+                        <td class='docblock short'><p>Retrieve a vector containing all entries within a provided directory</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.readlink.html'
+                               title='std::io::fs::readlink'>readlink</a></td>
+                        <td class='docblock short'><p>Reads a symlink, returning the file that the symlink points to.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.rename.html'
+                               title='std::io::fs::rename'>rename</a></td>
+                        <td class='docblock short'><p>Rename a file or directory to a new name.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.rmdir.html'
+                               title='std::io::fs::rmdir'>rmdir</a></td>
+                        <td class='docblock short'><p>Remove an existing, empty directory</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.rmdir_recursive.html'
+                               title='std::io::fs::rmdir_recursive'>rmdir_recursive</a></td>
+                        <td class='docblock short'><p>Removes a directory at this path, after removing all its contents. Use
+carefully!</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.stat.html'
+                               title='std::io::fs::stat'>stat</a></td>
+                        <td class='docblock short'><p>Given a path, query the file system to get information about a file,
+directory, etc. This function will traverse symlinks to query
+information about the destination file.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.symlink.html'
+                               title='std::io::fs::symlink'>symlink</a></td>
+                        <td class='docblock short'><p>Creates a new symbolic link on the filesystem. The <code>dst</code> path will be a
+symlink pointing to the <code>src</code> path.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.unlink.html'
+                               title='std::io::fs::unlink'>unlink</a></td>
+                        <td class='docblock short'><p>Unlink a file from the underlying filesystem.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.walk_dir.html'
+                               title='std::io::fs::walk_dir'>walk_dir</a></td>
+                        <td class='docblock short'><p>Returns an iterator which will recursively walk the directory structure
+rooted at <code>path</code>. The path given will not be iterated over, and this will
+perform iteration in some top-down order.  The contents of unreadable
+subdirectories are ignored.</p>
+</td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "std";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    <script src="../../../playpen.js"></script>
+    <script async src="../../../search-index.js"></script>
+</body>
+</html>

@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The core library documentation.">
+
+    <title>core::intrinsics - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../core/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../index.html'>core</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='../any/index.html'>any</a><a class='mod ' href='../atomics/index.html'>atomics</a><a class='mod ' href='../bool/index.html'>bool</a><a class='mod ' href='../cell/index.html'>cell</a><a class='mod ' href='../char/index.html'>char</a><a class='mod ' href='../clone/index.html'>clone</a><a class='mod ' href='../cmp/index.html'>cmp</a><a class='mod ' href='../collections/index.html'>collections</a><a class='mod ' href='../default/index.html'>default</a><a class='mod ' href='../f32/index.html'>f32</a><a class='mod ' href='../f64/index.html'>f64</a><a class='mod ' href='../failure/index.html'>failure</a><a class='mod ' href='../finally/index.html'>finally</a><a class='mod ' href='../fmt/index.html'>fmt</a><a class='mod ' href='../i16/index.html'>i16</a><a class='mod ' href='../i32/index.html'>i32</a><a class='mod ' href='../i64/index.html'>i64</a><a class='mod ' href='../i8/index.html'>i8</a><a class='mod ' href='../int/index.html'>int</a><a class='mod current' href='../intrinsics/index.html'>intrinsics</a><a class='mod ' href='../iter/index.html'>iter</a><a class='mod ' href='../kinds/index.html'>kinds</a><a class='mod ' href='../mem/index.html'>mem</a><a class='mod ' href='../num/index.html'>num</a><a class='mod ' href='../ops/index.html'>ops</a><a class='mod ' href='../option/index.html'>option</a><a class='mod ' href='../prelude/index.html'>prelude</a><a class='mod ' href='../ptr/index.html'>ptr</a><a class='mod ' href='../raw/index.html'>raw</a><a class='mod ' href='../result/index.html'>result</a><a class='mod ' href='../simd/index.html'>simd</a><a class='mod ' href='../slice/index.html'>slice</a><a class='mod ' href='../str/index.html'>str</a><a class='mod ' href='../tuple/index.html'>tuple</a><a class='mod ' href='../ty/index.html'>ty</a><a class='mod ' href='../u16/index.html'>u16</a><a class='mod ' href='../u32/index.html'>u32</a><a class='mod ' href='../u64/index.html'>u64</a><a class='mod ' href='../u8/index.html'>u8</a><a class='mod ' href='../uint/index.html'>uint</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'>Module <a href='../index.html'>core</a>::<a class='mod' href=''>intrinsics</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-17200' href='../../src/core/Users/aturon/moz/working/stability-dashboard/src/libcore/intrinsics.rs.html#11-570'>[src]</a></span></h1>
+<div class='docblock'><p>rustc compiler intrinsics.</p>
+
+<p>The corresponding definitions are in librustc/middle/trans/foreign.rs.</p>
+
+<h1 id="volatiles" class='section-header'><a
+                           href="#volatiles">Volatiles</a></h1>
+<p>The volatile intrinsics provide operations intended to act on I/O
+memory, which are guaranteed to not be reordered by the compiler
+across other volatile intrinsics. See the LLVM documentation on
+[<a href="http://llvm.org/docs/LangRef.html#volatile-memory-accesses">volatile</a>].</p>
+
+<h1 id="atomics" class='section-header'><a
+                           href="#atomics">Atomics</a></h1>
+<p>The atomic intrinsics provide common atomic operations on machine
+words, with multiple possible memory orderings. They obey the same
+semantics as C++11. See the LLVM documentation on [<a href="http://llvm.org/docs/Atomics.html">atomics</a>].</p>
+
+<p>A quick refresher on memory ordering:</p>
+
+<ul>
+<li>Acquire - a barrier for acquiring a lock. Subsequent reads and writes
+take place after the barrier.</li>
+<li>Release - a barrier for releasing a lock. Preceding reads and writes
+take place before the barrier.</li>
+<li>Sequentially consistent - sequentially consistent operations are
+guaranteed to happen in order. This is the standard mode for working
+with atomic types and is equivalent to Java&#39;s <code>volatile</code>.</li>
+</ul>
+</div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.TyDesc.html'
+                               title='core::intrinsics::TyDesc'>TyDesc</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.TypeId.html'
+                               title='core::intrinsics::TypeId'>TypeId</a></td>
+                        <td class='docblock short'><p><code>TypeId</code> represents a globally unique identifier for a type</p>
+</td>
+                    </tr>
+                </table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.Opaque.html'
+                               title='core::intrinsics::Opaque'>Opaque</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                </table><h2 id='ffi-fns' class='section-header'><a href="#ffi-fns">Foreign Functions</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.abort.html'
+                               title='core::intrinsics::abort'>abort</a></td>
+                        <td class='docblock short'><p>Abort the execution of the process.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_and.html'
+                               title='core::intrinsics::atomic_and'>atomic_and</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_and_acq.html'
+                               title='core::intrinsics::atomic_and_acq'>atomic_and_acq</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_and_acqrel.html'
+                               title='core::intrinsics::atomic_and_acqrel'>atomic_and_acqrel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_and_rel.html'
+                               title='core::intrinsics::atomic_and_rel'>atomic_and_rel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_and_relaxed.html'
+                               title='core::intrinsics::atomic_and_relaxed'>atomic_and_relaxed</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_cxchg.html'
+                               title='core::intrinsics::atomic_cxchg'>atomic_cxchg</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_cxchg_acq.html'
+                               title='core::intrinsics::atomic_cxchg_acq'>atomic_cxchg_acq</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_cxchg_acqrel.html'
+                               title='core::intrinsics::atomic_cxchg_acqrel'>atomic_cxchg_acqrel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_cxchg_rel.html'
+                               title='core::intrinsics::atomic_cxchg_rel'>atomic_cxchg_rel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_cxchg_relaxed.html'
+                               title='core::intrinsics::atomic_cxchg_relaxed'>atomic_cxchg_relaxed</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_fence.html'
+                               title='core::intrinsics::atomic_fence'>atomic_fence</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_fence_acq.html'
+                               title='core::intrinsics::atomic_fence_acq'>atomic_fence_acq</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_fence_acqrel.html'
+                               title='core::intrinsics::atomic_fence_acqrel'>atomic_fence_acqrel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_fence_rel.html'
+                               title='core::intrinsics::atomic_fence_rel'>atomic_fence_rel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_load.html'
+                               title='core::intrinsics::atomic_load'>atomic_load</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_load_acq.html'
+                               title='core::intrinsics::atomic_load_acq'>atomic_load_acq</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_load_relaxed.html'
+                               title='core::intrinsics::atomic_load_relaxed'>atomic_load_relaxed</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_max.html'
+                               title='core::intrinsics::atomic_max'>atomic_max</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_max_acq.html'
+                               title='core::intrinsics::atomic_max_acq'>atomic_max_acq</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_max_acqrel.html'
+                               title='core::intrinsics::atomic_max_acqrel'>atomic_max_acqrel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_max_rel.html'
+                               title='core::intrinsics::atomic_max_rel'>atomic_max_rel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_max_relaxed.html'
+                               title='core::intrinsics::atomic_max_relaxed'>atomic_max_relaxed</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_min.html'
+                               title='core::intrinsics::atomic_min'>atomic_min</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_min_acq.html'
+                               title='core::intrinsics::atomic_min_acq'>atomic_min_acq</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_min_acqrel.html'
+                               title='core::intrinsics::atomic_min_acqrel'>atomic_min_acqrel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_min_rel.html'
+                               title='core::intrinsics::atomic_min_rel'>atomic_min_rel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_min_relaxed.html'
+                               title='core::intrinsics::atomic_min_relaxed'>atomic_min_relaxed</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_nand.html'
+                               title='core::intrinsics::atomic_nand'>atomic_nand</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_nand_acq.html'
+                               title='core::intrinsics::atomic_nand_acq'>atomic_nand_acq</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_nand_acqrel.html'
+                               title='core::intrinsics::atomic_nand_acqrel'>atomic_nand_acqrel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_nand_rel.html'
+                               title='core::intrinsics::atomic_nand_rel'>atomic_nand_rel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_nand_relaxed.html'
+                               title='core::intrinsics::atomic_nand_relaxed'>atomic_nand_relaxed</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_or.html'
+                               title='core::intrinsics::atomic_or'>atomic_or</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_or_acq.html'
+                               title='core::intrinsics::atomic_or_acq'>atomic_or_acq</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_or_acqrel.html'
+                               title='core::intrinsics::atomic_or_acqrel'>atomic_or_acqrel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_or_rel.html'
+                               title='core::intrinsics::atomic_or_rel'>atomic_or_rel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_or_relaxed.html'
+                               title='core::intrinsics::atomic_or_relaxed'>atomic_or_relaxed</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_store.html'
+                               title='core::intrinsics::atomic_store'>atomic_store</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_store_rel.html'
+                               title='core::intrinsics::atomic_store_rel'>atomic_store_rel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_store_relaxed.html'
+                               title='core::intrinsics::atomic_store_relaxed'>atomic_store_relaxed</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_umax.html'
+                               title='core::intrinsics::atomic_umax'>atomic_umax</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_umax_acq.html'
+                               title='core::intrinsics::atomic_umax_acq'>atomic_umax_acq</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_umax_acqrel.html'
+                               title='core::intrinsics::atomic_umax_acqrel'>atomic_umax_acqrel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_umax_rel.html'
+                               title='core::intrinsics::atomic_umax_rel'>atomic_umax_rel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_umax_relaxed.html'
+                               title='core::intrinsics::atomic_umax_relaxed'>atomic_umax_relaxed</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_umin.html'
+                               title='core::intrinsics::atomic_umin'>atomic_umin</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_umin_acq.html'
+                               title='core::intrinsics::atomic_umin_acq'>atomic_umin_acq</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_umin_acqrel.html'
+                               title='core::intrinsics::atomic_umin_acqrel'>atomic_umin_acqrel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_umin_rel.html'
+                               title='core::intrinsics::atomic_umin_rel'>atomic_umin_rel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_umin_relaxed.html'
+                               title='core::intrinsics::atomic_umin_relaxed'>atomic_umin_relaxed</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_xadd.html'
+                               title='core::intrinsics::atomic_xadd'>atomic_xadd</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_xadd_acq.html'
+                               title='core::intrinsics::atomic_xadd_acq'>atomic_xadd_acq</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_xadd_acqrel.html'
+                               title='core::intrinsics::atomic_xadd_acqrel'>atomic_xadd_acqrel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_xadd_rel.html'
+                               title='core::intrinsics::atomic_xadd_rel'>atomic_xadd_rel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_xadd_relaxed.html'
+                               title='core::intrinsics::atomic_xadd_relaxed'>atomic_xadd_relaxed</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_xchg.html'
+                               title='core::intrinsics::atomic_xchg'>atomic_xchg</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_xchg_acq.html'
+                               title='core::intrinsics::atomic_xchg_acq'>atomic_xchg_acq</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_xchg_acqrel.html'
+                               title='core::intrinsics::atomic_xchg_acqrel'>atomic_xchg_acqrel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_xchg_rel.html'
+                               title='core::intrinsics::atomic_xchg_rel'>atomic_xchg_rel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_xchg_relaxed.html'
+                               title='core::intrinsics::atomic_xchg_relaxed'>atomic_xchg_relaxed</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_xor.html'
+                               title='core::intrinsics::atomic_xor'>atomic_xor</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_xor_acq.html'
+                               title='core::intrinsics::atomic_xor_acq'>atomic_xor_acq</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_xor_acqrel.html'
+                               title='core::intrinsics::atomic_xor_acqrel'>atomic_xor_acqrel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_xor_rel.html'
+                               title='core::intrinsics::atomic_xor_rel'>atomic_xor_rel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_xor_relaxed.html'
+                               title='core::intrinsics::atomic_xor_relaxed'>atomic_xor_relaxed</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_xsub.html'
+                               title='core::intrinsics::atomic_xsub'>atomic_xsub</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_xsub_acq.html'
+                               title='core::intrinsics::atomic_xsub_acq'>atomic_xsub_acq</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_xsub_acqrel.html'
+                               title='core::intrinsics::atomic_xsub_acqrel'>atomic_xsub_acqrel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_xsub_rel.html'
+                               title='core::intrinsics::atomic_xsub_rel'>atomic_xsub_rel</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.atomic_xsub_relaxed.html'
+                               title='core::intrinsics::atomic_xsub_relaxed'>atomic_xsub_relaxed</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.breakpoint.html'
+                               title='core::intrinsics::breakpoint'>breakpoint</a></td>
+                        <td class='docblock short'><p>Execute a breakpoint trap, for inspection by a debugger.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.bswap16.html'
+                               title='core::intrinsics::bswap16'>bswap16</a></td>
+                        <td class='docblock short'><p>Reverses the bytes in a <code>u16</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.bswap32.html'
+                               title='core::intrinsics::bswap32'>bswap32</a></td>
+                        <td class='docblock short'><p>Reverses the bytes in a <code>u32</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.bswap64.html'
+                               title='core::intrinsics::bswap64'>bswap64</a></td>
+                        <td class='docblock short'><p>Reverses the bytes in a <code>u64</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.ceilf32.html'
+                               title='core::intrinsics::ceilf32'>ceilf32</a></td>
+                        <td class='docblock short'><p>Returns the smallest integer greater than or equal to an <code>f32</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.ceilf64.html'
+                               title='core::intrinsics::ceilf64'>ceilf64</a></td>
+                        <td class='docblock short'><p>Returns the smallest integer greater than or equal to an <code>f64</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.copy_memory.html'
+                               title='core::intrinsics::copy_memory'>copy_memory</a></td>
+                        <td class='docblock short'><p>Equivalent to the appropriate <code>llvm.memmove.p0i8.0i8.*</code> intrinsic, with
+a size of <code>count</code> * <code>size_of::&lt;T&gt;()</code> and an alignment of
+<code>min_align_of::&lt;T&gt;()</code></p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.copy_nonoverlapping_memory.html'
+                               title='core::intrinsics::copy_nonoverlapping_memory'>copy_nonoverlapping_memory</a></td>
+                        <td class='docblock short'><p>Equivalent to the appropriate <code>llvm.memcpy.p0i8.0i8.*</code> intrinsic, with
+a size of <code>count</code> * <code>size_of::&lt;T&gt;()</code> and an alignment of
+<code>min_align_of::&lt;T&gt;()</code></p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.copysignf32.html'
+                               title='core::intrinsics::copysignf32'>copysignf32</a></td>
+                        <td class='docblock short'><p>Copies the sign from <code>y</code> to <code>x</code> for <code>f32</code> values.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.copysignf64.html'
+                               title='core::intrinsics::copysignf64'>copysignf64</a></td>
+                        <td class='docblock short'><p>Copies the sign from <code>y</code> to <code>x</code> for <code>f64</code> values.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.cosf32.html'
+                               title='core::intrinsics::cosf32'>cosf32</a></td>
+                        <td class='docblock short'><p>Returns the cosine of an <code>f32</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.cosf64.html'
+                               title='core::intrinsics::cosf64'>cosf64</a></td>
+                        <td class='docblock short'><p>Returns the cosine of an <code>f64</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.ctlz16.html'
+                               title='core::intrinsics::ctlz16'>ctlz16</a></td>
+                        <td class='docblock short'><p>Returns the number of leading bits unset in a <code>u16</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.ctlz32.html'
+                               title='core::intrinsics::ctlz32'>ctlz32</a></td>
+                        <td class='docblock short'><p>Returns the number of leading bits unset in a <code>u32</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.ctlz64.html'
+                               title='core::intrinsics::ctlz64'>ctlz64</a></td>
+                        <td class='docblock short'><p>Returns the number of leading bits unset in a <code>u64</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.ctlz8.html'
+                               title='core::intrinsics::ctlz8'>ctlz8</a></td>
+                        <td class='docblock short'><p>Returns the number of leading bits unset in a <code>u8</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.ctpop16.html'
+                               title='core::intrinsics::ctpop16'>ctpop16</a></td>
+                        <td class='docblock short'><p>Returns the number of bits set in a <code>u16</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.ctpop32.html'
+                               title='core::intrinsics::ctpop32'>ctpop32</a></td>
+                        <td class='docblock short'><p>Returns the number of bits set in a <code>u32</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.ctpop64.html'
+                               title='core::intrinsics::ctpop64'>ctpop64</a></td>
+                        <td class='docblock short'><p>Returns the number of bits set in a <code>u64</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.ctpop8.html'
+                               title='core::intrinsics::ctpop8'>ctpop8</a></td>
+                        <td class='docblock short'><p>Returns the number of bits set in a <code>u8</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.cttz16.html'
+                               title='core::intrinsics::cttz16'>cttz16</a></td>
+                        <td class='docblock short'><p>Returns the number of trailing bits unset in a <code>u16</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.cttz32.html'
+                               title='core::intrinsics::cttz32'>cttz32</a></td>
+                        <td class='docblock short'><p>Returns the number of trailing bits unset in a <code>u32</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.cttz64.html'
+                               title='core::intrinsics::cttz64'>cttz64</a></td>
+                        <td class='docblock short'><p>Returns the number of trailing bits unset in a <code>u64</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.cttz8.html'
+                               title='core::intrinsics::cttz8'>cttz8</a></td>
+                        <td class='docblock short'><p>Returns the number of trailing bits unset in a <code>u8</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.exp2f32.html'
+                               title='core::intrinsics::exp2f32'>exp2f32</a></td>
+                        <td class='docblock short'><p>Returns 2 raised to the power of an <code>f32</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.exp2f64.html'
+                               title='core::intrinsics::exp2f64'>exp2f64</a></td>
+                        <td class='docblock short'><p>Returns 2 raised to the power of an <code>f64</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.expf32.html'
+                               title='core::intrinsics::expf32'>expf32</a></td>
+                        <td class='docblock short'><p>Returns the exponential of an <code>f32</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.expf64.html'
+                               title='core::intrinsics::expf64'>expf64</a></td>
+                        <td class='docblock short'><p>Returns the exponential of an <code>f64</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.fabsf32.html'
+                               title='core::intrinsics::fabsf32'>fabsf32</a></td>
+                        <td class='docblock short'><p>Returns the absolute value of an <code>f32</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.fabsf64.html'
+                               title='core::intrinsics::fabsf64'>fabsf64</a></td>
+                        <td class='docblock short'><p>Returns the absolute value of an <code>f64</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.floorf32.html'
+                               title='core::intrinsics::floorf32'>floorf32</a></td>
+                        <td class='docblock short'><p>Returns the largest integer less than or equal to an <code>f32</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.floorf64.html'
+                               title='core::intrinsics::floorf64'>floorf64</a></td>
+                        <td class='docblock short'><p>Returns the largest integer less than or equal to an <code>f64</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.fmaf32.html'
+                               title='core::intrinsics::fmaf32'>fmaf32</a></td>
+                        <td class='docblock short'><p>Returns <code>a * b + c</code> for <code>f32</code> values.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.fmaf64.html'
+                               title='core::intrinsics::fmaf64'>fmaf64</a></td>
+                        <td class='docblock short'><p>Returns <code>a * b + c</code> for <code>f64</code> values.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.forget.html'
+                               title='core::intrinsics::forget'>forget</a></td>
+                        <td class='docblock short'><p>Move a value out of scope without running drop glue.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.get_tydesc.html'
+                               title='core::intrinsics::get_tydesc'>get_tydesc</a></td>
+                        <td class='docblock short'><p>Get a static pointer to a type descriptor.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.i16_add_with_overflow.html'
+                               title='core::intrinsics::i16_add_with_overflow'>i16_add_with_overflow</a></td>
+                        <td class='docblock short'><p>Performs checked <code>i16</code> addition.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.i16_mul_with_overflow.html'
+                               title='core::intrinsics::i16_mul_with_overflow'>i16_mul_with_overflow</a></td>
+                        <td class='docblock short'><p>Performs checked <code>i16</code> multiplication.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.i16_sub_with_overflow.html'
+                               title='core::intrinsics::i16_sub_with_overflow'>i16_sub_with_overflow</a></td>
+                        <td class='docblock short'><p>Performs checked <code>i16</code> subtraction.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.i32_add_with_overflow.html'
+                               title='core::intrinsics::i32_add_with_overflow'>i32_add_with_overflow</a></td>
+                        <td class='docblock short'><p>Performs checked <code>i32</code> addition.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.i32_mul_with_overflow.html'
+                               title='core::intrinsics::i32_mul_with_overflow'>i32_mul_with_overflow</a></td>
+                        <td class='docblock short'><p>Performs checked <code>i32</code> multiplication.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.i32_sub_with_overflow.html'
+                               title='core::intrinsics::i32_sub_with_overflow'>i32_sub_with_overflow</a></td>
+                        <td class='docblock short'><p>Performs checked <code>i32</code> subtraction.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.i64_add_with_overflow.html'
+                               title='core::intrinsics::i64_add_with_overflow'>i64_add_with_overflow</a></td>
+                        <td class='docblock short'><p>Performs checked <code>i64</code> addition.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.i64_mul_with_overflow.html'
+                               title='core::intrinsics::i64_mul_with_overflow'>i64_mul_with_overflow</a></td>
+                        <td class='docblock short'><p>Performs checked <code>i64</code> multiplication.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.i64_sub_with_overflow.html'
+                               title='core::intrinsics::i64_sub_with_overflow'>i64_sub_with_overflow</a></td>
+                        <td class='docblock short'><p>Performs checked <code>i64</code> subtraction.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.i8_add_with_overflow.html'
+                               title='core::intrinsics::i8_add_with_overflow'>i8_add_with_overflow</a></td>
+                        <td class='docblock short'><p>Performs checked <code>i8</code> addition.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.i8_mul_with_overflow.html'
+                               title='core::intrinsics::i8_mul_with_overflow'>i8_mul_with_overflow</a></td>
+                        <td class='docblock short'><p>Performs checked <code>i8</code> multiplication.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.i8_sub_with_overflow.html'
+                               title='core::intrinsics::i8_sub_with_overflow'>i8_sub_with_overflow</a></td>
+                        <td class='docblock short'><p>Performs checked <code>i8</code> subtraction.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.init.html'
+                               title='core::intrinsics::init'>init</a></td>
+                        <td class='docblock short'><p>Create a value initialized to zero.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.log10f32.html'
+                               title='core::intrinsics::log10f32'>log10f32</a></td>
+                        <td class='docblock short'><p>Returns the base 10 logarithm of an <code>f32</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.log10f64.html'
+                               title='core::intrinsics::log10f64'>log10f64</a></td>
+                        <td class='docblock short'><p>Returns the base 10 logarithm of an <code>f64</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.log2f32.html'
+                               title='core::intrinsics::log2f32'>log2f32</a></td>
+                        <td class='docblock short'><p>Returns the base 2 logarithm of an <code>f32</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.log2f64.html'
+                               title='core::intrinsics::log2f64'>log2f64</a></td>
+                        <td class='docblock short'><p>Returns the base 2 logarithm of an <code>f64</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.logf32.html'
+                               title='core::intrinsics::logf32'>logf32</a></td>
+                        <td class='docblock short'><p>Returns the natural logarithm of an <code>f32</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.logf64.html'
+                               title='core::intrinsics::logf64'>logf64</a></td>
+                        <td class='docblock short'><p>Returns the natural logarithm of an <code>f64</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.min_align_of.html'
+                               title='core::intrinsics::min_align_of'>min_align_of</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.move_val_init.html'
+                               title='core::intrinsics::move_val_init'>move_val_init</a></td>
+                        <td class='docblock short'><p>Move a value to an uninitialized memory location.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.nearbyintf32.html'
+                               title='core::intrinsics::nearbyintf32'>nearbyintf32</a></td>
+                        <td class='docblock short'><p>Returns the nearest integer to an <code>f32</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.nearbyintf64.html'
+                               title='core::intrinsics::nearbyintf64'>nearbyintf64</a></td>
+                        <td class='docblock short'><p>Returns the nearest integer to an <code>f64</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.needs_drop.html'
+                               title='core::intrinsics::needs_drop'>needs_drop</a></td>
+                        <td class='docblock short'><p>Returns <code>true</code> if a type requires drop glue.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.offset.html'
+                               title='core::intrinsics::offset'>offset</a></td>
+                        <td class='docblock short'><p>Calculates the offset from a pointer. The offset <em>must</em> be in-bounds of
+the object, or one-byte-past-the-end. An arithmetic overflow is also
+undefined behaviour.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.owns_managed.html'
+                               title='core::intrinsics::owns_managed'>owns_managed</a></td>
+                        <td class='docblock short'><p>Returns <code>true</code> if a type is managed (will be allocated on the local heap)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.powf32.html'
+                               title='core::intrinsics::powf32'>powf32</a></td>
+                        <td class='docblock short'><p>Raises an <code>f32</code> to an <code>f32</code> power.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.powf64.html'
+                               title='core::intrinsics::powf64'>powf64</a></td>
+                        <td class='docblock short'><p>Raises an <code>f64</code> to an <code>f64</code> power.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.powif32.html'
+                               title='core::intrinsics::powif32'>powif32</a></td>
+                        <td class='docblock short'><p>Raises an <code>f32</code> to an integer power.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.powif64.html'
+                               title='core::intrinsics::powif64'>powif64</a></td>
+                        <td class='docblock short'><p>Raises an <code>f64</code> to an integer power.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.pref_align_of.html'
+                               title='core::intrinsics::pref_align_of'>pref_align_of</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.rintf32.html'
+                               title='core::intrinsics::rintf32'>rintf32</a></td>
+                        <td class='docblock short'><p>Returns the nearest integer to an <code>f32</code>. May raise an inexact floating-point exception
+if the argument is not an integer.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.rintf64.html'
+                               title='core::intrinsics::rintf64'>rintf64</a></td>
+                        <td class='docblock short'><p>Returns the nearest integer to an <code>f64</code>. May raise an inexact floating-point exception
+if the argument is not an integer.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.roundf32.html'
+                               title='core::intrinsics::roundf32'>roundf32</a></td>
+                        <td class='docblock short'><p>Returns the nearest integer to an <code>f32</code>. Rounds half-way cases away from zero.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.roundf64.html'
+                               title='core::intrinsics::roundf64'>roundf64</a></td>
+                        <td class='docblock short'><p>Returns the nearest integer to an <code>f64</code>. Rounds half-way cases away from zero.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.set_memory.html'
+                               title='core::intrinsics::set_memory'>set_memory</a></td>
+                        <td class='docblock short'><p>Equivalent to the appropriate <code>llvm.memset.p0i8.*</code> intrinsic, with a
+size of <code>count</code> * <code>size_of::&lt;T&gt;()</code> and an alignment of
+<code>min_align_of::&lt;T&gt;()</code></p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.sinf32.html'
+                               title='core::intrinsics::sinf32'>sinf32</a></td>
+                        <td class='docblock short'><p>Returns the sine of an <code>f32</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.sinf64.html'
+                               title='core::intrinsics::sinf64'>sinf64</a></td>
+                        <td class='docblock short'><p>Returns the sine of an <code>f64</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.size_of.html'
+                               title='core::intrinsics::size_of'>size_of</a></td>
+                        <td class='docblock short'><p>The size of a type in bytes.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.sqrtf32.html'
+                               title='core::intrinsics::sqrtf32'>sqrtf32</a></td>
+                        <td class='docblock short'><p>Returns the square root of an <code>f32</code></p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.sqrtf64.html'
+                               title='core::intrinsics::sqrtf64'>sqrtf64</a></td>
+                        <td class='docblock short'><p>Returns the square root of an <code>f64</code></p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.transmute.html'
+                               title='core::intrinsics::transmute'>transmute</a></td>
+                        <td class='docblock short'><p>Unsafely transforms a value of one type into a value of another type.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.truncf32.html'
+                               title='core::intrinsics::truncf32'>truncf32</a></td>
+                        <td class='docblock short'><p>Returns the integer part of an <code>f32</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.truncf64.html'
+                               title='core::intrinsics::truncf64'>truncf64</a></td>
+                        <td class='docblock short'><p>Returns the integer part of an <code>f64</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.type_id.html'
+                               title='core::intrinsics::type_id'>type_id</a></td>
+                        <td class='docblock short'><p>Gets an identifier which is globally unique to the specified type. This
+function will return the same value for a type regardless of whichever
+crate it is invoked in.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.u16_add_with_overflow.html'
+                               title='core::intrinsics::u16_add_with_overflow'>u16_add_with_overflow</a></td>
+                        <td class='docblock short'><p>Performs checked <code>u16</code> addition.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.u16_mul_with_overflow.html'
+                               title='core::intrinsics::u16_mul_with_overflow'>u16_mul_with_overflow</a></td>
+                        <td class='docblock short'><p>Performs checked <code>u16</code> multiplication.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.u16_sub_with_overflow.html'
+                               title='core::intrinsics::u16_sub_with_overflow'>u16_sub_with_overflow</a></td>
+                        <td class='docblock short'><p>Performs checked <code>u16</code> subtraction.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.u32_add_with_overflow.html'
+                               title='core::intrinsics::u32_add_with_overflow'>u32_add_with_overflow</a></td>
+                        <td class='docblock short'><p>Performs checked <code>u32</code> addition.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.u32_mul_with_overflow.html'
+                               title='core::intrinsics::u32_mul_with_overflow'>u32_mul_with_overflow</a></td>
+                        <td class='docblock short'><p>Performs checked <code>u32</code> multiplication.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.u32_sub_with_overflow.html'
+                               title='core::intrinsics::u32_sub_with_overflow'>u32_sub_with_overflow</a></td>
+                        <td class='docblock short'><p>Performs checked <code>u32</code> subtraction.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.u64_add_with_overflow.html'
+                               title='core::intrinsics::u64_add_with_overflow'>u64_add_with_overflow</a></td>
+                        <td class='docblock short'><p>Performs checked <code>u64</code> addition.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.u64_mul_with_overflow.html'
+                               title='core::intrinsics::u64_mul_with_overflow'>u64_mul_with_overflow</a></td>
+                        <td class='docblock short'><p>Performs checked <code>u64</code> multiplication.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.u64_sub_with_overflow.html'
+                               title='core::intrinsics::u64_sub_with_overflow'>u64_sub_with_overflow</a></td>
+                        <td class='docblock short'><p>Performs checked <code>u64</code> subtraction.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.u8_add_with_overflow.html'
+                               title='core::intrinsics::u8_add_with_overflow'>u8_add_with_overflow</a></td>
+                        <td class='docblock short'><p>Performs checked <code>u8</code> addition.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.u8_mul_with_overflow.html'
+                               title='core::intrinsics::u8_mul_with_overflow'>u8_mul_with_overflow</a></td>
+                        <td class='docblock short'><p>Performs checked <code>u8</code> multiplication.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.u8_sub_with_overflow.html'
+                               title='core::intrinsics::u8_sub_with_overflow'>u8_sub_with_overflow</a></td>
+                        <td class='docblock short'><p>Performs checked <code>u8</code> subtraction.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uninit.html'
+                               title='core::intrinsics::uninit'>uninit</a></td>
+                        <td class='docblock short'><p>Create an uninitialized value.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.visit_tydesc.html'
+                               title='core::intrinsics::visit_tydesc'>visit_tydesc</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.volatile_copy_memory.html'
+                               title='core::intrinsics::volatile_copy_memory'>volatile_copy_memory</a></td>
+                        <td class='docblock short'><p>Equivalent to the appropriate <code>llvm.memmove.p0i8.0i8.*</code> intrinsic, with
+a size of <code>count</code> * <code>size_of::&lt;T&gt;()</code> and an alignment of
+<code>min_align_of::&lt;T&gt;()</code></p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.volatile_copy_nonoverlapping_memory.html'
+                               title='core::intrinsics::volatile_copy_nonoverlapping_memory'>volatile_copy_nonoverlapping_memory</a></td>
+                        <td class='docblock short'><p>Equivalent to the appropriate <code>llvm.memcpy.p0i8.0i8.*</code> intrinsic, with
+a size of <code>count</code> * <code>size_of::&lt;T&gt;()</code> and an alignment of
+<code>min_align_of::&lt;T&gt;()</code></p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.volatile_load.html'
+                               title='core::intrinsics::volatile_load'>volatile_load</a></td>
+                        <td class='docblock short'><p>Perform a volatile load from the <code>src</code> pointer.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.volatile_set_memory.html'
+                               title='core::intrinsics::volatile_set_memory'>volatile_set_memory</a></td>
+                        <td class='docblock short'><p>Equivalent to the appropriate <code>llvm.memset.p0i8.*</code> intrinsic, with a
+size of <code>count</code> * <code>size_of::&lt;T&gt;()</code> and an alignment of
+<code>min_align_of::&lt;T&gt;()</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.volatile_store.html'
+                               title='core::intrinsics::volatile_store'>volatile_store</a></td>
+                        <td class='docblock short'><p>Perform a volatile store to the <code>dst</code> pointer.</p>
+</td>
+                    </tr>
+                </table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.TyVisitor.html'
+                               title='core::intrinsics::TyVisitor'>TyVisitor</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                </table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.Disr.html'
+                               title='core::intrinsics::Disr'>Disr</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.GlueFn.html'
+                               title='core::intrinsics::GlueFn'>GlueFn</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "core";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script src="../../playpen.js"></script>
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

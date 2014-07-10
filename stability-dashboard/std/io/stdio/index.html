@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The std library documentation.">
+
+    <title>std::io::stdio - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../../std/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../../index.html'>std</a>&#8203;::<a href='../index.html'>io</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='../extensions/index.html'>extensions</a><a class='mod ' href='../fs/index.html'>fs</a><a class='mod ' href='../net/index.html'>net</a><a class='mod ' href='../pipe/index.html'>pipe</a><a class='mod ' href='../process/index.html'>process</a><a class='mod ' href='../signal/index.html'>signal</a><a class='mod current' href='../stdio/index.html'>stdio</a><a class='mod ' href='../test/index.html'>test</a><a class='mod ' href='../timer/index.html'>timer</a><a class='mod ' href='../util/index.html'>util</a></div><div class='block struct'><h2>Structs</h2><a class='struct ' href='../struct.BufReader.html'>BufReader</a><a class='struct ' href='../struct.BufWriter.html'>BufWriter</a><a class='struct ' href='../struct.BufferedReader.html'>BufferedReader</a><a class='struct ' href='../struct.BufferedStream.html'>BufferedStream</a><a class='struct ' href='../struct.BufferedWriter.html'>BufferedWriter</a><a class='struct ' href='../struct.ChanReader.html'>ChanReader</a><a class='struct ' href='../struct.ChanWriter.html'>ChanWriter</a><a class='struct ' href='../struct.Chars.html'>Chars</a><a class='struct ' href='../struct.FilePermission.html'>FilePermission</a><a class='struct ' href='../struct.FileStat.html'>FileStat</a><a class='struct ' href='../struct.IncomingConnections.html'>IncomingConnections</a><a class='struct ' href='../struct.IoError.html'>IoError</a><a class='struct ' href='../struct.LineBufferedWriter.html'>LineBufferedWriter</a><a class='struct ' href='../struct.Lines.html'>Lines</a><a class='struct ' href='../struct.MemReader.html'>MemReader</a><a class='struct ' href='../struct.MemWriter.html'>MemWriter</a><a class='struct ' href='../struct.RefReader.html'>RefReader</a><a class='struct ' href='../struct.RefWriter.html'>RefWriter</a><a class='struct ' href='../struct.TempDir.html'>TempDir</a><a class='struct ' href='../struct.UnstableFileStat.html'>UnstableFileStat</a></div><div class='block trait'><h2>Traits</h2><a class='trait ' href='../trait.Acceptor.html'>Acceptor</a><a class='trait ' href='../trait.Buffer.html'>Buffer</a><a class='trait ' href='../trait.Listener.html'>Listener</a><a class='trait ' href='../trait.Reader.html'>Reader</a><a class='trait ' href='../trait.Seek.html'>Seek</a><a class='trait ' href='../trait.Stream.html'>Stream</a><a class='trait ' href='../trait.UpdateIoError.html'>UpdateIoError</a><a class='trait ' href='../trait.Writer.html'>Writer</a></div><div class='block fn'><h2>Functions</h2><a class='fn ' href='../fn.standard_error.html'>standard_error</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'>Module <a href='../../index.html'>std</a>::<a href='../index.html'>io</a>::<a class='mod' href=''>stdio</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-42826' href='../../../src/std/Users/aturon/moz/working/stability-dashboard/src/libstd/io/stdio.rs.html#11-410'>[src]</a></span></h1>
+<div class='docblock'><p>Non-blocking access to stdin, stdout, and stderr.</p>
+
+<p>This module provides bindings to the local event loop&#39;s TTY interface, using it
+to offer synchronous but non-blocking versions of stdio. These handles can be
+inspected for information about terminal dimensions or for related information
+about the stream or terminal to which it is attached.</p>
+
+<h1 id="example" class='section-header'><a
+                           href="#example">Example</a></h1><span id='rust-example-raw-0' class='rusttest'>fn main() {
+    #![allow(unused_must_use)]
+    use std::io;
+    
+    let mut out = io::stdout();
+    out.write(b&quot;Hello, world!&quot;);
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>out</span> <span class='op'>=</span> <span class='ident'>io</span>::<span class='ident'>stdout</span>();
+<span class='ident'>out</span>.<span class='ident'>write</span>(<span class='string'>b&quot;Hello, world!&quot;</span>);
+</pre>
+</div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.StdReader.html'
+                               title='std::io::stdio::StdReader'>StdReader</a></td>
+                        <td class='docblock short'><p>Representation of a reader of a standard input stream</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.StdWriter.html'
+                               title='std::io::stdio::StdWriter'>StdWriter</a></td>
+                        <td class='docblock short'><p>Representation of a writer to a standard output stream</p>
+</td>
+                    </tr>
+                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.flush.html'
+                               title='std::io::stdio::flush'>flush</a></td>
+                        <td class='docblock short'><p>Flushes the local task&#39;s stdout handle.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.print.html'
+                               title='std::io::stdio::print'>print</a></td>
+                        <td class='docblock short'><p>Prints a string to the stdout of the current process. No newline is emitted
+after the string is printed.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.print_args.html'
+                               title='std::io::stdio::print_args'>print_args</a></td>
+                        <td class='docblock short'><p>Similar to <code>print</code>, but takes a <code>fmt::Arguments</code> structure to be compatible
+with the <code>format_args!</code> macro.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.println.html'
+                               title='std::io::stdio::println'>println</a></td>
+                        <td class='docblock short'><p>Prints a string as a line. to the stdout of the current process. A literal
+<code>\n</code> character is printed to the console after the string.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.println_args.html'
+                               title='std::io::stdio::println_args'>println_args</a></td>
+                        <td class='docblock short'><p>Similar to <code>println</code>, but takes a <code>fmt::Arguments</code> structure to be
+compatible with the <code>format_args!</code> macro.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.set_stderr.html'
+                               title='std::io::stdio::set_stderr'>set_stderr</a></td>
+                        <td class='docblock short'><p>Resets the task-local stderr handle to the specified writer</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.set_stdout.html'
+                               title='std::io::stdio::set_stdout'>set_stdout</a></td>
+                        <td class='docblock short'><p>Resets the task-local stdout handle to the specified writer</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.stderr.html'
+                               title='std::io::stdio::stderr'>stderr</a></td>
+                        <td class='docblock short'><p>Creates a line-buffered handle to the stderr of the current process.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.stderr_raw.html'
+                               title='std::io::stdio::stderr_raw'>stderr_raw</a></td>
+                        <td class='docblock short'><p>Creates an unbuffered handle to the stderr of the current process</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.stdin.html'
+                               title='std::io::stdio::stdin'>stdin</a></td>
+                        <td class='docblock short'><p>Creates a new non-blocking handle to the stdin of the current process.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.stdin_raw.html'
+                               title='std::io::stdio::stdin_raw'>stdin_raw</a></td>
+                        <td class='docblock short'><p>Creates a new non-blocking handle to the stdin of the current process.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.stdout.html'
+                               title='std::io::stdio::stdout'>stdout</a></td>
+                        <td class='docblock short'><p>Creates a line-buffered handle to the stdout of the current process.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.stdout_raw.html'
+                               title='std::io::stdio::stdout_raw'>stdout_raw</a></td>
+                        <td class='docblock short'><p>Creates an unbuffered handle to the stdout of the current process</p>
+</td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "std";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    <script src="../../../playpen.js"></script>
+    <script async src="../../../search-index.js"></script>
+</body>
+</html>

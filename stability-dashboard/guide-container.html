@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="generator" content="rustdoc">
+    <title>The Rust Containers and Iterators Guide</title>
+
+    <link rel="stylesheet" type="text/css" href="rust.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400'
+        rel='stylesheet' type='text/css'>
+
+
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    <div id="versioninfo">
+  <img src="http://www.rust-lang.org/logos/rust-logo-32x32-blk.png" width="32" height="32" alt><br>
+  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.11.0-pre</span><br>
+  <a href="http://github.com/rust-lang/rust/commit/169c988d09a9d4e46de2b7fead9489e94964c7c7"
+    class="hash white-sticker">169c988d</a>
+</div>
+
+
+    <h1 class="title">The Rust Containers and Iterators Guide</h1>
+    <nav id="TOC"><ul>
+<li><a href="#containers">1 Containers</a><ul>
+<li><a href="#unique-vectors">1.1 Unique vectors</a><ul></ul></li>
+<li><a href="#maps-and-sets">1.2 Maps and sets</a><ul></ul></li>
+<li><a href="#double-ended-queues">1.3 Double-ended queues</a><ul></ul></li>
+<li><a href="#priority-queues">1.4 Priority queues</a><ul></ul></li></ul></li>
+<li><a href="#iterators">2 Iterators</a><ul>
+<li><a href="#iteration-protocol">2.1 Iteration protocol</a><ul></ul></li>
+<li><a href="#container-iterators">2.2 Container iterators</a><ul>
+<li><a href="#freezing">2.2.1 Freezing</a><ul></ul></li></ul></li>
+<li><a href="#iterator-adaptors">2.3 Iterator adaptors</a><ul></ul></li>
+<li><a href="#for-loops">2.4 For loops</a><ul></ul></li>
+<li><a href="#conversion">2.5 Conversion</a><ul>
+<li><a href="#size-hints">2.5.1 Size hints</a><ul></ul></li></ul></li>
+<li><a href="#double-ended-iterators">2.6 Double-ended iterators</a><ul></ul></li>
+<li><a href="#random-access-iterators">2.7 Random-access iterators</a><ul></ul></li></ul></li></ul></nav>
+<h1 id="containers" class='section-header'><a
+                           href="#containers">1 Containers</a></h1>
+<p>The container traits are defined in the <code>std::container</code> module.</p>
+
+<h2 id="unique-vectors" class='section-header'><a
+                           href="#unique-vectors">1.1 Unique vectors</a></h2>
+<p>Vectors have <code>O(1)</code> indexing, push (to the end) and pop (from the end). Vectors
+are the most common container in Rust, and are flexible enough to fit many use
+cases.</p>
+
+<p>Vectors can also be sorted and used as efficient lookup tables with the
+<code>bsearch()</code> method, if all the elements are inserted at one time and
+deletions are unnecessary.</p>
+
+<h2 id="maps-and-sets" class='section-header'><a
+                           href="#maps-and-sets">1.2 Maps and sets</a></h2>
+<p>Maps are collections of unique keys with corresponding values, and sets are
+just unique keys without a corresponding value. The <code>Map</code> and <code>Set</code> traits in
+<code>std::container</code> define the basic interface.</p>
+
+<p>The standard library provides three owned map/set types:</p>
+
+<ul>
+<li><code>collections::HashMap</code> and <code>collections::HashSet</code>, requiring the keys to
+implement <code>Eq</code> and <code>Hash</code></li>
+<li><code>collections::TrieMap</code> and <code>collections::TrieSet</code>, requiring the keys to be <code>uint</code></li>
+<li><code>collections::TreeMap</code> and <code>collections::TreeSet</code>, requiring the keys
+to implement <code>Ord</code></li>
+</ul>
+
+<p>These maps do not use managed pointers so they can be sent between tasks as
+long as the key and value types are sendable. Neither the key or value type has
+to be copyable.</p>
+
+<p>The <code>TrieMap</code> and <code>TreeMap</code> maps are ordered, while <code>HashMap</code> uses an arbitrary
+order.</p>
+
+<p>Each <code>HashMap</code> instance has a random 128-bit key to use with a keyed hash,
+making the order of a set of keys in a given hash table randomized. Rust
+provides a <a href="https://131002.net/siphash/">SipHash</a> implementation for any type
+implementing the <code>Hash</code> trait.</p>
+
+<h2 id="double-ended-queues" class='section-header'><a
+                           href="#double-ended-queues">1.3 Double-ended queues</a></h2>
+<p>The <code>collections::ringbuf</code> module implements a double-ended queue with <code>O(1)</code>
+amortized inserts and removals from both ends of the container. It also has
+<code>O(1)</code> indexing like a vector. The contained elements are not required to be
+copyable, and the queue will be sendable if the contained type is sendable.
+Its interface <code>Deque</code> is defined in <code>collections</code>.</p>
+
+<p>The <code>extra::dlist</code> module implements a double-ended linked list, also
+implementing the <code>Deque</code> trait, with <code>O(1)</code> removals and inserts at either end,
+and <code>O(1)</code> concatenation.</p>
+
+<h2 id="priority-queues" class='section-header'><a
+                           href="#priority-queues">1.4 Priority queues</a></h2>
+<p>The <code>collections::priority_queue</code> module implements a queue ordered by a key.  The
+contained elements are not required to be copyable, and the queue will be
+sendable if the contained type is sendable.</p>
+
+<p>Insertions have <code>O(log n)</code> time complexity and checking or popping the largest
+element is <code>O(1)</code>. Converting a vector to a priority queue can be done
+in-place, and has <code>O(n)</code> complexity. A priority queue can also be converted to
+a sorted vector in-place, allowing it to be used for an <code>O(n log n)</code> in-place
+heapsort.</p>
+
+<h1 id="iterators" class='section-header'><a
+                           href="#iterators">2 Iterators</a></h1>
+<h2 id="iteration-protocol" class='section-header'><a
+                           href="#iteration-protocol">2.1 Iteration protocol</a></h2>
+<p>The iteration protocol is defined by the <code>Iterator</code> trait in the
+<code>std::iter</code> module. The minimal implementation of the trait is a <code>next</code>
+method, yielding the next element from an iterator object:</p>
+<span id='rust-example-raw-0' class='rusttest'>fn main() {
+    /// An infinite stream of zeroes
+    struct ZeroStream;
+    
+    impl Iterator&lt;int&gt; for ZeroStream {
+        fn next(&amp;mut self) -&gt; Option&lt;int&gt; {
+            Some(0)
+        }
+    }
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='doccomment'>/// An infinite stream of zeroes</span>
+<span class='kw'>struct</span> <span class='ident'>ZeroStream</span>;
+
+<span class='kw'>impl</span> <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>ZeroStream</span> {
+    <span class='kw'>fn</span> <span class='ident'>next</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span> {
+        <span class='prelude-val'>Some</span>(<span class='number'>0</span>)
+    }
+}
+</pre>
+
+<p>Reaching the end of the iterator is signalled by returning <code>None</code> instead of
+<code>Some(item)</code>:</p>
+<span id='rust-example-raw-1' class='rusttest'>fn main() {}
+/// A stream of N zeroes
+struct ZeroStream {
+    remaining: uint
+}
+
+impl ZeroStream {
+    fn new(n: uint) -&gt; ZeroStream {
+        ZeroStream { remaining: n }
+    }
+}
+
+impl Iterator&lt;int&gt; for ZeroStream {
+    fn next(&amp;mut self) -&gt; Option&lt;int&gt; {
+        if self.remaining == 0 {
+            None
+        } else {
+            self.remaining -= 1;
+            Some(0)
+        }
+    }
+}</span><pre id='rust-example-rendered-1' class='rust '>
+<span class='doccomment'>/// A stream of N zeroes</span>
+<span class='kw'>struct</span> <span class='ident'>ZeroStream</span> {
+    <span class='ident'>remaining</span>: <span class='ident'>uint</span>
+}
+
+<span class='kw'>impl</span> <span class='ident'>ZeroStream</span> {
+    <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>n</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>ZeroStream</span> {
+        <span class='ident'>ZeroStream</span> { <span class='ident'>remaining</span>: <span class='ident'>n</span> }
+    }
+}
+
+<span class='kw'>impl</span> <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>ZeroStream</span> {
+    <span class='kw'>fn</span> <span class='ident'>next</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span> {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>remaining</span> <span class='op'>==</span> <span class='number'>0</span> {
+            <span class='prelude-val'>None</span>
+        } <span class='kw'>else</span> {
+            <span class='self'>self</span>.<span class='ident'>remaining</span> <span class='op'>-=</span> <span class='number'>1</span>;
+            <span class='prelude-val'>Some</span>(<span class='number'>0</span>)
+        }
+    }
+}
+</pre>
+
+<p>In general, you cannot rely on the behavior of the <code>next()</code> method after it has
+returned <code>None</code>. Some iterators may return <code>None</code> forever. Others may behave
+differently.</p>
+
+<h2 id="container-iterators" class='section-header'><a
+                           href="#container-iterators">2.2 Container iterators</a></h2>
+<p>Containers implement iteration over the contained elements by returning an
+iterator object. For example, vector slices several iterators available:</p>
+
+<ul>
+<li><code>iter()</code> for immutable references to the elements</li>
+<li><code>mut_iter()</code> for mutable references to the elements</li>
+<li><code>move_iter()</code> to move the elements out by-value</li>
+</ul>
+
+<p>A typical mutable container will implement at least <code>iter()</code>, <code>mut_iter()</code> and
+<code>move_iter()</code>. If it maintains an order, the returned iterators will be
+<code>DoubleEndedIterator</code>s, which are described below.</p>
+
+<h3 id="freezing" class='section-header'><a
+                           href="#freezing">2.2.1 Freezing</a></h3>
+<p>Unlike most other languages with external iterators, Rust has no <em>iterator
+invalidation</em>. As long as an iterator is still in scope, the compiler will prevent
+modification of the container through another handle.</p>
+<span id='rust-example-raw-2' class='rusttest'>fn main() {
+    let mut xs = [1i, 2, 3];
+    {
+        let _it = xs.iter();
+    
+        // the vector is frozen for this scope, the compiler will statically
+        // prevent modification
+    }
+    // the vector becomes unfrozen again at the end of the scope
+}</span><pre id='rust-example-rendered-2' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>xs</span> <span class='op'>=</span> [<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
+{
+    <span class='kw'>let</span> <span class='ident'>_it</span> <span class='op'>=</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>();<span class='comment'>
+
+    // the vector is frozen for this scope, the compiler will statically
+    // prevent modification
+</span>}<span class='comment'>
+// the vector becomes unfrozen again at the end of the scope
+</span></pre>
+
+<p>These semantics are due to most container iterators being implemented with <code>&amp;</code>
+and <code>&amp;mut</code>.</p>
+
+<h2 id="iterator-adaptors" class='section-header'><a
+                           href="#iterator-adaptors">2.3 Iterator adaptors</a></h2>
+<p>The <code>Iterator</code> trait provides many common algorithms as default methods. For
+example, the <code>fold</code> method will accumulate the items yielded by an <code>Iterator</code>
+into a single value:</p>
+<span id='rust-example-raw-3' class='rusttest'>fn main() {
+    let xs = [1i, 9, 2, 3, 14, 12];
+    let result = xs.iter().fold(0, |accumulator, item| accumulator - *item);
+    assert_eq!(result, -41);
+}</span><pre id='rust-example-rendered-3' class='rust '>
+<span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> [<span class='number'>1i</span>, <span class='number'>9</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>14</span>, <span class='number'>12</span>];
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>().<span class='ident'>fold</span>(<span class='number'>0</span>, <span class='op'>|</span><span class='ident'>accumulator</span>, <span class='ident'>item</span><span class='op'>|</span> <span class='ident'>accumulator</span> <span class='op'>-</span> <span class='op'>*</span><span class='ident'>item</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>result</span>, <span class='op'>-</span><span class='number'>41</span>);
+</pre>
+
+<p>Most adaptors return an adaptor object implementing the <code>Iterator</code> trait itself:</p>
+<span id='rust-example-raw-4' class='rusttest'>fn main() {
+    let xs = [1i, 9, 2, 3, 14, 12];
+    let ys = [5i, 2, 1, 8];
+    let sum = xs.iter().chain(ys.iter()).fold(0, |a, b| a + *b);
+    assert_eq!(sum, 57);
+}</span><pre id='rust-example-rendered-4' class='rust '>
+<span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> [<span class='number'>1i</span>, <span class='number'>9</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>14</span>, <span class='number'>12</span>];
+<span class='kw'>let</span> <span class='ident'>ys</span> <span class='op'>=</span> [<span class='number'>5i</span>, <span class='number'>2</span>, <span class='number'>1</span>, <span class='number'>8</span>];
+<span class='kw'>let</span> <span class='ident'>sum</span> <span class='op'>=</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>().<span class='ident'>chain</span>(<span class='ident'>ys</span>.<span class='ident'>iter</span>()).<span class='ident'>fold</span>(<span class='number'>0</span>, <span class='op'>|</span><span class='ident'>a</span>, <span class='ident'>b</span><span class='op'>|</span> <span class='ident'>a</span> <span class='op'>+</span> <span class='op'>*</span><span class='ident'>b</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>sum</span>, <span class='number'>57</span>);
+</pre>
+
+<p>Some iterator adaptors may return <code>None</code> before exhausting the underlying
+iterator. Additionally, if these iterator adaptors are called again after
+returning <code>None</code>, they may call their underlying iterator again even if the
+adaptor will continue to return <code>None</code> forever. This may not be desired if the
+underlying iterator has side-effects.</p>
+
+<p>In order to provide a guarantee about behavior once <code>None</code> has been returned, an
+iterator adaptor named <code>fuse()</code> is provided. This returns an iterator that will
+never call its underlying iterator again once <code>None</code> has been returned:</p>
+<span id='rust-example-raw-5' class='rusttest'>fn main() {
+    let xs = [1i,2,3,4,5];
+    let mut calls = 0i;
+    
+    {
+        let it = xs.iter().scan((), |_, x| {
+            calls += 1;
+            if *x &lt; 3 { Some(x) } else { None }});
+    
+        // the iterator will only yield 1 and 2 before returning None
+        // If we were to call it 5 times, calls would end up as 5, despite
+        // only 2 values being yielded (and therefore 3 unique calls being
+        // made). The fuse() adaptor can fix this.
+    
+        let mut it = it.fuse();
+        it.next();
+        it.next();
+        it.next();
+        it.next();
+        it.next();
+    }
+    
+    assert_eq!(calls, 3);
+}</span><pre id='rust-example-rendered-5' class='rust '>
+<span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> [<span class='number'>1i</span>,<span class='number'>2</span>,<span class='number'>3</span>,<span class='number'>4</span>,<span class='number'>5</span>];
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>calls</span> <span class='op'>=</span> <span class='number'>0i</span>;
+
+{
+    <span class='kw'>let</span> <span class='ident'>it</span> <span class='op'>=</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>().<span class='ident'>scan</span>((), <span class='op'>|</span>_, <span class='ident'>x</span><span class='op'>|</span> {
+        <span class='ident'>calls</span> <span class='op'>+=</span> <span class='number'>1</span>;
+        <span class='kw'>if</span> <span class='op'>*</span><span class='ident'>x</span> <span class='op'>&lt;</span> <span class='number'>3</span> { <span class='prelude-val'>Some</span>(<span class='ident'>x</span>) } <span class='kw'>else</span> { <span class='prelude-val'>None</span> }});<span class='comment'>
+
+    // the iterator will only yield 1 and 2 before returning None
+    // If we were to call it 5 times, calls would end up as 5, despite
+    // only 2 values being yielded (and therefore 3 unique calls being
+    // made). The fuse() adaptor can fix this.
+
+    </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>it</span> <span class='op'>=</span> <span class='ident'>it</span>.<span class='ident'>fuse</span>();
+    <span class='ident'>it</span>.<span class='ident'>next</span>();
+    <span class='ident'>it</span>.<span class='ident'>next</span>();
+    <span class='ident'>it</span>.<span class='ident'>next</span>();
+    <span class='ident'>it</span>.<span class='ident'>next</span>();
+    <span class='ident'>it</span>.<span class='ident'>next</span>();
+}
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>calls</span>, <span class='number'>3</span>);
+</pre>
+
+<h2 id="for-loops" class='section-header'><a
+                           href="#for-loops">2.4 For loops</a></h2>
+<p>The function <code>range</code> (or <code>range_inclusive</code>) allows to simply iterate through a given range:</p>
+<span id='rust-example-raw-6' class='rusttest'>fn main() {
+    for i in range(0i, 5) {
+      print!(&quot;{} &quot;, i) // prints &quot;0 1 2 3 4&quot;
+    }
+    
+    for i in std::iter::range_inclusive(0i, 5) { // needs explicit import
+      print!(&quot;{} &quot;, i) // prints &quot;0 1 2 3 4 5&quot;
+    }
+}</span><pre id='rust-example-rendered-6' class='rust '>
+<span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0i</span>, <span class='number'>5</span>) {
+  <span class='macro'>print</span><span class='macro'>!</span>(<span class='string'>&quot;{} &quot;</span>, <span class='ident'>i</span>)<span class='comment'> // prints &quot;0 1 2 3 4&quot;
+</span>}
+
+<span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>std</span>::<span class='ident'>iter</span>::<span class='ident'>range_inclusive</span>(<span class='number'>0i</span>, <span class='number'>5</span>) {<span class='comment'> // needs explicit import
+  </span><span class='macro'>print</span><span class='macro'>!</span>(<span class='string'>&quot;{} &quot;</span>, <span class='ident'>i</span>)<span class='comment'> // prints &quot;0 1 2 3 4 5&quot;
+</span>}
+</pre>
+
+<p>The <code>for</code> keyword can be used as sugar for iterating through any iterator:</p>
+<span id='rust-example-raw-7' class='rusttest'>fn main() {
+    let xs = [2u, 3, 5, 7, 11, 13, 17];
+    
+    // print out all the elements in the vector
+    for x in xs.iter() {
+        println!(&quot;{}&quot;, *x)
+    }
+    
+    // print out all but the first 3 elements in the vector
+    for x in xs.iter().skip(3) {
+        println!(&quot;{}&quot;, *x)
+    }
+}</span><pre id='rust-example-rendered-7' class='rust '>
+<span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> [<span class='number'>2u</span>, <span class='number'>3</span>, <span class='number'>5</span>, <span class='number'>7</span>, <span class='number'>11</span>, <span class='number'>13</span>, <span class='number'>17</span>];<span class='comment'>
+
+// print out all the elements in the vector
+</span><span class='kw'>for</span> <span class='ident'>x</span> <span class='kw'>in</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>() {
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='op'>*</span><span class='ident'>x</span>)
+}<span class='comment'>
+
+// print out all but the first 3 elements in the vector
+</span><span class='kw'>for</span> <span class='ident'>x</span> <span class='kw'>in</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>().<span class='ident'>skip</span>(<span class='number'>3</span>) {
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='op'>*</span><span class='ident'>x</span>)
+}
+</pre>
+
+<p>For loops are <em>often</em> used with a temporary iterator object, as above. They can
+also advance the state of an iterator in a mutable location:</p>
+<span id='rust-example-raw-8' class='rusttest'>fn main() {
+    let xs = [1i, 2, 3, 4, 5];
+    let ys = [&quot;foo&quot;, &quot;bar&quot;, &quot;baz&quot;, &quot;foobar&quot;];
+    
+    // create an iterator yielding tuples of elements from both vectors
+    let mut it = xs.iter().zip(ys.iter());
+    
+    // print out the pairs of elements up to (&amp;3, &amp;&quot;baz&quot;)
+    for (x, y) in it {
+        println!(&quot;{} {}&quot;, *x, *y);
+    
+        if *x == 3 {
+            break;
+        }
+    }
+    
+    // yield and print the last pair from the iterator
+    println!(&quot;last: {}&quot;, it.next());
+    
+    // the iterator is now fully consumed
+    assert!(it.next().is_none());
+}</span><pre id='rust-example-rendered-8' class='rust '>
+<span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> [<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>, <span class='number'>5</span>];
+<span class='kw'>let</span> <span class='ident'>ys</span> <span class='op'>=</span> [<span class='string'>&quot;foo&quot;</span>, <span class='string'>&quot;bar&quot;</span>, <span class='string'>&quot;baz&quot;</span>, <span class='string'>&quot;foobar&quot;</span>];<span class='comment'>
+
+// create an iterator yielding tuples of elements from both vectors
+</span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>it</span> <span class='op'>=</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>().<span class='ident'>zip</span>(<span class='ident'>ys</span>.<span class='ident'>iter</span>());<span class='comment'>
+
+// print out the pairs of elements up to (&amp;3, &amp;&quot;baz&quot;)
+</span><span class='kw'>for</span> (<span class='ident'>x</span>, <span class='ident'>y</span>) <span class='kw'>in</span> <span class='ident'>it</span> {
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{} {}&quot;</span>, <span class='op'>*</span><span class='ident'>x</span>, <span class='op'>*</span><span class='ident'>y</span>);
+
+    <span class='kw'>if</span> <span class='op'>*</span><span class='ident'>x</span> <span class='op'>==</span> <span class='number'>3</span> {
+        <span class='kw'>break</span>;
+    }
+}<span class='comment'>
+
+// yield and print the last pair from the iterator
+</span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;last: {}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>next</span>());<span class='comment'>
+
+// the iterator is now fully consumed
+</span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>it</span>.<span class='ident'>next</span>().<span class='ident'>is_none</span>());
+</pre>
+
+<h2 id="conversion" class='section-header'><a
+                           href="#conversion">2.5 Conversion</a></h2>
+<p>Iterators offer generic conversion to containers with the <code>collect</code> adaptor:</p>
+<span id='rust-example-raw-9' class='rusttest'>fn main() {
+    let xs = [0i, 1, 1, 2, 3, 5, 8];
+    let ys = xs.iter().rev().skip(1).map(|&amp;x| x * 2).collect::&lt;Vec&lt;int&gt;&gt;();
+    assert_eq!(ys, vec![10, 6, 4, 2, 2, 0]);
+}</span><pre id='rust-example-rendered-9' class='rust '>
+<span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> [<span class='number'>0i</span>, <span class='number'>1</span>, <span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>5</span>, <span class='number'>8</span>];
+<span class='kw'>let</span> <span class='ident'>ys</span> <span class='op'>=</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>().<span class='ident'>rev</span>().<span class='ident'>skip</span>(<span class='number'>1</span>).<span class='ident'>map</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span> <span class='op'>*</span> <span class='number'>2</span>).<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;&gt;</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ys</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>10</span>, <span class='number'>6</span>, <span class='number'>4</span>, <span class='number'>2</span>, <span class='number'>2</span>, <span class='number'>0</span>]);
+</pre>
+
+<p>The method requires a type hint for the container type, if the surrounding code
+does not provide sufficient information.</p>
+
+<p>Containers can provide conversion from iterators through <code>collect</code> by
+implementing the <code>FromIterator</code> trait. For example, the implementation for
+vectors is as follows:</p>
+<span id='rust-example-raw-10' class='rusttest'>fn main() {
+    impl&lt;T&gt; FromIterator&lt;T&gt; for Vec&lt;T&gt; {
+        fn from_iter&lt;I:Iterator&lt;A&gt;&gt;(mut iterator: I) -&gt; Vec&lt;T&gt; {
+            let (lower, _) = iterator.size_hint();
+            let mut vector = Vec::with_capacity(lower);
+            for element in iterator {
+                vector.push(element);
+            }
+            vector
+        }
+    }
+}</span><pre id='rust-example-rendered-10' class='rust '>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>FromIterator</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>from_iter</span><span class='op'>&lt;</span><span class='ident'>I</span>:<span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>mut</span> <span class='ident'>iterator</span>: <span class='ident'>I</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+        <span class='kw'>let</span> (<span class='ident'>lower</span>, _) <span class='op'>=</span> <span class='ident'>iterator</span>.<span class='ident'>size_hint</span>();
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vector</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='ident'>lower</span>);
+        <span class='kw'>for</span> <span class='ident'>element</span> <span class='kw'>in</span> <span class='ident'>iterator</span> {
+            <span class='ident'>vector</span>.<span class='ident'>push</span>(<span class='ident'>element</span>);
+        }
+        <span class='ident'>vector</span>
+    }
+}
+</pre>
+
+<h3 id="size-hints" class='section-header'><a
+                           href="#size-hints">2.5.1 Size hints</a></h3>
+<p>The <code>Iterator</code> trait provides a <code>size_hint</code> default method, returning a lower
+bound and optionally on upper bound on the length of the iterator:</p>
+<span id='rust-example-raw-11' class='rusttest'>fn main() {
+    fn size_hint(&amp;self) -&gt; (uint, Option&lt;uint&gt;) { (0, None) }
+}</span><pre id='rust-example-rendered-11' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>size_hint</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='ident'>uint</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>) { (<span class='number'>0</span>, <span class='prelude-val'>None</span>) }
+</pre>
+
+<p>The vector implementation of <code>FromIterator</code> from above uses the lower bound
+to pre-allocate enough space to hold the minimum number of elements the
+iterator will yield.</p>
+
+<p>The default implementation is always correct, but it should be overridden if
+the iterator can provide better information.</p>
+
+<p>The <code>ZeroStream</code> from earlier can provide an exact lower and upper bound:</p>
+<span id='rust-example-raw-12' class='rusttest'>fn main() {}
+/// A stream of N zeroes
+struct ZeroStream {
+    remaining: uint
+}
+
+impl ZeroStream {
+    fn new(n: uint) -&gt; ZeroStream {
+        ZeroStream { remaining: n }
+    }
+
+    fn size_hint(&amp;self) -&gt; (uint, Option&lt;uint&gt;) {
+        (self.remaining, Some(self.remaining))
+    }
+}
+
+impl Iterator&lt;int&gt; for ZeroStream {
+    fn next(&amp;mut self) -&gt; Option&lt;int&gt; {
+        if self.remaining == 0 {
+            None
+        } else {
+            self.remaining -= 1;
+            Some(0)
+        }
+    }
+}</span><pre id='rust-example-rendered-12' class='rust '>
+<span class='doccomment'>/// A stream of N zeroes</span>
+<span class='kw'>struct</span> <span class='ident'>ZeroStream</span> {
+    <span class='ident'>remaining</span>: <span class='ident'>uint</span>
+}
+
+<span class='kw'>impl</span> <span class='ident'>ZeroStream</span> {
+    <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>n</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>ZeroStream</span> {
+        <span class='ident'>ZeroStream</span> { <span class='ident'>remaining</span>: <span class='ident'>n</span> }
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>size_hint</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='ident'>uint</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>) {
+        (<span class='self'>self</span>.<span class='ident'>remaining</span>, <span class='prelude-val'>Some</span>(<span class='self'>self</span>.<span class='ident'>remaining</span>))
+    }
+}
+
+<span class='kw'>impl</span> <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>ZeroStream</span> {
+    <span class='kw'>fn</span> <span class='ident'>next</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span> {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>remaining</span> <span class='op'>==</span> <span class='number'>0</span> {
+            <span class='prelude-val'>None</span>
+        } <span class='kw'>else</span> {
+            <span class='self'>self</span>.<span class='ident'>remaining</span> <span class='op'>-=</span> <span class='number'>1</span>;
+            <span class='prelude-val'>Some</span>(<span class='number'>0</span>)
+        }
+    }
+}
+</pre>
+
+<h2 id="double-ended-iterators" class='section-header'><a
+                           href="#double-ended-iterators">2.6 Double-ended iterators</a></h2>
+<p>The <code>DoubleEndedIterator</code> trait represents an iterator able to yield elements
+from either end of a range. It inherits from the <code>Iterator</code> trait and extends
+it with the <code>next_back</code> function.</p>
+
+<p>A <code>DoubleEndedIterator</code> can have its direction changed with the <code>rev</code> adaptor,
+returning another <code>DoubleEndedIterator</code> with <code>next</code> and <code>next_back</code> exchanged.</p>
+<span id='rust-example-raw-13' class='rusttest'>fn main() {
+    let xs = [1i, 2, 3, 4, 5, 6];
+    let mut it = xs.iter();
+    println!(&quot;{}&quot;, it.next()); // prints `Some(1)`
+    println!(&quot;{}&quot;, it.next()); // prints `Some(2)`
+    println!(&quot;{}&quot;, it.next_back()); // prints `Some(6)`
+    
+    // prints `5`, `4` and `3`
+    for &amp;x in it.rev() {
+        println!(&quot;{}&quot;, x)
+    }
+}</span><pre id='rust-example-rendered-13' class='rust '>
+<span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> [<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>, <span class='number'>5</span>, <span class='number'>6</span>];
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>it</span> <span class='op'>=</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>();
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>next</span>());<span class='comment'> // prints `Some(1)`
+</span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>next</span>());<span class='comment'> // prints `Some(2)`
+</span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>next_back</span>());<span class='comment'> // prints `Some(6)`
+
+// prints `5`, `4` and `3`
+</span><span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='ident'>x</span> <span class='kw'>in</span> <span class='ident'>it</span>.<span class='ident'>rev</span>() {
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>x</span>)
+}
+</pre>
+
+<p>The <code>chain</code>, <code>map</code>, <code>filter</code>, <code>filter_map</code> and <code>inspect</code> adaptors are
+<code>DoubleEndedIterator</code> implementations if the underlying iterators are.</p>
+<span id='rust-example-raw-14' class='rusttest'>fn main() {
+    let xs = [1i, 2, 3, 4];
+    let ys = [5i, 6, 7, 8];
+    let mut it = xs.iter().chain(ys.iter()).map(|&amp;x| x * 2);
+    
+    println!(&quot;{}&quot;, it.next()); // prints `Some(2)`
+    
+    // prints `16`, `14`, `12`, `10`, `8`, `6`, `4`
+    for x in it.rev() {
+        println!(&quot;{}&quot;, x);
+    }
+}</span><pre id='rust-example-rendered-14' class='rust '>
+<span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> [<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>];
+<span class='kw'>let</span> <span class='ident'>ys</span> <span class='op'>=</span> [<span class='number'>5i</span>, <span class='number'>6</span>, <span class='number'>7</span>, <span class='number'>8</span>];
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>it</span> <span class='op'>=</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>().<span class='ident'>chain</span>(<span class='ident'>ys</span>.<span class='ident'>iter</span>()).<span class='ident'>map</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span> <span class='op'>*</span> <span class='number'>2</span>);
+
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>next</span>());<span class='comment'> // prints `Some(2)`
+
+// prints `16`, `14`, `12`, `10`, `8`, `6`, `4`
+</span><span class='kw'>for</span> <span class='ident'>x</span> <span class='kw'>in</span> <span class='ident'>it</span>.<span class='ident'>rev</span>() {
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>x</span>);
+}
+</pre>
+
+<p>The <code>reverse_</code> method is also available for any double-ended iterator yielding
+mutable references. It can be used to reverse a container in-place. Note that
+the trailing underscore is a workaround for issue #5898 and will be removed.</p>
+<span id='rust-example-raw-15' class='rusttest'>fn main() {
+    let mut ys = [1i, 2, 3, 4, 5];
+    ys.mut_iter().reverse_();
+    assert!(ys == [5i, 4, 3, 2, 1]);
+}</span><pre id='rust-example-rendered-15' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>ys</span> <span class='op'>=</span> [<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>, <span class='number'>5</span>];
+<span class='ident'>ys</span>.<span class='ident'>mut_iter</span>().<span class='ident'>reverse_</span>();
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>ys</span> <span class='op'>==</span> [<span class='number'>5i</span>, <span class='number'>4</span>, <span class='number'>3</span>, <span class='number'>2</span>, <span class='number'>1</span>]);
+</pre>
+
+<h2 id="random-access-iterators" class='section-header'><a
+                           href="#random-access-iterators">2.7 Random-access iterators</a></h2>
+<p>The <code>RandomAccessIterator</code> trait represents an iterator offering random access
+to the whole range. The <code>indexable</code> method retrieves the number of elements
+accessible with the <code>idx</code> method.</p>
+
+<p>The <code>chain</code> adaptor is an implementation of <code>RandomAccessIterator</code> if the
+underlying iterators are.</p>
+<span id='rust-example-raw-16' class='rusttest'>fn main() {
+    let xs = [1i, 2, 3, 4, 5];
+    let ys = [7i, 9, 11];
+    let mut it = xs.iter().chain(ys.iter());
+    println!(&quot;{}&quot;, it.idx(0)); // prints `Some(1)`
+    println!(&quot;{}&quot;, it.idx(5)); // prints `Some(7)`
+    println!(&quot;{}&quot;, it.idx(7)); // prints `Some(11)`
+    println!(&quot;{}&quot;, it.idx(8)); // prints `None`
+    
+    // yield two elements from the beginning, and one from the end
+    it.next();
+    it.next();
+    it.next_back();
+    
+    println!(&quot;{}&quot;, it.idx(0)); // prints `Some(3)`
+    println!(&quot;{}&quot;, it.idx(4)); // prints `Some(9)`
+    println!(&quot;{}&quot;, it.idx(6)); // prints `None`
+}</span><pre id='rust-example-rendered-16' class='rust '>
+<span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> [<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>, <span class='number'>5</span>];
+<span class='kw'>let</span> <span class='ident'>ys</span> <span class='op'>=</span> [<span class='number'>7i</span>, <span class='number'>9</span>, <span class='number'>11</span>];
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>it</span> <span class='op'>=</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>().<span class='ident'>chain</span>(<span class='ident'>ys</span>.<span class='ident'>iter</span>());
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>idx</span>(<span class='number'>0</span>));<span class='comment'> // prints `Some(1)`
+</span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>idx</span>(<span class='number'>5</span>));<span class='comment'> // prints `Some(7)`
+</span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>idx</span>(<span class='number'>7</span>));<span class='comment'> // prints `Some(11)`
+</span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>idx</span>(<span class='number'>8</span>));<span class='comment'> // prints `None`
+
+// yield two elements from the beginning, and one from the end
+</span><span class='ident'>it</span>.<span class='ident'>next</span>();
+<span class='ident'>it</span>.<span class='ident'>next</span>();
+<span class='ident'>it</span>.<span class='ident'>next_back</span>();
+
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>idx</span>(<span class='number'>0</span>));<span class='comment'> // prints `Some(3)`
+</span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>idx</span>(<span class='number'>4</span>));<span class='comment'> // prints `Some(9)`
+</span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>idx</span>(<span class='number'>6</span>));<span class='comment'> // prints `None`
+</span></pre>
+
+    <script type="text/javascript">
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <footer><p>
+Copyright &copy; 2011-2014 The Rust Project Developers. Licensed under the
+<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>
+or the <a href="http://opensource.org/licenses/MIT">MIT license</a>, at your option.
+</p><p>
+This file may not be copied, modified, or distributed except according to those terms.
+</p></footer>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="playpen.js"></script>
+
+
+</body>
+</html>

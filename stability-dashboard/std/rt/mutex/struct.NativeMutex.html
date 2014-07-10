@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The std library documentation.">
+
+    <title>std::rt::mutex::NativeMutex - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../../std/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../../index.html'>std</a>&#8203;::<a href='../index.html'>rt</a>&#8203;::<a href='index.html'>mutex</a></p><div class='block struct'><h2>Structs</h2><a class='struct ' href='struct.LockGuard.html'>LockGuard</a><a class='struct current' href='struct.NativeMutex.html'>NativeMutex</a><a class='struct ' href='struct.StaticNativeMutex.html'>StaticNativeMutex</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'>Struct <a href='../../index.html'>std</a>::<a href='../index.html'>rt</a>::<a href='index.html'>mutex</a>::<a class='struct' href=''>NativeMutex</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-7210' href='../../../rustrt/mutex/struct.NativeMutex.html?gotosrc=7210'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct NativeMutex {
+    // some fields omitted
+}</pre><div class='docblock'><p>A native mutex with a destructor for clean-up.</p>
+
+<p>See <code>StaticNativeMutex</code> for a version that is suitable for storing in
+statics.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='struct' href='../../../std/rt/mutex/struct.NativeMutex.html' title='std::rt::mutex::NativeMutex'>NativeMutex</a></code></h3><div class='impl-methods'><h4 id='method.new' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class='struct' href='../../../std/rt/mutex/struct.NativeMutex.html' title='std::rt::mutex::NativeMutex'>NativeMutex</a></code></h4>
+<div class='docblock'><p>Creates a new mutex.</p>
+
+<p>The user must be careful to ensure the mutex is not locked when its is
+being destroyed.
+Also it is important to avoid locking until mutex has stopped moving</p>
+</div><h4 id='method.lock' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#method.lock' class='fnname'>lock</a>(&amp;'a self) -&gt; <a class='struct' href='../../../std/rt/mutex/struct.LockGuard.html' title='std::rt::mutex::LockGuard'>LockGuard</a>&lt;'a&gt;</code></h4>
+<div class='docblock'><p>Acquires this lock. This assumes that the current thread does not
+already hold the lock.</p>
+
+<h1 id="example" class='section-header'><a
+                           href="#example">Example</a></h1><span id='rust-example-raw-0' class='rusttest'>fn main() {
+    use std::rt::mutex::NativeMutex;
+    unsafe {
+        let mut lock = NativeMutex::new();
+    
+        {
+            let _guard = lock.lock();
+            // critical section...
+        } // automatically unlocked in `_guard`&#39;s destructor
+    }
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rt</span>::<span class='ident'>mutex</span>::<span class='ident'>NativeMutex</span>;
+<span class='kw'>unsafe</span> {
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>NativeMutex</span>::<span class='ident'>new</span>();
+
+    {
+        <span class='kw'>let</span> <span class='ident'>_guard</span> <span class='op'>=</span> <span class='ident'>lock</span>.<span class='ident'>lock</span>();<span class='comment'>
+        // critical section...
+    </span>}<span class='comment'> // automatically unlocked in `_guard`&#39;s destructor
+</span>}
+</pre>
+
+<h1 id="unsafety" class='section-header'><a
+                           href="#unsafety">Unsafety</a></h1>
+<p>This method is unsafe due to the same reasons as
+<code>StaticNativeMutex::lock</code>.</p>
+</div><h4 id='method.trylock' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#method.trylock' class='fnname'>trylock</a>(&amp;'a self) -&gt; <a class='type' href='../../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;<a class='struct' href='../../../std/rt/mutex/struct.LockGuard.html' title='std::rt::mutex::LockGuard'>LockGuard</a>&lt;'a&gt;&gt;</code></h4>
+<div class='docblock'><p>Attempts to acquire the lock. The value returned is <code>Some</code> if
+the attempt succeeded.</p>
+
+<h1 id="unsafety-1" class='section-header'><a
+                           href="#unsafety-1">Unsafety</a></h1>
+<p>This method is unsafe due to the same reasons as
+<code>StaticNativeMutex::trylock</code>.</p>
+</div><h4 id='method.lock_noguard' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#method.lock_noguard' class='fnname'>lock_noguard</a>(&amp;self)</code></h4>
+<div class='docblock'><p>Acquire the lock without creating a <code>LockGuard</code>.</p>
+
+<p>These needs to be paired with a call to <code>.unlock_noguard</code>. Prefer using
+<code>.lock</code>.</p>
+
+<h1 id="unsafety-2" class='section-header'><a
+                           href="#unsafety-2">Unsafety</a></h1>
+<p>This method is unsafe due to the same reasons as
+<code>StaticNativeMutex::lock_noguard</code>.</p>
+</div><h4 id='method.trylock_noguard' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#method.trylock_noguard' class='fnname'>trylock_noguard</a>(&amp;self) -&gt; <a href='../../primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Attempts to acquire the lock without creating a
+<code>LockGuard</code>. The value returned is whether the lock was
+acquired or not.</p>
+
+<p>If <code>true</code> is returned, this needs to be paired with a call to
+<code>.unlock_noguard</code>. Prefer using <code>.trylock</code>.</p>
+
+<h1 id="unsafety-3" class='section-header'><a
+                           href="#unsafety-3">Unsafety</a></h1>
+<p>This method is unsafe due to the same reasons as
+<code>StaticNativeMutex::trylock_noguard</code>.</p>
+</div><h4 id='method.unlock_noguard' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#method.unlock_noguard' class='fnname'>unlock_noguard</a>(&amp;self)</code></h4>
+<div class='docblock'><p>Unlocks the lock. This assumes that the current thread already holds the
+lock.</p>
+
+<h1 id="unsafety-4" class='section-header'><a
+                           href="#unsafety-4">Unsafety</a></h1>
+<p>This method is unsafe due to the same reasons as
+<code>StaticNativeMutex::unlock_noguard</code>.</p>
+</div><h4 id='method.wait_noguard' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#method.wait_noguard' class='fnname'>wait_noguard</a>(&amp;self)</code></h4>
+<div class='docblock'><p>Block on the internal condition variable.</p>
+
+<p>This function assumes that the lock is already held. Prefer
+using <code>LockGuard.wait</code> since that guarantees that the lock is
+held.</p>
+
+<h1 id="unsafety-5" class='section-header'><a
+                           href="#unsafety-5">Unsafety</a></h1>
+<p>This method is unsafe due to the same reasons as
+<code>StaticNativeMutex::wait_noguard</code>.</p>
+</div><h4 id='method.signal_noguard' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#method.signal_noguard' class='fnname'>signal_noguard</a>(&amp;self)</code></h4>
+<div class='docblock'><p>Signals a thread in <code>wait</code> to wake up</p>
+
+<h1 id="unsafety-6" class='section-header'><a
+                           href="#unsafety-6">Unsafety</a></h1>
+<p>This method is unsafe due to the same reasons as
+<code>StaticNativeMutex::signal_noguard</code>.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../../std/ops/trait.Drop.html' title='std::ops::Drop'>Drop</a> for <a class='struct' href='../../../std/rt/mutex/struct.NativeMutex.html' title='std::rt::mutex::NativeMutex'>NativeMutex</a></code></h3><div class='impl-methods'><h4 id='method.drop' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.drop' class='fnname'>drop</a>(&amp;mut self)</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "std";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    <script src="../../../playpen.js"></script>
+    <script async src="../../../search-index.js"></script>
+</body>
+</html>

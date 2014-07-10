@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The core library documentation.">
+
+    <title>core::result - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../core/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../index.html'>core</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='../any/index.html'>any</a><a class='mod ' href='../atomics/index.html'>atomics</a><a class='mod ' href='../bool/index.html'>bool</a><a class='mod ' href='../cell/index.html'>cell</a><a class='mod ' href='../char/index.html'>char</a><a class='mod ' href='../clone/index.html'>clone</a><a class='mod ' href='../cmp/index.html'>cmp</a><a class='mod ' href='../collections/index.html'>collections</a><a class='mod ' href='../default/index.html'>default</a><a class='mod ' href='../f32/index.html'>f32</a><a class='mod ' href='../f64/index.html'>f64</a><a class='mod ' href='../failure/index.html'>failure</a><a class='mod ' href='../finally/index.html'>finally</a><a class='mod ' href='../fmt/index.html'>fmt</a><a class='mod ' href='../i16/index.html'>i16</a><a class='mod ' href='../i32/index.html'>i32</a><a class='mod ' href='../i64/index.html'>i64</a><a class='mod ' href='../i8/index.html'>i8</a><a class='mod ' href='../int/index.html'>int</a><a class='mod ' href='../intrinsics/index.html'>intrinsics</a><a class='mod ' href='../iter/index.html'>iter</a><a class='mod ' href='../kinds/index.html'>kinds</a><a class='mod ' href='../mem/index.html'>mem</a><a class='mod ' href='../num/index.html'>num</a><a class='mod ' href='../ops/index.html'>ops</a><a class='mod ' href='../option/index.html'>option</a><a class='mod ' href='../prelude/index.html'>prelude</a><a class='mod ' href='../ptr/index.html'>ptr</a><a class='mod ' href='../raw/index.html'>raw</a><a class='mod current' href='../result/index.html'>result</a><a class='mod ' href='../simd/index.html'>simd</a><a class='mod ' href='../slice/index.html'>slice</a><a class='mod ' href='../str/index.html'>str</a><a class='mod ' href='../tuple/index.html'>tuple</a><a class='mod ' href='../ty/index.html'>ty</a><a class='mod ' href='../u16/index.html'>u16</a><a class='mod ' href='../u32/index.html'>u32</a><a class='mod ' href='../u64/index.html'>u64</a><a class='mod ' href='../u8/index.html'>u8</a><a class='mod ' href='../uint/index.html'>uint</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'>Module <a href='../index.html'>core</a>::<a class='mod' href=''>result</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-95340' href='../../src/core/Users/aturon/moz/working/stability-dashboard/src/libcore/result.rs.html#11-649'>[src]</a></span></h1>
+<div class='docblock'><p>Error handling with the <code>Result</code> type</p>
+
+<p><code>Result&lt;T&gt;</code> is the type used for returning and propagating
+errors. It is an enum with the variants, <code>Ok(T)</code>, representing
+success and containing a value, and <code>Err(E)</code>, representing error
+and containing an error value.</p>
+<span id='rust-example-raw-0' class='rusttest'>fn main() {
+    enum Result&lt;T, E&gt; {
+       Ok(T),
+       Err(E)
+    }
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='kw'>enum</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>E</span><span class='op'>&gt;</span> {
+   <span class='prelude-val'>Ok</span>(<span class='ident'>T</span>),
+   <span class='prelude-val'>Err</span>(<span class='ident'>E</span>)
+}
+</pre>
+
+<p>Functions return <code>Result</code> whenever errors are expected and
+recoverable. In the <code>std</code> crate <code>Result</code> is most prominently used
+for <a href="../../std/io/index.html">I/O</a>.</p>
+
+<p>A simple function returning <code>Result</code> might be
+defined and used like so:</p>
+<span id='rust-example-raw-1' class='rusttest'>fn main() {
+    #[deriving(Show)]
+    enum Version { Version1, Version2 }
+    
+    fn parse_version(header: &amp;[u8]) -&gt; Result&lt;Version, &amp;&#39;static str&gt; {
+        if header.len() &lt; 1 {
+            return Err(&quot;invalid header length&quot;);
+        }
+        match header[0] {
+            1 =&gt; Ok(Version1),
+            2 =&gt; Ok(Version2),
+            _ =&gt; Err(&quot;invalid version&quot;)
+        }
+    }
+    
+    let version = parse_version(&amp;[1, 2, 3, 4]);
+    match version {
+        Ok(v) =&gt; {
+            println!(&quot;working with version: {}&quot;, v);
+        }
+        Err(e) =&gt; {
+            println!(&quot;error parsing header: {}&quot;, e);
+        }
+    }
+}</span><pre id='rust-example-rendered-1' class='rust '>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Show</span>)]</span>
+<span class='kw'>enum</span> <span class='ident'>Version</span> { <span class='ident'>Version1</span>, <span class='ident'>Version2</span> }
+
+<span class='kw'>fn</span> <span class='ident'>parse_version</span>(<span class='ident'>header</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Version</span>, <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span><span class='op'>&gt;</span> {
+    <span class='kw'>if</span> <span class='ident'>header</span>.<span class='ident'>len</span>() <span class='op'>&lt;</span> <span class='number'>1</span> {
+        <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;invalid header length&quot;</span>);
+    }
+    <span class='kw'>match</span> <span class='ident'>header</span>[<span class='number'>0</span>] {
+        <span class='number'>1</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>Version1</span>),
+        <span class='number'>2</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>Version2</span>),
+        _ <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;invalid version&quot;</span>)
+    }
+}
+
+<span class='kw'>let</span> <span class='ident'>version</span> <span class='op'>=</span> <span class='ident'>parse_version</span>(<span class='kw-2'>&amp;</span>[<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>]);
+<span class='kw'>match</span> <span class='ident'>version</span> {
+    <span class='prelude-val'>Ok</span>(<span class='ident'>v</span>) <span class='op'>=&gt;</span> {
+        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;working with version: {}&quot;</span>, <span class='ident'>v</span>);
+    }
+    <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
+        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;error parsing header: {}&quot;</span>, <span class='ident'>e</span>);
+    }
+}
+</pre>
+
+<p>Pattern matching on <code>Result</code>s is clear and straightforward for
+simple cases, but <code>Result</code> comes with some convenience methods
+that make working it more succinct.</p>
+<span id='rust-example-raw-2' class='rusttest'>fn main() {
+    let good_result: Result&lt;int, int&gt; = Ok(10);
+    let bad_result: Result&lt;int, int&gt; = Err(10);
+    
+    // The `is_ok` and `is_err` methods do what they say.
+    assert!(good_result.is_ok() &amp;&amp; !good_result.is_err());
+    assert!(bad_result.is_err() &amp;&amp; !bad_result.is_ok());
+    
+    // `map` consumes the `Result` and produces another.
+    let good_result: Result&lt;int, int&gt; = good_result.map(|i| i + 1);
+    let bad_result: Result&lt;int, int&gt; = bad_result.map(|i| i - 1);
+    
+    // Use `and_then` to continue the computation.
+    let good_result: Result&lt;bool, int&gt; = good_result.and_then(|i| Ok(i == 11));
+    
+    // Use `or_else` to handle the error.
+    let bad_result: Result&lt;int, int&gt; = bad_result.or_else(|i| Ok(11));
+    
+    // Consume the result and return the contents with `unwrap`.
+    let final_awesome_result = good_result.ok().unwrap();
+}</span><pre id='rust-example-rendered-2' class='rust '>
+<span class='kw'>let</span> <span class='ident'>good_result</span>: <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>int</span>, <span class='ident'>int</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='prelude-val'>Ok</span>(<span class='number'>10</span>);
+<span class='kw'>let</span> <span class='ident'>bad_result</span>: <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>int</span>, <span class='ident'>int</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='prelude-val'>Err</span>(<span class='number'>10</span>);<span class='comment'>
+
+// The `is_ok` and `is_err` methods do what they say.
+</span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>good_result</span>.<span class='ident'>is_ok</span>() <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='ident'>good_result</span>.<span class='ident'>is_err</span>());
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>bad_result</span>.<span class='ident'>is_err</span>() <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='ident'>bad_result</span>.<span class='ident'>is_ok</span>());<span class='comment'>
+
+// `map` consumes the `Result` and produces another.
+</span><span class='kw'>let</span> <span class='ident'>good_result</span>: <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>int</span>, <span class='ident'>int</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>good_result</span>.<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>i</span><span class='op'>|</span> <span class='ident'>i</span> <span class='op'>+</span> <span class='number'>1</span>);
+<span class='kw'>let</span> <span class='ident'>bad_result</span>: <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>int</span>, <span class='ident'>int</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>bad_result</span>.<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>i</span><span class='op'>|</span> <span class='ident'>i</span> <span class='op'>-</span> <span class='number'>1</span>);<span class='comment'>
+
+// Use `and_then` to continue the computation.
+</span><span class='kw'>let</span> <span class='ident'>good_result</span>: <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>bool</span>, <span class='ident'>int</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>good_result</span>.<span class='ident'>and_then</span>(<span class='op'>|</span><span class='ident'>i</span><span class='op'>|</span> <span class='prelude-val'>Ok</span>(<span class='ident'>i</span> <span class='op'>==</span> <span class='number'>11</span>));<span class='comment'>
+
+// Use `or_else` to handle the error.
+</span><span class='kw'>let</span> <span class='ident'>bad_result</span>: <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>int</span>, <span class='ident'>int</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>bad_result</span>.<span class='ident'>or_else</span>(<span class='op'>|</span><span class='ident'>i</span><span class='op'>|</span> <span class='prelude-val'>Ok</span>(<span class='number'>11</span>));<span class='comment'>
+
+// Consume the result and return the contents with `unwrap`.
+</span><span class='kw'>let</span> <span class='ident'>final_awesome_result</span> <span class='op'>=</span> <span class='ident'>good_result</span>.<span class='ident'>ok</span>().<span class='ident'>unwrap</span>();
+</pre>
+
+<h1 id="results-must-be-used" class='section-header'><a
+                           href="#results-must-be-used">Results must be used</a></h1>
+<p>A common problem with using return values to indicate errors is
+that it is easy to ignore the return value, thus failing to handle
+the error. Result is annotated with the #[must_use] attribute,
+which will cause the compiler to issue a warning when a Result
+value is ignored. This makes <code>Result</code> especially useful with
+functions that may encounter errors but don&#39;t otherwise return a
+useful value.</p>
+
+<p>Consider the <code>write_line</code> method defined for I/O types
+by the <a href="../io/trait.Writer.html"><code>Writer</code></a> trait:</p>
+<span id='rust-example-raw-3' class='rusttest'>fn main() {
+    use std::io::IoError;
+    
+    trait Writer {
+        fn write_line(&amp;mut self, s: &amp;str) -&gt; Result&lt;(), IoError&gt;;
+    }
+}</span><pre id='rust-example-rendered-3' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>IoError</span>;
+
+<span class='kw'>trait</span> <span class='ident'>Writer</span> {
+    <span class='kw'>fn</span> <span class='ident'>write_line</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>IoError</span><span class='op'>&gt;</span>;
+}
+</pre>
+
+<p><em>Note: The actual definition of <code>Writer</code> uses <code>IoResult</code>, which
+is just a synonym for <code>Result&lt;T, IoError&gt;</code>.</em></p>
+
+<p>This method doesn&#39;t produce a value, but the write may
+fail. It&#39;s crucial to handle the error case, and <em>not</em> write
+something like this:</p>
+<span id='rust-example-raw-4' class='rusttest'>fn main() {
+    use std::io::{File, Open, Write};
+    
+    let mut file = File::open_mode(&amp;Path::new(&quot;valuable_data.txt&quot;), Open, Write);
+    // If `write_line` errors, then we&#39;ll never know, because the return
+    // value is ignored.
+    file.write_line(&quot;important message&quot;);
+    drop(file);
+}</span><pre id='rust-example-rendered-4' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>File</span>, <span class='ident'>Open</span>, <span class='ident'>Write</span>};
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>File</span>::<span class='ident'>open_mode</span>(<span class='kw-2'>&amp;</span><span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;valuable_data.txt&quot;</span>), <span class='ident'>Open</span>, <span class='ident'>Write</span>);<span class='comment'>
+// If `write_line` errors, then we&#39;ll never know, because the return
+// value is ignored.
+</span><span class='ident'>file</span>.<span class='ident'>write_line</span>(<span class='string'>&quot;important message&quot;</span>);
+<span class='ident'>drop</span>(<span class='ident'>file</span>);
+</pre>
+
+<p>If you <em>do</em> write that in Rust, the compiler will by give you a
+warning (by default, controlled by the <code>unused_must_use</code> lint).</p>
+
+<p>You might instead, if you don&#39;t want to handle the error, simply
+fail, by converting to an <code>Option</code> with <code>ok</code>, then asserting
+success with <code>expect</code>. This will fail if the write fails, proving
+a marginally useful message indicating why:</p>
+<span id='rust-example-raw-5' class='rusttest'>fn main() {
+    use std::io::{File, Open, Write};
+    
+    let mut file = File::open_mode(&amp;Path::new(&quot;valuable_data.txt&quot;), Open, Write);
+    file.write_line(&quot;important message&quot;).ok().expect(&quot;failed to write message&quot;);
+    drop(file);
+}</span><pre id='rust-example-rendered-5' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>File</span>, <span class='ident'>Open</span>, <span class='ident'>Write</span>};
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>File</span>::<span class='ident'>open_mode</span>(<span class='kw-2'>&amp;</span><span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;valuable_data.txt&quot;</span>), <span class='ident'>Open</span>, <span class='ident'>Write</span>);
+<span class='ident'>file</span>.<span class='ident'>write_line</span>(<span class='string'>&quot;important message&quot;</span>).<span class='ident'>ok</span>().<span class='ident'>expect</span>(<span class='string'>&quot;failed to write message&quot;</span>);
+<span class='ident'>drop</span>(<span class='ident'>file</span>);
+</pre>
+
+<p>You might also simply assert success:</p>
+<span id='rust-example-raw-6' class='rusttest'>fn main() {
+    use std::io::{File, Open, Write};
+    
+    let mut file = File::open_mode(&amp;Path::new(&quot;valuable_data.txt&quot;), Open, Write);
+    assert!(file.write_line(&quot;important message&quot;).is_ok());
+    drop(file);
+}</span><pre id='rust-example-rendered-6' class='rust '>
+
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>file</span>.<span class='ident'>write_line</span>(<span class='string'>&quot;important message&quot;</span>).<span class='ident'>is_ok</span>());
+</pre>
+
+<p>Or propagate the error up the call stack with <code>try!</code>:</p>
+<span id='rust-example-raw-7' class='rusttest'>fn main() {
+    use std::io::{File, Open, Write, IoError};
+    fn write_message() -&gt; Result&lt;(), IoError&gt; {
+        let mut file = File::open_mode(&amp;Path::new(&quot;valuable_data.txt&quot;), Open, Write);
+        try!(file.write_line(&quot;important message&quot;));
+        drop(file);
+        return Ok(());
+    }
+}</span><pre id='rust-example-rendered-7' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>write_message</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>IoError</span><span class='op'>&gt;</span> {
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>File</span>::<span class='ident'>open_mode</span>(<span class='kw-2'>&amp;</span><span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;valuable_data.txt&quot;</span>), <span class='ident'>Open</span>, <span class='ident'>Write</span>);
+    <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>file</span>.<span class='ident'>write_line</span>(<span class='string'>&quot;important message&quot;</span>));
+    <span class='ident'>drop</span>(<span class='ident'>file</span>);
+    <span class='kw'>return</span> <span class='prelude-val'>Ok</span>(());
+}
+</pre>
+
+<h1 id="the-try!-macro" class='section-header'><a
+                           href="#the-try!-macro">The <code>try!</code> macro</a></h1>
+<p>When writing code that calls many functions that return the
+<code>Result</code> type, the error handling can be tedious.  The <code>try!</code>
+macro hides some of the boilerplate of propagating errors up the
+call stack.</p>
+
+<p>It replaces this:</p>
+<span id='rust-example-raw-8' class='rusttest'>fn main() {
+    use std::io::{File, Open, Write, IoError};
+    
+    struct Info {
+        name: String,
+        age: int,
+        rating: int
+    }
+    
+    fn write_info(info: &amp;Info) -&gt; Result&lt;(), IoError&gt; {
+        let mut file = File::open_mode(&amp;Path::new(&quot;my_best_friends.txt&quot;), Open, Write);
+        // Early return on error
+        match file.write_line(format!(&quot;name: {}&quot;, info.name).as_slice()) {
+            Ok(_) =&gt; (),
+            Err(e) =&gt; return Err(e)
+        }
+        match file.write_line(format!(&quot;age: {}&quot;, info.age).as_slice()) {
+            Ok(_) =&gt; (),
+            Err(e) =&gt; return Err(e)
+        }
+        return file.write_line(format!(&quot;rating: {}&quot;, info.rating).as_slice());
+    }
+}</span><pre id='rust-example-rendered-8' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>File</span>, <span class='ident'>Open</span>, <span class='ident'>Write</span>, <span class='ident'>IoError</span>};
+
+<span class='kw'>struct</span> <span class='ident'>Info</span> {
+    <span class='ident'>name</span>: <span class='ident'>String</span>,
+    <span class='ident'>age</span>: <span class='ident'>int</span>,
+    <span class='ident'>rating</span>: <span class='ident'>int</span>
+}
+
+<span class='kw'>fn</span> <span class='ident'>write_info</span>(<span class='ident'>info</span>: <span class='kw-2'>&amp;</span><span class='ident'>Info</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>IoError</span><span class='op'>&gt;</span> {
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>File</span>::<span class='ident'>open_mode</span>(<span class='kw-2'>&amp;</span><span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;my_best_friends.txt&quot;</span>), <span class='ident'>Open</span>, <span class='ident'>Write</span>);<span class='comment'>
+    // Early return on error
+    </span><span class='kw'>match</span> <span class='ident'>file</span>.<span class='ident'>write_line</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;name: {}&quot;</span>, <span class='ident'>info</span>.<span class='ident'>name</span>).<span class='ident'>as_slice</span>()) {
+        <span class='prelude-val'>Ok</span>(_) <span class='op'>=&gt;</span> (),
+        <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>)
+    }
+    <span class='kw'>match</span> <span class='ident'>file</span>.<span class='ident'>write_line</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;age: {}&quot;</span>, <span class='ident'>info</span>.<span class='ident'>age</span>).<span class='ident'>as_slice</span>()) {
+        <span class='prelude-val'>Ok</span>(_) <span class='op'>=&gt;</span> (),
+        <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>)
+    }
+    <span class='kw'>return</span> <span class='ident'>file</span>.<span class='ident'>write_line</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;rating: {}&quot;</span>, <span class='ident'>info</span>.<span class='ident'>rating</span>).<span class='ident'>as_slice</span>());
+}
+</pre>
+
+<p>With this:</p>
+<span id='rust-example-raw-9' class='rusttest'>fn main() {
+    use std::io::{File, Open, Write, IoError};
+    
+    struct Info {
+        name: String,
+        age: int,
+        rating: int
+    }
+    
+    fn write_info(info: &amp;Info) -&gt; Result&lt;(), IoError&gt; {
+        let mut file = File::open_mode(&amp;Path::new(&quot;my_best_friends.txt&quot;), Open, Write);
+        // Early return on error
+        try!(file.write_line(format!(&quot;name: {}&quot;, info.name).as_slice()));
+        try!(file.write_line(format!(&quot;age: {}&quot;, info.age).as_slice()));
+        try!(file.write_line(format!(&quot;rating: {}&quot;, info.rating).as_slice()));
+        return Ok(());
+    }
+}</span><pre id='rust-example-rendered-9' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>File</span>, <span class='ident'>Open</span>, <span class='ident'>Write</span>, <span class='ident'>IoError</span>};
+
+<span class='kw'>struct</span> <span class='ident'>Info</span> {
+    <span class='ident'>name</span>: <span class='ident'>String</span>,
+    <span class='ident'>age</span>: <span class='ident'>int</span>,
+    <span class='ident'>rating</span>: <span class='ident'>int</span>
+}
+
+<span class='kw'>fn</span> <span class='ident'>write_info</span>(<span class='ident'>info</span>: <span class='kw-2'>&amp;</span><span class='ident'>Info</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>IoError</span><span class='op'>&gt;</span> {
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='ident'>File</span>::<span class='ident'>open_mode</span>(<span class='kw-2'>&amp;</span><span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;my_best_friends.txt&quot;</span>), <span class='ident'>Open</span>, <span class='ident'>Write</span>);<span class='comment'>
+    // Early return on error
+    </span><span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>file</span>.<span class='ident'>write_line</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;name: {}&quot;</span>, <span class='ident'>info</span>.<span class='ident'>name</span>).<span class='ident'>as_slice</span>()));
+    <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>file</span>.<span class='ident'>write_line</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;age: {}&quot;</span>, <span class='ident'>info</span>.<span class='ident'>age</span>).<span class='ident'>as_slice</span>()));
+    <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>file</span>.<span class='ident'>write_line</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;rating: {}&quot;</span>, <span class='ident'>info</span>.<span class='ident'>rating</span>).<span class='ident'>as_slice</span>()));
+    <span class='kw'>return</span> <span class='prelude-val'>Ok</span>(());
+}
+</pre>
+
+<p><em>It&#39;s much nicer!</em></p>
+
+<p>Wrapping an expression in <code>try!</code> will result in the unwrapped
+success (<code>Ok</code>) value, unless the result is <code>Err</code>, in which case
+<code>Err</code> is returned early from the enclosing function. Its simple definition
+makes it clear:</p>
+<span id='rust-example-raw-10' class='rusttest'>#![feature(macro_rules)]
+macro_rules! try(
+    ($e:expr) =&gt; (match $e { Ok(e) =&gt; e, Err(e) =&gt; return Err(e) })
+)
+fn main() { }</span><pre id='rust-example-rendered-10' class='rust '>
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>try</span>(
+    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> (<span class='kw'>match</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span> { <span class='prelude-val'>Ok</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='ident'>e</span>, <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) })
+)
+</pre>
+
+<p><code>try!</code> is imported by the prelude, and is available everywhere.</p>
+
+<h1 id="result-and-option" class='section-header'><a
+                           href="#result-and-option"><code>Result</code> and <code>Option</code></a></h1>
+<p>The <code>Result</code> and <a href="../option/index.html"><code>Option</code></a> types are
+similar and complementary: they are often employed to indicate a
+lack of a return value; and they are trivially converted between
+each other, so <code>Result</code>s are often handled by first converting to
+<code>Option</code> with the <a href="type.Result.html#method.ok"><code>ok</code></a> and
+<a href="type.Result.html#method.ok"><code>err</code></a> methods.</p>
+
+<p>Whereas <code>Option</code> only indicates the lack of a value, <code>Result</code> is
+specifically for error reporting, and carries with it an error
+value.  Sometimes <code>Option</code> is used for indicating errors, but this
+is only for simple cases and is generally discouraged. Even when
+there is no useful error value to return, prefer <code>Result&lt;T, ()&gt;</code>.</p>
+
+<p>Converting to an <code>Option</code> with <code>ok()</code> to handle an error:</p>
+<span id='rust-example-raw-11' class='rusttest'>fn main() {
+    use std::io::Timer;
+    let mut t = Timer::new().ok().expect(&quot;failed to create timer!&quot;);
+}</span><pre id='rust-example-rendered-11' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Timer</span>;
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>().<span class='ident'>ok</span>().<span class='ident'>expect</span>(<span class='string'>&quot;failed to create timer!&quot;</span>);
+</pre>
+
+<h1 id="result-vs.-fail!" class='section-header'><a
+                           href="#result-vs.-fail!"><code>Result</code> vs. <code>fail!</code></a></h1>
+<p><code>Result</code> is for recoverable errors; <code>fail!</code> is for unrecoverable
+errors. Callers should always be able to avoid failure if they
+take the proper precautions, for example, calling <code>is_some()</code>
+on an <code>Option</code> type before calling <code>unwrap</code>.</p>
+
+<p>The suitability of <code>fail!</code> as an error handling mechanism is
+limited by Rust&#39;s lack of any way to &quot;catch&quot; and resume execution
+from a thrown exception. Therefore using failure for error
+handling requires encapsulating fallible code in a task. Calling
+the <code>fail!</code> macro, or invoking <code>fail!</code> indirectly should be
+avoided as an error reporting strategy. Failure is only for
+unrecoverable errors and a failing task is typically the sign of
+a bug.</p>
+
+<p>A module that instead returns <code>Results</code> is alerting the caller
+that failure is possible, and providing precise control over how
+it is handled.</p>
+
+<p>Furthermore, failure may not be recoverable at all, depending on
+the context. The caller of <code>fail!</code> should assume that execution
+will not resume after failure, that failure is catastrophic.</p>
+</div><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.Result.html'
+                               title='core::result::Result'>Result</a></td>
+                        <td class='docblock short'><p><code>Result</code> is a type that represents either success (<code>Ok</code>) or failure (<code>Err</code>).</p>
+</td>
+                    </tr>
+                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.collect.html'
+                               title='core::result::collect'>collect</a></td>
+                        <td class='docblock short'><p>Takes each element in the <code>Iterator</code>: if it is an <code>Err</code>, no further
+elements are taken, and the <code>Err</code> is returned. Should no <code>Err</code> occur, a
+vector containing the values of each <code>Result</code> is returned.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.fold.html'
+                               title='core::result::fold'>fold</a></td>
+                        <td class='docblock short'><p>Perform a fold operation over the result values from an iterator.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.fold_.html'
+                               title='core::result::fold_'>fold_</a></td>
+                        <td class='docblock short'><p>Perform a trivial fold operation over the result values
+from an iterator.</p>
+</td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "core";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script src="../../playpen.js"></script>
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

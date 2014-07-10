@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The core library documentation.">
+
+    <title>core::fmt - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../core/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../index.html'>core</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='../any/index.html'>any</a><a class='mod ' href='../atomics/index.html'>atomics</a><a class='mod ' href='../bool/index.html'>bool</a><a class='mod ' href='../cell/index.html'>cell</a><a class='mod ' href='../char/index.html'>char</a><a class='mod ' href='../clone/index.html'>clone</a><a class='mod ' href='../cmp/index.html'>cmp</a><a class='mod ' href='../collections/index.html'>collections</a><a class='mod ' href='../default/index.html'>default</a><a class='mod ' href='../f32/index.html'>f32</a><a class='mod ' href='../f64/index.html'>f64</a><a class='mod ' href='../failure/index.html'>failure</a><a class='mod ' href='../finally/index.html'>finally</a><a class='mod current' href='../fmt/index.html'>fmt</a><a class='mod ' href='../i16/index.html'>i16</a><a class='mod ' href='../i32/index.html'>i32</a><a class='mod ' href='../i64/index.html'>i64</a><a class='mod ' href='../i8/index.html'>i8</a><a class='mod ' href='../int/index.html'>int</a><a class='mod ' href='../intrinsics/index.html'>intrinsics</a><a class='mod ' href='../iter/index.html'>iter</a><a class='mod ' href='../kinds/index.html'>kinds</a><a class='mod ' href='../mem/index.html'>mem</a><a class='mod ' href='../num/index.html'>num</a><a class='mod ' href='../ops/index.html'>ops</a><a class='mod ' href='../option/index.html'>option</a><a class='mod ' href='../prelude/index.html'>prelude</a><a class='mod ' href='../ptr/index.html'>ptr</a><a class='mod ' href='../raw/index.html'>raw</a><a class='mod ' href='../result/index.html'>result</a><a class='mod ' href='../simd/index.html'>simd</a><a class='mod ' href='../slice/index.html'>slice</a><a class='mod ' href='../str/index.html'>str</a><a class='mod ' href='../tuple/index.html'>tuple</a><a class='mod ' href='../ty/index.html'>ty</a><a class='mod ' href='../u16/index.html'>u16</a><a class='mod ' href='../u32/index.html'>u32</a><a class='mod ' href='../u64/index.html'>u64</a><a class='mod ' href='../u8/index.html'>u8</a><a class='mod ' href='../uint/index.html'>uint</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'>Module <a href='../index.html'>core</a>::<a class='mod' href=''>fmt</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-133935' href='../../src/core/Users/aturon/moz/working/stability-dashboard/src/libcore/fmt/mod.rs.html#11-740'>[src]</a></span></h1>
+<div class='docblock'><p>Utilities for formatting and printing strings</p>
+</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='mod' href='rt/index.html'
+                               title='core::fmt::rt'>rt</a></td>
+                        <td class='docblock short'><p>This is an internal module used by the ifmt! runtime. These structures are
+emitted to static arrays to precompile format strings ahead of time.</p>
+</td>
+                    </tr>
+                </table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.Argument.html'
+                               title='core::fmt::Argument'>Argument</a></td>
+                        <td class='docblock short'><p>This struct represents the generic &quot;argument&quot; which is taken by the Xprintf
+family of functions. It contains a function to format the given value. At
+compile time it is ensured that the function and the value have the correct
+types, and then this struct is used to canonicalize arguments to one type.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.Arguments.html'
+                               title='core::fmt::Arguments'>Arguments</a></td>
+                        <td class='docblock short'><p>This structure represents a safely precompiled version of a format string
+and its arguments. This cannot be generated at runtime because it cannot
+safely be done so, so no constructors are given and the fields are private
+to prevent modification.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.Formatter.html'
+                               title='core::fmt::Formatter'>Formatter</a></td>
+                        <td class='docblock short'><p>A struct to represent both where to emit formatting strings to and how they
+should be formatted. A mutable version of this is passed to all formatting
+traits.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.Radix.html'
+                               title='core::fmt::Radix'>Radix</a></td>
+                        <td class='docblock short'><p>A radix with in the range of <code>2..36</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.RadixFmt.html'
+                               title='core::fmt::RadixFmt'>RadixFmt</a></td>
+                        <td class='docblock short'><p>A helper type for formatting radixes.</p>
+</td>
+                    </tr>
+                </table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.FormatError.html'
+                               title='core::fmt::FormatError'>FormatError</a></td>
+                        <td class='docblock short'><p>The error type which is returned from formatting a message into a stream.</p>
+</td>
+                    </tr>
+                </table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.Binary.html'
+                               title='core::fmt::Binary'>Binary</a></td>
+                        <td class='docblock short'><p>Format trait for the <code>t</code> character</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.Bool.html'
+                               title='core::fmt::Bool'>Bool</a></td>
+                        <td class='docblock short'><p>Format trait for the <code>b</code> character</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.Char.html'
+                               title='core::fmt::Char'>Char</a></td>
+                        <td class='docblock short'><p>Format trait for the <code>c</code> character</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.Float.html'
+                               title='core::fmt::Float'>Float</a></td>
+                        <td class='docblock short'><p>Format trait for the <code>f</code> character</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.FormatWriter.html'
+                               title='core::fmt::FormatWriter'>FormatWriter</a></td>
+                        <td class='docblock short'><p>A collection of methods that are required to format a message into a stream.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.LowerExp.html'
+                               title='core::fmt::LowerExp'>LowerExp</a></td>
+                        <td class='docblock short'><p>Format trait for the <code>e</code> character</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.LowerHex.html'
+                               title='core::fmt::LowerHex'>LowerHex</a></td>
+                        <td class='docblock short'><p>Format trait for the <code>x</code> character</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.Octal.html'
+                               title='core::fmt::Octal'>Octal</a></td>
+                        <td class='docblock short'><p>Format trait for the <code>o</code> character</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.Pointer.html'
+                               title='core::fmt::Pointer'>Pointer</a></td>
+                        <td class='docblock short'><p>Format trait for the <code>p</code> character</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.Show.html'
+                               title='core::fmt::Show'>Show</a></td>
+                        <td class='docblock short'><p>When a format is not otherwise specified, types are formatted by ascribing
+to this trait. There is not an explicit way of selecting this trait to be
+used for formatting, it is only if no other format is specified.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.Signed.html'
+                               title='core::fmt::Signed'>Signed</a></td>
+                        <td class='docblock short'><p>Format trait for the <code>i</code> and <code>d</code> characters</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.String.html'
+                               title='core::fmt::String'>String</a></td>
+                        <td class='docblock short'><p>Format trait for the <code>s</code> character</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.Unsigned.html'
+                               title='core::fmt::Unsigned'>Unsigned</a></td>
+                        <td class='docblock short'><p>Format trait for the <code>u</code> character</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.UpperExp.html'
+                               title='core::fmt::UpperExp'>UpperExp</a></td>
+                        <td class='docblock short'><p>Format trait for the <code>E</code> character</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.UpperHex.html'
+                               title='core::fmt::UpperHex'>UpperHex</a></td>
+                        <td class='docblock short'><p>Format trait for the <code>X</code> character</p>
+</td>
+                    </tr>
+                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.radix.html'
+                               title='core::fmt::radix'>radix</a></td>
+                        <td class='docblock short'><p>Constructs a radix formatter in the range of <code>2..36</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.write.html'
+                               title='core::fmt::write'>write</a></td>
+                        <td class='docblock short'><p>The <code>write</code> function takes an output stream, a precompiled format string,
+and a list of arguments. The arguments will be formatted according to the
+specified format string into the output stream provided.</p>
+</td>
+                    </tr>
+                </table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.Result.html'
+                               title='core::fmt::Result'>Result</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "core";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script src="../../playpen.js"></script>
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The rustrt library documentation.">
+
+    <title>rustrt::local_data - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../rustrt/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../index.html'>rustrt</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='../args/index.html'>args</a><a class='mod ' href='../bookkeeping/index.html'>bookkeeping</a><a class='mod ' href='../c_str/index.html'>c_str</a><a class='mod ' href='../exclusive/index.html'>exclusive</a><a class='mod ' href='../local/index.html'>local</a><a class='mod current' href='../local_data/index.html'>local_data</a><a class='mod ' href='../local_heap/index.html'>local_heap</a><a class='mod ' href='../mutex/index.html'>mutex</a><a class='mod ' href='../rtio/index.html'>rtio</a><a class='mod ' href='../stack/index.html'>stack</a><a class='mod ' href='../task/index.html'>task</a><a class='mod ' href='../thread/index.html'>thread</a><a class='mod ' href='../unwind/index.html'>unwind</a></div><div class='block struct'><h2>Structs</h2><a class='struct ' href='../struct.Stdio.html'>Stdio</a></div><div class='block trait'><h2>Traits</h2><a class='trait ' href='../trait.Runtime.html'>Runtime</a></div><div class='block fn'><h2>Functions</h2><a class='fn ' href='../fn.at_exit.html'>at_exit</a><a class='fn ' href='../fn.cleanup.html'>cleanup</a><a class='fn ' href='../fn.init.html'>init</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'>Module <a href='../index.html'>rustrt</a>::<a class='mod' href=''>local_data</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-4986' href='../../src/rustrt/Users/aturon/moz/working/stability-dashboard/src/librustrt/local_data.rs.html#11-433'>[src]</a></span></h1>
+<div class='docblock'><p>Task local data management</p>
+
+<p>Allows storing arbitrary types inside task-local-storage (TLS), to be accessed
+anywhere within a task, keyed by a global pointer parameterized over the type of
+the TLS slot.  Useful for dynamic variables, singletons, and interfacing with
+foreign code with bad callback interfaces.</p>
+
+<p>To declare a new key for storing local data of a particular type, use the
+<code>local_data_key!</code> macro. This macro will expand to a <code>static</code> item appropriately
+named and annotated. This name is then passed to the functions in this module to
+modify/read the slot specified by the key.</p>
+<pre class='rust '>
+<span class='macro'>local_data_key</span><span class='macro'>!</span>(<span class='ident'>key_int</span>: <span class='ident'>int</span>)
+<span class='macro'>local_data_key</span><span class='macro'>!</span>(<span class='ident'>key_vector</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>)
+
+<span class='ident'>key_int</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='number'>3</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>key_int</span>.<span class='ident'>get</span>().<span class='ident'>unwrap</span>(), <span class='number'>3</span>);
+
+<span class='ident'>key_vector</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>4</span>]));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>key_vector</span>.<span class='ident'>get</span>().<span class='ident'>unwrap</span>(), <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>4</span>]);
+</pre>
+</div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.Ref.html'
+                               title='rustrt::local_data::Ref'>Ref</a></td>
+                        <td class='docblock short'><p>An RAII immutable reference to a task-local value.</p>
+</td>
+                    </tr>
+                </table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.KeyValue.html'
+                               title='rustrt::local_data::KeyValue'>KeyValue</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                </table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.Key.html'
+                               title='rustrt::local_data::Key'>Key</a></td>
+                        <td class='docblock short'><p>Indexes a task-local data slot. This pointer is used for comparison to
+differentiate keys from one another. The actual type <code>T</code> is not used anywhere
+as a member of this type, except that it is parameterized with it to define
+the type of each key&#39;s value.</p>
+</td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "rustrt";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

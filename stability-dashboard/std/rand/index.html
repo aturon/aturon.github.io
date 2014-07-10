@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The std library documentation.">
+
+    <title>std::rand - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../std/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../index.html'>std</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='../any/index.html'>any</a><a class='mod ' href='../ascii/index.html'>ascii</a><a class='mod ' href='../bitflags/index.html'>bitflags</a><a class='mod ' href='../bool/index.html'>bool</a><a class='mod ' href='../c_str/index.html'>c_str</a><a class='mod ' href='../c_vec/index.html'>c_vec</a><a class='mod ' href='../cell/index.html'>cell</a><a class='mod ' href='../char/index.html'>char</a><a class='mod ' href='../clone/index.html'>clone</a><a class='mod ' href='../cmp/index.html'>cmp</a><a class='mod ' href='../collections/index.html'>collections</a><a class='mod ' href='../comm/index.html'>comm</a><a class='mod ' href='../default/index.html'>default</a><a class='mod ' href='../dynamic_lib/index.html'>dynamic_lib</a><a class='mod ' href='../f32/index.html'>f32</a><a class='mod ' href='../f64/index.html'>f64</a><a class='mod ' href='../finally/index.html'>finally</a><a class='mod ' href='../fmt/index.html'>fmt</a><a class='mod ' href='../from_str/index.html'>from_str</a><a class='mod ' href='../gc/index.html'>gc</a><a class='mod ' href='../hash/index.html'>hash</a><a class='mod ' href='../i16/index.html'>i16</a><a class='mod ' href='../i32/index.html'>i32</a><a class='mod ' href='../i64/index.html'>i64</a><a class='mod ' href='../i8/index.html'>i8</a><a class='mod ' href='../int/index.html'>int</a><a class='mod ' href='../intrinsics/index.html'>intrinsics</a><a class='mod ' href='../io/index.html'>io</a><a class='mod ' href='../iter/index.html'>iter</a><a class='mod ' href='../kinds/index.html'>kinds</a><a class='mod ' href='../local_data/index.html'>local_data</a><a class='mod ' href='../macros/index.html'>macros</a><a class='mod ' href='../mem/index.html'>mem</a><a class='mod ' href='../num/index.html'>num</a><a class='mod ' href='../ops/index.html'>ops</a><a class='mod ' href='../option/index.html'>option</a><a class='mod ' href='../os/index.html'>os</a><a class='mod ' href='../owned/index.html'>owned</a><a class='mod ' href='../path/index.html'>path</a><a class='mod ' href='../prelude/index.html'>prelude</a><a class='mod ' href='../ptr/index.html'>ptr</a><a class='mod current' href='../rand/index.html'>rand</a><a class='mod ' href='../raw/index.html'>raw</a><a class='mod ' href='../rc/index.html'>rc</a><a class='mod ' href='../result/index.html'>result</a><a class='mod ' href='../rt/index.html'>rt</a><a class='mod ' href='../simd/index.html'>simd</a><a class='mod ' href='../slice/index.html'>slice</a><a class='mod ' href='../str/index.html'>str</a><a class='mod ' href='../string/index.html'>string</a><a class='mod ' href='../sync/index.html'>sync</a><a class='mod ' href='../task/index.html'>task</a><a class='mod ' href='../to_str/index.html'>to_str</a><a class='mod ' href='../tuple/index.html'>tuple</a><a class='mod ' href='../ty/index.html'>ty</a><a class='mod ' href='../u16/index.html'>u16</a><a class='mod ' href='../u32/index.html'>u32</a><a class='mod ' href='../u64/index.html'>u64</a><a class='mod ' href='../u8/index.html'>u8</a><a class='mod ' href='../uint/index.html'>uint</a><a class='mod ' href='../unstable/index.html'>unstable</a><a class='mod ' href='../vec/index.html'>vec</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'>Module <a href='../index.html'>std</a>::<a class='mod' href=''>rand</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-5054' href='../../src/std/Users/aturon/moz/working/stability-dashboard/src/libstd/rand/mod.rs.html#11-527'>[src]</a></span></h1>
+<div class='docblock'><p>Utilities for random number generation</p>
+
+<p>The key functions are <code>random()</code> and <code>Rng::gen()</code>. These are polymorphic
+and so can be used to generate any type that implements <code>Rand</code>. Type inference
+means that often a simple call to <code>rand::random()</code> or <code>rng.gen()</code> will
+suffice, but sometimes an annotation is required, e.g. <code>rand::random::&lt;f64&gt;()</code>.</p>
+
+<p>See the <code>distributions</code> submodule for sampling random numbers from
+distributions like normal and exponential.</p>
+
+<h1 id="task-local-rng" class='section-header'><a
+                           href="#task-local-rng">Task-local RNG</a></h1>
+<p>There is built-in support for a RNG associated with each task stored
+in task-local storage. This RNG can be accessed via <code>task_rng</code>, or
+used implicitly via <code>random</code>. This RNG is normally randomly seeded
+from an operating-system source of randomness, e.g. <code>/dev/urandom</code> on
+Unix systems, and will automatically reseed itself from this source
+after generating 32 KiB of random data.</p>
+
+<h1 id="cryptographic-security" class='section-header'><a
+                           href="#cryptographic-security">Cryptographic security</a></h1>
+<p>An application that requires an entropy source for cryptographic purposes
+must use <code>OsRng</code>, which reads randomness from the source that the operating
+system provides (e.g. <code>/dev/urandom</code> on Unixes or <code>CryptGenRandom()</code> on Windows).
+The other random number generators provided by this module are not suitable
+for such purposes.</p>
+
+<p><em>Note</em>: many Unix systems provide <code>/dev/random</code> as well as <code>/dev/urandom</code>.
+This module uses <code>/dev/urandom</code> for the following reasons:</p>
+
+<ul>
+<li>  On Linux, <code>/dev/random</code> may block if entropy pool is empty; <code>/dev/urandom</code> will not block.
+This does not mean that <code>/dev/random</code> provides better output than
+<code>/dev/urandom</code>; the kernel internally runs a cryptographically secure pseudorandom
+number generator (CSPRNG) based on entropy pool for random number generation,
+so the &quot;quality&quot; of <code>/dev/random</code> is not better than <code>/dev/urandom</code> in most cases.
+However, this means that <code>/dev/urandom</code> can yield somewhat predictable randomness
+if the entropy pool is very small, such as immediately after first booting.
+If an application likely to be run soon after first booting, or on a system with very
+few entropy sources, one should consider using <code>/dev/random</code> via <code>ReaderRng</code>.</li>
+<li>  On some systems (e.g. FreeBSD, OpenBSD and Mac OS X) there is no difference
+between the two sources. (Also note that, on some systems e.g. FreeBSD, both <code>/dev/random</code>
+and <code>/dev/urandom</code> may block once if the CSPRNG has not seeded yet.)</li>
+</ul>
+
+<h1 id="examples" class='section-header'><a
+                           href="#examples">Examples</a></h1><span id='rust-example-raw-0' class='rusttest'>fn main() {
+    use std::rand;
+    use std::rand::Rng;
+    
+    let mut rng = rand::task_rng();
+    if rng.gen() { // random bool
+        println!(&quot;int: {}, uint: {}&quot;, rng.gen::&lt;int&gt;(), rng.gen::&lt;uint&gt;())
+    }
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rand</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rand</span>::<span class='ident'>Rng</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>rng</span> <span class='op'>=</span> <span class='ident'>rand</span>::<span class='ident'>task_rng</span>();
+<span class='kw'>if</span> <span class='ident'>rng</span>.<span class='ident'>gen</span>() {<span class='comment'> // random bool
+    </span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;int: {}, uint: {}&quot;</span>, <span class='ident'>rng</span>.<span class='ident'>gen</span>::<span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>(), <span class='ident'>rng</span>.<span class='ident'>gen</span>::<span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>())
+}
+</pre>
+<span id='rust-example-raw-1' class='rusttest'>fn main() {
+    use std::rand;
+    
+    let tuple = rand::random::&lt;(f64, char)&gt;();
+    println!(&quot;{}&quot;, tuple)
+}</span><pre id='rust-example-rendered-1' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rand</span>;
+
+<span class='kw'>let</span> <span class='ident'>tuple</span> <span class='op'>=</span> <span class='ident'>rand</span>::<span class='ident'>random</span>::<span class='op'>&lt;</span>(<span class='ident'>f64</span>, <span class='ident'>char</span>)<span class='op'>&gt;</span>();
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>tuple</span>)
+</pre>
+</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='mod' href='distributions/index.html'
+                               title='std::rand::distributions'>distributions</a></td>
+                        <td class='docblock short'><p>Sampling from random distributions.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='mod' href='os/index.html'
+                               title='std::rand::os'>os</a></td>
+                        <td class='docblock short'><p>Interfaces to the operating system provided random number
+generators.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='mod' href='reader/index.html'
+                               title='std::rand::reader'>reader</a></td>
+                        <td class='docblock short'><p>A wrapper around any Reader to treat it as an RNG.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='mod' href='reseeding/index.html'
+                               title='std::rand::reseeding'>reseeding</a></td>
+                        <td class='docblock short'><p>A wrapper around another RNG that reseeds it after it
+generates a certain number of random bytes.</p>
+</td>
+                    </tr>
+                </table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.Closed01.html'
+                               title='std::rand::Closed01'>Closed01</a></td>
+                        <td class='docblock short'><p>A wrapper for generating floating point numbers uniformly in the
+closed interval <code>[0,1]</code> (including both endpoints).</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.Isaac64Rng.html'
+                               title='std::rand::Isaac64Rng'>Isaac64Rng</a></td>
+                        <td class='docblock short'><p>A random number generator that uses ISAAC-64[1], the 64-bit
+variant of the ISAAC algorithm.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.IsaacRng.html'
+                               title='std::rand::IsaacRng'>IsaacRng</a></td>
+                        <td class='docblock short'><p>A random number generator that uses the ISAAC algorithm[1].</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.Open01.html'
+                               title='std::rand::Open01'>Open01</a></td>
+                        <td class='docblock short'><p>A wrapper for generating floating point numbers uniformly in the
+open interval <code>(0,1)</code> (not including either endpoint).</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.OsRng.html'
+                               title='std::rand::OsRng'>OsRng</a></td>
+                        <td class='docblock short'><p>A random number generator that retrieves randomness straight from
+the operating system. Platform sources:</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.StdRng.html'
+                               title='std::rand::StdRng'>StdRng</a></td>
+                        <td class='docblock short'><p>The standard RNG. This is designed to be efficient on the current
+platform.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.TaskRng.html'
+                               title='std::rand::TaskRng'>TaskRng</a></td>
+                        <td class='docblock short'><p>The task-local RNG.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.XorShiftRng.html'
+                               title='std::rand::XorShiftRng'>XorShiftRng</a></td>
+                        <td class='docblock short'><p>An Xorshift[1] random number
+generator.</p>
+</td>
+                    </tr>
+                </table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.Rand.html'
+                               title='std::rand::Rand'>Rand</a></td>
+                        <td class='docblock short'><p>A type that can be randomly generated using an <code>Rng</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.Rng.html'
+                               title='std::rand::Rng'>Rng</a></td>
+                        <td class='docblock short'><p>A random number generator.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.SeedableRng.html'
+                               title='std::rand::SeedableRng'>SeedableRng</a></td>
+                        <td class='docblock short'><p>A random number generator that can be explicitly seeded to produce
+the same stream of randomness multiple times.</p>
+</td>
+                    </tr>
+                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.random.html'
+                               title='std::rand::random'>random</a></td>
+                        <td class='docblock short'><p>Generate a random value using the task-local random number
+generator.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.sample.html'
+                               title='std::rand::sample'>sample</a></td>
+                        <td class='docblock short'><p>Randomly sample up to <code>amount</code> elements from an iterator.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.task_rng.html'
+                               title='std::rand::task_rng'>task_rng</a></td>
+                        <td class='docblock short'><p>Retrieve the lazily-initialized task-local random number
+generator, seeded by the system. Intended to be used in method
+chaining style, e.g. <code>task_rng().gen::&lt;int&gt;()</code>.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.weak_rng.html'
+                               title='std::rand::weak_rng'>weak_rng</a></td>
+                        <td class='docblock short'><p>Create a weak random number generator with a default algorithm and seed.</p>
+</td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "std";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script src="../../playpen.js"></script>
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

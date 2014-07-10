@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The native library documentation.">
+
+    <title>native::io::timer - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../../native/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../../index.html'>native</a>&#8203;::<a href='../index.html'>io</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='../addrinfo/index.html'>addrinfo</a><a class='mod ' href='../file/index.html'>file</a><a class='mod ' href='../net/index.html'>net</a><a class='mod ' href='../pipe/index.html'>pipe</a><a class='mod ' href='../process/index.html'>process</a><a class='mod current' href='../timer/index.html'>timer</a></div><div class='block struct'><h2>Structs</h2><a class='struct ' href='../struct.IoFactory.html'>IoFactory</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'>Module <a href='../../index.html'>native</a>::<a href='../index.html'>io</a>::<a class='mod' href=''>timer</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-11531' href='../../../src/native/Users/aturon/moz/working/stability-dashboard/src/libnative/io/timer_unix.rs.html#11-299'>[src]</a></span></h1>
+<div class='docblock'><p>Timers for non-linux/non-windows OSes</p>
+
+<p>This module implements timers with a worker thread, select(), and a lot of
+witchcraft that turns out to be horribly inaccurate timers. The unfortunate
+part is that I&#39;m at a loss of what else to do one these OSes. This is also
+why linux has a specialized timerfd implementation and windows has its own
+implementation (they&#39;re more accurate than this one).</p>
+
+<p>The basic idea is that there is a worker thread that&#39;s communicated to via a
+channel and a pipe, the pipe is used by the worker thread in a select()
+syscall with a timeout. The timeout is the &quot;next timer timeout&quot; while the
+channel is used to send data over to the worker thread.</p>
+
+<p>Whenever the call to select() times out, then a channel receives a message.
+Whenever the call returns that the file descriptor has information, then the
+channel from timers is drained, enqueuing all incoming requests.</p>
+
+<p>The actual implementation of the helper thread is a sorted array of
+timers in terms of target firing date. The target is the absolute time at
+which the timer should fire. Timers are then re-enqueued after a firing if
+the repeat boolean is set.</p>
+
+<p>Naturally, all this logic of adding times and keeping track of
+relative/absolute time is a little lossy and not quite exact. I&#39;ve done the
+best I could to reduce the amount of calls to &#39;now()&#39;, but there&#39;s likely
+still inaccuracies trickling in here and there.</p>
+
+<p>One of the tricky parts of this implementation is that whenever a timer is
+acted upon, it must cancel whatever the previous action was (if one is
+active) in order to act like the other implementations of this timer. In
+order to do this, the timer&#39;s inner pointer is transferred to the worker
+thread. Whenever the timer is modified, it first takes ownership back from
+the worker thread in order to modify the same data structure. This has the
+side effect of &quot;cancelling&quot; the previous requests while allowing a
+re-enqueuing later on.</p>
+
+<p>Note that all time units in this file are in <em>milliseconds</em>.</p>
+</div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.Timer.html'
+                               title='native::io::timer::Timer'>Timer</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                </table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.Req.html'
+                               title='native::io::timer::Req'>Req</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.now.html'
+                               title='native::io::timer::now'>now</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "native";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script async src="../../../search-index.js"></script>
+</body>
+</html>

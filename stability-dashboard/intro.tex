@@ -1,0 +1,510 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+    \usepackage{xltxtra,xunicode}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
+  \newcommand{\euro}{€}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{\usepackage{microtype}}{}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\newenvironment{Shaded}{}{}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{{#1}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{{#1}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
+\ifxetex
+  \usepackage[setpagesize=false, % page size defined by xetex
+              unicode=false, % unicode breaks when used with xetex
+              xetex]{hyperref}
+\else
+  \usepackage[unicode=true]{hyperref}
+\fi
+\hypersetup{breaklinks=true,
+            bookmarks=true,
+            pdfauthor={},
+            pdftitle={A 30-minute Introduction to Rust},
+            colorlinks=true,
+            citecolor=blue,
+            urlcolor=blue,
+            linkcolor=magenta,
+            pdfborder={0 0 0}}
+\urlstyle{same}  % don't use monospace font for urls
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\setcounter{secnumdepth}{5}
+
+\title{A 30-minute Introduction to Rust}
+
+\begin{document}
+\maketitle
+
+0.11.0-pre (169c988d09a9d4e46de2b7fead9489e94964c7c7 2014-07-02 18:41:38 +0000)
+
+Copyright © 2011-2014 The Rust Project Developers. Licensed under the
+\href{http://www.apache.org/licenses/LICENSE-2.0}{Apache License,
+Version 2.0} or the \href{http://opensource.org/licenses/MIT}{MIT
+license}, at your option.
+
+This file may not be copied, modified, or distributed except according
+to those terms.
+
+{
+\hypersetup{linkcolor=black}
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+Rust is a systems programming language that combines strong compile-time
+correctness guarantees with fast performance. It improves upon the ideas
+of other systems languages like C++ by providing guaranteed memory
+safety (no crashes, no data races) and complete control over the
+lifecycle of memory. Strong memory guarantees make writing correct
+concurrent Rust code easier than in other languages. This tutorial will
+give you an idea of what Rust is like in about thirty minutes. It
+expects that you're at least vaguely familiar with a previous `curly
+brace' language, but does not require prior experience with systems
+programming. The concepts are more important than the syntax, so don't
+worry if you don't get every last detail: the
+\href{tutorial.html}{tutorial} can help you out with that later.
+
+Let's talk about the most important concept in Rust, ``ownership,'' and
+its implications on a task that programmers usually find very difficult:
+concurrency.
+
+\section{The power of ownership}\label{the-power-of-ownership}
+
+Ownership is central to Rust, and is the feature from which many of
+Rust's powerful capabilities are derived. ``Ownership'' refers to which
+parts of your code are allowed to read, write, and ultimately release,
+memory. Let's start by looking at some C++ code:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DataTypeTok{int}\NormalTok{* dangling(}\DataTypeTok{void}\NormalTok{)}
+\NormalTok{\{}
+    \DataTypeTok{int} \NormalTok{i = }\DecValTok{1234}\NormalTok{;}
+    \KeywordTok{return} \NormalTok{&i;}
+\NormalTok{\}}
+
+\DataTypeTok{int} \NormalTok{add_one(}\DataTypeTok{void}\NormalTok{)}
+\NormalTok{\{}
+    \DataTypeTok{int}\NormalTok{* num = dangling();}
+    \KeywordTok{return} \NormalTok{*num + }\DecValTok{1}\NormalTok{;}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{Note: obviously this is very simple and non-idiomatic C++. You
+wouldn't write it in practice; it is for illustrative purposes.}
+
+This function allocates an integer on the stack, and stores it in a
+variable, \texttt{i}. It then returns a reference to the variable
+\texttt{i}. There's just one problem: stack memory becomes invalid when
+the function returns. This means that in the second line of
+\texttt{add\_one}, \texttt{num} points to some garbage values, and we
+won't get the effect that we want. While this is a trivial example, it
+can happen quite often in C++ code. There's a similar problem when
+memory on the heap is allocated with \texttt{malloc} (or \texttt{new}),
+then freed with \texttt{free} (or \texttt{delete}), yet your code
+attempts to do something with the pointer to that memory. This problem
+is called a `dangling pointer,' and it's not possible to write Rust code
+that has it. Let's try writing it in Rust:
+
+\begin{verbatim}
+fn dangling() -> &int {
+    let i = 1234;
+    return &i;
+}
+
+fn add_one() -> int {
+    let num = dangling();
+    return *num + 1;
+}
+
+fn main() {
+    add_one();
+}
+\end{verbatim}
+
+Save this program as \texttt{dangling.rs}. When you try to compile this
+program with \texttt{rustc dangling.rs}, you'll get an interesting (and
+long) error message:
+
+\begin{verbatim}
+dangling.rs:3:12: 3:14 error: `i` does not live long enough
+dangling.rs:3     return &i;
+                         ^~
+dangling.rs:1:23: 4:2 note: reference must be valid for the anonymous lifetime #1 defined on the block at 1:22...
+dangling.rs:1 fn dangling() -> &int {
+dangling.rs:2     let i = 1234;
+dangling.rs:3     return &i;
+dangling.rs:4 }
+dangling.rs:1:23: 4:2 note: ...but borrowed value is only valid for the block at 1:22
+dangling.rs:1 fn dangling() -> &int {
+dangling.rs:2     let i = 1234;
+dangling.rs:3     return &i;
+dangling.rs:4 }
+error: aborting due to previous error
+\end{verbatim}
+
+In order to fully understand this error message, we need to talk about
+what it means to ``own'' something. So for now, let's just accept that
+Rust will not allow us to write code with a dangling pointer, and we'll
+come back to this code once we understand ownership.
+
+Let's forget about programming for a second and talk about books. I like
+to read physical books, and sometimes I really like one and tell my
+friends they should read it. While I'm reading my book, I own it: the
+book is in my possession. When I loan the book out to someone else for a
+while, they ``borrow'' it from me. And when you borrow a book, it's
+yours for a certain period of time, and then you give it back to me, and
+I own it again. Right?
+
+This concept applies directly to Rust code as well: some code ``owns'' a
+particular pointer to memory. It's the sole owner of that pointer. It
+can also lend that memory out to some other code for a while: that code
+``borrows'' the memory, and it borrows it for a precise period of time,
+called a ``lifetime.''
+
+That's all there is to it. That doesn't seem so hard, right? Let's go
+back to that error message:
+\texttt{error: 'i' does not live long enough}. We tried to loan out a
+particular variable, \texttt{i}, using a reference (the \texttt{\&}
+operator) but Rust knew that the variable would be invalid after the
+function returns, and so it tells us that:
+\texttt{reference must be valid for the anonymous lifetime \#1...}.
+Neat!
+
+That's a great example for stack memory, but what about heap memory?
+Rust has a second kind of pointer, an `owned box', that you can create
+with the \texttt{box} operator. Check it out:
+
+\begin{verbatim}
+
+fn dangling() -> Box<int> {
+    let i = box 1234i;
+    return i;
+}
+
+fn add_one() -> int {
+    let num = dangling();
+    return *num + 1;
+}
+\end{verbatim}
+
+Now instead of a stack allocated \texttt{1234i}, we have a heap
+allocated \texttt{box 1234i}. Whereas \texttt{\&} borrows a pointer to
+existing memory, creating an owned box allocates memory on the heap and
+places a value in it, giving you the sole pointer to that memory. You
+can roughly compare these two lines:
+
+\begin{verbatim}
+// Rust
+let i = box 1234i;
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{// C++}
+\DataTypeTok{int} \NormalTok{*i = }\KeywordTok{new} \DataTypeTok{int}\NormalTok{;}
+\NormalTok{*i = }\DecValTok{1234}\NormalTok{;}
+\end{Highlighting}
+\end{Shaded}
+
+Rust infers the correct type, allocates the correct amount of memory and
+sets it to the value you asked for. This means that it's impossible to
+allocate uninitialized memory: \emph{Rust does not have the concept of
+null}. Hooray! There's one other difference between this line of Rust
+and the C++: The Rust compiler also figures out the lifetime of
+\texttt{i}, and then inserts a corresponding \texttt{free} call after
+it's invalid, like a destructor in C++. You get all of the benefits of
+manually allocated heap memory without having to do all the bookkeeping
+yourself. Furthermore, all of this checking is done at compile time, so
+there's no runtime overhead. You'll get (basically) the exact same code
+that you'd get if you wrote the correct C++, but it's impossible to
+write the incorrect version, thanks to the compiler.
+
+You've seen one way that ownership and borrowing are useful to prevent
+code that would normally be dangerous in a less-strict language, but
+let's talk about another: concurrency.
+
+\section{Owning concurrency}\label{owning-concurrency}
+
+Concurrency is an incredibly hot topic in the software world right now.
+It's always been an interesting area of study for computer scientists,
+but as usage of the Internet explodes, people are looking to improve the
+number of users a given service can handle. Concurrency is one way of
+achieving this goal. There is a pretty big drawback to concurrent code,
+though: it can be hard to reason about, because it is non-deterministic.
+There are a few different approaches to writing good concurrent code,
+but let's talk about how Rust's notions of ownership and lifetimes
+contribute to correct but concurrent code.
+
+First, let's go over a simple concurrency example. Rust makes it easy to
+create ``tasks'', otherwise known as ``threads''. Typically, tasks do
+not share memory but instead communicate amongst each other with
+`channels', like this:
+
+\begin{verbatim}
+fn main() {
+    let numbers = vec![1i, 2i, 3i];
+
+    let (tx, rx)  = channel();
+    tx.send(numbers);
+
+    spawn(proc() {
+        let numbers = rx.recv();
+        println!("{}", *numbers.get(0));
+    })
+}
+\end{verbatim}
+
+In this example, we create a boxed array of numbers. We then make a
+`channel', Rust's primary means of passing messages between tasks. The
+\texttt{channel} function returns two different ends of the channel: a
+\texttt{Sender} and \texttt{Receiver} (commonly abbreviated \texttt{tx}
+and \texttt{rx}). The \texttt{spawn} function spins up a new task, given
+a \emph{heap allocated closure} to run. As you can see in the code, we
+call \texttt{tx.send()} from the original task, passing in our boxed
+array, and we call \texttt{rx.recv()} (short for `receive') inside of
+the new task: values given to the \texttt{Sender} via the \texttt{send}
+method come out the other end via the \texttt{recv} method on the
+\texttt{Receiver}.
+
+Now here's the exciting part: because \texttt{numbers} is an owned type,
+when it is sent across the channel, it is actually \emph{moved},
+transferring ownership of \texttt{numbers} between tasks. This ownership
+transfer is \emph{very fast} - in this case simply copying a pointer -
+while also ensuring that the original owning task cannot create data
+races by continuing to read or write to \texttt{numbers} in parallel
+with the new owner.
+
+To prove that Rust performs the ownership transfer, try to modify the
+previous example to continue using the variable \texttt{numbers}:
+
+\begin{verbatim}
+fn main() {
+    let numbers = vec![1i, 2i, 3i];
+
+    let (tx, rx)  = channel();
+    tx.send(numbers);
+
+    spawn(proc() {
+        let numbers = rx.recv();
+        println!("{}", numbers.get(0));
+    });
+
+    // Try to print a number from the original task
+    println!("{}", *numbers.get(0));
+}
+\end{verbatim}
+
+The compiler will produce an error indicating that the value is no
+longer in scope:
+
+\begin{verbatim}
+concurrency.rs:12:20: 12:27 error: use of moved value: 'numbers'
+concurrency.rs:12     println!("{}", numbers.get(0));
+                                     ^~~~~~~
+\end{verbatim}
+
+Since only one task can own a boxed array at a time, if instead of
+distributing our \texttt{numbers} array to a single task we wanted to
+distribute it to many tasks, we would need to copy the array for each.
+Let's see an example that uses the \texttt{clone} method to create
+copies of the data:
+
+\begin{verbatim}
+fn main() {
+    let numbers = vec![1i, 2i, 3i];
+
+    for num in range(0u, 3) {
+        let (tx, rx)  = channel();
+        // Use `clone` to send a *copy* of the array
+        tx.send(numbers.clone());
+
+        spawn(proc() {
+            let numbers = rx.recv();
+            println!("{:d}", *numbers.get(num as uint));
+        })
+    }
+}
+\end{verbatim}
+
+This is similar to the code we had before, except now we loop three
+times, making three tasks, and \emph{cloning} \texttt{numbers} before
+sending it.
+
+However, if we're making a lot of tasks, or if our data is very large,
+creating a copy for each task requires a lot of work and a lot of extra
+memory for little benefit. In practice, we might not want to do this
+because of the cost. Enter \texttt{Arc}, an atomically reference counted
+box (``A.R.C.'' == ``atomically reference counted''). \texttt{Arc} is
+the most common way to \emph{share} data between tasks. Here's some
+code:
+
+\begin{verbatim}
+use std::sync::Arc;
+
+fn main() {
+    let numbers = vec![1i, 2i, 3i];
+    let numbers = Arc::new(numbers);
+
+    for num in range(0u, 3) {
+        let (tx, rx)  = channel();
+        tx.send(numbers.clone());
+
+        spawn(proc() {
+            let numbers = rx.recv();
+            println!("{:d}", *numbers.get(num as uint));
+        })
+    }
+}
+\end{verbatim}
+
+This is almost exactly the same, except that this time \texttt{numbers}
+is first put into an \texttt{Arc}. \texttt{Arc::new} creates the
+\texttt{Arc}, \texttt{.clone()} makes another \texttt{Arc} that refers
+to the same contents. So we clone the \texttt{Arc} for each task, send
+that clone down the channel, and then use it to print out a number. Now
+instead of copying an entire array to send it to our multiple tasks we
+are just copying a pointer (the \texttt{Arc}) and \emph{sharing} the
+array.
+
+How can this work though? Surely if we're sharing data then can't we
+cause data races if one task writes to the array while others read?
+
+Well, Rust is super-smart and will only let you put data into an
+\texttt{Arc} that is provably safe to share. In this case, it's safe to
+share the array \emph{as long as it's immutable}, i.e.~many tasks may
+read the data in parallel as long as none can write. So for this type
+and many others \texttt{Arc} will only give you an immutable view of the
+data.
+
+Arcs are great for immutable data, but what about mutable data? Shared
+mutable state is the bane of the concurrent programmer: you can use a
+mutex to protect shared mutable state, but if you forget to acquire the
+mutex, bad things can happen, including crashes. Rust provides mutexes
+but makes it impossible to use them in a way that subverts memory
+safety.
+
+Let's take the same example yet again, and modify it to mutate the
+shared state:
+
+\begin{verbatim}
+use std::sync::{Arc, Mutex};
+
+fn main() {
+    let numbers = vec![1i, 2i, 3i];
+    let numbers_lock = Arc::new(Mutex::new(numbers));
+
+    for num in range(0u, 3) {
+        let (tx, rx)  = channel();
+        tx.send(numbers_lock.clone());
+
+        spawn(proc() {
+            let numbers_lock = rx.recv();
+
+            // Take the lock, along with exclusive access to the underlying array
+            let mut numbers = numbers_lock.lock();
+
+            // This is ugly for now, but will be replaced by
+            // `numbers[num as uint] += 1` in the near future.
+            // See: https://github.com/rust-lang/rust/issues/6515
+            *numbers.get_mut(num as uint) = *numbers.get_mut(num as uint) + 1;
+
+            println!("{}", *numbers.get(num as uint));
+
+            // When `numbers` goes out of scope the lock is dropped
+        })
+    }
+}
+\end{verbatim}
+
+This example is starting to get more subtle, but it hints at the
+powerful composability of Rust's concurrent types. This time we've put
+our array of numbers inside a \texttt{Mutex} and then put \emph{that}
+inside the \texttt{Arc}. Like immutable data, \texttt{Mutex}es are
+sharable, but unlike immutable data, data inside a \texttt{Mutex} may be
+mutated as long as the mutex is locked.
+
+The \texttt{lock} method here returns not your original array or a
+pointer thereof, but a \texttt{MutexGuard}, a type that is responsible
+for releasing the lock when it goes out of scope. This same
+\texttt{MutexGuard} can transparently be treated as if it were the value
+the \texttt{Mutex} contains, as you can see in the subsequent indexing
+operation that performs the mutation.
+
+OK, let's stop there before we get too deep.
+
+\section{A footnote: unsafe}\label{a-footnote-unsafe}
+
+The Rust compiler and libraries are entirely written in Rust; we say
+that Rust is ``self-hosting''. If Rust makes it impossible to unsafely
+share data between threads, and Rust is written in Rust, then how does
+it implement concurrent types like \texttt{Arc} and \texttt{Mutex}? The
+answer: \texttt{unsafe}.
+
+You see, while the Rust compiler is very smart, and saves you from
+making mistakes you might normally make, it's not an artificial
+intelligence. Because we're smarter than the compiler - sometimes - we
+need to over-ride this safe behavior. For this purpose, Rust has an
+\texttt{unsafe} keyword. Within an \texttt{unsafe} block, Rust turns off
+many of its safety checks. If something bad happens to your program, you
+only have to audit what you've done inside \texttt{unsafe}, and not the
+entire program itself.
+
+If one of the major goals of Rust was safety, why allow that safety to
+be turned off? Well, there are really only three main reasons to do it:
+interfacing with external code, such as doing FFI into a C library;
+performance (in certain cases); and to provide a safe abstraction around
+operations that normally would not be safe. Our \texttt{Arc}s are an
+example of this last purpose. We can safely hand out multiple pointers
+to the contents of the \texttt{Arc}, because we are sure the data is
+safe to share. But the Rust compiler can't know that we've made these
+choices, so \emph{inside} the implementation of the Arcs, we use
+\texttt{unsafe} blocks to do (normally) dangerous things. But we expose
+a safe interface, which means that the \texttt{Arc}s are impossible to
+use incorrectly.
+
+This is how Rust's type system prevents you from making some of the
+mistakes that make concurrent programming difficult, yet get the
+efficiency of languages such as C++.
+
+\section{That's all, folks}\label{thats-all-folks}
+
+I hope that this taste of Rust has given you an idea if Rust is the
+right language for you. If that's true, I encourage you to check out
+\href{tutorial.html}{the tutorial} for a full, in-depth exploration of
+Rust's syntax and concepts.
+
+\end{document}

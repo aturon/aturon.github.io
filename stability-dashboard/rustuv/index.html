@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The rustuv library documentation.">
+
+    <title>rustuv - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../main.css">
+
+    
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        
+        <p class='location'></p>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'>Crate <a class='mod' href=''>rustuv</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a href='stability.html'>[stability dashboard]</a> <a id='src-0' href='../src/rustuv/Users/aturon/moz/working/stability-dashboard/src/librustuv/lib.rs.html#11-533'>[src]</a></span></h1>
+<div class='docblock'><p>Bindings to libuv, along with the default implementation of <code>std::rt::rtio</code>.</p>
+
+<p>UV types consist of the event loop (Loop), Watchers, Requests and
+Callbacks.</p>
+
+<p>Watchers and Requests encapsulate pointers to uv <em>handles</em>, which have
+subtyping relationships with each other.  This subtyping is reflected
+in the bindings with explicit or implicit coercions. For example, an
+upcast from TcpWatcher to StreamWatcher is done with
+<code>tcp_watcher.as_stream()</code>. In other cases a callback on a specific
+type of watcher will be passed a watcher of a supertype.</p>
+
+<p>Currently all use of Request types (connect/write requests) are
+encapsulated in the bindings and don&#39;t need to be dealt with by the
+caller.</p>
+
+<h1 id="safety-note" class='section-header'><a
+                           href="#safety-note">Safety note</a></h1>
+<p>Due to the complex lifecycle of uv handles, as well as compiler bugs,
+this module is not memory safe and requires explicit memory management,
+via <code>close</code> and <code>delete</code> methods.</p>
+</div><h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
+<table><tr><td><code>pub use self::<a class='mod'
+                                            href='./async/index.html'>async</a>::<a class='struct' href='../rustuv/async/struct.AsyncWatcher.html' title='rustuv::async::AsyncWatcher'>AsyncWatcher</a>;</code></td></tr><tr><td><code>pub use self::file::{<a class='struct' href='../rustuv/file/struct.FsRequest.html' title='rustuv::file::FsRequest'>FsRequest</a>, <a class='struct' href='../rustuv/file/struct.FileWatcher.html' title='rustuv::file::FileWatcher'>FileWatcher</a>};</code></td></tr><tr><td><code>pub use self::<a class='mod'
+                                            href='./idle/index.html'>idle</a>::<a class='struct' href='../rustuv/idle/struct.IdleWatcher.html' title='rustuv::idle::IdleWatcher'>IdleWatcher</a>;</code></td></tr><tr><td><code>pub use self::net::{<a class='struct' href='../rustuv/net/struct.TcpWatcher.html' title='rustuv::net::TcpWatcher'>TcpWatcher</a>, <a class='struct' href='../rustuv/net/struct.TcpListener.html' title='rustuv::net::TcpListener'>TcpListener</a>, <a class='struct' href='../rustuv/net/struct.TcpAcceptor.html' title='rustuv::net::TcpAcceptor'>TcpAcceptor</a>, <a class='struct' href='../rustuv/net/struct.UdpWatcher.html' title='rustuv::net::UdpWatcher'>UdpWatcher</a>};</code></td></tr><tr><td><code>pub use self::pipe::{<a class='struct' href='../rustuv/pipe/struct.PipeWatcher.html' title='rustuv::pipe::PipeWatcher'>PipeWatcher</a>, <a class='struct' href='../rustuv/pipe/struct.PipeListener.html' title='rustuv::pipe::PipeListener'>PipeListener</a>, <a class='struct' href='../rustuv/pipe/struct.PipeAcceptor.html' title='rustuv::pipe::PipeAcceptor'>PipeAcceptor</a>};</code></td></tr><tr><td><code>pub use self::<a class='mod'
+                                            href='./process/index.html'>process</a>::<a class='struct' href='../rustuv/process/struct.Process.html' title='rustuv::process::Process'>Process</a>;</code></td></tr><tr><td><code>pub use self::<a class='mod'
+                                            href='./signal/index.html'>signal</a>::<a class='struct' href='../rustuv/signal/struct.SignalWatcher.html' title='rustuv::signal::SignalWatcher'>SignalWatcher</a>;</code></td></tr><tr><td><code>pub use self::<a class='mod'
+                                            href='./timer/index.html'>timer</a>::<a class='struct' href='../rustuv/timer/struct.TimerWatcher.html' title='rustuv::timer::TimerWatcher'>TimerWatcher</a>;</code></td></tr><tr><td><code>pub use self::<a class='mod'
+                                            href='./tty/index.html'>tty</a>::<a class='struct' href='../rustuv/tty/struct.TtyWatcher.html' title='rustuv::tty::TtyWatcher'>TtyWatcher</a>;</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='mod' href='addrinfo/index.html'
+                               title='rustuv::addrinfo'>addrinfo</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='mod' href='async/index.html'
+                               title='rustuv::async'>async</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='mod' href='file/index.html'
+                               title='rustuv::file'>file</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='mod' href='idle/index.html'
+                               title='rustuv::idle'>idle</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='mod' href='net/index.html'
+                               title='rustuv::net'>net</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='mod' href='pipe/index.html'
+                               title='rustuv::pipe'>pipe</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='mod' href='process/index.html'
+                               title='rustuv::process'>process</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='mod' href='signal/index.html'
+                               title='rustuv::signal'>signal</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='mod' href='stream/index.html'
+                               title='rustuv::stream'>stream</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='mod' href='timer/index.html'
+                               title='rustuv::timer'>timer</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='mod' href='tty/index.html'
+                               title='rustuv::tty'>tty</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='mod' href='uvio/index.html'
+                               title='rustuv::uvio'>uvio</a></td>
+                        <td class='docblock short'><p>The implementation of <code>rtio</code> for libuv</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='mod' href='uvll/index.html'
+                               title='rustuv::uvll'>uvll</a></td>
+                        <td class='docblock short'><p>Low-level bindings to the libuv library.</p>
+</td>
+                    </tr>
+                </table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.ForbidSwitch.html'
+                               title='rustuv::ForbidSwitch'>ForbidSwitch</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.ForbidUnwind.html'
+                               title='rustuv::ForbidUnwind'>ForbidUnwind</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.Loop.html'
+                               title='rustuv::Loop'>Loop</a></td>
+                        <td class='docblock short'><p>FIXME: Loop(*handle) is buggy with destructors. Normal structs
+with dtors may not be destructured, but tuple structs can,
+but the results are not correct.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.Request.html'
+                               title='rustuv::Request'>Request</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.UvError.html'
+                               title='rustuv::UvError'>UvError</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                </table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.UvHandle.html'
+                               title='rustuv::UvHandle'>UvHandle</a></td>
+                        <td class='docblock short'><p>A type that wraps a uv handle</p>
+</td>
+                    </tr>
+                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.empty_buf.html'
+                               title='rustuv::empty_buf'>empty_buf</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.event_loop.html'
+                               title='rustuv::event_loop'>event_loop</a></td>
+                        <td class='docblock short'><p>Creates a new event loop which is powered by libuv</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.slice_to_uv_buf.html'
+                               title='rustuv::slice_to_uv_buf'>slice_to_uv_buf</a></td>
+                        <td class='docblock short'><p>Borrow a slice to a Buf</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.status_to_io_result.html'
+                               title='rustuv::status_to_io_result'>status_to_io_result</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.status_to_maybe_uv_error.html'
+                               title='rustuv::status_to_maybe_uv_error'>status_to_maybe_uv_error</a></td>
+                        <td class='docblock short'><p>Given a uv error code, convert a callback status to a UvError</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.uv_error_to_io_error.html'
+                               title='rustuv::uv_error_to_io_error'>uv_error_to_io_error</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                </table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.Buf.html'
+                               title='rustuv::Buf'>Buf</a></td>
+                        <td class='docblock short'><p>The uv buffer type</p>
+</td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "rustuv";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script async src="../search-index.js"></script>
+</body>
+</html>

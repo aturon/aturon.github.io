@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The core library documentation.">
+
+    <title>core::finally::try_finally - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../core/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../index.html'>core</a>&#8203;::<a href='index.html'>finally</a></p><div class='block trait'><h2>Traits</h2><a class='trait ' href='trait.Finally.html'>Finally</a></div><div class='block fn'><h2>Functions</h2><a class='fn current' href='fn.try_finally.html'>try_finally</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content fn">
+<h1 class='fqn'>Function <a href='../index.html'>core</a>::<a href='index.html'>finally</a>::<a class='fn' href=''>try_finally</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-85237' href='../../src/core/Users/aturon/moz/working/stability-dashboard/src/libcore/finally.rs.html#93-103'>[src]</a></span></h1>
+<pre class='rust fn'>pub fn try_finally&lt;T, U, R&gt;(mutate: &amp;mut T, drop: U, try_fn: |&amp;mut T, U| -&gt; R, finally_fn: |&amp;mut T|) -&gt; R</pre><div class='docblock'><p>The most general form of the <code>finally</code> functions. The function
+<code>try_fn</code> will be invoked first; whether or not it fails, the
+function <code>finally_fn</code> will be invoked next. The two parameters
+<code>mutate</code> and <code>drop</code> are used to thread state through the two
+closures. <code>mutate</code> is used for any shared, mutable state that both
+closures require access to; <code>drop</code> is used for any state that the
+<code>try_fn</code> requires ownership of.</p>
+
+<p><strong>WARNING:</strong> While shared, mutable state between the try and finally
+function is often necessary, one must be very careful; the <code>try</code>
+function could have failed at any point, so the values of the shared
+state may be inconsistent.</p>
+
+<h1 id="example" class='section-header'><a
+                           href="#example">Example</a></h1><span id='rust-example-raw-0' class='rusttest'>fn main() {
+    use std::finally::try_finally;
+    
+    struct State&lt;&#39;a&gt; { buffer: &amp;&#39;a mut [u8], len: uint }
+    let mut buf = [];
+    let mut state = State { buffer: buf, len: 0 };
+    try_finally(
+        &amp;mut state, (),
+        |state, ()| {
+            // use state.buffer, state.len
+        },
+        |state| {
+            // use state.buffer, state.len to cleanup
+        })
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>finally</span>::<span class='ident'>try_finally</span>;
+
+<span class='kw'>struct</span> <span class='ident'>State</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> { <span class='ident'>buffer</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> [<span class='ident'>u8</span>], <span class='ident'>len</span>: <span class='ident'>uint</span> }
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>state</span> <span class='op'>=</span> <span class='ident'>State</span> { <span class='ident'>buffer</span>: <span class='ident'>buf</span>, <span class='ident'>len</span>: <span class='number'>0</span> };
+<span class='ident'>try_finally</span>(
+    <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>state</span>, (),
+    <span class='op'>|</span><span class='ident'>state</span>, ()<span class='op'>|</span> {<span class='comment'>
+        // use state.buffer, state.len
+    </span>},
+    <span class='op'>|</span><span class='ident'>state</span><span class='op'>|</span> {<span class='comment'>
+        // use state.buffer, state.len to cleanup
+    </span>})
+</pre>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "core";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script src="../../playpen.js"></script>
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

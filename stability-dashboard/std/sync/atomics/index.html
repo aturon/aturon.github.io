@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The std library documentation.">
+
+    <title>std::sync::atomics - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../../std/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../../index.html'>std</a>&#8203;::<a href='../index.html'>sync</a></p><div class='block mod'><h2>Modules</h2><a class='mod current' href='../atomics/index.html'>atomics</a><a class='mod ' href='../deque/index.html'>deque</a><a class='mod ' href='../mpmc_bounded_queue/index.html'>mpmc_bounded_queue</a><a class='mod ' href='../mpsc_queue/index.html'>mpsc_queue</a><a class='mod ' href='../spsc_queue/index.html'>spsc_queue</a></div><div class='block struct'><h2>Structs</h2><a class='struct ' href='../struct.Arc.html'>Arc</a><a class='struct ' href='../struct.Barrier.html'>Barrier</a><a class='struct ' href='../struct.Condvar.html'>Condvar</a><a class='struct ' href='../struct.Future.html'>Future</a><a class='struct ' href='../struct.Mutex.html'>Mutex</a><a class='struct ' href='../struct.MutexGuard.html'>MutexGuard</a><a class='struct ' href='../struct.Once.html'>Once</a><a class='struct ' href='../struct.RWLock.html'>RWLock</a><a class='struct ' href='../struct.RWLockReadGuard.html'>RWLockReadGuard</a><a class='struct ' href='../struct.RWLockWriteGuard.html'>RWLockWriteGuard</a><a class='struct ' href='../struct.Semaphore.html'>Semaphore</a><a class='struct ' href='../struct.SemaphoreGuard.html'>SemaphoreGuard</a><a class='struct ' href='../struct.TaskPool.html'>TaskPool</a><a class='struct ' href='../struct.Weak.html'>Weak</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'>Module <a href='../../index.html'>std</a>::<a href='../index.html'>sync</a>::<a class='mod' href=''>atomics</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-19' href='../../../sync/atomics/index.html?gotosrc=19'>[src]</a></span></h1>
+<div class='docblock'><p>Atomic types</p>
+
+<p>Atomic types provide primitive shared-memory communication between
+threads, and are the building blocks of other concurrent
+types.</p>
+
+<p>This module defines atomic versions of a select number of primitive
+types, including <code>AtomicBool</code>, <code>AtomicInt</code>, <code>AtomicUint</code>, and <code>AtomicOption</code>.
+Atomic types present operations that, when used correctly, synchronize
+updates between threads.</p>
+
+<p>Each method takes an <code>Ordering</code> which represents the strength of
+the memory barrier for that operation. These orderings are the
+same as <a href="http://gcc.gnu.org/wiki/Atomic/GCCMM/AtomicSync">C++11 atomic orderings</a>.</p>
+
+<p>Atomic variables are safe to share between threads (they implement <code>Share</code>)
+but they do not themselves provide the mechanism for sharing. The most
+common way to share an atomic variable is to put it into an <code>Arc</code> (an
+atomically-reference-counted shared pointer).</p>
+
+<p>Most atomic types may be stored in static variables, initialized using
+the provided static initializers like <code>INIT_ATOMIC_BOOL</code>. Atomic statics
+are often used for lazy global initialization.</p>
+
+<h1 id="examples" class='section-header'><a
+                           href="#examples">Examples</a></h1>
+<p>A simple spinlock:</p>
+<span id='rust-example-raw-0' class='rusttest'>use std::sync::Arc;
+use std::sync::atomics::{AtomicUint, SeqCst};
+use std::task::deschedule;
+
+fn main() {
+    let spinlock = Arc::new(AtomicUint::new(1));
+
+    let spinlock_clone = spinlock.clone();
+    spawn(proc() {
+        spinlock_clone.store(0, SeqCst);
+    });
+
+    // Wait for the other task to release the lock
+    while spinlock.load(SeqCst) != 0 {
+        // Since tasks may not be preemptive (if they are green threads)
+        // yield to the scheduler to let the other task run. Low level
+        // concurrent code needs to take into account Rust&#39;s two threading
+        // models.
+        deschedule();
+    }
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>Arc</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>atomics</span>::{<span class='ident'>AtomicUint</span>, <span class='ident'>SeqCst</span>};
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>task</span>::<span class='ident'>deschedule</span>;
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='ident'>spinlock</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>AtomicUint</span>::<span class='ident'>new</span>(<span class='number'>1</span>));
+
+    <span class='kw'>let</span> <span class='ident'>spinlock_clone</span> <span class='op'>=</span> <span class='ident'>spinlock</span>.<span class='ident'>clone</span>();
+    <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+        <span class='ident'>spinlock_clone</span>.<span class='ident'>store</span>(<span class='number'>0</span>, <span class='ident'>SeqCst</span>);
+    });<span class='comment'>
+
+    // Wait for the other task to release the lock
+    </span><span class='kw'>while</span> <span class='ident'>spinlock</span>.<span class='ident'>load</span>(<span class='ident'>SeqCst</span>) <span class='op'>!=</span> <span class='number'>0</span> {<span class='comment'>
+        // Since tasks may not be preemptive (if they are green threads)
+        // yield to the scheduler to let the other task run. Low level
+        // concurrent code needs to take into account Rust&#39;s two threading
+        // models.
+        </span><span class='ident'>deschedule</span>();
+    }
+}
+</pre>
+
+<p>Transferring a heap object with <code>AtomicOption</code>:</p>
+<span id='rust-example-raw-1' class='rusttest'>use std::sync::Arc;
+use std::sync::atomics::{AtomicOption, SeqCst};
+
+fn main() {
+    struct BigObject;
+
+    let shared_big_object = Arc::new(AtomicOption::empty());
+
+    let shared_big_object_clone = shared_big_object.clone();
+    spawn(proc() {
+        let unwrapped_big_object = shared_big_object_clone.take(SeqCst);
+        if unwrapped_big_object.is_some() {
+            println!(&quot;got a big object from another task&quot;);
+        } else {
+            println!(&quot;other task hasn&#39;t sent big object yet&quot;);
+        }
+    });
+
+    shared_big_object.swap(box BigObject, SeqCst);
+}</span><pre id='rust-example-rendered-1' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>Arc</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>atomics</span>::{<span class='ident'>AtomicOption</span>, <span class='ident'>SeqCst</span>};
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>struct</span> <span class='ident'>BigObject</span>;
+
+    <span class='kw'>let</span> <span class='ident'>shared_big_object</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>AtomicOption</span>::<span class='ident'>empty</span>());
+
+    <span class='kw'>let</span> <span class='ident'>shared_big_object_clone</span> <span class='op'>=</span> <span class='ident'>shared_big_object</span>.<span class='ident'>clone</span>();
+    <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+        <span class='kw'>let</span> <span class='ident'>unwrapped_big_object</span> <span class='op'>=</span> <span class='ident'>shared_big_object_clone</span>.<span class='ident'>take</span>(<span class='ident'>SeqCst</span>);
+        <span class='kw'>if</span> <span class='ident'>unwrapped_big_object</span>.<span class='ident'>is_some</span>() {
+            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;got a big object from another task&quot;</span>);
+        } <span class='kw'>else</span> {
+            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;other task hasn&#39;t sent big object yet&quot;</span>);
+        }
+    });
+
+    <span class='ident'>shared_big_object</span>.<span class='ident'>swap</span>(<span class='kw'>box</span> <span class='ident'>BigObject</span>, <span class='ident'>SeqCst</span>);
+}
+</pre>
+
+<p>Keep a global count of live tasks:</p>
+<span id='rust-example-raw-2' class='rusttest'>fn main() {
+    use std::sync::atomics::{AtomicUint, SeqCst, INIT_ATOMIC_UINT};
+    
+    static mut GLOBAL_TASK_COUNT: AtomicUint = INIT_ATOMIC_UINT;
+    
+    unsafe {
+        let old_task_count = GLOBAL_TASK_COUNT.fetch_add(1, SeqCst);
+        println!(&quot;live tasks: {}&quot;, old_task_count + 1);
+    }
+}</span><pre id='rust-example-rendered-2' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>atomics</span>::{<span class='ident'>AtomicUint</span>, <span class='ident'>SeqCst</span>, <span class='ident'>INIT_ATOMIC_UINT</span>};
+
+<span class='kw'>static</span> <span class='kw-2'>mut</span> <span class='ident'>GLOBAL_TASK_COUNT</span>: <span class='ident'>AtomicUint</span> <span class='op'>=</span> <span class='ident'>INIT_ATOMIC_UINT</span>;
+
+<span class='kw'>unsafe</span> {
+    <span class='kw'>let</span> <span class='ident'>old_task_count</span> <span class='op'>=</span> <span class='ident'>GLOBAL_TASK_COUNT</span>.<span class='ident'>fetch_add</span>(<span class='number'>1</span>, <span class='ident'>SeqCst</span>);
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;live tasks: {}&quot;</span>, <span class='ident'>old_task_count</span> <span class='op'>+</span> <span class='number'>1</span>);
+}
+</pre>
+</div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.AtomicBool.html'
+                               title='std::sync::atomics::AtomicBool'>AtomicBool</a></td>
+                        <td class='docblock short'><p>An atomic boolean type.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.AtomicInt.html'
+                               title='std::sync::atomics::AtomicInt'>AtomicInt</a></td>
+                        <td class='docblock short'><p>A signed atomic integer type, supporting basic atomic arithmetic operations</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.AtomicOption.html'
+                               title='std::sync::atomics::AtomicOption'>AtomicOption</a></td>
+                        <td class='docblock short'><p>An atomic, nullable unique pointer</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.AtomicPtr.html'
+                               title='std::sync::atomics::AtomicPtr'>AtomicPtr</a></td>
+                        <td class='docblock short'><p>An unsafe atomic pointer. Only supports basic atomic operations</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.AtomicUint.html'
+                               title='std::sync::atomics::AtomicUint'>AtomicUint</a></td>
+                        <td class='docblock short'><p>An unsigned atomic integer type, supporting basic atomic arithmetic operations</p>
+</td>
+                    </tr>
+                </table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.Ordering.html'
+                               title='std::sync::atomics::Ordering'>Ordering</a></td>
+                        <td class='docblock short'><p>Atomic memory orderings</p>
+</td>
+                    </tr>
+                </table><h2 id='statics' class='section-header'><a href="#statics">Statics</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><code>pub static INIT_ATOMIC_BOOL: <a class='struct' href='../../../std/sync/atomics/struct.AtomicBool.html' title='std::sync::atomics::AtomicBool'>AtomicBool</a></code><code> = </code><a href='../../../core/atomics/static.INIT_ATOMIC_BOOL.html?gotosrc=80665'>[definition]</a></td>
+                        <td class='docblock'>&nbsp;</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><code>pub static INIT_ATOMIC_INT: <a class='struct' href='../../../std/sync/atomics/struct.AtomicInt.html' title='std::sync::atomics::AtomicInt'>AtomicInt</a></code><code> = </code><a href='../../../core/atomics/static.INIT_ATOMIC_INT.html?gotosrc=80673'>[definition]</a></td>
+                        <td class='docblock'>&nbsp;</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><code>pub static INIT_ATOMIC_UINT: <a class='struct' href='../../../std/sync/atomics/struct.AtomicUint.html' title='std::sync::atomics::AtomicUint'>AtomicUint</a></code><code> = </code><a href='../../../core/atomics/static.INIT_ATOMIC_UINT.html?gotosrc=80681'>[definition]</a></td>
+                        <td class='docblock'>&nbsp;</td>
+                    </tr>
+                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.fence.html'
+                               title='std::sync::atomics::fence'>fence</a></td>
+                        <td class='docblock short'><p>An atomic fence.</p>
+</td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "std";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    <script src="../../../playpen.js"></script>
+    <script async src="../../../search-index.js"></script>
+</body>
+</html>

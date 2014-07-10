@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The std library documentation.">
+
+    <title>std::path - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../std/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../index.html'>std</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='../any/index.html'>any</a><a class='mod ' href='../ascii/index.html'>ascii</a><a class='mod ' href='../bitflags/index.html'>bitflags</a><a class='mod ' href='../bool/index.html'>bool</a><a class='mod ' href='../c_str/index.html'>c_str</a><a class='mod ' href='../c_vec/index.html'>c_vec</a><a class='mod ' href='../cell/index.html'>cell</a><a class='mod ' href='../char/index.html'>char</a><a class='mod ' href='../clone/index.html'>clone</a><a class='mod ' href='../cmp/index.html'>cmp</a><a class='mod ' href='../collections/index.html'>collections</a><a class='mod ' href='../comm/index.html'>comm</a><a class='mod ' href='../default/index.html'>default</a><a class='mod ' href='../dynamic_lib/index.html'>dynamic_lib</a><a class='mod ' href='../f32/index.html'>f32</a><a class='mod ' href='../f64/index.html'>f64</a><a class='mod ' href='../finally/index.html'>finally</a><a class='mod ' href='../fmt/index.html'>fmt</a><a class='mod ' href='../from_str/index.html'>from_str</a><a class='mod ' href='../gc/index.html'>gc</a><a class='mod ' href='../hash/index.html'>hash</a><a class='mod ' href='../i16/index.html'>i16</a><a class='mod ' href='../i32/index.html'>i32</a><a class='mod ' href='../i64/index.html'>i64</a><a class='mod ' href='../i8/index.html'>i8</a><a class='mod ' href='../int/index.html'>int</a><a class='mod ' href='../intrinsics/index.html'>intrinsics</a><a class='mod ' href='../io/index.html'>io</a><a class='mod ' href='../iter/index.html'>iter</a><a class='mod ' href='../kinds/index.html'>kinds</a><a class='mod ' href='../local_data/index.html'>local_data</a><a class='mod ' href='../macros/index.html'>macros</a><a class='mod ' href='../mem/index.html'>mem</a><a class='mod ' href='../num/index.html'>num</a><a class='mod ' href='../ops/index.html'>ops</a><a class='mod ' href='../option/index.html'>option</a><a class='mod ' href='../os/index.html'>os</a><a class='mod ' href='../owned/index.html'>owned</a><a class='mod current' href='../path/index.html'>path</a><a class='mod ' href='../prelude/index.html'>prelude</a><a class='mod ' href='../ptr/index.html'>ptr</a><a class='mod ' href='../rand/index.html'>rand</a><a class='mod ' href='../raw/index.html'>raw</a><a class='mod ' href='../rc/index.html'>rc</a><a class='mod ' href='../result/index.html'>result</a><a class='mod ' href='../rt/index.html'>rt</a><a class='mod ' href='../simd/index.html'>simd</a><a class='mod ' href='../slice/index.html'>slice</a><a class='mod ' href='../str/index.html'>str</a><a class='mod ' href='../string/index.html'>string</a><a class='mod ' href='../sync/index.html'>sync</a><a class='mod ' href='../task/index.html'>task</a><a class='mod ' href='../to_str/index.html'>to_str</a><a class='mod ' href='../tuple/index.html'>tuple</a><a class='mod ' href='../ty/index.html'>ty</a><a class='mod ' href='../u16/index.html'>u16</a><a class='mod ' href='../u32/index.html'>u32</a><a class='mod ' href='../u64/index.html'>u64</a><a class='mod ' href='../u8/index.html'>u8</a><a class='mod ' href='../uint/index.html'>uint</a><a class='mod ' href='../unstable/index.html'>unstable</a><a class='mod ' href='../vec/index.html'>vec</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'>Module <a href='../index.html'>std</a>::<a class='mod' href=''>path</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-51539' href='../../src/std/Users/aturon/moz/working/stability-dashboard/src/libstd/path/mod.rs.html#11-582'>[src]</a></span></h1>
+<div class='docblock'><p>Cross-platform path support</p>
+
+<p>This module implements support for two flavors of paths. <code>PosixPath</code> represents
+a path on any unix-like system, whereas <code>WindowsPath</code> represents a path on
+Windows. This module also exposes a typedef <code>Path</code> which is equal to the
+appropriate platform-specific path variant.</p>
+
+<p>Both <code>PosixPath</code> and <code>WindowsPath</code> implement a trait <code>GenericPath</code>, which
+contains the set of methods that behave the same for both paths. They each also
+implement some methods that could not be expressed in <code>GenericPath</code>, yet behave
+identically for both path flavors, such as <code>.components()</code>.</p>
+
+<p>The three main design goals of this module are 1) to avoid unnecessary
+allocation, 2) to behave the same regardless of which flavor of path is being
+used, and 3) to support paths that cannot be represented in UTF-8 (as Linux has
+no restriction on paths beyond disallowing NUL).</p>
+
+<h2 id="usage" class='section-header'><a
+                           href="#usage">Usage</a></h2>
+<p>Usage of this module is fairly straightforward. Unless writing platform-specific
+code, <code>Path</code> should be used to refer to the platform-native path.</p>
+
+<p>Creation of a path is typically done with either <code>Path::new(some_str)</code> or
+<code>Path::new(some_vec)</code>. This path can be modified with <code>.push()</code> and
+<code>.pop()</code> (and other setters). The resulting Path can either be passed to another
+API that expects a path, or can be turned into a <code>&amp;[u8]</code> with <code>.as_vec()</code> or a
+<code>Option&lt;&amp;str&gt;</code> with <code>.as_str()</code>. Similarly, attributes of the path can be queried
+with methods such as <code>.filename()</code>. There are also methods that return a new
+path instead of modifying the receiver, such as <code>.join()</code> or <code>.dir_path()</code>.</p>
+
+<p>Paths are always kept in normalized form. This means that creating the path
+<code>Path::new(&quot;a/b/../c&quot;)</code> will return the path <code>a/c</code>. Similarly any attempt
+to mutate the path will always leave it in normalized form.</p>
+
+<p>When rendering a path to some form of output, there is a method <code>.display()</code>
+which is compatible with the <code>format!()</code> parameter <code>{}</code>. This will render the
+path as a string, replacing all non-utf8 sequences with the Replacement
+Character (U+FFFD). As such it is not suitable for passing to any API that
+actually operates on the path; it is only intended for display.</p>
+
+<h2 id="example" class='section-header'><a
+                           href="#example">Example</a></h2><span id='rust-example-raw-0' class='rusttest'>fn main() {
+    let mut path = Path::new(&quot;/tmp/path&quot;);
+    println!(&quot;path: {}&quot;, path.display());
+    path.set_filename(&quot;foo&quot;);
+    path.push(&quot;bar&quot;);
+    println!(&quot;new path: {}&quot;, path.display());
+    println!(&quot;path exists: {}&quot;, path.exists());
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;/tmp/path&quot;</span>);
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;path: {}&quot;</span>, <span class='ident'>path</span>.<span class='ident'>display</span>());
+<span class='ident'>path</span>.<span class='ident'>set_filename</span>(<span class='string'>&quot;foo&quot;</span>);
+<span class='ident'>path</span>.<span class='ident'>push</span>(<span class='string'>&quot;bar&quot;</span>);
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;new path: {}&quot;</span>, <span class='ident'>path</span>.<span class='ident'>display</span>());
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;path exists: {}&quot;</span>, <span class='ident'>path</span>.<span class='ident'>exists</span>());
+</pre>
+</div><h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
+<table><tr><td><code>pub use PosixPath = self::<a class='mod'
+                                            href='./posix/index.html'>posix</a>::<a class='struct' href='../../std/path/posix/struct.Path.html' title='std::path::posix::Path'>Path</a>;</code></td></tr><tr><td><code>pub use WindowsPath = self::<a class='mod'
+                                            href='./windows/index.html'>windows</a>::<a class='struct' href='../../std/path/windows/struct.Path.html' title='std::path::windows::Path'>Path</a>;</code></td></tr><tr><td><code>pub use self::<a class='mod'
+                                            href='./posix/index.html'>posix</a>::<a class='struct' href='../../std/path/posix/struct.Path.html' title='std::path::posix::Path'>Path</a>;</code></td></tr><tr><td><code>pub use self::<a class='mod'
+                                            href='./posix/index.html'>posix</a>::<a class='type' href='../../std/path/posix/type.Components.html' title='std::path::posix::Components'>Components</a>;</code></td></tr><tr><td><code>pub use self::<a class='mod'
+                                            href='./posix/index.html'>posix</a>::<a class='type' href='../../std/path/posix/type.StrComponents.html' title='std::path::posix::StrComponents'>StrComponents</a>;</code></td></tr><tr><td><code>pub use self::<a class='mod'
+                                            href='./posix/index.html'>posix</a>::SEP;</code></td></tr><tr><td><code>pub use self::<a class='mod'
+                                            href='./posix/index.html'>posix</a>::SEP_BYTE;</code></td></tr><tr><td><code>pub use self::<a class='mod'
+                                            href='./posix/index.html'>posix</a>::<a class='fn' href='../../std/path/posix/fn.is_sep.html' title='std::path::posix::is_sep'>is_sep</a>;</code></td></tr><tr><td><code>pub use self::<a class='mod'
+                                            href='./posix/index.html'>posix</a>::<a class='fn' href='../../std/path/posix/fn.is_sep_byte.html' title='std::path::posix::is_sep_byte'>is_sep_byte</a>;</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='mod' href='posix/index.html'
+                               title='std::path::posix'>posix</a></td>
+                        <td class='docblock short'><p>POSIX file path handling</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='mod' href='windows/index.html'
+                               title='std::path::windows'>windows</a></td>
+                        <td class='docblock short'><p>Windows file path handling</p>
+</td>
+                    </tr>
+                </table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.Display.html'
+                               title='std::path::Display'>Display</a></td>
+                        <td class='docblock short'><p>Helper struct for printing paths with format!()</p>
+</td>
+                    </tr>
+                </table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.BytesContainer.html'
+                               title='std::path::BytesContainer'>BytesContainer</a></td>
+                        <td class='docblock short'><p>A trait that represents something bytes-like (e.g. a &amp;[u8] or a &amp;str)</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.GenericPath.html'
+                               title='std::path::GenericPath'>GenericPath</a></td>
+                        <td class='docblock short'><p>A trait that represents the generic operations available on paths</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.GenericPathUnsafe.html'
+                               title='std::path::GenericPathUnsafe'>GenericPathUnsafe</a></td>
+                        <td class='docblock short'><p>A trait that represents the unsafe operations on GenericPaths</p>
+</td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "std";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script src="../../playpen.js"></script>
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

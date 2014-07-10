@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The rustuv library documentation.">
+
+    <title>rustuv::uvll - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        
+        <p class='location'><a href='../index.html'>rustuv</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='../addrinfo/index.html'>addrinfo</a><a class='mod ' href='../async/index.html'>async</a><a class='mod ' href='../file/index.html'>file</a><a class='mod ' href='../idle/index.html'>idle</a><a class='mod ' href='../net/index.html'>net</a><a class='mod ' href='../pipe/index.html'>pipe</a><a class='mod ' href='../process/index.html'>process</a><a class='mod ' href='../signal/index.html'>signal</a><a class='mod ' href='../stream/index.html'>stream</a><a class='mod ' href='../timer/index.html'>timer</a><a class='mod ' href='../tty/index.html'>tty</a><a class='mod ' href='../uvio/index.html'>uvio</a><a class='mod current' href='../uvll/index.html'>uvll</a></div><div class='block struct'><h2>Structs</h2><a class='struct ' href='../struct.ForbidSwitch.html'>ForbidSwitch</a><a class='struct ' href='../struct.ForbidUnwind.html'>ForbidUnwind</a><a class='struct ' href='../struct.Loop.html'>Loop</a><a class='struct ' href='../struct.Request.html'>Request</a><a class='struct ' href='../struct.UvError.html'>UvError</a></div><div class='block trait'><h2>Traits</h2><a class='trait ' href='../trait.UvHandle.html'>UvHandle</a></div><div class='block fn'><h2>Functions</h2><a class='fn ' href='../fn.empty_buf.html'>empty_buf</a><a class='fn ' href='../fn.event_loop.html'>event_loop</a><a class='fn ' href='../fn.slice_to_uv_buf.html'>slice_to_uv_buf</a><a class='fn ' href='../fn.status_to_io_result.html'>status_to_io_result</a><a class='fn ' href='../fn.status_to_maybe_uv_error.html'>status_to_maybe_uv_error</a><a class='fn ' href='../fn.uv_error_to_io_error.html'>uv_error_to_io_error</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'>Module <a href='../index.html'>rustuv</a>::<a class='mod' href=''>uvll</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-4544' href='../../src/rustuv/Users/aturon/moz/working/stability-dashboard/src/librustuv/uvll.rs.html#11-710'>[src]</a></span></h1>
+<div class='docblock'><p>Low-level bindings to the libuv library.</p>
+
+<p>This module contains a set of direct, &#39;bare-metal&#39; wrappers around
+the libuv C-API.</p>
+
+<p>We&#39;re not bothering yet to redefine uv&#39;s structs as Rust structs
+because they are quite large and change often between versions.
+The maintenance burden is just too high. Instead we use the uv&#39;s
+<code>uv_handle_size</code> and <code>uv_req_size</code> to find the correct size of the
+structs and allocate them on the heap. This can be revisited later.</p>
+
+<p>There are also a collection of helper functions to ease interacting
+with the low-level API.</p>
+
+<p>As new functionality, existent in uv.h, is added to the rust stdlib,
+the mappings should be added in this module.</p>
+</div><h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
+<table><tr><td><code>pub use self::errors::{EACCES, ECONNREFUSED, ECONNRESET, EPIPE, ECONNABORTED, ECANCELED, EBADF, ENOTCONN, ENOENT, EADDRNOTAVAIL, EADDRINUSE};</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='mod' href='errors/index.html'
+                               title='rustuv::uvll::errors'>errors</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                </table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.uv_buf_t.html'
+                               title='rustuv::uvll::uv_buf_t'>uv_buf_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.uv_process_options_t.html'
+                               title='rustuv::uvll::uv_process_options_t'>uv_process_options_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.uv_stat_t.html'
+                               title='rustuv::uvll::uv_stat_t'>uv_stat_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.uv_stdio_container_t.html'
+                               title='rustuv::uvll::uv_stdio_container_t'>uv_stdio_container_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.uv_timespec_t.html'
+                               title='rustuv::uvll::uv_timespec_t'>uv_timespec_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                </table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_handle_type.html'
+                               title='rustuv::uvll::uv_handle_type'>uv_handle_type</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_membership.html'
+                               title='rustuv::uvll::uv_membership'>uv_membership</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_req_type.html'
+                               title='rustuv::uvll::uv_req_type'>uv_req_type</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_run_mode.html'
+                               title='rustuv::uvll::uv_run_mode'>uv_run_mode</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                </table><h2 id='statics' class='section-header'><a href="#statics">Statics</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><code>pub static EOF: <a class='type' href='../../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a></code><code> = </code><code>-4095</code></td>
+                        <td class='docblock'>&nbsp;</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><code>pub static OK: <a class='type' href='../../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a></code><code> = </code><code>0</code></td>
+                        <td class='docblock'>&nbsp;</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><code>pub static PROCESS_DETACHED: <a class='type' href='../../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a></code><code> = </code><code>1 << 3</code></td>
+                        <td class='docblock'>&nbsp;</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><code>pub static PROCESS_SETGID: <a class='type' href='../../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a></code><code> = </code><code>1 << 1</code></td>
+                        <td class='docblock'>&nbsp;</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><code>pub static PROCESS_SETUID: <a class='type' href='../../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a></code><code> = </code><code>1 << 0</code></td>
+                        <td class='docblock'>&nbsp;</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><code>pub static PROCESS_WINDOWS_HIDE: <a class='type' href='../../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a></code><code> = </code><code>1 << 4</code></td>
+                        <td class='docblock'>&nbsp;</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><code>pub static PROCESS_WINDOWS_VERBATIM_ARGUMENTS: <a class='type' href='../../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a></code><code> = </code><code>1 << 2</code></td>
+                        <td class='docblock'>&nbsp;</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><code>pub static STDIO_CREATE_PIPE: <a class='type' href='../../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a></code><code> = </code><code>0x01</code></td>
+                        <td class='docblock'>&nbsp;</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><code>pub static STDIO_IGNORE: <a class='type' href='../../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a></code><code> = </code><code>0x00</code></td>
+                        <td class='docblock'>&nbsp;</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><code>pub static STDIO_INHERIT_FD: <a class='type' href='../../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a></code><code> = </code><code>0x02</code></td>
+                        <td class='docblock'>&nbsp;</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><code>pub static STDIO_INHERIT_STREAM: <a class='type' href='../../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a></code><code> = </code><code>0x04</code></td>
+                        <td class='docblock'>&nbsp;</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><code>pub static STDIO_READABLE_PIPE: <a class='type' href='../../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a></code><code> = </code><code>0x10</code></td>
+                        <td class='docblock'>&nbsp;</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><code>pub static STDIO_WRITABLE_PIPE: <a class='type' href='../../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a></code><code> = </code><code>0x20</code></td>
+                        <td class='docblock'>&nbsp;</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><code>pub static UNKNOWN: <a class='type' href='../../libc/types/os/arch/c95/type.c_int.html' title='libc::types::os::arch::c95::c_int'>c_int</a></code><code> = </code><code>-4094</code></td>
+                        <td class='docblock'>&nbsp;</td>
+                    </tr>
+                </table><h2 id='ffi-fns' class='section-header'><a href="#ffi-fns">Foreign Functions</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_accept.html'
+                               title='rustuv::uvll::uv_accept'>uv_accept</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_async_init.html'
+                               title='rustuv::uvll::uv_async_init'>uv_async_init</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_async_send.html'
+                               title='rustuv::uvll::uv_async_send'>uv_async_send</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_buf_init.html'
+                               title='rustuv::uvll::uv_buf_init'>uv_buf_init</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_close.html'
+                               title='rustuv::uvll::uv_close'>uv_close</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_err_name.html'
+                               title='rustuv::uvll::uv_err_name'>uv_err_name</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_freeaddrinfo.html'
+                               title='rustuv::uvll::uv_freeaddrinfo'>uv_freeaddrinfo</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_fs_chmod.html'
+                               title='rustuv::uvll::uv_fs_chmod'>uv_fs_chmod</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_fs_chown.html'
+                               title='rustuv::uvll::uv_fs_chown'>uv_fs_chown</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_fs_close.html'
+                               title='rustuv::uvll::uv_fs_close'>uv_fs_close</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_fs_fdatasync.html'
+                               title='rustuv::uvll::uv_fs_fdatasync'>uv_fs_fdatasync</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_fs_fstat.html'
+                               title='rustuv::uvll::uv_fs_fstat'>uv_fs_fstat</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_fs_fsync.html'
+                               title='rustuv::uvll::uv_fs_fsync'>uv_fs_fsync</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_fs_ftruncate.html'
+                               title='rustuv::uvll::uv_fs_ftruncate'>uv_fs_ftruncate</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_fs_link.html'
+                               title='rustuv::uvll::uv_fs_link'>uv_fs_link</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_fs_lstat.html'
+                               title='rustuv::uvll::uv_fs_lstat'>uv_fs_lstat</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_fs_mkdir.html'
+                               title='rustuv::uvll::uv_fs_mkdir'>uv_fs_mkdir</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_fs_open.html'
+                               title='rustuv::uvll::uv_fs_open'>uv_fs_open</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_fs_read.html'
+                               title='rustuv::uvll::uv_fs_read'>uv_fs_read</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_fs_readdir.html'
+                               title='rustuv::uvll::uv_fs_readdir'>uv_fs_readdir</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_fs_readlink.html'
+                               title='rustuv::uvll::uv_fs_readlink'>uv_fs_readlink</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_fs_rename.html'
+                               title='rustuv::uvll::uv_fs_rename'>uv_fs_rename</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_fs_req_cleanup.html'
+                               title='rustuv::uvll::uv_fs_req_cleanup'>uv_fs_req_cleanup</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_fs_rmdir.html'
+                               title='rustuv::uvll::uv_fs_rmdir'>uv_fs_rmdir</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_fs_stat.html'
+                               title='rustuv::uvll::uv_fs_stat'>uv_fs_stat</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_fs_symlink.html'
+                               title='rustuv::uvll::uv_fs_symlink'>uv_fs_symlink</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_fs_unlink.html'
+                               title='rustuv::uvll::uv_fs_unlink'>uv_fs_unlink</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_fs_utime.html'
+                               title='rustuv::uvll::uv_fs_utime'>uv_fs_utime</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_fs_write.html'
+                               title='rustuv::uvll::uv_fs_write'>uv_fs_write</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_getaddrinfo.html'
+                               title='rustuv::uvll::uv_getaddrinfo'>uv_getaddrinfo</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_handle_size.html'
+                               title='rustuv::uvll::uv_handle_size'>uv_handle_size</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_idle_init.html'
+                               title='rustuv::uvll::uv_idle_init'>uv_idle_init</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_idle_start.html'
+                               title='rustuv::uvll::uv_idle_start'>uv_idle_start</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_idle_stop.html'
+                               title='rustuv::uvll::uv_idle_stop'>uv_idle_stop</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_kill.html'
+                               title='rustuv::uvll::uv_kill'>uv_kill</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_listen.html'
+                               title='rustuv::uvll::uv_listen'>uv_listen</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_loop_delete.html'
+                               title='rustuv::uvll::uv_loop_delete'>uv_loop_delete</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_pipe_bind.html'
+                               title='rustuv::uvll::uv_pipe_bind'>uv_pipe_bind</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_pipe_connect.html'
+                               title='rustuv::uvll::uv_pipe_connect'>uv_pipe_connect</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_pipe_init.html'
+                               title='rustuv::uvll::uv_pipe_init'>uv_pipe_init</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_pipe_open.html'
+                               title='rustuv::uvll::uv_pipe_open'>uv_pipe_open</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_process_kill.html'
+                               title='rustuv::uvll::uv_process_kill'>uv_process_kill</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_read_start.html'
+                               title='rustuv::uvll::uv_read_start'>uv_read_start</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_read_stop.html'
+                               title='rustuv::uvll::uv_read_stop'>uv_read_stop</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_ref.html'
+                               title='rustuv::uvll::uv_ref'>uv_ref</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_req_size.html'
+                               title='rustuv::uvll::uv_req_size'>uv_req_size</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_run.html'
+                               title='rustuv::uvll::uv_run'>uv_run</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_shutdown.html'
+                               title='rustuv::uvll::uv_shutdown'>uv_shutdown</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_signal_init.html'
+                               title='rustuv::uvll::uv_signal_init'>uv_signal_init</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_signal_start.html'
+                               title='rustuv::uvll::uv_signal_start'>uv_signal_start</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_signal_stop.html'
+                               title='rustuv::uvll::uv_signal_stop'>uv_signal_stop</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_spawn.html'
+                               title='rustuv::uvll::uv_spawn'>uv_spawn</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_strerror.html'
+                               title='rustuv::uvll::uv_strerror'>uv_strerror</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_tcp_bind.html'
+                               title='rustuv::uvll::uv_tcp_bind'>uv_tcp_bind</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_tcp_connect.html'
+                               title='rustuv::uvll::uv_tcp_connect'>uv_tcp_connect</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_tcp_getpeername.html'
+                               title='rustuv::uvll::uv_tcp_getpeername'>uv_tcp_getpeername</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_tcp_getsockname.html'
+                               title='rustuv::uvll::uv_tcp_getsockname'>uv_tcp_getsockname</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_tcp_init.html'
+                               title='rustuv::uvll::uv_tcp_init'>uv_tcp_init</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_tcp_keepalive.html'
+                               title='rustuv::uvll::uv_tcp_keepalive'>uv_tcp_keepalive</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_tcp_nodelay.html'
+                               title='rustuv::uvll::uv_tcp_nodelay'>uv_tcp_nodelay</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_tcp_simultaneous_accepts.html'
+                               title='rustuv::uvll::uv_tcp_simultaneous_accepts'>uv_tcp_simultaneous_accepts</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_timer_init.html'
+                               title='rustuv::uvll::uv_timer_init'>uv_timer_init</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_timer_start.html'
+                               title='rustuv::uvll::uv_timer_start'>uv_timer_start</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_timer_stop.html'
+                               title='rustuv::uvll::uv_timer_stop'>uv_timer_stop</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_tty_get_winsize.html'
+                               title='rustuv::uvll::uv_tty_get_winsize'>uv_tty_get_winsize</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_tty_init.html'
+                               title='rustuv::uvll::uv_tty_init'>uv_tty_init</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_tty_set_mode.html'
+                               title='rustuv::uvll::uv_tty_set_mode'>uv_tty_set_mode</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_udp_bind.html'
+                               title='rustuv::uvll::uv_udp_bind'>uv_udp_bind</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_udp_getsockname.html'
+                               title='rustuv::uvll::uv_udp_getsockname'>uv_udp_getsockname</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_udp_init.html'
+                               title='rustuv::uvll::uv_udp_init'>uv_udp_init</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_udp_recv_start.html'
+                               title='rustuv::uvll::uv_udp_recv_start'>uv_udp_recv_start</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_udp_recv_stop.html'
+                               title='rustuv::uvll::uv_udp_recv_stop'>uv_udp_recv_stop</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_udp_set_broadcast.html'
+                               title='rustuv::uvll::uv_udp_set_broadcast'>uv_udp_set_broadcast</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_udp_set_membership.html'
+                               title='rustuv::uvll::uv_udp_set_membership'>uv_udp_set_membership</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_udp_set_multicast_loop.html'
+                               title='rustuv::uvll::uv_udp_set_multicast_loop'>uv_udp_set_multicast_loop</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_udp_set_multicast_ttl.html'
+                               title='rustuv::uvll::uv_udp_set_multicast_ttl'>uv_udp_set_multicast_ttl</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_udp_set_ttl.html'
+                               title='rustuv::uvll::uv_udp_set_ttl'>uv_udp_set_ttl</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_unref.html'
+                               title='rustuv::uvll::uv_unref'>uv_unref</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='ffi' href='ffi.uv_walk.html'
+                               title='rustuv::uvll::uv_walk'>uv_walk</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.free_handle.html'
+                               title='rustuv::uvll::free_handle'>free_handle</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.free_req.html'
+                               title='rustuv::uvll::free_req'>free_req</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.get_data_for_req.html'
+                               title='rustuv::uvll::get_data_for_req'>get_data_for_req</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.get_data_for_uv_handle.html'
+                               title='rustuv::uvll::get_data_for_uv_handle'>get_data_for_uv_handle</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.get_data_for_uv_loop.html'
+                               title='rustuv::uvll::get_data_for_uv_loop'>get_data_for_uv_loop</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.get_loop_for_uv_handle.html'
+                               title='rustuv::uvll::get_loop_for_uv_handle'>get_loop_for_uv_handle</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.get_loop_from_fs_req.html'
+                               title='rustuv::uvll::get_loop_from_fs_req'>get_loop_from_fs_req</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.get_loop_from_getaddrinfo_req.html'
+                               title='rustuv::uvll::get_loop_from_getaddrinfo_req'>get_loop_from_getaddrinfo_req</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.get_path_from_fs_req.html'
+                               title='rustuv::uvll::get_path_from_fs_req'>get_path_from_fs_req</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.get_ptr_from_fs_req.html'
+                               title='rustuv::uvll::get_ptr_from_fs_req'>get_ptr_from_fs_req</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.get_result_from_fs_req.html'
+                               title='rustuv::uvll::get_result_from_fs_req'>get_result_from_fs_req</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.get_stream_handle_from_connect_req.html'
+                               title='rustuv::uvll::get_stream_handle_from_connect_req'>get_stream_handle_from_connect_req</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.get_stream_handle_from_write_req.html'
+                               title='rustuv::uvll::get_stream_handle_from_write_req'>get_stream_handle_from_write_req</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.get_udp_handle_from_send_req.html'
+                               title='rustuv::uvll::get_udp_handle_from_send_req'>get_udp_handle_from_send_req</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.guess_handle.html'
+                               title='rustuv::uvll::guess_handle'>guess_handle</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.loop_new.html'
+                               title='rustuv::uvll::loop_new'>loop_new</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.malloc_handle.html'
+                               title='rustuv::uvll::malloc_handle'>malloc_handle</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.malloc_req.html'
+                               title='rustuv::uvll::malloc_req'>malloc_req</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.populate_stat.html'
+                               title='rustuv::uvll::populate_stat'>populate_stat</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.process_pid.html'
+                               title='rustuv::uvll::process_pid'>process_pid</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.set_data_for_req.html'
+                               title='rustuv::uvll::set_data_for_req'>set_data_for_req</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.set_data_for_uv_handle.html'
+                               title='rustuv::uvll::set_data_for_uv_handle'>set_data_for_uv_handle</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.set_data_for_uv_loop.html'
+                               title='rustuv::uvll::set_data_for_uv_loop'>set_data_for_uv_loop</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.set_stdio_container_fd.html'
+                               title='rustuv::uvll::set_stdio_container_fd'>set_stdio_container_fd</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.set_stdio_container_flags.html'
+                               title='rustuv::uvll::set_stdio_container_flags'>set_stdio_container_flags</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.set_stdio_container_stream.html'
+                               title='rustuv::uvll::set_stdio_container_stream'>set_stdio_container_stream</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.uv_udp_send.html'
+                               title='rustuv::uvll::uv_udp_send'>uv_udp_send</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.uv_write.html'
+                               title='rustuv::uvll::uv_write'>uv_write</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                </table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_alloc_cb.html'
+                               title='rustuv::uvll::uv_alloc_cb'>uv_alloc_cb</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_async_cb.html'
+                               title='rustuv::uvll::uv_async_cb'>uv_async_cb</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_async_t.html'
+                               title='rustuv::uvll::uv_async_t'>uv_async_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_buf_len_t.html'
+                               title='rustuv::uvll::uv_buf_len_t'>uv_buf_len_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_close_cb.html'
+                               title='rustuv::uvll::uv_close_cb'>uv_close_cb</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_connect_cb.html'
+                               title='rustuv::uvll::uv_connect_cb'>uv_connect_cb</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_connect_t.html'
+                               title='rustuv::uvll::uv_connect_t'>uv_connect_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_connection_cb.html'
+                               title='rustuv::uvll::uv_connection_cb'>uv_connection_cb</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_connection_t.html'
+                               title='rustuv::uvll::uv_connection_t'>uv_connection_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_exit_cb.html'
+                               title='rustuv::uvll::uv_exit_cb'>uv_exit_cb</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_fs_cb.html'
+                               title='rustuv::uvll::uv_fs_cb'>uv_fs_cb</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_fs_t.html'
+                               title='rustuv::uvll::uv_fs_t'>uv_fs_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_getaddrinfo_cb.html'
+                               title='rustuv::uvll::uv_getaddrinfo_cb'>uv_getaddrinfo_cb</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_getaddrinfo_t.html'
+                               title='rustuv::uvll::uv_getaddrinfo_t'>uv_getaddrinfo_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_gid_t.html'
+                               title='rustuv::uvll::uv_gid_t'>uv_gid_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_handle_t.html'
+                               title='rustuv::uvll::uv_handle_t'>uv_handle_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_idle_cb.html'
+                               title='rustuv::uvll::uv_idle_cb'>uv_idle_cb</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_idle_t.html'
+                               title='rustuv::uvll::uv_idle_t'>uv_idle_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_loop_t.html'
+                               title='rustuv::uvll::uv_loop_t'>uv_loop_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_pipe_t.html'
+                               title='rustuv::uvll::uv_pipe_t'>uv_pipe_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_process_t.html'
+                               title='rustuv::uvll::uv_process_t'>uv_process_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_read_cb.html'
+                               title='rustuv::uvll::uv_read_cb'>uv_read_cb</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_req_t.html'
+                               title='rustuv::uvll::uv_req_t'>uv_req_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_shutdown_cb.html'
+                               title='rustuv::uvll::uv_shutdown_cb'>uv_shutdown_cb</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_shutdown_t.html'
+                               title='rustuv::uvll::uv_shutdown_t'>uv_shutdown_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_signal_cb.html'
+                               title='rustuv::uvll::uv_signal_cb'>uv_signal_cb</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_signal_t.html'
+                               title='rustuv::uvll::uv_signal_t'>uv_signal_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_stream_t.html'
+                               title='rustuv::uvll::uv_stream_t'>uv_stream_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_tcp_t.html'
+                               title='rustuv::uvll::uv_tcp_t'>uv_tcp_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_timer_cb.html'
+                               title='rustuv::uvll::uv_timer_cb'>uv_timer_cb</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_timer_t.html'
+                               title='rustuv::uvll::uv_timer_t'>uv_timer_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_tty_t.html'
+                               title='rustuv::uvll::uv_tty_t'>uv_tty_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_udp_recv_cb.html'
+                               title='rustuv::uvll::uv_udp_recv_cb'>uv_udp_recv_cb</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_udp_send_cb.html'
+                               title='rustuv::uvll::uv_udp_send_cb'>uv_udp_send_cb</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_udp_send_t.html'
+                               title='rustuv::uvll::uv_udp_send_t'>uv_udp_send_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_udp_t.html'
+                               title='rustuv::uvll::uv_udp_t'>uv_udp_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_uid_t.html'
+                               title='rustuv::uvll::uv_uid_t'>uv_uid_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_walk_cb.html'
+                               title='rustuv::uvll::uv_walk_cb'>uv_walk_cb</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_write_cb.html'
+                               title='rustuv::uvll::uv_write_cb'>uv_write_cb</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.uv_write_t.html'
+                               title='rustuv::uvll::uv_write_t'>uv_write_t</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "rustuv";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

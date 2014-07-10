@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The rustdoc library documentation.">
+
+    <title>rustdoc::html::render - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+
+    
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>rustdoc</a>&#8203;::<a href='../index.html'>html</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='../escape/index.html'>escape</a><a class='mod ' href='../format/index.html'>format</a><a class='mod ' href='../highlight/index.html'>highlight</a><a class='mod ' href='../item_type/index.html'>item_type</a><a class='mod ' href='../layout/index.html'>layout</a><a class='mod ' href='../markdown/index.html'>markdown</a><a class='mod current' href='../render/index.html'>render</a><a class='mod ' href='../toc/index.html'>toc</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'>Module <a href='../../index.html'>rustdoc</a>::<a href='../index.html'>html</a>::<a class='mod' href=''>render</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-41135' href='../../../src/rustdoc/Users/aturon/moz/working/stability-dashboard/src/librustdoc/html/render.rs.html#11-2138'>[src]</a></span></h1>
+<div class='docblock'><p>Rustdoc&#39;s HTML Rendering module</p>
+
+<p>This modules contains the bulk of the logic necessary for rendering a
+rustdoc <code>clean::Crate</code> instance to a set of static HTML pages. This
+rendering process is largely driven by the <code>format!</code> syntax extension to
+perform all I/O into files and streams.</p>
+
+<p>The rendering process is largely driven by the <code>Context</code> and <code>Cache</code>
+structures. The cache is pre-populated by crawling the crate in question,
+and then it is shared among the various rendering tasks. The cache is meant
+to be a fairly large structure not implementing <code>Clone</code> (because it&#39;s shared
+among tasks). The context, however, should be a lightweight structure. This
+is cloned per-task and contains information about what is currently being
+rendered.</p>
+
+<p>In order to speed up rendering (mostly because of markdown rendering), the
+rendering process has been parallelized. This parallelization is only
+exposed through the <code>crate</code> method on the context, and then also from the
+fact that the shared cache is stored in TLS (and must be accessed as such).</p>
+
+<p>In addition to rendering the crate itself, this module is also responsible
+for creating the corresponding search index and source file renderings.
+These tasks are not parallelized (they haven&#39;t been a bottleneck yet), and
+both occur before the crate is rendered.</p>
+</div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.Cache.html'
+                               title='rustdoc::html::render::Cache'>Cache</a></td>
+                        <td class='docblock short'><p>This cache is used to store information about the <code>clean::Crate</code> being
+rendered in order to provide more useful documentation. This contains
+information like all implementors of a trait, all traits a type implements,
+documentation for all known traits, etc.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.Context.html'
+                               title='rustdoc::html::render::Context'>Context</a></td>
+                        <td class='docblock short'><p>Major driving force in all rustdoc rendering. This contains information
+about where in the tree-like hierarchy rendering is occurring and controls
+how the current page is being rendered.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.Impl.html'
+                               title='rustdoc::html::render::Impl'>Impl</a></td>
+                        <td class='docblock short'><p>Metadata about implementations for a type.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.Implementor.html'
+                               title='rustdoc::html::render::Implementor'>Implementor</a></td>
+                        <td class='docblock short'><p>Metadata about an implementor of a trait.</p>
+</td>
+                    </tr>
+                </table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='type' href='type.ExternalLocation.html'
+                               title='rustdoc::html::render::ExternalLocation'>ExternalLocation</a></td>
+                        <td class='docblock short'><p>Indicates where an external crate can be found.</p>
+</td>
+                    </tr>
+                </table><h2 id='statics' class='section-header'><a href="#statics">Statics</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><code>pub static cache_key: <a class='type' href='../../../rustrt/local_data/type.Key.html' title='rustrt::local_data::Key'>Key</a>&lt;<a class='struct' href='../../../alloc/arc/struct.Arc.html' title='alloc::arc::Arc'>Arc</a>&lt;<a class='struct' href='../../../rustdoc/html/render/struct.Cache.html' title='rustdoc::html::render::Cache'>Cache</a>&gt;&gt;</code><code> = </code><code>&::std::local_data::Key</code></td>
+                        <td class='docblock'>&nbsp;</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><code>pub static current_location_key: <a class='type' href='../../../rustrt/local_data/type.Key.html' title='rustrt::local_data::Key'>Key</a>&lt;<a class='struct' href='../../../collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../../collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;&gt;</code><code> = </code><code>&::std::local_data::Key</code></td>
+                        <td class='docblock'>&nbsp;</td>
+                    </tr>
+                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.run.html'
+                               title='rustdoc::html::render::run'>run</a></td>
+                        <td class='docblock short'><p>Generates the documentation for <code>crate</code> into the directory <code>dst</code></p>
+</td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "rustdoc";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script async src="../../../search-index.js"></script>
+</body>
+</html>

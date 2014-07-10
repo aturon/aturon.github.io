@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The sync library documentation.">
+
+    <title>sync::spsc_queue::Queue - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../sync/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../index.html'>sync</a>&#8203;::<a href='index.html'>spsc_queue</a></p><div class='block struct'><h2>Structs</h2><a class='struct current' href='struct.Queue.html'>Queue</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'>Struct <a href='../index.html'>sync</a>::<a href='index.html'>spsc_queue</a>::<a class='struct' href=''>Queue</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-633' href='../../src/sync/Users/aturon/moz/working/stability-dashboard/src/libsync/spsc_queue.rs.html#59-74'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Queue&lt;T&gt; {
+    // some fields omitted
+}</pre><div class='docblock'><p>The single-producer single-consumer queue. This structure is not cloneable,
+but it can be safely shared in an Arc if it is guaranteed that there
+is only one popper and one pusher touching the queue at any one point in
+time.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../core/kinds/trait.Send.html' title='core::kinds::Send'>Send</a>&gt; <a class='struct' href='../../sync/spsc_queue/struct.Queue.html' title='sync::spsc_queue::Queue'>Queue</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.new' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.new' class='fnname'>new</a>(bound: <a href='../../core/primitive.uint.html'>uint</a>) -&gt; <a class='struct' href='../../sync/spsc_queue/struct.Queue.html' title='sync::spsc_queue::Queue'>Queue</a>&lt;T&gt;</code></h4>
+<div class='docblock'><p>Creates a new queue. The producer returned is connected to the consumer
+to push all data to the consumer.</p>
+
+<h1 id="arguments" class='section-header'><a
+                           href="#arguments">Arguments</a></h1>
+<ul>
+<li><code>bound</code> - This queue implementation is implemented with a linked
+          list, and this means that a push is always a malloc. In
+          order to amortize this cost, an internal cache of nodes is
+          maintained to prevent a malloc from always being
+          necessary. This bound is the limit on the size of the
+          cache (if desired). If the value is 0, then the cache has
+          no bound. Otherwise, the cache will never grow larger than
+          <code>bound</code> (although the queue itself could be much larger.</li>
+</ul>
+</div><h4 id='method.push' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.push' class='fnname'>push</a>(&amp;self, t: T)</code></h4>
+<div class='docblock'><p>Pushes a new value onto this queue. Note that to use this function
+safely, it must be externally guaranteed that there is only one pusher.</p>
+</div><h4 id='method.pop' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.pop' class='fnname'>pop</a>(&amp;self) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;T&gt;</code></h4>
+<div class='docblock'><p>Attempts to pop a value from this queue. Remember that to use this type
+safely you must ensure that there is only one popper at a time.</p>
+</div><h4 id='method.peek' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.peek' class='fnname'>peek</a>&lt;'a&gt;(&amp;'a self) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;&amp;'a mut T&gt;</code></h4>
+<div class='docblock'><p>Attempts to peek at the head of the queue, returning <code>None</code> if the queue
+has no data currently</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../core/kinds/trait.Send.html' title='core::kinds::Send'>Send</a>&gt; <a class='trait' href='../../core/ops/trait.Drop.html' title='core::ops::Drop'>Drop</a> for <a class='struct' href='../../sync/spsc_queue/struct.Queue.html' title='sync::spsc_queue::Queue'>Queue</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.drop' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.drop' class='fnname'>drop</a>(&amp;mut self)</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "sync";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script src="../../playpen.js"></script>
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

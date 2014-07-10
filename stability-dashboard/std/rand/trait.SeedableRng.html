@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The std library documentation.">
+
+    <title>std::rand::SeedableRng - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../std/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../index.html'>std</a>&#8203;::<a href='index.html'>rand</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='distributions/index.html'>distributions</a><a class='mod ' href='os/index.html'>os</a><a class='mod ' href='reader/index.html'>reader</a><a class='mod ' href='reseeding/index.html'>reseeding</a></div><div class='block struct'><h2>Structs</h2><a class='struct ' href='struct.Closed01.html'>Closed01</a><a class='struct ' href='struct.Isaac64Rng.html'>Isaac64Rng</a><a class='struct ' href='struct.IsaacRng.html'>IsaacRng</a><a class='struct ' href='struct.Open01.html'>Open01</a><a class='struct ' href='struct.OsRng.html'>OsRng</a><a class='struct ' href='struct.StdRng.html'>StdRng</a><a class='struct ' href='struct.TaskRng.html'>TaskRng</a><a class='struct ' href='struct.XorShiftRng.html'>XorShiftRng</a></div><div class='block trait'><h2>Traits</h2><a class='trait ' href='trait.Rand.html'>Rand</a><a class='trait ' href='trait.Rng.html'>Rng</a><a class='trait current' href='trait.SeedableRng.html'>SeedableRng</a></div><div class='block fn'><h2>Functions</h2><a class='fn ' href='fn.random.html'>random</a><a class='fn ' href='fn.sample.html'>sample</a><a class='fn ' href='fn.task_rng.html'>task_rng</a><a class='fn ' href='fn.weak_rng.html'>weak_rng</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content trait">
+<h1 class='fqn'>Trait <a href='../index.html'>std</a>::<a href='index.html'>rand</a>::<a class='trait' href=''>SeedableRng</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-11154' href='../../rand/trait.SeedableRng.html?gotosrc=11154'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait SeedableRng&lt;Seed&gt;: <a class='trait' href='../../std/rand/trait.Rng.html' title='std::rand::Rng'>Rng</a> {
+    fn <a href='#tymethod.reseed' class='fnname'>reseed</a>&lt;Seed&gt;(&amp;mut self, Seed);
+    fn <a href='#tymethod.from_seed' class='fnname'>from_seed</a>&lt;Seed&gt;(seed: Seed) -&gt; Self;
+}</pre><div class='docblock'><p>A random number generator that can be explicitly seeded to produce
+the same stream of randomness multiple times.</p>
+</div>
+            <h2 id='required-methods'>Required Methods</h2>
+            <div class='methods'>
+        <h3 id='tymethod.reseed' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.reseed' class='fnname'>reseed</a>&lt;Seed&gt;(&amp;mut self, Seed)</code></h3><div class='docblock'><p>Reseed an RNG with the given seed.</p>
+
+<h1 id="example" class='section-header'><a
+                           href="#example">Example</a></h1><span id='rust-example-raw-0' class='rusttest'>fn main() {
+    use std::rand::{Rng, SeedableRng, StdRng};
+    
+    let mut rng: StdRng = SeedableRng::from_seed(&amp;[1, 2, 3, 4]);
+    println!(&quot;{}&quot;, rng.gen::&lt;f64&gt;());
+    rng.reseed([5, 6, 7, 8]);
+    println!(&quot;{}&quot;, rng.gen::&lt;f64&gt;());
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rand</span>::{<span class='ident'>Rng</span>, <span class='ident'>SeedableRng</span>, <span class='ident'>StdRng</span>};
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>rng</span>: <span class='ident'>StdRng</span> <span class='op'>=</span> <span class='ident'>SeedableRng</span>::<span class='ident'>from_seed</span>(<span class='kw-2'>&amp;</span>[<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>]);
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>rng</span>.<span class='ident'>gen</span>::<span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>());
+<span class='ident'>rng</span>.<span class='ident'>reseed</span>([<span class='number'>5</span>, <span class='number'>6</span>, <span class='number'>7</span>, <span class='number'>8</span>]);
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>rng</span>.<span class='ident'>gen</span>::<span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>());
+</pre>
+</div><h3 id='tymethod.from_seed' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.from_seed' class='fnname'>from_seed</a>&lt;Seed&gt;(seed: Seed) -&gt; Self</code></h3><div class='docblock'><p>Create a new RNG with the given seed.</p>
+
+<h1 id="example-1" class='section-header'><a
+                           href="#example-1">Example</a></h1><span id='rust-example-raw-1' class='rusttest'>fn main() {
+    use std::rand::{Rng, SeedableRng, StdRng};
+    
+    let mut rng: StdRng = SeedableRng::from_seed(&amp;[1, 2, 3, 4]);
+    println!(&quot;{}&quot;, rng.gen::&lt;f64&gt;());
+}</span><pre id='rust-example-rendered-1' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rand</span>::{<span class='ident'>Rng</span>, <span class='ident'>SeedableRng</span>, <span class='ident'>StdRng</span>};
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>rng</span>: <span class='ident'>StdRng</span> <span class='op'>=</span> <span class='ident'>SeedableRng</span>::<span class='ident'>from_seed</span>(<span class='kw-2'>&amp;</span>[<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>]);
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>rng</span>.<span class='ident'>gen</span>::<span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span>());
+</pre>
+</div></div>
+        <h2 id='implementors'>Implementors</h2>
+        <ul class='item-list' id='implementors-list'>
+    <li><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a&gt; <a class='trait' href='../../std/rand/trait.SeedableRng.html' title='std::rand::SeedableRng'>SeedableRng</a>&lt;&amp;'a <a href='../primitive.slice.html'>[<a href='../primitive.uint.html'>uint</a>]</a>&gt; for <a class='struct' href='../../std/rand/struct.StdRng.html' title='std::rand::StdRng'>StdRng</a></code></li>
+<li><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a&gt; <a class='trait' href='../../std/rand/trait.SeedableRng.html' title='std::rand::SeedableRng'>SeedableRng</a>&lt;&amp;'a <a href='../primitive.slice.html'>[<a href='../primitive.u32.html'>u32</a>]</a>&gt; for <a class='struct' href='../../std/rand/struct.IsaacRng.html' title='std::rand::IsaacRng'>IsaacRng</a></code></li>
+<li><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a&gt; <a class='trait' href='../../std/rand/trait.SeedableRng.html' title='std::rand::SeedableRng'>SeedableRng</a>&lt;&amp;'a <a href='../primitive.slice.html'>[<a href='../primitive.u64.html'>u64</a>]</a>&gt; for <a class='struct' href='../../std/rand/struct.Isaac64Rng.html' title='std::rand::Isaac64Rng'>Isaac64Rng</a></code></li>
+<li><a class='stability Experimental' title='Experimental'></a><code>impl&lt;S, R: <a class='trait' href='../../std/rand/trait.SeedableRng.html' title='std::rand::SeedableRng'>SeedableRng</a>&lt;S&gt;, Rsdr: <a class='trait' href='../../std/rand/reseeding/trait.Reseeder.html' title='std::rand::reseeding::Reseeder'>Reseeder</a>&lt;R&gt; + <a class='trait' href='../../std/default/trait.Default.html' title='std::default::Default'>Default</a>&gt; <a class='trait' href='../../std/rand/trait.SeedableRng.html' title='std::rand::SeedableRng'>SeedableRng</a>&lt;<a href='../primitive.tuple.html'>(Rsdr, S)</a>&gt; for <a class='struct' href='../../std/rand/reseeding/struct.ReseedingRng.html' title='std::rand::reseeding::ReseedingRng'>ReseedingRng</a>&lt;R, Rsdr&gt;</code></li>
+<li><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../std/rand/trait.SeedableRng.html' title='std::rand::SeedableRng'>SeedableRng</a>&lt;<a href='../primitive.slice.html'>[<a href='../primitive.u32.html'>u32</a>, ..4]</a>&gt; for <a class='struct' href='../../std/rand/struct.XorShiftRng.html' title='std::rand::XorShiftRng'>XorShiftRng</a></code></li>
+</ul><script type="text/javascript" async
+                              src="../../implementors/rand/trait.SeedableRng.js">
+                      </script></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "std";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script src="../../playpen.js"></script>
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

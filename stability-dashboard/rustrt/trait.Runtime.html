@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The rustrt library documentation.">
+
+    <title>rustrt::Runtime - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../rustrt/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='index.html'>rustrt</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='args/index.html'>args</a><a class='mod ' href='bookkeeping/index.html'>bookkeeping</a><a class='mod ' href='c_str/index.html'>c_str</a><a class='mod ' href='exclusive/index.html'>exclusive</a><a class='mod ' href='local/index.html'>local</a><a class='mod ' href='local_data/index.html'>local_data</a><a class='mod ' href='local_heap/index.html'>local_heap</a><a class='mod ' href='mutex/index.html'>mutex</a><a class='mod ' href='rtio/index.html'>rtio</a><a class='mod ' href='stack/index.html'>stack</a><a class='mod ' href='task/index.html'>task</a><a class='mod ' href='thread/index.html'>thread</a><a class='mod ' href='unwind/index.html'>unwind</a></div><div class='block struct'><h2>Structs</h2><a class='struct ' href='struct.Stdio.html'>Stdio</a></div><div class='block trait'><h2>Traits</h2><a class='trait current' href='trait.Runtime.html'>Runtime</a></div><div class='block fn'><h2>Functions</h2><a class='fn ' href='fn.at_exit.html'>at_exit</a><a class='fn ' href='fn.cleanup.html'>cleanup</a><a class='fn ' href='fn.init.html'>init</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content trait">
+<h1 class='fqn'>Trait <a href='index.html'>rustrt</a>::<a class='trait' href=''>Runtime</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-14757' href='../src/rustrt/Users/aturon/moz/working/stability-dashboard/src/librustrt/lib.rs.html#74-96'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait Runtime {
+    fn <a href='#tymethod.yield_now' class='fnname'>yield_now</a>(~self, cur_task: <a class='struct' href='../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../rustrt/task/struct.Task.html' title='rustrt::task::Task'>Task</a>&gt;);
+    fn <a href='#tymethod.maybe_yield' class='fnname'>maybe_yield</a>(~self, cur_task: <a class='struct' href='../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../rustrt/task/struct.Task.html' title='rustrt::task::Task'>Task</a>&gt;);
+    fn <a href='#tymethod.deschedule' class='fnname'>deschedule</a>(~self, times: <a href='../core/primitive.uint.html'>uint</a>, cur_task: <a class='struct' href='../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../rustrt/task/struct.Task.html' title='rustrt::task::Task'>Task</a>&gt;, f: |<a class='type' href='../rustrt/task/type.BlockedTask.html' title='rustrt::task::BlockedTask'>BlockedTask</a>| -&gt; <a class='type' href='../core/result/type.Result.html' title='core::result::Result'>Result</a>&lt;(), <a class='type' href='../rustrt/task/type.BlockedTask.html' title='rustrt::task::BlockedTask'>BlockedTask</a>&gt;);
+    fn <a href='#tymethod.reawaken' class='fnname'>reawaken</a>(~self, to_wake: <a class='struct' href='../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../rustrt/task/struct.Task.html' title='rustrt::task::Task'>Task</a>&gt;);
+    fn <a href='#tymethod.spawn_sibling' class='fnname'>spawn_sibling</a>(~self, cur_task: <a class='struct' href='../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../rustrt/task/struct.Task.html' title='rustrt::task::Task'>Task</a>&gt;, opts: <a class='struct' href='../rustrt/task/struct.TaskOpts.html' title='rustrt::task::TaskOpts'>TaskOpts</a>, f: proc(): <a class='trait' href='../core/kinds/trait.Send.html' title='core::kinds::Send'>Send</a>);
+    fn <a href='#tymethod.local_io' class='fnname'>local_io</a>&lt;'a&gt;(&amp;'a mut self) -&gt; <a class='type' href='../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../rustrt/rtio/struct.LocalIo.html' title='rustrt::rtio::LocalIo'>LocalIo</a>&lt;'a&gt;&gt;;
+    fn <a href='#tymethod.stack_bounds' class='fnname'>stack_bounds</a>(&amp;self) -&gt; <a href='../core/primitive.tuple.html'>(<a href='../core/primitive.uint.html'>uint</a>, <a href='../core/primitive.uint.html'>uint</a>)</a>;
+    fn <a href='#tymethod.can_block' class='fnname'>can_block</a>(&amp;self) -&gt; <a href='../core/primitive.bool.html'>bool</a>;
+    fn <a href='#tymethod.wrap' class='fnname'>wrap</a>(~self) -&gt; <a class='struct' href='../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='trait' href='../core/any/trait.Any.html' title='core::any::Any'>Any</a>&gt;;
+}</pre><div class='docblock'><p>The interface to the current runtime.</p>
+
+<p>This trait is used as the abstraction between 1:1 and M:N scheduling. The
+two independent crates, libnative and libgreen, both have objects which
+implement this trait. The goal of this trait is to encompass all the
+fundamental differences in functionality between the 1:1 and M:N runtime
+modes.</p>
+</div>
+            <h2 id='required-methods'>Required Methods</h2>
+            <div class='methods'>
+        <h3 id='tymethod.yield_now' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.yield_now' class='fnname'>yield_now</a>(~self, cur_task: <a class='struct' href='../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../rustrt/task/struct.Task.html' title='rustrt::task::Task'>Task</a>&gt;)</code></h3><h3 id='tymethod.maybe_yield' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.maybe_yield' class='fnname'>maybe_yield</a>(~self, cur_task: <a class='struct' href='../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../rustrt/task/struct.Task.html' title='rustrt::task::Task'>Task</a>&gt;)</code></h3><h3 id='tymethod.deschedule' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.deschedule' class='fnname'>deschedule</a>(~self, times: <a href='../core/primitive.uint.html'>uint</a>, cur_task: <a class='struct' href='../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../rustrt/task/struct.Task.html' title='rustrt::task::Task'>Task</a>&gt;, f: |<a class='type' href='../rustrt/task/type.BlockedTask.html' title='rustrt::task::BlockedTask'>BlockedTask</a>| -&gt; <a class='type' href='../core/result/type.Result.html' title='core::result::Result'>Result</a>&lt;(), <a class='type' href='../rustrt/task/type.BlockedTask.html' title='rustrt::task::BlockedTask'>BlockedTask</a>&gt;)</code></h3><h3 id='tymethod.reawaken' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.reawaken' class='fnname'>reawaken</a>(~self, to_wake: <a class='struct' href='../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../rustrt/task/struct.Task.html' title='rustrt::task::Task'>Task</a>&gt;)</code></h3><h3 id='tymethod.spawn_sibling' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.spawn_sibling' class='fnname'>spawn_sibling</a>(~self, cur_task: <a class='struct' href='../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='struct' href='../rustrt/task/struct.Task.html' title='rustrt::task::Task'>Task</a>&gt;, opts: <a class='struct' href='../rustrt/task/struct.TaskOpts.html' title='rustrt::task::TaskOpts'>TaskOpts</a>, f: proc(): <a class='trait' href='../core/kinds/trait.Send.html' title='core::kinds::Send'>Send</a>)</code></h3><h3 id='tymethod.local_io' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.local_io' class='fnname'>local_io</a>&lt;'a&gt;(&amp;'a mut self) -&gt; <a class='type' href='../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../rustrt/rtio/struct.LocalIo.html' title='rustrt::rtio::LocalIo'>LocalIo</a>&lt;'a&gt;&gt;</code></h3><h3 id='tymethod.stack_bounds' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.stack_bounds' class='fnname'>stack_bounds</a>(&amp;self) -&gt; <a href='../core/primitive.tuple.html'>(<a href='../core/primitive.uint.html'>uint</a>, <a href='../core/primitive.uint.html'>uint</a>)</a></code></h3><div class='docblock'><p>The (low, high) edges of the current stack.</p>
+</div><h3 id='tymethod.can_block' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.can_block' class='fnname'>can_block</a>(&amp;self) -&gt; <a href='../core/primitive.bool.html'>bool</a></code></h3><h3 id='tymethod.wrap' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.wrap' class='fnname'>wrap</a>(~self) -&gt; <a class='struct' href='../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='trait' href='../core/any/trait.Any.html' title='core::any::Any'>Any</a>&gt;</code></h3></div>
+        <h2 id='implementors'>Implementors</h2>
+        <ul class='item-list' id='implementors-list'>
+    </ul><script type="text/javascript" async
+                              src="../implementors/rustrt/trait.Runtime.js">
+                      </script></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "rustrt";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script async src="../search-index.js"></script>
+</body>
+</html>

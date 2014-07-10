@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The sync library documentation.">
+
+    <title>sync::one::Once - Rust</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../sync/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../index.html'>sync</a>&#8203;::<a href='index.html'>one</a></p><div class='block struct'><h2>Structs</h2><a class='struct current' href='struct.Once.html'>Once</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'>Struct <a href='../index.html'>sync</a>::<a href='index.html'>one</a>::<a class='struct' href=''>Once</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-7645' href='../../src/sync/Users/aturon/moz/working/stability-dashboard/src/libsync/one.rs.html#41-45'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Once {
+    // some fields omitted
+}</pre><div class='docblock'><p>A synchronization primitive which can be used to run a one-time global
+initialization. Useful for one-time initialization for FFI or related
+functionality. This type can only be constructed with the <code>ONCE_INIT</code>
+value.</p>
+
+<h1 id="example" class='section-header'><a
+                           href="#example">Example</a></h1><span id='rust-example-raw-0' class='rusttest'>extern crate sync;
+fn main() {
+    use sync::one::{Once, ONCE_INIT};
+    
+    static mut START: Once = ONCE_INIT;
+    
+    unsafe {
+        START.doit(|| {
+            // run initialization here
+        });
+    }
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='kw'>use</span> <span class='ident'>sync</span>::<span class='ident'>one</span>::{<span class='ident'>Once</span>, <span class='ident'>ONCE_INIT</span>};
+
+<span class='kw'>static</span> <span class='kw-2'>mut</span> <span class='ident'>START</span>: <span class='ident'>Once</span> <span class='op'>=</span> <span class='ident'>ONCE_INIT</span>;
+
+<span class='kw'>unsafe</span> {
+    <span class='ident'>START</span>.<span class='ident'>doit</span>(<span class='op'>||</span> {<span class='comment'>
+        // run initialization here
+    </span>});
+}
+</pre>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='struct' href='../../sync/one/struct.Once.html' title='sync::one::Once'>Once</a></code></h3><div class='impl-methods'><h4 id='method.doit' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.doit' class='fnname'>doit</a>(&amp;self, f: ||)</code></h4>
+<div class='docblock'><p>Perform an initialization routine once and only once. The given closure
+will be executed if this is the first time <code>doit</code> has been called, and
+otherwise the routine will <em>not</em> be invoked.</p>
+
+<p>This method will block the calling task if another initialization
+routine is currently running.</p>
+
+<p>When this function returns, it is guaranteed that some initialization
+has run and completed (it may not be the closure specified).</p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "sync";
+        window.playgroundUrl = "http://play.rust-lang.org/";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script src="../../playpen.js"></script>
+    <script async src="../../search-index.js"></script>
+</body>
+</html>
