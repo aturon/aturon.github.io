@@ -7,8 +7,6 @@
 
     <title>regex - Rust</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -41,7 +39,7 @@
     </nav>
 
     <section id='main' class="content mod">
-<h1 class='fqn'>Crate <a class='mod' href=''>regex</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a href='stability.html'>[stability dashboard]</a> <a id='src-0' href='../src/regex/Users/aturon/moz/working/stability-dashboard/src/libregex/lib.rs.html#11-427'>[src]</a></span></h1>
+<h1 class='fqn'>Crate <a class='mod' href=''>regex</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a href='stability.html'>[stability dashboard]</a> <a id='src-0' href='../src/regex/Users/aturon/moz/working/stability-dashboard/src/libregex/lib.rs.html#11-433'>[src]</a></span></h1>
 <div class='docblock'><p>This crate provides a native implementation of regular expressions that is
 heavily based on RE2 both in syntax and in implementation. Notably,
 backreferences and arbitrary lookahead/lookbehind assertions are not
@@ -157,12 +155,12 @@ for cap in re.captures_iter(text) {
 <span class='kw'>let</span> <span class='ident'>text</span> <span class='op'>=</span> <span class='string'>&quot;2012-03-14, 2013-01-01 and 2014-07-05&quot;</span>;
 <span class='kw'>for</span> <span class='ident'>cap</span> <span class='kw'>in</span> <span class='ident'>re</span>.<span class='ident'>captures_iter</span>(<span class='ident'>text</span>) {
     <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Month: {} Day: {} Year: {}&quot;</span>, <span class='ident'>cap</span>.<span class='ident'>at</span>(<span class='number'>2</span>), <span class='ident'>cap</span>.<span class='ident'>at</span>(<span class='number'>3</span>), <span class='ident'>cap</span>.<span class='ident'>at</span>(<span class='number'>1</span>));
-}<span class='comment'>
-// Output:
-// Month: 03 Day: 14 Year: 2012
-// Month: 01 Day: 01 Year: 2013
-// Month: 07 Day: 05 Year: 2014
-</span></pre>
+}
+<span class='comment'>// Output:</span>
+<span class='comment'>// Month: 03 Day: 14 Year: 2012</span>
+<span class='comment'>// Month: 01 Day: 01 Year: 2013</span>
+<span class='comment'>// Month: 07 Day: 05 Year: 2014</span>
+</pre>
 
 <p>Notice that the year is in the capture group indexed at <code>1</code>. This is
 because the <em>entire match</em> is stored in the capture group at index <code>0</code>.</p>
@@ -366,12 +364,15 @@ assert_eq!(cap.at(0), &quot;AaAaAbb&quot;);
 
 <h2 id="perl-character-classes-(unicode-friendly)" class='section-header'><a
                            href="#perl-character-classes-(unicode-friendly)">Perl character classes (Unicode friendly)</a></h2>
+<p>These classes are based on the definitions provided in
+<a href="http://www.unicode.org/reports/tr18/#Compatibility_Properties">UTS#18</a>:</p>
+
 <pre class="rust">
-\d     digit ([0-9] + \p{Nd})
+\d     digit (\p{Nd})
 \D     not digit
-\s     whitespace ([\t\n\f\r ] + \p{Z})
+\s     whitespace (\p{White_Space})
 \S     not whitespace
-\w     word character ([0-9A-Za-z_] + \p{L})
+\w     word character (\p{Alphabetic} + \p{M} + \d + \p{Pc} + \p{Join_Control})
 \W     not word character
 </pre>
 

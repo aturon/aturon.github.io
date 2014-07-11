@@ -7,8 +7,6 @@
 
     <title>libc_heap.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -89,28 +87,28 @@
 <span id='47'>47</span>
 <span id='48'>48</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2012 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2012 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
 
-</span><span class='doccomment'>//! The global (exchange) heap.</span>
+<span class='doccomment'>//! The global (exchange) heap.</span>
 
 <span class='kw'>use</span> <span class='ident'>libc</span>::{<span class='ident'>c_void</span>, <span class='ident'>size_t</span>, <span class='ident'>free</span>, <span class='ident'>malloc</span>, <span class='ident'>realloc</span>};
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>ptr</span>::{<span class='ident'>RawPtr</span>, <span class='ident'>mut_null</span>};
 
 <span class='doccomment'>/// A wrapper around libc::malloc, aborting on out-of-memory</span>
 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-<span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>malloc_raw</span>(<span class='ident'>size</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span> {<span class='comment'>
-    // `malloc(0)` may allocate, but it may also return a null pointer
-    // http://pubs.opengroup.org/onlinepubs/9699919799/functions/malloc.html
-    </span><span class='kw'>if</span> <span class='ident'>size</span> <span class='op'>==</span> <span class='number'>0</span> {
+<span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>malloc_raw</span>(<span class='ident'>size</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span> {
+    <span class='comment'>// `malloc(0)` may allocate, but it may also return a null pointer</span>
+    <span class='comment'>// http://pubs.opengroup.org/onlinepubs/9699919799/functions/malloc.html</span>
+    <span class='kw'>if</span> <span class='ident'>size</span> <span class='op'>==</span> <span class='number'>0</span> {
         <span class='ident'>mut_null</span>()
     } <span class='kw'>else</span> {
         <span class='kw'>let</span> <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>malloc</span>(<span class='ident'>size</span> <span class='kw'>as</span> <span class='ident'>size_t</span>);
@@ -123,10 +121,10 @@
 
 <span class='doccomment'>/// A wrapper around libc::realloc, aborting on out-of-memory</span>
 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-<span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>realloc_raw</span>(<span class='ident'>ptr</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span>, <span class='ident'>size</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span> {<span class='comment'>
-    // `realloc(ptr, 0)` may allocate, but it may also return a null pointer
-    // http://pubs.opengroup.org/onlinepubs/9699919799/functions/realloc.html
-    </span><span class='kw'>if</span> <span class='ident'>size</span> <span class='op'>==</span> <span class='number'>0</span> {
+<span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>realloc_raw</span>(<span class='ident'>ptr</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span>, <span class='ident'>size</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span> {
+    <span class='comment'>// `realloc(ptr, 0)` may allocate, but it may also return a null pointer</span>
+    <span class='comment'>// http://pubs.opengroup.org/onlinepubs/9699919799/functions/realloc.html</span>
+    <span class='kw'>if</span> <span class='ident'>size</span> <span class='op'>==</span> <span class='number'>0</span> {
         <span class='ident'>free</span>(<span class='ident'>ptr</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>c_void</span>);
         <span class='ident'>mut_null</span>()
     } <span class='kw'>else</span> {

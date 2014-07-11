@@ -8,8 +8,6 @@
     <link rel="stylesheet" type="text/css" href="rust.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
-<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400'
-        rel='stylesheet' type='text/css'>
 
 
 </head>
@@ -23,9 +21,9 @@
 
     <div id="versioninfo">
   <img src="http://www.rust-lang.org/logos/rust-logo-32x32-blk.png" width="32" height="32" alt><br>
-  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.11.0-pre</span><br>
-  <a href="http://github.com/rust-lang/rust/commit/169c988d09a9d4e46de2b7fead9489e94964c7c7"
-    class="hash white-sticker">169c988d</a>
+  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.11.0</span><br>
+  <a href="http://github.com/rust-lang/rust/commit/305cf1f1098dc87e346003e6bf7e7cca5705a135"
+    class="hash white-sticker">305cf1f1</a>
 </div>
 
 
@@ -122,16 +120,16 @@ closure in the new task.</p>
     
     spawn(proc() println!(&quot;I am also running in a different task!&quot;) );
 }</span><pre id='rust-example-rendered-0' class='rust '>
-<span class='comment'>
-// Print something profound in a different task using a named function
-</span><span class='kw'>fn</span> <span class='ident'>print_message</span>() { <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;I am running in a different task!&quot;</span>); }
-<span class='ident'>spawn</span>(<span class='ident'>print_message</span>);<span class='comment'>
 
-// Print something profound in a different task using a `proc` expression
-// The `proc` expression evaluates to an (unnamed) owned closure.
-// That closure will call `println!(...)` when the spawned task runs.
+<span class='comment'>// Print something profound in a different task using a named function</span>
+<span class='kw'>fn</span> <span class='ident'>print_message</span>() { <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;I am running in a different task!&quot;</span>); }
+<span class='ident'>spawn</span>(<span class='ident'>print_message</span>);
 
-</span><span class='ident'>spawn</span>(<span class='kw'>proc</span>() <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;I am also running in a different task!&quot;</span>) );
+<span class='comment'>// Print something profound in a different task using a `proc` expression</span>
+<span class='comment'>// The `proc` expression evaluates to an (unnamed) owned closure.</span>
+<span class='comment'>// That closure will call `println!(...)` when the spawned task runs.</span>
+
+<span class='ident'>spawn</span>(<span class='kw'>proc</span>() <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;I am also running in a different task!&quot;</span>) );
 </pre>
 
 <p>In Rust, there is nothing special about creating tasks: a task is not a
@@ -157,12 +155,12 @@ an environment that it carries across tasks.</p>
         println!(&quot;I am child number {}&quot;, child_task_number);
     });
 }</span><pre id='rust-example-rendered-1' class='rust '>
-<span class='comment'>// Generate some state locally
-</span><span class='kw'>let</span> <span class='ident'>child_task_number</span> <span class='op'>=</span> <span class='ident'>generate_task_number</span>();
+<span class='comment'>// Generate some state locally</span>
+<span class='kw'>let</span> <span class='ident'>child_task_number</span> <span class='op'>=</span> <span class='ident'>generate_task_number</span>();
 
-<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {<span class='comment'>
-    // Capture it in the remote task
-    </span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;I am child number {}&quot;</span>, <span class='ident'>child_task_number</span>);
+<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+    <span class='comment'>// Capture it in the remote task</span>
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;I am child number {}&quot;</span>, <span class='ident'>child_task_number</span>);
 });
 </pre>
 
@@ -281,11 +279,11 @@ results across a number of tasks? The following program is ill-typed:</p>
 
 <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
     <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='ident'>some_expensive_computation</span>());
-});<span class='comment'>
+});
 
-// ERROR! The previous spawn statement already owns the sender,
-// so the compiler will not allow it to be captured again
-</span><span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+<span class='comment'>// ERROR! The previous spawn statement already owns the sender,</span>
+<span class='comment'>// so the compiler will not allow it to be captured again</span>
+<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
     <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='ident'>some_expensive_computation</span>());
 });
 </pre>
@@ -307,9 +305,9 @@ results across a number of tasks? The following program is ill-typed:</p>
 }</span><pre id='rust-example-rendered-7' class='rust '>
 <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
 
-<span class='kw'>for</span> <span class='ident'>init_val</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>3</span>) {<span class='comment'>
-    // Create a new channel handle to distribute to the child task
-    </span><span class='kw'>let</span> <span class='ident'>child_tx</span> <span class='op'>=</span> <span class='ident'>tx</span>.<span class='ident'>clone</span>();
+<span class='kw'>for</span> <span class='ident'>init_val</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>3</span>) {
+    <span class='comment'>// Create a new channel handle to distribute to the child task</span>
+    <span class='kw'>let</span> <span class='ident'>child_tx</span> <span class='op'>=</span> <span class='ident'>tx</span>.<span class='ident'>clone</span>();
     <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
         <span class='ident'>child_tx</span>.<span class='ident'>send</span>(<span class='ident'>some_expensive_computation</span>(<span class='ident'>init_val</span>));
     });
@@ -344,18 +342,18 @@ might look like the example below.</p>
     let result = rxs.iter().fold(0, |accum, rx| accum + rx.recv() );
     fn some_expensive_computation(_i: uint) -&gt; int { 42 }
 }</span><pre id='rust-example-rendered-8' class='rust '>
-<span class='comment'>
-// Create a vector of ports, one for each child task
-</span><span class='kw'>let</span> <span class='ident'>rxs</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>from_fn</span>(<span class='number'>3</span>, <span class='op'>|</span><span class='ident'>init_val</span><span class='op'>|</span> {
+
+<span class='comment'>// Create a vector of ports, one for each child task</span>
+<span class='kw'>let</span> <span class='ident'>rxs</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>from_fn</span>(<span class='number'>3</span>, <span class='op'>|</span><span class='ident'>init_val</span><span class='op'>|</span> {
     <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
     <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
         <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='ident'>some_expensive_computation</span>(<span class='ident'>init_val</span>));
     });
     <span class='ident'>rx</span>
-});<span class='comment'>
+});
 
-// Wait on each port, accumulating the results
-</span><span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>rxs</span>.<span class='ident'>iter</span>().<span class='ident'>fold</span>(<span class='number'>0</span>, <span class='op'>|</span><span class='ident'>accum</span>, <span class='ident'>rx</span><span class='op'>|</span> <span class='ident'>accum</span> <span class='op'>+</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>() );
+<span class='comment'>// Wait on each port, accumulating the results</span>
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>rxs</span>.<span class='ident'>iter</span>().<span class='ident'>fold</span>(<span class='number'>0</span>, <span class='op'>|</span><span class='ident'>accum</span>, <span class='ident'>rx</span><span class='op'>|</span> <span class='ident'>accum</span> <span class='op'>+</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>() );
 </pre>
 
 <h2 id="backgrounding-computations:-futures" class='section-header'><a
@@ -379,9 +377,9 @@ println!(&quot;fib(50) = {}&quot;, delayed_fib.get())
 }</span><pre id='rust-example-rendered-9' class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>Future</span>;
 
-<span class='kw'>fn</span> <span class='ident'>fib</span>(<span class='ident'>n</span>: <span class='ident'>u64</span>) <span class='op'>-&gt;</span> <span class='ident'>u64</span> {<span class='comment'>
-    // lengthy computation returning an uint
-    </span><span class='number'>12586269025</span>
+<span class='kw'>fn</span> <span class='ident'>fib</span>(<span class='ident'>n</span>: <span class='ident'>u64</span>) <span class='op'>-&gt;</span> <span class='ident'>u64</span> {
+    <span class='comment'>// lengthy computation returning an uint</span>
+    <span class='number'>12586269025</span>
 }
 
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>delayed_fib</span> <span class='op'>=</span> <span class='ident'>Future</span>::<span class='ident'>spawn</span>(<span class='kw'>proc</span>() <span class='ident'>fib</span>(<span class='number'>50</span>));
@@ -516,9 +514,9 @@ spawn(proc() {
 });
 }</span><pre id='rust-example-rendered-13' class='rust '>
 <span class='kw'>let</span> <span class='ident'>task_numbers</span> <span class='op'>=</span> <span class='ident'>numbers_arc</span>.<span class='ident'>clone</span>();
-<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {<span class='comment'>
-    // Capture task_numbers and use it as if it was the underlying vector
-    </span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}-norm = {}&quot;</span>, <span class='ident'>num</span>, <span class='ident'>pnorm</span>(<span class='ident'>task_numbers</span>.<span class='ident'>as_slice</span>(), <span class='ident'>num</span>));
+<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+    <span class='comment'>// Capture task_numbers and use it as if it was the underlying vector</span>
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}-norm = {}&quot;</span>, <span class='ident'>num</span>, <span class='ident'>pnorm</span>(<span class='ident'>task_numbers</span>.<span class='ident'>as_slice</span>(), <span class='ident'>num</span>));
 });
 </pre>
 
@@ -610,7 +608,7 @@ fn stringifier(channel: &amp;DuplexStream&lt;String, uint&gt;) {
     let mut value: uint;
     loop {
         value = channel.recv();
-        channel.send(value.to_str());
+        channel.send(value.to_string());
         if value == 0 { break; }
     }
 }
@@ -622,7 +620,7 @@ fn stringifier(channel: &amp;DuplexStream&lt;String, uint&gt;) {
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>value</span>: <span class='ident'>uint</span>;
     <span class='kw'>loop</span> {
         <span class='ident'>value</span> <span class='op'>=</span> <span class='ident'>channel</span>.<span class='ident'>recv</span>();
-        <span class='ident'>channel</span>.<span class='ident'>send</span>(<span class='ident'>value</span>.<span class='ident'>to_str</span>());
+        <span class='ident'>channel</span>.<span class='ident'>send</span>(<span class='ident'>value</span>.<span class='ident'>to_string</span>());
         <span class='kw'>if</span> <span class='ident'>value</span> <span class='op'>==</span> <span class='number'>0</span> { <span class='kw'>break</span>; }
     }
 }
@@ -634,7 +632,7 @@ send strings (the first type parameter) and receive <code>uint</code> messages
 (the second type parameter). The body itself simply loops, reading
 from the channel and then sending its response back.  The actual
 response itself is simply the stringified version of the received value,
-<code>uint::to_str(value)</code>.</p>
+<code>uint::to_string(value)</code>.</p>
 
 <p>Here is the code for the parent task:</p>
 <span id='rust-example-raw-16' class='rusttest'>#![allow(deprecated)]
@@ -646,7 +644,7 @@ fn stringifier(channel: &amp;DuplexStream&lt;String, uint&gt;) {
     let mut value: uint;
     loop {
         value = channel.recv();
-        channel.send(value.to_str());
+        channel.send(value.to_string());
         if value == 0u { break; }
     }
 }

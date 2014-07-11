@@ -7,8 +7,6 @@
 
     <title>green - Rust</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -41,7 +39,7 @@
     </nav>
 
     <section id='main' class="content mod">
-<h1 class='fqn'>Crate <a class='mod' href=''>green</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a href='stability.html'>[stability dashboard]</a> <a id='src-0' href='../src/green/Users/aturon/moz/working/stability-dashboard/src/libgreen/lib.rs.html#11-622'>[src]</a></span></h1>
+<h1 class='fqn'>Crate <a class='mod' href=''>green</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a href='stability.html'>[stability dashboard]</a> <a id='src-0' href='../src/green/Users/aturon/moz/working/stability-dashboard/src/libgreen/lib.rs.html#11-620'>[src]</a></span></h1>
 <div class='docblock'><p>The &quot;green scheduling&quot; library</p>
 
 <p>This library provides M:N threading for rust programs. Internally this has
@@ -161,9 +159,9 @@ fn main() {
     <span class='ident'>green</span>::<span class='ident'>start</span>(<span class='ident'>argc</span>, <span class='ident'>argv</span>, <span class='ident'>green</span>::<span class='ident'>basic</span>::<span class='ident'>event_loop</span>, <span class='ident'>main</span>)
 }
 
-<span class='kw'>fn</span> <span class='ident'>main</span>() {<span class='comment'>
-    // this code is running in a pool of schedulers
-</span>}
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='comment'>// this code is running in a pool of schedulers</span>
+}
 </pre>
 
 <blockquote>
@@ -191,9 +189,9 @@ fn main() {
     <span class='ident'>green</span>::<span class='ident'>start</span>(<span class='ident'>argc</span>, <span class='ident'>argv</span>, <span class='ident'>rustuv</span>::<span class='ident'>event_loop</span>, <span class='ident'>main</span>)
 }
 
-<span class='kw'>fn</span> <span class='ident'>main</span>() {<span class='comment'>
-    // this code is running in a pool of schedulers all powered by libuv
-</span>}
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='comment'>// this code is running in a pool of schedulers all powered by libuv</span>
+}
 </pre>
 
 <p>The above code can also be shortened with a macro from libgreen.</p>
@@ -210,9 +208,9 @@ fn main() {
 
 <span class='macro'>green_start</span><span class='macro'>!</span>(<span class='ident'>main</span>)
 
-<span class='kw'>fn</span> <span class='ident'>main</span>() {<span class='comment'>
-    // run inside of a green pool
-</span>}
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='comment'>// run inside of a green pool</span>
+}
 </pre>
 
 <h1 id="using-a-scheduler-pool" class='section-header'><a
@@ -258,33 +256,33 @@ fn main() {
 <span class='kw'>use</span> <span class='ident'>green</span>::{<span class='ident'>SchedPool</span>, <span class='ident'>PoolConfig</span>, <span class='ident'>GreenTaskBuilder</span>};
 
 <span class='kw'>let</span> <span class='ident'>config</span> <span class='op'>=</span> <span class='ident'>PoolConfig</span>::<span class='ident'>new</span>();
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>pool</span> <span class='op'>=</span> <span class='ident'>SchedPool</span>::<span class='ident'>new</span>(<span class='ident'>config</span>);<span class='comment'>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>pool</span> <span class='op'>=</span> <span class='ident'>SchedPool</span>::<span class='ident'>new</span>(<span class='ident'>config</span>);
 
-// Spawn tasks into the pool of schedulers
-</span><span class='ident'>TaskBuilder</span>::<span class='ident'>new</span>().<span class='ident'>green</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>pool</span>).<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {<span class='comment'>
-    // this code is running inside the pool of schedulers
+<span class='comment'>// Spawn tasks into the pool of schedulers</span>
+<span class='ident'>TaskBuilder</span>::<span class='ident'>new</span>().<span class='ident'>green</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>pool</span>).<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+    <span class='comment'>// this code is running inside the pool of schedulers</span>
 
-    </span><span class='ident'>spawn</span>(<span class='kw'>proc</span>() {<span class='comment'>
-        // this code is also running inside the same scheduler pool
-    </span>});
-});<span class='comment'>
+    <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+        <span class='comment'>// this code is also running inside the same scheduler pool</span>
+    });
+});
 
-// Dynamically add a new scheduler to the scheduler pool. This adds another
-// OS thread that green threads can be multiplexed on to.
-</span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>handle</span> <span class='op'>=</span> <span class='ident'>pool</span>.<span class='ident'>spawn_sched</span>();<span class='comment'>
+<span class='comment'>// Dynamically add a new scheduler to the scheduler pool. This adds another</span>
+<span class='comment'>// OS thread that green threads can be multiplexed on to.</span>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>handle</span> <span class='op'>=</span> <span class='ident'>pool</span>.<span class='ident'>spawn_sched</span>();
 
-// Pin a task to the spawned scheduler
-</span><span class='ident'>TaskBuilder</span>::<span class='ident'>new</span>().<span class='ident'>green_pinned</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>pool</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>handle</span>).<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {<span class='comment'>
-    /* ... */
-</span>});<span class='comment'>
+<span class='comment'>// Pin a task to the spawned scheduler</span>
+<span class='ident'>TaskBuilder</span>::<span class='ident'>new</span>().<span class='ident'>green_pinned</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>pool</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>handle</span>).<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+    <span class='comment'>/* ... */</span>
+});
 
-// Handles keep schedulers alive, so be sure to drop all handles before
-// destroying the sched pool
-</span><span class='ident'>drop</span>(<span class='ident'>handle</span>);<span class='comment'>
+<span class='comment'>// Handles keep schedulers alive, so be sure to drop all handles before</span>
+<span class='comment'>// destroying the sched pool</span>
+<span class='ident'>drop</span>(<span class='ident'>handle</span>);
 
-// Required to shut down this scheduler pool.
-// The task will fail if `shutdown` is not called.
-</span><span class='ident'>pool</span>.<span class='ident'>shutdown</span>();
+<span class='comment'>// Required to shut down this scheduler pool.</span>
+<span class='comment'>// The task will fail if `shutdown` is not called.</span>
+<span class='ident'>pool</span>.<span class='ident'>shutdown</span>();
 </pre>
 </div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>

@@ -7,8 +7,6 @@
 
     <title>test.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -243,17 +241,17 @@
 <span id='201'>201</span>
 <span id='202'>202</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>/*! Various utility functions useful for writing I/O tests */</span>
+<span class='doccomment'>/*! Various utility functions useful for writing I/O tests */</span>
 
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>macro_escape</span>]</span>
 
@@ -308,11 +306,11 @@
 
 <span class='doccomment'>/// Get a temporary path which could be the location of a unix socket</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>next_test_unix</span>() <span class='op'>-&gt;</span> <span class='ident'>Path</span> {
-    <span class='kw'>static</span> <span class='kw-2'>mut</span> <span class='ident'>COUNT</span>: <span class='ident'>AtomicUint</span> <span class='op'>=</span> <span class='ident'>INIT_ATOMIC_UINT</span>;<span class='comment'>
-    // base port and pid are an attempt to be unique between multiple
-    // test-runners of different configurations running on one
-    // buildbot, the count is to be unique within this executable.
-    </span><span class='kw'>let</span> <span class='ident'>string</span> <span class='op'>=</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;rust-test-unix-path-{}-{}-{}&quot;</span>,
+    <span class='kw'>static</span> <span class='kw-2'>mut</span> <span class='ident'>COUNT</span>: <span class='ident'>AtomicUint</span> <span class='op'>=</span> <span class='ident'>INIT_ATOMIC_UINT</span>;
+    <span class='comment'>// base port and pid are an attempt to be unique between multiple</span>
+    <span class='comment'>// test-runners of different configurations running on one</span>
+    <span class='comment'>// buildbot, the count is to be unique within this executable.</span>
+    <span class='kw'>let</span> <span class='ident'>string</span> <span class='op'>=</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;rust-test-unix-path-{}-{}-{}&quot;</span>,
                          <span class='ident'>base_port</span>(),
                          <span class='kw'>unsafe</span> {<span class='ident'>libc</span>::<span class='ident'>getpid</span>()},
                          <span class='kw'>unsafe</span> {<span class='ident'>COUNT</span>.<span class='ident'>fetch_add</span>(<span class='number'>1</span>, <span class='ident'>Relaxed</span>)});
@@ -331,16 +329,16 @@
 <span class='doccomment'>/// Get a unique IPv6 localhost:port pair starting at 9600</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>next_test_ip6</span>() <span class='op'>-&gt;</span> <span class='ident'>SocketAddr</span> {
     <span class='ident'>SocketAddr</span> { <span class='ident'>ip</span>: <span class='ident'>Ipv6Addr</span>(<span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>1</span>), <span class='ident'>port</span>: <span class='ident'>next_test_port</span>() }
-}<span class='comment'>
+}
 
-/*
+<span class='comment'>/*
 XXX: Welcome to MegaHack City.
 
 The bots run multiple builds at the same time, and these builds
 all want to use ports. This function figures out which workspace
 it is running in and assigns a port range based on it.
-*/
-</span><span class='kw'>fn</span> <span class='ident'>base_port</span>() <span class='op'>-&gt;</span> <span class='ident'>u16</span> {
+*/</span>
+<span class='kw'>fn</span> <span class='ident'>base_port</span>() <span class='op'>-&gt;</span> <span class='ident'>u16</span> {
 
     <span class='kw'>let</span> <span class='ident'>base</span> <span class='op'>=</span> <span class='number'>9600u16</span>;
     <span class='kw'>let</span> <span class='ident'>range</span> <span class='op'>=</span> <span class='number'>1000u16</span>;
@@ -354,10 +352,10 @@ it is running in and assigns a port range based on it.
         (<span class='string'>&quot;all-opt&quot;</span>, <span class='ident'>base</span> <span class='op'>+</span> <span class='ident'>range</span> <span class='op'>*</span> <span class='number'>6</span>),
         (<span class='string'>&quot;snap3&quot;</span>, <span class='ident'>base</span> <span class='op'>+</span> <span class='ident'>range</span> <span class='op'>*</span> <span class='number'>7</span>),
         (<span class='string'>&quot;dist&quot;</span>, <span class='ident'>base</span> <span class='op'>+</span> <span class='ident'>range</span> <span class='op'>*</span> <span class='number'>8</span>)
-    ];<span class='comment'>
+    ];
 
-    // FIXME (#9639): This needs to handle non-utf8 paths
-    </span><span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>os</span>::<span class='ident'>getcwd</span>();
+    <span class='comment'>// FIXME (#9639): This needs to handle non-utf8 paths</span>
+    <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>os</span>::<span class='ident'>getcwd</span>();
     <span class='kw'>let</span> <span class='ident'>path_s</span> <span class='op'>=</span> <span class='ident'>path</span>.<span class='ident'>as_str</span>().<span class='ident'>unwrap</span>();
 
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>final_base</span> <span class='op'>=</span> <span class='ident'>base</span>;
@@ -394,9 +392,9 @@ it is running in and assigns a port range based on it.
         <span class='ident'>rlim_cur</span>: <span class='ident'>rlim_t</span>,
         <span class='ident'>rlim_max</span>: <span class='ident'>rlim_t</span>
     }
-    <span class='kw'>extern</span> {<span class='comment'>
-        // name probably doesn&#39;t need to be mut, but the C function doesn&#39;t specify const
-        </span><span class='kw'>fn</span> <span class='ident'>sysctl</span>(<span class='ident'>name</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_int</span>, <span class='ident'>namelen</span>: <span class='ident'>libc</span>::<span class='ident'>c_uint</span>,
+    <span class='kw'>extern</span> {
+        <span class='comment'>// name probably doesn&#39;t need to be mut, but the C function doesn&#39;t specify const</span>
+        <span class='kw'>fn</span> <span class='ident'>sysctl</span>(<span class='ident'>name</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_int</span>, <span class='ident'>namelen</span>: <span class='ident'>libc</span>::<span class='ident'>c_uint</span>,
                   <span class='ident'>oldp</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>, <span class='ident'>oldlenp</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>size_t</span>,
                   <span class='ident'>newp</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>, <span class='ident'>newlen</span>: <span class='ident'>libc</span>::<span class='ident'>size_t</span>) <span class='op'>-&gt;</span> <span class='ident'>libc</span>::<span class='ident'>c_int</span>;
         <span class='kw'>fn</span> <span class='ident'>getrlimit</span>(<span class='ident'>resource</span>: <span class='ident'>libc</span>::<span class='ident'>c_int</span>, <span class='ident'>rlp</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>rlimit</span>) <span class='op'>-&gt;</span> <span class='ident'>libc</span>::<span class='ident'>c_int</span>;
@@ -406,35 +404,35 @@ it is running in and assigns a port range based on it.
     <span class='kw'>static</span> <span class='ident'>KERN_MAXFILESPERPROC</span>: <span class='ident'>libc</span>::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>29</span>;
     <span class='kw'>static</span> <span class='ident'>RLIMIT_NOFILE</span>: <span class='ident'>libc</span>::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>8</span>;
 
-    <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>raise_fd_limit</span>() {<span class='comment'>
-        // The strategy here is to fetch the current resource limits, read the kern.maxfilesperproc
-        // sysctl value, and bump the soft resource limit for maxfiles up to the sysctl value.
-        </span><span class='kw'>use</span> <span class='ident'>ptr</span>::<span class='ident'>mut_null</span>;
+    <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>raise_fd_limit</span>() {
+        <span class='comment'>// The strategy here is to fetch the current resource limits, read the kern.maxfilesperproc</span>
+        <span class='comment'>// sysctl value, and bump the soft resource limit for maxfiles up to the sysctl value.</span>
+        <span class='kw'>use</span> <span class='ident'>ptr</span>::<span class='ident'>mut_null</span>;
         <span class='kw'>use</span> <span class='ident'>mem</span>::<span class='ident'>size_of_val</span>;
-        <span class='kw'>use</span> <span class='ident'>os</span>::<span class='ident'>last_os_error</span>;<span class='comment'>
+        <span class='kw'>use</span> <span class='ident'>os</span>::<span class='ident'>last_os_error</span>;
 
-        // Fetch the kern.maxfilesperproc value
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>mib</span>: [<span class='ident'>libc</span>::<span class='ident'>c_int</span>, ..<span class='number'>2</span>] <span class='op'>=</span> [<span class='ident'>CTL_KERN</span>, <span class='ident'>KERN_MAXFILESPERPROC</span>];
+        <span class='comment'>// Fetch the kern.maxfilesperproc value</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>mib</span>: [<span class='ident'>libc</span>::<span class='ident'>c_int</span>, ..<span class='number'>2</span>] <span class='op'>=</span> [<span class='ident'>CTL_KERN</span>, <span class='ident'>KERN_MAXFILESPERPROC</span>];
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>maxfiles</span>: <span class='ident'>libc</span>::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>0</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>size</span>: <span class='ident'>libc</span>::<span class='ident'>size_t</span> <span class='op'>=</span> <span class='ident'>size_of_val</span>(<span class='kw-2'>&amp;</span><span class='ident'>maxfiles</span>) <span class='kw'>as</span> <span class='ident'>libc</span>::<span class='ident'>size_t</span>;
         <span class='kw'>if</span> <span class='ident'>sysctl</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>mib</span>[<span class='number'>0</span>], <span class='number'>2</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>maxfiles</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_int</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>size</span>,
                   <span class='ident'>mut_null</span>(), <span class='number'>0</span>) <span class='op'>!=</span> <span class='number'>0</span> {
             <span class='kw'>let</span> <span class='ident'>err</span> <span class='op'>=</span> <span class='ident'>last_os_error</span>();
             <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;raise_fd_limit: error calling sysctl: {}&quot;</span>, <span class='ident'>err</span>);
-        }<span class='comment'>
+        }
 
-        // Fetch the current resource limits
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>rlim</span> <span class='op'>=</span> <span class='ident'>rlimit</span>{<span class='ident'>rlim_cur</span>: <span class='number'>0</span>, <span class='ident'>rlim_max</span>: <span class='number'>0</span>};
+        <span class='comment'>// Fetch the current resource limits</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>rlim</span> <span class='op'>=</span> <span class='ident'>rlimit</span>{<span class='ident'>rlim_cur</span>: <span class='number'>0</span>, <span class='ident'>rlim_max</span>: <span class='number'>0</span>};
         <span class='kw'>if</span> <span class='ident'>getrlimit</span>(<span class='ident'>RLIMIT_NOFILE</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>rlim</span>) <span class='op'>!=</span> <span class='number'>0</span> {
             <span class='kw'>let</span> <span class='ident'>err</span> <span class='op'>=</span> <span class='ident'>last_os_error</span>();
             <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;raise_fd_limit: error calling getrlimit: {}&quot;</span>, <span class='ident'>err</span>);
-        }<span class='comment'>
+        }
 
-        // Bump the soft limit to the smaller of kern.maxfilesperproc and the hard limit
-        </span><span class='ident'>rlim</span>.<span class='ident'>rlim_cur</span> <span class='op'>=</span> ::<span class='ident'>cmp</span>::<span class='ident'>min</span>(<span class='ident'>maxfiles</span> <span class='kw'>as</span> <span class='ident'>rlim_t</span>, <span class='ident'>rlim</span>.<span class='ident'>rlim_max</span>);<span class='comment'>
+        <span class='comment'>// Bump the soft limit to the smaller of kern.maxfilesperproc and the hard limit</span>
+        <span class='ident'>rlim</span>.<span class='ident'>rlim_cur</span> <span class='op'>=</span> ::<span class='ident'>cmp</span>::<span class='ident'>min</span>(<span class='ident'>maxfiles</span> <span class='kw'>as</span> <span class='ident'>rlim_t</span>, <span class='ident'>rlim</span>.<span class='ident'>rlim_max</span>);
 
-        // Set our newly-increased resource limit
-        </span><span class='kw'>if</span> <span class='ident'>setrlimit</span>(<span class='ident'>RLIMIT_NOFILE</span>, <span class='kw-2'>&amp;</span><span class='ident'>rlim</span>) <span class='op'>!=</span> <span class='number'>0</span> {
+        <span class='comment'>// Set our newly-increased resource limit</span>
+        <span class='kw'>if</span> <span class='ident'>setrlimit</span>(<span class='ident'>RLIMIT_NOFILE</span>, <span class='kw-2'>&amp;</span><span class='ident'>rlim</span>) <span class='op'>!=</span> <span class='number'>0</span> {
             <span class='kw'>let</span> <span class='ident'>err</span> <span class='op'>=</span> <span class='ident'>last_os_error</span>();
             <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;raise_fd_limit: error calling setrlimit: {}&quot;</span>, <span class='ident'>err</span>);
         }

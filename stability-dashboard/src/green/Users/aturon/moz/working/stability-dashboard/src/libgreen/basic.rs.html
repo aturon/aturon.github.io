@@ -7,8 +7,6 @@
 
     <title>basic.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -301,17 +299,17 @@
 <span id='259'>259</span>
 <span id='260'>260</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! This is a basic event loop implementation not meant for any &quot;real purposes&quot;</span>
+<span class='doccomment'>//! This is a basic event loop implementation not meant for any &quot;real purposes&quot;</span>
 <span class='doccomment'>//! other than testing the scheduler and proving that it&#39;s possible to have a</span>
 <span class='doccomment'>//! pluggable event loop.</span>
 <span class='doccomment'>//!</span>
@@ -331,8 +329,8 @@
 }
 
 <span class='kw'>struct</span> <span class='ident'>BasicLoop</span> {
-    <span class='ident'>work</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw'>proc</span>(): <span class='ident'>Send</span><span class='op'>&gt;</span>,<span class='comment'>             // pending work
-    </span><span class='ident'>remotes</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span>(<span class='ident'>uint</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Callback</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>)<span class='op'>&gt;</span>,
+    <span class='ident'>work</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw'>proc</span>(): <span class='ident'>Send</span><span class='op'>&gt;</span>,             <span class='comment'>// pending work</span>
+    <span class='ident'>remotes</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span>(<span class='ident'>uint</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Callback</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>)<span class='op'>&gt;</span>,
     <span class='ident'>next_remote</span>: <span class='ident'>uint</span>,
     <span class='ident'>messages</span>: <span class='ident'>Arc</span><span class='op'>&lt;</span><span class='ident'>Exclusive</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Message</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>,
     <span class='ident'>idle</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Callback</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;&gt;</span>,
@@ -374,7 +372,7 @@
     <span class='kw'>fn</span> <span class='ident'>message</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>message</span>: <span class='ident'>Message</span>) {
         <span class='kw'>match</span> <span class='ident'>message</span> {
             <span class='ident'>RunRemote</span>(<span class='ident'>i</span>) <span class='op'>=&gt;</span> {
-                <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>remotes</span>.<span class='ident'>mut_iter</span>().<span class='ident'>find</span>(<span class='op'>|</span><span class='op'>&amp;</span> <span class='kw-2'>&amp;</span>(<span class='ident'>id</span>, _)<span class='op'>|</span> <span class='ident'>id</span> <span class='op'>==</span> <span class='ident'>i</span>) {
+                <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>remotes</span>.<span class='ident'>mut_iter</span>().<span class='ident'>find</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span> <span class='kw-2'>&amp;</span>(<span class='ident'>id</span>, _)<span class='op'>|</span> <span class='ident'>id</span> <span class='op'>==</span> <span class='ident'>i</span>) {
                     <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span>(_, <span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>f</span>)) <span class='op'>=&gt;</span> <span class='ident'>f</span>.<span class='ident'>call</span>(),
                     <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='macro'>unreachable</span><span class='macro'>!</span>()
                 }
@@ -406,9 +404,9 @@
 }
 
 <span class='kw'>impl</span> <span class='ident'>EventLoop</span> <span class='kw'>for</span> <span class='ident'>BasicLoop</span> {
-    <span class='kw'>fn</span> <span class='ident'>run</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {<span class='comment'>
-        // Not exactly efficient, but it gets the job done.
-        </span><span class='kw'>while</span> <span class='self'>self</span>.<span class='ident'>remotes</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='number'>0</span> <span class='op'>||</span> <span class='self'>self</span>.<span class='ident'>work</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='number'>0</span> <span class='op'>||</span> <span class='self'>self</span>.<span class='ident'>has_idle</span>() {
+    <span class='kw'>fn</span> <span class='ident'>run</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
+        <span class='comment'>// Not exactly efficient, but it gets the job done.</span>
+        <span class='kw'>while</span> <span class='self'>self</span>.<span class='ident'>remotes</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='number'>0</span> <span class='op'>||</span> <span class='self'>self</span>.<span class='ident'>work</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='number'>0</span> <span class='op'>||</span> <span class='self'>self</span>.<span class='ident'>has_idle</span>() {
 
             <span class='self'>self</span>.<span class='ident'>work</span>();
             <span class='self'>self</span>.<span class='ident'>remote_work</span>();
@@ -419,10 +417,10 @@
             }
 
             <span class='kw'>unsafe</span> {
-                <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>messages</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>messages</span>.<span class='ident'>lock</span>();<span class='comment'>
-                // We block here if we have no messages to process and we may
-                // receive a message at a later date
-                </span><span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>remotes</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='number'>0</span> <span class='op'>&amp;&amp;</span> <span class='ident'>messages</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> <span class='op'>&amp;&amp;</span>
+                <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>messages</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>messages</span>.<span class='ident'>lock</span>();
+                <span class='comment'>// We block here if we have no messages to process and we may</span>
+                <span class='comment'>// receive a message at a later date</span>
+                <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>remotes</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='number'>0</span> <span class='op'>&amp;&amp;</span> <span class='ident'>messages</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> <span class='op'>&amp;&amp;</span>
                    <span class='self'>self</span>.<span class='ident'>work</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
                     <span class='ident'>messages</span>.<span class='ident'>wait</span>()
                 }
@@ -432,10 +430,10 @@
 
     <span class='kw'>fn</span> <span class='ident'>callback</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw'>proc</span>():<span class='ident'>Send</span>) {
         <span class='self'>self</span>.<span class='ident'>work</span>.<span class='ident'>push</span>(<span class='ident'>f</span>);
-    }<span class='comment'>
+    }
 
-    // FIXME: Seems like a really weird requirement to have an event loop provide.
-    </span><span class='kw'>fn</span> <span class='ident'>pausable_idle_callback</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>cb</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Callback</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>)
+    <span class='comment'>// FIXME: Seems like a really weird requirement to have an event loop provide.</span>
+    <span class='kw'>fn</span> <span class='ident'>pausable_idle_callback</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>cb</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Callback</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>)
                               <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>PausableIdleCallback</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span> {
         <span class='macro'>rtassert</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>idle</span>.<span class='ident'>is_none</span>());
         <span class='self'>self</span>.<span class='ident'>idle</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>cb</span>);

@@ -7,8 +7,6 @@
 
     <title>lock.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -867,17 +865,17 @@
 <span id='825'>825</span>
 <span id='826'>826</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! Wrappers for safe, shared, mutable memory between tasks</span>
+<span class='doccomment'>//! Wrappers for safe, shared, mutable memory between tasks</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! The wrappers in this module build on the primitives from `sync::raw` to</span>
 <span class='doccomment'>//! provide safe interfaces around using the primitive locks. These primitives</span>
@@ -894,13 +892,13 @@
 <span class='kw'>use</span> <span class='ident'>rustrt</span>::<span class='ident'>local</span>::<span class='ident'>Local</span>;
 <span class='kw'>use</span> <span class='ident'>rustrt</span>::<span class='ident'>task</span>::<span class='ident'>Task</span>;
 
-<span class='kw'>use</span> <span class='ident'>raw</span>;<span class='comment'>
+<span class='kw'>use</span> <span class='ident'>raw</span>;
 
-/****************************************************************************
+<span class='comment'>/****************************************************************************
  * Poisoning helpers
- ****************************************************************************/
+ ****************************************************************************/</span>
 
-</span><span class='kw'>struct</span> <span class='ident'>PoisonOnFail</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+<span class='kw'>struct</span> <span class='ident'>PoisonOnFail</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
     <span class='ident'>flag</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>bool</span>,
     <span class='ident'>failed</span>: <span class='ident'>bool</span>,
 }
@@ -932,13 +930,13 @@
             <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>flag</span> <span class='op'>=</span> <span class='boolval'>true</span>;
         }
     }
-}<span class='comment'>
+}
 
-/****************************************************************************
+<span class='comment'>/****************************************************************************
  * Condvar
- ****************************************************************************/
+ ****************************************************************************/</span>
 
-</span><span class='kw'>enum</span> <span class='ident'>Inner</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+<span class='kw'>enum</span> <span class='ident'>Inner</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
     <span class='ident'>InnerMutex</span>(<span class='ident'>raw</span>::<span class='ident'>MutexGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>),
     <span class='ident'>InnerRWLock</span>(<span class='ident'>raw</span>::<span class='ident'>RWLockWriteGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>),
 }
@@ -955,11 +953,11 @@
 <span class='doccomment'>/// A condition variable, a mechanism for unlock-and-descheduling and</span>
 <span class='doccomment'>/// signaling, for use with the lock types.</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Condvar</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-    <span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>,<span class='comment'>
-    // n.b. Inner must be after PoisonOnFail because we must set the poison flag
-    //      *inside* the mutex, and struct fields are destroyed top-to-bottom
-    //      (destroy the lock guard last).
-    </span><span class='ident'>poison</span>: <span class='ident'>PoisonOnFail</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>,
+    <span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>,
+    <span class='comment'>// n.b. Inner must be after PoisonOnFail because we must set the poison flag</span>
+    <span class='comment'>//      *inside* the mutex, and struct fields are destroyed top-to-bottom</span>
+    <span class='comment'>//      (destroy the lock guard last).</span>
+    <span class='ident'>poison</span>: <span class='ident'>PoisonOnFail</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>,
     <span class='ident'>inner</span>: <span class='ident'>Inner</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>,
 }
 
@@ -984,9 +982,9 @@
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>wait_on</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>condvar_id</span>: <span class='ident'>uint</span>) {
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='op'>*</span><span class='self'>self</span>.<span class='ident'>poison</span>.<span class='ident'>flag</span>);
-        <span class='self'>self</span>.<span class='ident'>inner</span>.<span class='ident'>cond</span>().<span class='ident'>wait_on</span>(<span class='ident'>condvar_id</span>);<span class='comment'>
-        // This is why we need to wrap sync::condvar.
-        </span><span class='ident'>PoisonOnFail</span>::<span class='ident'>check</span>(<span class='op'>*</span><span class='self'>self</span>.<span class='ident'>poison</span>.<span class='ident'>flag</span>, <span class='self'>self</span>.<span class='ident'>name</span>);
+        <span class='self'>self</span>.<span class='ident'>inner</span>.<span class='ident'>cond</span>().<span class='ident'>wait_on</span>(<span class='ident'>condvar_id</span>);
+        <span class='comment'>// This is why we need to wrap sync::condvar.</span>
+        <span class='ident'>PoisonOnFail</span>::<span class='ident'>check</span>(<span class='op'>*</span><span class='self'>self</span>.<span class='ident'>poison</span>.<span class='ident'>flag</span>, <span class='self'>self</span>.<span class='ident'>name</span>);
     }
 
     <span class='doccomment'>/// Wake up a blocked task. Returns false if there was no blocked task.</span>
@@ -1012,13 +1010,13 @@
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='op'>*</span><span class='self'>self</span>.<span class='ident'>poison</span>.<span class='ident'>flag</span>);
         <span class='self'>self</span>.<span class='ident'>inner</span>.<span class='ident'>cond</span>().<span class='ident'>broadcast_on</span>(<span class='ident'>condvar_id</span>)
     }
-}<span class='comment'>
+}
 
-/****************************************************************************
+<span class='comment'>/****************************************************************************
  * Mutex
- ****************************************************************************/
+ ****************************************************************************/</span>
 
-</span><span class='doccomment'>/// A wrapper type which provides synchronized access to the underlying data, of</span>
+<span class='doccomment'>/// A wrapper type which provides synchronized access to the underlying data, of</span>
 <span class='doccomment'>/// type `T`. A mutex always provides exclusive access, and concurrent requests</span>
 <span class='doccomment'>/// will block while the mutex is already locked.</span>
 <span class='doccomment'>///</span>
@@ -1049,10 +1047,10 @@
 
 <span class='doccomment'>/// An guard which is created by locking a mutex. Through this guard the</span>
 <span class='doccomment'>/// underlying data can be accessed.</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>MutexGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {<span class='comment'>
-    // FIXME #12808: strange name to try to avoid interfering with
-    // field accesses of the contained type via Deref
-    </span><span class='ident'>_data</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>T</span>,
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>MutexGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
+    <span class='comment'>// FIXME #12808: strange name to try to avoid interfering with</span>
+    <span class='comment'>// field accesses of the contained type via Deref</span>
+    <span class='ident'>_data</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>T</span>,
     <span class='doccomment'>/// Inner condition variable connected to the locked mutex that this guard</span>
     <span class='doccomment'>/// was created from. This can be used for atomic-unlock-and-deschedule.</span>
     <span class='kw'>pub</span> <span class='ident'>cond</span>: <span class='ident'>Condvar</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>,
@@ -1090,12 +1088,12 @@
     <span class='doccomment'>/// blocked on the mutex) will also fail immediately.</span>
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>lock</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>MutexGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>guard</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>lock</span>.<span class='ident'>lock</span>();<span class='comment'>
+        <span class='kw'>let</span> <span class='ident'>guard</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>lock</span>.<span class='ident'>lock</span>();
 
-        // These two accesses are safe because we&#39;re guranteed at this point
-        // that we have exclusive access to this mutex. We are indeed able to
-        // promote ourselves from &amp;Mutex to `&amp;mut T`
-        </span><span class='kw'>let</span> <span class='ident'>poison</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>failed</span>.<span class='ident'>get</span>() };
+        <span class='comment'>// These two accesses are safe because we&#39;re guranteed at this point</span>
+        <span class='comment'>// that we have exclusive access to this mutex. We are indeed able to</span>
+        <span class='comment'>// promote ourselves from &amp;Mutex to `&amp;mut T`</span>
+        <span class='kw'>let</span> <span class='ident'>poison</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>failed</span>.<span class='ident'>get</span>() };
         <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>data</span>.<span class='ident'>get</span>() };
 
         <span class='ident'>MutexGuard</span> {
@@ -1114,13 +1112,13 @@
 }
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>: <span class='ident'>Send</span><span class='op'>&gt;</span> <span class='ident'>DerefMut</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>MutexGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='kw'>fn</span> <span class='ident'>deref_mut</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>T</span> { <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>_data</span> }
-}<span class='comment'>
+}
 
-/****************************************************************************
+<span class='comment'>/****************************************************************************
  * R/W lock protected lock
- ****************************************************************************/
+ ****************************************************************************/</span>
 
-</span><span class='doccomment'>/// A dual-mode reader-writer lock. The data can be accessed mutably or</span>
+<span class='doccomment'>/// A dual-mode reader-writer lock. The data can be accessed mutably or</span>
 <span class='doccomment'>/// immutably, and immutably-accessing tasks may run concurrently.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// # Example</span>
@@ -1149,10 +1147,10 @@
 
 <span class='doccomment'>/// A guard which is created by locking an rwlock in write mode. Through this</span>
 <span class='doccomment'>/// guard the underlying data can be accessed.</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>RWLockWriteGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {<span class='comment'>
-    // FIXME #12808: strange name to try to avoid interfering with
-    // field accesses of the contained type via Deref
-    </span><span class='ident'>_data</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>T</span>,
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>RWLockWriteGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
+    <span class='comment'>// FIXME #12808: strange name to try to avoid interfering with</span>
+    <span class='comment'>// field accesses of the contained type via Deref</span>
+    <span class='ident'>_data</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>T</span>,
     <span class='doccomment'>/// Inner condition variable that can be used to sleep on the write mode of</span>
     <span class='doccomment'>/// this rwlock.</span>
     <span class='kw'>pub</span> <span class='ident'>cond</span>: <span class='ident'>Condvar</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>,
@@ -1160,10 +1158,10 @@
 
 <span class='doccomment'>/// A guard which is created by locking an rwlock in read mode. Through this</span>
 <span class='doccomment'>/// guard the underlying data can be accessed.</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>RWLockReadGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {<span class='comment'>
-    // FIXME #12808: strange names to try to avoid interfering with
-    // field accesses of the contained type via Deref
-    </span><span class='ident'>_data</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>T</span>,
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>RWLockReadGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
+    <span class='comment'>// FIXME #12808: strange names to try to avoid interfering with</span>
+    <span class='comment'>// field accesses of the contained type via Deref</span>
+    <span class='ident'>_data</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>T</span>,
     <span class='ident'>_guard</span>: <span class='ident'>raw</span>::<span class='ident'>RWLockReadGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>,
 }
 
@@ -1193,12 +1191,12 @@
     <span class='doccomment'>/// the lock, so subsequent readers and writers will both also fail.</span>
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>write</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>RWLockWriteGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>guard</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>lock</span>.<span class='ident'>write</span>();<span class='comment'>
+        <span class='kw'>let</span> <span class='ident'>guard</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>lock</span>.<span class='ident'>write</span>();
 
-        // These two accesses are safe because we&#39;re guranteed at this point
-        // that we have exclusive access to this rwlock. We are indeed able to
-        // promote ourselves from &amp;RWLock to `&amp;mut T`
-        </span><span class='kw'>let</span> <span class='ident'>poison</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>failed</span>.<span class='ident'>get</span>() };
+        <span class='comment'>// These two accesses are safe because we&#39;re guranteed at this point</span>
+        <span class='comment'>// that we have exclusive access to this rwlock. We are indeed able to</span>
+        <span class='comment'>// promote ourselves from &amp;RWLock to `&amp;mut T`</span>
+        <span class='kw'>let</span> <span class='ident'>poison</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>failed</span>.<span class='ident'>get</span>() };
         <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>data</span>.<span class='ident'>get</span>() };
 
         <span class='ident'>RWLockWriteGuard</span> {
@@ -1233,9 +1231,9 @@
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// This will allow pending readers to come into the lock.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>downgrade</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>RWLockReadGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>RWLockWriteGuard</span> { <span class='ident'>_data</span>, <span class='ident'>cond</span> } <span class='op'>=</span> <span class='self'>self</span>;<span class='comment'>
-        // convert the data to read-only explicitly
-        </span><span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>_data</span>;
+        <span class='kw'>let</span> <span class='ident'>RWLockWriteGuard</span> { <span class='ident'>_data</span>, <span class='ident'>cond</span> } <span class='op'>=</span> <span class='self'>self</span>;
+        <span class='comment'>// convert the data to read-only explicitly</span>
+        <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>_data</span>;
         <span class='kw'>let</span> <span class='ident'>guard</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>cond</span>.<span class='ident'>inner</span> {
             <span class='ident'>InnerMutex</span>(..) <span class='op'>=&gt;</span> <span class='macro'>unreachable</span><span class='macro'>!</span>(),
             <span class='ident'>InnerRWLock</span>(<span class='ident'>guard</span>) <span class='op'>=&gt;</span> <span class='ident'>guard</span>.<span class='ident'>downgrade</span>()
@@ -1252,13 +1250,13 @@
 }
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>: <span class='ident'>Send</span> <span class='op'>+</span> <span class='ident'>Share</span><span class='op'>&gt;</span> <span class='ident'>DerefMut</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>RWLockWriteGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='kw'>fn</span> <span class='ident'>deref_mut</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>T</span> { <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>_data</span> }
-}<span class='comment'>
+}
 
-/****************************************************************************
+<span class='comment'>/****************************************************************************
  * Barrier
- ****************************************************************************/
+ ****************************************************************************/</span>
 
-</span><span class='doccomment'>/// A barrier enables multiple tasks to synchronize the beginning</span>
+<span class='doccomment'>/// A barrier enables multiple tasks to synchronize the beginning</span>
 <span class='doccomment'>/// of some computation.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// ```rust</span>
@@ -1279,10 +1277,10 @@
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Barrier</span> {
     <span class='ident'>lock</span>: <span class='ident'>Mutex</span><span class='op'>&lt;</span><span class='ident'>BarrierState</span><span class='op'>&gt;</span>,
     <span class='ident'>num_tasks</span>: <span class='ident'>uint</span>,
-}<span class='comment'>
+}
 
-// The inner state of a double barrier
-</span><span class='kw'>struct</span> <span class='ident'>BarrierState</span> {
+<span class='comment'>// The inner state of a double barrier</span>
+<span class='kw'>struct</span> <span class='ident'>BarrierState</span> {
     <span class='ident'>count</span>: <span class='ident'>uint</span>,
     <span class='ident'>generation_id</span>: <span class='ident'>uint</span>,
 }
@@ -1304,10 +1302,10 @@
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>lock</span>.<span class='ident'>lock</span>();
         <span class='kw'>let</span> <span class='ident'>local_gen</span> <span class='op'>=</span> <span class='ident'>lock</span>.<span class='ident'>generation_id</span>;
         <span class='ident'>lock</span>.<span class='ident'>count</span> <span class='op'>+=</span> <span class='number'>1</span>;
-        <span class='kw'>if</span> <span class='ident'>lock</span>.<span class='ident'>count</span> <span class='op'>&lt;</span> <span class='self'>self</span>.<span class='ident'>num_tasks</span> {<span class='comment'>
-            // We need a while loop to guard against spurious wakeups.
-            // http://en.wikipedia.org/wiki/Spurious_wakeup
-            </span><span class='kw'>while</span> <span class='ident'>local_gen</span> <span class='op'>==</span> <span class='ident'>lock</span>.<span class='ident'>generation_id</span> <span class='op'>&amp;&amp;</span>
+        <span class='kw'>if</span> <span class='ident'>lock</span>.<span class='ident'>count</span> <span class='op'>&lt;</span> <span class='self'>self</span>.<span class='ident'>num_tasks</span> {
+            <span class='comment'>// We need a while loop to guard against spurious wakeups.</span>
+            <span class='comment'>// http://en.wikipedia.org/wiki/Spurious_wakeup</span>
+            <span class='kw'>while</span> <span class='ident'>local_gen</span> <span class='op'>==</span> <span class='ident'>lock</span>.<span class='ident'>generation_id</span> <span class='op'>&amp;&amp;</span>
                   <span class='ident'>lock</span>.<span class='ident'>count</span> <span class='op'>&lt;</span> <span class='self'>self</span>.<span class='ident'>num_tasks</span> {
                 <span class='ident'>lock</span>.<span class='ident'>cond</span>.<span class='ident'>wait</span>();
             }
@@ -1317,13 +1315,13 @@
             <span class='ident'>lock</span>.<span class='ident'>cond</span>.<span class='ident'>broadcast</span>();
         }
     }
-}<span class='comment'>
+}
 
-/****************************************************************************
+<span class='comment'>/****************************************************************************
  * Tests
- ****************************************************************************/
+ ****************************************************************************/</span>
 
-</span><span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>tests</span> {
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>comm</span>::<span class='ident'>Empty</span>;
@@ -1338,9 +1336,9 @@
         <span class='kw'>let</span> <span class='ident'>arc</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>Mutex</span>::<span class='ident'>new</span>(<span class='boolval'>false</span>));
         <span class='kw'>let</span> <span class='ident'>arc2</span> <span class='op'>=</span> <span class='ident'>arc</span>.<span class='ident'>clone</span>();
         <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
-        <span class='ident'>task</span>::<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {<span class='comment'>
-            // wait until parent gets in
-            </span><span class='ident'>rx</span>.<span class='ident'>recv</span>();
+        <span class='ident'>task</span>::<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+            <span class='comment'>// wait until parent gets in</span>
+            <span class='ident'>rx</span>.<span class='ident'>recv</span>();
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>arc2</span>.<span class='ident'>lock</span>();
             <span class='op'>*</span><span class='ident'>lock</span> <span class='op'>=</span> <span class='boolval'>true</span>;
             <span class='ident'>lock</span>.<span class='ident'>cond</span>.<span class='ident'>signal</span>();
@@ -1363,9 +1361,9 @@
         <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
             <span class='ident'>rx</span>.<span class='ident'>recv</span>();
             <span class='kw'>let</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>arc2</span>.<span class='ident'>lock</span>();
-            <span class='ident'>lock</span>.<span class='ident'>cond</span>.<span class='ident'>signal</span>();<span class='comment'>
-            // Parent should fail when it wakes up.
-            </span><span class='macro'>fail</span><span class='macro'>!</span>();
+            <span class='ident'>lock</span>.<span class='ident'>cond</span>.<span class='ident'>signal</span>();
+            <span class='comment'>// Parent should fail when it wakes up.</span>
+            <span class='macro'>fail</span><span class='macro'>!</span>();
         });
 
         <span class='kw'>let</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>arc</span>.<span class='ident'>lock</span>();
@@ -1388,10 +1386,10 @@
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_mutex_arc_nested</span>() {<span class='comment'>
-        // Tests nested mutexes and access
-        // to underlying data.
-        </span><span class='kw'>let</span> <span class='ident'>arc</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>Mutex</span>::<span class='ident'>new</span>(<span class='number'>1i</span>));
+    <span class='kw'>fn</span> <span class='ident'>test_mutex_arc_nested</span>() {
+        <span class='comment'>// Tests nested mutexes and access</span>
+        <span class='comment'>// to underlying data.</span>
+        <span class='kw'>let</span> <span class='ident'>arc</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>Mutex</span>::<span class='ident'>new</span>(<span class='number'>1i</span>));
         <span class='kw'>let</span> <span class='ident'>arc2</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>Mutex</span>::<span class='ident'>new</span>(<span class='ident'>arc</span>));
         <span class='ident'>task</span>::<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
             <span class='kw'>let</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>arc2</span>.<span class='ident'>lock</span>();
@@ -1492,25 +1490,25 @@
                 <span class='op'>*</span><span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>tmp</span> <span class='op'>+</span> <span class='number'>1</span>;
             }
             <span class='ident'>tx</span>.<span class='ident'>send</span>(());
-        });<span class='comment'>
+        });
 
-        // Readers try to catch the writer in the act
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>children</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
+        <span class='comment'>// Readers try to catch the writer in the act</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>children</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
         <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>5</span>) {
             <span class='kw'>let</span> <span class='ident'>arc3</span> <span class='op'>=</span> <span class='ident'>arc</span>.<span class='ident'>clone</span>();
             <span class='ident'>children</span>.<span class='ident'>push</span>(<span class='ident'>try_future</span>(<span class='kw'>proc</span>() {
                 <span class='kw'>let</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>arc3</span>.<span class='ident'>read</span>();
                 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>lock</span> <span class='op'>&gt;=</span> <span class='number'>0</span>);
             }));
-        }<span class='comment'>
+        }
 
-        // Wait for children to pass their asserts
-        </span><span class='kw'>for</span> <span class='ident'>r</span> <span class='kw'>in</span> <span class='ident'>children</span>.<span class='ident'>mut_iter</span>() {
+        <span class='comment'>// Wait for children to pass their asserts</span>
+        <span class='kw'>for</span> <span class='ident'>r</span> <span class='kw'>in</span> <span class='ident'>children</span>.<span class='ident'>mut_iter</span>() {
             <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>r</span>.<span class='ident'>get_ref</span>().<span class='ident'>is_ok</span>());
-        }<span class='comment'>
+        }
 
-        // Wait for writer to finish
-        </span><span class='ident'>rx</span>.<span class='ident'>recv</span>();
+        <span class='comment'>// Wait for writer to finish</span>
+        <span class='ident'>rx</span>.<span class='ident'>recv</span>();
         <span class='kw'>let</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>arc</span>.<span class='ident'>read</span>();
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>lock</span>, <span class='number'>10</span>);
     }
@@ -1537,31 +1535,31 @@
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_rw_downgrade</span>() {<span class='comment'>
-        // (1) A downgrader gets in write mode and does cond.wait.
-        // (2) A writer gets in write mode, sets state to 42, and does signal.
-        // (3) Downgrader wakes, sets state to 31337.
-        // (4) tells writer and all other readers to contend as it downgrades.
-        // (5) Writer attempts to set state back to 42, while downgraded task
-        //     and all reader tasks assert that it&#39;s 31337.
-        </span><span class='kw'>let</span> <span class='ident'>arc</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>RWLock</span>::<span class='ident'>new</span>(<span class='number'>0i</span>));<span class='comment'>
+    <span class='kw'>fn</span> <span class='ident'>test_rw_downgrade</span>() {
+        <span class='comment'>// (1) A downgrader gets in write mode and does cond.wait.</span>
+        <span class='comment'>// (2) A writer gets in write mode, sets state to 42, and does signal.</span>
+        <span class='comment'>// (3) Downgrader wakes, sets state to 31337.</span>
+        <span class='comment'>// (4) tells writer and all other readers to contend as it downgrades.</span>
+        <span class='comment'>// (5) Writer attempts to set state back to 42, while downgraded task</span>
+        <span class='comment'>//     and all reader tasks assert that it&#39;s 31337.</span>
+        <span class='kw'>let</span> <span class='ident'>arc</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>RWLock</span>::<span class='ident'>new</span>(<span class='number'>0i</span>));
 
-        // Reader tasks
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>reader_convos</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
+        <span class='comment'>// Reader tasks</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>reader_convos</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
         <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>10</span>) {
             <span class='kw'>let</span> ((<span class='ident'>tx1</span>, <span class='ident'>rx1</span>), (<span class='ident'>tx2</span>, <span class='ident'>rx2</span>)) <span class='op'>=</span> (<span class='ident'>channel</span>(), <span class='ident'>channel</span>());
             <span class='ident'>reader_convos</span>.<span class='ident'>push</span>((<span class='ident'>tx1</span>, <span class='ident'>rx2</span>));
             <span class='kw'>let</span> <span class='ident'>arcn</span> <span class='op'>=</span> <span class='ident'>arc</span>.<span class='ident'>clone</span>();
             <span class='ident'>task</span>::<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
-                <span class='ident'>rx1</span>.<span class='ident'>recv</span>();<span class='comment'> // wait for downgrader to give go-ahead
-                </span><span class='kw'>let</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>arcn</span>.<span class='ident'>read</span>();
+                <span class='ident'>rx1</span>.<span class='ident'>recv</span>(); <span class='comment'>// wait for downgrader to give go-ahead</span>
+                <span class='kw'>let</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>arcn</span>.<span class='ident'>read</span>();
                 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>lock</span>, <span class='number'>31337</span>);
                 <span class='ident'>tx2</span>.<span class='ident'>send</span>(());
             });
-        }<span class='comment'>
+        }
 
-        // Writer task
-        </span><span class='kw'>let</span> <span class='ident'>arc2</span> <span class='op'>=</span> <span class='ident'>arc</span>.<span class='ident'>clone</span>();
+        <span class='comment'>// Writer task</span>
+        <span class='kw'>let</span> <span class='ident'>arc2</span> <span class='op'>=</span> <span class='ident'>arc</span>.<span class='ident'>clone</span>();
         <span class='kw'>let</span> ((<span class='ident'>tx1</span>, <span class='ident'>rx1</span>), (<span class='ident'>tx2</span>, <span class='ident'>rx2</span>)) <span class='op'>=</span> (<span class='ident'>channel</span>(), <span class='ident'>channel</span>());
         <span class='ident'>task</span>::<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
             <span class='ident'>rx1</span>.<span class='ident'>recv</span>();
@@ -1573,99 +1571,99 @@
             }
             <span class='ident'>rx1</span>.<span class='ident'>recv</span>();
             {
-                <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>arc2</span>.<span class='ident'>write</span>();<span class='comment'>
-                // This shouldn&#39;t happen until after the downgrade read
-                // section, and all other readers, finish.
-                </span><span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>lock</span>, <span class='number'>31337</span>);
+                <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>arc2</span>.<span class='ident'>write</span>();
+                <span class='comment'>// This shouldn&#39;t happen until after the downgrade read</span>
+                <span class='comment'>// section, and all other readers, finish.</span>
+                <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>lock</span>, <span class='number'>31337</span>);
                 <span class='op'>*</span><span class='ident'>lock</span> <span class='op'>=</span> <span class='number'>42</span>;
             }
             <span class='ident'>tx2</span>.<span class='ident'>send</span>(());
-        });<span class='comment'>
+        });
 
-        // Downgrader (us)
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>arc</span>.<span class='ident'>write</span>();
-        <span class='ident'>tx1</span>.<span class='ident'>send</span>(());<span class='comment'> // send to another writer who will wake us up
-        </span><span class='kw'>while</span> <span class='op'>*</span><span class='ident'>lock</span> <span class='op'>==</span> <span class='number'>0</span> {
+        <span class='comment'>// Downgrader (us)</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>arc</span>.<span class='ident'>write</span>();
+        <span class='ident'>tx1</span>.<span class='ident'>send</span>(()); <span class='comment'>// send to another writer who will wake us up</span>
+        <span class='kw'>while</span> <span class='op'>*</span><span class='ident'>lock</span> <span class='op'>==</span> <span class='number'>0</span> {
             <span class='ident'>lock</span>.<span class='ident'>cond</span>.<span class='ident'>wait</span>();
         }
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>lock</span>, <span class='number'>42</span>);
-        <span class='op'>*</span><span class='ident'>lock</span> <span class='op'>=</span> <span class='number'>31337</span>;<span class='comment'>
-        // send to other readers
-        </span><span class='kw'>for</span> <span class='kw-2'>&amp;</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>rc</span>, _) <span class='kw'>in</span> <span class='ident'>reader_convos</span>.<span class='ident'>mut_iter</span>() {
+        <span class='op'>*</span><span class='ident'>lock</span> <span class='op'>=</span> <span class='number'>31337</span>;
+        <span class='comment'>// send to other readers</span>
+        <span class='kw'>for</span> <span class='kw-2'>&amp;</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>rc</span>, _) <span class='kw'>in</span> <span class='ident'>reader_convos</span>.<span class='ident'>mut_iter</span>() {
             <span class='ident'>rc</span>.<span class='ident'>send</span>(())
         }
-        <span class='kw'>let</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>lock</span>.<span class='ident'>downgrade</span>();<span class='comment'>
-        // complete handshake with other readers
-        </span><span class='kw'>for</span> <span class='kw-2'>&amp;</span>(_, <span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>rp</span>) <span class='kw'>in</span> <span class='ident'>reader_convos</span>.<span class='ident'>mut_iter</span>() {
+        <span class='kw'>let</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>lock</span>.<span class='ident'>downgrade</span>();
+        <span class='comment'>// complete handshake with other readers</span>
+        <span class='kw'>for</span> <span class='kw-2'>&amp;</span>(_, <span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>rp</span>) <span class='kw'>in</span> <span class='ident'>reader_convos</span>.<span class='ident'>mut_iter</span>() {
             <span class='ident'>rp</span>.<span class='ident'>recv</span>()
         }
-        <span class='ident'>tx1</span>.<span class='ident'>send</span>(());<span class='comment'> // tell writer to try again
-        </span><span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>lock</span>, <span class='number'>31337</span>);
+        <span class='ident'>tx1</span>.<span class='ident'>send</span>(()); <span class='comment'>// tell writer to try again</span>
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>lock</span>, <span class='number'>31337</span>);
         <span class='ident'>drop</span>(<span class='ident'>lock</span>);
 
-        <span class='ident'>rx2</span>.<span class='ident'>recv</span>();<span class='comment'> // complete handshake with writer
-    </span>}
+        <span class='ident'>rx2</span>.<span class='ident'>recv</span>(); <span class='comment'>// complete handshake with writer</span>
+    }
 
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_rw_write_cond_downgrade_read_race_helper</span>() {<span class='comment'>
-        // Tests that when a downgrader hands off the &quot;reader cloud&quot; lock
-        // because of a contending reader, a writer can&#39;t race to get it
-        // instead, which would result in readers_and_writers. This tests
-        // the raw module rather than this one, but it&#39;s here because an
-        // rwarc gives us extra shared state to help check for the race.
-        </span><span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>RWLock</span>::<span class='ident'>new</span>(<span class='boolval'>true</span>));
-        <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();<span class='comment'>
+    <span class='kw'>fn</span> <span class='ident'>test_rw_write_cond_downgrade_read_race_helper</span>() {
+        <span class='comment'>// Tests that when a downgrader hands off the &quot;reader cloud&quot; lock</span>
+        <span class='comment'>// because of a contending reader, a writer can&#39;t race to get it</span>
+        <span class='comment'>// instead, which would result in readers_and_writers. This tests</span>
+        <span class='comment'>// the raw module rather than this one, but it&#39;s here because an</span>
+        <span class='comment'>// rwarc gives us extra shared state to help check for the race.</span>
+        <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>RWLock</span>::<span class='ident'>new</span>(<span class='boolval'>true</span>));
+        <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
 
-        // writer task
-        </span><span class='kw'>let</span> <span class='ident'>xw</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>clone</span>();
+        <span class='comment'>// writer task</span>
+        <span class='kw'>let</span> <span class='ident'>xw</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>clone</span>();
         <span class='ident'>task</span>::<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>xw</span>.<span class='ident'>write</span>();
-            <span class='ident'>tx</span>.<span class='ident'>send</span>(());<span class='comment'> // tell downgrader it&#39;s ok to go
-            </span><span class='ident'>lock</span>.<span class='ident'>cond</span>.<span class='ident'>wait</span>();<span class='comment'>
-            // The core of the test is here: the condvar reacquire path
-            // must involve order_lock, so that it cannot race with a reader
-            // trying to receive the &quot;reader cloud lock hand-off&quot;.
-            </span><span class='op'>*</span><span class='ident'>lock</span> <span class='op'>=</span> <span class='boolval'>false</span>;
+            <span class='ident'>tx</span>.<span class='ident'>send</span>(()); <span class='comment'>// tell downgrader it&#39;s ok to go</span>
+            <span class='ident'>lock</span>.<span class='ident'>cond</span>.<span class='ident'>wait</span>();
+            <span class='comment'>// The core of the test is here: the condvar reacquire path</span>
+            <span class='comment'>// must involve order_lock, so that it cannot race with a reader</span>
+            <span class='comment'>// trying to receive the &quot;reader cloud lock hand-off&quot;.</span>
+            <span class='op'>*</span><span class='ident'>lock</span> <span class='op'>=</span> <span class='boolval'>false</span>;
         });
 
-        <span class='ident'>rx</span>.<span class='ident'>recv</span>();<span class='comment'> // wait for writer to get in
+        <span class='ident'>rx</span>.<span class='ident'>recv</span>(); <span class='comment'>// wait for writer to get in</span>
 
-        </span><span class='kw'>let</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>write</span>();
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>lock</span>);<span class='comment'>
-        // make writer contend in the cond-reacquire path
-        </span><span class='ident'>lock</span>.<span class='ident'>cond</span>.<span class='ident'>signal</span>();<span class='comment'>
-        // make a reader task to trigger the &quot;reader cloud lock&quot; handoff
-        </span><span class='kw'>let</span> <span class='ident'>xr</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>clone</span>();
+        <span class='kw'>let</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>write</span>();
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>lock</span>);
+        <span class='comment'>// make writer contend in the cond-reacquire path</span>
+        <span class='ident'>lock</span>.<span class='ident'>cond</span>.<span class='ident'>signal</span>();
+        <span class='comment'>// make a reader task to trigger the &quot;reader cloud lock&quot; handoff</span>
+        <span class='kw'>let</span> <span class='ident'>xr</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>clone</span>();
         <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
         <span class='ident'>task</span>::<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
             <span class='ident'>tx</span>.<span class='ident'>send</span>(());
             <span class='ident'>drop</span>(<span class='ident'>xr</span>.<span class='ident'>read</span>());
         });
-        <span class='ident'>rx</span>.<span class='ident'>recv</span>();<span class='comment'> // wait for reader task to exist
+        <span class='ident'>rx</span>.<span class='ident'>recv</span>(); <span class='comment'>// wait for reader task to exist</span>
 
-        </span><span class='kw'>let</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>lock</span>.<span class='ident'>downgrade</span>();<span class='comment'>
-        // if writer mistakenly got in, make sure it mutates state
-        // before we assert on it
-        </span><span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>5</span>) { <span class='ident'>task</span>::<span class='ident'>deschedule</span>(); }<span class='comment'>
-        // make sure writer didn&#39;t get in.
-        </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>lock</span>);
+        <span class='kw'>let</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>lock</span>.<span class='ident'>downgrade</span>();
+        <span class='comment'>// if writer mistakenly got in, make sure it mutates state</span>
+        <span class='comment'>// before we assert on it</span>
+        <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>5</span>) { <span class='ident'>task</span>::<span class='ident'>deschedule</span>(); }
+        <span class='comment'>// make sure writer didn&#39;t get in.</span>
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>lock</span>);
     }
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_rw_write_cond_downgrade_read_race</span>() {<span class='comment'>
-        // Ideally the above test case would have deschedule statements in it
-        // that helped to expose the race nearly 100% of the time... but adding
-        // deschedules in the intuitively-right locations made it even less
-        // likely, and I wasn&#39;t sure why :( . This is a mediocre &quot;next best&quot;
-        // option.
-        </span><span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>8</span>) {
+    <span class='kw'>fn</span> <span class='ident'>test_rw_write_cond_downgrade_read_race</span>() {
+        <span class='comment'>// Ideally the above test case would have deschedule statements in it</span>
+        <span class='comment'>// that helped to expose the race nearly 100% of the time... but adding</span>
+        <span class='comment'>// deschedules in the intuitively-right locations made it even less</span>
+        <span class='comment'>// likely, and I wasn&#39;t sure why :( . This is a mediocre &quot;next best&quot;</span>
+        <span class='comment'>// option.</span>
+        <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>8</span>) {
             <span class='ident'>test_rw_write_cond_downgrade_read_race_helper</span>();
         }
-    }<span class='comment'>
+    }
 
-    /************************************************************************
+    <span class='comment'>/************************************************************************
      * Barrier tests
-     ************************************************************************/
-    </span><span class='attribute'>#[<span class='ident'>test</span>]</span>
+     ************************************************************************/</span>
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_barrier</span>() {
         <span class='kw'>let</span> <span class='ident'>barrier</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>Barrier</span>::<span class='ident'>new</span>(<span class='number'>10</span>));
         <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
@@ -1677,18 +1675,18 @@
                 <span class='ident'>c</span>.<span class='ident'>wait</span>();
                 <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='boolval'>true</span>);
             });
-        }<span class='comment'>
+        }
 
-        // At this point, all spawned tasks should be blocked,
-        // so we shouldn&#39;t get anything from the port
-        </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='kw'>match</span> <span class='ident'>rx</span>.<span class='ident'>try_recv</span>() {
+        <span class='comment'>// At this point, all spawned tasks should be blocked,</span>
+        <span class='comment'>// so we shouldn&#39;t get anything from the port</span>
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='kw'>match</span> <span class='ident'>rx</span>.<span class='ident'>try_recv</span>() {
             <span class='prelude-val'>Err</span>(<span class='ident'>Empty</span>) <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
             _ <span class='op'>=&gt;</span> <span class='boolval'>false</span>,
         });
 
-        <span class='ident'>barrier</span>.<span class='ident'>wait</span>();<span class='comment'>
-        // Now, the barrier is cleared and we should get data.
-        </span><span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>9</span>) {
+        <span class='ident'>barrier</span>.<span class='ident'>wait</span>();
+        <span class='comment'>// Now, the barrier is cleared and we should get data.</span>
+        <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>9</span>) {
             <span class='ident'>rx</span>.<span class='ident'>recv</span>();
         }
     }

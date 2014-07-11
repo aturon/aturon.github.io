@@ -8,8 +8,6 @@
     <link rel="stylesheet" type="text/css" href="rust.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
-<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400'
-        rel='stylesheet' type='text/css'>
 
 
 </head>
@@ -23,9 +21,9 @@
 
     <div id="versioninfo">
   <img src="http://www.rust-lang.org/logos/rust-logo-32x32-blk.png" width="32" height="32" alt><br>
-  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.11.0-pre</span><br>
-  <a href="http://github.com/rust-lang/rust/commit/169c988d09a9d4e46de2b7fead9489e94964c7c7"
-    class="hash white-sticker">169c988d</a>
+  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.11.0</span><br>
+  <a href="http://github.com/rust-lang/rust/commit/305cf1f1098dc87e346003e6bf7e7cca5705a135"
+    class="hash white-sticker">305cf1f1</a>
 </div>
 
 
@@ -204,8 +202,8 @@ You can roughly compare these two lines:</p>
     // Rust
     let i = box 1234i;
 }</span><pre id='rust-example-rendered-2' class='rust '>
-<span class='comment'>// Rust
-</span><span class='kw'>let</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='number'>1234i</span>;
+<span class='comment'>// Rust</span>
+<span class='kw'>let</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='number'>1234i</span>;
 </pre>
 
 <pre><code class="language-cpp">// C++
@@ -317,10 +315,10 @@ try to modify the previous example to continue using the variable <code>numbers<
     <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
         <span class='kw'>let</span> <span class='ident'>numbers</span> <span class='op'>=</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>();
         <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>numbers</span>.<span class='ident'>get</span>(<span class='number'>0</span>));
-    });<span class='comment'>
+    });
 
-    // Try to print a number from the original task
-    </span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='op'>*</span><span class='ident'>numbers</span>.<span class='ident'>get</span>(<span class='number'>0</span>));
+    <span class='comment'>// Try to print a number from the original task</span>
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='op'>*</span><span class='ident'>numbers</span>.<span class='ident'>get</span>(<span class='number'>0</span>));
 }
 </pre>
 
@@ -352,9 +350,9 @@ Let&#39;s see an example that uses the <code>clone</code> method to create copie
     <span class='kw'>let</span> <span class='ident'>numbers</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2i</span>, <span class='number'>3i</span>];
 
     <span class='kw'>for</span> <span class='ident'>num</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>3</span>) {
-        <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>)  <span class='op'>=</span> <span class='ident'>channel</span>();<span class='comment'>
-        // Use `clone` to send a *copy* of the array
-        </span><span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='ident'>numbers</span>.<span class='ident'>clone</span>());
+        <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>)  <span class='op'>=</span> <span class='ident'>channel</span>();
+        <span class='comment'>// Use `clone` to send a *copy* of the array</span>
+        <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='ident'>numbers</span>.<span class='ident'>clone</span>());
 
         <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
             <span class='kw'>let</span> <span class='ident'>numbers</span> <span class='op'>=</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>();
@@ -475,20 +473,20 @@ fn main() {
         <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='ident'>numbers_lock</span>.<span class='ident'>clone</span>());
 
         <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
-            <span class='kw'>let</span> <span class='ident'>numbers_lock</span> <span class='op'>=</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>();<span class='comment'>
+            <span class='kw'>let</span> <span class='ident'>numbers_lock</span> <span class='op'>=</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>();
 
-            // Take the lock, along with exclusive access to the underlying array
-            </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>numbers</span> <span class='op'>=</span> <span class='ident'>numbers_lock</span>.<span class='ident'>lock</span>();<span class='comment'>
+            <span class='comment'>// Take the lock, along with exclusive access to the underlying array</span>
+            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>numbers</span> <span class='op'>=</span> <span class='ident'>numbers_lock</span>.<span class='ident'>lock</span>();
 
-            // This is ugly for now, but will be replaced by
-            // `numbers[num as uint] += 1` in the near future.
-            // See: https://github.com/rust-lang/rust/issues/6515
-            </span><span class='op'>*</span><span class='ident'>numbers</span>.<span class='ident'>get_mut</span>(<span class='ident'>num</span> <span class='kw'>as</span> <span class='ident'>uint</span>) <span class='op'>=</span> <span class='op'>*</span><span class='ident'>numbers</span>.<span class='ident'>get_mut</span>(<span class='ident'>num</span> <span class='kw'>as</span> <span class='ident'>uint</span>) <span class='op'>+</span> <span class='number'>1</span>;
+            <span class='comment'>// This is ugly for now, but will be replaced by</span>
+            <span class='comment'>// `numbers[num as uint] += 1` in the near future.</span>
+            <span class='comment'>// See: https://github.com/rust-lang/rust/issues/6515</span>
+            <span class='op'>*</span><span class='ident'>numbers</span>.<span class='ident'>get_mut</span>(<span class='ident'>num</span> <span class='kw'>as</span> <span class='ident'>uint</span>) <span class='op'>=</span> <span class='op'>*</span><span class='ident'>numbers</span>.<span class='ident'>get_mut</span>(<span class='ident'>num</span> <span class='kw'>as</span> <span class='ident'>uint</span>) <span class='op'>+</span> <span class='number'>1</span>;
 
-            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='op'>*</span><span class='ident'>numbers</span>.<span class='ident'>get</span>(<span class='ident'>num</span> <span class='kw'>as</span> <span class='ident'>uint</span>));<span class='comment'>
+            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='op'>*</span><span class='ident'>numbers</span>.<span class='ident'>get</span>(<span class='ident'>num</span> <span class='kw'>as</span> <span class='ident'>uint</span>));
 
-            // When `numbers` goes out of scope the lock is dropped
-        </span>})
+            <span class='comment'>// When `numbers` goes out of scope the lock is dropped</span>
+        })
     }
 }
 </pre>

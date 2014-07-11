@@ -7,8 +7,6 @@
 
     <title>lib.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -1748,17 +1746,17 @@
 <span id='1706'>1706</span>
 <span id='1707'>1707</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! Support code for rustc&#39;s built in unit-test and micro-benchmarking</span>
+<span class='doccomment'>//! Support code for rustc&#39;s built in unit-test and micro-benchmarking</span>
 <span class='doccomment'>//! framework.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! Almost all user code will only be interested in `Bencher` and</span>
@@ -1766,14 +1764,14 @@
 <span class='doccomment'>//! benchmarks themselves) should be done via the `#[test]` and</span>
 <span class='doccomment'>//! `#[bench]` attributes.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! See the [Testing Guide](../guide-testing.html) for more details.</span><span class='comment'>
+<span class='doccomment'>//! See the [Testing Guide](../guide-testing.html) for more details.</span>
 
-// Currently, not much of this is meant for users. It is intended to
-// support the simplest interface possible for representing and
-// running tests while providing a base that other test frameworks may
-// build off of.
+<span class='comment'>// Currently, not much of this is meant for users. It is intended to</span>
+<span class='comment'>// support the simplest interface possible for representing and</span>
+<span class='comment'>// running tests while providing a base that other test frameworks may</span>
+<span class='comment'>// build off of.</span>
 
-</span><span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_id</span> <span class='op'>=</span> <span class='string'>&quot;test#0.11.0-pre&quot;</span>]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_name</span> <span class='op'>=</span> <span class='string'>&quot;test&quot;</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>experimental</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>comment</span> <span class='op'>=</span> <span class='string'>&quot;Rust internal test library only used by rustc&quot;</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>license</span> <span class='op'>=</span> <span class='string'>&quot;MIT/ASL2&quot;</span>]</span>
@@ -1781,7 +1779,7 @@
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_type</span> <span class='op'>=</span> <span class='string'>&quot;dylib&quot;</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>doc</span>(<span class='ident'>html_logo_url</span> <span class='op'>=</span> <span class='string'>&quot;http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png&quot;</span>,
        <span class='ident'>html_favicon_url</span> <span class='op'>=</span> <span class='string'>&quot;http://www.rust-lang.org/favicon.ico&quot;</span>,
-       <span class='ident'>html_root_url</span> <span class='op'>=</span> <span class='string'>&quot;http://doc.rust-lang.org/&quot;</span>)]</span>
+       <span class='ident'>html_root_url</span> <span class='op'>=</span> <span class='string'>&quot;http://doc.rust-lang.org/0.11.0/&quot;</span>)]</span>
 
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>asm</span>, <span class='ident'>macro_rules</span>, <span class='ident'>phase</span>)]</span>
 
@@ -1812,10 +1810,10 @@
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>os</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>str</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>string</span>::<span class='ident'>String</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>task</span>::<span class='ident'>TaskBuilder</span>;<span class='comment'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>task</span>::<span class='ident'>TaskBuilder</span>;
 
-// to be used by rustc to compile tests in libtest
-</span><span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>test</span> {
+<span class='comment'>// to be used by rustc to compile tests in libtest</span>
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>test</span> {
     <span class='kw'>pub</span> <span class='kw'>use</span> {<span class='ident'>Bencher</span>, <span class='ident'>TestName</span>, <span class='ident'>TestResult</span>, <span class='ident'>TestDesc</span>,
              <span class='ident'>TestDescAndFn</span>, <span class='ident'>TestOpts</span>, <span class='ident'>TrFailed</span>, <span class='ident'>TrIgnored</span>, <span class='ident'>TrOk</span>,
              <span class='ident'>Metric</span>, <span class='ident'>MetricMap</span>, <span class='ident'>MetricAdded</span>, <span class='ident'>MetricRemoved</span>,
@@ -1825,14 +1823,14 @@
              <span class='ident'>parse_opts</span>, <span class='ident'>StaticBenchFn</span>};
 }
 
-<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>stats</span>;<span class='comment'>
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>stats</span>;
 
-// The name of a test. By convention this follows the rules for rust
-// paths; i.e. it should be a series of identifiers separated by double
-// colons. This way if some test runner wants to arrange the tests
-// hierarchically it may.
+<span class='comment'>// The name of a test. By convention this follows the rules for rust</span>
+<span class='comment'>// paths; i.e. it should be a series of identifiers separated by double</span>
+<span class='comment'>// colons. This way if some test runner wants to arrange the tests</span>
+<span class='comment'>// hierarchically it may.</span>
 
-</span><span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Eq</span>, <span class='ident'>Hash</span>)]</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Eq</span>, <span class='ident'>Hash</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>TestName</span> {
     <span class='ident'>StaticTestName</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>),
     <span class='ident'>DynTestName</span>(<span class='ident'>String</span>)
@@ -1877,13 +1875,13 @@
 <span class='doccomment'>/// Represents a benchmark function.</span>
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>TDynBenchFn</span> {
     <span class='kw'>fn</span> <span class='ident'>run</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>harness</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Bencher</span>);
-}<span class='comment'>
+}
 
-// A function that runs a test. If the function returns successfully,
-// the test succeeds; if the function fails then the test fails. We
-// may need to come up with a more clever definition of test in order
-// to support isolation of tests into tasks.
-</span><span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>TestFn</span> {
+<span class='comment'>// A function that runs a test. If the function returns successfully,</span>
+<span class='comment'>// the test succeeds; if the function fails then the test fails. We</span>
+<span class='comment'>// may need to come up with a more clever definition of test in order</span>
+<span class='comment'>// to support isolation of tests into tasks.</span>
+<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>TestFn</span> {
     <span class='ident'>StaticTestFn</span>(<span class='kw'>fn</span>()),
     <span class='ident'>StaticBenchFn</span>(<span class='kw'>fn</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Bencher</span>)),
     <span class='ident'>StaticMetricFn</span>(<span class='kw'>proc</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>MetricMap</span>)),
@@ -1928,11 +1926,11 @@
     <span class='ident'>ns_start</span>: <span class='ident'>u64</span>,
     <span class='ident'>ns_end</span>: <span class='ident'>u64</span>,
     <span class='kw'>pub</span> <span class='ident'>bytes</span>: <span class='ident'>u64</span>,
-}<span class='comment'>
+}
 
-// The definition of a single test. A test runner will run a list of
-// these.
-</span><span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>Show</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Eq</span>, <span class='ident'>Hash</span>)]</span>
+<span class='comment'>// The definition of a single test. A test runner will run a list of</span>
+<span class='comment'>// these.</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>Show</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Eq</span>, <span class='ident'>Hash</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>TestDesc</span> {
     <span class='kw'>pub</span> <span class='ident'>name</span>: <span class='ident'>TestName</span>,
     <span class='kw'>pub</span> <span class='ident'>ignore</span>: <span class='ident'>bool</span>,
@@ -1977,11 +1975,11 @@
     <span class='ident'>Regression</span>(<span class='ident'>f64</span>)
 }
 
-<span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>MetricDiff</span> <span class='op'>=</span> <span class='ident'>TreeMap</span><span class='op'>&lt;</span><span class='ident'>String</span>,<span class='ident'>MetricChange</span><span class='op'>&gt;</span>;<span class='comment'>
+<span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>MetricDiff</span> <span class='op'>=</span> <span class='ident'>TreeMap</span><span class='op'>&lt;</span><span class='ident'>String</span>,<span class='ident'>MetricChange</span><span class='op'>&gt;</span>;
 
-// The default console test runner. It accepts the command line
-// arguments and a vector of test_descs.
-</span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>test_main</span>(<span class='ident'>args</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>String</span>], <span class='ident'>tests</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>TestDescAndFn</span><span class='op'>&gt;</span> ) {
+<span class='comment'>// The default console test runner. It accepts the command line</span>
+<span class='comment'>// arguments and a vector of test_descs.</span>
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>test_main</span>(<span class='ident'>args</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>String</span>], <span class='ident'>tests</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>TestDescAndFn</span><span class='op'>&gt;</span> ) {
     <span class='kw'>let</span> <span class='ident'>opts</span> <span class='op'>=</span>
         <span class='kw'>match</span> <span class='ident'>parse_opts</span>(<span class='ident'>args</span>) {
             <span class='prelude-val'>Some</span>(<span class='prelude-val'>Ok</span>(<span class='ident'>o</span>)) <span class='op'>=&gt;</span> <span class='ident'>o</span>,
@@ -1993,16 +1991,16 @@
         <span class='prelude-val'>Ok</span>(<span class='boolval'>false</span>) <span class='op'>=&gt;</span> <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;Some tests failed&quot;</span>),
         <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;io error when running tests: {}&quot;</span>, <span class='ident'>e</span>),
     }
-}<span class='comment'>
+}
 
-// A variant optimized for invocation with a static test vector.
-// This will fail (intentionally) when fed any dynamic tests, because
-// it is copying the static values out into a dynamic vector and cannot
-// copy dynamic values. It is doing this because from this point on
-// a ~[TestDescAndFn] is used in order to effect ownership-transfer
-// semantics into parallel test runners, which in turn requires a ~[]
-// rather than a &amp;[].
-</span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>test_main_static</span>(<span class='ident'>args</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>String</span>], <span class='ident'>tests</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>TestDescAndFn</span>]) {
+<span class='comment'>// A variant optimized for invocation with a static test vector.</span>
+<span class='comment'>// This will fail (intentionally) when fed any dynamic tests, because</span>
+<span class='comment'>// it is copying the static values out into a dynamic vector and cannot</span>
+<span class='comment'>// copy dynamic values. It is doing this because from this point on</span>
+<span class='comment'>// a ~[TestDescAndFn] is used in order to effect ownership-transfer</span>
+<span class='comment'>// semantics into parallel test runners, which in turn requires a ~[]</span>
+<span class='comment'>// rather than a &amp;[].</span>
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>test_main_static</span>(<span class='ident'>args</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>String</span>], <span class='ident'>tests</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>TestDescAndFn</span>]) {
     <span class='kw'>let</span> <span class='ident'>owned_tests</span> <span class='op'>=</span> <span class='ident'>tests</span>.<span class='ident'>iter</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>t</span><span class='op'>|</span> {
         <span class='kw'>match</span> <span class='ident'>t</span>.<span class='ident'>testfn</span> {
             <span class='ident'>StaticTestFn</span>(<span class='ident'>f</span>) <span class='op'>=&gt;</span> <span class='ident'>TestDescAndFn</span> { <span class='ident'>testfn</span>: <span class='ident'>StaticTestFn</span>(<span class='ident'>f</span>), <span class='ident'>desc</span>: <span class='ident'>t</span>.<span class='ident'>desc</span>.<span class='ident'>clone</span>() },
@@ -2110,15 +2108,15 @@ Test Attributes:
                      ignore the test on certain configurations.&quot;</span>,
              <span class='ident'>usage</span> <span class='op'>=</span> <span class='ident'>getopts</span>::<span class='ident'>usage</span>(<span class='ident'>message</span>.<span class='ident'>as_slice</span>(),
                                     <span class='ident'>optgroups</span>().<span class='ident'>as_slice</span>()));
-}<span class='comment'>
+}
 
-// Parses command line arguments into test options
-</span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>parse_opts</span>(<span class='ident'>args</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>String</span>]) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>OptRes</span><span class='op'>&gt;</span> {
+<span class='comment'>// Parses command line arguments into test options</span>
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>parse_opts</span>(<span class='ident'>args</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>String</span>]) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>OptRes</span><span class='op'>&gt;</span> {
     <span class='kw'>let</span> <span class='ident'>args_</span> <span class='op'>=</span> <span class='ident'>args</span>.<span class='ident'>tail</span>();
     <span class='kw'>let</span> <span class='ident'>matches</span> <span class='op'>=</span>
         <span class='kw'>match</span> <span class='ident'>getopts</span>::<span class='ident'>getopts</span>(<span class='ident'>args_</span>.<span class='ident'>as_slice</span>(), <span class='ident'>optgroups</span>().<span class='ident'>as_slice</span>()) {
           <span class='prelude-val'>Ok</span>(<span class='ident'>m</span>) <span class='op'>=&gt;</span> <span class='ident'>m</span>,
-          <span class='prelude-val'>Err</span>(<span class='ident'>f</span>) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='prelude-val'>Err</span>(<span class='ident'>f</span>.<span class='ident'>to_str</span>()))
+          <span class='prelude-val'>Err</span>(<span class='ident'>f</span>) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='prelude-val'>Err</span>(<span class='ident'>f</span>.<span class='ident'>to_string</span>()))
         };
 
     <span class='kw'>if</span> <span class='ident'>matches</span>.<span class='ident'>opt_present</span>(<span class='string'>&quot;h&quot;</span>) { <span class='ident'>usage</span>(<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>as_slice</span>()); <span class='kw'>return</span> <span class='prelude-val'>None</span>; }
@@ -2239,8 +2237,8 @@ Test Attributes:
     <span class='ident'>measured</span>: <span class='ident'>uint</span>,
     <span class='ident'>metrics</span>: <span class='ident'>MetricMap</span>,
     <span class='ident'>failures</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span>(<span class='ident'>TestDesc</span>, <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> )<span class='op'>&gt;</span> ,
-    <span class='ident'>max_name_len</span>: <span class='ident'>uint</span>,<span class='comment'> // number of columns to fill when aligning names
-</span>}
+    <span class='ident'>max_name_len</span>: <span class='ident'>uint</span>, <span class='comment'>// number of columns to fill when aligning names</span>
+}
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Writer</span><span class='op'>&gt;</span> <span class='ident'>ConsoleTestState</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>opts</span>: <span class='kw-2'>&amp;</span><span class='ident'>TestOpts</span>,
@@ -2382,7 +2380,7 @@ Test Attributes:
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>failures</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>fail_out</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>new</span>();
         <span class='kw'>for</span> <span class='kw-2'>&amp;</span>(<span class='kw-2'>ref</span> <span class='ident'>f</span>, <span class='kw-2'>ref</span> <span class='ident'>stdout</span>) <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>failures</span>.<span class='ident'>iter</span>() {
-            <span class='ident'>failures</span>.<span class='ident'>push</span>(<span class='ident'>f</span>.<span class='ident'>name</span>.<span class='ident'>to_str</span>());
+            <span class='ident'>failures</span>.<span class='ident'>push</span>(<span class='ident'>f</span>.<span class='ident'>name</span>.<span class='ident'>to_string</span>());
             <span class='kw'>if</span> <span class='ident'>stdout</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='number'>0</span> {
                 <span class='ident'>fail_out</span>.<span class='ident'>push_str</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;---- {} stdout ----\n\t&quot;</span>,
                                           <span class='ident'>f</span>.<span class='ident'>name</span>.<span class='ident'>as_slice</span>()).<span class='ident'>as_slice</span>());
@@ -2487,9 +2485,9 @@ Test Attributes:
         <span class='kw'>let</span> <span class='ident'>success</span> <span class='op'>=</span> <span class='ident'>ratchet_success</span> <span class='op'>&amp;&amp;</span> <span class='ident'>test_success</span>;
 
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>write_plain</span>(<span class='string'>&quot;\ntest result: &quot;</span>));
-        <span class='kw'>if</span> <span class='ident'>success</span> {<span class='comment'>
-            // There&#39;s no parallelism at this point so it&#39;s safe to use color
-            </span><span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>write_ok</span>());
+        <span class='kw'>if</span> <span class='ident'>success</span> {
+            <span class='comment'>// There&#39;s no parallelism at this point so it&#39;s safe to use color</span>
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>write_ok</span>());
         } <span class='kw'>else</span> {
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>write_failed</span>());
         }
@@ -2520,10 +2518,10 @@ Test Attributes:
              <span class='ident'>bs</span>.<span class='ident'>ns_iter_summ</span>.<span class='ident'>median</span> <span class='kw'>as</span> <span class='ident'>uint</span>,
              (<span class='ident'>bs</span>.<span class='ident'>ns_iter_summ</span>.<span class='ident'>max</span> <span class='op'>-</span> <span class='ident'>bs</span>.<span class='ident'>ns_iter_summ</span>.<span class='ident'>min</span>) <span class='kw'>as</span> <span class='ident'>uint</span>)
     }
-}<span class='comment'>
+}
 
-// A simple console test runner
-</span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>run_tests_console</span>(<span class='ident'>opts</span>: <span class='kw-2'>&amp;</span><span class='ident'>TestOpts</span>, <span class='ident'>tests</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>TestDescAndFn</span><span class='op'>&gt;</span> ) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='ident'>IoResult</span><span class='op'>&lt;</span><span class='ident'>bool</span><span class='op'>&gt;</span> {
+<span class='comment'>// A simple console test runner</span>
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>run_tests_console</span>(<span class='ident'>opts</span>: <span class='kw-2'>&amp;</span><span class='ident'>TestOpts</span>, <span class='ident'>tests</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>TestDescAndFn</span><span class='op'>&gt;</span> ) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='ident'>IoResult</span><span class='op'>&lt;</span><span class='ident'>bool</span><span class='op'>&gt;</span> {
 
     <span class='kw'>fn</span> <span class='ident'>callback</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Writer</span><span class='op'>&gt;</span>(<span class='ident'>event</span>: <span class='kw-2'>&amp;</span><span class='ident'>TestEvent</span>, <span class='ident'>st</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>ConsoleTestState</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='kw'>match</span> (<span class='op'>*</span><span class='ident'>event</span>).<span class='ident'>clone</span>() {
@@ -2665,11 +2663,11 @@ Test Attributes:
                 <span class='ident'>StaticTestFn</span>(_) <span class='op'>|</span> <span class='ident'>DynTestFn</span>(_) <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
                 _ <span class='op'>=&gt;</span> <span class='boolval'>false</span>
             }
-        });<span class='comment'>
+        });
 
-    // It&#39;s tempting to just spawn all the tests at once, but since we have
-    // many tests that run in other processes we would be making a big mess.
-    </span><span class='kw'>let</span> <span class='ident'>concurrency</span> <span class='op'>=</span> <span class='ident'>get_concurrency</span>();
+    <span class='comment'>// It&#39;s tempting to just spawn all the tests at once, but since we have</span>
+    <span class='comment'>// many tests that run in other processes we would be making a big mess.</span>
+    <span class='kw'>let</span> <span class='ident'>concurrency</span> <span class='op'>=</span> <span class='ident'>get_concurrency</span>();
 
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>remaining</span> <span class='op'>=</span> <span class='ident'>filtered_tests</span>;
     <span class='ident'>remaining</span>.<span class='ident'>reverse</span>();
@@ -2680,11 +2678,11 @@ Test Attributes:
     <span class='kw'>while</span> <span class='ident'>pending</span> <span class='op'>&gt;</span> <span class='number'>0</span> <span class='op'>||</span> <span class='op'>!</span><span class='ident'>remaining</span>.<span class='ident'>is_empty</span>() {
         <span class='kw'>while</span> <span class='ident'>pending</span> <span class='op'>&lt;</span> <span class='ident'>concurrency</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='ident'>remaining</span>.<span class='ident'>is_empty</span>() {
             <span class='kw'>let</span> <span class='ident'>test</span> <span class='op'>=</span> <span class='ident'>remaining</span>.<span class='ident'>pop</span>().<span class='ident'>unwrap</span>();
-            <span class='kw'>if</span> <span class='ident'>concurrency</span> <span class='op'>==</span> <span class='number'>1</span> {<span class='comment'>
-                // We are doing one test at a time so we can print the name
-                // of the test before we run it. Useful for debugging tests
-                // that hang forever.
-                </span><span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>callback</span>(<span class='ident'>TeWait</span>(<span class='ident'>test</span>.<span class='ident'>desc</span>.<span class='ident'>clone</span>(), <span class='ident'>test</span>.<span class='ident'>testfn</span>.<span class='ident'>padding</span>())));
+            <span class='kw'>if</span> <span class='ident'>concurrency</span> <span class='op'>==</span> <span class='number'>1</span> {
+                <span class='comment'>// We are doing one test at a time so we can print the name</span>
+                <span class='comment'>// of the test before we run it. Useful for debugging tests</span>
+                <span class='comment'>// that hang forever.</span>
+                <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>callback</span>(<span class='ident'>TeWait</span>(<span class='ident'>test</span>.<span class='ident'>desc</span>.<span class='ident'>clone</span>(), <span class='ident'>test</span>.<span class='ident'>testfn</span>.<span class='ident'>padding</span>())));
             }
             <span class='ident'>run_test</span>(<span class='ident'>opts</span>, <span class='op'>!</span><span class='ident'>opts</span>.<span class='ident'>run_tests</span>, <span class='ident'>test</span>, <span class='ident'>tx</span>.<span class='ident'>clone</span>());
             <span class='ident'>pending</span> <span class='op'>+=</span> <span class='number'>1</span>;
@@ -2696,11 +2694,11 @@ Test Attributes:
         }
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>callback</span>(<span class='ident'>TeResult</span>(<span class='ident'>desc</span>, <span class='ident'>result</span>, <span class='ident'>stdout</span>)));
         <span class='ident'>pending</span> <span class='op'>-=</span> <span class='number'>1</span>;
-    }<span class='comment'>
+    }
 
-    // All benchmarks run at the end, in serial.
-    // (this includes metric fns)
-    </span><span class='kw'>for</span> <span class='ident'>b</span> <span class='kw'>in</span> <span class='ident'>filtered_benchs_and_metrics</span>.<span class='ident'>move_iter</span>() {
+    <span class='comment'>// All benchmarks run at the end, in serial.</span>
+    <span class='comment'>// (this includes metric fns)</span>
+    <span class='kw'>for</span> <span class='ident'>b</span> <span class='kw'>in</span> <span class='ident'>filtered_benchs_and_metrics</span>.<span class='ident'>move_iter</span>() {
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>callback</span>(<span class='ident'>TeWait</span>(<span class='ident'>b</span>.<span class='ident'>desc</span>.<span class='ident'>clone</span>(), <span class='ident'>b</span>.<span class='ident'>testfn</span>.<span class='ident'>padding</span>())));
         <span class='ident'>run_test</span>(<span class='ident'>opts</span>, <span class='op'>!</span><span class='ident'>opts</span>.<span class='ident'>run_benchmarks</span>, <span class='ident'>b</span>, <span class='ident'>tx</span>.<span class='ident'>clone</span>());
         <span class='kw'>let</span> (<span class='ident'>test</span>, <span class='ident'>result</span>, <span class='ident'>stdout</span>) <span class='op'>=</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>();
@@ -2726,19 +2724,19 @@ Test Attributes:
 }
 
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>filter_tests</span>(<span class='ident'>opts</span>: <span class='kw-2'>&amp;</span><span class='ident'>TestOpts</span>, <span class='ident'>tests</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>TestDescAndFn</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>TestDescAndFn</span><span class='op'>&gt;</span> {
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>filtered</span> <span class='op'>=</span> <span class='ident'>tests</span>;<span class='comment'>
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>filtered</span> <span class='op'>=</span> <span class='ident'>tests</span>;
 
-    // Remove tests that don&#39;t match the test filter
-    </span><span class='ident'>filtered</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>opts</span>.<span class='ident'>filter</span> {
+    <span class='comment'>// Remove tests that don&#39;t match the test filter</span>
+    <span class='ident'>filtered</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>opts</span>.<span class='ident'>filter</span> {
         <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>filtered</span>,
         <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>re</span>) <span class='op'>=&gt;</span> {
             <span class='ident'>filtered</span>.<span class='ident'>move_iter</span>()
                 .<span class='ident'>filter</span>(<span class='op'>|</span><span class='ident'>test</span><span class='op'>|</span> <span class='ident'>re</span>.<span class='ident'>is_match</span>(<span class='ident'>test</span>.<span class='ident'>desc</span>.<span class='ident'>name</span>.<span class='ident'>as_slice</span>())).<span class='ident'>collect</span>()
         }
-    };<span class='comment'>
+    };
 
-    // Maybe pull out the ignored test and unignore them
-    </span><span class='ident'>filtered</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>opts</span>.<span class='ident'>run_ignored</span> {
+    <span class='comment'>// Maybe pull out the ignored test and unignore them</span>
+    <span class='ident'>filtered</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>opts</span>.<span class='ident'>run_ignored</span> {
         <span class='ident'>filtered</span>
     } <span class='kw'>else</span> {
         <span class='kw'>fn</span> <span class='ident'>filter</span>(<span class='ident'>test</span>: <span class='ident'>TestDescAndFn</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>TestDescAndFn</span><span class='op'>&gt;</span> {
@@ -2753,19 +2751,19 @@ Test Attributes:
             }
         };
         <span class='ident'>filtered</span>.<span class='ident'>move_iter</span>().<span class='ident'>filter_map</span>(<span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>filter</span>(<span class='ident'>x</span>)).<span class='ident'>collect</span>()
-    };<span class='comment'>
+    };
 
-    // Sort the tests alphabetically
-    </span><span class='ident'>filtered</span>.<span class='ident'>sort_by</span>(<span class='op'>|</span><span class='ident'>t1</span>, <span class='ident'>t2</span><span class='op'>|</span> <span class='ident'>t1</span>.<span class='ident'>desc</span>.<span class='ident'>name</span>.<span class='ident'>as_slice</span>().<span class='ident'>cmp</span>(<span class='kw-2'>&amp;</span><span class='ident'>t2</span>.<span class='ident'>desc</span>.<span class='ident'>name</span>.<span class='ident'>as_slice</span>()));<span class='comment'>
+    <span class='comment'>// Sort the tests alphabetically</span>
+    <span class='ident'>filtered</span>.<span class='ident'>sort_by</span>(<span class='op'>|</span><span class='ident'>t1</span>, <span class='ident'>t2</span><span class='op'>|</span> <span class='ident'>t1</span>.<span class='ident'>desc</span>.<span class='ident'>name</span>.<span class='ident'>as_slice</span>().<span class='ident'>cmp</span>(<span class='kw-2'>&amp;</span><span class='ident'>t2</span>.<span class='ident'>desc</span>.<span class='ident'>name</span>.<span class='ident'>as_slice</span>()));
 
-    // Shard the remaining tests, if sharding requested.
-    </span><span class='kw'>match</span> <span class='ident'>opts</span>.<span class='ident'>test_shard</span> {
+    <span class='comment'>// Shard the remaining tests, if sharding requested.</span>
+    <span class='kw'>match</span> <span class='ident'>opts</span>.<span class='ident'>test_shard</span> {
         <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>filtered</span>,
         <span class='prelude-val'>Some</span>((<span class='ident'>a</span>,<span class='ident'>b</span>)) <span class='op'>=&gt;</span> {
-            <span class='ident'>filtered</span>.<span class='ident'>move_iter</span>().<span class='ident'>enumerate</span>()<span class='comment'>
-            // note: using a - 1 so that the valid shards, for example, are
-            // 1.2 and 2.2 instead of 0.2 and 1.2
-            </span>.<span class='ident'>filter</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span>(<span class='ident'>i</span>,_)<span class='op'>|</span> <span class='ident'>i</span> <span class='op'>%</span> <span class='ident'>b</span> <span class='op'>==</span> (<span class='ident'>a</span> <span class='op'>-</span> <span class='number'>1</span>))
+            <span class='ident'>filtered</span>.<span class='ident'>move_iter</span>().<span class='ident'>enumerate</span>()
+            <span class='comment'>// note: using a - 1 so that the valid shards, for example, are</span>
+            <span class='comment'>// 1.2 and 2.2 instead of 0.2 and 1.2</span>
+            .<span class='ident'>filter</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span>(<span class='ident'>i</span>,_)<span class='op'>|</span> <span class='ident'>i</span> <span class='op'>%</span> <span class='ident'>b</span> <span class='op'>==</span> (<span class='ident'>a</span> <span class='op'>-</span> <span class='number'>1</span>))
             .<span class='ident'>map</span>(<span class='op'>|</span>(_,<span class='ident'>t</span>)<span class='op'>|</span> <span class='ident'>t</span>)
             .<span class='ident'>collect</span>()
         }
@@ -2888,10 +2886,10 @@ Test Attributes:
     <span class='doccomment'>/// Write MetricDiff to a file.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>save</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>p</span>: <span class='kw-2'>&amp;</span><span class='ident'>Path</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>file</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>File</span>::<span class='ident'>create</span>(<span class='ident'>p</span>));
-        <span class='kw'>let</span> <span class='ident'>MetricMap</span>(<span class='kw-2'>ref</span> <span class='ident'>map</span>) <span class='op'>=</span> <span class='op'>*</span><span class='self'>self</span>;<span class='comment'>
+        <span class='kw'>let</span> <span class='ident'>MetricMap</span>(<span class='kw-2'>ref</span> <span class='ident'>map</span>) <span class='op'>=</span> <span class='op'>*</span><span class='self'>self</span>;
 
-        // FIXME(pcwalton): Yuck.
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>new_map</span> <span class='op'>=</span> <span class='ident'>TreeMap</span>::<span class='ident'>new</span>();
+        <span class='comment'>// FIXME(pcwalton): Yuck.</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>new_map</span> <span class='op'>=</span> <span class='ident'>TreeMap</span>::<span class='ident'>new</span>();
         <span class='kw'>for</span> (<span class='kw-2'>ref</span> <span class='ident'>key</span>, <span class='kw-2'>ref</span> <span class='ident'>value</span>) <span class='kw'>in</span> <span class='ident'>map</span>.<span class='ident'>iter</span>() {
             <span class='ident'>new_map</span>.<span class='ident'>insert</span>(<span class='ident'>key</span>.<span class='ident'>to_string</span>(), (<span class='op'>*</span><span class='ident'>value</span>).<span class='ident'>clone</span>());
         }
@@ -2923,20 +2921,20 @@ Test Attributes:
                         <span class='ident'>LikelyNoise</span>
                     } <span class='kw'>else</span> {
                         <span class='kw'>let</span> <span class='ident'>pct</span> <span class='op'>=</span> <span class='ident'>delta</span>.<span class='ident'>abs</span>() <span class='op'>/</span> <span class='ident'>vold</span>.<span class='ident'>value</span>.<span class='ident'>max</span>(<span class='ident'>f64</span>::<span class='ident'>EPSILON</span>) <span class='op'>*</span> <span class='number'>100.0</span>;
-                        <span class='kw'>if</span> <span class='ident'>vold</span>.<span class='ident'>noise</span> <span class='op'>&lt;</span> <span class='number'>0.0</span> {<span class='comment'>
-                            // When &#39;noise&#39; is negative, it means we want
-                            // to see deltas that go up over time, and can
-                            // only tolerate slight negative movement.
-                            </span><span class='kw'>if</span> <span class='ident'>delta</span> <span class='op'>&lt;</span> <span class='number'>0.0</span> {
+                        <span class='kw'>if</span> <span class='ident'>vold</span>.<span class='ident'>noise</span> <span class='op'>&lt;</span> <span class='number'>0.0</span> {
+                            <span class='comment'>// When &#39;noise&#39; is negative, it means we want</span>
+                            <span class='comment'>// to see deltas that go up over time, and can</span>
+                            <span class='comment'>// only tolerate slight negative movement.</span>
+                            <span class='kw'>if</span> <span class='ident'>delta</span> <span class='op'>&lt;</span> <span class='number'>0.0</span> {
                                 <span class='ident'>Regression</span>(<span class='ident'>pct</span>)
                             } <span class='kw'>else</span> {
                                 <span class='ident'>Improvement</span>(<span class='ident'>pct</span>)
                             }
-                        } <span class='kw'>else</span> {<span class='comment'>
-                            // When &#39;noise&#39; is positive, it means we want
-                            // to see deltas that go down over time, and
-                            // can only tolerate slight positive movements.
-                            </span><span class='kw'>if</span> <span class='ident'>delta</span> <span class='op'>&lt;</span> <span class='number'>0.0</span> {
+                        } <span class='kw'>else</span> {
+                            <span class='comment'>// When &#39;noise&#39; is positive, it means we want</span>
+                            <span class='comment'>// to see deltas that go down over time, and</span>
+                            <span class='comment'>// can only tolerate slight positive movements.</span>
+                            <span class='kw'>if</span> <span class='ident'>delta</span> <span class='op'>&lt;</span> <span class='number'>0.0</span> {
                                 <span class='ident'>Improvement</span>(<span class='ident'>pct</span>)
                             } <span class='kw'>else</span> {
                                 <span class='ident'>Regression</span>(<span class='ident'>pct</span>)
@@ -3004,20 +3002,20 @@ Test Attributes:
         }
         <span class='kw'>return</span> (<span class='ident'>diff</span>, <span class='ident'>ok</span>)
     }
-}<span class='comment'>
+}
 
 
-// Benchmarking
+<span class='comment'>// Benchmarking</span>
 
-</span><span class='doccomment'>/// A function that is opaque to the optimizer, to allow benchmarks to</span>
+<span class='doccomment'>/// A function that is opaque to the optimizer, to allow benchmarks to</span>
 <span class='doccomment'>/// pretend to use outputs to assist in avoiding dead-code</span>
 <span class='doccomment'>/// elimination.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// This function is a no-op, and does not even read from `dummy`.</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>black_box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>dummy</span>: <span class='ident'>T</span>) {<span class='comment'>
-    // we need to &quot;use&quot; the argument in some way LLVM can&#39;t
-    // introspect.
-    </span><span class='kw'>unsafe</span> {<span class='macro'>asm</span><span class='macro'>!</span>(<span class='string'>&quot;&quot;</span> : : <span class='string'>&quot;r&quot;</span>(<span class='kw-2'>&amp;</span><span class='ident'>dummy</span>))}
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>black_box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>dummy</span>: <span class='ident'>T</span>) {
+    <span class='comment'>// we need to &quot;use&quot; the argument in some way LLVM can&#39;t</span>
+    <span class='comment'>// introspect.</span>
+    <span class='kw'>unsafe</span> {<span class='macro'>asm</span><span class='macro'>!</span>(<span class='string'>&quot;&quot;</span> : : <span class='string'>&quot;r&quot;</span>(<span class='kw-2'>&amp;</span><span class='ident'>dummy</span>))}
 }
 
 
@@ -3051,28 +3049,28 @@ Test Attributes:
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>bench_n</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>n</span>: <span class='ident'>u64</span>, <span class='ident'>f</span>: <span class='op'>|</span><span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Bencher</span><span class='op'>|</span>) {
         <span class='self'>self</span>.<span class='ident'>iterations</span> <span class='op'>=</span> <span class='ident'>n</span>;
         <span class='ident'>f</span>(<span class='self'>self</span>);
-    }<span class='comment'>
+    }
 
-    // This is a more statistics-driven benchmark algorithm
-    </span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>auto_bench</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>f</span>: <span class='op'>|</span><span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Bencher</span><span class='op'>|</span>) <span class='op'>-&gt;</span> <span class='ident'>stats</span>::<span class='ident'>Summary</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span> {<span class='comment'>
+    <span class='comment'>// This is a more statistics-driven benchmark algorithm</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>auto_bench</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>f</span>: <span class='op'>|</span><span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Bencher</span><span class='op'>|</span>) <span class='op'>-&gt;</span> <span class='ident'>stats</span>::<span class='ident'>Summary</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span> {
 
-        // Initial bench run to get ballpark figure.
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='number'>1_u64</span>;
-        <span class='self'>self</span>.<span class='ident'>bench_n</span>(<span class='ident'>n</span>, <span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>f</span>(<span class='ident'>x</span>));<span class='comment'>
+        <span class='comment'>// Initial bench run to get ballpark figure.</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='number'>1_u64</span>;
+        <span class='self'>self</span>.<span class='ident'>bench_n</span>(<span class='ident'>n</span>, <span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>f</span>(<span class='ident'>x</span>));
 
-        // Try to estimate iter count for 1ms falling back to 1m
-        // iterations if first run took &lt; 1ns.
-        </span><span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>ns_per_iter</span>() <span class='op'>==</span> <span class='number'>0</span> {
+        <span class='comment'>// Try to estimate iter count for 1ms falling back to 1m</span>
+        <span class='comment'>// iterations if first run took &lt; 1ns.</span>
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>ns_per_iter</span>() <span class='op'>==</span> <span class='number'>0</span> {
             <span class='ident'>n</span> <span class='op'>=</span> <span class='number'>1_000_000</span>;
         } <span class='kw'>else</span> {
             <span class='ident'>n</span> <span class='op'>=</span> <span class='number'>1_000_000</span> <span class='op'>/</span> <span class='ident'>cmp</span>::<span class='ident'>max</span>(<span class='self'>self</span>.<span class='ident'>ns_per_iter</span>(), <span class='number'>1</span>);
-        }<span class='comment'>
-        // if the first run took more than 1ms we don&#39;t want to just
-        // be left doing 0 iterations on every loop. The unfortunate
-        // side effect of not being able to do as many runs is
-        // automatically handled by the statistical analysis below
-        // (i.e. larger error bars).
-        </span><span class='kw'>if</span> <span class='ident'>n</span> <span class='op'>==</span> <span class='number'>0</span> { <span class='ident'>n</span> <span class='op'>=</span> <span class='number'>1</span>; }
+        }
+        <span class='comment'>// if the first run took more than 1ms we don&#39;t want to just</span>
+        <span class='comment'>// be left doing 0 iterations on every loop. The unfortunate</span>
+        <span class='comment'>// side effect of not being able to do as many runs is</span>
+        <span class='comment'>// automatically handled by the statistical analysis below</span>
+        <span class='comment'>// (i.e. larger error bars).</span>
+        <span class='kw'>if</span> <span class='ident'>n</span> <span class='op'>==</span> <span class='number'>0</span> { <span class='ident'>n</span> <span class='op'>=</span> <span class='number'>1</span>; }
 
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>total_run</span> <span class='op'>=</span> <span class='number'>0</span>;
         <span class='kw'>let</span> <span class='ident'>samples</span> : <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> [<span class='ident'>f64</span>] <span class='op'>=</span> [<span class='number'>0.0_f64</span>, ..<span class='number'>50</span>];
@@ -3096,19 +3094,19 @@ Test Attributes:
             <span class='kw'>let</span> <span class='ident'>summ5</span> <span class='op'>=</span> <span class='ident'>stats</span>::<span class='ident'>Summary</span>::<span class='ident'>new</span>(<span class='ident'>samples</span>);
 
             <span class='kw'>let</span> <span class='ident'>now</span> <span class='op'>=</span> <span class='ident'>precise_time_ns</span>();
-            <span class='kw'>let</span> <span class='ident'>loop_run</span> <span class='op'>=</span> <span class='ident'>now</span> <span class='op'>-</span> <span class='ident'>loop_start</span>;<span class='comment'>
+            <span class='kw'>let</span> <span class='ident'>loop_run</span> <span class='op'>=</span> <span class='ident'>now</span> <span class='op'>-</span> <span class='ident'>loop_start</span>;
 
-            // If we&#39;ve run for 100ms and seem to have converged to a
-            // stable median.
-            </span><span class='kw'>if</span> <span class='ident'>loop_run</span> <span class='op'>&gt;</span> <span class='number'>100_000_000</span> <span class='op'>&amp;&amp;</span>
+            <span class='comment'>// If we&#39;ve run for 100ms and seem to have converged to a</span>
+            <span class='comment'>// stable median.</span>
+            <span class='kw'>if</span> <span class='ident'>loop_run</span> <span class='op'>&gt;</span> <span class='number'>100_000_000</span> <span class='op'>&amp;&amp;</span>
                 <span class='ident'>summ</span>.<span class='ident'>median_abs_dev_pct</span> <span class='op'>&lt;</span> <span class='number'>1.0</span> <span class='op'>&amp;&amp;</span>
                 <span class='ident'>summ</span>.<span class='ident'>median</span> <span class='op'>-</span> <span class='ident'>summ5</span>.<span class='ident'>median</span> <span class='op'>&lt;</span> <span class='ident'>summ5</span>.<span class='ident'>median_abs_dev</span> {
                 <span class='kw'>return</span> <span class='ident'>summ5</span>;
             }
 
-            <span class='ident'>total_run</span> <span class='op'>+=</span> <span class='ident'>loop_run</span>;<span class='comment'>
-            // Longest we ever run for is 3s.
-            </span><span class='kw'>if</span> <span class='ident'>total_run</span> <span class='op'>&gt;</span> <span class='number'>3_000_000_000</span> {
+            <span class='ident'>total_run</span> <span class='op'>+=</span> <span class='ident'>loop_run</span>;
+            <span class='comment'>// Longest we ever run for is 3s.</span>
+            <span class='kw'>if</span> <span class='ident'>total_run</span> <span class='op'>&gt;</span> <span class='number'>3_000_000_000</span> {
                 <span class='kw'>return</span> <span class='ident'>summ5</span>;
             }
 
@@ -3242,11 +3240,11 @@ Test Attributes:
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>filter_for_ignored_option</span>() {<span class='comment'>
-        // When we run ignored tests the test filter should filter out all the
-        // unignored tests and flip the ignore flag on the rest to false
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>filter_for_ignored_option</span>() {
+        <span class='comment'>// When we run ignored tests the test filter should filter out all the</span>
+        <span class='comment'>// unignored tests and flip the ignore flag on the rest to false</span>
 
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>opts</span> <span class='op'>=</span> <span class='ident'>TestOpts</span>::<span class='ident'>new</span>();
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>opts</span> <span class='op'>=</span> <span class='ident'>TestOpts</span>::<span class='ident'>new</span>();
         <span class='ident'>opts</span>.<span class='ident'>run_tests</span> <span class='op'>=</span> <span class='boolval'>true</span>;
         <span class='ident'>opts</span>.<span class='ident'>run_ignored</span> <span class='op'>=</span> <span class='boolval'>true</span>;
 
@@ -3270,7 +3268,7 @@ Test Attributes:
         <span class='kw'>let</span> <span class='ident'>filtered</span> <span class='op'>=</span> <span class='ident'>filter_tests</span>(<span class='kw-2'>&amp;</span><span class='ident'>opts</span>, <span class='ident'>tests</span>);
 
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>filtered</span>.<span class='ident'>len</span>(), <span class='number'>1</span>);
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>filtered</span>.<span class='ident'>get</span>(<span class='number'>0</span>).<span class='ident'>desc</span>.<span class='ident'>name</span>.<span class='ident'>to_str</span>(),
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>filtered</span>.<span class='ident'>get</span>(<span class='number'>0</span>).<span class='ident'>desc</span>.<span class='ident'>name</span>.<span class='ident'>to_string</span>(),
                    <span class='string'>&quot;1&quot;</span>.<span class='ident'>to_string</span>());
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>filtered</span>.<span class='ident'>get</span>(<span class='number'>0</span>).<span class='ident'>desc</span>.<span class='ident'>ignore</span> <span class='op'>==</span> <span class='boolval'>false</span>);
     }
@@ -3321,7 +3319,7 @@ Test Attributes:
                  <span class='string'>&quot;test::sort_tests&quot;</span>.<span class='ident'>to_string</span>());
 
         <span class='kw'>for</span> (<span class='ident'>a</span>, <span class='ident'>b</span>) <span class='kw'>in</span> <span class='ident'>expected</span>.<span class='ident'>iter</span>().<span class='ident'>zip</span>(<span class='ident'>filtered</span>.<span class='ident'>iter</span>()) {
-            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>a</span> <span class='op'>==</span> <span class='ident'>b</span>.<span class='ident'>desc</span>.<span class='ident'>name</span>.<span class='ident'>to_str</span>());
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>a</span> <span class='op'>==</span> <span class='ident'>b</span>.<span class='ident'>desc</span>.<span class='ident'>name</span>.<span class='ident'>to_string</span>());
         }
     }
 
@@ -3423,32 +3421,32 @@ Test Attributes:
         <span class='ident'>m2</span>.<span class='ident'>insert_metric</span>(<span class='string'>&quot;runtime&quot;</span>, <span class='number'>1100.0</span>, <span class='number'>2.0</span>);
         <span class='ident'>m2</span>.<span class='ident'>insert_metric</span>(<span class='string'>&quot;throughput&quot;</span>, <span class='number'>50.0</span>, <span class='number'>2.0</span>);
 
-        <span class='ident'>m1</span>.<span class='ident'>save</span>(<span class='kw-2'>&amp;</span><span class='ident'>pth</span>).<span class='ident'>unwrap</span>();<span class='comment'>
+        <span class='ident'>m1</span>.<span class='ident'>save</span>(<span class='kw-2'>&amp;</span><span class='ident'>pth</span>).<span class='ident'>unwrap</span>();
 
-        // Ask for a ratchet that should fail to advance.
-        </span><span class='kw'>let</span> (<span class='ident'>diff1</span>, <span class='ident'>ok1</span>) <span class='op'>=</span> <span class='ident'>m2</span>.<span class='ident'>ratchet</span>(<span class='kw-2'>&amp;</span><span class='ident'>pth</span>, <span class='prelude-val'>None</span>);
+        <span class='comment'>// Ask for a ratchet that should fail to advance.</span>
+        <span class='kw'>let</span> (<span class='ident'>diff1</span>, <span class='ident'>ok1</span>) <span class='op'>=</span> <span class='ident'>m2</span>.<span class='ident'>ratchet</span>(<span class='kw-2'>&amp;</span><span class='ident'>pth</span>, <span class='prelude-val'>None</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ok1</span>, <span class='boolval'>false</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>diff1</span>.<span class='ident'>len</span>(), <span class='number'>2</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span>(<span class='ident'>diff1</span>.<span class='ident'>find</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;runtime&quot;</span>.<span class='ident'>to_string</span>()).<span class='ident'>unwrap</span>()), <span class='ident'>Regression</span>(<span class='number'>10.0</span>));
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span>(<span class='ident'>diff1</span>.<span class='ident'>find</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;throughput&quot;</span>.<span class='ident'>to_string</span>()).<span class='ident'>unwrap</span>()), <span class='ident'>LikelyNoise</span>);<span class='comment'>
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span>(<span class='ident'>diff1</span>.<span class='ident'>find</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;throughput&quot;</span>.<span class='ident'>to_string</span>()).<span class='ident'>unwrap</span>()), <span class='ident'>LikelyNoise</span>);
 
-        // Check that it was not rewritten.
-        </span><span class='kw'>let</span> <span class='ident'>m3</span> <span class='op'>=</span> <span class='ident'>MetricMap</span>::<span class='ident'>load</span>(<span class='kw-2'>&amp;</span><span class='ident'>pth</span>);
+        <span class='comment'>// Check that it was not rewritten.</span>
+        <span class='kw'>let</span> <span class='ident'>m3</span> <span class='op'>=</span> <span class='ident'>MetricMap</span>::<span class='ident'>load</span>(<span class='kw-2'>&amp;</span><span class='ident'>pth</span>);
         <span class='kw'>let</span> <span class='ident'>MetricMap</span>(<span class='ident'>m3</span>) <span class='op'>=</span> <span class='ident'>m3</span>;
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>m3</span>.<span class='ident'>len</span>(), <span class='number'>2</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span>(<span class='ident'>m3</span>.<span class='ident'>find</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;runtime&quot;</span>.<span class='ident'>to_string</span>()).<span class='ident'>unwrap</span>()), <span class='ident'>Metric</span>::<span class='ident'>new</span>(<span class='number'>1000.0</span>, <span class='number'>2.0</span>));
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span>(<span class='ident'>m3</span>.<span class='ident'>find</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;throughput&quot;</span>.<span class='ident'>to_string</span>()).<span class='ident'>unwrap</span>()), <span class='ident'>Metric</span>::<span class='ident'>new</span>(<span class='number'>50.0</span>, <span class='number'>2.0</span>));<span class='comment'>
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span>(<span class='ident'>m3</span>.<span class='ident'>find</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;throughput&quot;</span>.<span class='ident'>to_string</span>()).<span class='ident'>unwrap</span>()), <span class='ident'>Metric</span>::<span class='ident'>new</span>(<span class='number'>50.0</span>, <span class='number'>2.0</span>));
 
-        // Ask for a ratchet with an explicit noise-percentage override,
-        // that should advance.
-        </span><span class='kw'>let</span> (<span class='ident'>diff2</span>, <span class='ident'>ok2</span>) <span class='op'>=</span> <span class='ident'>m2</span>.<span class='ident'>ratchet</span>(<span class='kw-2'>&amp;</span><span class='ident'>pth</span>, <span class='prelude-val'>Some</span>(<span class='number'>10.0</span>));
+        <span class='comment'>// Ask for a ratchet with an explicit noise-percentage override,</span>
+        <span class='comment'>// that should advance.</span>
+        <span class='kw'>let</span> (<span class='ident'>diff2</span>, <span class='ident'>ok2</span>) <span class='op'>=</span> <span class='ident'>m2</span>.<span class='ident'>ratchet</span>(<span class='kw-2'>&amp;</span><span class='ident'>pth</span>, <span class='prelude-val'>Some</span>(<span class='number'>10.0</span>));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ok2</span>, <span class='boolval'>true</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>diff2</span>.<span class='ident'>len</span>(), <span class='number'>2</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span>(<span class='ident'>diff2</span>.<span class='ident'>find</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;runtime&quot;</span>.<span class='ident'>to_string</span>()).<span class='ident'>unwrap</span>()), <span class='ident'>LikelyNoise</span>);
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span>(<span class='ident'>diff2</span>.<span class='ident'>find</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;throughput&quot;</span>.<span class='ident'>to_string</span>()).<span class='ident'>unwrap</span>()), <span class='ident'>LikelyNoise</span>);<span class='comment'>
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span>(<span class='ident'>diff2</span>.<span class='ident'>find</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;throughput&quot;</span>.<span class='ident'>to_string</span>()).<span class='ident'>unwrap</span>()), <span class='ident'>LikelyNoise</span>);
 
-        // Check that it was rewritten.
-        </span><span class='kw'>let</span> <span class='ident'>m4</span> <span class='op'>=</span> <span class='ident'>MetricMap</span>::<span class='ident'>load</span>(<span class='kw-2'>&amp;</span><span class='ident'>pth</span>);
+        <span class='comment'>// Check that it was rewritten.</span>
+        <span class='kw'>let</span> <span class='ident'>m4</span> <span class='op'>=</span> <span class='ident'>MetricMap</span>::<span class='ident'>load</span>(<span class='kw-2'>&amp;</span><span class='ident'>pth</span>);
         <span class='kw'>let</span> <span class='ident'>MetricMap</span>(<span class='ident'>m4</span>) <span class='op'>=</span> <span class='ident'>m4</span>;
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>m4</span>.<span class='ident'>len</span>(), <span class='number'>2</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span>(<span class='ident'>m4</span>.<span class='ident'>find</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;runtime&quot;</span>.<span class='ident'>to_string</span>()).<span class='ident'>unwrap</span>()), <span class='ident'>Metric</span>::<span class='ident'>new</span>(<span class='number'>1100.0</span>, <span class='number'>2.0</span>));

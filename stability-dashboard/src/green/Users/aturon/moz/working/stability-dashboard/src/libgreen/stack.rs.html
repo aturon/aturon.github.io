@@ -7,8 +7,6 @@
 
     <title>stack.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -245,17 +243,17 @@
 <span id='203'>203</span>
 <span id='204'>204</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>atomics</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>atomics</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>os</span>::{<span class='ident'>errno</span>, <span class='ident'>page_size</span>, <span class='ident'>MemoryMap</span>, <span class='ident'>MapReadable</span>, <span class='ident'>MapWritable</span>,
               <span class='ident'>MapNonStandardFlags</span>, <span class='ident'>MapVirtual</span>, <span class='ident'>getenv</span>};
 <span class='kw'>use</span> <span class='ident'>libc</span>;
@@ -265,13 +263,13 @@
     <span class='ident'>buf</span>: <span class='ident'>MemoryMap</span>,
     <span class='ident'>min_size</span>: <span class='ident'>uint</span>,
     <span class='ident'>valgrind_id</span>: <span class='ident'>libc</span>::<span class='ident'>c_uint</span>,
-}<span class='comment'>
+}
 
-// Try to use MAP_STACK on platforms that support it (it&#39;s what we&#39;re doing
-// anyway), but some platforms don&#39;t support it at all. For example, it appears
-// that there&#39;s a bug in freebsd that MAP_STACK implies MAP_FIXED (so it always
-// fails): http://lists.freebsd.org/pipermail/freebsd-bugs/2011-July/044840.html
-</span><span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>windows</span>), <span class='ident'>not</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;freebsd&quot;</span>))]</span>
+<span class='comment'>// Try to use MAP_STACK on platforms that support it (it&#39;s what we&#39;re doing</span>
+<span class='comment'>// anyway), but some platforms don&#39;t support it at all. For example, it appears</span>
+<span class='comment'>// that there&#39;s a bug in freebsd that MAP_STACK implies MAP_FIXED (so it always</span>
+<span class='comment'>// fails): http://lists.freebsd.org/pipermail/freebsd-bugs/2011-July/044840.html</span>
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>windows</span>), <span class='ident'>not</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;freebsd&quot;</span>))]</span>
 <span class='kw'>static</span> <span class='ident'>STACK_FLAGS</span>: <span class='ident'>libc</span>::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='ident'>libc</span>::<span class='ident'>MAP_STACK</span> <span class='op'>|</span> <span class='ident'>libc</span>::<span class='ident'>MAP_PRIVATE</span> <span class='op'>|</span>
                                   <span class='ident'>libc</span>::<span class='ident'>MAP_ANON</span>;
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;freebsd&quot;</span>)]</span>
@@ -282,22 +280,22 @@
 <span class='kw'>impl</span> <span class='ident'>Stack</span> {
     <span class='doccomment'>/// Allocate a new stack of `size`. If size = 0, this will fail. Use</span>
     <span class='doccomment'>/// `dummy_stack` if you want a zero-sized stack.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>size</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>Stack</span> {<span class='comment'>
-        // Map in a stack. Eventually we might be able to handle stack
-        // allocation failure, which would fail to spawn the task. But there&#39;s
-        // not many sensible things to do on OOM.  Failure seems fine (and is
-        // what the old stack allocation did).
-        </span><span class='kw'>let</span> <span class='ident'>stack</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>MemoryMap</span>::<span class='ident'>new</span>(<span class='ident'>size</span>, [<span class='ident'>MapReadable</span>, <span class='ident'>MapWritable</span>,
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>size</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>Stack</span> {
+        <span class='comment'>// Map in a stack. Eventually we might be able to handle stack</span>
+        <span class='comment'>// allocation failure, which would fail to spawn the task. But there&#39;s</span>
+        <span class='comment'>// not many sensible things to do on OOM.  Failure seems fine (and is</span>
+        <span class='comment'>// what the old stack allocation did).</span>
+        <span class='kw'>let</span> <span class='ident'>stack</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>MemoryMap</span>::<span class='ident'>new</span>(<span class='ident'>size</span>, [<span class='ident'>MapReadable</span>, <span class='ident'>MapWritable</span>,
                                          <span class='ident'>MapNonStandardFlags</span>(<span class='ident'>STACK_FLAGS</span>)]) {
             <span class='prelude-val'>Ok</span>(<span class='ident'>map</span>) <span class='op'>=&gt;</span> <span class='ident'>map</span>,
             <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;mmap for stack of size {} failed: {}&quot;</span>, <span class='ident'>size</span>, <span class='ident'>e</span>)
-        };<span class='comment'>
+        };
 
-        // Change the last page to be inaccessible. This is to provide safety;
-        // when an FFI function overflows it will (hopefully) hit this guard
-        // page. It isn&#39;t guaranteed, but that&#39;s why FFI is unsafe. buf.data is
-        // guaranteed to be aligned properly.
-        </span><span class='kw'>if</span> <span class='op'>!</span><span class='ident'>protect_last_page</span>(<span class='kw-2'>&amp;</span><span class='ident'>stack</span>) {
+        <span class='comment'>// Change the last page to be inaccessible. This is to provide safety;</span>
+        <span class='comment'>// when an FFI function overflows it will (hopefully) hit this guard</span>
+        <span class='comment'>// page. It isn&#39;t guaranteed, but that&#39;s why FFI is unsafe. buf.data is</span>
+        <span class='comment'>// guaranteed to be aligned properly.</span>
+        <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>protect_last_page</span>(<span class='kw-2'>&amp;</span><span class='ident'>stack</span>) {
             <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;Could not memory-protect guard page. stack={}, errno={}&quot;</span>,
                   <span class='ident'>stack</span>.<span class='ident'>data</span>, <span class='ident'>errno</span>());
         }
@@ -306,10 +304,10 @@
             <span class='ident'>buf</span>: <span class='ident'>stack</span>,
             <span class='ident'>min_size</span>: <span class='ident'>size</span>,
             <span class='ident'>valgrind_id</span>: <span class='number'>0</span>
-        };<span class='comment'>
+        };
 
-        // FIXME: Using the FFI to call a C macro. Slow
-        </span><span class='ident'>stk</span>.<span class='ident'>valgrind_id</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {
+        <span class='comment'>// FIXME: Using the FFI to call a C macro. Slow</span>
+        <span class='ident'>stk</span>.<span class='ident'>valgrind_id</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {
             <span class='ident'>rust_valgrind_stack_register</span>(<span class='ident'>stk</span>.<span class='ident'>start</span>(), <span class='ident'>stk</span>.<span class='ident'>end</span>())
         };
         <span class='kw'>return</span> <span class='ident'>stk</span>;
@@ -339,11 +337,11 @@
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>unix</span>)]</span>
 <span class='kw'>fn</span> <span class='ident'>protect_last_page</span>(<span class='ident'>stack</span>: <span class='kw-2'>&amp;</span><span class='ident'>MemoryMap</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
-    <span class='kw'>unsafe</span> {<span class='comment'>
-        // This may seem backwards: the start of the segment is the last page?
-        // Yes! The stack grows from higher addresses (the end of the allocated
-        // block) to lower addresses (the start of the allocated block).
-        </span><span class='kw'>let</span> <span class='ident'>last_page</span> <span class='op'>=</span> <span class='ident'>stack</span>.<span class='ident'>data</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>;
+    <span class='kw'>unsafe</span> {
+        <span class='comment'>// This may seem backwards: the start of the segment is the last page?</span>
+        <span class='comment'>// Yes! The stack grows from higher addresses (the end of the allocated</span>
+        <span class='comment'>// block) to lower addresses (the start of the allocated block).</span>
+        <span class='kw'>let</span> <span class='ident'>last_page</span> <span class='op'>=</span> <span class='ident'>stack</span>.<span class='ident'>data</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>;
         <span class='ident'>libc</span>::<span class='ident'>mprotect</span>(<span class='ident'>last_page</span>, <span class='ident'>page_size</span>() <span class='kw'>as</span> <span class='ident'>libc</span>::<span class='ident'>size_t</span>,
                        <span class='ident'>libc</span>::<span class='ident'>PROT_NONE</span>) <span class='op'>!=</span> <span class='op'>-</span><span class='number'>1</span>
     }
@@ -351,9 +349,9 @@
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>windows</span>)]</span>
 <span class='kw'>fn</span> <span class='ident'>protect_last_page</span>(<span class='ident'>stack</span>: <span class='kw-2'>&amp;</span><span class='ident'>MemoryMap</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
-    <span class='kw'>unsafe</span> {<span class='comment'>
-        // see above
-        </span><span class='kw'>let</span> <span class='ident'>last_page</span> <span class='op'>=</span> <span class='ident'>stack</span>.<span class='ident'>data</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>;
+    <span class='kw'>unsafe</span> {
+        <span class='comment'>// see above</span>
+        <span class='kw'>let</span> <span class='ident'>last_page</span> <span class='op'>=</span> <span class='ident'>stack</span>.<span class='ident'>data</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>old_prot</span>: <span class='ident'>libc</span>::<span class='ident'>DWORD</span> <span class='op'>=</span> <span class='number'>0</span>;
         <span class='ident'>libc</span>::<span class='ident'>VirtualProtect</span>(<span class='ident'>last_page</span>, <span class='ident'>page_size</span>() <span class='kw'>as</span> <span class='ident'>libc</span>::<span class='ident'>SIZE_T</span>,
                              <span class='ident'>libc</span>::<span class='ident'>PAGE_NOACCESS</span>,
@@ -363,17 +361,17 @@
 
 <span class='kw'>impl</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>Stack</span> {
     <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='kw'>unsafe</span> {<span class='comment'>
-            // FIXME: Using the FFI to call a C macro. Slow
-            </span><span class='ident'>rust_valgrind_stack_deregister</span>(<span class='self'>self</span>.<span class='ident'>valgrind_id</span>);
+        <span class='kw'>unsafe</span> {
+            <span class='comment'>// FIXME: Using the FFI to call a C macro. Slow</span>
+            <span class='ident'>rust_valgrind_stack_deregister</span>(<span class='self'>self</span>.<span class='ident'>valgrind_id</span>);
         }
     }
 }
 
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>StackPool</span> {<span class='comment'>
-    // Ideally this would be some datastructure that preserved ordering on
-    // Stack.min_size.
-    </span><span class='ident'>stacks</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Stack</span><span class='op'>&gt;</span>,
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>StackPool</span> {
+    <span class='comment'>// Ideally this would be some data structure that preserved ordering on</span>
+    <span class='comment'>// Stack.min_size.</span>
+    <span class='ident'>stacks</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Stack</span><span class='op'>&gt;</span>,
 }
 
 <span class='kw'>impl</span> <span class='ident'>StackPool</span> {
@@ -383,9 +381,9 @@
         }
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>take_stack</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>min_size</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>Stack</span> {<span class='comment'>
-        // Ideally this would be a binary search
-        </span><span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>stacks</span>.<span class='ident'>iter</span>().<span class='ident'>position</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='ident'>min_size</span> <span class='op'>&lt;=</span> <span class='ident'>s</span>.<span class='ident'>min_size</span>) {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>take_stack</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>min_size</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>Stack</span> {
+        <span class='comment'>// Ideally this would be a binary search</span>
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>stacks</span>.<span class='ident'>iter</span>().<span class='ident'>position</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='ident'>min_size</span> <span class='op'>&lt;=</span> <span class='ident'>s</span>.<span class='ident'>min_size</span>) {
             <span class='prelude-val'>Some</span>(<span class='ident'>idx</span>) <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='ident'>stacks</span>.<span class='ident'>swap_remove</span>(<span class='ident'>idx</span>).<span class='ident'>unwrap</span>(),
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>Stack</span>::<span class='ident'>new</span>(<span class='ident'>min_size</span>)
         }
@@ -404,13 +402,13 @@
         <span class='number'>0</span> <span class='op'>=&gt;</span> {}
         <span class='ident'>n</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='ident'>n</span> <span class='op'>-</span> <span class='number'>1</span>,
     }
-    <span class='kw'>let</span> <span class='ident'>amt</span> <span class='op'>=</span> <span class='ident'>getenv</span>(<span class='string'>&quot;RUST_MAX_CACHED_STACKS&quot;</span>).<span class='ident'>and_then</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='ident'>from_str</span>(<span class='ident'>s</span>.<span class='ident'>as_slice</span>()));<span class='comment'>
-    // This default corresponds to 20M of cache per scheduler (at the
-    // default size).
-    </span><span class='kw'>let</span> <span class='ident'>amt</span> <span class='op'>=</span> <span class='ident'>amt</span>.<span class='ident'>unwrap_or</span>(<span class='number'>10</span>);<span class='comment'>
-    // 0 is our sentinel value, so ensure that we&#39;ll never see 0 after
-    // initialization has run
-    </span><span class='kw'>unsafe</span> { <span class='ident'>AMT</span>.<span class='ident'>store</span>(<span class='ident'>amt</span> <span class='op'>+</span> <span class='number'>1</span>, <span class='ident'>atomics</span>::<span class='ident'>SeqCst</span>); }
+    <span class='kw'>let</span> <span class='ident'>amt</span> <span class='op'>=</span> <span class='ident'>getenv</span>(<span class='string'>&quot;RUST_MAX_CACHED_STACKS&quot;</span>).<span class='ident'>and_then</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='ident'>from_str</span>(<span class='ident'>s</span>.<span class='ident'>as_slice</span>()));
+    <span class='comment'>// This default corresponds to 20M of cache per scheduler (at the</span>
+    <span class='comment'>// default size).</span>
+    <span class='kw'>let</span> <span class='ident'>amt</span> <span class='op'>=</span> <span class='ident'>amt</span>.<span class='ident'>unwrap_or</span>(<span class='number'>10</span>);
+    <span class='comment'>// 0 is our sentinel value, so ensure that we&#39;ll never see 0 after</span>
+    <span class='comment'>// initialization has run</span>
+    <span class='kw'>unsafe</span> { <span class='ident'>AMT</span>.<span class='ident'>store</span>(<span class='ident'>amt</span> <span class='op'>+</span> <span class='number'>1</span>, <span class='ident'>atomics</span>::<span class='ident'>SeqCst</span>); }
     <span class='kw'>return</span> <span class='ident'>amt</span>;
 }
 

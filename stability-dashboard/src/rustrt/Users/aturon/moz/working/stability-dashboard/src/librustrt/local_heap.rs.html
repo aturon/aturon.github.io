@@ -7,8 +7,6 @@
 
     <title>local_heap.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -386,17 +384,17 @@
 <span id='344'>344</span>
 <span id='345'>345</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! The local, garbage collected heap</span>
+<span class='doccomment'>//! The local, garbage collected heap</span>
 
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
 
@@ -439,12 +437,12 @@
                  <span class='ident'>align</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Box</span> {
         <span class='kw'>let</span> <span class='ident'>total_size</span> <span class='op'>=</span> <span class='ident'>util</span>::<span class='ident'>get_box_size</span>(<span class='ident'>size</span>, <span class='ident'>align</span>);
         <span class='kw'>let</span> <span class='ident'>alloc</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>memory_region</span>.<span class='ident'>malloc</span>(<span class='ident'>total_size</span>);
-        {<span class='comment'>
-            // Make sure that we can&#39;t use `mybox` outside of this scope
-            </span><span class='kw'>let</span> <span class='ident'>mybox</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Box</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>alloc</span>) };<span class='comment'>
-            // Clear out this box, and move it to the front of the live
-            // allocations list
-            </span><span class='ident'>mybox</span>.<span class='ident'>drop_glue</span> <span class='op'>=</span> <span class='ident'>drop_glue</span>;
+        {
+            <span class='comment'>// Make sure that we can&#39;t use `mybox` outside of this scope</span>
+            <span class='kw'>let</span> <span class='ident'>mybox</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Box</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>alloc</span>) };
+            <span class='comment'>// Clear out this box, and move it to the front of the live</span>
+            <span class='comment'>// allocations list</span>
+            <span class='ident'>mybox</span>.<span class='ident'>drop_glue</span> <span class='op'>=</span> <span class='ident'>drop_glue</span>;
             <span class='ident'>mybox</span>.<span class='ident'>ref_count</span> <span class='op'>=</span> <span class='number'>1</span>;
             <span class='ident'>mybox</span>.<span class='ident'>prev</span> <span class='op'>=</span> <span class='ident'>ptr</span>::<span class='ident'>mut_null</span>();
             <span class='ident'>mybox</span>.<span class='ident'>next</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>live_allocs</span>;
@@ -457,13 +455,13 @@
     }
 
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>realloc</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>ptr</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Box</span>, <span class='ident'>size</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Box</span> {<span class='comment'>
-        // Make sure that we can&#39;t use `mybox` outside of this scope
-        </span><span class='kw'>let</span> <span class='ident'>total_size</span> <span class='op'>=</span> <span class='ident'>size</span> <span class='op'>+</span> <span class='ident'>mem</span>::<span class='ident'>size_of</span>::<span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&gt;</span>();
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>realloc</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>ptr</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Box</span>, <span class='ident'>size</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Box</span> {
+        <span class='comment'>// Make sure that we can&#39;t use `mybox` outside of this scope</span>
+        <span class='kw'>let</span> <span class='ident'>total_size</span> <span class='op'>=</span> <span class='ident'>size</span> <span class='op'>+</span> <span class='ident'>mem</span>::<span class='ident'>size_of</span>::<span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&gt;</span>();
         <span class='kw'>let</span> <span class='ident'>new_box</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>memory_region</span>.<span class='ident'>realloc</span>(<span class='ident'>ptr</span>, <span class='ident'>total_size</span>);
-        {<span class='comment'>
-            // Fix links because we could have moved around
-            </span><span class='kw'>let</span> <span class='ident'>mybox</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Box</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>new_box</span>) };
+        {
+            <span class='comment'>// Fix links because we could have moved around</span>
+            <span class='kw'>let</span> <span class='ident'>mybox</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Box</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>new_box</span>) };
             <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>mybox</span>.<span class='ident'>prev</span>.<span class='ident'>is_null</span>() {
                 <span class='kw'>unsafe</span> { (<span class='op'>*</span><span class='ident'>mybox</span>.<span class='ident'>prev</span>).<span class='ident'>next</span> <span class='op'>=</span> <span class='ident'>new_box</span>; }
             }
@@ -479,12 +477,12 @@
 
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>free</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>alloc</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Box</span>) {
-        {<span class='comment'>
-            // Make sure that we can&#39;t use `mybox` outside of this scope
-            </span><span class='kw'>let</span> <span class='ident'>mybox</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Box</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>alloc</span>) };<span class='comment'>
+        {
+            <span class='comment'>// Make sure that we can&#39;t use `mybox` outside of this scope</span>
+            <span class='kw'>let</span> <span class='ident'>mybox</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Box</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>alloc</span>) };
 
-            // Unlink it from the linked list
-            </span><span class='kw'>if</span> <span class='op'>!</span><span class='ident'>mybox</span>.<span class='ident'>prev</span>.<span class='ident'>is_null</span>() {
+            <span class='comment'>// Unlink it from the linked list</span>
+            <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>mybox</span>.<span class='ident'>prev</span>.<span class='ident'>is_null</span>() {
                 <span class='kw'>unsafe</span> { (<span class='op'>*</span><span class='ident'>mybox</span>.<span class='ident'>prev</span>).<span class='ident'>next</span> <span class='op'>=</span> <span class='ident'>mybox</span>.<span class='ident'>next</span>; }
             }
             <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>mybox</span>.<span class='ident'>next</span>.<span class='ident'>is_null</span>() {
@@ -504,20 +502,20 @@
     <span class='doccomment'>/// allocations from being deallocated. This is used in preparation for when</span>
     <span class='doccomment'>/// a task is about to destroy TLD.</span>
     <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>immortalize</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>n_total_boxes</span> <span class='op'>=</span> <span class='number'>0u</span>;<span class='comment'>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>n_total_boxes</span> <span class='op'>=</span> <span class='number'>0u</span>;
 
-        // Pass 1: Make all boxes immortal.
-        //
-        // In this pass, nothing gets freed, so it does not matter whether
-        // we read the next field before or after the callback.
-        </span><span class='self'>self</span>.<span class='ident'>each_live_alloc</span>(<span class='boolval'>true</span>, <span class='op'>|</span>_, <span class='ident'>alloc</span><span class='op'>|</span> {
+        <span class='comment'>// Pass 1: Make all boxes immortal.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// In this pass, nothing gets freed, so it does not matter whether</span>
+        <span class='comment'>// we read the next field before or after the callback.</span>
+        <span class='self'>self</span>.<span class='ident'>each_live_alloc</span>(<span class='boolval'>true</span>, <span class='op'>|</span>_, <span class='ident'>alloc</span><span class='op'>|</span> {
             <span class='ident'>n_total_boxes</span> <span class='op'>+=</span> <span class='number'>1</span>;
             (<span class='op'>*</span><span class='ident'>alloc</span>).<span class='ident'>ref_count</span> <span class='op'>=</span> <span class='ident'>RC_IMMORTAL</span>;
         });
 
-        <span class='kw'>if</span> <span class='ident'>debug_mem</span>() {<span class='comment'>
-            // We do logging here w/o allocation.
-            </span><span class='macro'>rterrln</span><span class='macro'>!</span>(<span class='string'>&quot;total boxes annihilated: {}&quot;</span>, <span class='ident'>n_total_boxes</span>);
+        <span class='kw'>if</span> <span class='ident'>debug_mem</span>() {
+            <span class='comment'>// We do logging here w/o allocation.</span>
+            <span class='macro'>rterrln</span><span class='macro'>!</span>(<span class='string'>&quot;total boxes annihilated: {}&quot;</span>, <span class='ident'>n_total_boxes</span>);
         }
     }
 
@@ -525,25 +523,25 @@
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// This is invoked from the destructor, and requires that `immortalize` has</span>
     <span class='doccomment'>/// been called previously.</span>
-    <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>annihilate</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {<span class='comment'>
-        // Pass 2: Drop all boxes.
-        //
-        // In this pass, unique-managed boxes may get freed, but not
-        // managed boxes, so we must read the `next` field *after* the
-        // callback, as the original value may have been freed.
-        </span><span class='self'>self</span>.<span class='ident'>each_live_alloc</span>(<span class='boolval'>false</span>, <span class='op'>|</span>_, <span class='ident'>alloc</span><span class='op'>|</span> {
+    <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>annihilate</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
+        <span class='comment'>// Pass 2: Drop all boxes.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// In this pass, unique-managed boxes may get freed, but not</span>
+        <span class='comment'>// managed boxes, so we must read the `next` field *after* the</span>
+        <span class='comment'>// callback, as the original value may have been freed.</span>
+        <span class='self'>self</span>.<span class='ident'>each_live_alloc</span>(<span class='boolval'>false</span>, <span class='op'>|</span>_, <span class='ident'>alloc</span><span class='op'>|</span> {
             <span class='kw'>let</span> <span class='ident'>drop_glue</span> <span class='op'>=</span> (<span class='op'>*</span><span class='ident'>alloc</span>).<span class='ident'>drop_glue</span>;
             <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> (<span class='op'>*</span><span class='ident'>alloc</span>).<span class='ident'>data</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> ();
             <span class='ident'>drop_glue</span>(<span class='ident'>data</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span>);
-        });<span class='comment'>
+        });
 
-        // Pass 3: Free all boxes.
-        //
-        // In this pass, managed boxes may get freed (but not
-        // unique-managed boxes, though I think that none of those are
-        // left), so we must read the `next` field before, since it will
-        // not be valid after.
-        </span><span class='self'>self</span>.<span class='ident'>each_live_alloc</span>(<span class='boolval'>true</span>, <span class='op'>|</span><span class='ident'>me</span>, <span class='ident'>alloc</span><span class='op'>|</span> {
+        <span class='comment'>// Pass 3: Free all boxes.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// In this pass, managed boxes may get freed (but not</span>
+        <span class='comment'>// unique-managed boxes, though I think that none of those are</span>
+        <span class='comment'>// left), so we must read the `next` field before, since it will</span>
+        <span class='comment'>// not be valid after.</span>
+        <span class='self'>self</span>.<span class='ident'>each_live_alloc</span>(<span class='boolval'>true</span>, <span class='op'>|</span><span class='ident'>me</span>, <span class='ident'>alloc</span><span class='op'>|</span> {
             <span class='ident'>me</span>.<span class='ident'>free</span>(<span class='ident'>alloc</span>);
         });
     }
@@ -586,9 +584,9 @@
         (<span class='ident'>myaddr</span> <span class='op'>+</span> <span class='ident'>AllocHeader</span>::<span class='ident'>size</span>()) <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Box</span>
     }
 
-    <span class='kw'>fn</span> <span class='ident'>size</span>() <span class='op'>-&gt;</span> <span class='ident'>uint</span> {<span class='comment'>
-        // For some platforms, 16 byte alignment is required.
-        </span><span class='kw'>let</span> <span class='ident'>ptr_size</span> <span class='op'>=</span> <span class='number'>16</span>;
+    <span class='kw'>fn</span> <span class='ident'>size</span>() <span class='op'>-&gt;</span> <span class='ident'>uint</span> {
+        <span class='comment'>// For some platforms, 16 byte alignment is required.</span>
+        <span class='kw'>let</span> <span class='ident'>ptr_size</span> <span class='op'>=</span> <span class='number'>16</span>;
         <span class='kw'>let</span> <span class='ident'>header_size</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>size_of</span>::<span class='op'>&lt;</span><span class='ident'>AllocHeader</span><span class='op'>&gt;</span>();
         <span class='kw'>return</span> (<span class='ident'>header_size</span> <span class='op'>+</span> <span class='ident'>ptr_size</span> <span class='op'>-</span> <span class='number'>1</span>) <span class='op'>/</span> <span class='ident'>ptr_size</span> <span class='op'>*</span> <span class='ident'>ptr_size</span>;
     }
@@ -599,9 +597,9 @@
 }
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>unix</span>)]</span>
-<span class='kw'>fn</span> <span class='ident'>debug_mem</span>() <span class='op'>-&gt;</span> <span class='ident'>bool</span> {<span class='comment'>
-    // FIXME: Need to port the environment struct to newsched
-    </span><span class='boolval'>false</span>
+<span class='kw'>fn</span> <span class='ident'>debug_mem</span>() <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+    <span class='comment'>// FIXME: Need to port the environment struct to newsched</span>
+    <span class='boolval'>false</span>
 }
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>windows</span>)]</span>
@@ -682,9 +680,9 @@
 
 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>local_malloc</span>(<span class='ident'>drop_glue</span>: <span class='kw'>fn</span>(<span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span>), <span class='ident'>size</span>: <span class='ident'>uint</span>,
-                           <span class='ident'>align</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span> {<span class='comment'>
-    // FIXME: Unsafe borrow for speed. Lame.
-    </span><span class='kw'>let</span> <span class='ident'>task</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Task</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Local</span>::<span class='ident'>try_unsafe_borrow</span>();
+                           <span class='ident'>align</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span> {
+    <span class='comment'>// FIXME: Unsafe borrow for speed. Lame.</span>
+    <span class='kw'>let</span> <span class='ident'>task</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Task</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Local</span>::<span class='ident'>try_unsafe_borrow</span>();
     <span class='kw'>match</span> <span class='ident'>task</span> {
         <span class='prelude-val'>Some</span>(<span class='ident'>task</span>) <span class='op'>=&gt;</span> {
             (<span class='op'>*</span><span class='ident'>task</span>).<span class='ident'>heap</span>.<span class='ident'>alloc</span>(<span class='ident'>drop_glue</span>, <span class='ident'>size</span>, <span class='ident'>align</span>) <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span>
@@ -698,15 +696,15 @@
 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>local_free_</span>(<span class='ident'>ptr</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span>) {
     <span class='ident'>local_free</span>(<span class='ident'>ptr</span>)
-}<span class='comment'>
+}
 
-// NB: Calls to free CANNOT be allowed to fail, as throwing an exception from
-// inside a landing pad may corrupt the state of the exception handler. If a
-// problem occurs, call exit instead.
-</span><span class='attribute'>#[<span class='ident'>inline</span>]</span>
-<span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>local_free</span>(<span class='ident'>ptr</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span>) {<span class='comment'>
-    // FIXME: Unsafe borrow for speed. Lame.
-    </span><span class='kw'>let</span> <span class='ident'>task_ptr</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Task</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Local</span>::<span class='ident'>try_unsafe_borrow</span>();
+<span class='comment'>// NB: Calls to free CANNOT be allowed to fail, as throwing an exception from</span>
+<span class='comment'>// inside a landing pad may corrupt the state of the exception handler. If a</span>
+<span class='comment'>// problem occurs, call exit instead.</span>
+<span class='attribute'>#[<span class='ident'>inline</span>]</span>
+<span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>local_free</span>(<span class='ident'>ptr</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span>) {
+    <span class='comment'>// FIXME: Unsafe borrow for speed. Lame.</span>
+    <span class='kw'>let</span> <span class='ident'>task_ptr</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Task</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Local</span>::<span class='ident'>try_unsafe_borrow</span>();
     <span class='kw'>match</span> <span class='ident'>task_ptr</span> {
         <span class='prelude-val'>Some</span>(<span class='ident'>task</span>) <span class='op'>=&gt;</span> {
             (<span class='op'>*</span><span class='ident'>task</span>).<span class='ident'>heap</span>.<span class='ident'>free</span>(<span class='ident'>ptr</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Box</span>)

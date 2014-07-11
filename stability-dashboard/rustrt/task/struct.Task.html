@@ -7,8 +7,6 @@
 
     <title>rustrt::task::Task - Rust</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -88,27 +86,27 @@ More information can be found on these specific methods.</p>
 <h1 id="example" class='section-header'><a
                            href="#example">Example</a></h1><pre class='rust '>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>native</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>uint</span>;<span class='comment'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>uint</span>;
 
-// Create a task using a native runtime
-</span><span class='kw'>let</span> <span class='ident'>task</span> <span class='op'>=</span> <span class='ident'>native</span>::<span class='ident'>task</span>::<span class='ident'>new</span>((<span class='number'>0</span>, <span class='ident'>uint</span>::<span class='ident'>MAX</span>));<span class='comment'>
+<span class='comment'>// Create a task using a native runtime</span>
+<span class='kw'>let</span> <span class='ident'>task</span> <span class='op'>=</span> <span class='ident'>native</span>::<span class='ident'>task</span>::<span class='ident'>new</span>((<span class='number'>0</span>, <span class='ident'>uint</span>::<span class='ident'>MAX</span>));
 
-// Run some code, catching any possible failures
-</span><span class='kw'>let</span> <span class='ident'>task</span> <span class='op'>=</span> <span class='ident'>task</span>.<span class='ident'>run</span>(<span class='op'>||</span> {<span class='comment'>
-    // Run some code inside this task
-    </span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Hello with a native runtime!&quot;</span>);
-});<span class='comment'>
+<span class='comment'>// Run some code, catching any possible failures</span>
+<span class='kw'>let</span> <span class='ident'>task</span> <span class='op'>=</span> <span class='ident'>task</span>.<span class='ident'>run</span>(<span class='op'>||</span> {
+    <span class='comment'>// Run some code inside this task</span>
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Hello with a native runtime!&quot;</span>);
+});
 
-// Run some code again, catching the failure
-</span><span class='kw'>let</span> <span class='ident'>task</span> <span class='op'>=</span> <span class='ident'>task</span>.<span class='ident'>run</span>(<span class='op'>||</span> {
+<span class='comment'>// Run some code again, catching the failure</span>
+<span class='kw'>let</span> <span class='ident'>task</span> <span class='op'>=</span> <span class='ident'>task</span>.<span class='ident'>run</span>(<span class='op'>||</span> {
     <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;oh no, what to do!&quot;</span>);
-});<span class='comment'>
+});
 
-// Now that the task is failed, it can never be used again
-</span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>task</span>.<span class='ident'>is_destroyed</span>());<span class='comment'>
+<span class='comment'>// Now that the task is failed, it can never be used again</span>
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>task</span>.<span class='ident'>is_destroyed</span>());
 
-// Deallocate the resources associated with this task
-</span><span class='ident'>task</span>.<span class='ident'>destroy</span>();
+<span class='comment'>// Deallocate the resources associated with this task</span>
+<span class='ident'>task</span>.<span class='ident'>destroy</span>();
 </pre>
 </div><h2 class='fields'>Fields</h2>
 <table><tr><td id='structfield.heap'><a class='stability Experimental' title='Experimental'></a><code>heap</code></td><td></td></tr><tr><td id='structfield.gc'><a class='stability Experimental' title='Experimental'></a><code>gc</code></td><td></td></tr><tr><td id='structfield.storage'><a class='stability Experimental' title='Experimental'></a><code>storage</code></td><td></td></tr><tr><td id='structfield.unwinder'><a class='stability Experimental' title='Experimental'></a><code>unwinder</code></td><td></td></tr><tr><td id='structfield.death'><a class='stability Experimental' title='Experimental'></a><code>death</code></td><td></td></tr><tr><td id='structfield.destroyed'><a class='stability Experimental' title='Experimental'></a><code>destroyed</code></td><td></td></tr><tr><td id='structfield.name'><a class='stability Experimental' title='Experimental'></a><code>name</code></td><td></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='struct' href='../../rustrt/task/struct.Task.html' title='rustrt::task::Task'>Task</a></code></h3><div class='impl-methods'><h4 id='method.new' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class='struct' href='../../rustrt/task/struct.Task.html' title='rustrt::task::Task'>Task</a></code></h4>
@@ -125,7 +123,7 @@ task creation functions through libnative or libgreen.</p>
 <p>This function can be used as an emulated &quot;try/catch&quot; to interoperate
 with the rust runtime at the outermost boundary. It is not possible to
 use this function in a nested fashion (a try/catch inside of another
-try/catch). Invoking this funciton is quite cheap.</p>
+try/catch). Invoking this function is quite cheap.</p>
 
 <p>If the closure <code>f</code> succeeds, then the returned task can be used again
 for another invocation of <code>run</code>. If the closure <code>f</code> fails then <code>self</code>
@@ -145,13 +143,13 @@ destroyed via a failed call to <code>run</code>.</p>
 <h1 id="example-1" class='section-header'><a
                            href="#example-1">Example</a></h1><pre class='rust '>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>native</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>uint</span>;<span class='comment'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>uint</span>;
 
-// Create a new native task
-</span><span class='kw'>let</span> <span class='ident'>task</span> <span class='op'>=</span> <span class='ident'>native</span>::<span class='ident'>task</span>::<span class='ident'>new</span>((<span class='number'>0</span>, <span class='ident'>uint</span>::<span class='ident'>MAX</span>));<span class='comment'>
+<span class='comment'>// Create a new native task</span>
+<span class='kw'>let</span> <span class='ident'>task</span> <span class='op'>=</span> <span class='ident'>native</span>::<span class='ident'>task</span>::<span class='ident'>new</span>((<span class='number'>0</span>, <span class='ident'>uint</span>::<span class='ident'>MAX</span>));
 
-// Run some code once and then destroy this task
-</span><span class='ident'>task</span>.<span class='ident'>run</span>(<span class='op'>||</span> {
+<span class='comment'>// Run some code once and then destroy this task</span>
+<span class='ident'>task</span>.<span class='ident'>run</span>(<span class='op'>||</span> {
     <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Hello with a native runtime!&quot;</span>);
 }).<span class='ident'>destroy</span>();
 </pre>
@@ -184,7 +182,7 @@ This function may not be available in the future.</p>
 </div><h4 id='method.spawn_sibling' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.spawn_sibling' class='fnname'>spawn_sibling</a>(~self, opts: <a class='struct' href='../../rustrt/task/struct.TaskOpts.html' title='rustrt::task::TaskOpts'>TaskOpts</a>, f: proc(): <a class='trait' href='../../core/kinds/trait.Send.html' title='core::kinds::Send'>Send</a>)</code></h4>
 <div class='docblock'><p>Spawns a sibling to this task. The newly spawned task is configured with
 the <code>opts</code> structure and will run <code>f</code> as the body of its code.</p>
-</div><h4 id='method.deschedule' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.deschedule' class='fnname'>deschedule</a>(~self, amt: <a href='../../core/primitive.uint.html'>uint</a>, f: |<a class='type' href='../../rustrt/task/type.BlockedTask.html' title='rustrt::task::BlockedTask'>BlockedTask</a>| -&gt; <a class='type' href='../../core/result/type.Result.html' title='core::result::Result'>Result</a>&lt;(), <a class='type' href='../../rustrt/task/type.BlockedTask.html' title='rustrt::task::BlockedTask'>BlockedTask</a>&gt;)</code></h4>
+</div><h4 id='method.deschedule' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.deschedule' class='fnname'>deschedule</a>(~self, amt: <a href='../../core/primitive.uint.html'>uint</a>, f: |<a class='type' href='../../rustrt/task/type.BlockedTask.html' title='rustrt::task::BlockedTask'>BlockedTask</a>| -&gt; <a class='type' href='../../core/result/type.Result.html' title='core::result::Result'>Result</a>&lt;<a href='../../core/primitive.unit.html'>()</a>, <a class='type' href='../../rustrt/task/type.BlockedTask.html' title='rustrt::task::BlockedTask'>BlockedTask</a>&gt;)</code></h4>
 <div class='docblock'><p>Deschedules the current task, invoking <code>f</code> <code>amt</code> times. It is not
 recommended to use this function directly, but rather communication
 primitives in <code>std::comm</code> should be used.</p>

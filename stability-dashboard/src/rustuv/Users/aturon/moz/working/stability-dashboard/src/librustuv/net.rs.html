@@ -7,11 +7,9 @@
 
     <title>net.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
-    
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
     
 </head>
 <body>
@@ -25,7 +23,7 @@
     
 
     <section class="sidebar">
-        
+        <a href='../../../../../../../../../rustuv/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
         
     </section>
 
@@ -1292,17 +1290,17 @@
 <span id='1250'>1250</span>
 <span id='1251'>1251</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='kw'>use</span> <span class='ident'>libc</span>::{<span class='ident'>size_t</span>, <span class='ident'>ssize_t</span>, <span class='ident'>c_int</span>, <span class='ident'>c_void</span>, <span class='ident'>c_uint</span>};
+<span class='kw'>use</span> <span class='ident'>libc</span>::{<span class='ident'>size_t</span>, <span class='ident'>ssize_t</span>, <span class='ident'>c_int</span>, <span class='ident'>c_void</span>, <span class='ident'>c_uint</span>};
 <span class='kw'>use</span> <span class='ident'>libc</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ptr</span>;
@@ -1318,13 +1316,13 @@
             <span class='ident'>wait_until_woken_after</span>, <span class='ident'>wakeup</span>};
 <span class='kw'>use</span> <span class='ident'>timeout</span>::{<span class='ident'>AccessTimeout</span>, <span class='ident'>AcceptTimeout</span>, <span class='ident'>ConnectCtx</span>};
 <span class='kw'>use</span> <span class='ident'>uvio</span>::<span class='ident'>UvIoFactory</span>;
-<span class='kw'>use</span> <span class='ident'>uvll</span>;<span class='comment'>
+<span class='kw'>use</span> <span class='ident'>uvll</span>;
 
-////////////////////////////////////////////////////////////////////////////////
-</span><span class='doccomment'>/// Generic functions related to dealing with sockaddr things</span><span class='comment'>
-////////////////////////////////////////////////////////////////////////////////
+<span class='comment'>////////////////////////////////////////////////////////////////////////////////</span>
+<span class='doccomment'>/// Generic functions related to dealing with sockaddr things</span>
+<span class='comment'>////////////////////////////////////////////////////////////////////////////////</span>
 
-</span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>htons</span>(<span class='ident'>u</span>: <span class='ident'>u16</span>) <span class='op'>-&gt;</span> <span class='ident'>u16</span> { <span class='ident'>u</span>.<span class='ident'>to_be</span>() }
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>htons</span>(<span class='ident'>u</span>: <span class='ident'>u16</span>) <span class='op'>-&gt;</span> <span class='ident'>u16</span> { <span class='ident'>u</span>.<span class='ident'>to_be</span>() }
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>ntohs</span>(<span class='ident'>u</span>: <span class='ident'>u16</span>) <span class='op'>-&gt;</span> <span class='ident'>u16</span> { <span class='ident'>Int</span>::<span class='ident'>from_be</span>(<span class='ident'>u</span>) }
 
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>sockaddr_to_addr</span>(<span class='ident'>storage</span>: <span class='kw-2'>&amp;</span><span class='ident'>libc</span>::<span class='ident'>sockaddr_storage</span>,
@@ -1424,10 +1422,10 @@
         <span class='ident'>TcpPeer</span> <span class='op'>=&gt;</span> <span class='ident'>uvll</span>::<span class='ident'>uv_tcp_getpeername</span>,
         <span class='ident'>Tcp</span>     <span class='op'>=&gt;</span> <span class='ident'>uvll</span>::<span class='ident'>uv_tcp_getsockname</span>,
         <span class='ident'>Udp</span>     <span class='op'>=&gt;</span> <span class='ident'>uvll</span>::<span class='ident'>uv_udp_getsockname</span>,
-    };<span class='comment'>
+    };
 
-    // Allocate a sockaddr_storage since we don&#39;t know if it&#39;s ipv4 or ipv6
-    </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>sockaddr</span>: <span class='ident'>libc</span>::<span class='ident'>sockaddr_storage</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>zeroed</span>() };
+    <span class='comment'>// Allocate a sockaddr_storage since we don&#39;t know if it&#39;s ipv4 or ipv6</span>
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>sockaddr</span>: <span class='ident'>libc</span>::<span class='ident'>sockaddr_storage</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>zeroed</span>() };
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>namelen</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>size_of</span>::<span class='op'>&lt;</span><span class='ident'>libc</span>::<span class='ident'>sockaddr_storage</span><span class='op'>&gt;</span>() <span class='kw'>as</span> <span class='ident'>c_int</span>;
 
     <span class='kw'>let</span> <span class='ident'>sockaddr_p</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>sockaddr</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>sockaddr_storage</span>;
@@ -1437,23 +1435,23 @@
         <span class='number'>0</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>sockaddr_to_addr</span>(<span class='kw-2'>&amp;</span><span class='ident'>sockaddr</span>, <span class='ident'>namelen</span> <span class='kw'>as</span> <span class='ident'>uint</span>)),
         <span class='ident'>n</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>uv_error_to_io_error</span>(<span class='ident'>UvError</span>(<span class='ident'>n</span>)))
     }
-}<span class='comment'>
+}
 
-////////////////////////////////////////////////////////////////////////////////
-</span><span class='doccomment'>/// TCP implementation</span><span class='comment'>
-////////////////////////////////////////////////////////////////////////////////
+<span class='comment'>////////////////////////////////////////////////////////////////////////////////</span>
+<span class='doccomment'>/// TCP implementation</span>
+<span class='comment'>////////////////////////////////////////////////////////////////////////////////</span>
 
-</span><span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>TcpWatcher</span> {
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>TcpWatcher</span> {
     <span class='ident'>handle</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uvll</span>::<span class='ident'>uv_tcp_t</span>,
     <span class='ident'>stream</span>: <span class='ident'>StreamWatcher</span>,
     <span class='ident'>home</span>: <span class='ident'>HomeHandle</span>,
-    <span class='ident'>refcount</span>: <span class='ident'>Refcount</span>,<span class='comment'>
+    <span class='ident'>refcount</span>: <span class='ident'>Refcount</span>,
 
-    // libuv can&#39;t support concurrent reads and concurrent writes of the same
-    // stream object, so we use these access guards in order to arbitrate among
-    // multiple concurrent reads and writes. Note that libuv *can* read and
-    // write simultaneously, it just can&#39;t read and read simultaneously.
-    </span><span class='ident'>read_access</span>: <span class='ident'>AccessTimeout</span>,
+    <span class='comment'>// libuv can&#39;t support concurrent reads and concurrent writes of the same</span>
+    <span class='comment'>// stream object, so we use these access guards in order to arbitrate among</span>
+    <span class='comment'>// multiple concurrent reads and writes. Note that libuv *can* read and</span>
+    <span class='comment'>// write simultaneously, it just can&#39;t read and read simultaneously.</span>
+    <span class='ident'>read_access</span>: <span class='ident'>AccessTimeout</span>,
     <span class='ident'>write_access</span>: <span class='ident'>AccessTimeout</span>,
 }
 
@@ -1467,11 +1465,11 @@
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>TcpAcceptor</span> {
     <span class='ident'>listener</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>TcpListener</span><span class='op'>&gt;</span>,
     <span class='ident'>timeout</span>: <span class='ident'>AcceptTimeout</span>,
-}<span class='comment'>
+}
 
-// TCP watchers (clients/streams)
+<span class='comment'>// TCP watchers (clients/streams)</span>
 
-</span><span class='kw'>impl</span> <span class='ident'>TcpWatcher</span> {
+<span class='kw'>impl</span> <span class='ident'>TcpWatcher</span> {
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>io</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>UvIoFactory</span>) <span class='op'>-&gt;</span> <span class='ident'>TcpWatcher</span> {
         <span class='kw'>let</span> <span class='ident'>handle</span> <span class='op'>=</span> <span class='ident'>io</span>.<span class='ident'>make_handle</span>();
         <span class='ident'>TcpWatcher</span>::<span class='ident'>new_home</span>(<span class='kw-2'>&amp;</span><span class='ident'>io</span>.<span class='ident'>loop_</span>, <span class='ident'>handle</span>)
@@ -1519,10 +1517,10 @@
 <span class='kw'>impl</span> <span class='ident'>rtio</span>::<span class='ident'>RtioTcpStream</span> <span class='kw'>for</span> <span class='ident'>TcpWatcher</span> {
     <span class='kw'>fn</span> <span class='ident'>read</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>buf</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> [<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>uint</span>, <span class='ident'>IoError</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>fire_homing_missile</span>();
-        <span class='kw'>let</span> <span class='ident'>guard</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>read_access</span>.<span class='ident'>grant</span>(<span class='ident'>m</span>));<span class='comment'>
+        <span class='kw'>let</span> <span class='ident'>guard</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>read_access</span>.<span class='ident'>grant</span>(<span class='ident'>m</span>));
 
-        // see comments in close_read about this check
-        </span><span class='kw'>if</span> <span class='ident'>guard</span>.<span class='ident'>access</span>.<span class='ident'>is_closed</span>() {
+        <span class='comment'>// see comments in close_read about this check</span>
+        <span class='kw'>if</span> <span class='ident'>guard</span>.<span class='ident'>access</span>.<span class='ident'>is_closed</span>() {
             <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>uv_error_to_io_error</span>(<span class='ident'>UvError</span>(<span class='ident'>uvll</span>::<span class='ident'>EOF</span>)))
         }
 
@@ -1580,9 +1578,9 @@
         } <span class='kw'>as</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>rtio</span>::<span class='ident'>RtioTcpStream</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>
     }
 
-    <span class='kw'>fn</span> <span class='ident'>close_read</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>IoError</span><span class='op'>&gt;</span> {<span class='comment'>
-        // see comments in PipeWatcher::close_read
-        </span><span class='kw'>let</span> <span class='ident'>task</span> <span class='op'>=</span> {
+    <span class='kw'>fn</span> <span class='ident'>close_read</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>IoError</span><span class='op'>&gt;</span> {
+        <span class='comment'>// see comments in PipeWatcher::close_read</span>
+        <span class='kw'>let</span> <span class='ident'>task</span> <span class='op'>=</span> {
             <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>fire_homing_missile</span>();
             <span class='self'>self</span>.<span class='ident'>read_access</span>.<span class='ident'>access</span>.<span class='ident'>close</span>(<span class='kw-2'>&amp;</span><span class='ident'>m</span>);
     <span class='self'>self</span>.<span class='ident'>stream</span>.<span class='ident'>cancel_read</span>(<span class='ident'>uvll</span>::<span class='ident'>EOF</span> <span class='kw'>as</span> <span class='ident'>libc</span>::<span class='ident'>ssize_t</span>)
@@ -1637,11 +1635,11 @@
             <span class='self'>self</span>.<span class='ident'>close</span>();
         }
     }
-}<span class='comment'>
+}
 
-// TCP listeners (unbound servers)
+<span class='comment'>// TCP listeners (unbound servers)</span>
 
-</span><span class='kw'>impl</span> <span class='ident'>TcpListener</span> {
+<span class='kw'>impl</span> <span class='ident'>TcpListener</span> {
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>bind</span>(<span class='ident'>io</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>UvIoFactory</span>, <span class='ident'>address</span>: <span class='ident'>rtio</span>::<span class='ident'>SocketAddr</span>)
                 <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>TcpListener</span><span class='op'>&gt;</span>, <span class='ident'>UvError</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>handle</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>uvll</span>::<span class='ident'>malloc_handle</span>(<span class='ident'>uvll</span>::<span class='ident'>UV_TCP</span>) };
@@ -1683,16 +1681,16 @@
 }
 
 <span class='kw'>impl</span> <span class='ident'>rtio</span>::<span class='ident'>RtioTcpListener</span> <span class='kw'>for</span> <span class='ident'>TcpListener</span> {
-    <span class='kw'>fn</span> <span class='ident'>listen</span>(<span class='kw-2'>~</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>rtio</span>::<span class='ident'>RtioTcpAcceptor</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>, <span class='ident'>IoError</span><span class='op'>&gt;</span> {<span class='comment'>
-        // create the acceptor object from ourselves
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>acceptor</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>TcpAcceptor</span> {
+    <span class='kw'>fn</span> <span class='ident'>listen</span>(<span class='kw-2'>~</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>rtio</span>::<span class='ident'>RtioTcpAcceptor</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>, <span class='ident'>IoError</span><span class='op'>&gt;</span> {
+        <span class='comment'>// create the acceptor object from ourselves</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>acceptor</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>TcpAcceptor</span> {
             <span class='ident'>listener</span>: <span class='self'>self</span>,
             <span class='ident'>timeout</span>: <span class='ident'>AcceptTimeout</span>::<span class='ident'>new</span>(),
         };
 
-        <span class='kw'>let</span> <span class='ident'>_m</span> <span class='op'>=</span> <span class='ident'>acceptor</span>.<span class='ident'>fire_homing_missile</span>();<span class='comment'>
-        // FIXME: the 128 backlog should be configurable
-        </span><span class='kw'>match</span> <span class='kw'>unsafe</span> { <span class='ident'>uvll</span>::<span class='ident'>uv_listen</span>(<span class='ident'>acceptor</span>.<span class='ident'>listener</span>.<span class='ident'>handle</span>, <span class='number'>128</span>, <span class='ident'>listen_cb</span>) } {
+        <span class='kw'>let</span> <span class='ident'>_m</span> <span class='op'>=</span> <span class='ident'>acceptor</span>.<span class='ident'>fire_homing_missile</span>();
+        <span class='comment'>// FIXME: the 128 backlog should be configurable</span>
+        <span class='kw'>match</span> <span class='kw'>unsafe</span> { <span class='ident'>uvll</span>::<span class='ident'>uv_listen</span>(<span class='ident'>acceptor</span>.<span class='ident'>listener</span>.<span class='ident'>handle</span>, <span class='number'>128</span>, <span class='ident'>listen_cb</span>) } {
             <span class='number'>0</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>acceptor</span> <span class='kw'>as</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>rtio</span>::<span class='ident'>RtioTcpAcceptor</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>),
             <span class='ident'>n</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>uv_error_to_io_error</span>(<span class='ident'>UvError</span>(<span class='ident'>n</span>))),
         }
@@ -1721,11 +1719,11 @@
         <span class='kw'>let</span> <span class='ident'>_m</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>fire_homing_missile</span>();
         <span class='self'>self</span>.<span class='ident'>close</span>();
     }
-}<span class='comment'>
+}
 
-// TCP acceptors (bound servers)
+<span class='comment'>// TCP acceptors (bound servers)</span>
 
-</span><span class='kw'>impl</span> <span class='ident'>HomingIO</span> <span class='kw'>for</span> <span class='ident'>TcpAcceptor</span> {
+<span class='kw'>impl</span> <span class='ident'>HomingIO</span> <span class='kw'>for</span> <span class='ident'>TcpAcceptor</span> {
     <span class='kw'>fn</span> <span class='ident'>home</span><span class='op'>&lt;</span><span class='lifetime'>&#39;r</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='kw-2'>mut</span> <span class='ident'>HomeHandle</span> { <span class='self'>self</span>.<span class='ident'>listener</span>.<span class='ident'>home</span>() }
 }
 
@@ -1762,18 +1760,18 @@
             <span class='prelude-val'>Some</span>(<span class='ident'>ms</span>) <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='ident'>timeout</span>.<span class='ident'>set_timeout</span>(<span class='ident'>ms</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>listener</span>),
         }
     }
-}<span class='comment'>
+}
 
-////////////////////////////////////////////////////////////////////////////////
-</span><span class='doccomment'>/// UDP implementation</span><span class='comment'>
-////////////////////////////////////////////////////////////////////////////////
+<span class='comment'>////////////////////////////////////////////////////////////////////////////////</span>
+<span class='doccomment'>/// UDP implementation</span>
+<span class='comment'>////////////////////////////////////////////////////////////////////////////////</span>
 
-</span><span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>UdpWatcher</span> {
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>UdpWatcher</span> {
     <span class='ident'>handle</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uvll</span>::<span class='ident'>uv_udp_t</span>,
-    <span class='ident'>home</span>: <span class='ident'>HomeHandle</span>,<span class='comment'>
+    <span class='ident'>home</span>: <span class='ident'>HomeHandle</span>,
 
-    // See above for what these fields are
-    </span><span class='ident'>refcount</span>: <span class='ident'>Refcount</span>,
+    <span class='comment'>// See above for what these fields are</span>
+    <span class='ident'>refcount</span>: <span class='ident'>Refcount</span>,
     <span class='ident'>read_access</span>: <span class='ident'>AccessTimeout</span>,
     <span class='ident'>write_access</span>: <span class='ident'>AccessTimeout</span>,
 
@@ -1879,12 +1877,12 @@
             <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>nread</span> <span class='op'>!=</span> <span class='ident'>uvll</span>::<span class='ident'>ECANCELED</span> <span class='kw'>as</span> <span class='ident'>ssize_t</span>);
             <span class='kw'>let</span> <span class='ident'>cx</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {
                 <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span>(<span class='ident'>uvll</span>::<span class='ident'>get_data_for_uv_handle</span>(<span class='ident'>handle</span>) <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>UdpRecvCtx</span>)
-            };<span class='comment'>
+            };
 
-            // When there&#39;s no data to read the recv callback can be a no-op.
-            // This can happen if read returns EAGAIN/EWOULDBLOCK. By ignoring
-            // this we just drop back to kqueue and wait for the next callback.
-            </span><span class='kw'>if</span> <span class='ident'>nread</span> <span class='op'>==</span> <span class='number'>0</span> {
+            <span class='comment'>// When there&#39;s no data to read the recv callback can be a no-op.</span>
+            <span class='comment'>// This can happen if read returns EAGAIN/EWOULDBLOCK. By ignoring</span>
+            <span class='comment'>// this we just drop back to kqueue and wait for the next callback.</span>
+            <span class='kw'>if</span> <span class='ident'>nread</span> <span class='op'>==</span> <span class='number'>0</span> {
                 <span class='ident'>cx</span>.<span class='ident'>buf</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='kw'>unsafe</span> { <span class='op'>*</span><span class='ident'>buf</span> });
                 <span class='kw'>return</span>
             }
@@ -1908,11 +1906,11 @@
 
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>req</span> <span class='op'>=</span> <span class='ident'>Request</span>::<span class='ident'>new</span>(<span class='ident'>uvll</span>::<span class='ident'>UV_UDP_SEND</span>);
         <span class='kw'>let</span> (<span class='ident'>addr</span>, <span class='ident'>_len</span>) <span class='op'>=</span> <span class='ident'>addr_to_sockaddr</span>(<span class='ident'>dst</span>);
-        <span class='kw'>let</span> <span class='ident'>addr_p</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>addr</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> _ <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>libc</span>::<span class='ident'>sockaddr</span>;<span class='comment'>
+        <span class='kw'>let</span> <span class='ident'>addr_p</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>addr</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> _ <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>libc</span>::<span class='ident'>sockaddr</span>;
 
-        // see comments in StreamWatcher::write for why we may allocate a buffer
-        // here.
-        </span><span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>guard</span>.<span class='ident'>can_timeout</span> {<span class='prelude-val'>Some</span>(<span class='ident'>Vec</span>::<span class='ident'>from_slice</span>(<span class='ident'>buf</span>))} <span class='kw'>else</span> {<span class='prelude-val'>None</span>};
+        <span class='comment'>// see comments in StreamWatcher::write for why we may allocate a buffer</span>
+        <span class='comment'>// here.</span>
+        <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>guard</span>.<span class='ident'>can_timeout</span> {<span class='prelude-val'>Some</span>(<span class='ident'>Vec</span>::<span class='ident'>from_slice</span>(<span class='ident'>buf</span>))} <span class='kw'>else</span> {<span class='prelude-val'>None</span>};
         <span class='kw'>let</span> <span class='ident'>uv_buf</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>guard</span>.<span class='ident'>can_timeout</span> {
             <span class='ident'>slice_to_uv_buf</span>(<span class='ident'>data</span>.<span class='ident'>get_ref</span>().<span class='ident'>as_slice</span>())
         } <span class='kw'>else</span> {
@@ -1923,8 +1921,8 @@
             <span class='ident'>uvll</span>::<span class='ident'>uv_udp_send</span>(<span class='ident'>req</span>.<span class='ident'>handle</span>, <span class='self'>self</span>.<span class='ident'>handle</span>, [<span class='ident'>uv_buf</span>], <span class='ident'>addr_p</span>, <span class='ident'>send_cb</span>)
         } {
             <span class='number'>0</span> <span class='op'>=&gt;</span> {
-                <span class='ident'>req</span>.<span class='ident'>defuse</span>();<span class='comment'> // uv callback now owns this request
-                </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>cx</span> <span class='op'>=</span> <span class='ident'>UdpSendCtx</span> {
+                <span class='ident'>req</span>.<span class='ident'>defuse</span>(); <span class='comment'>// uv callback now owns this request</span>
+                <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>cx</span> <span class='op'>=</span> <span class='ident'>UdpSendCtx</span> {
                     <span class='ident'>result</span>: <span class='ident'>uvll</span>::<span class='ident'>ECANCELED</span>, <span class='ident'>data</span>: <span class='ident'>data</span>, <span class='ident'>udp</span>: <span class='self'>self</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> _
                 };
                 <span class='ident'>wait_until_woken_after</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>blocked_sender</span>, <span class='kw-2'>&amp;</span><span class='ident'>loop_</span>, <span class='op'>||</span> {
@@ -1949,11 +1947,11 @@
                 <span class='prelude-val'>Err</span>(<span class='ident'>uv_error_to_io_error</span>(<span class='ident'>UvError</span>(<span class='ident'>cx</span>.<span class='ident'>result</span>)))
             }
             <span class='ident'>n</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>uv_error_to_io_error</span>(<span class='ident'>UvError</span>(<span class='ident'>n</span>)))
-        };<span class='comment'>
+        };
 
-        // This function is the same as stream::write_cb, but adapted for udp
-        // instead of streams.
-        </span><span class='kw'>extern</span> <span class='kw'>fn</span> <span class='ident'>send_cb</span>(<span class='ident'>req</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uvll</span>::<span class='ident'>uv_udp_send_t</span>, <span class='ident'>status</span>: <span class='ident'>c_int</span>) {
+        <span class='comment'>// This function is the same as stream::write_cb, but adapted for udp</span>
+        <span class='comment'>// instead of streams.</span>
+        <span class='kw'>extern</span> <span class='kw'>fn</span> <span class='ident'>send_cb</span>(<span class='ident'>req</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uvll</span>::<span class='ident'>uv_udp_send_t</span>, <span class='ident'>status</span>: <span class='ident'>c_int</span>) {
             <span class='kw'>let</span> <span class='ident'>req</span> <span class='op'>=</span> <span class='ident'>Request</span>::<span class='ident'>wrap</span>(<span class='ident'>req</span>);
             <span class='kw'>let</span> <span class='ident'>cx</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>UdpSendCtx</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>req</span>.<span class='ident'>get_data</span>() };
             <span class='ident'>cx</span>.<span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>status</span>;
@@ -1970,7 +1968,7 @@
     <span class='kw'>fn</span> <span class='ident'>join_multicast</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>multi</span>: <span class='ident'>rtio</span>::<span class='ident'>IpAddr</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>IoError</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>_m</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>fire_homing_missile</span>();
         <span class='ident'>status_to_io_result</span>(<span class='kw'>unsafe</span> {
-            <span class='ident'>multi</span>.<span class='ident'>to_str</span>().<span class='ident'>with_c_str</span>(<span class='op'>|</span><span class='ident'>m_addr</span><span class='op'>|</span> {
+            <span class='ident'>multi</span>.<span class='ident'>to_string</span>().<span class='ident'>with_c_str</span>(<span class='op'>|</span><span class='ident'>m_addr</span><span class='op'>|</span> {
                 <span class='ident'>uvll</span>::<span class='ident'>uv_udp_set_membership</span>(<span class='self'>self</span>.<span class='ident'>handle</span>,
                                             <span class='ident'>m_addr</span>, <span class='ident'>ptr</span>::<span class='ident'>null</span>(),
                                             <span class='ident'>uvll</span>::<span class='ident'>UV_JOIN_GROUP</span>)
@@ -1981,7 +1979,7 @@
     <span class='kw'>fn</span> <span class='ident'>leave_multicast</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>multi</span>: <span class='ident'>rtio</span>::<span class='ident'>IpAddr</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>IoError</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>_m</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>fire_homing_missile</span>();
         <span class='ident'>status_to_io_result</span>(<span class='kw'>unsafe</span> {
-            <span class='ident'>multi</span>.<span class='ident'>to_str</span>().<span class='ident'>with_c_str</span>(<span class='op'>|</span><span class='ident'>m_addr</span><span class='op'>|</span> {
+            <span class='ident'>multi</span>.<span class='ident'>to_string</span>().<span class='ident'>with_c_str</span>(<span class='op'>|</span><span class='ident'>m_addr</span><span class='op'>|</span> {
                 <span class='ident'>uvll</span>::<span class='ident'>uv_udp_set_membership</span>(<span class='self'>self</span>.<span class='ident'>handle</span>,
                                             <span class='ident'>m_addr</span>, <span class='ident'>ptr</span>::<span class='ident'>null</span>(),
                                             <span class='ident'>uvll</span>::<span class='ident'>UV_LEAVE_GROUP</span>)
@@ -2058,10 +2056,10 @@
         <span class='self'>self</span>.<span class='ident'>read_access</span>.<span class='ident'>set_timeout</span>(<span class='ident'>ms</span>, <span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>home</span>, <span class='kw-2'>&amp;</span><span class='ident'>loop_</span>, <span class='ident'>cancel_read</span>,
                                      <span class='self'>self</span>.<span class='ident'>handle</span> <span class='kw'>as</span> <span class='ident'>uint</span>);
 
-        <span class='kw'>fn</span> <span class='ident'>cancel_read</span>(<span class='ident'>stream</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>BlockedTask</span><span class='op'>&gt;</span> {<span class='comment'>
-            // This method is quite similar to StreamWatcher::cancel_read, see
-            // there for more information
-            </span><span class='kw'>let</span> <span class='ident'>handle</span> <span class='op'>=</span> <span class='ident'>stream</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uvll</span>::<span class='ident'>uv_udp_t</span>;
+        <span class='kw'>fn</span> <span class='ident'>cancel_read</span>(<span class='ident'>stream</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>BlockedTask</span><span class='op'>&gt;</span> {
+            <span class='comment'>// This method is quite similar to StreamWatcher::cancel_read, see</span>
+            <span class='comment'>// there for more information</span>
+            <span class='kw'>let</span> <span class='ident'>handle</span> <span class='op'>=</span> <span class='ident'>stream</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uvll</span>::<span class='ident'>uv_udp_t</span>;
             <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw'>unsafe</span> { <span class='ident'>uvll</span>::<span class='ident'>uv_udp_recv_stop</span>(<span class='ident'>handle</span>) }, <span class='number'>0</span>);
             <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {
                 <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>uvll</span>::<span class='ident'>get_data_for_uv_handle</span>(<span class='ident'>handle</span>);
@@ -2088,20 +2086,20 @@
 }
 
 <span class='kw'>impl</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>UdpWatcher</span> {
-    <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {<span class='comment'>
-        // Send ourselves home to close this handle (blocking while doing so).
-        </span><span class='kw'>let</span> <span class='ident'>_m</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>fire_homing_missile</span>();
+    <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
+        <span class='comment'>// Send ourselves home to close this handle (blocking while doing so).</span>
+        <span class='kw'>let</span> <span class='ident'>_m</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>fire_homing_missile</span>();
         <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>refcount</span>.<span class='ident'>decrement</span>() {
             <span class='self'>self</span>.<span class='ident'>close</span>();
         }
     }
-}<span class='comment'>
+}
 
-////////////////////////////////////////////////////////////////////////////////
-// Shutdown helper
-////////////////////////////////////////////////////////////////////////////////
+<span class='comment'>////////////////////////////////////////////////////////////////////////////////</span>
+<span class='comment'>// Shutdown helper</span>
+<span class='comment'>////////////////////////////////////////////////////////////////////////////////</span>
 
-</span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>shutdown</span>(<span class='ident'>handle</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uvll</span>::<span class='ident'>uv_stream_t</span>, <span class='ident'>loop_</span>: <span class='kw-2'>&amp;</span><span class='ident'>Loop</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>IoError</span><span class='op'>&gt;</span> {
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>shutdown</span>(<span class='ident'>handle</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uvll</span>::<span class='ident'>uv_stream_t</span>, <span class='ident'>loop_</span>: <span class='kw-2'>&amp;</span><span class='ident'>Loop</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>IoError</span><span class='op'>&gt;</span> {
     <span class='kw'>struct</span> <span class='ident'>Ctx</span> {
         <span class='ident'>slot</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>BlockedTask</span><span class='op'>&gt;</span>,
         <span class='ident'>status</span>: <span class='ident'>c_int</span>,
@@ -2110,8 +2108,8 @@
 
     <span class='kw'>return</span> <span class='kw'>match</span> <span class='kw'>unsafe</span> { <span class='ident'>uvll</span>::<span class='ident'>uv_shutdown</span>(<span class='ident'>req</span>.<span class='ident'>handle</span>, <span class='ident'>handle</span>, <span class='ident'>shutdown_cb</span>) } {
         <span class='number'>0</span> <span class='op'>=&gt;</span> {
-            <span class='ident'>req</span>.<span class='ident'>defuse</span>();<span class='comment'> // uv callback now owns this request
-            </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>cx</span> <span class='op'>=</span> <span class='ident'>Ctx</span> { <span class='ident'>slot</span>: <span class='prelude-val'>None</span>, <span class='ident'>status</span>: <span class='number'>0</span> };
+            <span class='ident'>req</span>.<span class='ident'>defuse</span>(); <span class='comment'>// uv callback now owns this request</span>
+            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>cx</span> <span class='op'>=</span> <span class='ident'>Ctx</span> { <span class='ident'>slot</span>: <span class='prelude-val'>None</span>, <span class='ident'>status</span>: <span class='number'>0</span> };
 
             <span class='ident'>wait_until_woken_after</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>cx</span>.<span class='ident'>slot</span>, <span class='ident'>loop_</span>, <span class='op'>||</span> {
                 <span class='ident'>req</span>.<span class='ident'>set_data</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>cx</span>);
@@ -2342,8 +2340,8 @@
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='attribute'>#[<span class='ident'>ignore</span>(<span class='ident'>cfg</span>(<span class='ident'>windows</span>))]</span><span class='comment'> // FIXME(#10102) server never sees second packet
-    </span><span class='kw'>fn</span> <span class='ident'>test_udp_twice</span>() {
+    <span class='attribute'>#[<span class='ident'>ignore</span>(<span class='ident'>cfg</span>(<span class='ident'>windows</span>))]</span> <span class='comment'>// FIXME(#10102) server never sees second packet</span>
+    <span class='kw'>fn</span> <span class='ident'>test_udp_twice</span>() {
         <span class='kw'>let</span> <span class='ident'>server_addr</span> <span class='op'>=</span> ::<span class='ident'>next_test_ip4</span>();
         <span class='kw'>let</span> <span class='ident'>client_addr</span> <span class='op'>=</span> ::<span class='ident'>next_test_ip4</span>();
         <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
@@ -2390,12 +2388,12 @@
             <span class='kw'>let</span> <span class='ident'>msg</span> <span class='op'>=</span> [<span class='number'>1</span>, .. <span class='number'>2048</span>];
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>total_bytes_sent</span> <span class='op'>=</span> <span class='number'>0</span>;
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> [<span class='number'>1</span>];
-            <span class='kw'>while</span> <span class='ident'>buf</span>[<span class='number'>0</span>] <span class='op'>==</span> <span class='number'>1</span> {<span class='comment'>
-                // send more data
-                </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>server_out</span>.<span class='ident'>send_to</span>(<span class='ident'>msg</span>, <span class='ident'>client_in_addr</span>).<span class='ident'>is_ok</span>());
-                <span class='ident'>total_bytes_sent</span> <span class='op'>+=</span> <span class='ident'>msg</span>.<span class='ident'>len</span>();<span class='comment'>
-                // check if the client has received enough
-                </span><span class='kw'>let</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>server_in</span>.<span class='ident'>recv_from</span>(<span class='ident'>buf</span>);
+            <span class='kw'>while</span> <span class='ident'>buf</span>[<span class='number'>0</span>] <span class='op'>==</span> <span class='number'>1</span> {
+                <span class='comment'>// send more data</span>
+                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>server_out</span>.<span class='ident'>send_to</span>(<span class='ident'>msg</span>, <span class='ident'>client_in_addr</span>).<span class='ident'>is_ok</span>());
+                <span class='ident'>total_bytes_sent</span> <span class='op'>+=</span> <span class='ident'>msg</span>.<span class='ident'>len</span>();
+                <span class='comment'>// check if the client has received enough</span>
+                <span class='kw'>let</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>server_in</span>.<span class='ident'>recv_from</span>(<span class='ident'>buf</span>);
                 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>res</span>.<span class='ident'>is_ok</span>());
                 <span class='kw'>let</span> (<span class='ident'>nread</span>, <span class='ident'>src</span>) <span class='op'>=</span> <span class='ident'>res</span>.<span class='ident'>ok</span>().<span class='ident'>unwrap</span>();
                 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>nread</span>, <span class='number'>1</span>);
@@ -2412,11 +2410,11 @@
         <span class='ident'>tx</span>.<span class='ident'>send</span>(());
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>total_bytes_recv</span> <span class='op'>=</span> <span class='number'>0</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> [<span class='number'>0</span>, .. <span class='number'>2048</span>];
-        <span class='kw'>while</span> <span class='ident'>total_bytes_recv</span> <span class='op'>&lt;</span> <span class='ident'>MAX</span> {<span class='comment'>
-            // ask for more
-            </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>client_out</span>.<span class='ident'>send_to</span>([<span class='number'>1</span>], <span class='ident'>server_in_addr</span>).<span class='ident'>is_ok</span>());<span class='comment'>
-            // wait for data
-            </span><span class='kw'>let</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>client_in</span>.<span class='ident'>recv_from</span>(<span class='ident'>buf</span>);
+        <span class='kw'>while</span> <span class='ident'>total_bytes_recv</span> <span class='op'>&lt;</span> <span class='ident'>MAX</span> {
+            <span class='comment'>// ask for more</span>
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>client_out</span>.<span class='ident'>send_to</span>([<span class='number'>1</span>], <span class='ident'>server_in_addr</span>).<span class='ident'>is_ok</span>());
+            <span class='comment'>// wait for data</span>
+            <span class='kw'>let</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>client_in</span>.<span class='ident'>recv_from</span>(<span class='ident'>buf</span>);
             <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>res</span>.<span class='ident'>is_ok</span>());
             <span class='kw'>let</span> (<span class='ident'>nread</span>, <span class='ident'>src</span>) <span class='op'>=</span> <span class='ident'>res</span>.<span class='ident'>ok</span>().<span class='ident'>unwrap</span>();
             <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>src</span> <span class='op'>==</span> <span class='ident'>server_out_addr</span>);
@@ -2424,9 +2422,9 @@
             <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='ident'>nread</span>) {
                 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>buf</span>[<span class='ident'>i</span>], <span class='number'>1</span>);
             }
-        }<span class='comment'>
-        // tell the server we&#39;re done
-        </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>client_out</span>.<span class='ident'>send_to</span>([<span class='number'>0</span>], <span class='ident'>server_in_addr</span>).<span class='ident'>is_ok</span>());
+        }
+        <span class='comment'>// tell the server we&#39;re done</span>
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>client_out</span>.<span class='ident'>send_to</span>([<span class='number'>0</span>], <span class='ident'>server_in_addr</span>).<span class='ident'>is_ok</span>());
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -2466,10 +2464,10 @@
             <span class='ident'>reads</span> <span class='op'>+=</span> <span class='number'>1</span>;
 
             <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>tx2</span>.<span class='ident'>send_opt</span>(());
-        }<span class='comment'>
+        }
 
-        // Make sure we had multiple reads
-        </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>reads</span> <span class='op'>&gt;</span> <span class='number'>1</span>);
+        <span class='comment'>// Make sure we had multiple reads</span>
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>reads</span> <span class='op'>&gt;</span> <span class='number'>1</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -2529,12 +2527,12 @@
     <span class='attribute'>#[<span class='ident'>should_fail</span>]</span> <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>udp_fail_other_task</span>() {
         <span class='kw'>let</span> <span class='ident'>addr</span> <span class='op'>=</span> ::<span class='ident'>next_test_ip4</span>();
-        <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();<span class='comment'>
+        <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
 
-        // force the handle to be created on a different scheduler, failure in
-        // the original task will force a homing operation back to this
-        // scheduler.
-        </span><span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+        <span class='comment'>// force the handle to be created on a different scheduler, failure in</span>
+        <span class='comment'>// the original task will force a homing operation back to this</span>
+        <span class='comment'>// scheduler.</span>
+        <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
             <span class='kw'>let</span> <span class='ident'>w</span> <span class='op'>=</span> <span class='ident'>UdpWatcher</span>::<span class='ident'>bind</span>(<span class='ident'>local_loop</span>(), <span class='ident'>addr</span>).<span class='ident'>unwrap</span>();
             <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='ident'>w</span>);
         });
@@ -2585,11 +2583,11 @@
     <script>
         window.rootPath = "../../../../../../../../../";
         window.currentCrate = "rustuv";
-        window.playgroundUrl = "";
+        window.playgroundUrl = "http://play.rust-lang.org/";
     </script>
     <script src="../../../../../../../../../jquery.js"></script>
     <script src="../../../../../../../../../main.js"></script>
-    
+    <script src="../../../../../../../../../playpen.js"></script>
     <script async src="../../../../../../../../../search-index.js"></script>
 </body>
 </html>

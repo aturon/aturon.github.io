@@ -7,8 +7,6 @@
 
     <title>raw.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -1152,17 +1150,17 @@
 <span id='1110'>1110</span>
 <span id='1111'>1111</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! Raw concurrency primitives you know and love.</span>
+<span class='doccomment'>//! Raw concurrency primitives you know and love.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! These primitives are not recommended for general use, but are provided for</span>
 <span class='doccomment'>//! flavorful use-cases. It is recommended to use the types at the top of the</span>
@@ -1179,17 +1177,17 @@
 <span class='kw'>use</span> <span class='ident'>collections</span>::<span class='ident'>Vec</span>;
 
 <span class='kw'>use</span> <span class='ident'>mutex</span>;
-<span class='kw'>use</span> <span class='ident'>comm</span>::{<span class='ident'>Receiver</span>, <span class='ident'>Sender</span>, <span class='ident'>channel</span>};<span class='comment'>
+<span class='kw'>use</span> <span class='ident'>comm</span>::{<span class='ident'>Receiver</span>, <span class='ident'>Sender</span>, <span class='ident'>channel</span>};
 
-/****************************************************************************
+<span class='comment'>/****************************************************************************
  * Internals
- ****************************************************************************/
+ ****************************************************************************/</span>
 
-// Each waiting task receives on one of these.
-</span><span class='kw'>type</span> <span class='ident'>WaitEnd</span> <span class='op'>=</span> <span class='ident'>Receiver</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span>;
-<span class='kw'>type</span> <span class='ident'>SignalEnd</span> <span class='op'>=</span> <span class='ident'>Sender</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span>;<span class='comment'>
-// A doubly-ended queue of waiting tasks.
-</span><span class='kw'>struct</span> <span class='ident'>WaitQueue</span> {
+<span class='comment'>// Each waiting task receives on one of these.</span>
+<span class='kw'>type</span> <span class='ident'>WaitEnd</span> <span class='op'>=</span> <span class='ident'>Receiver</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span>;
+<span class='kw'>type</span> <span class='ident'>SignalEnd</span> <span class='op'>=</span> <span class='ident'>Sender</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span>;
+<span class='comment'>// A doubly-ended queue of waiting tasks.</span>
+<span class='kw'>struct</span> <span class='ident'>WaitQueue</span> {
     <span class='ident'>head</span>: <span class='ident'>Receiver</span><span class='op'>&lt;</span><span class='ident'>SignalEnd</span><span class='op'>&gt;</span>,
     <span class='ident'>tail</span>: <span class='ident'>Sender</span><span class='op'>&lt;</span><span class='ident'>SignalEnd</span><span class='op'>&gt;</span>,
 }
@@ -1198,15 +1196,15 @@
     <span class='kw'>fn</span> <span class='ident'>new</span>() <span class='op'>-&gt;</span> <span class='ident'>WaitQueue</span> {
         <span class='kw'>let</span> (<span class='ident'>block_tail</span>, <span class='ident'>block_head</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
         <span class='ident'>WaitQueue</span> { <span class='ident'>head</span>: <span class='ident'>block_head</span>, <span class='ident'>tail</span>: <span class='ident'>block_tail</span> }
-    }<span class='comment'>
+    }
 
-    // Signals one live task from the queue.
-    </span><span class='kw'>fn</span> <span class='ident'>signal</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+    <span class='comment'>// Signals one live task from the queue.</span>
+    <span class='kw'>fn</span> <span class='ident'>signal</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
         <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>head</span>.<span class='ident'>try_recv</span>() {
-            <span class='prelude-val'>Ok</span>(<span class='ident'>ch</span>) <span class='op'>=&gt;</span> {<span class='comment'>
-                // Send a wakeup signal. If the waiter was killed, its port will
-                // have closed. Keep trying until we get a live task.
-                </span><span class='kw'>if</span> <span class='ident'>ch</span>.<span class='ident'>send_opt</span>(()).<span class='ident'>is_ok</span>() {
+            <span class='prelude-val'>Ok</span>(<span class='ident'>ch</span>) <span class='op'>=&gt;</span> {
+                <span class='comment'>// Send a wakeup signal. If the waiter was killed, its port will</span>
+                <span class='comment'>// have closed. Keep trying until we get a live task.</span>
+                <span class='kw'>if</span> <span class='ident'>ch</span>.<span class='ident'>send_opt</span>(()).<span class='ident'>is_ok</span>() {
                     <span class='boolval'>true</span>
                 } <span class='kw'>else</span> {
                     <span class='self'>self</span>.<span class='ident'>signal</span>()
@@ -1236,24 +1234,24 @@
         <span class='self'>self</span>.<span class='ident'>tail</span>.<span class='ident'>send</span>(<span class='ident'>signal_end</span>);
         <span class='ident'>wait_end</span>
     }
-}<span class='comment'>
+}
 
-// The building-block used to make semaphores, mutexes, and rwlocks.
-</span><span class='kw'>struct</span> <span class='ident'>Sem</span><span class='op'>&lt;</span><span class='ident'>Q</span><span class='op'>&gt;</span> {
-    <span class='ident'>lock</span>: <span class='ident'>mutex</span>::<span class='ident'>Mutex</span>,<span class='comment'>
-    // n.b, we need Sem to be `Share`, but the WaitQueue type is not send/share
-    //      (for good reason). We have an internal invariant on this semaphore,
-    //      however, that the queue is never accessed outside of a locked
-    //      context.
-    </span><span class='ident'>inner</span>: <span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='ident'>SemInner</span><span class='op'>&lt;</span><span class='ident'>Q</span><span class='op'>&gt;&gt;</span>
+<span class='comment'>// The building-block used to make semaphores, mutexes, and rwlocks.</span>
+<span class='kw'>struct</span> <span class='ident'>Sem</span><span class='op'>&lt;</span><span class='ident'>Q</span><span class='op'>&gt;</span> {
+    <span class='ident'>lock</span>: <span class='ident'>mutex</span>::<span class='ident'>Mutex</span>,
+    <span class='comment'>// n.b, we need Sem to be `Share`, but the WaitQueue type is not send/share</span>
+    <span class='comment'>//      (for good reason). We have an internal invariant on this semaphore,</span>
+    <span class='comment'>//      however, that the queue is never accessed outside of a locked</span>
+    <span class='comment'>//      context.</span>
+    <span class='ident'>inner</span>: <span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='ident'>SemInner</span><span class='op'>&lt;</span><span class='ident'>Q</span><span class='op'>&gt;&gt;</span>
 }
 
 <span class='kw'>struct</span> <span class='ident'>SemInner</span><span class='op'>&lt;</span><span class='ident'>Q</span><span class='op'>&gt;</span> {
     <span class='ident'>count</span>: <span class='ident'>int</span>,
-    <span class='ident'>waiters</span>: <span class='ident'>WaitQueue</span>,<span class='comment'>
-    // Can be either unit or another waitqueue. Some sems shouldn&#39;t come with
-    // a condition variable attached, others should.
-    </span><span class='ident'>blocked</span>: <span class='ident'>Q</span>,
+    <span class='ident'>waiters</span>: <span class='ident'>WaitQueue</span>,
+    <span class='comment'>// Can be either unit or another waitqueue. Some sems shouldn&#39;t come with</span>
+    <span class='comment'>// a condition variable attached, others should.</span>
+    <span class='ident'>blocked</span>: <span class='ident'>Q</span>,
 }
 
 <span class='attribute'>#[<span class='ident'>must_use</span>]</span>
@@ -1274,9 +1272,9 @@
     }
 
     <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>with</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='op'>|</span><span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>SemInner</span><span class='op'>&lt;</span><span class='ident'>Q</span><span class='op'>&gt;</span><span class='op'>|</span>) {
-        <span class='kw'>let</span> <span class='ident'>_g</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>lock</span>.<span class='ident'>lock</span>();<span class='comment'>
-        // This &amp;mut is safe because, due to the lock, we are the only one who can touch the data
-        </span><span class='ident'>f</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>inner</span>.<span class='ident'>get</span>())
+        <span class='kw'>let</span> <span class='ident'>_g</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>lock</span>.<span class='ident'>lock</span>();
+        <span class='comment'>// This &amp;mut is safe because, due to the lock, we are the only one who can touch the data</span>
+        <span class='ident'>f</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>inner</span>.<span class='ident'>get</span>())
     }
 
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>acquire</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) {
@@ -1284,17 +1282,17 @@
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>waiter_nobe</span> <span class='op'>=</span> <span class='prelude-val'>None</span>;
             <span class='self'>self</span>.<span class='ident'>with</span>(<span class='op'>|</span><span class='ident'>state</span><span class='op'>|</span> {
                 <span class='ident'>state</span>.<span class='ident'>count</span> <span class='op'>-=</span> <span class='number'>1</span>;
-                <span class='kw'>if</span> <span class='ident'>state</span>.<span class='ident'>count</span> <span class='op'>&lt;</span> <span class='number'>0</span> {<span class='comment'>
-                    // Create waiter nobe, enqueue ourself, and tell
-                    // outer scope we need to block.
-                    </span><span class='ident'>waiter_nobe</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>state</span>.<span class='ident'>waiters</span>.<span class='ident'>wait_end</span>());
+                <span class='kw'>if</span> <span class='ident'>state</span>.<span class='ident'>count</span> <span class='op'>&lt;</span> <span class='number'>0</span> {
+                    <span class='comment'>// Create waiter nobe, enqueue ourself, and tell</span>
+                    <span class='comment'>// outer scope we need to block.</span>
+                    <span class='ident'>waiter_nobe</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>state</span>.<span class='ident'>waiters</span>.<span class='ident'>wait_end</span>());
                 }
-            });<span class='comment'>
-            // Uncomment if you wish to test for sem races. Not
-            // valgrind-friendly.
-            /* for _ in range(0u, 1000) { task::deschedule(); } */
-            // Need to wait outside the exclusive.
-            </span><span class='kw'>if</span> <span class='ident'>waiter_nobe</span>.<span class='ident'>is_some</span>() {
+            });
+            <span class='comment'>// Uncomment if you wish to test for sem races. Not</span>
+            <span class='comment'>// valgrind-friendly.</span>
+            <span class='comment'>/* for _ in range(0u, 1000) { task::deschedule(); } */</span>
+            <span class='comment'>// Need to wait outside the exclusive.</span>
+            <span class='kw'>if</span> <span class='ident'>waiter_nobe</span>.<span class='ident'>is_some</span>() {
                 <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>waiter_nobe</span>.<span class='ident'>unwrap</span>().<span class='ident'>recv</span>();
             }
         }
@@ -1329,40 +1327,40 @@
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>queues</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
         <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0</span>, <span class='ident'>num_condvars</span>) { <span class='ident'>queues</span>.<span class='ident'>push</span>(<span class='ident'>WaitQueue</span>::<span class='ident'>new</span>()); }
         <span class='ident'>Sem</span>::<span class='ident'>new</span>(<span class='ident'>count</span>, <span class='ident'>queues</span>)
-    }<span class='comment'>
+    }
 
-    // The only other places that condvars get built are rwlock.write_cond()
-    // and rwlock_write_mode.
-    </span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>access_cond</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>SemCondGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+    <span class='comment'>// The only other places that condvars get built are rwlock.write_cond()</span>
+    <span class='comment'>// and rwlock_write_mode.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>access_cond</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>SemCondGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
         <span class='ident'>SemCondGuard</span> {
             <span class='ident'>guard</span>: <span class='self'>self</span>.<span class='ident'>access</span>(),
             <span class='ident'>cvar</span>: <span class='ident'>Condvar</span> { <span class='ident'>sem</span>: <span class='self'>self</span>, <span class='ident'>order</span>: <span class='ident'>Nothing</span>, <span class='ident'>nocopy</span>: <span class='ident'>marker</span>::<span class='ident'>NoCopy</span> },
         }
     }
-}<span class='comment'>
+}
 
-// FIXME(#3598): Want to use an Option down below, but we need a custom enum
-// that&#39;s not polymorphic to get around the fact that lifetimes are invariant
-// inside of type parameters.
-</span><span class='kw'>enum</span> <span class='ident'>ReacquireOrderLock</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-    <span class='ident'>Nothing</span>,<span class='comment'> // c.c
-    </span><span class='ident'>Just</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>Semaphore</span>),
+<span class='comment'>// FIXME(#3598): Want to use an Option down below, but we need a custom enum</span>
+<span class='comment'>// that&#39;s not polymorphic to get around the fact that lifetimes are invariant</span>
+<span class='comment'>// inside of type parameters.</span>
+<span class='kw'>enum</span> <span class='ident'>ReacquireOrderLock</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+    <span class='ident'>Nothing</span>, <span class='comment'>// c.c</span>
+    <span class='ident'>Just</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>Semaphore</span>),
 }
 
 <span class='doccomment'>/// A mechanism for atomic-unlock-and-deschedule blocking and signalling.</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Condvar</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {<span class='comment'>
-    // The &#39;Sem&#39; object associated with this condvar. This is the one that&#39;s
-    // atomically-unlocked-and-descheduled upon and reacquired during wakeup.
-    </span><span class='ident'>sem</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>Sem</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>WaitQueue</span><span class='op'>&gt;</span> <span class='op'>&gt;</span>,<span class='comment'>
-    // This is (can be) an extra semaphore which is held around the reacquire
-    // operation on the first one. This is only used in cvars associated with
-    // rwlocks, and is needed to ensure that, when a downgrader is trying to
-    // hand off the access lock (which would be the first field, here), a 2nd
-    // writer waking up from a cvar wait can&#39;t race with a reader to steal it,
-    // See the comment in write_cond for more detail.
-    </span><span class='ident'>order</span>: <span class='ident'>ReacquireOrderLock</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>,<span class='comment'>
-    // Make sure condvars are non-copyable.
-    </span><span class='ident'>nocopy</span>: <span class='ident'>marker</span>::<span class='ident'>NoCopy</span>,
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Condvar</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+    <span class='comment'>// The &#39;Sem&#39; object associated with this condvar. This is the one that&#39;s</span>
+    <span class='comment'>// atomically-unlocked-and-descheduled upon and reacquired during wakeup.</span>
+    <span class='ident'>sem</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>Sem</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>WaitQueue</span><span class='op'>&gt;</span> <span class='op'>&gt;</span>,
+    <span class='comment'>// This is (can be) an extra semaphore which is held around the reacquire</span>
+    <span class='comment'>// operation on the first one. This is only used in cvars associated with</span>
+    <span class='comment'>// rwlocks, and is needed to ensure that, when a downgrader is trying to</span>
+    <span class='comment'>// hand off the access lock (which would be the first field, here), a 2nd</span>
+    <span class='comment'>// writer waking up from a cvar wait can&#39;t race with a reader to steal it,</span>
+    <span class='comment'>// See the comment in write_cond for more detail.</span>
+    <span class='ident'>order</span>: <span class='ident'>ReacquireOrderLock</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>,
+    <span class='comment'>// Make sure condvars are non-copyable.</span>
+    <span class='ident'>nocopy</span>: <span class='ident'>marker</span>::<span class='ident'>NoCopy</span>,
 }
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>Condvar</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
@@ -1385,36 +1383,36 @@
     <span class='doccomment'>/// wait() is equivalent to wait_on(0).</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>wait_on</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>condvar_id</span>: <span class='ident'>uint</span>) {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>wait_end</span> <span class='op'>=</span> <span class='prelude-val'>None</span>;
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>out_of_bounds</span> <span class='op'>=</span> <span class='prelude-val'>None</span>;<span class='comment'>
-        // Release lock, &#39;atomically&#39; enqueuing ourselves in so doing.
-        </span><span class='kw'>unsafe</span> {
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>out_of_bounds</span> <span class='op'>=</span> <span class='prelude-val'>None</span>;
+        <span class='comment'>// Release lock, &#39;atomically&#39; enqueuing ourselves in so doing.</span>
+        <span class='kw'>unsafe</span> {
             <span class='self'>self</span>.<span class='ident'>sem</span>.<span class='ident'>with</span>(<span class='op'>|</span><span class='ident'>state</span><span class='op'>|</span> {
-                <span class='kw'>if</span> <span class='ident'>condvar_id</span> <span class='op'>&lt;</span> <span class='ident'>state</span>.<span class='ident'>blocked</span>.<span class='ident'>len</span>() {<span class='comment'>
-                    // Drop the lock.
-                    </span><span class='ident'>state</span>.<span class='ident'>count</span> <span class='op'>+=</span> <span class='number'>1</span>;
+                <span class='kw'>if</span> <span class='ident'>condvar_id</span> <span class='op'>&lt;</span> <span class='ident'>state</span>.<span class='ident'>blocked</span>.<span class='ident'>len</span>() {
+                    <span class='comment'>// Drop the lock.</span>
+                    <span class='ident'>state</span>.<span class='ident'>count</span> <span class='op'>+=</span> <span class='number'>1</span>;
                     <span class='kw'>if</span> <span class='ident'>state</span>.<span class='ident'>count</span> <span class='op'>&lt;=</span> <span class='number'>0</span> {
                         <span class='ident'>state</span>.<span class='ident'>waiters</span>.<span class='ident'>signal</span>();
-                    }<span class='comment'>
-                    // Create waiter nobe, and enqueue ourself to
-                    // be woken up by a signaller.
-                    </span><span class='ident'>wait_end</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>state</span>.<span class='ident'>blocked</span>.<span class='ident'>get</span>(<span class='ident'>condvar_id</span>).<span class='ident'>wait_end</span>());
+                    }
+                    <span class='comment'>// Create waiter nobe, and enqueue ourself to</span>
+                    <span class='comment'>// be woken up by a signaller.</span>
+                    <span class='ident'>wait_end</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>state</span>.<span class='ident'>blocked</span>.<span class='ident'>get</span>(<span class='ident'>condvar_id</span>).<span class='ident'>wait_end</span>());
                 } <span class='kw'>else</span> {
                     <span class='ident'>out_of_bounds</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>state</span>.<span class='ident'>blocked</span>.<span class='ident'>len</span>());
                 }
             })
-        }<span class='comment'>
+        }
 
-        // If deschedule checks start getting inserted anywhere, we can be
-        // killed before or after enqueueing.
-        </span><span class='ident'>check_cvar_bounds</span>(<span class='ident'>out_of_bounds</span>, <span class='ident'>condvar_id</span>, <span class='string'>&quot;cond.wait_on()&quot;</span>, <span class='op'>||</span> {<span class='comment'>
-            // Unconditionally &quot;block&quot;. (Might not actually block if a
-            // signaller already sent -- I mean &#39;unconditionally&#39; in contrast
-            // with acquire().)
-            </span>(<span class='op'>||</span> {
+        <span class='comment'>// If deschedule checks start getting inserted anywhere, we can be</span>
+        <span class='comment'>// killed before or after enqueueing.</span>
+        <span class='ident'>check_cvar_bounds</span>(<span class='ident'>out_of_bounds</span>, <span class='ident'>condvar_id</span>, <span class='string'>&quot;cond.wait_on()&quot;</span>, <span class='op'>||</span> {
+            <span class='comment'>// Unconditionally &quot;block&quot;. (Might not actually block if a</span>
+            <span class='comment'>// signaller already sent -- I mean &#39;unconditionally&#39; in contrast</span>
+            <span class='comment'>// with acquire().)</span>
+            (<span class='op'>||</span> {
                 <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>wait_end</span>.<span class='ident'>take_unwrap</span>().<span class='ident'>recv</span>();
-            }).<span class='ident'>finally</span>(<span class='op'>||</span> {<span class='comment'>
-                // Reacquire the condvar.
-                </span><span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>order</span> {
+            }).<span class='ident'>finally</span>(<span class='op'>||</span> {
+                <span class='comment'>// Reacquire the condvar.</span>
+                <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>order</span> {
                     <span class='ident'>Just</span>(<span class='ident'>lock</span>) <span class='op'>=&gt;</span> {
                         <span class='kw'>let</span> <span class='ident'>_g</span> <span class='op'>=</span> <span class='ident'>lock</span>.<span class='ident'>access</span>();
                         <span class='self'>self</span>.<span class='ident'>sem</span>.<span class='ident'>acquire</span>();
@@ -1456,11 +1454,11 @@
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>queue</span> <span class='op'>=</span> <span class='prelude-val'>None</span>;
         <span class='kw'>unsafe</span> {
             <span class='self'>self</span>.<span class='ident'>sem</span>.<span class='ident'>with</span>(<span class='op'>|</span><span class='ident'>state</span><span class='op'>|</span> {
-                <span class='kw'>if</span> <span class='ident'>condvar_id</span> <span class='op'>&lt;</span> <span class='ident'>state</span>.<span class='ident'>blocked</span>.<span class='ident'>len</span>() {<span class='comment'>
-                    // To avoid :broadcast_heavy, we make a new waitqueue,
-                    // swap it out with the old one, and broadcast on the
-                    // old one outside of the little-lock.
-                    </span><span class='ident'>queue</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>mem</span>::<span class='ident'>replace</span>(<span class='ident'>state</span>.<span class='ident'>blocked</span>.<span class='ident'>get_mut</span>(<span class='ident'>condvar_id</span>),
+                <span class='kw'>if</span> <span class='ident'>condvar_id</span> <span class='op'>&lt;</span> <span class='ident'>state</span>.<span class='ident'>blocked</span>.<span class='ident'>len</span>() {
+                    <span class='comment'>// To avoid :broadcast_heavy, we make a new waitqueue,</span>
+                    <span class='comment'>// swap it out with the old one, and broadcast on the</span>
+                    <span class='comment'>// old one outside of the little-lock.</span>
+                    <span class='ident'>queue</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>mem</span>::<span class='ident'>replace</span>(<span class='ident'>state</span>.<span class='ident'>blocked</span>.<span class='ident'>get_mut</span>(<span class='ident'>condvar_id</span>),
                                               <span class='ident'>WaitQueue</span>::<span class='ident'>new</span>()));
                 } <span class='kw'>else</span> {
                     <span class='ident'>out_of_bounds</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>state</span>.<span class='ident'>blocked</span>.<span class='ident'>len</span>());
@@ -1474,11 +1472,11 @@
             })
         }
     }
-}<span class='comment'>
+}
 
-// Checks whether a condvar ID was out of bounds, and fails if so, or does
-// something else next on success.
-</span><span class='attribute'>#[<span class='ident'>inline</span>]</span>
+<span class='comment'>// Checks whether a condvar ID was out of bounds, and fails if so, or does</span>
+<span class='comment'>// something else next on success.</span>
+<span class='attribute'>#[<span class='ident'>inline</span>]</span>
 <span class='kw'>fn</span> <span class='ident'>check_cvar_bounds</span><span class='op'>&lt;</span><span class='ident'>U</span><span class='op'>&gt;</span>(
                      <span class='ident'>out_of_bounds</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>,
                      <span class='ident'>id</span>: <span class='ident'>uint</span>,
@@ -1498,13 +1496,13 @@
 <span class='kw'>struct</span> <span class='ident'>SemCondGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
     <span class='ident'>guard</span>: <span class='ident'>SemGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>WaitQueue</span><span class='op'>&gt;&gt;</span>,
     <span class='ident'>cvar</span>: <span class='ident'>Condvar</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>,
-}<span class='comment'>
+}
 
-/****************************************************************************
+<span class='comment'>/****************************************************************************
  * Semaphores
- ****************************************************************************/
+ ****************************************************************************/</span>
 
-</span><span class='doccomment'>/// A counting, blocking, bounded-waiting semaphore.</span>
+<span class='doccomment'>/// A counting, blocking, bounded-waiting semaphore.</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Semaphore</span> {
     <span class='ident'>sem</span>: <span class='ident'>Sem</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span>,
 }
@@ -1535,13 +1533,13 @@
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>access</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>SemaphoreGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
         <span class='ident'>SemaphoreGuard</span> { <span class='ident'>_guard</span>: <span class='self'>self</span>.<span class='ident'>sem</span>.<span class='ident'>access</span>() }
     }
-}<span class='comment'>
+}
 
-/****************************************************************************
+<span class='comment'>/****************************************************************************
  * Mutexes
- ****************************************************************************/
+ ****************************************************************************/</span>
 
-</span><span class='doccomment'>/// A blocking, bounded-waiting, mutual exclusion lock with an associated</span>
+<span class='doccomment'>/// A blocking, bounded-waiting, mutual exclusion lock with an associated</span>
 <span class='doccomment'>/// FIFO condition variable.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// # Failure</span>
@@ -1581,15 +1579,15 @@
         <span class='kw'>let</span> <span class='ident'>SemCondGuard</span> { <span class='ident'>guard</span>, <span class='ident'>cvar</span> } <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>sem</span>.<span class='ident'>access_cond</span>();
         <span class='ident'>MutexGuard</span> { <span class='ident'>_guard</span>: <span class='ident'>guard</span>, <span class='ident'>cond</span>: <span class='ident'>cvar</span> }
     }
-}<span class='comment'>
+}
 
-/****************************************************************************
+<span class='comment'>/****************************************************************************
  * Reader-writer locks
- ****************************************************************************/
+ ****************************************************************************/</span>
 
-// NB: Wikipedia - Readers-writers_problem#The_third_readers-writers_problem
+<span class='comment'>// NB: Wikipedia - Readers-writers_problem#The_third_readers-writers_problem</span>
 
-</span><span class='doccomment'>/// A blocking, no-starvation, reader-writer lock with an associated condvar.</span>
+<span class='doccomment'>/// A blocking, no-starvation, reader-writer lock with an associated condvar.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// # Failure</span>
 <span class='doccomment'>///</span>
@@ -1597,16 +1595,16 @@
 <span class='doccomment'>/// unwinds.</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>RWLock</span> {
     <span class='ident'>order_lock</span>:  <span class='ident'>Semaphore</span>,
-    <span class='ident'>access_lock</span>: <span class='ident'>Sem</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>WaitQueue</span><span class='op'>&gt;&gt;</span>,<span class='comment'>
+    <span class='ident'>access_lock</span>: <span class='ident'>Sem</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>WaitQueue</span><span class='op'>&gt;&gt;</span>,
 
-    // The only way the count flag is ever accessed is with xadd. Since it is
-    // a read-modify-write operation, multiple xadds on different cores will
-    // always be consistent with respect to each other, so a monotonic/relaxed
-    // consistency ordering suffices (i.e., no extra barriers are needed).
-    //
-    // FIXME(#6598): The atomics module has no relaxed ordering flag, so I use
-    // acquire/release orderings superfluously. Change these someday.
-    </span><span class='ident'>read_count</span>: <span class='ident'>atomics</span>::<span class='ident'>AtomicUint</span>,
+    <span class='comment'>// The only way the count flag is ever accessed is with xadd. Since it is</span>
+    <span class='comment'>// a read-modify-write operation, multiple xadds on different cores will</span>
+    <span class='comment'>// always be consistent with respect to each other, so a monotonic/relaxed</span>
+    <span class='comment'>// consistency ordering suffices (i.e., no extra barriers are needed).</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// FIXME(#6598): The atomics module has no relaxed ordering flag, so I use</span>
+    <span class='comment'>// acquire/release orderings superfluously. Change these someday.</span>
+    <span class='ident'>read_count</span>: <span class='ident'>atomics</span>::<span class='ident'>AtomicUint</span>,
 }
 
 <span class='doccomment'>/// An RAII helper which is created by acquiring a read lock on an RWLock. When</span>
@@ -1676,35 +1674,35 @@
     <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>write</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>RWLockWriteGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>_g</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>order_lock</span>.<span class='ident'>access</span>();
-        <span class='self'>self</span>.<span class='ident'>access_lock</span>.<span class='ident'>acquire</span>();<span class='comment'>
+        <span class='self'>self</span>.<span class='ident'>access_lock</span>.<span class='ident'>acquire</span>();
 
-        // It&#39;s important to thread our order lock into the condvar, so that
-        // when a cond.wait() wakes up, it uses it while reacquiring the
-        // access lock. If we permitted a waking-up writer to &quot;cut in line&quot;,
-        // there could arise a subtle race when a downgrader attempts to hand
-        // off the reader cloud lock to a waiting reader. This race is tested
-        // in arc.rs (test_rw_write_cond_downgrade_read_race) and looks like:
-        // T1 (writer)              T2 (downgrader)             T3 (reader)
-        // [in cond.wait()]
-        //                          [locks for writing]
-        //                          [holds access_lock]
-        // [is signalled, perhaps by
-        //  downgrader or a 4th thread]
-        // tries to lock access(!)
-        //                                                      lock order_lock
-        //                                                      xadd read_count[0-&gt;1]
-        //                                                      tries to lock access
-        //                          [downgrade]
-        //                          xadd read_count[1-&gt;2]
-        //                          unlock access
-        // Since T1 contended on the access lock before T3 did, it will steal
-        // the lock handoff. Adding order_lock in the condvar reacquire path
-        // solves this because T1 will hold order_lock while waiting on access,
-        // which will cause T3 to have to wait until T1 finishes its write,
-        // which can&#39;t happen until T2 finishes the downgrade-read entirely.
-        // The astute reader will also note that making waking writers use the
-        // order_lock is better for not starving readers.
-        </span><span class='ident'>RWLockWriteGuard</span> {
+        <span class='comment'>// It&#39;s important to thread our order lock into the condvar, so that</span>
+        <span class='comment'>// when a cond.wait() wakes up, it uses it while reacquiring the</span>
+        <span class='comment'>// access lock. If we permitted a waking-up writer to &quot;cut in line&quot;,</span>
+        <span class='comment'>// there could arise a subtle race when a downgrader attempts to hand</span>
+        <span class='comment'>// off the reader cloud lock to a waiting reader. This race is tested</span>
+        <span class='comment'>// in arc.rs (test_rw_write_cond_downgrade_read_race) and looks like:</span>
+        <span class='comment'>// T1 (writer)              T2 (downgrader)             T3 (reader)</span>
+        <span class='comment'>// [in cond.wait()]</span>
+        <span class='comment'>//                          [locks for writing]</span>
+        <span class='comment'>//                          [holds access_lock]</span>
+        <span class='comment'>// [is signalled, perhaps by</span>
+        <span class='comment'>//  downgrader or a 4th thread]</span>
+        <span class='comment'>// tries to lock access(!)</span>
+        <span class='comment'>//                                                      lock order_lock</span>
+        <span class='comment'>//                                                      xadd read_count[0-&gt;1]</span>
+        <span class='comment'>//                                                      tries to lock access</span>
+        <span class='comment'>//                          [downgrade]</span>
+        <span class='comment'>//                          xadd read_count[1-&gt;2]</span>
+        <span class='comment'>//                          unlock access</span>
+        <span class='comment'>// Since T1 contended on the access lock before T3 did, it will steal</span>
+        <span class='comment'>// the lock handoff. Adding order_lock in the condvar reacquire path</span>
+        <span class='comment'>// solves this because T1 will hold order_lock while waiting on access,</span>
+        <span class='comment'>// which will cause T3 to have to wait until T1 finishes its write,</span>
+        <span class='comment'>// which can&#39;t happen until T2 finishes the downgrade-read entirely.</span>
+        <span class='comment'>// The astute reader will also note that making waking writers use the</span>
+        <span class='comment'>// order_lock is better for not starving readers.</span>
+        <span class='ident'>RWLockWriteGuard</span> {
             <span class='ident'>lock</span>: <span class='self'>self</span>,
             <span class='ident'>cond</span>: <span class='ident'>Condvar</span> {
                 <span class='ident'>sem</span>: <span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>access_lock</span>,
@@ -1718,21 +1716,21 @@
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>RWLockWriteGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Consumes this write lock and converts it into a read lock.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>downgrade</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>RWLockReadGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>lock</span>;<span class='comment'>
-        // Don&#39;t run the destructor of the write guard, we&#39;re in charge of
-        // things from now on
-        </span><span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>forget</span>(<span class='self'>self</span>) }
+        <span class='kw'>let</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>lock</span>;
+        <span class='comment'>// Don&#39;t run the destructor of the write guard, we&#39;re in charge of</span>
+        <span class='comment'>// things from now on</span>
+        <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>forget</span>(<span class='self'>self</span>) }
 
-        <span class='kw'>let</span> <span class='ident'>old_count</span> <span class='op'>=</span> <span class='ident'>lock</span>.<span class='ident'>read_count</span>.<span class='ident'>fetch_add</span>(<span class='number'>1</span>, <span class='ident'>atomics</span>::<span class='ident'>Release</span>);<span class='comment'>
-        // If another reader was already blocking, we need to hand-off
-        // the &quot;reader cloud&quot; access lock to them.
-        </span><span class='kw'>if</span> <span class='ident'>old_count</span> <span class='op'>!=</span> <span class='number'>0</span> {<span class='comment'>
-            // Guaranteed not to let another writer in, because
-            // another reader was holding the order_lock. Hence they
-            // must be the one to get the access_lock (because all
-            // access_locks are acquired with order_lock held). See
-            // the comment in write_cond for more justification.
-            </span><span class='ident'>lock</span>.<span class='ident'>access_lock</span>.<span class='ident'>release</span>();
+        <span class='kw'>let</span> <span class='ident'>old_count</span> <span class='op'>=</span> <span class='ident'>lock</span>.<span class='ident'>read_count</span>.<span class='ident'>fetch_add</span>(<span class='number'>1</span>, <span class='ident'>atomics</span>::<span class='ident'>Release</span>);
+        <span class='comment'>// If another reader was already blocking, we need to hand-off</span>
+        <span class='comment'>// the &quot;reader cloud&quot; access lock to them.</span>
+        <span class='kw'>if</span> <span class='ident'>old_count</span> <span class='op'>!=</span> <span class='number'>0</span> {
+            <span class='comment'>// Guaranteed not to let another writer in, because</span>
+            <span class='comment'>// another reader was holding the order_lock. Hence they</span>
+            <span class='comment'>// must be the one to get the access_lock (because all</span>
+            <span class='comment'>// access_locks are acquired with order_lock held). See</span>
+            <span class='comment'>// the comment in write_cond for more justification.</span>
+            <span class='ident'>lock</span>.<span class='ident'>access_lock</span>.<span class='ident'>release</span>();
         }
         <span class='ident'>RWLockReadGuard</span> { <span class='ident'>lock</span>: <span class='ident'>lock</span> }
     }
@@ -1750,21 +1748,21 @@
     <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
         <span class='kw'>let</span> <span class='ident'>old_count</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>lock</span>.<span class='ident'>read_count</span>.<span class='ident'>fetch_sub</span>(<span class='number'>1</span>, <span class='ident'>atomics</span>::<span class='ident'>Release</span>);
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>old_count</span> <span class='op'>&gt;</span> <span class='number'>0</span>);
-        <span class='kw'>if</span> <span class='ident'>old_count</span> <span class='op'>==</span> <span class='number'>1</span> {<span class='comment'>
-            // Note: this release used to be outside of a locked access
-            // to exclusive-protected state. If this code is ever
-            // converted back to such (instead of using atomic ops),
-            // this access MUST NOT go inside the exclusive access.
-            </span><span class='self'>self</span>.<span class='ident'>lock</span>.<span class='ident'>access_lock</span>.<span class='ident'>release</span>();
+        <span class='kw'>if</span> <span class='ident'>old_count</span> <span class='op'>==</span> <span class='number'>1</span> {
+            <span class='comment'>// Note: this release used to be outside of a locked access</span>
+            <span class='comment'>// to exclusive-protected state. If this code is ever</span>
+            <span class='comment'>// converted back to such (instead of using atomic ops),</span>
+            <span class='comment'>// this access MUST NOT go inside the exclusive access.</span>
+            <span class='self'>self</span>.<span class='ident'>lock</span>.<span class='ident'>access_lock</span>.<span class='ident'>release</span>();
         }
     }
-}<span class='comment'>
+}
 
-/****************************************************************************
+<span class='comment'>/****************************************************************************
  * Tests
- ****************************************************************************/
+ ****************************************************************************/</span>
 
-</span><span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>tests</span> {
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
 
@@ -1773,12 +1771,12 @@
 
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>result</span>;
-    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>task</span>;<span class='comment'>
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>task</span>;
 
-    /************************************************************************
+    <span class='comment'>/************************************************************************
      * Semaphore tests
-     ************************************************************************/
-    </span><span class='attribute'>#[<span class='ident'>test</span>]</span>
+     ************************************************************************/</span>
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_sem_acquire_release</span>() {
         <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>Semaphore</span>::<span class='ident'>new</span>(<span class='number'>1</span>);
         <span class='ident'>s</span>.<span class='ident'>acquire</span>();
@@ -1802,9 +1800,9 @@
         <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>5</span>) { <span class='ident'>task</span>::<span class='ident'>deschedule</span>(); }
     }
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_sem_as_cvar</span>() {<span class='comment'>
-        /* Child waits and parent signals */
-        </span><span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
+    <span class='kw'>fn</span> <span class='ident'>test_sem_as_cvar</span>() {
+        <span class='comment'>/* Child waits and parent signals */</span>
+        <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
         <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>Semaphore</span>::<span class='ident'>new</span>(<span class='number'>0</span>));
         <span class='kw'>let</span> <span class='ident'>s2</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>clone</span>();
         <span class='ident'>task</span>::<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
@@ -1813,10 +1811,10 @@
         });
         <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>5</span>) { <span class='ident'>task</span>::<span class='ident'>deschedule</span>(); }
         <span class='ident'>s</span>.<span class='ident'>release</span>();
-        <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>();<span class='comment'>
+        <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>();
 
-        /* Parent waits and child signals */
-        </span><span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
+        <span class='comment'>/* Parent waits and child signals */</span>
+        <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
         <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>Semaphore</span>::<span class='ident'>new</span>(<span class='number'>0</span>));
         <span class='kw'>let</span> <span class='ident'>s2</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>clone</span>();
         <span class='ident'>task</span>::<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
@@ -1828,10 +1826,10 @@
         <span class='ident'>tx</span>.<span class='ident'>send</span>(());
     }
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_sem_multi_resource</span>() {<span class='comment'>
-        // Parent and child both get in the critical section at the same
-        // time, and shake hands.
-        </span><span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>Semaphore</span>::<span class='ident'>new</span>(<span class='number'>2</span>));
+    <span class='kw'>fn</span> <span class='ident'>test_sem_multi_resource</span>() {
+        <span class='comment'>// Parent and child both get in the critical section at the same</span>
+        <span class='comment'>// time, and shake hands.</span>
+        <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>Semaphore</span>::<span class='ident'>new</span>(<span class='number'>2</span>));
         <span class='kw'>let</span> <span class='ident'>s2</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>clone</span>();
         <span class='kw'>let</span> (<span class='ident'>tx1</span>, <span class='ident'>rx1</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
         <span class='kw'>let</span> (<span class='ident'>tx2</span>, <span class='ident'>rx2</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
@@ -1845,10 +1843,10 @@
         <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>rx1</span>.<span class='ident'>recv</span>();
     }
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_sem_runtime_friendly_blocking</span>() {<span class='comment'>
-        // Force the runtime to schedule two threads on the same sched_loop.
-        // When one blocks, it should schedule the other one.
-        </span><span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>Semaphore</span>::<span class='ident'>new</span>(<span class='number'>1</span>));
+    <span class='kw'>fn</span> <span class='ident'>test_sem_runtime_friendly_blocking</span>() {
+        <span class='comment'>// Force the runtime to schedule two threads on the same sched_loop.</span>
+        <span class='comment'>// When one blocks, it should schedule the other one.</span>
+        <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>Semaphore</span>::<span class='ident'>new</span>(<span class='number'>1</span>));
         <span class='kw'>let</span> <span class='ident'>s2</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>clone</span>();
         <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
         {
@@ -1858,19 +1856,19 @@
                 <span class='ident'>drop</span>(<span class='ident'>s2</span>.<span class='ident'>access</span>());
                 <span class='ident'>tx</span>.<span class='ident'>send</span>(());
             });
-            <span class='ident'>rx</span>.<span class='ident'>recv</span>();<span class='comment'> // wait for child to come alive
-            </span><span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>5</span>) { <span class='ident'>task</span>::<span class='ident'>deschedule</span>(); }<span class='comment'> // let the child contend
-        </span>}
-        <span class='ident'>rx</span>.<span class='ident'>recv</span>();<span class='comment'> // wait for child to be done
-    </span>}<span class='comment'>
-    /************************************************************************
+            <span class='ident'>rx</span>.<span class='ident'>recv</span>(); <span class='comment'>// wait for child to come alive</span>
+            <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>5</span>) { <span class='ident'>task</span>::<span class='ident'>deschedule</span>(); } <span class='comment'>// let the child contend</span>
+        }
+        <span class='ident'>rx</span>.<span class='ident'>recv</span>(); <span class='comment'>// wait for child to be done</span>
+    }
+    <span class='comment'>/************************************************************************
      * Mutex tests
-     ************************************************************************/
-    </span><span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_mutex_lock</span>() {<span class='comment'>
-        // Unsafely achieve shared state, and do the textbook
-        // &quot;load tmp = move ptr; inc tmp; store ptr &lt;- tmp&quot; dance.
-        </span><span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
+     ************************************************************************/</span>
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>test_mutex_lock</span>() {
+        <span class='comment'>// Unsafely achieve shared state, and do the textbook</span>
+        <span class='comment'>// &quot;load tmp = move ptr; inc tmp; store ptr &lt;- tmp&quot; dance.</span>
+        <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
         <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>Mutex</span>::<span class='ident'>new</span>());
         <span class='kw'>let</span> <span class='ident'>m2</span> <span class='op'>=</span> <span class='ident'>m</span>.<span class='ident'>clone</span>();
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>sharedstate</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='number'>0</span>;
@@ -1899,10 +1897,10 @@
     }
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_mutex_cond_wait</span>() {
-        <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>Mutex</span>::<span class='ident'>new</span>());<span class='comment'>
+        <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>Mutex</span>::<span class='ident'>new</span>());
 
-        // Child wakes up parent
-        </span>{
+        <span class='comment'>// Child wakes up parent</span>
+        {
             <span class='kw'>let</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>m</span>.<span class='ident'>lock</span>();
             <span class='kw'>let</span> <span class='ident'>m2</span> <span class='op'>=</span> <span class='ident'>m</span>.<span class='ident'>clone</span>();
             <span class='ident'>task</span>::<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
@@ -1911,9 +1909,9 @@
                 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>woken</span>);
             });
             <span class='ident'>lock</span>.<span class='ident'>cond</span>.<span class='ident'>wait</span>();
-        }<span class='comment'>
-        // Parent wakes up child
-        </span><span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
+        }
+        <span class='comment'>// Parent wakes up child</span>
+        <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
         <span class='kw'>let</span> <span class='ident'>m3</span> <span class='op'>=</span> <span class='ident'>m</span>.<span class='ident'>clone</span>();
         <span class='ident'>task</span>::<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
             <span class='kw'>let</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>m3</span>.<span class='ident'>lock</span>();
@@ -1921,14 +1919,14 @@
             <span class='ident'>lock</span>.<span class='ident'>cond</span>.<span class='ident'>wait</span>();
             <span class='ident'>tx</span>.<span class='ident'>send</span>(());
         });
-        <span class='ident'>rx</span>.<span class='ident'>recv</span>();<span class='comment'> // Wait until child gets in the mutex
-        </span>{
+        <span class='ident'>rx</span>.<span class='ident'>recv</span>(); <span class='comment'>// Wait until child gets in the mutex</span>
+        {
             <span class='kw'>let</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>m</span>.<span class='ident'>lock</span>();
             <span class='kw'>let</span> <span class='ident'>woken</span> <span class='op'>=</span> <span class='ident'>lock</span>.<span class='ident'>cond</span>.<span class='ident'>signal</span>();
             <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>woken</span>);
         }
-        <span class='ident'>rx</span>.<span class='ident'>recv</span>();<span class='comment'> // Wait until child wakes up
-    </span>}
+        <span class='ident'>rx</span>.<span class='ident'>recv</span>(); <span class='comment'>// Wait until child wakes up</span>
+    }
 
     <span class='kw'>fn</span> <span class='ident'>test_mutex_cond_broadcast_helper</span>(<span class='ident'>num_waiters</span>: <span class='ident'>uint</span>) {
         <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>Mutex</span>::<span class='ident'>new</span>());
@@ -1944,17 +1942,17 @@
                 <span class='ident'>lock</span>.<span class='ident'>cond</span>.<span class='ident'>wait</span>();
                 <span class='ident'>tx</span>.<span class='ident'>send</span>(());
             });
-        }<span class='comment'>
+        }
 
-        // wait until all children get in the mutex
-        </span><span class='kw'>for</span> <span class='ident'>rx</span> <span class='kw'>in</span> <span class='ident'>rxs</span>.<span class='ident'>mut_iter</span>() { <span class='ident'>rx</span>.<span class='ident'>recv</span>(); }
+        <span class='comment'>// wait until all children get in the mutex</span>
+        <span class='kw'>for</span> <span class='ident'>rx</span> <span class='kw'>in</span> <span class='ident'>rxs</span>.<span class='ident'>mut_iter</span>() { <span class='ident'>rx</span>.<span class='ident'>recv</span>(); }
         {
             <span class='kw'>let</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>m</span>.<span class='ident'>lock</span>();
             <span class='kw'>let</span> <span class='ident'>num_woken</span> <span class='op'>=</span> <span class='ident'>lock</span>.<span class='ident'>cond</span>.<span class='ident'>broadcast</span>();
             <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>num_woken</span>, <span class='ident'>num_waiters</span>);
-        }<span class='comment'>
-        // wait until all children wake up
-        </span><span class='kw'>for</span> <span class='ident'>rx</span> <span class='kw'>in</span> <span class='ident'>rxs</span>.<span class='ident'>mut_iter</span>() { <span class='ident'>rx</span>.<span class='ident'>recv</span>(); }
+        }
+        <span class='comment'>// wait until all children wake up</span>
+        <span class='kw'>for</span> <span class='ident'>rx</span> <span class='kw'>in</span> <span class='ident'>rxs</span>.<span class='ident'>mut_iter</span>() { <span class='ident'>rx</span>.<span class='ident'>recv</span>(); }
     }
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_mutex_cond_broadcast</span>() {
@@ -1976,24 +1974,24 @@
     }
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_mutex_killed_simple</span>() {
-        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>any</span>::<span class='ident'>Any</span>;<span class='comment'>
+        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>any</span>::<span class='ident'>Any</span>;
 
-        // Mutex must get automatically unlocked if failed/killed within.
-        </span><span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>Mutex</span>::<span class='ident'>new</span>());
+        <span class='comment'>// Mutex must get automatically unlocked if failed/killed within.</span>
+        <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>Mutex</span>::<span class='ident'>new</span>());
         <span class='kw'>let</span> <span class='ident'>m2</span> <span class='op'>=</span> <span class='ident'>m</span>.<span class='ident'>clone</span>();
 
         <span class='kw'>let</span> <span class='ident'>result</span>: <span class='ident'>result</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;&gt;</span> <span class='op'>=</span> <span class='ident'>task</span>::<span class='ident'>try</span>(<span class='kw'>proc</span>() {
             <span class='kw'>let</span> <span class='ident'>_lock</span> <span class='op'>=</span> <span class='ident'>m2</span>.<span class='ident'>lock</span>();
             <span class='macro'>fail</span><span class='macro'>!</span>();
         });
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>result</span>.<span class='ident'>is_err</span>());<span class='comment'>
-        // child task must have finished by the time try returns
-        </span><span class='ident'>drop</span>(<span class='ident'>m</span>.<span class='ident'>lock</span>());
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>result</span>.<span class='ident'>is_err</span>());
+        <span class='comment'>// child task must have finished by the time try returns</span>
+        <span class='ident'>drop</span>(<span class='ident'>m</span>.<span class='ident'>lock</span>());
     }
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_mutex_cond_signal_on_0</span>() {<span class='comment'>
-        // Tests that signal_on(0) is equivalent to signal().
-        </span><span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>Mutex</span>::<span class='ident'>new</span>());
+    <span class='kw'>fn</span> <span class='ident'>test_mutex_cond_signal_on_0</span>() {
+        <span class='comment'>// Tests that signal_on(0) is equivalent to signal().</span>
+        <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>Mutex</span>::<span class='ident'>new</span>());
         <span class='kw'>let</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>m</span>.<span class='ident'>lock</span>();
         <span class='kw'>let</span> <span class='ident'>m2</span> <span class='op'>=</span> <span class='ident'>m</span>.<span class='ident'>clone</span>();
         <span class='ident'>task</span>::<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
@@ -2019,11 +2017,11 @@
             <span class='ident'>m</span>.<span class='ident'>lock</span>().<span class='ident'>cond</span>.<span class='ident'>broadcast</span>();
         });
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>result</span>.<span class='ident'>is_err</span>());
-    }<span class='comment'>
-    /************************************************************************
+    }
+    <span class='comment'>/************************************************************************
      * Reader/writer lock tests
-     ************************************************************************/
-    </span><span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
+     ************************************************************************/</span>
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
     <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>RWLockMode</span> { <span class='ident'>Read</span>, <span class='ident'>Write</span>, <span class='ident'>Downgrade</span>, <span class='ident'>DowngradeRead</span> }
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>lock_rwlock_in_mode</span>(<span class='ident'>x</span>: <span class='kw-2'>&amp;</span><span class='ident'>Arc</span><span class='op'>&lt;</span><span class='ident'>RWLock</span><span class='op'>&gt;</span>, <span class='ident'>mode</span>: <span class='ident'>RWLockMode</span>, <span class='ident'>blk</span>: <span class='op'>||</span>) {
@@ -2037,10 +2035,10 @@
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>test_rwlock_exclusion</span>(<span class='ident'>x</span>: <span class='ident'>Arc</span><span class='op'>&lt;</span><span class='ident'>RWLock</span><span class='op'>&gt;</span>,
                              <span class='ident'>mode1</span>: <span class='ident'>RWLockMode</span>,
-                             <span class='ident'>mode2</span>: <span class='ident'>RWLockMode</span>) {<span class='comment'>
-        // Test mutual exclusion between readers and writers. Just like the
-        // mutex mutual exclusion test, a ways above.
-        </span><span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
+                             <span class='ident'>mode2</span>: <span class='ident'>RWLockMode</span>) {
+        <span class='comment'>// Test mutual exclusion between readers and writers. Just like the</span>
+        <span class='comment'>// mutex mutual exclusion test, a ways above.</span>
+        <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
         <span class='kw'>let</span> <span class='ident'>x2</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>clone</span>();
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>sharedstate</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='number'>0</span>;
         {
@@ -2090,47 +2088,47 @@
     <span class='kw'>fn</span> <span class='ident'>test_rwlock_handshake</span>(<span class='ident'>x</span>: <span class='ident'>Arc</span><span class='op'>&lt;</span><span class='ident'>RWLock</span><span class='op'>&gt;</span>,
                              <span class='ident'>mode1</span>: <span class='ident'>RWLockMode</span>,
                              <span class='ident'>mode2</span>: <span class='ident'>RWLockMode</span>,
-                             <span class='ident'>make_mode2_go_first</span>: <span class='ident'>bool</span>) {<span class='comment'>
-        // Much like sem_multi_resource.
-        </span><span class='kw'>let</span> <span class='ident'>x2</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>clone</span>();
+                             <span class='ident'>make_mode2_go_first</span>: <span class='ident'>bool</span>) {
+        <span class='comment'>// Much like sem_multi_resource.</span>
+        <span class='kw'>let</span> <span class='ident'>x2</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>clone</span>();
         <span class='kw'>let</span> (<span class='ident'>tx1</span>, <span class='ident'>rx1</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
         <span class='kw'>let</span> (<span class='ident'>tx2</span>, <span class='ident'>rx2</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
         <span class='ident'>task</span>::<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
             <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>make_mode2_go_first</span> {
-                <span class='ident'>rx2</span>.<span class='ident'>recv</span>();<span class='comment'> // parent sends to us once it locks, or ...
-            </span>}
+                <span class='ident'>rx2</span>.<span class='ident'>recv</span>(); <span class='comment'>// parent sends to us once it locks, or ...</span>
+            }
             <span class='ident'>lock_rwlock_in_mode</span>(<span class='kw-2'>&amp;</span><span class='ident'>x2</span>, <span class='ident'>mode2</span>, <span class='op'>||</span> {
                 <span class='kw'>if</span> <span class='ident'>make_mode2_go_first</span> {
-                    <span class='ident'>tx1</span>.<span class='ident'>send</span>(());<span class='comment'> // ... we send to it once we lock
-                </span>}
+                    <span class='ident'>tx1</span>.<span class='ident'>send</span>(()); <span class='comment'>// ... we send to it once we lock</span>
+                }
                 <span class='ident'>rx2</span>.<span class='ident'>recv</span>();
                 <span class='ident'>tx1</span>.<span class='ident'>send</span>(());
             })
         });
         <span class='kw'>if</span> <span class='ident'>make_mode2_go_first</span> {
-            <span class='ident'>rx1</span>.<span class='ident'>recv</span>();<span class='comment'> // child sends to us once it locks, or ...
-        </span>}
+            <span class='ident'>rx1</span>.<span class='ident'>recv</span>(); <span class='comment'>// child sends to us once it locks, or ...</span>
+        }
         <span class='ident'>lock_rwlock_in_mode</span>(<span class='kw-2'>&amp;</span><span class='ident'>x</span>, <span class='ident'>mode1</span>, <span class='op'>||</span> {
             <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>make_mode2_go_first</span> {
-                <span class='ident'>tx2</span>.<span class='ident'>send</span>(());<span class='comment'> // ... we send to it once we lock
-            </span>}
+                <span class='ident'>tx2</span>.<span class='ident'>send</span>(()); <span class='comment'>// ... we send to it once we lock</span>
+            }
             <span class='ident'>tx2</span>.<span class='ident'>send</span>(());
             <span class='ident'>rx1</span>.<span class='ident'>recv</span>();
         })
     }
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_rwlock_readers_and_readers</span>() {
-        <span class='ident'>test_rwlock_handshake</span>(<span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>RWLock</span>::<span class='ident'>new</span>()), <span class='ident'>Read</span>, <span class='ident'>Read</span>, <span class='boolval'>false</span>);<span class='comment'>
-        // The downgrader needs to get in before the reader gets in, otherwise
-        // they cannot end up reading at the same time.
-        </span><span class='ident'>test_rwlock_handshake</span>(<span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>RWLock</span>::<span class='ident'>new</span>()), <span class='ident'>DowngradeRead</span>, <span class='ident'>Read</span>, <span class='boolval'>false</span>);
-        <span class='ident'>test_rwlock_handshake</span>(<span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>RWLock</span>::<span class='ident'>new</span>()), <span class='ident'>Read</span>, <span class='ident'>DowngradeRead</span>, <span class='boolval'>true</span>);<span class='comment'>
-        // Two downgrade_reads can never both end up reading at the same time.
-    </span>}
+        <span class='ident'>test_rwlock_handshake</span>(<span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>RWLock</span>::<span class='ident'>new</span>()), <span class='ident'>Read</span>, <span class='ident'>Read</span>, <span class='boolval'>false</span>);
+        <span class='comment'>// The downgrader needs to get in before the reader gets in, otherwise</span>
+        <span class='comment'>// they cannot end up reading at the same time.</span>
+        <span class='ident'>test_rwlock_handshake</span>(<span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>RWLock</span>::<span class='ident'>new</span>()), <span class='ident'>DowngradeRead</span>, <span class='ident'>Read</span>, <span class='boolval'>false</span>);
+        <span class='ident'>test_rwlock_handshake</span>(<span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>RWLock</span>::<span class='ident'>new</span>()), <span class='ident'>Read</span>, <span class='ident'>DowngradeRead</span>, <span class='boolval'>true</span>);
+        <span class='comment'>// Two downgrade_reads can never both end up reading at the same time.</span>
+    }
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_rwlock_downgrade_unlock</span>() {<span class='comment'>
-        // Tests that downgrade can unlock the lock in both modes
-        </span><span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>RWLock</span>::<span class='ident'>new</span>());
+    <span class='kw'>fn</span> <span class='ident'>test_rwlock_downgrade_unlock</span>() {
+        <span class='comment'>// Tests that downgrade can unlock the lock in both modes</span>
+        <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>RWLock</span>::<span class='ident'>new</span>());
         <span class='ident'>lock_rwlock_in_mode</span>(<span class='kw-2'>&amp;</span><span class='ident'>x</span>, <span class='ident'>Downgrade</span>, <span class='op'>||</span> { });
         <span class='ident'>test_rwlock_handshake</span>(<span class='ident'>x</span>, <span class='ident'>Read</span>, <span class='ident'>Read</span>, <span class='boolval'>false</span>);
         <span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>RWLock</span>::<span class='ident'>new</span>());
@@ -2144,12 +2142,12 @@
         <span class='kw'>let</span> <span class='ident'>_g2</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>read</span>();
     }
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_rwlock_cond_wait</span>() {<span class='comment'>
-        // As test_mutex_cond_wait above.
-        </span><span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>RWLock</span>::<span class='ident'>new</span>());<span class='comment'>
+    <span class='kw'>fn</span> <span class='ident'>test_rwlock_cond_wait</span>() {
+        <span class='comment'>// As test_mutex_cond_wait above.</span>
+        <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>RWLock</span>::<span class='ident'>new</span>());
 
-        // Child wakes up parent
-        </span>{
+        <span class='comment'>// Child wakes up parent</span>
+        {
             <span class='kw'>let</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>write</span>();
             <span class='kw'>let</span> <span class='ident'>x2</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>clone</span>();
             <span class='ident'>task</span>::<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
@@ -2157,9 +2155,9 @@
                 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>lock</span>.<span class='ident'>cond</span>.<span class='ident'>signal</span>());
             });
             <span class='ident'>lock</span>.<span class='ident'>cond</span>.<span class='ident'>wait</span>();
-        }<span class='comment'>
-        // Parent wakes up child
-        </span><span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
+        }
+        <span class='comment'>// Parent wakes up child</span>
+        <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
         <span class='kw'>let</span> <span class='ident'>x3</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>clone</span>();
         <span class='ident'>task</span>::<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
             <span class='kw'>let</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>x3</span>.<span class='ident'>write</span>();
@@ -2167,19 +2165,19 @@
             <span class='ident'>lock</span>.<span class='ident'>cond</span>.<span class='ident'>wait</span>();
             <span class='ident'>tx</span>.<span class='ident'>send</span>(());
         });
-        <span class='ident'>rx</span>.<span class='ident'>recv</span>();<span class='comment'> // Wait until child gets in the rwlock
-        </span><span class='ident'>drop</span>(<span class='ident'>x</span>.<span class='ident'>read</span>());<span class='comment'> // Must be able to get in as a reader
-        </span>{
+        <span class='ident'>rx</span>.<span class='ident'>recv</span>(); <span class='comment'>// Wait until child gets in the rwlock</span>
+        <span class='ident'>drop</span>(<span class='ident'>x</span>.<span class='ident'>read</span>()); <span class='comment'>// Must be able to get in as a reader</span>
+        {
             <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>write</span>();
             <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>x</span>.<span class='ident'>cond</span>.<span class='ident'>signal</span>());
         }
-        <span class='ident'>rx</span>.<span class='ident'>recv</span>();<span class='comment'> // Wait until child wakes up
-        </span><span class='ident'>drop</span>(<span class='ident'>x</span>.<span class='ident'>read</span>());<span class='comment'> // Just for good measure
-    </span>}
+        <span class='ident'>rx</span>.<span class='ident'>recv</span>(); <span class='comment'>// Wait until child wakes up</span>
+        <span class='ident'>drop</span>(<span class='ident'>x</span>.<span class='ident'>read</span>()); <span class='comment'>// Just for good measure</span>
+    }
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_rwlock_cond_broadcast_helper</span>(<span class='ident'>num_waiters</span>: <span class='ident'>uint</span>) {<span class='comment'>
-        // Much like the mutex broadcast test. Downgrade-enabled.
-        </span><span class='kw'>fn</span> <span class='ident'>lock_cond</span>(<span class='ident'>x</span>: <span class='kw-2'>&amp;</span><span class='ident'>Arc</span><span class='op'>&lt;</span><span class='ident'>RWLock</span><span class='op'>&gt;</span>, <span class='ident'>blk</span>: <span class='op'>|</span><span class='ident'>c</span>: <span class='kw-2'>&amp;</span><span class='ident'>Condvar</span><span class='op'>|</span>) {
+    <span class='kw'>fn</span> <span class='ident'>test_rwlock_cond_broadcast_helper</span>(<span class='ident'>num_waiters</span>: <span class='ident'>uint</span>) {
+        <span class='comment'>// Much like the mutex broadcast test. Downgrade-enabled.</span>
+        <span class='kw'>fn</span> <span class='ident'>lock_cond</span>(<span class='ident'>x</span>: <span class='kw-2'>&amp;</span><span class='ident'>Arc</span><span class='op'>&lt;</span><span class='ident'>RWLock</span><span class='op'>&gt;</span>, <span class='ident'>blk</span>: <span class='op'>|</span><span class='ident'>c</span>: <span class='kw-2'>&amp;</span><span class='ident'>Condvar</span><span class='op'>|</span>) {
             <span class='kw'>let</span> <span class='ident'>lock</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>write</span>();
             <span class='ident'>blk</span>(<span class='kw-2'>&amp;</span><span class='ident'>lock</span>.<span class='ident'>cond</span>);
         }
@@ -2198,16 +2196,16 @@
                     <span class='ident'>tx</span>.<span class='ident'>send</span>(());
                 })
             });
-        }<span class='comment'>
+        }
 
-        // wait until all children get in the mutex
-        </span><span class='kw'>for</span> <span class='ident'>rx</span> <span class='kw'>in</span> <span class='ident'>rxs</span>.<span class='ident'>mut_iter</span>() { <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>(); }
+        <span class='comment'>// wait until all children get in the mutex</span>
+        <span class='kw'>for</span> <span class='ident'>rx</span> <span class='kw'>in</span> <span class='ident'>rxs</span>.<span class='ident'>mut_iter</span>() { <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>(); }
         <span class='ident'>lock_cond</span>(<span class='kw-2'>&amp;</span><span class='ident'>x</span>, <span class='op'>|</span><span class='ident'>cond</span><span class='op'>|</span> {
             <span class='kw'>let</span> <span class='ident'>num_woken</span> <span class='op'>=</span> <span class='ident'>cond</span>.<span class='ident'>broadcast</span>();
             <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>num_woken</span>, <span class='ident'>num_waiters</span>);
-        });<span class='comment'>
-        // wait until all children wake up
-        </span><span class='kw'>for</span> <span class='ident'>rx</span> <span class='kw'>in</span> <span class='ident'>rxs</span>.<span class='ident'>mut_iter</span>() { <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>(); }
+        });
+        <span class='comment'>// wait until all children wake up</span>
+        <span class='kw'>for</span> <span class='ident'>rx</span> <span class='kw'>in</span> <span class='ident'>rxs</span>.<span class='ident'>mut_iter</span>() { <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>(); }
     }
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_rwlock_cond_broadcast</span>() {
@@ -2216,10 +2214,10 @@
     }
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>rwlock_kill_helper</span>(<span class='ident'>mode1</span>: <span class='ident'>RWLockMode</span>, <span class='ident'>mode2</span>: <span class='ident'>RWLockMode</span>) {
-        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>any</span>::<span class='ident'>Any</span>;<span class='comment'>
+        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>any</span>::<span class='ident'>Any</span>;
 
-        // Mutex must get automatically unlocked if failed/killed within.
-        </span><span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>RWLock</span>::<span class='ident'>new</span>());
+        <span class='comment'>// Mutex must get automatically unlocked if failed/killed within.</span>
+        <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>RWLock</span>::<span class='ident'>new</span>());
         <span class='kw'>let</span> <span class='ident'>x2</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>clone</span>();
 
         <span class='kw'>let</span> <span class='ident'>result</span>: <span class='ident'>result</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;&gt;</span> <span class='op'>=</span> <span class='ident'>task</span>::<span class='ident'>try</span>(<span class='kw'>proc</span>() {
@@ -2227,9 +2225,9 @@
                 <span class='macro'>fail</span><span class='macro'>!</span>();
             })
         });
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>result</span>.<span class='ident'>is_err</span>());<span class='comment'>
-        // child task must have finished by the time try returns
-        </span><span class='ident'>lock_rwlock_in_mode</span>(<span class='kw-2'>&amp;</span><span class='ident'>x</span>, <span class='ident'>mode2</span>, <span class='op'>||</span> { })
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>result</span>.<span class='ident'>is_err</span>());
+        <span class='comment'>// child task must have finished by the time try returns</span>
+        <span class='ident'>lock_rwlock_in_mode</span>(<span class='kw-2'>&amp;</span><span class='ident'>x</span>, <span class='ident'>mode2</span>, <span class='op'>||</span> { })
     }
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_rwlock_reader_killed_writer</span>() {

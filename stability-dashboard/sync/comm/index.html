@@ -7,8 +7,6 @@
 
     <title>sync::comm - Rust</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -117,8 +115,8 @@ still communicate with one another using channels.</p>
     });
     assert_eq!(rx.recv(), 10i);
 }</span><pre id='rust-example-rendered-0' class='rust '>
-<span class='comment'>// Create a simple streaming channel
-</span><span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
+<span class='comment'>// Create a simple streaming channel</span>
+<span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
 <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
     <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='number'>10i</span>);
 });
@@ -141,8 +139,8 @@ still communicate with one another using channels.</p>
         assert!(0 &lt;= j &amp;&amp; j &lt; 10);
     }
 }</span><pre id='rust-example-rendered-1' class='rust '>
-<span class='comment'>// Create a shared channel which can be sent along from many tasks
-</span><span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
+<span class='comment'>// Create a shared channel which can be sent along from many tasks</span>
+<span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
 <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0i</span>, <span class='number'>10i</span>) {
     <span class='kw'>let</span> <span class='ident'>tx</span> <span class='op'>=</span> <span class='ident'>tx</span>.<span class='ident'>clone</span>();
     <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
@@ -164,9 +162,9 @@ still communicate with one another using channels.</p>
     drop(tx);
     rx.recv();
 }</span><pre id='rust-example-rendered-2' class='rust '>
-<span class='comment'>// The call to recv() will fail!() because the channel has already hung
-// up (or been deallocated)
-</span><span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>::<span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>();
+<span class='comment'>// The call to recv() will fail!() because the channel has already hung</span>
+<span class='comment'>// up (or been deallocated)</span>
+<span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>::<span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>();
 <span class='ident'>drop</span>(<span class='ident'>tx</span>);
 <span class='ident'>rx</span>.<span class='ident'>recv</span>();
 </pre>
@@ -182,9 +180,9 @@ fn main() {
     rx.recv();
 }</span><pre id='rust-example-rendered-3' class='rust '>
 <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>sync_channel</span>::<span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>(<span class='number'>0</span>);
-<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {<span class='comment'>
-    // This will wait for the parent task to start receiving
-    </span><span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='number'>53</span>);
+<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+    <span class='comment'>// This will wait for the parent task to start receiving</span>
+    <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='number'>53</span>);
 });
 <span class='ident'>rx</span>.<span class='ident'>recv</span>();
 </pre>

@@ -7,8 +7,6 @@
 
     <title>lib.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -652,17 +650,17 @@
 <span id='610'>610</span>
 <span id='611'>611</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
-//
-</span><span class='doccomment'>//! The arena, a fast but limited type of allocator.</span>
+<span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
+<span class='comment'>//</span>
+<span class='doccomment'>//! The arena, a fast but limited type of allocator.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! Arenas are a type of allocator that destroy the objects within, all at</span>
 <span class='doccomment'>//! once, once the arena itself is destroyed. They do not support deallocation</span>
@@ -673,14 +671,14 @@
 <span class='doccomment'>//! arena but can only hold objects of a single type, and Arena, which is a</span>
 <span class='doccomment'>//! more complex, slower Arena which can hold objects of any type.</span>
 
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_id</span> <span class='op'>=</span> <span class='string'>&quot;arena#0.11.0-pre&quot;</span>]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_name</span> <span class='op'>=</span> <span class='string'>&quot;arena&quot;</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>experimental</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_type</span> <span class='op'>=</span> <span class='string'>&quot;rlib&quot;</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_type</span> <span class='op'>=</span> <span class='string'>&quot;dylib&quot;</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>license</span> <span class='op'>=</span> <span class='string'>&quot;MIT/ASL2&quot;</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>doc</span>(<span class='ident'>html_logo_url</span> <span class='op'>=</span> <span class='string'>&quot;http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png&quot;</span>,
        <span class='ident'>html_favicon_url</span> <span class='op'>=</span> <span class='string'>&quot;http://www.rust-lang.org/favicon.ico&quot;</span>,
-       <span class='ident'>html_root_url</span> <span class='op'>=</span> <span class='string'>&quot;http://doc.rust-lang.org/&quot;</span>)]</span>
+       <span class='ident'>html_root_url</span> <span class='op'>=</span> <span class='string'>&quot;http://doc.rust-lang.org/0.11.0/&quot;</span>)]</span>
 
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>unsafe_destructor</span>)]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>missing_doc</span>)]</span>
@@ -693,12 +691,12 @@
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>num</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ptr</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rc</span>::<span class='ident'>Rc</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rt</span>::<span class='ident'>heap</span>::<span class='ident'>allocate</span>;<span class='comment'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rt</span>::<span class='ident'>heap</span>::<span class='ident'>allocate</span>;
 
-// The way arena uses arrays is really deeply awful. The arrays are
-// allocated, and have capacities reserved, but the fill for the array
-// will always stay at 0.
-</span><span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>)]</span>
+<span class='comment'>// The way arena uses arrays is really deeply awful. The arrays are</span>
+<span class='comment'>// allocated, and have capacities reserved, but the fill for the array</span>
+<span class='comment'>// will always stay at 0.</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>)]</span>
 <span class='kw'>struct</span> <span class='ident'>Chunk</span> {
     <span class='ident'>data</span>: <span class='ident'>Rc</span><span class='op'>&lt;</span><span class='ident'>RefCell</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> <span class='op'>&gt;&gt;</span>,
     <span class='ident'>fill</span>: <span class='ident'>Cell</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>,
@@ -734,11 +732,11 @@
 <span class='doccomment'>/// different chunks than objects without destructors. This reduces</span>
 <span class='doccomment'>/// overhead when initializing plain-old-data and means we don&#39;t need</span>
 <span class='doccomment'>/// to waste time running the destructors of POD.</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Arena</span> {<span class='comment'>
-    // The head is separated out from the list as a unbenchmarked
-    // microoptimization, to avoid needing to case on the list to access the
-    // head.
-    </span><span class='ident'>head</span>: <span class='ident'>RefCell</span><span class='op'>&lt;</span><span class='ident'>Chunk</span><span class='op'>&gt;</span>,
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Arena</span> {
+    <span class='comment'>// The head is separated out from the list as a unbenchmarked</span>
+    <span class='comment'>// microoptimization, to avoid needing to case on the list to access the</span>
+    <span class='comment'>// head.</span>
+    <span class='ident'>head</span>: <span class='ident'>RefCell</span><span class='op'>&lt;</span><span class='ident'>Chunk</span><span class='op'>&gt;</span>,
     <span class='ident'>copy_head</span>: <span class='ident'>RefCell</span><span class='op'>&lt;</span><span class='ident'>Chunk</span><span class='op'>&gt;</span>,
     <span class='ident'>chunks</span>: <span class='ident'>RefCell</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Chunk</span><span class='op'>&gt;&gt;</span>,
 }
@@ -783,12 +781,12 @@
 
 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
 <span class='kw'>fn</span> <span class='ident'>round_up</span>(<span class='ident'>base</span>: <span class='ident'>uint</span>, <span class='ident'>align</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>uint</span> {
-    (<span class='ident'>base</span>.<span class='ident'>checked_add</span>(<span class='kw-2'>&amp;</span>(<span class='ident'>align</span> <span class='op'>-</span> <span class='number'>1</span>))).<span class='ident'>unwrap</span>() <span class='op'>&amp;</span> <span class='op'>!</span>(<span class='kw-2'>&amp;</span>(<span class='ident'>align</span> <span class='op'>-</span> <span class='number'>1</span>))
-}<span class='comment'>
+    (<span class='ident'>base</span>.<span class='ident'>checked_add</span>(<span class='kw-2'>&amp;</span>(<span class='ident'>align</span> <span class='op'>-</span> <span class='number'>1</span>))).<span class='ident'>unwrap</span>() <span class='kw-2'>&amp;</span> <span class='op'>!</span>(<span class='kw-2'>&amp;</span>(<span class='ident'>align</span> <span class='op'>-</span> <span class='number'>1</span>))
+}
 
-// Walk down a chunk, running the destructors for any objects stored
-// in it.
-</span><span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>destroy_chunk</span>(<span class='ident'>chunk</span>: <span class='kw-2'>&amp;</span><span class='ident'>Chunk</span>) {
+<span class='comment'>// Walk down a chunk, running the destructors for any objects stored</span>
+<span class='comment'>// in it.</span>
+<span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>destroy_chunk</span>(<span class='ident'>chunk</span>: <span class='kw-2'>&amp;</span><span class='ident'>Chunk</span>) {
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>idx</span> <span class='op'>=</span> <span class='number'>0</span>;
     <span class='kw'>let</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>chunk</span>.<span class='ident'>as_ptr</span>();
     <span class='kw'>let</span> <span class='ident'>fill</span> <span class='op'>=</span> <span class='ident'>chunk</span>.<span class='ident'>fill</span>.<span class='ident'>get</span>();
@@ -800,41 +798,41 @@
 
         <span class='kw'>let</span> <span class='ident'>after_tydesc</span> <span class='op'>=</span> <span class='ident'>idx</span> <span class='op'>+</span> <span class='ident'>mem</span>::<span class='ident'>size_of</span>::<span class='op'>&lt;</span><span class='op'>*</span><span class='kw'>const</span> <span class='ident'>TyDesc</span><span class='op'>&gt;</span>();
 
-        <span class='kw'>let</span> <span class='ident'>start</span> <span class='op'>=</span> <span class='ident'>round_up</span>(<span class='ident'>after_tydesc</span>, <span class='ident'>align</span>);<span class='comment'>
+        <span class='kw'>let</span> <span class='ident'>start</span> <span class='op'>=</span> <span class='ident'>round_up</span>(<span class='ident'>after_tydesc</span>, <span class='ident'>align</span>);
 
-        //debug!(&quot;freeing object: idx = {}, size = {}, align = {}, done = {}&quot;,
-        //       start, size, align, is_done);
-        </span><span class='kw'>if</span> <span class='ident'>is_done</span> {
+        <span class='comment'>//debug!(&quot;freeing object: idx = {}, size = {}, align = {}, done = {}&quot;,</span>
+        <span class='comment'>//       start, size, align, is_done);</span>
+        <span class='kw'>if</span> <span class='ident'>is_done</span> {
             ((<span class='op'>*</span><span class='ident'>tydesc</span>).<span class='ident'>drop_glue</span>)(<span class='ident'>buf</span>.<span class='ident'>offset</span>(<span class='ident'>start</span> <span class='kw'>as</span> <span class='ident'>int</span>) <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>i8</span>);
-        }<span class='comment'>
+        }
 
-        // Find where the next tydesc lives
-        </span><span class='ident'>idx</span> <span class='op'>=</span> <span class='ident'>round_up</span>(<span class='ident'>start</span> <span class='op'>+</span> <span class='ident'>size</span>, <span class='ident'>mem</span>::<span class='ident'>align_of</span>::<span class='op'>&lt;</span><span class='op'>*</span><span class='kw'>const</span> <span class='ident'>TyDesc</span><span class='op'>&gt;</span>());
+        <span class='comment'>// Find where the next tydesc lives</span>
+        <span class='ident'>idx</span> <span class='op'>=</span> <span class='ident'>round_up</span>(<span class='ident'>start</span> <span class='op'>+</span> <span class='ident'>size</span>, <span class='ident'>mem</span>::<span class='ident'>align_of</span>::<span class='op'>&lt;</span><span class='op'>*</span><span class='kw'>const</span> <span class='ident'>TyDesc</span><span class='op'>&gt;</span>());
     }
-}<span class='comment'>
+}
 
-// We encode whether the object a tydesc describes has been
-// initialized in the arena in the low bit of the tydesc pointer. This
-// is necessary in order to properly do cleanup if a failure occurs
-// during an initializer.
-</span><span class='attribute'>#[<span class='ident'>inline</span>]</span>
+<span class='comment'>// We encode whether the object a tydesc describes has been</span>
+<span class='comment'>// initialized in the arena in the low bit of the tydesc pointer. This</span>
+<span class='comment'>// is necessary in order to properly do cleanup if a failure occurs</span>
+<span class='comment'>// during an initializer.</span>
+<span class='attribute'>#[<span class='ident'>inline</span>]</span>
 <span class='kw'>fn</span> <span class='ident'>bitpack_tydesc_ptr</span>(<span class='ident'>p</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>TyDesc</span>, <span class='ident'>is_done</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='ident'>uint</span> {
     <span class='ident'>p</span> <span class='kw'>as</span> <span class='ident'>uint</span> <span class='op'>|</span> (<span class='ident'>is_done</span> <span class='kw'>as</span> <span class='ident'>uint</span>)
 }
 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
 <span class='kw'>fn</span> <span class='ident'>un_bitpack_tydesc_ptr</span>(<span class='ident'>p</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> (<span class='op'>*</span><span class='kw'>const</span> <span class='ident'>TyDesc</span>, <span class='ident'>bool</span>) {
-    ((<span class='ident'>p</span> <span class='op'>&amp;</span> <span class='op'>!</span><span class='number'>1</span>) <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>TyDesc</span>, <span class='ident'>p</span> <span class='op'>&amp;</span> <span class='number'>1</span> <span class='op'>==</span> <span class='number'>1</span>)
+    ((<span class='ident'>p</span> <span class='kw-2'>&amp;</span> <span class='op'>!</span><span class='number'>1</span>) <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>TyDesc</span>, <span class='ident'>p</span> <span class='kw-2'>&amp;</span> <span class='number'>1</span> <span class='op'>==</span> <span class='number'>1</span>)
 }
 
 <span class='kw'>impl</span> <span class='ident'>Arena</span> {
     <span class='kw'>fn</span> <span class='ident'>chunk_size</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>uint</span> {
         <span class='self'>self</span>.<span class='ident'>copy_head</span>.<span class='ident'>borrow</span>().<span class='ident'>capacity</span>()
-    }<span class='comment'>
+    }
 
-    // Functions for the POD part of the arena
-    </span><span class='kw'>fn</span> <span class='ident'>alloc_copy_grow</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>n_bytes</span>: <span class='ident'>uint</span>, <span class='ident'>align</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>u8</span> {<span class='comment'>
-        // Allocate a new chunk.
-        </span><span class='kw'>let</span> <span class='ident'>new_min_chunk_size</span> <span class='op'>=</span> <span class='ident'>cmp</span>::<span class='ident'>max</span>(<span class='ident'>n_bytes</span>, <span class='self'>self</span>.<span class='ident'>chunk_size</span>());
+    <span class='comment'>// Functions for the POD part of the arena</span>
+    <span class='kw'>fn</span> <span class='ident'>alloc_copy_grow</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>n_bytes</span>: <span class='ident'>uint</span>, <span class='ident'>align</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>u8</span> {
+        <span class='comment'>// Allocate a new chunk.</span>
+        <span class='kw'>let</span> <span class='ident'>new_min_chunk_size</span> <span class='op'>=</span> <span class='ident'>cmp</span>::<span class='ident'>max</span>(<span class='ident'>n_bytes</span>, <span class='self'>self</span>.<span class='ident'>chunk_size</span>());
         <span class='self'>self</span>.<span class='ident'>chunks</span>.<span class='ident'>borrow_mut</span>().<span class='ident'>push</span>(<span class='self'>self</span>.<span class='ident'>copy_head</span>.<span class='ident'>borrow</span>().<span class='ident'>clone</span>());
 
         <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>copy_head</span>.<span class='ident'>borrow_mut</span>() <span class='op'>=</span>
@@ -869,13 +867,13 @@
             <span class='ident'>ptr</span>::<span class='ident'>write</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> (<span class='op'>*</span><span class='ident'>ptr</span>), <span class='ident'>op</span>());
             <span class='kw'>return</span> <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>ptr</span>;
         }
-    }<span class='comment'>
+    }
 
-    // Functions for the non-POD part of the arena
-    </span><span class='kw'>fn</span> <span class='ident'>alloc_noncopy_grow</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>n_bytes</span>: <span class='ident'>uint</span>,
-                          <span class='ident'>align</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> (<span class='op'>*</span><span class='kw'>const</span> <span class='ident'>u8</span>, <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>u8</span>) {<span class='comment'>
-        // Allocate a new chunk.
-        </span><span class='kw'>let</span> <span class='ident'>new_min_chunk_size</span> <span class='op'>=</span> <span class='ident'>cmp</span>::<span class='ident'>max</span>(<span class='ident'>n_bytes</span>, <span class='self'>self</span>.<span class='ident'>chunk_size</span>());
+    <span class='comment'>// Functions for the non-POD part of the arena</span>
+    <span class='kw'>fn</span> <span class='ident'>alloc_noncopy_grow</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>n_bytes</span>: <span class='ident'>uint</span>,
+                          <span class='ident'>align</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> (<span class='op'>*</span><span class='kw'>const</span> <span class='ident'>u8</span>, <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>u8</span>) {
+        <span class='comment'>// Allocate a new chunk.</span>
+        <span class='kw'>let</span> <span class='ident'>new_min_chunk_size</span> <span class='op'>=</span> <span class='ident'>cmp</span>::<span class='ident'>max</span>(<span class='ident'>n_bytes</span>, <span class='self'>self</span>.<span class='ident'>chunk_size</span>());
         <span class='self'>self</span>.<span class='ident'>chunks</span>.<span class='ident'>borrow_mut</span>().<span class='ident'>push</span>(<span class='self'>self</span>.<span class='ident'>head</span>.<span class='ident'>borrow</span>().<span class='ident'>clone</span>());
 
         <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>head</span>.<span class='ident'>borrow_mut</span>() <span class='op'>=</span>
@@ -886,10 +884,10 @@
 
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>alloc_noncopy_inner</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>n_bytes</span>: <span class='ident'>uint</span>,
-                           <span class='ident'>align</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> (<span class='op'>*</span><span class='kw'>const</span> <span class='ident'>u8</span>, <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>u8</span>) {<span class='comment'>
-        // Be careful to not maintain any `head` borrows active, because
-        // `alloc_noncopy_grow` borrows it mutably.
-        </span><span class='kw'>let</span> (<span class='ident'>start</span>, <span class='ident'>end</span>, <span class='ident'>tydesc_start</span>, <span class='ident'>head_capacity</span>) <span class='op'>=</span> {
+                           <span class='ident'>align</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> (<span class='op'>*</span><span class='kw'>const</span> <span class='ident'>u8</span>, <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>u8</span>) {
+        <span class='comment'>// Be careful to not maintain any `head` borrows active, because</span>
+        <span class='comment'>// `alloc_noncopy_grow` borrows it mutably.</span>
+        <span class='kw'>let</span> (<span class='ident'>start</span>, <span class='ident'>end</span>, <span class='ident'>tydesc_start</span>, <span class='ident'>head_capacity</span>) <span class='op'>=</span> {
             <span class='kw'>let</span> <span class='ident'>head</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>head</span>.<span class='ident'>borrow</span>();
             <span class='kw'>let</span> <span class='ident'>fill</span> <span class='op'>=</span> <span class='ident'>head</span>.<span class='ident'>fill</span>.<span class='ident'>get</span>();
 
@@ -922,15 +920,15 @@
                 <span class='self'>self</span>.<span class='ident'>alloc_noncopy_inner</span>(<span class='ident'>mem</span>::<span class='ident'>size_of</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(),
                                          <span class='ident'>mem</span>::<span class='ident'>min_align_of</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>());
             <span class='kw'>let</span> <span class='ident'>ty_ptr</span> <span class='op'>=</span> <span class='ident'>ty_ptr</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uint</span>;
-            <span class='kw'>let</span> <span class='ident'>ptr</span> <span class='op'>=</span> <span class='ident'>ptr</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span>;<span class='comment'>
-            // Write in our tydesc along with a bit indicating that it
-            // has *not* been initialized yet.
-            </span><span class='op'>*</span><span class='ident'>ty_ptr</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>tydesc</span>);<span class='comment'>
-            // Actually initialize it
-            </span><span class='ident'>ptr</span>::<span class='ident'>write</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span>(<span class='op'>*</span><span class='ident'>ptr</span>), <span class='ident'>op</span>());<span class='comment'>
-            // Now that we are done, update the tydesc to indicate that
-            // the object is there.
-            </span><span class='op'>*</span><span class='ident'>ty_ptr</span> <span class='op'>=</span> <span class='ident'>bitpack_tydesc_ptr</span>(<span class='ident'>tydesc</span>, <span class='boolval'>true</span>);
+            <span class='kw'>let</span> <span class='ident'>ptr</span> <span class='op'>=</span> <span class='ident'>ptr</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span>;
+            <span class='comment'>// Write in our tydesc along with a bit indicating that it</span>
+            <span class='comment'>// has *not* been initialized yet.</span>
+            <span class='op'>*</span><span class='ident'>ty_ptr</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>tydesc</span>);
+            <span class='comment'>// Actually initialize it</span>
+            <span class='ident'>ptr</span>::<span class='ident'>write</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span>(<span class='op'>*</span><span class='ident'>ptr</span>), <span class='ident'>op</span>());
+            <span class='comment'>// Now that we are done, update the tydesc to indicate that</span>
+            <span class='comment'>// the object is there.</span>
+            <span class='op'>*</span><span class='ident'>ty_ptr</span> <span class='op'>=</span> <span class='ident'>bitpack_tydesc_ptr</span>(<span class='ident'>tydesc</span>, <span class='boolval'>true</span>);
 
             <span class='kw'>return</span> <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>ptr</span>;
         }
@@ -953,13 +951,13 @@
 <span class='attribute'>#[<span class='ident'>test</span>]</span>
 <span class='kw'>fn</span> <span class='ident'>test_arena_destructors</span>() {
     <span class='kw'>let</span> <span class='ident'>arena</span> <span class='op'>=</span> <span class='ident'>Arena</span>::<span class='ident'>new</span>();
-    <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>10</span>) {<span class='comment'>
-        // Arena allocate something with drop glue to make sure it
-        // doesn&#39;t leak.
-        </span><span class='ident'>arena</span>.<span class='ident'>alloc</span>(<span class='op'>||</span> <span class='ident'>Rc</span>::<span class='ident'>new</span>(<span class='ident'>i</span>));<span class='comment'>
-        // Allocate something with funny size and alignment, to keep
-        // things interesting.
-        </span><span class='ident'>arena</span>.<span class='ident'>alloc</span>(<span class='op'>||</span> [<span class='number'>0u8</span>, <span class='number'>1u8</span>, <span class='number'>2u8</span>]);
+    <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>10</span>) {
+        <span class='comment'>// Arena allocate something with drop glue to make sure it</span>
+        <span class='comment'>// doesn&#39;t leak.</span>
+        <span class='ident'>arena</span>.<span class='ident'>alloc</span>(<span class='op'>||</span> <span class='ident'>Rc</span>::<span class='ident'>new</span>(<span class='ident'>i</span>));
+        <span class='comment'>// Allocate something with funny size and alignment, to keep</span>
+        <span class='comment'>// things interesting.</span>
+        <span class='ident'>arena</span>.<span class='ident'>alloc</span>(<span class='op'>||</span> [<span class='number'>0u8</span>, <span class='number'>1u8</span>, <span class='number'>2u8</span>]);
     }
 }
 
@@ -980,20 +978,20 @@
 <span class='attribute'>#[<span class='ident'>test</span>]</span>
 <span class='attribute'>#[<span class='ident'>should_fail</span>]</span>
 <span class='kw'>fn</span> <span class='ident'>test_arena_destructors_fail</span>() {
-    <span class='kw'>let</span> <span class='ident'>arena</span> <span class='op'>=</span> <span class='ident'>Arena</span>::<span class='ident'>new</span>();<span class='comment'>
-    // Put some stuff in the arena.
-    </span><span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>10</span>) {<span class='comment'>
-        // Arena allocate something with drop glue to make sure it
-        // doesn&#39;t leak.
-        </span><span class='ident'>arena</span>.<span class='ident'>alloc</span>(<span class='op'>||</span> { <span class='ident'>Rc</span>::<span class='ident'>new</span>(<span class='ident'>i</span>) });<span class='comment'>
-        // Allocate something with funny size and alignment, to keep
-        // things interesting.
-        </span><span class='ident'>arena</span>.<span class='ident'>alloc</span>(<span class='op'>||</span> { [<span class='number'>0u8</span>, <span class='number'>1u8</span>, <span class='number'>2u8</span>] });
-    }<span class='comment'>
-    // Now, fail while allocating
-    </span><span class='ident'>arena</span>.<span class='ident'>alloc</span>::<span class='op'>&lt;</span><span class='ident'>Rc</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;&gt;</span>(<span class='op'>||</span> {<span class='comment'>
-        // Now fail.
-        </span><span class='macro'>fail</span><span class='macro'>!</span>();
+    <span class='kw'>let</span> <span class='ident'>arena</span> <span class='op'>=</span> <span class='ident'>Arena</span>::<span class='ident'>new</span>();
+    <span class='comment'>// Put some stuff in the arena.</span>
+    <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>10</span>) {
+        <span class='comment'>// Arena allocate something with drop glue to make sure it</span>
+        <span class='comment'>// doesn&#39;t leak.</span>
+        <span class='ident'>arena</span>.<span class='ident'>alloc</span>(<span class='op'>||</span> { <span class='ident'>Rc</span>::<span class='ident'>new</span>(<span class='ident'>i</span>) });
+        <span class='comment'>// Allocate something with funny size and alignment, to keep</span>
+        <span class='comment'>// things interesting.</span>
+        <span class='ident'>arena</span>.<span class='ident'>alloc</span>(<span class='op'>||</span> { [<span class='number'>0u8</span>, <span class='number'>1u8</span>, <span class='number'>2u8</span>] });
+    }
+    <span class='comment'>// Now, fail while allocating</span>
+    <span class='ident'>arena</span>.<span class='ident'>alloc</span>::<span class='op'>&lt;</span><span class='ident'>Rc</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;&gt;</span>(<span class='op'>||</span> {
+        <span class='comment'>// Now fail.</span>
+        <span class='macro'>fail</span><span class='macro'>!</span>();
     });
 }
 
@@ -1020,10 +1018,10 @@
     <span class='ident'>next</span>: <span class='ident'>TypedArenaChunkRef</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>,
 
     <span class='doccomment'>/// The number of elements that this chunk can hold.</span>
-    <span class='ident'>capacity</span>: <span class='ident'>uint</span>,<span class='comment'>
+    <span class='ident'>capacity</span>: <span class='ident'>uint</span>,
 
-    // Objects follow here, suitably aligned.
-</span>}
+    <span class='comment'>// Objects follow here, suitably aligned.</span>
+}
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>TypedArenaChunk</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
@@ -1049,40 +1047,40 @@
     <span class='doccomment'>/// Destroys this arena chunk. If the type descriptor is supplied, the</span>
     <span class='doccomment'>/// drop glue is called; otherwise, drop glue is not called.</span>
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>destroy</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>len</span>: <span class='ident'>uint</span>) {<span class='comment'>
-        // Destroy all the allocated objects.
-        </span><span class='kw'>if</span> <span class='ident'>intrinsics</span>::<span class='ident'>needs_drop</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>() {
+    <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>destroy</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>len</span>: <span class='ident'>uint</span>) {
+        <span class='comment'>// Destroy all the allocated objects.</span>
+        <span class='kw'>if</span> <span class='ident'>intrinsics</span>::<span class='ident'>needs_drop</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>() {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>start</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>start</span>();
             <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0</span>, <span class='ident'>len</span>) {
-                <span class='ident'>ptr</span>::<span class='ident'>read</span>(<span class='ident'>start</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>T</span>);<span class='comment'> // run the destructor on the pointer
-                </span><span class='ident'>start</span> <span class='op'>=</span> <span class='ident'>start</span>.<span class='ident'>offset</span>(<span class='ident'>mem</span>::<span class='ident'>size_of</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>() <span class='kw'>as</span> <span class='ident'>int</span>)
+                <span class='ident'>ptr</span>::<span class='ident'>read</span>(<span class='ident'>start</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>T</span>); <span class='comment'>// run the destructor on the pointer</span>
+                <span class='ident'>start</span> <span class='op'>=</span> <span class='ident'>start</span>.<span class='ident'>offset</span>(<span class='ident'>mem</span>::<span class='ident'>size_of</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>() <span class='kw'>as</span> <span class='ident'>int</span>)
             }
-        }<span class='comment'>
+        }
 
-        // Destroy the next chunk.
-        </span><span class='kw'>let</span> <span class='ident'>next_opt</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>replace</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>next</span>, <span class='prelude-val'>None</span>);
+        <span class='comment'>// Destroy the next chunk.</span>
+        <span class='kw'>let</span> <span class='ident'>next_opt</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>replace</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>next</span>, <span class='prelude-val'>None</span>);
         <span class='kw'>match</span> <span class='ident'>next_opt</span> {
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {}
-            <span class='prelude-val'>Some</span>(<span class='kw-2'>mut</span> <span class='ident'>next</span>) <span class='op'>=&gt;</span> {<span class='comment'>
-                // We assume that the next chunk is completely filled.
-                </span><span class='kw'>let</span> <span class='ident'>capacity</span> <span class='op'>=</span> <span class='ident'>next</span>.<span class='ident'>capacity</span>;
+            <span class='prelude-val'>Some</span>(<span class='kw-2'>mut</span> <span class='ident'>next</span>) <span class='op'>=&gt;</span> {
+                <span class='comment'>// We assume that the next chunk is completely filled.</span>
+                <span class='kw'>let</span> <span class='ident'>capacity</span> <span class='op'>=</span> <span class='ident'>next</span>.<span class='ident'>capacity</span>;
                 <span class='ident'>next</span>.<span class='ident'>destroy</span>(<span class='ident'>capacity</span>)
             }
         }
-    }<span class='comment'>
+    }
 
-    // Returns a pointer to the first allocated object.
-    </span><span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='comment'>// Returns a pointer to the first allocated object.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>start</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>u8</span> {
         <span class='kw'>let</span> <span class='ident'>this</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>TypedArenaChunk</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='self'>self</span>;
         <span class='kw'>unsafe</span> {
             <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>round_up</span>(<span class='ident'>this</span>.<span class='ident'>offset</span>(<span class='number'>1</span>) <span class='kw'>as</span> <span class='ident'>uint</span>,
                                     <span class='ident'>mem</span>::<span class='ident'>min_align_of</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>()))
         }
-    }<span class='comment'>
+    }
 
-    // Returns a pointer to the end of the allocated space.
-    </span><span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='comment'>// Returns a pointer to the end of the allocated space.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>end</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>u8</span> {
         <span class='kw'>unsafe</span> {
             <span class='kw'>let</span> <span class='ident'>size</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>size_of</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>().<span class='ident'>checked_mul</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>capacity</span>).<span class='ident'>unwrap</span>();
@@ -1141,14 +1139,14 @@
 
 <span class='attribute'>#[<span class='ident'>unsafe_destructor</span>]</span>
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>TypedArena</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
-    <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {<span class='comment'>
-        // Determine how much was filled.
-        </span><span class='kw'>let</span> <span class='ident'>start</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>first</span>.<span class='ident'>borrow</span>().<span class='ident'>get_ref</span>().<span class='ident'>start</span>() <span class='kw'>as</span> <span class='ident'>uint</span>;
+    <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
+        <span class='comment'>// Determine how much was filled.</span>
+        <span class='kw'>let</span> <span class='ident'>start</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>first</span>.<span class='ident'>borrow</span>().<span class='ident'>get_ref</span>().<span class='ident'>start</span>() <span class='kw'>as</span> <span class='ident'>uint</span>;
         <span class='kw'>let</span> <span class='ident'>end</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>ptr</span>.<span class='ident'>get</span>() <span class='kw'>as</span> <span class='ident'>uint</span>;
-        <span class='kw'>let</span> <span class='ident'>diff</span> <span class='op'>=</span> (<span class='ident'>end</span> <span class='op'>-</span> <span class='ident'>start</span>) <span class='op'>/</span> <span class='ident'>mem</span>::<span class='ident'>size_of</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>();<span class='comment'>
+        <span class='kw'>let</span> <span class='ident'>diff</span> <span class='op'>=</span> (<span class='ident'>end</span> <span class='op'>-</span> <span class='ident'>start</span>) <span class='op'>/</span> <span class='ident'>mem</span>::<span class='ident'>size_of</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>();
 
-        // Pass that to the `destroy` method.
-        </span><span class='kw'>unsafe</span> {
+        <span class='comment'>// Pass that to the `destroy` method.</span>
+        <span class='kw'>unsafe</span> {
             <span class='self'>self</span>.<span class='ident'>first</span>.<span class='ident'>borrow_mut</span>().<span class='ident'>get_mut_ref</span>().<span class='ident'>destroy</span>(<span class='ident'>diff</span>)
         }
     }

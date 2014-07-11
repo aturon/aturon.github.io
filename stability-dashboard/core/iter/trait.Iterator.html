@@ -7,8 +7,6 @@
 
     <title>core::iter::Iterator - Rust</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -41,7 +39,7 @@
     </nav>
 
     <section id='main' class="content trait">
-<h1 class='fqn'>Trait <a href='../index.html'>core</a>::<a href='index.html'>iter</a>::<a class='trait' href=''>Iterator</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-85385' href='../../src/core/Users/aturon/moz/working/stability-dashboard/src/libcore/iter.rs.html#98-643'>[src]</a></span></h1>
+<h1 class='fqn'>Trait <a href='../index.html'>core</a>::<a href='index.html'>iter</a>::<a class='trait' href=''>Iterator</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-35901' href='../../src/core/Users/aturon/moz/working/stability-dashboard/src/libcore/iter.rs.html#98-644'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait Iterator&lt;A&gt; {
     fn <a href='#tymethod.next' class='fnname'>next</a>(&amp;mut self) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;A&gt;;
 
@@ -356,9 +354,9 @@ and yields the elements of the produced iterators</p>
 
 <span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> [<span class='number'>2u</span>, <span class='number'>3</span>];
 <span class='kw'>let</span> <span class='ident'>ys</span> <span class='op'>=</span> [<span class='number'>0u</span>, <span class='number'>1</span>, <span class='number'>0</span>, <span class='number'>1</span>, <span class='number'>2</span>];
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>it</span> <span class='op'>=</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>().<span class='ident'>flat_map</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>count</span>(<span class='number'>0u</span>, <span class='number'>1</span>).<span class='ident'>take</span>(<span class='ident'>x</span>));<span class='comment'>
-// Check that `it` has the same elements as `ys`
-</span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='number'>0</span>;
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>it</span> <span class='op'>=</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>().<span class='ident'>flat_map</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>count</span>(<span class='number'>0u</span>, <span class='number'>1</span>).<span class='ident'>take</span>(<span class='ident'>x</span>));
+<span class='comment'>// Check that `it` has the same elements as `ys`</span>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='number'>0</span>;
 <span class='kw'>for</span> <span class='ident'>x</span> <span class='kw'>in</span> <span class='ident'>it</span> {
     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>x</span>, <span class='ident'>ys</span>[<span class='ident'>i</span>]);
     <span class='ident'>i</span> <span class='op'>+=</span> <span class='number'>1</span>;
@@ -396,9 +394,9 @@ affected, only single and double-ended iterator behavior.</p>
             <span class='kw'>continue</span>;
         }
         <span class='ident'>sum</span> <span class='op'>+=</span> <span class='ident'>x</span>;
-    }<span class='comment'>
-    // did we exhaust the iterator?
-    </span><span class='kw'>if</span> <span class='ident'>it</span>.<span class='ident'>next</span>().<span class='ident'>is_none</span>() {
+    }
+    <span class='comment'>// did we exhaust the iterator?</span>
+    <span class='kw'>if</span> <span class='ident'>it</span>.<span class='ident'>next</span>().<span class='ident'>is_none</span>() {
         <span class='ident'>sum</span> <span class='op'>+=</span> <span class='number'>1000</span>;
     }
     <span class='ident'>sum</span>
@@ -448,14 +446,14 @@ retaining ownership of the original iterator value.</p>
     // xs.next() is now `5`
     assert!(xs.next() == Some(5));
 }</span><pre id='rust-example-rendered-15' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>xs</span> <span class='op'>=</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>10</span>);<span class='comment'>
-// sum the first five values
-</span><span class='kw'>let</span> <span class='ident'>partial_sum</span> <span class='op'>=</span> <span class='ident'>xs</span>.<span class='ident'>by_ref</span>().<span class='ident'>take</span>(<span class='number'>5</span>).<span class='ident'>fold</span>(<span class='number'>0</span>, <span class='op'>|</span><span class='ident'>a</span>, <span class='ident'>b</span><span class='op'>|</span> <span class='ident'>a</span> <span class='op'>+</span> <span class='ident'>b</span>);
-<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>partial_sum</span> <span class='op'>==</span> <span class='number'>10</span>);<span class='comment'>
-// xs.next() is now `5`
-</span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>xs</span>.<span class='ident'>next</span>() <span class='op'>==</span> <span class='prelude-val'>Some</span>(<span class='number'>5</span>));
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>xs</span> <span class='op'>=</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>10</span>);
+<span class='comment'>// sum the first five values</span>
+<span class='kw'>let</span> <span class='ident'>partial_sum</span> <span class='op'>=</span> <span class='ident'>xs</span>.<span class='ident'>by_ref</span>().<span class='ident'>take</span>(<span class='number'>5</span>).<span class='ident'>fold</span>(<span class='number'>0</span>, <span class='op'>|</span><span class='ident'>a</span>, <span class='ident'>b</span><span class='op'>|</span> <span class='ident'>a</span> <span class='op'>+</span> <span class='ident'>b</span>);
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>partial_sum</span> <span class='op'>==</span> <span class='number'>10</span>);
+<span class='comment'>// xs.next() is now `5`</span>
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>xs</span>.<span class='ident'>next</span>() <span class='op'>==</span> <span class='prelude-val'>Some</span>(<span class='number'>5</span>));
 </pre>
-</div><h3 id='method.advance' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.advance' class='fnname'>advance</a>(&amp;mut self, f: |A| -&gt; <a href='../primitive.bool.html'>bool</a>) -&gt; <a href='../primitive.bool.html'>bool</a></code></h3><div class='docblock'><p>Apply a function to each element, or stop iterating if the
+</div><h3 id='method.advance' class='method'><a class='stability Deprecated' title='Deprecated: use the `all` method instead'></a><code>fn <a href='#method.advance' class='fnname'>advance</a>(&amp;mut self, f: |A| -&gt; <a href='../primitive.bool.html'>bool</a>) -&gt; <a href='../primitive.bool.html'>bool</a></code></h3><div class='docblock'><p>Apply a function to each element, or stop iterating if the
 function returns <code>false</code>.</p>
 
 <h1 id="example-16" class='section-header'><a

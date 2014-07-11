@@ -7,8 +7,6 @@
 
     <title>task.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -623,17 +621,17 @@
 <span id='581'>581</span>
 <span id='582'>582</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! The Green Task implementation</span>
+<span class='doccomment'>//! The Green Task implementation</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! This module contains the glue to the libstd runtime necessary to integrate</span>
 <span class='doccomment'>//! M:N scheduling. This GreenTask structure is hidden as a trait object in all</span>
@@ -688,10 +686,10 @@
     <span class='doccomment'>/// initialized until when the task is initially scheduled, and is used to</span>
     <span class='doccomment'>/// make sure that tasks are always woken up in the correct pool of</span>
     <span class='doccomment'>/// schedulers.</span>
-    <span class='kw'>pub</span> <span class='ident'>pool_id</span>: <span class='ident'>uint</span>,<span class='comment'>
+    <span class='kw'>pub</span> <span class='ident'>pool_id</span>: <span class='ident'>uint</span>,
 
-    // See the comments in the scheduler about why this is necessary
-    </span><span class='kw'>pub</span> <span class='ident'>nasty_deschedule_lock</span>: <span class='ident'>NativeMutex</span>,
+    <span class='comment'>// See the comments in the scheduler about why this is necessary</span>
+    <span class='kw'>pub</span> <span class='ident'>nasty_deschedule_lock</span>: <span class='ident'>NativeMutex</span>,
 }
 
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>TaskType</span> {
@@ -714,38 +712,38 @@
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// The goal for having this weird-looking function is to reduce the number of</span>
 <span class='doccomment'>/// allocations done on a green-task startup as much as possible.</span>
-<span class='kw'>extern</span> <span class='kw'>fn</span> <span class='ident'>bootstrap_green_task</span>(<span class='ident'>task</span>: <span class='ident'>uint</span>, <span class='ident'>code</span>: <span class='op'>*</span><span class='kw-2'>mut</span> (), <span class='ident'>env</span>: <span class='op'>*</span><span class='kw-2'>mut</span> ()) <span class='op'>-&gt;</span> <span class='op'>!</span> {<span class='comment'>
-    // Acquire ownership of the `proc()`
-    </span><span class='kw'>let</span> <span class='ident'>start</span>: <span class='kw'>proc</span>() <span class='op'>=</span> <span class='kw'>unsafe</span> {
+<span class='kw'>extern</span> <span class='kw'>fn</span> <span class='ident'>bootstrap_green_task</span>(<span class='ident'>task</span>: <span class='ident'>uint</span>, <span class='ident'>code</span>: <span class='op'>*</span><span class='kw-2'>mut</span> (), <span class='ident'>env</span>: <span class='op'>*</span><span class='kw-2'>mut</span> ()) <span class='op'>-&gt;</span> <span class='op'>!</span> {
+    <span class='comment'>// Acquire ownership of the `proc()`</span>
+    <span class='kw'>let</span> <span class='ident'>start</span>: <span class='kw'>proc</span>() <span class='op'>=</span> <span class='kw'>unsafe</span> {
         <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>raw</span>::<span class='ident'>Procedure</span> { <span class='ident'>code</span>: <span class='ident'>code</span>, <span class='ident'>env</span>: <span class='ident'>env</span> })
-    };<span class='comment'>
+    };
 
-    // Acquire ownership of the `Box&lt;GreenTask&gt;`
-    </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>task</span>) };<span class='comment'>
+    <span class='comment'>// Acquire ownership of the `Box&lt;GreenTask&gt;`</span>
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>task</span>) };
 
-    // First code after swap to this new context. Run our cleanup job
-    </span><span class='ident'>task</span>.<span class='ident'>pool_id</span> <span class='op'>=</span> {
+    <span class='comment'>// First code after swap to this new context. Run our cleanup job</span>
+    <span class='ident'>task</span>.<span class='ident'>pool_id</span> <span class='op'>=</span> {
         <span class='kw'>let</span> <span class='ident'>sched</span> <span class='op'>=</span> <span class='ident'>task</span>.<span class='ident'>sched</span>.<span class='ident'>get_mut_ref</span>();
         <span class='ident'>sched</span>.<span class='ident'>run_cleanup_job</span>();
         <span class='ident'>sched</span>.<span class='ident'>task_state</span>.<span class='ident'>increment</span>();
         <span class='ident'>sched</span>.<span class='ident'>pool_id</span>
-    };<span class='comment'>
+    };
 
-    // Convert our green task to a libstd task and then execute the code
-    // requested. This is the &quot;try/catch&quot; block for this green task and
-    // is the wrapper for *all* code run in the task.
-    </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>start</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>start</span>);
-    <span class='kw'>let</span> <span class='ident'>task</span> <span class='op'>=</span> <span class='ident'>task</span>.<span class='ident'>swap</span>().<span class='ident'>run</span>(<span class='op'>||</span> <span class='ident'>start</span>.<span class='ident'>take_unwrap</span>()()).<span class='ident'>destroy</span>();<span class='comment'>
+    <span class='comment'>// Convert our green task to a libstd task and then execute the code</span>
+    <span class='comment'>// requested. This is the &quot;try/catch&quot; block for this green task and</span>
+    <span class='comment'>// is the wrapper for *all* code run in the task.</span>
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>start</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>start</span>);
+    <span class='kw'>let</span> <span class='ident'>task</span> <span class='op'>=</span> <span class='ident'>task</span>.<span class='ident'>swap</span>().<span class='ident'>run</span>(<span class='op'>||</span> <span class='ident'>start</span>.<span class='ident'>take_unwrap</span>()()).<span class='ident'>destroy</span>();
 
-    // Once the function has exited, it&#39;s time to run the termination
-    // routine. This means we need to context switch one more time but
-    // clean ourselves up on the other end. Since we have no way of
-    // preserving a handle to the GreenTask down to this point, this
-    // unfortunately must call `GreenTask::convert`. In order to avoid
-    // this we could add a `terminate` function to the `Runtime` trait
-    // in libstd, but that seems less appropriate since the coversion
-    // method exists.
-    </span><span class='ident'>GreenTask</span>::<span class='ident'>convert</span>(<span class='ident'>task</span>).<span class='ident'>terminate</span>();
+    <span class='comment'>// Once the function has exited, it&#39;s time to run the termination</span>
+    <span class='comment'>// routine. This means we need to context switch one more time but</span>
+    <span class='comment'>// clean ourselves up on the other end. Since we have no way of</span>
+    <span class='comment'>// preserving a handle to the GreenTask down to this point, this</span>
+    <span class='comment'>// unfortunately must call `GreenTask::convert`. In order to avoid</span>
+    <span class='comment'>// this we could add a `terminate` function to the `Runtime` trait</span>
+    <span class='comment'>// in libstd, but that seems less appropriate since the coversion</span>
+    <span class='comment'>// method exists.</span>
+    <span class='ident'>GreenTask</span>::<span class='ident'>convert</span>(<span class='ident'>task</span>).<span class='ident'>terminate</span>();
 }
 
 <span class='kw'>impl</span> <span class='ident'>GreenTask</span> {
@@ -761,18 +759,18 @@
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new_homed</span>(<span class='ident'>stack_pool</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>StackPool</span>,
                      <span class='ident'>stack_size</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>,
                      <span class='ident'>home</span>: <span class='ident'>Home</span>,
-                     <span class='ident'>start</span>: <span class='kw'>proc</span>():<span class='ident'>Send</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span> {<span class='comment'>
-        // Allocate ourselves a GreenTask structure
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>ops</span> <span class='op'>=</span> <span class='ident'>GreenTask</span>::<span class='ident'>new_typed</span>(<span class='prelude-val'>None</span>, <span class='ident'>TypeGreen</span>(<span class='prelude-val'>Some</span>(<span class='ident'>home</span>)));<span class='comment'>
+                     <span class='ident'>start</span>: <span class='kw'>proc</span>():<span class='ident'>Send</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span> {
+        <span class='comment'>// Allocate ourselves a GreenTask structure</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>ops</span> <span class='op'>=</span> <span class='ident'>GreenTask</span>::<span class='ident'>new_typed</span>(<span class='prelude-val'>None</span>, <span class='ident'>TypeGreen</span>(<span class='prelude-val'>Some</span>(<span class='ident'>home</span>)));
 
-        // Allocate a stack for us to run on
-        </span><span class='kw'>let</span> <span class='ident'>stack_size</span> <span class='op'>=</span> <span class='ident'>stack_size</span>.<span class='ident'>unwrap_or_else</span>(<span class='op'>||</span> <span class='ident'>rt</span>::<span class='ident'>min_stack</span>());
+        <span class='comment'>// Allocate a stack for us to run on</span>
+        <span class='kw'>let</span> <span class='ident'>stack_size</span> <span class='op'>=</span> <span class='ident'>stack_size</span>.<span class='ident'>unwrap_or_else</span>(<span class='op'>||</span> <span class='ident'>rt</span>::<span class='ident'>min_stack</span>());
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>stack</span> <span class='op'>=</span> <span class='ident'>stack_pool</span>.<span class='ident'>take_stack</span>(<span class='ident'>stack_size</span>);
         <span class='kw'>let</span> <span class='ident'>context</span> <span class='op'>=</span> <span class='ident'>Context</span>::<span class='ident'>new</span>(<span class='ident'>bootstrap_green_task</span>, <span class='ident'>ops</span>.<span class='ident'>as_uint</span>(), <span class='ident'>start</span>,
-                                   <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stack</span>);<span class='comment'>
+                                   <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stack</span>);
 
-        // Package everything up in a coroutine and return
-        </span><span class='ident'>ops</span>.<span class='ident'>coroutine</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>Coroutine</span> {
+        <span class='comment'>// Package everything up in a coroutine and return</span>
+        <span class='ident'>ops</span>.<span class='ident'>coroutine</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>Coroutine</span> {
             <span class='ident'>current_stack_segment</span>: <span class='ident'>stack</span>,
             <span class='ident'>saved_context</span>: <span class='ident'>context</span>,
         });
@@ -840,20 +838,20 @@
             <span class='ident'>TypeGreen</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>home</span>) <span class='op'>=&gt;</span> <span class='ident'>home</span>.<span class='ident'>take_unwrap</span>(),
             <span class='ident'>TypeSched</span> <span class='op'>=&gt;</span> <span class='macro'>rtabort</span><span class='macro'>!</span>(<span class='string'>&quot;type error: used SchedTask as GreenTask&quot;</span>),
         }
-    }<span class='comment'>
+    }
 
-    // New utility functions for homes.
+    <span class='comment'>// New utility functions for homes.</span>
 
-    </span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>is_home_no_tls</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>sched</span>: <span class='kw-2'>&amp;</span><span class='ident'>Scheduler</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>is_home_no_tls</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>sched</span>: <span class='kw-2'>&amp;</span><span class='ident'>Scheduler</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
         <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>task_type</span> {
             <span class='ident'>TypeGreen</span>(<span class='prelude-val'>Some</span>(<span class='ident'>AnySched</span>)) <span class='op'>=&gt;</span> { <span class='boolval'>false</span> }
             <span class='ident'>TypeGreen</span>(<span class='prelude-val'>Some</span>(<span class='ident'>HomeSched</span>(<span class='ident'>SchedHandle</span> { <span class='ident'>sched_id</span>: <span class='kw-2'>ref</span> <span class='ident'>id</span>, .. }))) <span class='op'>=&gt;</span> {
                 <span class='op'>*</span><span class='ident'>id</span> <span class='op'>==</span> <span class='ident'>sched</span>.<span class='ident'>sched_id</span>()
             }
             <span class='ident'>TypeGreen</span>(<span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> { <span class='macro'>rtabort</span><span class='macro'>!</span>(<span class='string'>&quot;task without home&quot;</span>); }
-            <span class='ident'>TypeSched</span> <span class='op'>=&gt;</span> {<span class='comment'>
-                // Awe yea
-                </span><span class='macro'>rtabort</span><span class='macro'>!</span>(<span class='string'>&quot;type error: expected: TypeGreen, found: TaskSched&quot;</span>);
+            <span class='ident'>TypeSched</span> <span class='op'>=&gt;</span> {
+                <span class='comment'>// Awe yea</span>
+                <span class='macro'>rtabort</span><span class='macro'>!</span>(<span class='string'>&quot;type error: expected: TypeGreen, found: TaskSched&quot;</span>);
             }
         }
     }
@@ -875,22 +873,22 @@
         <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>task_type</span> {
             <span class='ident'>TypeGreen</span>(..) <span class='op'>=&gt;</span> <span class='boolval'>false</span>, <span class='ident'>TypeSched</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
         }
-    }<span class='comment'>
+    }
 
-    // Unsafe functions for transferring ownership of this GreenTask across
-    // context switches
+    <span class='comment'>// Unsafe functions for transferring ownership of this GreenTask across</span>
+    <span class='comment'>// context switches</span>
 
-    </span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>as_uint</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>uint</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>as_uint</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>uint</span> {
         <span class='self'>self</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>GreenTask</span> <span class='kw'>as</span> <span class='ident'>uint</span>
     }
 
     <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>from_uint</span>(<span class='ident'>val</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span> {
         <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>val</span>)
-    }<span class='comment'>
+    }
 
-    // Runtime glue functions and helpers
+    <span class='comment'>// Runtime glue functions and helpers</span>
 
-    </span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>put_with_sched</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>sched</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>) {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>put_with_sched</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>sched</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>) {
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>sched</span>.<span class='ident'>is_none</span>());
         <span class='self'>self</span>.<span class='ident'>sched</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>sched</span>);
         <span class='self'>self</span>.<span class='ident'>put</span>();
@@ -915,28 +913,28 @@
     <span class='kw'>fn</span> <span class='ident'>terminate</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>!</span> {
         <span class='kw'>let</span> <span class='ident'>sched</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>sched</span>.<span class='ident'>take_unwrap</span>();
         <span class='ident'>sched</span>.<span class='ident'>terminate_current_task</span>(<span class='self'>self</span>)
-    }<span class='comment'>
+    }
 
-    // This function is used to remotely wakeup this green task back on to its
-    // original pool of schedulers. In order to do so, each tasks arranges a
-    // SchedHandle upon descheduling to be available for sending itself back to
-    // the original pool.
-    //
-    // Note that there is an interesting transfer of ownership going on here. We
-    // must relinquish ownership of the green task, but then also send the task
-    // over the handle back to the original scheduler. In order to safely do
-    // this, we leverage the already-present &quot;nasty descheduling lock&quot;. The
-    // reason for doing this is that each task will bounce on this lock after
-    // resuming after a context switch. By holding the lock over the enqueueing
-    // of the task, we&#39;re guaranteed that the SchedHandle&#39;s memory will be valid
-    // for this entire function.
-    //
-    // An alternative would include having incredibly cheaply cloneable handles,
-    // but right now a SchedHandle is something like 6 allocations, so it is
-    // *not* a cheap operation to clone a handle. Until the day comes that we
-    // need to optimize this, a lock should do just fine (it&#39;s completely
-    // uncontended except for when the task is rescheduled).
-    </span><span class='kw'>fn</span> <span class='ident'>reawaken_remotely</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>) {
+    <span class='comment'>// This function is used to remotely wakeup this green task back on to its</span>
+    <span class='comment'>// original pool of schedulers. In order to do so, each tasks arranges a</span>
+    <span class='comment'>// SchedHandle upon descheduling to be available for sending itself back to</span>
+    <span class='comment'>// the original pool.</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// Note that there is an interesting transfer of ownership going on here. We</span>
+    <span class='comment'>// must relinquish ownership of the green task, but then also send the task</span>
+    <span class='comment'>// over the handle back to the original scheduler. In order to safely do</span>
+    <span class='comment'>// this, we leverage the already-present &quot;nasty descheduling lock&quot;. The</span>
+    <span class='comment'>// reason for doing this is that each task will bounce on this lock after</span>
+    <span class='comment'>// resuming after a context switch. By holding the lock over the enqueueing</span>
+    <span class='comment'>// of the task, we&#39;re guaranteed that the SchedHandle&#39;s memory will be valid</span>
+    <span class='comment'>// for this entire function.</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// An alternative would include having incredibly cheaply cloneable handles,</span>
+    <span class='comment'>// but right now a SchedHandle is something like 6 allocations, so it is</span>
+    <span class='comment'>// *not* a cheap operation to clone a handle. Until the day comes that we</span>
+    <span class='comment'>// need to optimize this, a lock should do just fine (it&#39;s completely</span>
+    <span class='comment'>// uncontended except for when the task is rescheduled).</span>
+    <span class='kw'>fn</span> <span class='ident'>reawaken_remotely</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>) {
         <span class='kw'>unsafe</span> {
             <span class='kw'>let</span> <span class='ident'>mtx</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>nasty_deschedule_lock</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>NativeMutex</span>;
             <span class='kw'>let</span> <span class='ident'>handle</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>handle</span>.<span class='ident'>get_mut_ref</span>() <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>SchedHandle</span>;
@@ -962,25 +960,25 @@
     <span class='kw'>fn</span> <span class='ident'>deschedule</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>times</span>: <span class='ident'>uint</span>, <span class='ident'>cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>,
                   <span class='ident'>f</span>: <span class='op'>|</span><span class='ident'>BlockedTask</span><span class='op'>|</span> <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>BlockedTask</span><span class='op'>&gt;</span>) {
         <span class='self'>self</span>.<span class='ident'>put_task</span>(<span class='ident'>cur_task</span>);
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>sched</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>sched</span>.<span class='ident'>take_unwrap</span>();<span class='comment'>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>sched</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>sched</span>.<span class='ident'>take_unwrap</span>();
 
-        // In order for this task to be reawoken in all possible contexts, we
-        // may need a handle back in to the current scheduler. When we&#39;re woken
-        // up in anything other than the local scheduler pool, this handle is
-        // used to send this task back into the scheduler pool.
-        </span><span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>handle</span>.<span class='ident'>is_none</span>() {
+        <span class='comment'>// In order for this task to be reawoken in all possible contexts, we</span>
+        <span class='comment'>// may need a handle back in to the current scheduler. When we&#39;re woken</span>
+        <span class='comment'>// up in anything other than the local scheduler pool, this handle is</span>
+        <span class='comment'>// used to send this task back into the scheduler pool.</span>
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>handle</span>.<span class='ident'>is_none</span>() {
             <span class='self'>self</span>.<span class='ident'>handle</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>sched</span>.<span class='ident'>make_handle</span>());
             <span class='self'>self</span>.<span class='ident'>pool_id</span> <span class='op'>=</span> <span class='ident'>sched</span>.<span class='ident'>pool_id</span>;
-        }<span class='comment'>
+        }
 
-        // This code is pretty standard, except for the usage of
-        // `GreenTask::convert`. Right now if we use `reawaken` directly it will
-        // expect for there to be a task in local TLS, but that is not true for
-        // this deschedule block (because the scheduler must retain ownership of
-        // the task while the cleanup job is running). In order to get around
-        // this for now, we invoke the scheduler directly with the converted
-        // Task =&gt; GreenTask structure.
-        </span><span class='kw'>if</span> <span class='ident'>times</span> <span class='op'>==</span> <span class='number'>1</span> {
+        <span class='comment'>// This code is pretty standard, except for the usage of</span>
+        <span class='comment'>// `GreenTask::convert`. Right now if we use `reawaken` directly it will</span>
+        <span class='comment'>// expect for there to be a task in local TLS, but that is not true for</span>
+        <span class='comment'>// this deschedule block (because the scheduler must retain ownership of</span>
+        <span class='comment'>// the task while the cleanup job is running). In order to get around</span>
+        <span class='comment'>// this for now, we invoke the scheduler directly with the converted</span>
+        <span class='comment'>// Task =&gt; GreenTask structure.</span>
+        <span class='kw'>if</span> <span class='ident'>times</span> <span class='op'>==</span> <span class='number'>1</span> {
             <span class='ident'>sched</span>.<span class='ident'>deschedule_running_task_and_then</span>(<span class='self'>self</span>, <span class='op'>|</span><span class='ident'>sched</span>, <span class='ident'>task</span><span class='op'>|</span> {
                 <span class='kw'>match</span> <span class='ident'>f</span>(<span class='ident'>task</span>) {
                     <span class='prelude-val'>Ok</span>(()) <span class='op'>=&gt;</span> {}
@@ -1010,35 +1008,35 @@
 
     <span class='kw'>fn</span> <span class='ident'>reawaken</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>to_wake</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) {
         <span class='self'>self</span>.<span class='ident'>put_task</span>(<span class='ident'>to_wake</span>);
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>sched</span>.<span class='ident'>is_none</span>());<span class='comment'>
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>sched</span>.<span class='ident'>is_none</span>());
 
-        // Optimistically look for a local task, but if one&#39;s not available to
-        // inspect (in order to see if it&#39;s in the same sched pool as we are),
-        // then just use our remote wakeup routine and carry on!
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>running_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>Local</span>::<span class='ident'>try_take</span>() {
+        <span class='comment'>// Optimistically look for a local task, but if one&#39;s not available to</span>
+        <span class='comment'>// inspect (in order to see if it&#39;s in the same sched pool as we are),</span>
+        <span class='comment'>// then just use our remote wakeup routine and carry on!</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>running_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>Local</span>::<span class='ident'>try_take</span>() {
             <span class='prelude-val'>Some</span>(<span class='ident'>task</span>) <span class='op'>=&gt;</span> <span class='ident'>task</span>,
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='self'>self</span>.<span class='ident'>reawaken_remotely</span>()
-        };<span class='comment'>
+        };
 
-        // Waking up a green thread is a bit of a tricky situation. We have no
-        // guarantee about where the current task is running. The options we
-        // have for where this current task is running are:
-        //
-        //  1. Our original scheduler pool
-        //  2. Some other scheduler pool
-        //  3. Something that isn&#39;t a scheduler pool
-        //
-        // In order to figure out what case we&#39;re in, this is the reason that
-        // the `maybe_take_runtime` function exists. Using this function we can
-        // dynamically check to see which of these cases is the current
-        // situation and then dispatch accordingly.
-        //
-        // In case 1, we just use the local scheduler to resume ourselves
-        // immediately (if a rescheduling is possible).
-        //
-        // In case 2 and 3, we need to remotely reawaken ourself in order to be
-        // transplanted back to the correct scheduler pool.
-        </span><span class='kw'>match</span> <span class='ident'>running_task</span>.<span class='ident'>maybe_take_runtime</span>::<span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>() {
+        <span class='comment'>// Waking up a green thread is a bit of a tricky situation. We have no</span>
+        <span class='comment'>// guarantee about where the current task is running. The options we</span>
+        <span class='comment'>// have for where this current task is running are:</span>
+        <span class='comment'>//</span>
+        <span class='comment'>//  1. Our original scheduler pool</span>
+        <span class='comment'>//  2. Some other scheduler pool</span>
+        <span class='comment'>//  3. Something that isn&#39;t a scheduler pool</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// In order to figure out what case we&#39;re in, this is the reason that</span>
+        <span class='comment'>// the `maybe_take_runtime` function exists. Using this function we can</span>
+        <span class='comment'>// dynamically check to see which of these cases is the current</span>
+        <span class='comment'>// situation and then dispatch accordingly.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// In case 1, we just use the local scheduler to resume ourselves</span>
+        <span class='comment'>// immediately (if a rescheduling is possible).</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// In case 2 and 3, we need to remotely reawaken ourself in order to be</span>
+        <span class='comment'>// transplanted back to the correct scheduler pool.</span>
+        <span class='kw'>match</span> <span class='ident'>running_task</span>.<span class='ident'>maybe_take_runtime</span>::<span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>() {
             <span class='prelude-val'>Some</span>(<span class='kw-2'>mut</span> <span class='ident'>running_green_task</span>) <span class='op'>=&gt;</span> {
                 <span class='ident'>running_green_task</span>.<span class='ident'>put_task</span>(<span class='ident'>running_task</span>);
                 <span class='kw'>let</span> <span class='ident'>sched</span> <span class='op'>=</span> <span class='ident'>running_green_task</span>.<span class='ident'>sched</span>.<span class='ident'>take_unwrap</span>();
@@ -1046,10 +1044,10 @@
                 <span class='kw'>if</span> <span class='ident'>sched</span>.<span class='ident'>pool_id</span> <span class='op'>==</span> <span class='self'>self</span>.<span class='ident'>pool_id</span> {
                     <span class='ident'>sched</span>.<span class='ident'>run_task</span>(<span class='ident'>running_green_task</span>, <span class='self'>self</span>);
                 } <span class='kw'>else</span> {
-                    <span class='self'>self</span>.<span class='ident'>reawaken_remotely</span>();<span class='comment'>
+                    <span class='self'>self</span>.<span class='ident'>reawaken_remotely</span>();
 
-                    // put that thing back where it came from!
-                    </span><span class='ident'>running_green_task</span>.<span class='ident'>put_with_sched</span>(<span class='ident'>sched</span>);
+                    <span class='comment'>// put that thing back where it came from!</span>
+                    <span class='ident'>running_green_task</span>.<span class='ident'>put_with_sched</span>(<span class='ident'>sched</span>);
                 }
             }
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
@@ -1063,21 +1061,21 @@
                      <span class='ident'>cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>,
                      <span class='ident'>opts</span>: <span class='ident'>TaskOpts</span>,
                      <span class='ident'>f</span>: <span class='kw'>proc</span>():<span class='ident'>Send</span>) {
-        <span class='self'>self</span>.<span class='ident'>put_task</span>(<span class='ident'>cur_task</span>);<span class='comment'>
+        <span class='self'>self</span>.<span class='ident'>put_task</span>(<span class='ident'>cur_task</span>);
 
-        // Spawns a task into the current scheduler. We allocate the new task&#39;s
-        // stack from the scheduler&#39;s stack pool, and then configure it
-        // accordingly to `opts`. Afterwards we bootstrap it immediately by
-        // switching to it.
-        //
-        // Upon returning, our task is back in TLS and we&#39;re good to return.
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>sched</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>sched</span>.<span class='ident'>take_unwrap</span>();
+        <span class='comment'>// Spawns a task into the current scheduler. We allocate the new task&#39;s</span>
+        <span class='comment'>// stack from the scheduler&#39;s stack pool, and then configure it</span>
+        <span class='comment'>// accordingly to `opts`. Afterwards we bootstrap it immediately by</span>
+        <span class='comment'>// switching to it.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// Upon returning, our task is back in TLS and we&#39;re good to return.</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>sched</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>sched</span>.<span class='ident'>take_unwrap</span>();
         <span class='kw'>let</span> <span class='ident'>sibling</span> <span class='op'>=</span> <span class='ident'>GreenTask</span>::<span class='ident'>configure</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>sched</span>.<span class='ident'>stack_pool</span>, <span class='ident'>opts</span>, <span class='ident'>f</span>);
         <span class='ident'>sched</span>.<span class='ident'>run_task</span>(<span class='self'>self</span>, <span class='ident'>sibling</span>)
-    }<span class='comment'>
+    }
 
-    // Local I/O is provided by the scheduler&#39;s event loop
-    </span><span class='kw'>fn</span> <span class='ident'>local_io</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>rtio</span>::<span class='ident'>LocalIo</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;&gt;</span> {
+    <span class='comment'>// Local I/O is provided by the scheduler&#39;s event loop</span>
+    <span class='kw'>fn</span> <span class='ident'>local_io</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>rtio</span>::<span class='ident'>LocalIo</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;&gt;</span> {
         <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>sched</span>.<span class='ident'>get_mut_ref</span>().<span class='ident'>event_loop</span>.<span class='ident'>io</span>() {
             <span class='prelude-val'>Some</span>(<span class='ident'>io</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>(<span class='ident'>rtio</span>::<span class='ident'>LocalIo</span>::<span class='ident'>new</span>(<span class='ident'>io</span>)),
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>,
@@ -1086,11 +1084,11 @@
 
     <span class='kw'>fn</span> <span class='ident'>stack_bounds</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='ident'>uint</span>, <span class='ident'>uint</span>) {
         <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>coroutine</span>.<span class='ident'>as_ref</span>()
-            .<span class='ident'>expect</span>(<span class='string'>&quot;GreenTask.stack_bounds called without a coroutine&quot;</span>);<span class='comment'>
+            .<span class='ident'>expect</span>(<span class='string'>&quot;GreenTask.stack_bounds called without a coroutine&quot;</span>);
 
-        // Don&#39;t return the red zone as part of the usable stack of this task,
-        // it&#39;s essentially an implementation detail.
-        </span>(<span class='ident'>c</span>.<span class='ident'>current_stack_segment</span>.<span class='ident'>start</span>() <span class='kw'>as</span> <span class='ident'>uint</span> <span class='op'>+</span> <span class='ident'>stack</span>::<span class='ident'>RED_ZONE</span>,
+        <span class='comment'>// Don&#39;t return the red zone as part of the usable stack of this task,</span>
+        <span class='comment'>// it&#39;s essentially an implementation detail.</span>
+        (<span class='ident'>c</span>.<span class='ident'>current_stack_segment</span>.<span class='ident'>start</span>() <span class='kw'>as</span> <span class='ident'>uint</span> <span class='op'>+</span> <span class='ident'>stack</span>::<span class='ident'>RED_ZONE</span>,
          <span class='ident'>c</span>.<span class='ident'>current_stack_segment</span>.<span class='ident'>end</span>() <span class='kw'>as</span> <span class='ident'>uint</span>)
     }
 

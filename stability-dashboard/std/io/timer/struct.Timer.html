@@ -7,8 +7,6 @@
 
     <title>std::io::timer::Timer - Rust</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -41,7 +39,7 @@
     </nav>
 
     <section id='main' class="content struct">
-<h1 class='fqn'>Struct <a href='../../index.html'>std</a>::<a href='../index.html'>io</a>::<a href='index.html'>timer</a>::<a class='struct' href=''>Timer</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-43754' href='../../../src/std/Users/aturon/moz/working/stability-dashboard/src/libstd/io/timer.rs.html#66-68'>[src]</a></span></h1>
+<h1 class='fqn'>Struct <a href='../../index.html'>std</a>::<a href='../index.html'>io</a>::<a href='index.html'>timer</a>::<a class='struct' href=''>Timer</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-44016' href='../../../src/std/Users/aturon/moz/working/stability-dashboard/src/libstd/io/timer.rs.html#66-68'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Timer {
     // some fields omitted
 }</pre><div class='docblock'><p>A synchronous timer object</p>
@@ -71,17 +69,17 @@ loop {
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Timer</span>;
 
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>timer</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>().<span class='ident'>unwrap</span>();
-<span class='ident'>timer</span>.<span class='ident'>sleep</span>(<span class='number'>10</span>);<span class='comment'> // block the task for awhile
+<span class='ident'>timer</span>.<span class='ident'>sleep</span>(<span class='number'>10</span>); <span class='comment'>// block the task for awhile</span>
 
-</span><span class='kw'>let</span> <span class='ident'>timeout</span> <span class='op'>=</span> <span class='ident'>timer</span>.<span class='ident'>oneshot</span>(<span class='number'>10</span>);<span class='comment'>
-// do some work
-</span><span class='ident'>timeout</span>.<span class='ident'>recv</span>();<span class='comment'> // wait for the timeout to expire
+<span class='kw'>let</span> <span class='ident'>timeout</span> <span class='op'>=</span> <span class='ident'>timer</span>.<span class='ident'>oneshot</span>(<span class='number'>10</span>);
+<span class='comment'>// do some work</span>
+<span class='ident'>timeout</span>.<span class='ident'>recv</span>(); <span class='comment'>// wait for the timeout to expire</span>
 
-</span><span class='kw'>let</span> <span class='ident'>periodic</span> <span class='op'>=</span> <span class='ident'>timer</span>.<span class='ident'>periodic</span>(<span class='number'>10</span>);
+<span class='kw'>let</span> <span class='ident'>periodic</span> <span class='op'>=</span> <span class='ident'>timer</span>.<span class='ident'>periodic</span>(<span class='number'>10</span>);
 <span class='kw'>loop</span> {
-    <span class='ident'>periodic</span>.<span class='ident'>recv</span>();<span class='comment'>
-    // this loop is only executed once every 10ms
-</span>}
+    <span class='ident'>periodic</span>.<span class='ident'>recv</span>();
+    <span class='comment'>// this loop is only executed once every 10ms</span>
+}
 </pre>
 
 <p>If only sleeping is necessary, then a convenience API is provided through
@@ -93,10 +91,10 @@ use std::io::timer;
 // Put this task to sleep for 5 seconds
 timer::sleep(5000);
 }</span><pre id='rust-example-rendered-1' class='rust '>
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>timer</span>;<span class='comment'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>timer</span>;
 
-// Put this task to sleep for 5 seconds
-</span><span class='ident'>timer</span>::<span class='ident'>sleep</span>(<span class='number'>5000</span>);
+<span class='comment'>// Put this task to sleep for 5 seconds</span>
+<span class='ident'>timer</span>::<span class='ident'>sleep</span>(<span class='number'>5000</span>);
 </pre>
 </div><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='struct' href='../../../std/io/timer/struct.Timer.html' title='std::io::timer::Timer'>Timer</a></code></h3><div class='impl-methods'><h4 id='method.new' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class='type' href='../../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;<a class='struct' href='../../../std/io/timer/struct.Timer.html' title='std::io::timer::Timer'>Timer</a>&gt;</code></h4>
 <div class='docblock'><p>Creates a new timer which can be used to put the current task to sleep
@@ -107,7 +105,7 @@ get notified after an amount of time has passed.</p>
 
 <p>Note that this function will cause any other receivers for this timer to
 be invalidated (the other end will be closed).</p>
-</div><h4 id='method.oneshot' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.oneshot' class='fnname'>oneshot</a>(&amp;mut self, msecs: <a href='../../primitive.u64.html'>u64</a>) -&gt; <a class='struct' href='../../../std/comm/struct.Receiver.html' title='std::comm::Receiver'>Receiver</a>&lt;()&gt;</code></h4>
+</div><h4 id='method.oneshot' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.oneshot' class='fnname'>oneshot</a>(&amp;mut self, msecs: <a href='../../primitive.u64.html'>u64</a>) -&gt; <a class='struct' href='../../../std/comm/struct.Receiver.html' title='std::comm::Receiver'>Receiver</a>&lt;<a href='../../primitive.unit.html'>()</a>&gt;</code></h4>
 <div class='docblock'><p>Creates a oneshot receiver which will have a notification sent when
 <code>msecs</code> milliseconds has elapsed.</p>
 
@@ -137,10 +135,10 @@ fail.</p>
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>timer</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>().<span class='ident'>unwrap</span>();
 <span class='kw'>let</span> <span class='ident'>ten_milliseconds</span> <span class='op'>=</span> <span class='ident'>timer</span>.<span class='ident'>oneshot</span>(<span class='number'>10</span>);
 
-<span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>100</span>) {<span class='comment'> /* do work */ </span>}<span class='comment'>
+<span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>100</span>) { <span class='comment'>/* do work */</span> }
 
-// blocks until 10 ms after the `oneshot` call
-</span><span class='ident'>ten_milliseconds</span>.<span class='ident'>recv</span>();
+<span class='comment'>// blocks until 10 ms after the `oneshot` call</span>
+<span class='ident'>ten_milliseconds</span>.<span class='ident'>recv</span>();
 </pre>
 <span id='rust-example-raw-3' class='rusttest'>fn main() {
     use std::io::Timer;
@@ -150,14 +148,14 @@ fail.</p>
     // The timer object was destroyed, so this will always fail:
     // five_ms.recv()
 }</span><pre id='rust-example-rendered-3' class='rust '>
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Timer</span>;<span class='comment'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Timer</span>;
 
-// Incorrect, method chaining-style:
-</span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>five_ms</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>().<span class='ident'>unwrap</span>().<span class='ident'>oneshot</span>(<span class='number'>5</span>);<span class='comment'>
-// The timer object was destroyed, so this will always fail:
-// five_ms.recv()
-</span></pre>
-</div><h4 id='method.periodic' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.periodic' class='fnname'>periodic</a>(&amp;mut self, msecs: <a href='../../primitive.u64.html'>u64</a>) -&gt; <a class='struct' href='../../../std/comm/struct.Receiver.html' title='std::comm::Receiver'>Receiver</a>&lt;()&gt;</code></h4>
+<span class='comment'>// Incorrect, method chaining-style:</span>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>five_ms</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>().<span class='ident'>unwrap</span>().<span class='ident'>oneshot</span>(<span class='number'>5</span>);
+<span class='comment'>// The timer object was destroyed, so this will always fail:</span>
+<span class='comment'>// five_ms.recv()</span>
+</pre>
+</div><h4 id='method.periodic' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.periodic' class='fnname'>periodic</a>(&amp;mut self, msecs: <a href='../../primitive.u64.html'>u64</a>) -&gt; <a class='struct' href='../../../std/comm/struct.Receiver.html' title='std::comm::Receiver'>Receiver</a>&lt;<a href='../../primitive.unit.html'>()</a>&gt;</code></h4>
 <div class='docblock'><p>Creates a receiver which will have a continuous stream of notifications
 being sent every <code>msecs</code> milliseconds.</p>
 
@@ -195,16 +193,16 @@ fail.</p>
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>timer</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>().<span class='ident'>unwrap</span>();
 <span class='kw'>let</span> <span class='ident'>ten_milliseconds</span> <span class='op'>=</span> <span class='ident'>timer</span>.<span class='ident'>periodic</span>(<span class='number'>10</span>);
 
-<span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>100</span>) {<span class='comment'> /* do work */ </span>}<span class='comment'>
+<span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>100</span>) { <span class='comment'>/* do work */</span> }
 
-// blocks until 10 ms after the `periodic` call
-</span><span class='ident'>ten_milliseconds</span>.<span class='ident'>recv</span>();
+<span class='comment'>// blocks until 10 ms after the `periodic` call</span>
+<span class='ident'>ten_milliseconds</span>.<span class='ident'>recv</span>();
 
-<span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>100</span>) {<span class='comment'> /* do work */ </span>}<span class='comment'>
+<span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>100</span>) { <span class='comment'>/* do work */</span> }
 
-// blocks until 20 ms after the `periodic` call (*not* 10ms after the
-// previous `recv`)
-</span><span class='ident'>ten_milliseconds</span>.<span class='ident'>recv</span>();
+<span class='comment'>// blocks until 20 ms after the `periodic` call (*not* 10ms after the</span>
+<span class='comment'>// previous `recv`)</span>
+<span class='ident'>ten_milliseconds</span>.<span class='ident'>recv</span>();
 </pre>
 <span id='rust-example-raw-5' class='rusttest'>fn main() {
     use std::io::Timer;
@@ -214,13 +212,13 @@ fail.</p>
     // The timer object was destroyed, so this will always fail:
     // five_ms.recv()
 }</span><pre id='rust-example-rendered-5' class='rust '>
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Timer</span>;<span class='comment'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Timer</span>;
 
-// Incorrect, method chaining-style.
-</span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>five_ms</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>().<span class='ident'>unwrap</span>().<span class='ident'>periodic</span>(<span class='number'>5</span>);<span class='comment'>
-// The timer object was destroyed, so this will always fail:
-// five_ms.recv()
-</span></pre>
+<span class='comment'>// Incorrect, method chaining-style.</span>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>five_ms</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>().<span class='ident'>unwrap</span>().<span class='ident'>periodic</span>(<span class='number'>5</span>);
+<span class='comment'>// The timer object was destroyed, so this will always fail:</span>
+<span class='comment'>// five_ms.recv()</span>
+</pre>
 </div></div></section>
     <section id='search' class="content hidden"></section>
 

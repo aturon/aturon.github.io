@@ -7,8 +7,6 @@
 
     <title>timer_unix.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -326,31 +324,18 @@
 <span id='284'>284</span>
 <span id='285'>285</span>
 <span id='286'>286</span>
-<span id='287'>287</span>
-<span id='288'>288</span>
-<span id='289'>289</span>
-<span id='290'>290</span>
-<span id='291'>291</span>
-<span id='292'>292</span>
-<span id='293'>293</span>
-<span id='294'>294</span>
-<span id='295'>295</span>
-<span id='296'>296</span>
-<span id='297'>297</span>
-<span id='298'>298</span>
-<span id='299'>299</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! Timers for non-linux/non-windows OSes</span>
+<span class='doccomment'>//! Timers for non-linux/non-windows OSes</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! This module implements timers with a worker thread, select(), and a lot of</span>
 <span class='doccomment'>//! witchcraft that turns out to be horribly inaccurate timers. The unfortunate</span>
@@ -417,59 +402,46 @@
 }
 
 <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>visible_private_types</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>Req</span> {<span class='comment'>
-    // Add a new timer to the helper thread.
-    </span><span class='ident'>NewTimer</span>(<span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Inner</span><span class='op'>&gt;</span>),<span class='comment'>
+<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>Req</span> {
+    <span class='comment'>// Add a new timer to the helper thread.</span>
+    <span class='ident'>NewTimer</span>(<span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Inner</span><span class='op'>&gt;</span>),
 
-    // Remove a timer based on its id and then send it back on the channel
-    // provided
-    </span><span class='ident'>RemoveTimer</span>(<span class='ident'>uint</span>, <span class='ident'>Sender</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Inner</span><span class='op'>&gt;&gt;</span>),
-}<span class='comment'>
+    <span class='comment'>// Remove a timer based on its id and then send it back on the channel</span>
+    <span class='comment'>// provided</span>
+    <span class='ident'>RemoveTimer</span>(<span class='ident'>uint</span>, <span class='ident'>Sender</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Inner</span><span class='op'>&gt;&gt;</span>),
+}
 
-// returns the current time (in milliseconds)
-</span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>now</span>() <span class='op'>-&gt;</span> <span class='ident'>u64</span> {
+<span class='comment'>// returns the current time (in milliseconds)</span>
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>now</span>() <span class='op'>-&gt;</span> <span class='ident'>u64</span> {
     <span class='kw'>unsafe</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>now</span>: <span class='ident'>libc</span>::<span class='ident'>timeval</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>zeroed</span>();
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>c</span>::<span class='ident'>gettimeofday</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>now</span>, <span class='ident'>ptr</span>::<span class='ident'>mut_null</span>()), <span class='number'>0</span>);
         <span class='kw'>return</span> (<span class='ident'>now</span>.<span class='ident'>tv_sec</span> <span class='kw'>as</span> <span class='ident'>u64</span>) <span class='op'>*</span> <span class='number'>1000</span> <span class='op'>+</span> (<span class='ident'>now</span>.<span class='ident'>tv_usec</span> <span class='kw'>as</span> <span class='ident'>u64</span>) <span class='op'>/</span> <span class='number'>1000</span>;
     }
-}<span class='comment'>
+}
 
-
-// Note: although the last parameter isn&#39;t used there is no way now to
-// convert it to unit type, because LLVM dies in SjLj preparation
-// step (unfortunately iOS uses SjLJ exceptions)
-//
-// It&#39;s definitely a temporary workaround just to get it working.
-// So far it looks like an LLVM issue and it was reported:
-// http://llvm.org/bugs/show_bug.cgi?id=19855
-// Actually this issue is pretty common while compiling for armv7 iOS
-// and in most cases it is simply solved by using --opt-level=2 (or -O)
-//
-// For this specific case unfortunately turning optimizations wasn&#39;t
-// enough.
-</span><span class='kw'>fn</span> <span class='ident'>helper</span>(<span class='ident'>input</span>: <span class='ident'>libc</span>::<span class='ident'>c_int</span>, <span class='ident'>messages</span>: <span class='ident'>Receiver</span><span class='op'>&lt;</span><span class='ident'>Req</span><span class='op'>&gt;</span>, _: <span class='ident'>int</span>) {
+<span class='kw'>fn</span> <span class='ident'>helper</span>(<span class='ident'>input</span>: <span class='ident'>libc</span>::<span class='ident'>c_int</span>, <span class='ident'>messages</span>: <span class='ident'>Receiver</span><span class='op'>&lt;</span><span class='ident'>Req</span><span class='op'>&gt;</span>, _: ()) {
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>set</span>: <span class='ident'>c</span>::<span class='ident'>fd_set</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>zeroed</span>() };
 
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>fd</span> <span class='op'>=</span> <span class='ident'>FileDesc</span>::<span class='ident'>new</span>(<span class='ident'>input</span>, <span class='boolval'>true</span>);
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>timeout</span>: <span class='ident'>libc</span>::<span class='ident'>timeval</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>zeroed</span>() };<span class='comment'>
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>timeout</span>: <span class='ident'>libc</span>::<span class='ident'>timeval</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>zeroed</span>() };
 
-    // active timers are those which are able to be selected upon (and it&#39;s a
-    // sorted list, and dead timers are those which have expired, but ownership
-    // hasn&#39;t yet been transferred back to the timer itself.
-    </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>active</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Inner</span><span class='op'>&gt;&gt;</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[];
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>dead</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[];<span class='comment'>
+    <span class='comment'>// active timers are those which are able to be selected upon (and it&#39;s a</span>
+    <span class='comment'>// sorted list, and dead timers are those which have expired, but ownership</span>
+    <span class='comment'>// hasn&#39;t yet been transferred back to the timer itself.</span>
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>active</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Inner</span><span class='op'>&gt;&gt;</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[];
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>dead</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[];
 
-    // inserts a timer into an array of timers (sorted by firing time)
-    </span><span class='kw'>fn</span> <span class='ident'>insert</span>(<span class='ident'>t</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Inner</span><span class='op'>&gt;</span>, <span class='ident'>active</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Inner</span><span class='op'>&gt;&gt;</span>) {
+    <span class='comment'>// inserts a timer into an array of timers (sorted by firing time)</span>
+    <span class='kw'>fn</span> <span class='ident'>insert</span>(<span class='ident'>t</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Inner</span><span class='op'>&gt;</span>, <span class='ident'>active</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Inner</span><span class='op'>&gt;&gt;</span>) {
         <span class='kw'>match</span> <span class='ident'>active</span>.<span class='ident'>iter</span>().<span class='ident'>position</span>(<span class='op'>|</span><span class='ident'>tm</span><span class='op'>|</span> <span class='ident'>tm</span>.<span class='ident'>target</span> <span class='op'>&gt;</span> <span class='ident'>t</span>.<span class='ident'>target</span>) {
             <span class='prelude-val'>Some</span>(<span class='ident'>pos</span>) <span class='op'>=&gt;</span> { <span class='ident'>active</span>.<span class='ident'>insert</span>(<span class='ident'>pos</span>, <span class='ident'>t</span>); }
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> { <span class='ident'>active</span>.<span class='ident'>push</span>(<span class='ident'>t</span>); }
         }
-    }<span class='comment'>
+    }
 
-    // signals the first requests in the queue, possible re-enqueueing it.
-    </span><span class='kw'>fn</span> <span class='ident'>signal</span>(<span class='ident'>active</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Inner</span><span class='op'>&gt;&gt;</span>,
+    <span class='comment'>// signals the first requests in the queue, possible re-enqueueing it.</span>
+    <span class='kw'>fn</span> <span class='ident'>signal</span>(<span class='ident'>active</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Inner</span><span class='op'>&gt;&gt;</span>,
               <span class='ident'>dead</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Vec</span><span class='op'>&lt;</span>(<span class='ident'>uint</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Inner</span><span class='op'>&gt;</span>)<span class='op'>&gt;</span>) {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>timer</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>active</span>.<span class='ident'>shift</span>() {
             <span class='prelude-val'>Some</span>(<span class='ident'>timer</span>) <span class='op'>=&gt;</span> <span class='ident'>timer</span>, <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span>
@@ -486,22 +458,22 @@
     }
 
     <span class='lifetime'>&#39;outer</span>: <span class='kw'>loop</span> {
-        <span class='kw'>let</span> <span class='ident'>timeout</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>active</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {<span class='comment'>
-            // Empty array? no timeout (wait forever for the next request)
-            </span><span class='ident'>ptr</span>::<span class='ident'>mut_null</span>()
+        <span class='kw'>let</span> <span class='ident'>timeout</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>active</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+            <span class='comment'>// Empty array? no timeout (wait forever for the next request)</span>
+            <span class='ident'>ptr</span>::<span class='ident'>mut_null</span>()
         } <span class='kw'>else</span> {
-            <span class='kw'>let</span> <span class='ident'>now</span> <span class='op'>=</span> <span class='ident'>now</span>();<span class='comment'>
-            // If this request has already expired, then signal it and go
-            // through another iteration
-            </span><span class='kw'>if</span> <span class='ident'>active</span>.<span class='ident'>get</span>(<span class='number'>0</span>).<span class='ident'>target</span> <span class='op'>&lt;=</span> <span class='ident'>now</span> {
+            <span class='kw'>let</span> <span class='ident'>now</span> <span class='op'>=</span> <span class='ident'>now</span>();
+            <span class='comment'>// If this request has already expired, then signal it and go</span>
+            <span class='comment'>// through another iteration</span>
+            <span class='kw'>if</span> <span class='ident'>active</span>.<span class='ident'>get</span>(<span class='number'>0</span>).<span class='ident'>target</span> <span class='op'>&lt;=</span> <span class='ident'>now</span> {
                 <span class='ident'>signal</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>active</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>dead</span>);
                 <span class='kw'>continue</span>;
-            }<span class='comment'>
+            }
 
-            // The actual timeout listed in the requests array is an
-            // absolute date, so here we translate the absolute time to a
-            // relative time.
-            </span><span class='kw'>let</span> <span class='ident'>tm</span> <span class='op'>=</span> <span class='ident'>active</span>.<span class='ident'>get</span>(<span class='number'>0</span>).<span class='ident'>target</span> <span class='op'>-</span> <span class='ident'>now</span>;
+            <span class='comment'>// The actual timeout listed in the requests array is an</span>
+            <span class='comment'>// absolute date, so here we translate the absolute time to a</span>
+            <span class='comment'>// relative time.</span>
+            <span class='kw'>let</span> <span class='ident'>tm</span> <span class='op'>=</span> <span class='ident'>active</span>.<span class='ident'>get</span>(<span class='number'>0</span>).<span class='ident'>target</span> <span class='op'>-</span> <span class='ident'>now</span>;
             <span class='ident'>timeout</span>.<span class='ident'>tv_sec</span> <span class='op'>=</span> (<span class='ident'>tm</span> <span class='op'>/</span> <span class='number'>1000</span>) <span class='kw'>as</span> <span class='ident'>libc</span>::<span class='ident'>time_t</span>;
             <span class='ident'>timeout</span>.<span class='ident'>tv_usec</span> <span class='op'>=</span> ((<span class='ident'>tm</span> <span class='op'>%</span> <span class='number'>1000</span>) <span class='op'>*</span> <span class='number'>1000</span>) <span class='kw'>as</span> <span class='ident'>libc</span>::<span class='ident'>suseconds_t</span>;
             <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>timeout</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>timeval</span>
@@ -511,12 +483,12 @@
         <span class='kw'>match</span> <span class='kw'>unsafe</span> {
             <span class='ident'>c</span>::<span class='ident'>select</span>(<span class='ident'>input</span> <span class='op'>+</span> <span class='number'>1</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>set</span>, <span class='ident'>ptr</span>::<span class='ident'>mut_null</span>(),
                       <span class='ident'>ptr</span>::<span class='ident'>mut_null</span>(), <span class='ident'>timeout</span>)
-        } {<span class='comment'>
-            // timed out
-            </span><span class='number'>0</span> <span class='op'>=&gt;</span> <span class='ident'>signal</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>active</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>dead</span>),<span class='comment'>
+        } {
+            <span class='comment'>// timed out</span>
+            <span class='number'>0</span> <span class='op'>=&gt;</span> <span class='ident'>signal</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>active</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>dead</span>),
 
-            // file descriptor write woke us up, we&#39;ve got some new requests
-            </span><span class='number'>1</span> <span class='op'>=&gt;</span> {
+            <span class='comment'>// file descriptor write woke us up, we&#39;ve got some new requests</span>
+            <span class='number'>1</span> <span class='op'>=&gt;</span> {
                 <span class='kw'>loop</span> {
                     <span class='kw'>match</span> <span class='ident'>messages</span>.<span class='ident'>try_recv</span>() {
                         <span class='prelude-val'>Err</span>(<span class='ident'>comm</span>::<span class='ident'>Disconnected</span>) <span class='op'>=&gt;</span> {
@@ -542,10 +514,10 @@
                         }
                         <span class='prelude-val'>Err</span>(..) <span class='op'>=&gt;</span> <span class='kw'>break</span>
                     }
-                }<span class='comment'>
+                }
 
-                // drain the file descriptor
-                </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> [<span class='number'>0</span>];
+                <span class='comment'>// drain the file descriptor</span>
+                <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> [<span class='number'>0</span>];
                 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>fd</span>.<span class='ident'>inner_read</span>(<span class='ident'>buf</span>).<span class='ident'>ok</span>().<span class='ident'>unwrap</span>(), <span class='number'>1</span>);
             }
 
@@ -557,10 +529,10 @@
 }
 
 <span class='kw'>impl</span> <span class='ident'>Timer</span> {
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>() <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span><span class='ident'>Timer</span><span class='op'>&gt;</span> {<span class='comment'>
-        // See notes above regarding using int return value
-        // instead of ()
-        </span><span class='kw'>unsafe</span> { <span class='ident'>HELPER</span>.<span class='ident'>boot</span>(<span class='op'>||</span> {<span class='number'>0</span>}, <span class='ident'>helper</span>); }
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>() <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span><span class='ident'>Timer</span><span class='op'>&gt;</span> {
+        <span class='comment'>// See notes above regarding using int return value</span>
+        <span class='comment'>// instead of ()</span>
+        <span class='kw'>unsafe</span> { <span class='ident'>HELPER</span>.<span class='ident'>boot</span>(<span class='op'>||</span> {}, <span class='ident'>helper</span>); }
 
         <span class='kw'>static</span> <span class='kw-2'>mut</span> <span class='ident'>ID</span>: <span class='ident'>atomics</span>::<span class='ident'>AtomicUint</span> <span class='op'>=</span> <span class='ident'>atomics</span>::<span class='ident'>INIT_ATOMIC_UINT</span>;
         <span class='kw'>let</span> <span class='ident'>id</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>ID</span>.<span class='ident'>fetch_add</span>(<span class='number'>1</span>, <span class='ident'>atomics</span>::<span class='ident'>Relaxed</span>) };
@@ -603,8 +575,8 @@
 <span class='kw'>impl</span> <span class='ident'>rtio</span>::<span class='ident'>RtioTimer</span> <span class='kw'>for</span> <span class='ident'>Timer</span> {
     <span class='kw'>fn</span> <span class='ident'>sleep</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>msecs</span>: <span class='ident'>u64</span>) {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>inner</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>inner</span>();
-        <span class='ident'>inner</span>.<span class='ident'>cb</span> <span class='op'>=</span> <span class='prelude-val'>None</span>;<span class='comment'> // cancel any previous request
-        </span><span class='self'>self</span>.<span class='ident'>inner</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>inner</span>);
+        <span class='ident'>inner</span>.<span class='ident'>cb</span> <span class='op'>=</span> <span class='prelude-val'>None</span>; <span class='comment'>// cancel any previous request</span>
+        <span class='self'>self</span>.<span class='ident'>inner</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>inner</span>);
 
         <span class='ident'>Timer</span>::<span class='ident'>sleep</span>(<span class='ident'>msecs</span>);
     }

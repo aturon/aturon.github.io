@@ -7,8 +7,6 @@
 
     <title>ops.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -776,18 +774,49 @@
 <span id='734'>734</span>
 <span id='735'>735</span>
 <span id='736'>736</span>
+<span id='737'>737</span>
+<span id='738'>738</span>
+<span id='739'>739</span>
+<span id='740'>740</span>
+<span id='741'>741</span>
+<span id='742'>742</span>
+<span id='743'>743</span>
+<span id='744'>744</span>
+<span id='745'>745</span>
+<span id='746'>746</span>
+<span id='747'>747</span>
+<span id='748'>748</span>
+<span id='749'>749</span>
+<span id='750'>750</span>
+<span id='751'>751</span>
+<span id='752'>752</span>
+<span id='753'>753</span>
+<span id='754'>754</span>
+<span id='755'>755</span>
+<span id='756'>756</span>
+<span id='757'>757</span>
+<span id='758'>758</span>
+<span id='759'>759</span>
+<span id='760'>760</span>
+<span id='761'>761</span>
+<span id='762'>762</span>
+<span id='763'>763</span>
+<span id='764'>764</span>
+<span id='765'>765</span>
+<span id='766'>766</span>
+<span id='767'>767</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2012 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2012 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>/*!
+<span class='doccomment'>/*!
  *
  * Overloadable operators
  *
@@ -1216,7 +1245,7 @@
     ($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> ($(
         <span class='kw'>impl</span> <span class='ident'>BitAnd</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span> {
             <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-            <span class='kw'>fn</span> <span class='ident'>bitand</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>rhs</span>: <span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span> { (<span class='op'>*</span><span class='self'>self</span>) <span class='op'>&amp;</span> (<span class='op'>*</span><span class='ident'>rhs</span>) }
+            <span class='kw'>fn</span> <span class='ident'>bitand</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>rhs</span>: <span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span> { (<span class='op'>*</span><span class='self'>self</span>) <span class='kw-2'>&amp;</span> (<span class='op'>*</span><span class='ident'>rhs</span>) }
         }
     )<span class='op'>*</span>)
 )
@@ -1392,7 +1421,7 @@
 <span class='doccomment'>/**
  *
  * The `Index` trait is used to specify the functionality of indexing operations
- * like `arr[idx]`.
+ * like `arr[idx]` when used in an immutable context.
  *
  * # Example
  *
@@ -1403,9 +1432,9 @@
  * struct Foo;
  *
  * impl Index&lt;Foo, Foo&gt; for Foo {
- *     fn index(&amp;self, _rhs: &amp;Foo) -&gt; Foo {
+ *     fn index&lt;&#39;a&gt;(&amp;&#39;a self, _rhs: &amp;Foo) -&gt; &amp;&#39;a Foo {
  *         println!(&quot;Indexing!&quot;);
- *         *self
+ *         self
  *     }
  * }
  *
@@ -1417,7 +1446,38 @@
 <span class='attribute'>#[<span class='ident'>lang</span><span class='op'>=</span><span class='string'>&quot;index&quot;</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>Index</span><span class='op'>&lt;</span><span class='ident'>Index</span>,<span class='prelude-ty'>Result</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// The method for the indexing (`Foo[Bar]`) operation</span>
-    <span class='kw'>fn</span> <span class='ident'>index</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>index</span>: <span class='kw-2'>&amp;</span><span class='ident'>Index</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span>;
+    <span class='kw'>fn</span> <span class='ident'>index</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>, <span class='ident'>index</span>: <span class='kw-2'>&amp;</span><span class='ident'>Index</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='prelude-ty'>Result</span>;
+}
+
+<span class='doccomment'>/**
+ *
+ * The `IndexMut` trait is used to specify the functionality of indexing
+ * operations like `arr[idx]`, when used in a mutable context.
+ *
+ * # Example
+ *
+ * A trivial implementation of `IndexMut`. When `Foo[Foo]` happens, it ends up
+ * calling `index`, and therefore, `main` prints `Indexing!`.
+ *
+ * ```
+ * struct Foo;
+ *
+ * impl IndexMut&lt;Foo, Foo&gt; for Foo {
+ *     fn index_mut&lt;&#39;a&gt;(&amp;&#39;a mut self, _rhs: &amp;Foo) -&gt; &amp;&#39;a mut Foo {
+ *         println!(&quot;Indexing!&quot;);
+ *         self
+ *     }
+ * }
+ *
+ * fn main() {
+ *     &amp;mut Foo[Foo];
+ * }
+ * ```
+ */</span>
+<span class='attribute'>#[<span class='ident'>lang</span><span class='op'>=</span><span class='string'>&quot;index_mut&quot;</span>]</span>
+<span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>IndexMut</span><span class='op'>&lt;</span><span class='ident'>Index</span>,<span class='prelude-ty'>Result</span><span class='op'>&gt;</span> {
+    <span class='doccomment'>/// The method for the indexing (`Foo[Bar]`) operation</span>
+    <span class='kw'>fn</span> <span class='ident'>index_mut</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>index</span>: <span class='kw-2'>&amp;</span><span class='ident'>Index</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='prelude-ty'>Result</span>;
 }
 
 <span class='doccomment'>/**

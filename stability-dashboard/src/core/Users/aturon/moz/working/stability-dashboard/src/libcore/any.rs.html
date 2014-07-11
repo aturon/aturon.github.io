@@ -7,8 +7,6 @@
 
     <title>any.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -157,28 +155,126 @@
 <span id='115'>115</span>
 <span id='116'>116</span>
 <span id='117'>117</span>
+<span id='118'>118</span>
+<span id='119'>119</span>
+<span id='120'>120</span>
+<span id='121'>121</span>
+<span id='122'>122</span>
+<span id='123'>123</span>
+<span id='124'>124</span>
+<span id='125'>125</span>
+<span id='126'>126</span>
+<span id='127'>127</span>
+<span id='128'>128</span>
+<span id='129'>129</span>
+<span id='130'>130</span>
+<span id='131'>131</span>
+<span id='132'>132</span>
+<span id='133'>133</span>
+<span id='134'>134</span>
+<span id='135'>135</span>
+<span id='136'>136</span>
+<span id='137'>137</span>
+<span id='138'>138</span>
+<span id='139'>139</span>
+<span id='140'>140</span>
+<span id='141'>141</span>
+<span id='142'>142</span>
+<span id='143'>143</span>
+<span id='144'>144</span>
+<span id='145'>145</span>
+<span id='146'>146</span>
+<span id='147'>147</span>
+<span id='148'>148</span>
+<span id='149'>149</span>
+<span id='150'>150</span>
+<span id='151'>151</span>
+<span id='152'>152</span>
+<span id='153'>153</span>
+<span id='154'>154</span>
+<span id='155'>155</span>
+<span id='156'>156</span>
+<span id='157'>157</span>
+<span id='158'>158</span>
+<span id='159'>159</span>
+<span id='160'>160</span>
+<span id='161'>161</span>
+<span id='162'>162</span>
+<span id='163'>163</span>
+<span id='164'>164</span>
+<span id='165'>165</span>
+<span id='166'>166</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! Traits for dynamic typing of any `&#39;static` type (through runtime reflection)</span>
+<span class='doccomment'>//! Traits for dynamic typing of any `&#39;static` type (through runtime reflection)</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! This module implements the `Any` trait, which enables dynamic typing</span>
 <span class='doccomment'>//! of any `&#39;static` type through runtime reflection.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! `Any` itself can be used to get a `TypeId`, and has more features when used as a trait object.</span>
-<span class='doccomment'>//! As `&amp;Any` (a borrowed trait object), it has the `is` and `as_ref` methods, to test if the</span>
-<span class='doccomment'>//! contained value is of a given type, and to get a reference to the inner value as a type. As</span>
-<span class='doccomment'>//! `&amp;mut Any`, there is also the `as_mut` method, for getting a mutable reference to the inner</span>
-<span class='doccomment'>//! value. `Box&lt;Any&gt;` adds the `move` method, which will unwrap a `Box&lt;T&gt;` from the object.  See</span>
-<span class='doccomment'>//! the extension traits (`*Ext`) for the full details.</span>
+<span class='doccomment'>//! `Any` itself can be used to get a `TypeId`, and has more features when used</span>
+<span class='doccomment'>//! as a trait object. As `&amp;Any` (a borrowed trait object), it has the `is` and</span>
+<span class='doccomment'>//! `as_ref` methods, to test if the contained value is of a given type, and to</span>
+<span class='doccomment'>//! get a reference to the inner value as a type. As`&amp;mut Any`, there is also</span>
+<span class='doccomment'>//! the `as_mut` method, for getting a mutable reference to the inner value.</span>
+<span class='doccomment'>//! `Box&lt;Any&gt;` adds the `move` method, which will unwrap a `Box&lt;T&gt;` from the</span>
+<span class='doccomment'>//! object.  See the extension traits (`*Ext`) for the full details.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! Note that &amp;Any is limited to testing whether a value is of a specified</span>
+<span class='doccomment'>//! concrete type, and cannot be used to test whether a type implements a trait.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! # Examples</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! Consider a situation where we want to log out a value passed to a function.</span>
+<span class='doccomment'>//! We know the value we&#39;re working on implements Show, but we don&#39;t know its</span>
+<span class='doccomment'>//! concrete type.  We want to give special treatment to certain types: in this</span>
+<span class='doccomment'>//! case printing out the length of String values prior to their value.</span>
+<span class='doccomment'>//! We don&#39;t know the concrete type of our value at compile time, so we need to</span>
+<span class='doccomment'>//! use runtime reflection instead.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! ```rust</span>
+<span class='doccomment'>//! use std::fmt::Show;</span>
+<span class='doccomment'>//! use std::any::{Any, AnyRefExt};</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! // Logger function for any type that implements Show.</span>
+<span class='doccomment'>//! fn log&lt;T: Any+Show&gt;(value: &amp;T) {</span>
+<span class='doccomment'>//!     let value_any = value as &amp;Any;</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//!     // try to convert our value to a String.  If successful, we want to</span>
+<span class='doccomment'>//!     // output the String&#39;s length as well as its value.  If not, it&#39;s a</span>
+<span class='doccomment'>//!     // different type: just print it out unadorned.</span>
+<span class='doccomment'>//!     match value_any.as_ref::&lt;String&gt;() {</span>
+<span class='doccomment'>//!         Some(as_string) =&gt; {</span>
+<span class='doccomment'>//!             println!(&quot;String ({}): {}&quot;, as_string.len(), as_string);</span>
+<span class='doccomment'>//!         }</span>
+<span class='doccomment'>//!         None =&gt; {</span>
+<span class='doccomment'>//!             println!(&quot;{}&quot;, value);</span>
+<span class='doccomment'>//!         }</span>
+<span class='doccomment'>//!     }</span>
+<span class='doccomment'>//! }</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! // This function wants to log its parameter out prior to doing work with it.</span>
+<span class='doccomment'>//! fn do_work&lt;T: Show&gt;(value: &amp;T) {</span>
+<span class='doccomment'>//!     log(value);</span>
+<span class='doccomment'>//!     // ...do some other work</span>
+<span class='doccomment'>//! }</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! fn main() {</span>
+<span class='doccomment'>//!     let my_string = &quot;Hello World&quot;.to_string();</span>
+<span class='doccomment'>//!     do_work(&amp;my_string);</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//!     let my_i8: i8 = 100;</span>
+<span class='doccomment'>//!     do_work(&amp;my_i8);</span>
+<span class='doccomment'>//! }</span>
+<span class='doccomment'>//! ```</span>
 
 <span class='kw'>use</span> <span class='ident'>mem</span>::{<span class='ident'>transmute</span>, <span class='ident'>transmute_copy</span>};
 <span class='kw'>use</span> <span class='ident'>option</span>::{<span class='prelude-ty'>Option</span>, <span class='prelude-val'>Some</span>, <span class='prelude-val'>None</span>};
@@ -186,13 +282,13 @@
 <span class='kw'>use</span> <span class='ident'>intrinsics</span>::<span class='ident'>TypeId</span>;
 
 <span class='doccomment'>/// A type with no inhabitants</span>
-<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>Void</span> { }<span class='comment'>
+<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>Void</span> { }
 
-///////////////////////////////////////////////////////////////////////////////
-// Any trait
-///////////////////////////////////////////////////////////////////////////////
+<span class='comment'>///////////////////////////////////////////////////////////////////////////////</span>
+<span class='comment'>// Any trait</span>
+<span class='comment'>///////////////////////////////////////////////////////////////////////////////</span>
 
-</span><span class='doccomment'>/// The `Any` trait is implemented by all `&#39;static` types, and can be used for dynamic typing</span>
+<span class='doccomment'>/// The `Any` trait is implemented by all `&#39;static` types, and can be used for dynamic typing</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// Every type with no non-`&#39;static` references implements `Any`, so `Any` can be used as a trait</span>
 <span class='doccomment'>/// object to emulate the effects dynamic typing.</span>
@@ -206,14 +302,14 @@
     <span class='kw'>fn</span> <span class='ident'>get_type_id</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>TypeId</span> {
         <span class='ident'>TypeId</span>::<span class='ident'>of</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>()
     }
-}<span class='comment'>
+}
 
-///////////////////////////////////////////////////////////////////////////////
-// Extension methods for Any trait objects.
-// Implemented as three extension traits so that the methods can be generic.
-///////////////////////////////////////////////////////////////////////////////
+<span class='comment'>///////////////////////////////////////////////////////////////////////////////</span>
+<span class='comment'>// Extension methods for Any trait objects.</span>
+<span class='comment'>// Implemented as three extension traits so that the methods can be generic.</span>
+<span class='comment'>///////////////////////////////////////////////////////////////////////////////</span>
 
-</span><span class='doccomment'>/// Extension methods for a referenced `Any` trait object</span>
+<span class='doccomment'>/// Extension methods for a referenced `Any` trait object</span>
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>AnyRefExt</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Returns true if the boxed type is the same as `T`</span>
     <span class='kw'>fn</span> <span class='ident'>is</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='lifetime'>&#39;static</span><span class='op'>&gt;</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span>;
@@ -225,26 +321,26 @@
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>AnyRefExt</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>Any</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>is</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='lifetime'>&#39;static</span><span class='op'>&gt;</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {<span class='comment'>
-        // Get TypeId of the type this function is instantiated with
-        </span><span class='kw'>let</span> <span class='ident'>t</span> <span class='op'>=</span> <span class='ident'>TypeId</span>::<span class='ident'>of</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>();<span class='comment'>
+    <span class='kw'>fn</span> <span class='ident'>is</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='lifetime'>&#39;static</span><span class='op'>&gt;</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+        <span class='comment'>// Get TypeId of the type this function is instantiated with</span>
+        <span class='kw'>let</span> <span class='ident'>t</span> <span class='op'>=</span> <span class='ident'>TypeId</span>::<span class='ident'>of</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>();
 
-        // Get TypeId of the type in the trait object
-        </span><span class='kw'>let</span> <span class='ident'>boxed</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>get_type_id</span>();<span class='comment'>
+        <span class='comment'>// Get TypeId of the type in the trait object</span>
+        <span class='kw'>let</span> <span class='ident'>boxed</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>get_type_id</span>();
 
-        // Compare both TypeIds on equality
-        </span><span class='ident'>t</span> <span class='op'>==</span> <span class='ident'>boxed</span>
+        <span class='comment'>// Compare both TypeIds on equality</span>
+        <span class='ident'>t</span> <span class='op'>==</span> <span class='ident'>boxed</span>
     }
 
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>as_ref</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='lifetime'>&#39;static</span><span class='op'>&gt;</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>() {
-            <span class='kw'>unsafe</span> {<span class='comment'>
-                // Get the raw representation of the trait object
-                </span><span class='kw'>let</span> <span class='ident'>to</span>: <span class='ident'>TraitObject</span> <span class='op'>=</span> <span class='ident'>transmute_copy</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>);<span class='comment'>
+            <span class='kw'>unsafe</span> {
+                <span class='comment'>// Get the raw representation of the trait object</span>
+                <span class='kw'>let</span> <span class='ident'>to</span>: <span class='ident'>TraitObject</span> <span class='op'>=</span> <span class='ident'>transmute_copy</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>);
 
-                // Extract the data pointer
-                </span><span class='prelude-val'>Some</span>(<span class='ident'>transmute</span>(<span class='ident'>to</span>.<span class='ident'>data</span>))
+                <span class='comment'>// Extract the data pointer</span>
+                <span class='prelude-val'>Some</span>(<span class='ident'>transmute</span>(<span class='ident'>to</span>.<span class='ident'>data</span>))
             }
         } <span class='kw'>else</span> {
             <span class='prelude-val'>None</span>
@@ -263,12 +359,12 @@
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>as_mut</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='lifetime'>&#39;static</span><span class='op'>&gt;</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>() {
-            <span class='kw'>unsafe</span> {<span class='comment'>
-                // Get the raw representation of the trait object
-                </span><span class='kw'>let</span> <span class='ident'>to</span>: <span class='ident'>TraitObject</span> <span class='op'>=</span> <span class='ident'>transmute_copy</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>);<span class='comment'>
+            <span class='kw'>unsafe</span> {
+                <span class='comment'>// Get the raw representation of the trait object</span>
+                <span class='kw'>let</span> <span class='ident'>to</span>: <span class='ident'>TraitObject</span> <span class='op'>=</span> <span class='ident'>transmute_copy</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>);
 
-                // Extract the data pointer
-                </span><span class='prelude-val'>Some</span>(<span class='ident'>transmute</span>(<span class='ident'>to</span>.<span class='ident'>data</span>))
+                <span class='comment'>// Extract the data pointer</span>
+                <span class='prelude-val'>Some</span>(<span class='ident'>transmute</span>(<span class='ident'>to</span>.<span class='ident'>data</span>))
             }
         } <span class='kw'>else</span> {
             <span class='prelude-val'>None</span>

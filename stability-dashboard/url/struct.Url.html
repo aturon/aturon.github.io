@@ -7,8 +7,6 @@
 
     <title>url::Url - Rust</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -41,15 +39,13 @@
     </nav>
 
     <section id='main' class="content struct">
-<h1 class='fqn'>Struct <a href='index.html'>url</a>::<a class='struct' href=''>Url</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-10' href='../src/url/Users/aturon/moz/working/stability-dashboard/src/liburl/lib.rs.html#51-68'>[src]</a></span></h1>
+<h1 class='fqn'>Struct <a href='index.html'>url</a>::<a class='struct' href=''>Url</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-9' href='../src/url/Users/aturon/moz/working/stability-dashboard/src/liburl/lib.rs.html#47-58'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Url {
     pub scheme: <a class='struct' href='../collections/string/struct.String.html' title='collections::string::String'>String</a>,
     pub user: <a class='type' href='../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../url/struct.UserInfo.html' title='url::UserInfo'>UserInfo</a>&gt;,
     pub host: <a class='struct' href='../collections/string/struct.String.html' title='collections::string::String'>String</a>,
-    pub port: <a class='type' href='../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;,
-    pub path: <a class='struct' href='../collections/string/struct.String.html' title='collections::string::String'>String</a>,
-    pub query: <a class='type' href='../url/type.Query.html' title='url::Query'>Query</a>,
-    pub fragment: <a class='type' href='../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;,
+    pub port: <a class='type' href='../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a href='../std/primitive.u16.html'>u16</a>&gt;,
+    pub path: <a class='struct' href='../url/struct.Path.html' title='url::Path'>Path</a>,
 }</pre><div class='docblock'><p>A Uniform Resource Locator (URL).  A URL is a form of URI (Uniform Resource
 Identifier) that includes network location information, such as hostname or
 port number.</p>
@@ -57,46 +53,46 @@ port number.</p>
 <h1 id="example" class='section-header'><a
                            href="#example">Example</a></h1><span id='rust-example-raw-0' class='rusttest'>extern crate url;
 fn main() {
-    use url::{Url, UserInfo};
+    use url::Url;
     
-    let url = Url { scheme: &quot;https&quot;.to_string(),
-                    user: Some(UserInfo { user: &quot;username&quot;.to_string(), pass: None }),
-                    host: &quot;example.com&quot;.to_string(),
-                    port: Some(&quot;8080&quot;.to_string()),
-                    path: &quot;/foo/bar&quot;.to_string(),
-                    query: vec!((&quot;baz&quot;.to_string(), &quot;qux&quot;.to_string())),
-                    fragment: Some(&quot;quz&quot;.to_string()) };
-    // https://username@example.com:8080/foo/bar?baz=qux#quz
+    let raw = &quot;https://username@example.com:8080/foo/bar?baz=qux#quz&quot;;
+    match Url::parse(raw) {
+        Ok(u) =&gt; println!(&quot;Parsed &#39;{}&#39;&quot;, u),
+        Err(e) =&gt; println!(&quot;Couldn&#39;t parse &#39;{}&#39;: {}&quot;, raw, e),
+    }
 }</span><pre id='rust-example-rendered-0' class='rust '>
-<span class='kw'>use</span> <span class='ident'>url</span>::{<span class='ident'>Url</span>, <span class='ident'>UserInfo</span>};
+<span class='kw'>use</span> <span class='ident'>url</span>::<span class='ident'>Url</span>;
 
-<span class='kw'>let</span> <span class='ident'>url</span> <span class='op'>=</span> <span class='ident'>Url</span> { <span class='ident'>scheme</span>: <span class='string'>&quot;https&quot;</span>.<span class='ident'>to_string</span>(),
-                <span class='ident'>user</span>: <span class='prelude-val'>Some</span>(<span class='ident'>UserInfo</span> { <span class='ident'>user</span>: <span class='string'>&quot;username&quot;</span>.<span class='ident'>to_string</span>(), <span class='ident'>pass</span>: <span class='prelude-val'>None</span> }),
-                <span class='ident'>host</span>: <span class='string'>&quot;example.com&quot;</span>.<span class='ident'>to_string</span>(),
-                <span class='ident'>port</span>: <span class='prelude-val'>Some</span>(<span class='string'>&quot;8080&quot;</span>.<span class='ident'>to_string</span>()),
-                <span class='ident'>path</span>: <span class='string'>&quot;/foo/bar&quot;</span>.<span class='ident'>to_string</span>(),
-                <span class='ident'>query</span>: <span class='macro'>vec</span><span class='macro'>!</span>((<span class='string'>&quot;baz&quot;</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;qux&quot;</span>.<span class='ident'>to_string</span>())),
-                <span class='ident'>fragment</span>: <span class='prelude-val'>Some</span>(<span class='string'>&quot;quz&quot;</span>.<span class='ident'>to_string</span>()) };<span class='comment'>
-// https://username@example.com:8080/foo/bar?baz=qux#quz
-</span></pre>
+<span class='kw'>let</span> <span class='ident'>raw</span> <span class='op'>=</span> <span class='string'>&quot;https://username@example.com:8080/foo/bar?baz=qux#quz&quot;</span>;
+<span class='kw'>match</span> <span class='ident'>Url</span>::<span class='ident'>parse</span>(<span class='ident'>raw</span>) {
+    <span class='prelude-val'>Ok</span>(<span class='ident'>u</span>) <span class='op'>=&gt;</span> <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Parsed &#39;{}&#39;&quot;</span>, <span class='ident'>u</span>),
+    <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Couldn&#39;t parse &#39;{}&#39;: {}&quot;</span>, <span class='ident'>raw</span>, <span class='ident'>e</span>),
+}
+</pre>
 </div><h2 class='fields'>Fields</h2>
 <table><tr><td id='structfield.scheme'><a class='stability Experimental' title='Experimental'></a><code>scheme</code></td><td><div class='docblock'><p>The scheme part of a URL, such as <code>https</code> in the above example.</p>
 </div></td></tr><tr><td id='structfield.user'><a class='stability Experimental' title='Experimental'></a><code>user</code></td><td><div class='docblock'><p>A URL subcomponent for user authentication.  <code>username</code> in the above example.</p>
 </div></td></tr><tr><td id='structfield.host'><a class='stability Experimental' title='Experimental'></a><code>host</code></td><td><div class='docblock'><p>A domain name or IP address.  For example, <code>example.com</code>.</p>
 </div></td></tr><tr><td id='structfield.port'><a class='stability Experimental' title='Experimental'></a><code>port</code></td><td><div class='docblock'><p>A TCP port number, for example <code>8080</code>.</p>
-</div></td></tr><tr><td id='structfield.path'><a class='stability Experimental' title='Experimental'></a><code>path</code></td><td><div class='docblock'><p>The path component of a URL, for example <code>/foo/bar</code>.</p>
-</div></td></tr><tr><td id='structfield.query'><a class='stability Experimental' title='Experimental'></a><code>query</code></td><td><div class='docblock'><p>The query component of a URL.
-<code>vec!((&quot;baz&quot;.to_string(), &quot;qux&quot;.to_string()))</code> represents the fragment
-<code>baz=qux</code> in the above example.</p>
-</div></td></tr><tr><td id='structfield.fragment'><a class='stability Experimental' title='Experimental'></a><code>fragment</code></td><td><div class='docblock'><p>The fragment component, such as <code>quz</code>.  Doesn&#39;t include the leading <code>#</code> character.</p>
-</div></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='struct' href='../url/struct.Url.html' title='url::Url'>Url</a></code></h3><div class='impl-methods'><h4 id='method.new' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.new' class='fnname'>new</a>(scheme: <a class='struct' href='../collections/string/struct.String.html' title='collections::string::String'>String</a>, user: <a class='type' href='../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../url/struct.UserInfo.html' title='url::UserInfo'>UserInfo</a>&gt;, host: <a class='struct' href='../collections/string/struct.String.html' title='collections::string::String'>String</a>, port: <a class='type' href='../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;, path: <a class='struct' href='../collections/string/struct.String.html' title='collections::string::String'>String</a>, query: <a class='type' href='../url/type.Query.html' title='url::Query'>Query</a>, fragment: <a class='type' href='../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;) -&gt; <a class='struct' href='../url/struct.Url.html' title='url::Url'>Url</a></code></h4>
-</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../std/from_str/trait.FromStr.html' title='std::from_str::FromStr'>FromStr</a> for <a class='struct' href='../url/struct.Url.html' title='url::Url'>Url</a></code></h3><div class='impl-methods'><h4 id='method.from_str' class='method'><a class='stability Experimental' title='Experimental: might need to return Result'></a><code>fn <a href='#method.from_str' class='fnname'>from_str</a>(s: &amp;<a href='../std/primitive.str.html'>str</a>) -&gt; <a class='type' href='../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../url/struct.Url.html' title='url::Url'>Url</a>&gt;</code></h4>
-</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../core/fmt/trait.Show.html' title='core::fmt::Show'>Show</a> for <a class='struct' href='../url/struct.Url.html' title='url::Url'>Url</a></code></h3><div class='impl-methods'><h4 id='method.fmt' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='../core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='../core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
-<div class='docblock'><p>Converts a URL from <code>Url</code> to string representation.</p>
+</div></td></tr><tr><td id='structfield.path'><a class='stability Experimental' title='Experimental'></a><code>path</code></td><td><div class='docblock'><p>The path component of a URL, for example <code>/foo/bar?baz=qux#quz</code>.</p>
+</div></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='struct' href='../url/struct.Url.html' title='url::Url'>Url</a></code></h3><div class='impl-methods'><h4 id='method.new' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.new' class='fnname'>new</a>(scheme: <a class='struct' href='../collections/string/struct.String.html' title='collections::string::String'>String</a>, user: <a class='type' href='../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../url/struct.UserInfo.html' title='url::UserInfo'>UserInfo</a>&gt;, host: <a class='struct' href='../collections/string/struct.String.html' title='collections::string::String'>String</a>, port: <a class='type' href='../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a href='../std/primitive.u16.html'>u16</a>&gt;, path: <a class='struct' href='../collections/string/struct.String.html' title='collections::string::String'>String</a>, query: <a class='type' href='../url/type.Query.html' title='url::Query'>Query</a>, fragment: <a class='type' href='../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;) -&gt; <a class='struct' href='../url/struct.Url.html' title='url::Url'>Url</a></code></h4>
+<h4 id='method.parse' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.parse' class='fnname'>parse</a>(rawurl: &amp;<a href='../std/primitive.str.html'>str</a>) -&gt; <a class='type' href='../url/type.DecodeResult.html' title='url::DecodeResult'>DecodeResult</a>&lt;<a class='struct' href='../url/struct.Url.html' title='url::Url'>Url</a>&gt;</code></h4>
+<div class='docblock'><p>Parses a URL, converting it from a string to a <code>Url</code> representation.</p>
 
 <h1 id="arguments" class='section-header'><a
                            href="#arguments">Arguments</a></h1>
-<p><code>url</code> - a URL.</p>
+<ul>
+<li>rawurl - a string representing the full URL, including scheme.</li>
+</ul>
+
+<h1 id="return-value" class='section-header'><a
+                           href="#return-value">Return value</a></h1>
+<p><code>Err(e)</code> if the string did not represent a valid URL, where <code>e</code> is a
+<code>String</code> error message. Otherwise, <code>Ok(u)</code> where <code>u</code> is a <code>Url</code> struct
+representing the URL.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../std/from_str/trait.FromStr.html' title='std::from_str::FromStr'>FromStr</a> for <a class='struct' href='../url/struct.Url.html' title='url::Url'>Url</a></code></h3><div class='impl-methods'><h4 id='method.from_str' class='method'><a class='stability Experimental' title='Experimental: might need to return Result'></a><code>fn <a href='#method.from_str' class='fnname'>from_str</a>(s: &amp;<a href='../std/primitive.str.html'>str</a>) -&gt; <a class='type' href='../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../url/struct.Url.html' title='url::Url'>Url</a>&gt;</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../core/fmt/trait.Show.html' title='core::fmt::Show'>Show</a> for <a class='struct' href='../url/struct.Url.html' title='url::Url'>Url</a></code></h3><div class='impl-methods'><h4 id='method.fmt' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='../core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='../core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+<div class='docblock'><p>Converts a URL from <code>Url</code> to string representation.</p>
 
 <h1 id="returns" class='section-header'><a
                            href="#returns">Returns</a></h1>

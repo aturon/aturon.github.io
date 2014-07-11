@@ -7,8 +7,6 @@
 
     <title>lib.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     
@@ -670,23 +668,23 @@
 <span id='628'>628</span>
 <span id='629'>629</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! Macro support for format strings</span>
+<span class='doccomment'>//! Macro support for format strings</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! These structures are used when parsing format strings for the compiler.</span>
 <span class='doccomment'>//! Parsing does not happen at runtime: structures of `std::fmt::rt` are</span>
 <span class='doccomment'>//! generated instead.</span>
 
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_id</span> <span class='op'>=</span> <span class='string'>&quot;fmt_macros#0.11.0-pre&quot;</span>]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_name</span> <span class='op'>=</span> <span class='string'>&quot;fmt_macros&quot;</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>experimental</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>license</span> <span class='op'>=</span> <span class='string'>&quot;MIT/ASL2&quot;</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_type</span> <span class='op'>=</span> <span class='string'>&quot;rlib&quot;</span>]</span>
@@ -894,9 +892,9 @@
     <span class='doccomment'>/// Parses all of a string which is to be considered a &quot;raw literal&quot; in a</span>
     <span class='doccomment'>/// format string. This is everything outside of the braces.</span>
     <span class='kw'>fn</span> <span class='ident'>string</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>start</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span> {
-        <span class='kw'>loop</span> {<span class='comment'>
-            // we may not consume the character, so clone the iterator
-            </span><span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>cur</span>.<span class='ident'>clone</span>().<span class='ident'>next</span>() {
+        <span class='kw'>loop</span> {
+            <span class='comment'>// we may not consume the character, so clone the iterator</span>
+            <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>cur</span>.<span class='ident'>clone</span>().<span class='ident'>next</span>() {
                 <span class='prelude-val'>Some</span>((<span class='ident'>pos</span>, <span class='string'>&#39;}&#39;</span>)) <span class='op'>|</span> <span class='prelude-val'>Some</span>((<span class='ident'>pos</span>, <span class='string'>&#39;{&#39;</span>)) <span class='op'>=&gt;</span> {
                     <span class='kw'>return</span> <span class='self'>self</span>.<span class='ident'>input</span>.<span class='ident'>slice</span>(<span class='ident'>start</span>, <span class='ident'>pos</span>);
                 }
@@ -945,10 +943,10 @@
             <span class='ident'>width</span>: <span class='ident'>CountImplied</span>,
             <span class='ident'>ty</span>: <span class='self'>self</span>.<span class='ident'>input</span>.<span class='ident'>slice</span>(<span class='number'>0</span>, <span class='number'>0</span>),
         };
-        <span class='kw'>if</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>consume</span>(<span class='string'>&#39;:&#39;</span>) { <span class='kw'>return</span> <span class='ident'>spec</span> }<span class='comment'>
+        <span class='kw'>if</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>consume</span>(<span class='string'>&#39;:&#39;</span>) { <span class='kw'>return</span> <span class='ident'>spec</span> }
 
-        // fill character
-        </span><span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>cur</span>.<span class='ident'>clone</span>().<span class='ident'>next</span>() {
+        <span class='comment'>// fill character</span>
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>cur</span>.<span class='ident'>clone</span>().<span class='ident'>next</span>() {
             <span class='prelude-val'>Some</span>((_, <span class='ident'>c</span>)) <span class='op'>=&gt;</span> {
                 <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>cur</span>.<span class='ident'>clone</span>().<span class='ident'>skip</span>(<span class='number'>1</span>).<span class='ident'>next</span>() {
                     <span class='prelude-val'>Some</span>((_, <span class='string'>&#39;&gt;&#39;</span>)) <span class='op'>|</span> <span class='prelude-val'>Some</span>((_, <span class='string'>&#39;&lt;&#39;</span>)) <span class='op'>=&gt;</span> {
@@ -959,31 +957,31 @@
                 }
             }
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {}
-        }<span class='comment'>
-        // Alignment
-        </span><span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>consume</span>(<span class='string'>&#39;&lt;&#39;</span>) {
+        }
+        <span class='comment'>// Alignment</span>
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>consume</span>(<span class='string'>&#39;&lt;&#39;</span>) {
             <span class='ident'>spec</span>.<span class='ident'>align</span> <span class='op'>=</span> <span class='ident'>AlignLeft</span>;
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>consume</span>(<span class='string'>&#39;&gt;&#39;</span>) {
             <span class='ident'>spec</span>.<span class='ident'>align</span> <span class='op'>=</span> <span class='ident'>AlignRight</span>;
-        }<span class='comment'>
-        // Sign flags
-        </span><span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>consume</span>(<span class='string'>&#39;+&#39;</span>) {
+        }
+        <span class='comment'>// Sign flags</span>
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>consume</span>(<span class='string'>&#39;+&#39;</span>) {
             <span class='ident'>spec</span>.<span class='ident'>flags</span> <span class='op'>|=</span> <span class='number'>1</span> <span class='op'>&lt;&lt;</span> (<span class='ident'>FlagSignPlus</span> <span class='kw'>as</span> <span class='ident'>uint</span>);
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>consume</span>(<span class='string'>&#39;-&#39;</span>) {
             <span class='ident'>spec</span>.<span class='ident'>flags</span> <span class='op'>|=</span> <span class='number'>1</span> <span class='op'>&lt;&lt;</span> (<span class='ident'>FlagSignMinus</span> <span class='kw'>as</span> <span class='ident'>uint</span>);
-        }<span class='comment'>
-        // Alternate marker
-        </span><span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>consume</span>(<span class='string'>&#39;#&#39;</span>) {
+        }
+        <span class='comment'>// Alternate marker</span>
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>consume</span>(<span class='string'>&#39;#&#39;</span>) {
             <span class='ident'>spec</span>.<span class='ident'>flags</span> <span class='op'>|=</span> <span class='number'>1</span> <span class='op'>&lt;&lt;</span> (<span class='ident'>FlagAlternate</span> <span class='kw'>as</span> <span class='ident'>uint</span>);
-        }<span class='comment'>
-        // Width and precision
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>havewidth</span> <span class='op'>=</span> <span class='boolval'>false</span>;
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>consume</span>(<span class='string'>&#39;0&#39;</span>) {<span class='comment'>
-            // small ambiguity with &#39;0$&#39; as a format string. In theory this is a
-            // &#39;0&#39; flag and then an ill-formatted format string with just a &#39;$&#39;
-            // and no count, but this is better if we instead interpret this as
-            // no &#39;0&#39; flag and &#39;0$&#39; as the width instead.
-            </span><span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>consume</span>(<span class='string'>&#39;$&#39;</span>) {
+        }
+        <span class='comment'>// Width and precision</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>havewidth</span> <span class='op'>=</span> <span class='boolval'>false</span>;
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>consume</span>(<span class='string'>&#39;0&#39;</span>) {
+            <span class='comment'>// small ambiguity with &#39;0$&#39; as a format string. In theory this is a</span>
+            <span class='comment'>// &#39;0&#39; flag and then an ill-formatted format string with just a &#39;$&#39;</span>
+            <span class='comment'>// and no count, but this is better if we instead interpret this as</span>
+            <span class='comment'>// no &#39;0&#39; flag and &#39;0$&#39; as the width instead.</span>
+            <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>consume</span>(<span class='string'>&#39;$&#39;</span>) {
                 <span class='ident'>spec</span>.<span class='ident'>width</span> <span class='op'>=</span> <span class='ident'>CountIsParam</span>(<span class='number'>0</span>);
                 <span class='ident'>havewidth</span> <span class='op'>=</span> <span class='boolval'>true</span>;
             } <span class='kw'>else</span> {
@@ -999,9 +997,9 @@
             } <span class='kw'>else</span> {
                 <span class='ident'>spec</span>.<span class='ident'>precision</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>count</span>();
             }
-        }<span class='comment'>
-        // Finally the actual format specifier
-        </span><span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>consume</span>(<span class='string'>&#39;?&#39;</span>) {
+        }
+        <span class='comment'>// Finally the actual format specifier</span>
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>consume</span>(<span class='string'>&#39;?&#39;</span>) {
             <span class='ident'>spec</span>.<span class='ident'>ty</span> <span class='op'>=</span> <span class='string'>&quot;?&quot;</span>;
         } <span class='kw'>else</span> {
             <span class='ident'>spec</span>.<span class='ident'>ty</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>word</span>();

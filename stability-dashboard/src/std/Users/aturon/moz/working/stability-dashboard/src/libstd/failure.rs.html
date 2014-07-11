@@ -7,8 +7,6 @@
 
     <title>failure.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -145,17 +143,17 @@
 <span id='103'>103</span>
 <span id='104'>104</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='attribute'>#<span class='op'>!</span>[<span class='ident'>experimental</span>]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>experimental</span>]</span>
 
 <span class='kw'>use</span> <span class='ident'>alloc</span>::<span class='ident'>owned</span>::<span class='ident'>Box</span>;
 <span class='kw'>use</span> <span class='ident'>any</span>::{<span class='ident'>Any</span>, <span class='ident'>AnyRefExt</span>};
@@ -169,10 +167,10 @@
 <span class='kw'>use</span> <span class='ident'>rustrt</span>::<span class='ident'>local</span>::<span class='ident'>Local</span>;
 <span class='kw'>use</span> <span class='ident'>rustrt</span>::<span class='ident'>task</span>::<span class='ident'>Task</span>;
 <span class='kw'>use</span> <span class='ident'>str</span>::<span class='ident'>Str</span>;
-<span class='kw'>use</span> <span class='ident'>string</span>::<span class='ident'>String</span>;<span class='comment'>
+<span class='kw'>use</span> <span class='ident'>string</span>::<span class='ident'>String</span>;
 
-// Defined in this module instead of io::stdio so that the unwinding
-</span><span class='macro'>local_data_key</span><span class='macro'>!</span>(<span class='kw'>pub</span> <span class='ident'>local_stderr</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Writer</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>)
+<span class='comment'>// Defined in this module instead of io::stdio so that the unwinding</span>
+<span class='macro'>local_data_key</span><span class='macro'>!</span>(<span class='kw'>pub</span> <span class='ident'>local_stderr</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Writer</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>)
 
 <span class='kw'>impl</span> <span class='ident'>Writer</span> <span class='kw'>for</span> <span class='ident'>Stdio</span> {
     <span class='kw'>fn</span> <span class='ident'>write</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>bytes</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
@@ -192,16 +190,16 @@
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='string'>&quot;Box&lt;Any&gt;&quot;</span>,
         }
     };
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>err</span> <span class='op'>=</span> <span class='ident'>Stderr</span>;<span class='comment'>
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>err</span> <span class='op'>=</span> <span class='ident'>Stderr</span>;
 
-    // It is assumed that all reasonable rust code will have a local task at
-    // all times. This means that this `exists` will return true almost all of
-    // the time. There are border cases, however, when the runtime has
-    // *almost* set up the local task, but hasn&#39;t quite gotten there yet. In
-    // order to get some better diagnostics, we print on failure and
-    // immediately abort the whole process if there is no local task
-    // available.
-    </span><span class='kw'>if</span> <span class='op'>!</span><span class='ident'>Local</span>::<span class='ident'>exists</span>(<span class='prelude-val'>None</span>::<span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) {
+    <span class='comment'>// It is assumed that all reasonable rust code will have a local task at</span>
+    <span class='comment'>// all times. This means that this `exists` will return true almost all of</span>
+    <span class='comment'>// the time. There are border cases, however, when the runtime has</span>
+    <span class='comment'>// *almost* set up the local task, but hasn&#39;t quite gotten there yet. In</span>
+    <span class='comment'>// order to get some better diagnostics, we print on failure and</span>
+    <span class='comment'>// immediately abort the whole process if there is no local task</span>
+    <span class='comment'>// available.</span>
+    <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>Local</span>::<span class='ident'>exists</span>(<span class='prelude-val'>None</span>::<span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) {
         <span class='kw'>let</span> _ <span class='op'>=</span> <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>err</span>, <span class='string'>&quot;failed at &#39;{}&#39;, {}:{}&quot;</span>, <span class='ident'>msg</span>, <span class='ident'>file</span>, <span class='ident'>line</span>);
         <span class='kw'>if</span> <span class='ident'>backtrace</span>::<span class='ident'>log_enabled</span>() {
             <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>backtrace</span>::<span class='ident'>write</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>err</span>);
@@ -210,11 +208,11 @@
                                         see a backtrace&quot;</span>);
         }
         <span class='kw'>return</span>
-    }<span class='comment'>
+    }
 
-    // Peel the name out of local task so we can print it. We&#39;ve got to be sure
-    // that the local task is in TLS while we&#39;re printing as I/O may occur.
-    </span><span class='kw'>let</span> (<span class='ident'>name</span>, <span class='ident'>unwinding</span>) <span class='op'>=</span> {
+    <span class='comment'>// Peel the name out of local task so we can print it. We&#39;ve got to be sure</span>
+    <span class='comment'>// that the local task is in TLS while we&#39;re printing as I/O may occur.</span>
+    <span class='kw'>let</span> (<span class='ident'>name</span>, <span class='ident'>unwinding</span>) <span class='op'>=</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t</span> <span class='op'>=</span> <span class='ident'>Local</span>::<span class='ident'>borrow</span>(<span class='prelude-val'>None</span>::<span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>);
         (<span class='ident'>t</span>.<span class='ident'>name</span>.<span class='ident'>take</span>(), <span class='ident'>t</span>.<span class='ident'>unwinder</span>.<span class='ident'>unwinding</span>())
     };
@@ -222,9 +220,9 @@
         <span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='ident'>name</span>.<span class='ident'>as_ref</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>n</span><span class='op'>|</span> <span class='ident'>n</span>.<span class='ident'>as_slice</span>()).<span class='ident'>unwrap_or</span>(<span class='string'>&quot;&lt;unnamed&gt;&quot;</span>);
 
         <span class='kw'>match</span> <span class='ident'>local_stderr</span>.<span class='ident'>replace</span>(<span class='prelude-val'>None</span>) {
-            <span class='prelude-val'>Some</span>(<span class='kw-2'>mut</span> <span class='ident'>stderr</span>) <span class='op'>=&gt;</span> {<span class='comment'>
-                // FIXME: what to do when the task printing fails?
-                </span><span class='kw'>let</span> _ <span class='op'>=</span> <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>stderr</span>,
+            <span class='prelude-val'>Some</span>(<span class='kw-2'>mut</span> <span class='ident'>stderr</span>) <span class='op'>=&gt;</span> {
+                <span class='comment'>// FIXME: what to do when the task printing fails?</span>
+                <span class='kw'>let</span> _ <span class='op'>=</span> <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>stderr</span>,
                                  <span class='string'>&quot;task &#39;{}&#39; failed at &#39;{}&#39;, {}:{}\n&quot;</span>,
                                  <span class='ident'>n</span>, <span class='ident'>msg</span>, <span class='ident'>file</span>, <span class='ident'>line</span>);
                 <span class='kw'>if</span> <span class='ident'>backtrace</span>::<span class='ident'>log_enabled</span>() {
@@ -239,11 +237,11 @@
                     <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>backtrace</span>::<span class='ident'>write</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>err</span>);
                 }
             }
-        }<span class='comment'>
+        }
 
-        // If this is a double failure, make sure that we printed a backtrace
-        // for this failure.
-        </span><span class='kw'>if</span> <span class='ident'>unwinding</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='ident'>backtrace</span>::<span class='ident'>log_enabled</span>() {
+        <span class='comment'>// If this is a double failure, make sure that we printed a backtrace</span>
+        <span class='comment'>// for this failure.</span>
+        <span class='kw'>if</span> <span class='ident'>unwinding</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='ident'>backtrace</span>::<span class='ident'>log_enabled</span>() {
             <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>backtrace</span>::<span class='ident'>write</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>err</span>);
         }
     }

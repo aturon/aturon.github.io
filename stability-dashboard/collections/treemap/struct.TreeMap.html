@@ -7,8 +7,6 @@
 
     <title>collections::treemap::TreeMap - Rust</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -41,7 +39,7 @@
     </nav>
 
     <section id='main' class="content struct">
-<h1 class='fqn'>Struct <a href='../index.html'>collections</a>::<a href='index.html'>treemap</a>::<a class='struct' href=''>TreeMap</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-16090' href='../../src/collections/Users/aturon/moz/working/stability-dashboard/src/libcollections/treemap.rs.html#47-50'>[src]</a></span></h1>
+<h1 class='fqn'>Struct <a href='../index.html'>collections</a>::<a href='index.html'>treemap</a>::<a class='struct' href=''>TreeMap</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-15271' href='../../src/collections/Users/aturon/moz/working/stability-dashboard/src/libcollections/treemap.rs.html#47-50'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct TreeMap&lt;K, V&gt; {
     // some fields omitted
 }</pre><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;K: <a class='trait' href='../../core/cmp/trait.Ord.html' title='core::cmp::Ord'>Ord</a>, V&gt; <a class='struct' href='../../collections/treemap/struct.TreeMap.html' title='collections::treemap::TreeMap'>TreeMap</a>&lt;K, V&gt;</code></h3><div class='impl-methods'><h4 id='method.new' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class='struct' href='../../collections/treemap/struct.TreeMap.html' title='collections::treemap::TreeMap'>TreeMap</a>&lt;K, V&gt;</code></h4>
@@ -60,6 +58,70 @@ map, with the values being mutable.</p>
 map, with the values being mutable.</p>
 </div><h4 id='method.move_iter' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.move_iter' class='fnname'>move_iter</a>(self) -&gt; <a class='struct' href='../../collections/treemap/struct.MoveEntries.html' title='collections::treemap::MoveEntries'>MoveEntries</a>&lt;K, V&gt;</code></h4>
 <div class='docblock'><p>Get a lazy iterator that consumes the treemap.</p>
+</div></div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;K, V&gt; <a class='struct' href='../../collections/treemap/struct.TreeMap.html' title='collections::treemap::TreeMap'>TreeMap</a>&lt;K, V&gt;</code></h3><div class='impl-methods'><h4 id='method.find_with' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.find_with' class='fnname'>find_with</a>&lt;'a&gt;(&amp;'a self, f: |&amp;K| -&gt; <a class='type' href='../../core/cmp/type.Ordering.html' title='core::cmp::Ordering'>Ordering</a>) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;&amp;'a V&gt;</code></h4>
+<div class='docblock'><p>Return the value for which f(key) returns Equal. f is invoked
+with current key and helps to navigate the tree</p>
+
+<h1 id="example" class='section-header'><a
+                           href="#example">Example</a></h1><span id='rust-example-raw-0' class='rusttest'>extern crate collections;
+fn main() {
+    use std::ascii::StrAsciiExt;
+    
+    let mut t = collections::treemap::TreeMap::new();
+    t.insert(&quot;Content-Type&quot;, &quot;application/xml&quot;);
+    t.insert(&quot;User-Agent&quot;, &quot;Curl-Rust/0.1&quot;);
+    
+    let ua_key = &quot;user-agent&quot;;
+    let ua = t.find_with(|&amp;k| {
+       ua_key.cmp(&amp;k.to_ascii_lower().as_slice())
+    });
+    
+    assert_eq!(*ua.unwrap(), &quot;Curl-Rust/0.1&quot;);
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ascii</span>::<span class='ident'>StrAsciiExt</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t</span> <span class='op'>=</span> <span class='ident'>collections</span>::<span class='ident'>treemap</span>::<span class='ident'>TreeMap</span>::<span class='ident'>new</span>();
+<span class='ident'>t</span>.<span class='ident'>insert</span>(<span class='string'>&quot;Content-Type&quot;</span>, <span class='string'>&quot;application/xml&quot;</span>);
+<span class='ident'>t</span>.<span class='ident'>insert</span>(<span class='string'>&quot;User-Agent&quot;</span>, <span class='string'>&quot;Curl-Rust/0.1&quot;</span>);
+
+<span class='kw'>let</span> <span class='ident'>ua_key</span> <span class='op'>=</span> <span class='string'>&quot;user-agent&quot;</span>;
+<span class='kw'>let</span> <span class='ident'>ua</span> <span class='op'>=</span> <span class='ident'>t</span>.<span class='ident'>find_with</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>k</span><span class='op'>|</span> {
+   <span class='ident'>ua_key</span>.<span class='ident'>cmp</span>(<span class='kw-2'>&amp;</span><span class='ident'>k</span>.<span class='ident'>to_ascii_lower</span>().<span class='ident'>as_slice</span>())
+});
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>ua</span>.<span class='ident'>unwrap</span>(), <span class='string'>&quot;Curl-Rust/0.1&quot;</span>);
+</pre>
+</div><h4 id='method.find_mut_with' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.find_mut_with' class='fnname'>find_mut_with</a>&lt;'a&gt;(&amp;'a mut self, f: |&amp;K| -&gt; <a class='type' href='../../core/cmp/type.Ordering.html' title='core::cmp::Ordering'>Ordering</a>) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;&amp;'a mut V&gt;</code></h4>
+<div class='docblock'><p>Return the value for which f(key) returns Equal. f is invoked
+with current key and helps to navigate the tree</p>
+
+<h1 id="example-1" class='section-header'><a
+                           href="#example-1">Example</a></h1><span id='rust-example-raw-1' class='rusttest'>extern crate collections;
+fn main() {
+    let mut t = collections::treemap::TreeMap::new();
+    t.insert(&quot;Content-Type&quot;, &quot;application/xml&quot;);
+    t.insert(&quot;User-Agent&quot;, &quot;Curl-Rust/0.1&quot;);
+    
+    let new_ua = &quot;Safari/156.0&quot;;
+    match t.find_mut_with(|k| &quot;User-Agent&quot;.cmp(k)) {
+       Some(x) =&gt; *x = new_ua,
+       None =&gt; fail!(),
+    }
+    
+    assert_eq!(t.find(&amp;&quot;User-Agent&quot;), Some(&amp;new_ua));
+}</span><pre id='rust-example-rendered-1' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t</span> <span class='op'>=</span> <span class='ident'>collections</span>::<span class='ident'>treemap</span>::<span class='ident'>TreeMap</span>::<span class='ident'>new</span>();
+<span class='ident'>t</span>.<span class='ident'>insert</span>(<span class='string'>&quot;Content-Type&quot;</span>, <span class='string'>&quot;application/xml&quot;</span>);
+<span class='ident'>t</span>.<span class='ident'>insert</span>(<span class='string'>&quot;User-Agent&quot;</span>, <span class='string'>&quot;Curl-Rust/0.1&quot;</span>);
+
+<span class='kw'>let</span> <span class='ident'>new_ua</span> <span class='op'>=</span> <span class='string'>&quot;Safari/156.0&quot;</span>;
+<span class='kw'>match</span> <span class='ident'>t</span>.<span class='ident'>find_mut_with</span>(<span class='op'>|</span><span class='ident'>k</span><span class='op'>|</span> <span class='string'>&quot;User-Agent&quot;</span>.<span class='ident'>cmp</span>(<span class='ident'>k</span>)) {
+   <span class='prelude-val'>Some</span>(<span class='ident'>x</span>) <span class='op'>=&gt;</span> <span class='op'>*</span><span class='ident'>x</span> <span class='op'>=</span> <span class='ident'>new_ua</span>,
+   <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='macro'>fail</span><span class='macro'>!</span>(),
+}
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>t</span>.<span class='ident'>find</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;User-Agent&quot;</span>), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>new_ua</span>));
+</pre>
 </div></div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;K: <a class='trait' href='../../core/cmp/trait.Ord.html' title='core::cmp::Ord'>Ord</a>, V&gt; <a class='struct' href='../../collections/treemap/struct.TreeMap.html' title='collections::treemap::TreeMap'>TreeMap</a>&lt;K, V&gt;</code></h3><div class='impl-methods'><h4 id='method.lower_bound' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.lower_bound' class='fnname'>lower_bound</a>&lt;'a&gt;(&amp;'a self, k: &amp;K) -&gt; <a class='struct' href='../../collections/treemap/struct.Entries.html' title='collections::treemap::Entries'>Entries</a>&lt;'a, K, V&gt;</code></h4>
 <div class='docblock'><p>Return a lazy iterator to the first key-value pair whose key is not less than <code>k</code>
 If all keys in map are less than <code>k</code> an empty iterator is returned.</p>

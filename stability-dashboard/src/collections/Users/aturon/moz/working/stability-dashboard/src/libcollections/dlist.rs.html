@@ -7,8 +7,6 @@
 
     <title>dlist.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -1224,30 +1222,30 @@
 <span id='1182'>1182</span>
 <span id='1183'>1183</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! A doubly-linked list with owned nodes.</span>
+<span class='doccomment'>//! A doubly-linked list with owned nodes.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! The DList allows pushing and popping elements at either end.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! DList implements the trait Deque. It should be imported with `use</span>
-<span class='doccomment'>//! collections::Deque`.</span><span class='comment'>
+<span class='doccomment'>//! collections::Deque`.</span>
 
-// DList is constructed like a singly-linked list over the field `next`.
-// including the last link being None; each Node owns its `next` field.
-//
-// Backlinks over DList::prev are raw pointers that form a full chain in
-// the reverse direction.
+<span class='comment'>// DList is constructed like a singly-linked list over the field `next`.</span>
+<span class='comment'>// including the last link being None; each Node owns its `next` field.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Backlinks over DList::prev are raw pointers that form a full chain in</span>
+<span class='comment'>// the reverse direction.</span>
 
-</span><span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
+<span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
 
 <span class='kw'>use</span> <span class='ident'>alloc</span>::<span class='ident'>owned</span>::<span class='ident'>Box</span>;
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>default</span>::<span class='ident'>Default</span>;
@@ -1279,10 +1277,10 @@
     <span class='ident'>head</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>Link</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>,
     <span class='ident'>tail</span>: <span class='ident'>Rawlink</span><span class='op'>&lt;</span><span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>,
     <span class='ident'>nelem</span>: <span class='ident'>uint</span>,
-}<span class='comment'>
+}
 
-// FIXME #11820: the &amp;&#39;a Option&lt;&gt; of the Link stops clone working.
-</span><span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>Clone</span> <span class='kw'>for</span> <span class='ident'>Items</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
+<span class='comment'>// FIXME #11820: the &amp;&#39;a Option&lt;&gt; of the Link stops clone working.</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>Clone</span> <span class='kw'>for</span> <span class='ident'>Items</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='kw'>fn</span> <span class='ident'>clone</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Items</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> { <span class='op'>*</span><span class='self'>self</span> }
 }
 
@@ -1373,10 +1371,10 @@
     <span class='kw'>fn</span> <span class='ident'>clear</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
         <span class='op'>*</span><span class='self'>self</span> <span class='op'>=</span> <span class='ident'>DList</span>::<span class='ident'>new</span>()
     }
-}<span class='comment'>
+}
 
-// private methods
-</span><span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>DList</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+<span class='comment'>// private methods</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>DList</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Add a Node first in the list</span>
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>push_front_node</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='kw-2'>mut</span> <span class='ident'>new_head</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>) {
@@ -1527,9 +1525,9 @@
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>append</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='kw-2'>mut</span> <span class='ident'>other</span>: <span class='ident'>DList</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) {
         <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>list_tail</span>.<span class='ident'>resolve</span>() {
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='op'>*</span><span class='self'>self</span> <span class='op'>=</span> <span class='ident'>other</span>,
-            <span class='prelude-val'>Some</span>(<span class='ident'>tail</span>) <span class='op'>=&gt;</span> {<span class='comment'>
-                // Carefully empty `other`.
-                </span><span class='kw'>let</span> <span class='ident'>o_tail</span> <span class='op'>=</span> <span class='ident'>other</span>.<span class='ident'>list_tail</span>.<span class='ident'>take</span>();
+            <span class='prelude-val'>Some</span>(<span class='ident'>tail</span>) <span class='op'>=&gt;</span> {
+                <span class='comment'>// Carefully empty `other`.</span>
+                <span class='kw'>let</span> <span class='ident'>o_tail</span> <span class='op'>=</span> <span class='ident'>other</span>.<span class='ident'>list_tail</span>.<span class='ident'>take</span>();
                 <span class='kw'>let</span> <span class='ident'>o_length</span> <span class='op'>=</span> <span class='ident'>other</span>.<span class='ident'>length</span>;
                 <span class='kw'>match</span> <span class='ident'>other</span>.<span class='ident'>list_head</span>.<span class='ident'>take</span>() {
                     <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span>,
@@ -1636,17 +1634,17 @@
 
 <span class='attribute'>#[<span class='ident'>unsafe_destructor</span>]</span>
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>DList</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
-    <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {<span class='comment'>
-        // Dissolve the dlist in backwards direction
-        // Just dropping the list_head can lead to stack exhaustion
-        // when length is &gt;&gt; 1_000_000
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>tail</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>list_tail</span>;
+    <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
+        <span class='comment'>// Dissolve the dlist in backwards direction</span>
+        <span class='comment'>// Just dropping the list_head can lead to stack exhaustion</span>
+        <span class='comment'>// when length is &gt;&gt; 1_000_000</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>tail</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>list_tail</span>;
         <span class='kw'>loop</span> {
             <span class='kw'>match</span> <span class='ident'>tail</span>.<span class='ident'>resolve</span>() {
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>break</span>,
                 <span class='prelude-val'>Some</span>(<span class='ident'>prev</span>) <span class='op'>=&gt;</span> {
-                    <span class='ident'>prev</span>.<span class='ident'>next</span>.<span class='ident'>take</span>();<span class='comment'> // release Box&lt;Node&lt;T&gt;&gt;
-                    </span><span class='ident'>tail</span> <span class='op'>=</span> <span class='ident'>prev</span>.<span class='ident'>prev</span>;
+                    <span class='ident'>prev</span>.<span class='ident'>next</span>.<span class='ident'>take</span>(); <span class='comment'>// release Box&lt;Node&lt;T&gt;&gt;</span>
+                    <span class='ident'>tail</span> <span class='op'>=</span> <span class='ident'>prev</span>.<span class='ident'>prev</span>;
                 }
             }
         }
@@ -1739,16 +1737,16 @@
 
     <span class='doccomment'>/// Provide a reference to the next element, without changing the iterator</span>
     <span class='kw'>fn</span> <span class='ident'>peek_next</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>A</span><span class='op'>&gt;</span>;
-}<span class='comment'>
+}
 
-// private methods for MutItems
-</span><span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span><span class='op'>&gt;</span> <span class='ident'>MutItems</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span><span class='op'>&gt;</span> {
-    <span class='kw'>fn</span> <span class='ident'>insert_next_node</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='kw-2'>mut</span> <span class='ident'>ins_node</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;&gt;</span>) {<span class='comment'>
-        // Insert before `self.head` so that it is between the
-        // previously yielded element and self.head.
-        //
-        // The inserted node will not appear in further iteration.
-        </span><span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>head</span>.<span class='ident'>resolve</span>() {
+<span class='comment'>// private methods for MutItems</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span><span class='op'>&gt;</span> <span class='ident'>MutItems</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>insert_next_node</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='kw-2'>mut</span> <span class='ident'>ins_node</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;&gt;</span>) {
+        <span class='comment'>// Insert before `self.head` so that it is between the</span>
+        <span class='comment'>// previously yielded element and self.head.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// The inserted node will not appear in further iteration.</span>
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>head</span>.<span class='ident'>resolve</span>() {
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>list</span>.<span class='ident'>push_back_node</span>(<span class='ident'>ins_node</span>); }
             <span class='prelude-val'>Some</span>(<span class='ident'>node</span>) <span class='op'>=&gt;</span> {
                 <span class='kw'>let</span> <span class='ident'>prev_node</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>node</span>.<span class='ident'>prev</span>.<span class='ident'>resolve</span>() {
@@ -2267,12 +2265,12 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_show</span>() {
         <span class='kw'>let</span> <span class='ident'>list</span>: <span class='ident'>DList</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>range</span>(<span class='number'>0i</span>, <span class='number'>10</span>).<span class='ident'>collect</span>();
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>list</span>.<span class='ident'>to_str</span>().<span class='ident'>as_slice</span>() <span class='op'>==</span> <span class='string'>&quot;[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]&quot;</span>);
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>list</span>.<span class='ident'>to_string</span>().<span class='ident'>as_slice</span>() <span class='op'>==</span> <span class='string'>&quot;[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]&quot;</span>);
 
         <span class='kw'>let</span> <span class='ident'>list</span>: <span class='ident'>DList</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;just&quot;</span>, <span class='string'>&quot;one&quot;</span>, <span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;more&quot;</span>].<span class='ident'>iter</span>()
                                                                    .<span class='ident'>map</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>s</span><span class='op'>|</span> <span class='ident'>s</span>)
                                                                    .<span class='ident'>collect</span>();
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>list</span>.<span class='ident'>to_str</span>().<span class='ident'>as_slice</span>() <span class='op'>==</span> <span class='string'>&quot;[just, one, test, more]&quot;</span>);
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>list</span>.<span class='ident'>to_string</span>().<span class='ident'>as_slice</span>() <span class='op'>==</span> <span class='string'>&quot;[just, one, test, more]&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>

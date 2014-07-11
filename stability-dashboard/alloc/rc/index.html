@@ -7,8 +7,6 @@
 
     <title>alloc::rc - Rust</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -67,42 +65,42 @@ alive as long as any Gadget points at it.</p>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rc</span>::<span class='ident'>Rc</span>;
 
 <span class='kw'>struct</span> <span class='ident'>Owner</span> {
-    <span class='ident'>name</span>: <span class='ident'>String</span><span class='comment'>
-    // ...other fields
-</span>}
+    <span class='ident'>name</span>: <span class='ident'>String</span>
+    <span class='comment'>// ...other fields</span>
+}
 
 <span class='kw'>struct</span> <span class='ident'>Gadget</span> {
     <span class='ident'>id</span>: <span class='ident'>int</span>,
-    <span class='ident'>owner</span>: <span class='ident'>Rc</span><span class='op'>&lt;</span><span class='ident'>Owner</span><span class='op'>&gt;</span><span class='comment'>
-    // ...other fields
-</span>}
+    <span class='ident'>owner</span>: <span class='ident'>Rc</span><span class='op'>&lt;</span><span class='ident'>Owner</span><span class='op'>&gt;</span>
+    <span class='comment'>// ...other fields</span>
+}
 
-<span class='kw'>fn</span> <span class='ident'>main</span>() {<span class='comment'>
-    // Create a reference counted Owner.
-    </span><span class='kw'>let</span> <span class='ident'>gadget_owner</span> : <span class='ident'>Rc</span><span class='op'>&lt;</span><span class='ident'>Owner</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Rc</span>::<span class='ident'>new</span>(
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='comment'>// Create a reference counted Owner.</span>
+    <span class='kw'>let</span> <span class='ident'>gadget_owner</span> : <span class='ident'>Rc</span><span class='op'>&lt;</span><span class='ident'>Owner</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Rc</span>::<span class='ident'>new</span>(
             <span class='ident'>Owner</span> { <span class='ident'>name</span>: <span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;Gadget Man&quot;</span>) }
-    );<span class='comment'>
+    );
 
-    // Create Gadgets belonging to gadget_owner.  To increment the reference
-    // count we clone the Rc object.
-    </span><span class='kw'>let</span> <span class='ident'>gadget1</span> <span class='op'>=</span> <span class='ident'>Gadget</span> { <span class='ident'>id</span>: <span class='number'>1</span>, <span class='ident'>owner</span>: <span class='ident'>gadget_owner</span>.<span class='ident'>clone</span>() };
+    <span class='comment'>// Create Gadgets belonging to gadget_owner.  To increment the reference</span>
+    <span class='comment'>// count we clone the Rc object.</span>
+    <span class='kw'>let</span> <span class='ident'>gadget1</span> <span class='op'>=</span> <span class='ident'>Gadget</span> { <span class='ident'>id</span>: <span class='number'>1</span>, <span class='ident'>owner</span>: <span class='ident'>gadget_owner</span>.<span class='ident'>clone</span>() };
     <span class='kw'>let</span> <span class='ident'>gadget2</span> <span class='op'>=</span> <span class='ident'>Gadget</span> { <span class='ident'>id</span>: <span class='number'>2</span>, <span class='ident'>owner</span>: <span class='ident'>gadget_owner</span>.<span class='ident'>clone</span>() };
 
-    <span class='ident'>drop</span>(<span class='ident'>gadget_owner</span>);<span class='comment'>
+    <span class='ident'>drop</span>(<span class='ident'>gadget_owner</span>);
 
-    // Despite dropping gadget_owner, we&#39;re still able to print out the name of
-    // the Owner of the Gadgets. This is because we&#39;ve only dropped the
-    // reference count object, not the Owner it wraps. As long as there are
-    // other Rc objects pointing at the same Owner, it will stay alive. Notice
-    // that the Rc wrapper around Gadget.owner gets automatically dereferenced
-    // for us.
-    </span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Gadget {} owned by {}&quot;</span>, <span class='ident'>gadget1</span>.<span class='ident'>id</span>, <span class='ident'>gadget1</span>.<span class='ident'>owner</span>.<span class='ident'>name</span>);
-    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Gadget {} owned by {}&quot;</span>, <span class='ident'>gadget2</span>.<span class='ident'>id</span>, <span class='ident'>gadget2</span>.<span class='ident'>owner</span>.<span class='ident'>name</span>);<span class='comment'>
+    <span class='comment'>// Despite dropping gadget_owner, we&#39;re still able to print out the name of</span>
+    <span class='comment'>// the Owner of the Gadgets. This is because we&#39;ve only dropped the</span>
+    <span class='comment'>// reference count object, not the Owner it wraps. As long as there are</span>
+    <span class='comment'>// other Rc objects pointing at the same Owner, it will stay alive. Notice</span>
+    <span class='comment'>// that the Rc wrapper around Gadget.owner gets automatically dereferenced</span>
+    <span class='comment'>// for us.</span>
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Gadget {} owned by {}&quot;</span>, <span class='ident'>gadget1</span>.<span class='ident'>id</span>, <span class='ident'>gadget1</span>.<span class='ident'>owner</span>.<span class='ident'>name</span>);
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Gadget {} owned by {}&quot;</span>, <span class='ident'>gadget2</span>.<span class='ident'>id</span>, <span class='ident'>gadget2</span>.<span class='ident'>owner</span>.<span class='ident'>name</span>);
 
-    // At the end of the method, gadget1 and gadget2 get destroyed, and with
-    // them the last counted references to our Owner.  Gadget Man now gets
-    // destroyed as well.
-</span>}
+    <span class='comment'>// At the end of the method, gadget1 and gadget2 get destroyed, and with</span>
+    <span class='comment'>// them the last counted references to our Owner.  Gadget Man now gets</span>
+    <span class='comment'>// destroyed as well.</span>
+}
 </pre>
 
 <p>If our requirements change, and we also need to be able to traverse from
@@ -129,52 +127,52 @@ interior mutability.</p>
 
 <span class='kw'>struct</span> <span class='ident'>Owner</span> {
     <span class='ident'>name</span>: <span class='ident'>String</span>,
-    <span class='ident'>gadgets</span>: <span class='ident'>RefCell</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Weak</span><span class='op'>&lt;</span><span class='ident'>Gadget</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span><span class='comment'>
-    // ...other fields
-</span>}
+    <span class='ident'>gadgets</span>: <span class='ident'>RefCell</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Weak</span><span class='op'>&lt;</span><span class='ident'>Gadget</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>
+    <span class='comment'>// ...other fields</span>
+}
 
 <span class='kw'>struct</span> <span class='ident'>Gadget</span> {
     <span class='ident'>id</span>: <span class='ident'>int</span>,
-    <span class='ident'>owner</span>: <span class='ident'>Rc</span><span class='op'>&lt;</span><span class='ident'>Owner</span><span class='op'>&gt;</span><span class='comment'>
-    // ...other fields
-</span>}
+    <span class='ident'>owner</span>: <span class='ident'>Rc</span><span class='op'>&lt;</span><span class='ident'>Owner</span><span class='op'>&gt;</span>
+    <span class='comment'>// ...other fields</span>
+}
 
-<span class='kw'>fn</span> <span class='ident'>main</span>() {<span class='comment'>
-    // Create a reference counted Owner.  Note the fact that we&#39;ve put the
-    // Owner&#39;s vector of Gadgets inside a RefCell so that we can mutate it
-    // through a shared reference.
-    </span><span class='kw'>let</span> <span class='ident'>gadget_owner</span> : <span class='ident'>Rc</span><span class='op'>&lt;</span><span class='ident'>Owner</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Rc</span>::<span class='ident'>new</span>(
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='comment'>// Create a reference counted Owner.  Note the fact that we&#39;ve put the</span>
+    <span class='comment'>// Owner&#39;s vector of Gadgets inside a RefCell so that we can mutate it</span>
+    <span class='comment'>// through a shared reference.</span>
+    <span class='kw'>let</span> <span class='ident'>gadget_owner</span> : <span class='ident'>Rc</span><span class='op'>&lt;</span><span class='ident'>Owner</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Rc</span>::<span class='ident'>new</span>(
             <span class='ident'>Owner</span> {
                 <span class='ident'>name</span>: <span class='string'>&quot;Gadget Man&quot;</span>.<span class='ident'>to_string</span>(),
                 <span class='ident'>gadgets</span>: <span class='ident'>RefCell</span>::<span class='ident'>new</span>(<span class='ident'>Vec</span>::<span class='ident'>new</span>())
             }
-    );<span class='comment'>
+    );
 
-    // Create Gadgets belonging to gadget_owner as before.
-    </span><span class='kw'>let</span> <span class='ident'>gadget1</span> <span class='op'>=</span> <span class='ident'>Rc</span>::<span class='ident'>new</span>(<span class='ident'>Gadget</span>{<span class='ident'>id</span>: <span class='number'>1</span>, <span class='ident'>owner</span>: <span class='ident'>gadget_owner</span>.<span class='ident'>clone</span>()});
-    <span class='kw'>let</span> <span class='ident'>gadget2</span> <span class='op'>=</span> <span class='ident'>Rc</span>::<span class='ident'>new</span>(<span class='ident'>Gadget</span>{<span class='ident'>id</span>: <span class='number'>2</span>, <span class='ident'>owner</span>: <span class='ident'>gadget_owner</span>.<span class='ident'>clone</span>()});<span class='comment'>
+    <span class='comment'>// Create Gadgets belonging to gadget_owner as before.</span>
+    <span class='kw'>let</span> <span class='ident'>gadget1</span> <span class='op'>=</span> <span class='ident'>Rc</span>::<span class='ident'>new</span>(<span class='ident'>Gadget</span>{<span class='ident'>id</span>: <span class='number'>1</span>, <span class='ident'>owner</span>: <span class='ident'>gadget_owner</span>.<span class='ident'>clone</span>()});
+    <span class='kw'>let</span> <span class='ident'>gadget2</span> <span class='op'>=</span> <span class='ident'>Rc</span>::<span class='ident'>new</span>(<span class='ident'>Gadget</span>{<span class='ident'>id</span>: <span class='number'>2</span>, <span class='ident'>owner</span>: <span class='ident'>gadget_owner</span>.<span class='ident'>clone</span>()});
 
-    // Add the Gadgets to their Owner.  To do this we mutably borrow from
-    // the RefCell holding the Owner&#39;s Gadgets.
-    </span><span class='ident'>gadget_owner</span>.<span class='ident'>gadgets</span>.<span class='ident'>borrow_mut</span>().<span class='ident'>push</span>(<span class='ident'>gadget1</span>.<span class='ident'>clone</span>().<span class='ident'>downgrade</span>());
-    <span class='ident'>gadget_owner</span>.<span class='ident'>gadgets</span>.<span class='ident'>borrow_mut</span>().<span class='ident'>push</span>(<span class='ident'>gadget2</span>.<span class='ident'>clone</span>().<span class='ident'>downgrade</span>());<span class='comment'>
+    <span class='comment'>// Add the Gadgets to their Owner.  To do this we mutably borrow from</span>
+    <span class='comment'>// the RefCell holding the Owner&#39;s Gadgets.</span>
+    <span class='ident'>gadget_owner</span>.<span class='ident'>gadgets</span>.<span class='ident'>borrow_mut</span>().<span class='ident'>push</span>(<span class='ident'>gadget1</span>.<span class='ident'>clone</span>().<span class='ident'>downgrade</span>());
+    <span class='ident'>gadget_owner</span>.<span class='ident'>gadgets</span>.<span class='ident'>borrow_mut</span>().<span class='ident'>push</span>(<span class='ident'>gadget2</span>.<span class='ident'>clone</span>().<span class='ident'>downgrade</span>());
 
-    // Iterate over our Gadgets, printing their details out
-    </span><span class='kw'>for</span> <span class='ident'>gadget_opt</span> <span class='kw'>in</span> <span class='ident'>gadget_owner</span>.<span class='ident'>gadgets</span>.<span class='ident'>borrow</span>().<span class='ident'>iter</span>() {<span class='comment'>
+    <span class='comment'>// Iterate over our Gadgets, printing their details out</span>
+    <span class='kw'>for</span> <span class='ident'>gadget_opt</span> <span class='kw'>in</span> <span class='ident'>gadget_owner</span>.<span class='ident'>gadgets</span>.<span class='ident'>borrow</span>().<span class='ident'>iter</span>() {
 
-        // gadget_opt is a Weak&lt;Gadget&gt;.  Since weak pointers can&#39;t guarantee
-        // that their object is still alive, we need to call upgrade() on them
-        // to turn them into a strong reference.  This returns an Option, which
-        // contains a reference to our object if it still exists.
-        </span><span class='kw'>let</span> <span class='ident'>gadget</span> <span class='op'>=</span> <span class='ident'>gadget_opt</span>.<span class='ident'>upgrade</span>().<span class='ident'>unwrap</span>();
+        <span class='comment'>// gadget_opt is a Weak&lt;Gadget&gt;.  Since weak pointers can&#39;t guarantee</span>
+        <span class='comment'>// that their object is still alive, we need to call upgrade() on them</span>
+        <span class='comment'>// to turn them into a strong reference.  This returns an Option, which</span>
+        <span class='comment'>// contains a reference to our object if it still exists.</span>
+        <span class='kw'>let</span> <span class='ident'>gadget</span> <span class='op'>=</span> <span class='ident'>gadget_opt</span>.<span class='ident'>upgrade</span>().<span class='ident'>unwrap</span>();
         <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Gadget {} owned by {}&quot;</span>, <span class='ident'>gadget</span>.<span class='ident'>id</span>, <span class='ident'>gadget</span>.<span class='ident'>owner</span>.<span class='ident'>name</span>);
-    }<span class='comment'>
+    }
 
-    // At the end of the method, gadget_owner, gadget1 and gadget2 get
-    // destroyed.  There are now no strong (Rc) references to the gadgets.
-    // Once they get destroyed, the Gadgets get destroyed.  This zeroes the
-    // reference count on Gadget Man, so he gets destroyed as well.
-</span>}
+    <span class='comment'>// At the end of the method, gadget_owner, gadget1 and gadget2 get</span>
+    <span class='comment'>// destroyed.  There are now no strong (Rc) references to the gadgets.</span>
+    <span class='comment'>// Once they get destroyed, the Gadgets get destroyed.  This zeroes the</span>
+    <span class='comment'>// reference count on Gadget Man, so he gets destroyed as well.</span>
+}
 </pre>
 </div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
 <table>

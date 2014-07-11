@@ -7,8 +7,6 @@
 
     <title>rustrt::c_str - Rust</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -77,18 +75,18 @@ unnecessary amounts of allocations.</p>
 }
 
 <span class='kw'>fn</span> <span class='ident'>main</span>() {
-    <span class='kw'>let</span> <span class='ident'>my_string</span> <span class='op'>=</span> <span class='string'>&quot;Hello, world!&quot;</span>;<span class='comment'>
+    <span class='kw'>let</span> <span class='ident'>my_string</span> <span class='op'>=</span> <span class='string'>&quot;Hello, world!&quot;</span>;
 
-    // Allocate the C string with an explicit local that owns the string. The
-    // `c_buffer` pointer will be deallocated when `my_c_string` goes out of scope.
-    </span><span class='kw'>let</span> <span class='ident'>my_c_string</span> <span class='op'>=</span> <span class='ident'>my_string</span>.<span class='ident'>to_c_str</span>();
+    <span class='comment'>// Allocate the C string with an explicit local that owns the string. The</span>
+    <span class='comment'>// `c_buffer` pointer will be deallocated when `my_c_string` goes out of scope.</span>
+    <span class='kw'>let</span> <span class='ident'>my_c_string</span> <span class='op'>=</span> <span class='ident'>my_string</span>.<span class='ident'>to_c_str</span>();
     <span class='kw'>unsafe</span> {
         <span class='ident'>puts</span>(<span class='ident'>my_c_string</span>.<span class='ident'>as_ptr</span>());
-    }<span class='comment'>
+    }
 
-    // Don&#39;t save/return the pointer to the C string, the `c_buffer` will be
-    // deallocated when this block returns!
-    </span><span class='ident'>my_string</span>.<span class='ident'>with_c_str</span>(<span class='op'>|</span><span class='ident'>c_buffer</span><span class='op'>|</span> {
+    <span class='comment'>// Don&#39;t save/return the pointer to the C string, the `c_buffer` will be</span>
+    <span class='comment'>// deallocated when this block returns!</span>
+    <span class='ident'>my_string</span>.<span class='ident'>with_c_str</span>(<span class='op'>|</span><span class='ident'>c_buffer</span><span class='op'>|</span> {
         <span class='kw'>unsafe</span> { <span class='ident'>puts</span>(<span class='ident'>c_buffer</span>); }
     });
 }

@@ -7,8 +7,6 @@
 
     <title>mod.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -2142,17 +2140,17 @@
 <span id='2100'>2100</span>
 <span id='2101'>2101</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! Communication primitives for concurrent tasks</span>
+<span class='doccomment'>//! Communication primitives for concurrent tasks</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! Rust makes it very difficult to share data among tasks to prevent race</span>
 <span class='doccomment'>//! conditions and to improve parallelism, but there is often a need for</span>
@@ -2309,159 +2307,159 @@
 <span class='doccomment'>//!         }</span>
 <span class='doccomment'>//!     }</span>
 <span class='doccomment'>//! }</span>
-<span class='doccomment'>//! ```</span><span class='comment'>
+<span class='doccomment'>//! ```</span>
 
-// A description of how Rust&#39;s channel implementation works
-//
-// Channels are supposed to be the basic building block for all other
-// concurrent primitives that are used in Rust. As a result, the channel type
-// needs to be highly optimized, flexible, and broad enough for use everywhere.
-//
-// The choice of implementation of all channels is to be built on lock-free data
-// structures. The channels themselves are then consequently also lock-free data
-// structures. As always with lock-free code, this is a very &quot;here be dragons&quot;
-// territory, especially because I&#39;m unaware of any academic papers which have
-// gone into great length about channels of these flavors.
-//
-// ## Flavors of channels
-//
-// From the perspective of a consumer of this library, there is only one flavor
-// of channel. This channel can be used as a stream and cloned to allow multiple
-// senders. Under the hood, however, there are actually three flavors of
-// channels in play.
-//
-// * Oneshots - these channels are highly optimized for the one-send use case.
-//              They contain as few atomics as possible and involve one and
-//              exactly one allocation.
-// * Streams - these channels are optimized for the non-shared use case. They
-//             use a different concurrent queue which is more tailored for this
-//             use case. The initial allocation of this flavor of channel is not
-//             optimized.
-// * Shared - this is the most general form of channel that this module offers,
-//            a channel with multiple senders. This type is as optimized as it
-//            can be, but the previous two types mentioned are much faster for
-//            their use-cases.
-//
-// ## Concurrent queues
-//
-// The basic idea of Rust&#39;s Sender/Receiver types is that send() never blocks, but
-// recv() obviously blocks. This means that under the hood there must be some
-// shared and concurrent queue holding all of the actual data.
-//
-// With two flavors of channels, two flavors of queues are also used. We have
-// chosen to use queues from a well-known author which are abbreviated as SPSC
-// and MPSC (single producer, single consumer and multiple producer, single
-// consumer). SPSC queues are used for streams while MPSC queues are used for
-// shared channels.
-//
-// ### SPSC optimizations
-//
-// The SPSC queue found online is essentially a linked list of nodes where one
-// half of the nodes are the &quot;queue of data&quot; and the other half of nodes are a
-// cache of unused nodes. The unused nodes are used such that an allocation is
-// not required on every push() and a free doesn&#39;t need to happen on every
-// pop().
-//
-// As found online, however, the cache of nodes is of an infinite size. This
-// means that if a channel at one point in its life had 50k items in the queue,
-// then the queue will always have the capacity for 50k items. I believed that
-// this was an unnecessary limitation of the implementation, so I have altered
-// the queue to optionally have a bound on the cache size.
-//
-// By default, streams will have an unbounded SPSC queue with a small-ish cache
-// size. The hope is that the cache is still large enough to have very fast
-// send() operations while not too large such that millions of channels can
-// coexist at once.
-//
-// ### MPSC optimizations
-//
-// Right now the MPSC queue has not been optimized. Like the SPSC queue, it uses
-// a linked list under the hood to earn its unboundedness, but I have not put
-// forth much effort into having a cache of nodes similar to the SPSC queue.
-//
-// For now, I believe that this is &quot;ok&quot; because shared channels are not the most
-// common type, but soon we may wish to revisit this queue choice and determine
-// another candidate for backend storage of shared channels.
-//
-// ## Overview of the Implementation
-//
-// Now that there&#39;s a little background on the concurrent queues used, it&#39;s
-// worth going into much more detail about the channels themselves. The basic
-// pseudocode for a send/recv are:
-//
-//
-//      send(t)                             recv()
-//        queue.push(t)                       return if queue.pop()
-//        if increment() == -1                deschedule {
-//          wakeup()                            if decrement() &gt; 0
-//                                                cancel_deschedule()
-//                                            }
-//                                            queue.pop()
-//
-// As mentioned before, there are no locks in this implementation, only atomic
-// instructions are used.
-//
-// ### The internal atomic counter
-//
-// Every channel has a shared counter with each half to keep track of the size
-// of the queue. This counter is used to abort descheduling by the receiver and
-// to know when to wake up on the sending side.
-//
-// As seen in the pseudocode, senders will increment this count and receivers
-// will decrement the count. The theory behind this is that if a sender sees a
-// -1 count, it will wake up the receiver, and if the receiver sees a 1+ count,
-// then it doesn&#39;t need to block.
-//
-// The recv() method has a beginning call to pop(), and if successful, it needs
-// to decrement the count. It is a crucial implementation detail that this
-// decrement does *not* happen to the shared counter. If this were the case,
-// then it would be possible for the counter to be very negative when there were
-// no receivers waiting, in which case the senders would have to determine when
-// it was actually appropriate to wake up a receiver.
-//
-// Instead, the &quot;steal count&quot; is kept track of separately (not atomically
-// because it&#39;s only used by receivers), and then the decrement() call when
-// descheduling will lump in all of the recent steals into one large decrement.
-//
-// The implication of this is that if a sender sees a -1 count, then there&#39;s
-// guaranteed to be a waiter waiting!
-//
-// ## Native Implementation
-//
-// A major goal of these channels is to work seamlessly on and off the runtime.
-// All of the previous race conditions have been worded in terms of
-// scheduler-isms (which is obviously not available without the runtime).
-//
-// For now, native usage of channels (off the runtime) will fall back onto
-// mutexes/cond vars for descheduling/atomic decisions. The no-contention path
-// is still entirely lock-free, the &quot;deschedule&quot; blocks above are surrounded by
-// a mutex and the &quot;wakeup&quot; blocks involve grabbing a mutex and signaling on a
-// condition variable.
-//
-// ## Select
-//
-// Being able to support selection over channels has greatly influenced this
-// design, and not only does selection need to work inside the runtime, but also
-// outside the runtime.
-//
-// The implementation is fairly straightforward. The goal of select() is not to
-// return some data, but only to return which channel can receive data without
-// blocking. The implementation is essentially the entire blocking procedure
-// followed by an increment as soon as its woken up. The cancellation procedure
-// involves an increment and swapping out of to_wake to acquire ownership of the
-// task to unblock.
-//
-// Sadly this current implementation requires multiple allocations, so I have
-// seen the throughput of select() be much worse than it should be. I do not
-// believe that there is anything fundamental which needs to change about these
-// channels, however, in order to support a more efficient select().
-//
-// # Conclusion
-//
-// And now that you&#39;ve seen all the races that I found and attempted to fix,
-// here&#39;s the code for you to find some more!
+<span class='comment'>// A description of how Rust&#39;s channel implementation works</span>
+<span class='comment'>//</span>
+<span class='comment'>// Channels are supposed to be the basic building block for all other</span>
+<span class='comment'>// concurrent primitives that are used in Rust. As a result, the channel type</span>
+<span class='comment'>// needs to be highly optimized, flexible, and broad enough for use everywhere.</span>
+<span class='comment'>//</span>
+<span class='comment'>// The choice of implementation of all channels is to be built on lock-free data</span>
+<span class='comment'>// structures. The channels themselves are then consequently also lock-free data</span>
+<span class='comment'>// structures. As always with lock-free code, this is a very &quot;here be dragons&quot;</span>
+<span class='comment'>// territory, especially because I&#39;m unaware of any academic papers which have</span>
+<span class='comment'>// gone into great length about channels of these flavors.</span>
+<span class='comment'>//</span>
+<span class='comment'>// ## Flavors of channels</span>
+<span class='comment'>//</span>
+<span class='comment'>// From the perspective of a consumer of this library, there is only one flavor</span>
+<span class='comment'>// of channel. This channel can be used as a stream and cloned to allow multiple</span>
+<span class='comment'>// senders. Under the hood, however, there are actually three flavors of</span>
+<span class='comment'>// channels in play.</span>
+<span class='comment'>//</span>
+<span class='comment'>// * Oneshots - these channels are highly optimized for the one-send use case.</span>
+<span class='comment'>//              They contain as few atomics as possible and involve one and</span>
+<span class='comment'>//              exactly one allocation.</span>
+<span class='comment'>// * Streams - these channels are optimized for the non-shared use case. They</span>
+<span class='comment'>//             use a different concurrent queue which is more tailored for this</span>
+<span class='comment'>//             use case. The initial allocation of this flavor of channel is not</span>
+<span class='comment'>//             optimized.</span>
+<span class='comment'>// * Shared - this is the most general form of channel that this module offers,</span>
+<span class='comment'>//            a channel with multiple senders. This type is as optimized as it</span>
+<span class='comment'>//            can be, but the previous two types mentioned are much faster for</span>
+<span class='comment'>//            their use-cases.</span>
+<span class='comment'>//</span>
+<span class='comment'>// ## Concurrent queues</span>
+<span class='comment'>//</span>
+<span class='comment'>// The basic idea of Rust&#39;s Sender/Receiver types is that send() never blocks, but</span>
+<span class='comment'>// recv() obviously blocks. This means that under the hood there must be some</span>
+<span class='comment'>// shared and concurrent queue holding all of the actual data.</span>
+<span class='comment'>//</span>
+<span class='comment'>// With two flavors of channels, two flavors of queues are also used. We have</span>
+<span class='comment'>// chosen to use queues from a well-known author which are abbreviated as SPSC</span>
+<span class='comment'>// and MPSC (single producer, single consumer and multiple producer, single</span>
+<span class='comment'>// consumer). SPSC queues are used for streams while MPSC queues are used for</span>
+<span class='comment'>// shared channels.</span>
+<span class='comment'>//</span>
+<span class='comment'>// ### SPSC optimizations</span>
+<span class='comment'>//</span>
+<span class='comment'>// The SPSC queue found online is essentially a linked list of nodes where one</span>
+<span class='comment'>// half of the nodes are the &quot;queue of data&quot; and the other half of nodes are a</span>
+<span class='comment'>// cache of unused nodes. The unused nodes are used such that an allocation is</span>
+<span class='comment'>// not required on every push() and a free doesn&#39;t need to happen on every</span>
+<span class='comment'>// pop().</span>
+<span class='comment'>//</span>
+<span class='comment'>// As found online, however, the cache of nodes is of an infinite size. This</span>
+<span class='comment'>// means that if a channel at one point in its life had 50k items in the queue,</span>
+<span class='comment'>// then the queue will always have the capacity for 50k items. I believed that</span>
+<span class='comment'>// this was an unnecessary limitation of the implementation, so I have altered</span>
+<span class='comment'>// the queue to optionally have a bound on the cache size.</span>
+<span class='comment'>//</span>
+<span class='comment'>// By default, streams will have an unbounded SPSC queue with a small-ish cache</span>
+<span class='comment'>// size. The hope is that the cache is still large enough to have very fast</span>
+<span class='comment'>// send() operations while not too large such that millions of channels can</span>
+<span class='comment'>// coexist at once.</span>
+<span class='comment'>//</span>
+<span class='comment'>// ### MPSC optimizations</span>
+<span class='comment'>//</span>
+<span class='comment'>// Right now the MPSC queue has not been optimized. Like the SPSC queue, it uses</span>
+<span class='comment'>// a linked list under the hood to earn its unboundedness, but I have not put</span>
+<span class='comment'>// forth much effort into having a cache of nodes similar to the SPSC queue.</span>
+<span class='comment'>//</span>
+<span class='comment'>// For now, I believe that this is &quot;ok&quot; because shared channels are not the most</span>
+<span class='comment'>// common type, but soon we may wish to revisit this queue choice and determine</span>
+<span class='comment'>// another candidate for backend storage of shared channels.</span>
+<span class='comment'>//</span>
+<span class='comment'>// ## Overview of the Implementation</span>
+<span class='comment'>//</span>
+<span class='comment'>// Now that there&#39;s a little background on the concurrent queues used, it&#39;s</span>
+<span class='comment'>// worth going into much more detail about the channels themselves. The basic</span>
+<span class='comment'>// pseudocode for a send/recv are:</span>
+<span class='comment'>//</span>
+<span class='comment'>//</span>
+<span class='comment'>//      send(t)                             recv()</span>
+<span class='comment'>//        queue.push(t)                       return if queue.pop()</span>
+<span class='comment'>//        if increment() == -1                deschedule {</span>
+<span class='comment'>//          wakeup()                            if decrement() &gt; 0</span>
+<span class='comment'>//                                                cancel_deschedule()</span>
+<span class='comment'>//                                            }</span>
+<span class='comment'>//                                            queue.pop()</span>
+<span class='comment'>//</span>
+<span class='comment'>// As mentioned before, there are no locks in this implementation, only atomic</span>
+<span class='comment'>// instructions are used.</span>
+<span class='comment'>//</span>
+<span class='comment'>// ### The internal atomic counter</span>
+<span class='comment'>//</span>
+<span class='comment'>// Every channel has a shared counter with each half to keep track of the size</span>
+<span class='comment'>// of the queue. This counter is used to abort descheduling by the receiver and</span>
+<span class='comment'>// to know when to wake up on the sending side.</span>
+<span class='comment'>//</span>
+<span class='comment'>// As seen in the pseudocode, senders will increment this count and receivers</span>
+<span class='comment'>// will decrement the count. The theory behind this is that if a sender sees a</span>
+<span class='comment'>// -1 count, it will wake up the receiver, and if the receiver sees a 1+ count,</span>
+<span class='comment'>// then it doesn&#39;t need to block.</span>
+<span class='comment'>//</span>
+<span class='comment'>// The recv() method has a beginning call to pop(), and if successful, it needs</span>
+<span class='comment'>// to decrement the count. It is a crucial implementation detail that this</span>
+<span class='comment'>// decrement does *not* happen to the shared counter. If this were the case,</span>
+<span class='comment'>// then it would be possible for the counter to be very negative when there were</span>
+<span class='comment'>// no receivers waiting, in which case the senders would have to determine when</span>
+<span class='comment'>// it was actually appropriate to wake up a receiver.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Instead, the &quot;steal count&quot; is kept track of separately (not atomically</span>
+<span class='comment'>// because it&#39;s only used by receivers), and then the decrement() call when</span>
+<span class='comment'>// descheduling will lump in all of the recent steals into one large decrement.</span>
+<span class='comment'>//</span>
+<span class='comment'>// The implication of this is that if a sender sees a -1 count, then there&#39;s</span>
+<span class='comment'>// guaranteed to be a waiter waiting!</span>
+<span class='comment'>//</span>
+<span class='comment'>// ## Native Implementation</span>
+<span class='comment'>//</span>
+<span class='comment'>// A major goal of these channels is to work seamlessly on and off the runtime.</span>
+<span class='comment'>// All of the previous race conditions have been worded in terms of</span>
+<span class='comment'>// scheduler-isms (which is obviously not available without the runtime).</span>
+<span class='comment'>//</span>
+<span class='comment'>// For now, native usage of channels (off the runtime) will fall back onto</span>
+<span class='comment'>// mutexes/cond vars for descheduling/atomic decisions. The no-contention path</span>
+<span class='comment'>// is still entirely lock-free, the &quot;deschedule&quot; blocks above are surrounded by</span>
+<span class='comment'>// a mutex and the &quot;wakeup&quot; blocks involve grabbing a mutex and signaling on a</span>
+<span class='comment'>// condition variable.</span>
+<span class='comment'>//</span>
+<span class='comment'>// ## Select</span>
+<span class='comment'>//</span>
+<span class='comment'>// Being able to support selection over channels has greatly influenced this</span>
+<span class='comment'>// design, and not only does selection need to work inside the runtime, but also</span>
+<span class='comment'>// outside the runtime.</span>
+<span class='comment'>//</span>
+<span class='comment'>// The implementation is fairly straightforward. The goal of select() is not to</span>
+<span class='comment'>// return some data, but only to return which channel can receive data without</span>
+<span class='comment'>// blocking. The implementation is essentially the entire blocking procedure</span>
+<span class='comment'>// followed by an increment as soon as its woken up. The cancellation procedure</span>
+<span class='comment'>// involves an increment and swapping out of to_wake to acquire ownership of the</span>
+<span class='comment'>// task to unblock.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Sadly this current implementation requires multiple allocations, so I have</span>
+<span class='comment'>// seen the throughput of select() be much worse than it should be. I do not</span>
+<span class='comment'>// believe that there is anything fundamental which needs to change about these</span>
+<span class='comment'>// channels, however, in order to support a more efficient select().</span>
+<span class='comment'>//</span>
+<span class='comment'>// # Conclusion</span>
+<span class='comment'>//</span>
+<span class='comment'>// And now that you&#39;ve seen all the races that I found and attempted to fix,</span>
+<span class='comment'>// here&#39;s the code for you to find some more!</span>
 
-</span><span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
+<span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
 
 <span class='kw'>use</span> <span class='ident'>alloc</span>::<span class='ident'>arc</span>::<span class='ident'>Arc</span>;
 <span class='kw'>use</span> <span class='ident'>alloc</span>::<span class='ident'>owned</span>::<span class='ident'>Box</span>;
@@ -2506,20 +2504,20 @@
 <span class='kw'>mod</span> <span class='ident'>select</span>;
 <span class='kw'>mod</span> <span class='ident'>shared</span>;
 <span class='kw'>mod</span> <span class='ident'>stream</span>;
-<span class='kw'>mod</span> <span class='ident'>sync</span>;<span class='comment'>
+<span class='kw'>mod</span> <span class='ident'>sync</span>;
 
-// Use a power of 2 to allow LLVM to optimize to something that&#39;s not a
-// division, this is hit pretty regularly.
-</span><span class='kw'>static</span> <span class='ident'>RESCHED_FREQ</span>: <span class='ident'>int</span> <span class='op'>=</span> <span class='number'>256</span>;
+<span class='comment'>// Use a power of 2 to allow LLVM to optimize to something that&#39;s not a</span>
+<span class='comment'>// division, this is hit pretty regularly.</span>
+<span class='kw'>static</span> <span class='ident'>RESCHED_FREQ</span>: <span class='ident'>int</span> <span class='op'>=</span> <span class='number'>256</span>;
 
 <span class='doccomment'>/// The receiving-half of Rust&#39;s channel type. This half can only be owned by</span>
 <span class='doccomment'>/// one task</span>
 <span class='attribute'>#[<span class='ident'>unstable</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Receiver</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='ident'>inner</span>: <span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='ident'>Flavor</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>,
-    <span class='ident'>receives</span>: <span class='ident'>Cell</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>,<span class='comment'>
-    // can&#39;t share in an arc
-    </span><span class='ident'>marker</span>: <span class='ident'>marker</span>::<span class='ident'>NoShare</span>,
+    <span class='ident'>receives</span>: <span class='ident'>Cell</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>,
+    <span class='comment'>// can&#39;t share in an arc</span>
+    <span class='ident'>marker</span>: <span class='ident'>marker</span>::<span class='ident'>NoShare</span>,
 }
 
 <span class='doccomment'>/// An iterator over messages on a receiver, this iterator will block</span>
@@ -2535,18 +2533,18 @@
 <span class='attribute'>#[<span class='ident'>unstable</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Sender</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='ident'>inner</span>: <span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='ident'>Flavor</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>,
-    <span class='ident'>sends</span>: <span class='ident'>Cell</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>,<span class='comment'>
-    // can&#39;t share in an arc
-    </span><span class='ident'>marker</span>: <span class='ident'>marker</span>::<span class='ident'>NoShare</span>,
+    <span class='ident'>sends</span>: <span class='ident'>Cell</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>,
+    <span class='comment'>// can&#39;t share in an arc</span>
+    <span class='ident'>marker</span>: <span class='ident'>marker</span>::<span class='ident'>NoShare</span>,
 }
 
 <span class='doccomment'>/// The sending-half of Rust&#39;s synchronous channel type. This half can only be</span>
 <span class='doccomment'>/// owned by one task, but it can be cloned to send to other tasks.</span>
 <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;this type may be renamed, but it will always exist&quot;</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>SyncSender</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
-    <span class='ident'>inner</span>: <span class='ident'>Arc</span><span class='op'>&lt;</span><span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='ident'>sync</span>::<span class='ident'>Packet</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>,<span class='comment'>
-    // can&#39;t share in an arc
-    </span><span class='ident'>marker</span>: <span class='ident'>marker</span>::<span class='ident'>NoShare</span>,
+    <span class='ident'>inner</span>: <span class='ident'>Arc</span><span class='op'>&lt;</span><span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='ident'>sync</span>::<span class='ident'>Packet</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>,
+    <span class='comment'>// can&#39;t share in an arc</span>
+    <span class='ident'>marker</span>: <span class='ident'>marker</span>::<span class='ident'>NoShare</span>,
 }
 
 <span class='doccomment'>/// This enumeration is the list of the possible reasons that try_recv could not</span>
@@ -2670,13 +2668,13 @@
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>sync_channel</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Send</span><span class='op'>&gt;</span>(<span class='ident'>bound</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> (<span class='ident'>SyncSender</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>Receiver</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) {
     <span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>Unsafe</span>::<span class='ident'>new</span>(<span class='ident'>sync</span>::<span class='ident'>Packet</span>::<span class='ident'>new</span>(<span class='ident'>bound</span>)));
     (<span class='ident'>SyncSender</span>::<span class='ident'>new</span>(<span class='ident'>a</span>.<span class='ident'>clone</span>()), <span class='ident'>Receiver</span>::<span class='ident'>new</span>(<span class='ident'>Sync</span>(<span class='ident'>a</span>)))
-}<span class='comment'>
+}
 
-////////////////////////////////////////////////////////////////////////////////
-// Sender
-////////////////////////////////////////////////////////////////////////////////
+<span class='comment'>////////////////////////////////////////////////////////////////////////////////</span>
+<span class='comment'>// Sender</span>
+<span class='comment'>////////////////////////////////////////////////////////////////////////////////</span>
 
-</span><span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Send</span><span class='op'>&gt;</span> <span class='ident'>Sender</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Send</span><span class='op'>&gt;</span> <span class='ident'>Sender</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>inner</span>: <span class='ident'>Flavor</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Sender</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='ident'>Sender</span> { <span class='ident'>inner</span>: <span class='ident'>Unsafe</span>::<span class='ident'>new</span>(<span class='ident'>inner</span>), <span class='ident'>sends</span>: <span class='ident'>Cell</span>::<span class='ident'>new</span>(<span class='number'>0</span>), <span class='ident'>marker</span>: <span class='ident'>marker</span>::<span class='ident'>NoShare</span> }
     }
@@ -2739,16 +2737,16 @@
     <span class='doccomment'>/// assert_eq!(tx.send_opt(1i), Err(1));</span>
     <span class='doccomment'>/// ```</span>
     <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;this function may be renamed to send() in the future&quot;</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_opt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>t</span>: <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>T</span><span class='op'>&gt;</span> {<span class='comment'>
-        // In order to prevent starvation of other tasks in situations where
-        // a task sends repeatedly without ever receiving, we occasionally
-        // yield instead of doing a send immediately.
-        //
-        // Don&#39;t unconditionally attempt to yield because the TLS overhead can
-        // be a bit much, and also use `try_take` instead of `take` because
-        // there&#39;s no reason that this send shouldn&#39;t be usable off the
-        // runtime.
-        </span><span class='kw'>let</span> <span class='ident'>cnt</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>sends</span>.<span class='ident'>get</span>() <span class='op'>+</span> <span class='number'>1</span>;
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_opt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>t</span>: <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>T</span><span class='op'>&gt;</span> {
+        <span class='comment'>// In order to prevent starvation of other tasks in situations where</span>
+        <span class='comment'>// a task sends repeatedly without ever receiving, we occasionally</span>
+        <span class='comment'>// yield instead of doing a send immediately.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// Don&#39;t unconditionally attempt to yield because the TLS overhead can</span>
+        <span class='comment'>// be a bit much, and also use `try_take` instead of `take` because</span>
+        <span class='comment'>// there&#39;s no reason that this send shouldn&#39;t be usable off the</span>
+        <span class='comment'>// runtime.</span>
+        <span class='kw'>let</span> <span class='ident'>cnt</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>sends</span>.<span class='ident'>get</span>() <span class='op'>+</span> <span class='number'>1</span>;
         <span class='self'>self</span>.<span class='ident'>sends</span>.<span class='ident'>set</span>(<span class='ident'>cnt</span>);
         <span class='kw'>if</span> <span class='ident'>cnt</span> <span class='op'>%</span> (<span class='ident'>RESCHED_FREQ</span> <span class='kw'>as</span> <span class='ident'>uint</span>) <span class='op'>==</span> <span class='number'>0</span> {
             <span class='kw'>let</span> <span class='ident'>task</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;&gt;</span> <span class='op'>=</span> <span class='ident'>Local</span>::<span class='ident'>try_take</span>();
@@ -2769,11 +2767,11 @@
                                 (<span class='ident'>a</span>, <span class='ident'>ret</span>)
                             }
                             <span class='ident'>oneshot</span>::<span class='ident'>UpDisconnected</span> <span class='op'>=&gt;</span> (<span class='ident'>a</span>, <span class='prelude-val'>Err</span>(<span class='ident'>t</span>)),
-                            <span class='ident'>oneshot</span>::<span class='ident'>UpWoke</span>(<span class='ident'>task</span>) <span class='op'>=&gt;</span> {<span class='comment'>
-                                // This send cannot fail because the task is
-                                // asleep (we&#39;re looking at it), so the receiver
-                                // can&#39;t go away.
-                                </span>(<span class='op'>*</span><span class='ident'>a</span>.<span class='ident'>get</span>()).<span class='ident'>send</span>(<span class='ident'>t</span>).<span class='ident'>ok</span>().<span class='ident'>unwrap</span>();
+                            <span class='ident'>oneshot</span>::<span class='ident'>UpWoke</span>(<span class='ident'>task</span>) <span class='op'>=&gt;</span> {
+                                <span class='comment'>// This send cannot fail because the task is</span>
+                                <span class='comment'>// asleep (we&#39;re looking at it), so the receiver</span>
+                                <span class='comment'>// can&#39;t go away.</span>
+                                (<span class='op'>*</span><span class='ident'>a</span>.<span class='ident'>get</span>()).<span class='ident'>send</span>(<span class='ident'>t</span>).<span class='ident'>ok</span>().<span class='ident'>unwrap</span>();
                                 <span class='ident'>task</span>.<span class='ident'>wake</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>t</span><span class='op'>|</span> <span class='ident'>t</span>.<span class='ident'>reawaken</span>());
                                 (<span class='ident'>a</span>, <span class='prelude-val'>Ok</span>(()))
                             }
@@ -2845,13 +2843,13 @@
             <span class='ident'>Sync</span>(..) <span class='op'>=&gt;</span> <span class='macro'>unreachable</span><span class='macro'>!</span>(),
         }
     }
-}<span class='comment'>
+}
 
-////////////////////////////////////////////////////////////////////////////////
-// SyncSender
-////////////////////////////////////////////////////////////////////////////////
+<span class='comment'>////////////////////////////////////////////////////////////////////////////////</span>
+<span class='comment'>// SyncSender</span>
+<span class='comment'>////////////////////////////////////////////////////////////////////////////////</span>
 
-</span><span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Send</span><span class='op'>&gt;</span> <span class='ident'>SyncSender</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Send</span><span class='op'>&gt;</span> <span class='ident'>SyncSender</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>inner</span>: <span class='ident'>Arc</span><span class='op'>&lt;</span><span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='ident'>sync</span>::<span class='ident'>Packet</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>SyncSender</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='ident'>SyncSender</span> { <span class='ident'>inner</span>: <span class='ident'>inner</span>, <span class='ident'>marker</span>: <span class='ident'>marker</span>::<span class='ident'>NoShare</span> }
     }
@@ -2933,13 +2931,13 @@
     <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
         <span class='kw'>unsafe</span> { (<span class='op'>*</span><span class='self'>self</span>.<span class='ident'>inner</span>.<span class='ident'>get</span>()).<span class='ident'>drop_chan</span>(); }
     }
-}<span class='comment'>
+}
 
-////////////////////////////////////////////////////////////////////////////////
-// Receiver
-////////////////////////////////////////////////////////////////////////////////
+<span class='comment'>////////////////////////////////////////////////////////////////////////////////</span>
+<span class='comment'>// Receiver</span>
+<span class='comment'>////////////////////////////////////////////////////////////////////////////////</span>
 
-</span><span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Send</span><span class='op'>&gt;</span> <span class='ident'>Receiver</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Send</span><span class='op'>&gt;</span> <span class='ident'>Receiver</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>inner</span>: <span class='ident'>Flavor</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Receiver</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='ident'>Receiver</span> { <span class='ident'>inner</span>: <span class='ident'>Unsafe</span>::<span class='ident'>new</span>(<span class='ident'>inner</span>), <span class='ident'>receives</span>: <span class='ident'>Cell</span>::<span class='ident'>new</span>(<span class='number'>0</span>), <span class='ident'>marker</span>: <span class='ident'>marker</span>::<span class='ident'>NoShare</span> }
     }
@@ -2983,12 +2981,12 @@
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// This function cannot fail.</span>
     <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;the return type of this function may be altered&quot;</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>try_recv</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>TryRecvError</span><span class='op'>&gt;</span> {<span class='comment'>
-        // If a thread is spinning in try_recv, we should take the opportunity
-        // to reschedule things occasionally. See notes above in scheduling on
-        // sends for why this doesn&#39;t always hit TLS, and also for why this uses
-        // `try_take` instead of `take`.
-        </span><span class='kw'>let</span> <span class='ident'>cnt</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>receives</span>.<span class='ident'>get</span>() <span class='op'>+</span> <span class='number'>1</span>;
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>try_recv</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>TryRecvError</span><span class='op'>&gt;</span> {
+        <span class='comment'>// If a thread is spinning in try_recv, we should take the opportunity</span>
+        <span class='comment'>// to reschedule things occasionally. See notes above in scheduling on</span>
+        <span class='comment'>// sends for why this doesn&#39;t always hit TLS, and also for why this uses</span>
+        <span class='comment'>// `try_take` instead of `take`.</span>
+        <span class='kw'>let</span> <span class='ident'>cnt</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>receives</span>.<span class='ident'>get</span>() <span class='op'>+</span> <span class='number'>1</span>;
         <span class='self'>self</span>.<span class='ident'>receives</span>.<span class='ident'>set</span>(<span class='ident'>cnt</span>);
         <span class='kw'>if</span> <span class='ident'>cnt</span> <span class='op'>%</span> (<span class='ident'>RESCHED_FREQ</span> <span class='kw'>as</span> <span class='ident'>uint</span>) <span class='op'>==</span> <span class='number'>0</span> {
             <span class='kw'>let</span> <span class='ident'>task</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;&gt;</span> <span class='op'>=</span> <span class='ident'>Local</span>::<span class='ident'>try_take</span>();
@@ -3404,34 +3402,34 @@
         <span class='ident'>rx3</span>.<span class='ident'>recv</span>();
     }
 
-    <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>oneshot_single_thread_close_port_first</span>() {<span class='comment'>
-        // Simple test of closing without sending
-        </span><span class='kw'>let</span> (<span class='ident'>_tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>::<span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>();
+    <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>oneshot_single_thread_close_port_first</span>() {
+        <span class='comment'>// Simple test of closing without sending</span>
+        <span class='kw'>let</span> (<span class='ident'>_tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>::<span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>();
         <span class='ident'>drop</span>(<span class='ident'>rx</span>);
     })
 
-    <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>oneshot_single_thread_close_chan_first</span>() {<span class='comment'>
-        // Simple test of closing without sending
-        </span><span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>_rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>::<span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>();
+    <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>oneshot_single_thread_close_chan_first</span>() {
+        <span class='comment'>// Simple test of closing without sending</span>
+        <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>_rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>::<span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>();
         <span class='ident'>drop</span>(<span class='ident'>tx</span>);
     })
 
-    <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>oneshot_single_thread_send_port_close</span>() {<span class='comment'>
-        // Testing that the sender cleans up the payload if receiver is closed
-        </span><span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>::<span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;&gt;</span>();
+    <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>oneshot_single_thread_send_port_close</span>() {
+        <span class='comment'>// Testing that the sender cleans up the payload if receiver is closed</span>
+        <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>::<span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;&gt;</span>();
         <span class='ident'>drop</span>(<span class='ident'>rx</span>);
         <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='kw'>box</span> <span class='number'>0</span>);
     } <span class='attribute'>#[<span class='ident'>should_fail</span>]</span>)
 
-    <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>oneshot_single_thread_recv_chan_close</span>() {<span class='comment'>
-        // Receiving on a closed chan will fail
-        </span><span class='kw'>let</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>task</span>::<span class='ident'>try</span>(<span class='kw'>proc</span>() {
+    <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>oneshot_single_thread_recv_chan_close</span>() {
+        <span class='comment'>// Receiving on a closed chan will fail</span>
+        <span class='kw'>let</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>task</span>::<span class='ident'>try</span>(<span class='kw'>proc</span>() {
             <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>::<span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>();
             <span class='ident'>drop</span>(<span class='ident'>tx</span>);
             <span class='ident'>rx</span>.<span class='ident'>recv</span>();
-        });<span class='comment'>
-        // What is our res?
-        </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>res</span>.<span class='ident'>is_err</span>());
+        });
+        <span class='comment'>// What is our res?</span>
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>res</span>.<span class='ident'>is_err</span>());
     })
 
     <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>oneshot_single_thread_send_then_recv</span>() {
@@ -3581,9 +3579,9 @@
         }
     })
 
-    <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>recv_a_lot</span>() {<span class='comment'>
-        // Regression test that we don&#39;t run out of stack in scheduler context
-        </span><span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
+    <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>recv_a_lot</span>() {
+        <span class='comment'>// Regression test that we don&#39;t run out of stack in scheduler context</span>
+        <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
         <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0i</span>, <span class='number'>10000</span>) { <span class='ident'>tx</span>.<span class='ident'>send</span>(()); }
         <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0i</span>, <span class='number'>10000</span>) { <span class='ident'>rx</span>.<span class='ident'>recv</span>(); }
     })
@@ -3667,28 +3665,28 @@
         <span class='ident'>tx2</span>.<span class='ident'>send</span>(());
         <span class='ident'>rx3</span>.<span class='ident'>recv</span>();
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>rx1</span>.<span class='ident'>try_recv</span>(), <span class='prelude-val'>Err</span>(<span class='ident'>Disconnected</span>));
-    })<span class='comment'>
+    })
 
-    // This bug used to end up in a livelock inside of the Receiver destructor
-    // because the internal state of the Shared packet was corrupted
-    </span><span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>destroy_upgraded_shared_port_when_sender_still_active</span>() {
+    <span class='comment'>// This bug used to end up in a livelock inside of the Receiver destructor</span>
+    <span class='comment'>// because the internal state of the Shared packet was corrupted</span>
+    <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>destroy_upgraded_shared_port_when_sender_still_active</span>() {
         <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
         <span class='kw'>let</span> (<span class='ident'>tx2</span>, <span class='ident'>rx2</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
         <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
-            <span class='ident'>rx</span>.<span class='ident'>recv</span>();<span class='comment'> // wait on a oneshot
-            </span><span class='ident'>drop</span>(<span class='ident'>rx</span>);<span class='comment'>  // destroy a shared
-            </span><span class='ident'>tx2</span>.<span class='ident'>send</span>(());
-        });<span class='comment'>
-        // make sure the other task has gone to sleep
-        </span><span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>5000</span>) { <span class='ident'>task</span>::<span class='ident'>deschedule</span>(); }<span class='comment'>
+            <span class='ident'>rx</span>.<span class='ident'>recv</span>(); <span class='comment'>// wait on a oneshot</span>
+            <span class='ident'>drop</span>(<span class='ident'>rx</span>);  <span class='comment'>// destroy a shared</span>
+            <span class='ident'>tx2</span>.<span class='ident'>send</span>(());
+        });
+        <span class='comment'>// make sure the other task has gone to sleep</span>
+        <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>5000</span>) { <span class='ident'>task</span>::<span class='ident'>deschedule</span>(); }
 
-        // upgrade to a shared chan and send a message
-        </span><span class='kw'>let</span> <span class='ident'>t</span> <span class='op'>=</span> <span class='ident'>tx</span>.<span class='ident'>clone</span>();
+        <span class='comment'>// upgrade to a shared chan and send a message</span>
+        <span class='kw'>let</span> <span class='ident'>t</span> <span class='op'>=</span> <span class='ident'>tx</span>.<span class='ident'>clone</span>();
         <span class='ident'>drop</span>(<span class='ident'>tx</span>);
-        <span class='ident'>t</span>.<span class='ident'>send</span>(());<span class='comment'>
+        <span class='ident'>t</span>.<span class='ident'>send</span>(());
 
-        // wait for the child task to exit before we exit
-        </span><span class='ident'>rx2</span>.<span class='ident'>recv</span>();
+        <span class='comment'>// wait for the child task to exit before we exit</span>
+        <span class='ident'>rx2</span>.<span class='ident'>recv</span>();
     })
 
     <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>sends_off_the_runtime</span>() {
@@ -3864,34 +3862,34 @@
         <span class='ident'>drx</span>.<span class='ident'>recv</span>();
     })
 
-    <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>oneshot_single_thread_close_port_first</span>() {<span class='comment'>
-        // Simple test of closing without sending
-        </span><span class='kw'>let</span> (<span class='ident'>_tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>sync_channel</span>::<span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>(<span class='number'>0</span>);
+    <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>oneshot_single_thread_close_port_first</span>() {
+        <span class='comment'>// Simple test of closing without sending</span>
+        <span class='kw'>let</span> (<span class='ident'>_tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>sync_channel</span>::<span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>(<span class='number'>0</span>);
         <span class='ident'>drop</span>(<span class='ident'>rx</span>);
     })
 
-    <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>oneshot_single_thread_close_chan_first</span>() {<span class='comment'>
-        // Simple test of closing without sending
-        </span><span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>_rx</span>) <span class='op'>=</span> <span class='ident'>sync_channel</span>::<span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>(<span class='number'>0</span>);
+    <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>oneshot_single_thread_close_chan_first</span>() {
+        <span class='comment'>// Simple test of closing without sending</span>
+        <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>_rx</span>) <span class='op'>=</span> <span class='ident'>sync_channel</span>::<span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>(<span class='number'>0</span>);
         <span class='ident'>drop</span>(<span class='ident'>tx</span>);
     })
 
-    <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>oneshot_single_thread_send_port_close</span>() {<span class='comment'>
-        // Testing that the sender cleans up the payload if receiver is closed
-        </span><span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>sync_channel</span>::<span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;&gt;</span>(<span class='number'>0</span>);
+    <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>oneshot_single_thread_send_port_close</span>() {
+        <span class='comment'>// Testing that the sender cleans up the payload if receiver is closed</span>
+        <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>sync_channel</span>::<span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;&gt;</span>(<span class='number'>0</span>);
         <span class='ident'>drop</span>(<span class='ident'>rx</span>);
         <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='kw'>box</span> <span class='number'>0</span>);
     } <span class='attribute'>#[<span class='ident'>should_fail</span>]</span>)
 
-    <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>oneshot_single_thread_recv_chan_close</span>() {<span class='comment'>
-        // Receiving on a closed chan will fail
-        </span><span class='kw'>let</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>task</span>::<span class='ident'>try</span>(<span class='kw'>proc</span>() {
+    <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>oneshot_single_thread_recv_chan_close</span>() {
+        <span class='comment'>// Receiving on a closed chan will fail</span>
+        <span class='kw'>let</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>task</span>::<span class='ident'>try</span>(<span class='kw'>proc</span>() {
             <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>sync_channel</span>::<span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>(<span class='number'>0</span>);
             <span class='ident'>drop</span>(<span class='ident'>tx</span>);
             <span class='ident'>rx</span>.<span class='ident'>recv</span>();
-        });<span class='comment'>
-        // What is our res?
-        </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>res</span>.<span class='ident'>is_err</span>());
+        });
+        <span class='comment'>// What is our res?</span>
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>res</span>.<span class='ident'>is_err</span>());
     })
 
     <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>oneshot_single_thread_send_then_recv</span>() {
@@ -4046,9 +4044,9 @@
         }
     })
 
-    <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>recv_a_lot</span>() {<span class='comment'>
-        // Regression test that we don&#39;t run out of stack in scheduler context
-        </span><span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>sync_channel</span>(<span class='number'>10000</span>);
+    <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>recv_a_lot</span>() {
+        <span class='comment'>// Regression test that we don&#39;t run out of stack in scheduler context</span>
+        <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>sync_channel</span>(<span class='number'>10000</span>);
         <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>10000</span>) { <span class='ident'>tx</span>.<span class='ident'>send</span>(()); }
         <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>10000</span>) { <span class='ident'>rx</span>.<span class='ident'>recv</span>(); }
     })
@@ -4132,28 +4130,28 @@
         <span class='ident'>tx2</span>.<span class='ident'>send</span>(());
         <span class='ident'>rx3</span>.<span class='ident'>recv</span>();
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>rx1</span>.<span class='ident'>try_recv</span>(), <span class='prelude-val'>Err</span>(<span class='ident'>Disconnected</span>));
-    })<span class='comment'>
+    })
 
-    // This bug used to end up in a livelock inside of the Receiver destructor
-    // because the internal state of the Shared packet was corrupted
-    </span><span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>destroy_upgraded_shared_port_when_sender_still_active</span>() {
+    <span class='comment'>// This bug used to end up in a livelock inside of the Receiver destructor</span>
+    <span class='comment'>// because the internal state of the Shared packet was corrupted</span>
+    <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>destroy_upgraded_shared_port_when_sender_still_active</span>() {
         <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>sync_channel</span>::<span class='op'>&lt;</span>()<span class='op'>&gt;</span>(<span class='number'>0</span>);
         <span class='kw'>let</span> (<span class='ident'>tx2</span>, <span class='ident'>rx2</span>) <span class='op'>=</span> <span class='ident'>sync_channel</span>::<span class='op'>&lt;</span>()<span class='op'>&gt;</span>(<span class='number'>0</span>);
         <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
-            <span class='ident'>rx</span>.<span class='ident'>recv</span>();<span class='comment'> // wait on a oneshot
-            </span><span class='ident'>drop</span>(<span class='ident'>rx</span>);<span class='comment'>  // destroy a shared
-            </span><span class='ident'>tx2</span>.<span class='ident'>send</span>(());
-        });<span class='comment'>
-        // make sure the other task has gone to sleep
-        </span><span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>5000</span>) { <span class='ident'>task</span>::<span class='ident'>deschedule</span>(); }<span class='comment'>
+            <span class='ident'>rx</span>.<span class='ident'>recv</span>(); <span class='comment'>// wait on a oneshot</span>
+            <span class='ident'>drop</span>(<span class='ident'>rx</span>);  <span class='comment'>// destroy a shared</span>
+            <span class='ident'>tx2</span>.<span class='ident'>send</span>(());
+        });
+        <span class='comment'>// make sure the other task has gone to sleep</span>
+        <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>5000</span>) { <span class='ident'>task</span>::<span class='ident'>deschedule</span>(); }
 
-        // upgrade to a shared chan and send a message
-        </span><span class='kw'>let</span> <span class='ident'>t</span> <span class='op'>=</span> <span class='ident'>tx</span>.<span class='ident'>clone</span>();
+        <span class='comment'>// upgrade to a shared chan and send a message</span>
+        <span class='kw'>let</span> <span class='ident'>t</span> <span class='op'>=</span> <span class='ident'>tx</span>.<span class='ident'>clone</span>();
         <span class='ident'>drop</span>(<span class='ident'>tx</span>);
-        <span class='ident'>t</span>.<span class='ident'>send</span>(());<span class='comment'>
+        <span class='ident'>t</span>.<span class='ident'>send</span>(());
 
-        // wait for the child task to exit before we exit
-        </span><span class='ident'>rx2</span>.<span class='ident'>recv</span>();
+        <span class='comment'>// wait for the child task to exit before we exit</span>
+        <span class='ident'>rx2</span>.<span class='ident'>recv</span>();
     })
 
     <span class='macro'>test</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>try_recvs_off_the_runtime</span>() {

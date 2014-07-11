@@ -7,8 +7,6 @@
 
     <title>lib.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     
@@ -485,17 +483,17 @@
 <span id='443'>443</span>
 <span id='444'>444</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_id</span> <span class='op'>=</span> <span class='string'>&quot;rustdoc#0.11.0-pre&quot;</span>]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_name</span> <span class='op'>=</span> <span class='string'>&quot;rustdoc&quot;</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>experimental</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>desc</span> <span class='op'>=</span> <span class='string'>&quot;rustdoc, the Rust documentation extractor&quot;</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>license</span> <span class='op'>=</span> <span class='string'>&quot;MIT/ASL2&quot;</span>]</span>
@@ -519,10 +517,10 @@
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>str</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>gc</span>::<span class='ident'>Gc</span>;
 <span class='kw'>use</span> <span class='ident'>serialize</span>::{<span class='ident'>json</span>, <span class='ident'>Decodable</span>, <span class='ident'>Encodable</span>};
-<span class='kw'>use</span> <span class='ident'>externalfiles</span>::<span class='ident'>ExternalHtml</span>;<span class='comment'>
+<span class='kw'>use</span> <span class='ident'>externalfiles</span>::<span class='ident'>ExternalHtml</span>;
 
-// reexported from `clean` so it can be easily updated with the mod itself
-</span><span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>clean</span>::<span class='ident'>SCHEMA_VERSION</span>;
+<span class='comment'>// reexported from `clean` so it can be easily updated with the mod itself</span>
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>clean</span>::<span class='ident'>SCHEMA_VERSION</span>;
 
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>clean</span>;
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>core</span>;
@@ -548,11 +546,11 @@
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>test</span>;
 <span class='kw'>mod</span> <span class='ident'>flock</span>;
 
-<span class='kw'>type</span> <span class='ident'>Pass</span> <span class='op'>=</span> (<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>,<span class='comment'>                                      // name
-             </span><span class='kw'>fn</span>(<span class='ident'>clean</span>::<span class='ident'>Crate</span>) <span class='op'>-&gt;</span> <span class='ident'>plugins</span>::<span class='ident'>PluginResult</span>,<span class='comment'>         // fn
-             </span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>);<span class='comment'>                                     // description
+<span class='kw'>type</span> <span class='ident'>Pass</span> <span class='op'>=</span> (<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>,                                      <span class='comment'>// name</span>
+             <span class='kw'>fn</span>(<span class='ident'>clean</span>::<span class='ident'>Crate</span>) <span class='op'>-&gt;</span> <span class='ident'>plugins</span>::<span class='ident'>PluginResult</span>,         <span class='comment'>// fn</span>
+             <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>);                                     <span class='comment'>// description</span>
 
-</span><span class='kw'>static</span> <span class='ident'>PASSES</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> [<span class='ident'>Pass</span>] <span class='op'>=</span> <span class='kw-2'>&amp;</span>[
+<span class='kw'>static</span> <span class='ident'>PASSES</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> [<span class='ident'>Pass</span>] <span class='op'>=</span> <span class='kw-2'>&amp;</span>[
     (<span class='string'>&quot;strip-hidden&quot;</span>, <span class='ident'>passes</span>::<span class='ident'>strip_hidden</span>,
      <span class='string'>&quot;strips all doc(hidden) items from the output&quot;</span>),
     (<span class='string'>&quot;unindent-comments&quot;</span>, <span class='ident'>passes</span>::<span class='ident'>unindent_comments</span>,
@@ -696,8 +694,8 @@
         <span class='kw'>for</span> <span class='kw-2'>&amp;</span>(<span class='ident'>name</span>, _, <span class='ident'>description</span>) <span class='kw'>in</span> <span class='ident'>PASSES</span>.<span class='ident'>iter</span>() {
             <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{:&gt;20s} - {}&quot;</span>, <span class='ident'>name</span>, <span class='ident'>description</span>);
         }
-        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='string'>&quot;\nDefault passes for rustdoc:&quot;</span>);<span class='comment'> // FIXME: #9970
-        </span><span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='ident'>name</span> <span class='kw'>in</span> <span class='ident'>DEFAULT_PASSES</span>.<span class='ident'>iter</span>() {
+        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='string'>&quot;\nDefault passes for rustdoc:&quot;</span>); <span class='comment'>// FIXME: #9970</span>
+        <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='ident'>name</span> <span class='kw'>in</span> <span class='ident'>DEFAULT_PASSES</span>.<span class='ident'>iter</span>() {
             <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{:&gt;20s}&quot;</span>, <span class='ident'>name</span>);
         }
         <span class='kw'>return</span> <span class='number'>0</span>;
@@ -763,10 +761,10 @@
 <span class='kw'>fn</span> <span class='ident'>rust_input</span>(<span class='ident'>cratefile</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>matches</span>: <span class='kw-2'>&amp;</span><span class='ident'>getopts</span>::<span class='ident'>Matches</span>) <span class='op'>-&gt;</span> <span class='ident'>Output</span> {
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>default_passes</span> <span class='op'>=</span> <span class='op'>!</span><span class='ident'>matches</span>.<span class='ident'>opt_present</span>(<span class='string'>&quot;no-defaults&quot;</span>);
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>passes</span> <span class='op'>=</span> <span class='ident'>matches</span>.<span class='ident'>opt_strs</span>(<span class='string'>&quot;passes&quot;</span>);
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>plugins</span> <span class='op'>=</span> <span class='ident'>matches</span>.<span class='ident'>opt_strs</span>(<span class='string'>&quot;plugins&quot;</span>);<span class='comment'>
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>plugins</span> <span class='op'>=</span> <span class='ident'>matches</span>.<span class='ident'>opt_strs</span>(<span class='string'>&quot;plugins&quot;</span>);
 
-    // First, parse the crate and extract all relevant information.
-    </span><span class='kw'>let</span> <span class='ident'>libs</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Path</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>matches</span>.<span class='ident'>opt_strs</span>(<span class='string'>&quot;L&quot;</span>)
+    <span class='comment'>// First, parse the crate and extract all relevant information.</span>
+    <span class='kw'>let</span> <span class='ident'>libs</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Path</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>matches</span>.<span class='ident'>opt_strs</span>(<span class='string'>&quot;L&quot;</span>)
                                  .<span class='ident'>iter</span>()
                                  .<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='ident'>s</span>.<span class='ident'>as_slice</span>()))
                                  .<span class='ident'>collect</span>();
@@ -780,11 +778,11 @@
                        <span class='kw-2'>&amp;</span><span class='ident'>cr</span>)
     }).<span class='ident'>map_err</span>(<span class='op'>|</span><span class='ident'>boxed_any</span><span class='op'>|</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{:?}&quot;</span>, <span class='ident'>boxed_any</span>)).<span class='ident'>unwrap</span>();
     <span class='macro'>info</span><span class='macro'>!</span>(<span class='string'>&quot;finished with rustc&quot;</span>);
-    <span class='ident'>analysiskey</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='ident'>analysis</span>));<span class='comment'>
+    <span class='ident'>analysiskey</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='ident'>analysis</span>));
 
-    // Process all of the crate attributes, extracting plugin metadata along
-    // with the passes which we are supposed to run.
-    </span><span class='kw'>match</span> <span class='ident'>krate</span>.<span class='ident'>module</span>.<span class='ident'>get_ref</span>().<span class='ident'>doc_list</span>() {
+    <span class='comment'>// Process all of the crate attributes, extracting plugin metadata along</span>
+    <span class='comment'>// with the passes which we are supposed to run.</span>
+    <span class='kw'>match</span> <span class='ident'>krate</span>.<span class='ident'>module</span>.<span class='ident'>get_ref</span>().<span class='ident'>doc_list</span>() {
         <span class='prelude-val'>Some</span>(<span class='ident'>nested</span>) <span class='op'>=&gt;</span> {
             <span class='kw'>for</span> <span class='ident'>inner</span> <span class='kw'>in</span> <span class='ident'>nested</span>.<span class='ident'>iter</span>() {
                 <span class='kw'>match</span> <span class='op'>*</span><span class='ident'>inner</span> {
@@ -814,10 +812,10 @@
         <span class='kw'>for</span> <span class='ident'>name</span> <span class='kw'>in</span> <span class='ident'>DEFAULT_PASSES</span>.<span class='ident'>iter</span>().<span class='ident'>rev</span>() {
             <span class='ident'>passes</span>.<span class='ident'>unshift</span>(<span class='ident'>name</span>.<span class='ident'>to_string</span>());
         }
-    }<span class='comment'>
+    }
 
-    // Load all plugins/passes into a PluginManager
-    </span><span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>matches</span>.<span class='ident'>opt_str</span>(<span class='string'>&quot;plugin-path&quot;</span>)
+    <span class='comment'>// Load all plugins/passes into a PluginManager</span>
+    <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>matches</span>.<span class='ident'>opt_str</span>(<span class='string'>&quot;plugin-path&quot;</span>)
                       .<span class='ident'>unwrap_or</span>(<span class='string'>&quot;/tmp/rustdoc/plugins&quot;</span>.<span class='ident'>to_string</span>());
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>pm</span> <span class='op'>=</span> <span class='ident'>plugins</span>::<span class='ident'>PluginManager</span>::<span class='ident'>new</span>(<span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='ident'>path</span>));
     <span class='kw'>for</span> <span class='ident'>pass</span> <span class='kw'>in</span> <span class='ident'>passes</span>.<span class='ident'>iter</span>() {
@@ -836,10 +834,10 @@
     <span class='macro'>info</span><span class='macro'>!</span>(<span class='string'>&quot;loading plugins...&quot;</span>);
     <span class='kw'>for</span> <span class='ident'>pname</span> <span class='kw'>in</span> <span class='ident'>plugins</span>.<span class='ident'>move_iter</span>() {
         <span class='ident'>pm</span>.<span class='ident'>load_plugin</span>(<span class='ident'>pname</span>);
-    }<span class='comment'>
+    }
 
-    // Run everything!
-    </span><span class='macro'>info</span><span class='macro'>!</span>(<span class='string'>&quot;Executing passes/plugins&quot;</span>);
+    <span class='comment'>// Run everything!</span>
+    <span class='macro'>info</span><span class='macro'>!</span>(<span class='string'>&quot;Executing passes/plugins&quot;</span>);
     <span class='kw'>return</span> <span class='ident'>pm</span>.<span class='ident'>run_plugins</span>(<span class='ident'>krate</span>);
 }
 
@@ -853,11 +851,11 @@
         }
     };
     <span class='kw'>match</span> <span class='ident'>json</span>::<span class='ident'>from_reader</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>input</span>) {
-        <span class='prelude-val'>Err</span>(<span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>s</span>.<span class='ident'>to_str</span>()),
+        <span class='prelude-val'>Err</span>(<span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>s</span>.<span class='ident'>to_string</span>()),
         <span class='prelude-val'>Ok</span>(<span class='ident'>json</span>::<span class='ident'>Object</span>(<span class='ident'>obj</span>)) <span class='op'>=&gt;</span> {
-            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>obj</span> <span class='op'>=</span> <span class='ident'>obj</span>;<span class='comment'>
-            // Make sure the schema is what we expect
-            </span><span class='kw'>match</span> <span class='ident'>obj</span>.<span class='ident'>pop</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;schema&quot;</span>.<span class='ident'>to_string</span>()) {
+            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>obj</span> <span class='op'>=</span> <span class='ident'>obj</span>;
+            <span class='comment'>// Make sure the schema is what we expect</span>
+            <span class='kw'>match</span> <span class='ident'>obj</span>.<span class='ident'>pop</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;schema&quot;</span>.<span class='ident'>to_string</span>()) {
                 <span class='prelude-val'>Some</span>(<span class='ident'>json</span>::<span class='ident'>String</span>(<span class='ident'>version</span>)) <span class='op'>=&gt;</span> {
                     <span class='kw'>if</span> <span class='ident'>version</span>.<span class='ident'>as_slice</span>() <span class='op'>!=</span> <span class='ident'>SCHEMA_VERSION</span> {
                         <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='macro'>format</span><span class='macro'>!</span>(
@@ -874,10 +872,10 @@
                     <span class='ident'>Decodable</span>::<span class='ident'>decode</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>d</span>).<span class='ident'>unwrap</span>()
                 }
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;malformed json&quot;</span>.<span class='ident'>to_string</span>()),
-            };<span class='comment'>
-            // FIXME: this should read from the &quot;plugins&quot; field, but currently
-            //      Json doesn&#39;t implement decodable...
-            </span><span class='kw'>let</span> <span class='ident'>plugin_output</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
+            };
+            <span class='comment'>// FIXME: this should read from the &quot;plugins&quot; field, but currently</span>
+            <span class='comment'>//      Json doesn&#39;t implement decodable...</span>
+            <span class='kw'>let</span> <span class='ident'>plugin_output</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
             <span class='prelude-val'>Ok</span>((<span class='ident'>krate</span>, <span class='ident'>plugin_output</span>))
         }
         <span class='prelude-val'>Ok</span>(..) <span class='op'>=&gt;</span> {
@@ -890,13 +888,13 @@
 <span class='doccomment'>/// Outputs the crate/plugin json as a giant json blob at the specified</span>
 <span class='doccomment'>/// destination.</span>
 <span class='kw'>fn</span> <span class='ident'>json_output</span>(<span class='ident'>krate</span>: <span class='ident'>clean</span>::<span class='ident'>Crate</span>, <span class='ident'>res</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>plugins</span>::<span class='ident'>PluginJson</span><span class='op'>&gt;</span> ,
-               <span class='ident'>dst</span>: <span class='ident'>Path</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {<span class='comment'>
-    // {
-    //   &quot;schema&quot;: version,
-    //   &quot;crate&quot;: { parsed crate ... },
-    //   &quot;plugins&quot;: { output of plugins ... }
-    // }
-    </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>json</span> <span class='op'>=</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>TreeMap</span>::<span class='ident'>new</span>();
+               <span class='ident'>dst</span>: <span class='ident'>Path</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+    <span class='comment'>// {</span>
+    <span class='comment'>//   &quot;schema&quot;: version,</span>
+    <span class='comment'>//   &quot;crate&quot;: { parsed crate ... },</span>
+    <span class='comment'>//   &quot;plugins&quot;: { output of plugins ... }</span>
+    <span class='comment'>// }</span>
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>json</span> <span class='op'>=</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>TreeMap</span>::<span class='ident'>new</span>();
     <span class='ident'>json</span>.<span class='ident'>insert</span>(<span class='string'>&quot;schema&quot;</span>.<span class='ident'>to_string</span>(), <span class='ident'>json</span>::<span class='ident'>String</span>(<span class='ident'>SCHEMA_VERSION</span>.<span class='ident'>to_string</span>()));
     <span class='kw'>let</span> <span class='ident'>plugins_json</span> <span class='op'>=</span> <span class='ident'>res</span>.<span class='ident'>move_iter</span>()
                           .<span class='ident'>filter_map</span>(<span class='op'>|</span><span class='ident'>opt</span><span class='op'>|</span> {
@@ -906,11 +904,11 @@
                                       <span class='prelude-val'>Some</span>((<span class='ident'>string</span>.<span class='ident'>to_string</span>(), <span class='ident'>json</span>))
                                   }
                               }
-                          }).<span class='ident'>collect</span>();<span class='comment'>
+                          }).<span class='ident'>collect</span>();
 
-    // FIXME #8335: yuck, Rust -&gt; str -&gt; JSON round trip! No way to .encode
-    // straight to the Rust JSON representation.
-    </span><span class='kw'>let</span> <span class='ident'>crate_json_str</span> <span class='op'>=</span> {
+    <span class='comment'>// FIXME #8335: yuck, Rust -&gt; str -&gt; JSON round trip! No way to .encode</span>
+    <span class='comment'>// straight to the Rust JSON representation.</span>
+    <span class='kw'>let</span> <span class='ident'>crate_json_str</span> <span class='op'>=</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>w</span> <span class='op'>=</span> <span class='ident'>MemWriter</span>::<span class='ident'>new</span>();
         {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>encoder</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>Encoder</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>w</span> <span class='kw'>as</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>io</span>::<span class='ident'>Writer</span>);

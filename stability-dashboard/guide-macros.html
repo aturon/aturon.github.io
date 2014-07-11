@@ -8,8 +8,6 @@
     <link rel="stylesheet" type="text/css" href="rust.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
-<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400'
-        rel='stylesheet' type='text/css'>
 
 
 </head>
@@ -23,9 +21,9 @@
 
     <div id="versioninfo">
   <img src="http://www.rust-lang.org/logos/rust-logo-32x32-blk.png" width="32" height="32" alt><br>
-  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.11.0-pre</span><br>
-  <a href="http://github.com/rust-lang/rust/commit/169c988d09a9d4e46de2b7fead9489e94964c7c7"
-    class="hash white-sticker">169c988d</a>
+  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.11.0</span><br>
+  <a href="http://github.com/rust-lang/rust/commit/305cf1f1098dc87e346003e6bf7e7cca5705a135"
+    class="hash white-sticker">305cf1f1</a>
 </div>
 
 
@@ -74,9 +72,9 @@ doing nothing otherwise:</p>
 <span class='kw'>match</span> <span class='ident'>input_1</span> {
     <span class='ident'>SpecialA</span>(<span class='ident'>x</span>) <span class='op'>=&gt;</span> { <span class='kw'>return</span> <span class='ident'>x</span>; }
     _ <span class='op'>=&gt;</span> {}
-}<span class='comment'>
-// ...
-</span><span class='kw'>match</span> <span class='ident'>input_2</span> {
+}
+<span class='comment'>// ...</span>
+<span class='kw'>match</span> <span class='ident'>input_2</span> {
     <span class='ident'>SpecialB</span>(<span class='ident'>x</span>) <span class='op'>=&gt;</span> { <span class='kw'>return</span> <span class='ident'>x</span>; }
     _ <span class='op'>=&gt;</span> {}
 }
@@ -110,17 +108,17 @@ return 0;
 }
 fn main() {}</span><pre id='rust-example-rendered-1' class='rust '>
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>early_return</span>(
-    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>inp</span>:<span class='ident'>expr</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>sp</span>:<span class='ident'>ident</span>) <span class='op'>=&gt;</span> (<span class='comment'> // invoke it like `(input_5 SpecialE)`
-        </span><span class='kw'>match</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>inp</span> {
+    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>inp</span>:<span class='ident'>expr</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>sp</span>:<span class='ident'>ident</span>) <span class='op'>=&gt;</span> ( <span class='comment'>// invoke it like `(input_5 SpecialE)`</span>
+        <span class='kw'>match</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>inp</span> {
             <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>sp</span>(<span class='ident'>x</span>) <span class='op'>=&gt;</span> { <span class='kw'>return</span> <span class='ident'>x</span>; }
             _ <span class='op'>=&gt;</span> {}
         }
     );
-)<span class='comment'>
-// ...
-</span><span class='macro'>early_return</span><span class='macro'>!</span>(<span class='ident'>input_1</span> <span class='ident'>SpecialA</span>);<span class='comment'>
-// ...
-</span><span class='macro'>early_return</span><span class='macro'>!</span>(<span class='ident'>input_2</span> <span class='ident'>SpecialB</span>);
+)
+<span class='comment'>// ...</span>
+<span class='macro'>early_return</span><span class='macro'>!</span>(<span class='ident'>input_1</span> <span class='ident'>SpecialA</span>);
+<span class='comment'>// ...</span>
+<span class='macro'>early_return</span><span class='macro'>!</span>(<span class='ident'>input_2</span> <span class='ident'>SpecialB</span>);
 </pre>
 
 <p>Macros are defined in pattern-matching style: in the above example, the text
@@ -253,11 +251,11 @@ fn main() {}</span><pre id='rust-example-rendered-2' class='rust '>
             _ <span class='op'>=&gt;</span> {}
         }
     );
-)<span class='comment'>
-// ...
-</span><span class='macro'>early_return</span><span class='macro'>!</span>(<span class='ident'>input_1</span>, [<span class='ident'>SpecialA</span><span class='op'>|</span><span class='ident'>SpecialC</span><span class='op'>|</span><span class='ident'>SpecialD</span>]);<span class='comment'>
-// ...
-</span><span class='macro'>early_return</span><span class='macro'>!</span>(<span class='ident'>input_2</span>, [<span class='ident'>SpecialB</span>]);
+)
+<span class='comment'>// ...</span>
+<span class='macro'>early_return</span><span class='macro'>!</span>(<span class='ident'>input_1</span>, [<span class='ident'>SpecialA</span><span class='op'>|</span><span class='ident'>SpecialC</span><span class='op'>|</span><span class='ident'>SpecialD</span>]);
+<span class='comment'>// ...</span>
+<span class='macro'>early_return</span><span class='macro'>!</span>(<span class='ident'>input_2</span>, [<span class='ident'>SpecialB</span>]);
 </pre>
 
 <h3 id="transcription" class='section-header'><a
@@ -319,15 +317,15 @@ fn main() {}</span><pre id='rust-example-rendered-3' class='rust '>
 <span class='kw'>match</span> <span class='ident'>x</span> {
     <span class='ident'>Good1</span>(<span class='ident'>g1</span>, <span class='ident'>val</span>) <span class='op'>=&gt;</span> {
         <span class='kw'>match</span> <span class='ident'>g1</span>.<span class='ident'>body</span> {
-            <span class='ident'>Good2</span>(<span class='ident'>result</span>) <span class='op'>=&gt;</span> {<span class='comment'>
-                // complicated stuff goes here
-                </span><span class='kw'>return</span> <span class='ident'>result</span> <span class='op'>+</span> <span class='ident'>val</span>;
+            <span class='ident'>Good2</span>(<span class='ident'>result</span>) <span class='op'>=&gt;</span> {
+                <span class='comment'>// complicated stuff goes here</span>
+                <span class='kw'>return</span> <span class='ident'>result</span> <span class='op'>+</span> <span class='ident'>val</span>;
             },
             _ <span class='op'>=&gt;</span> <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;Didn&#39;t get good_2&quot;</span>)
         }
     }
-    _ <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='number'>0</span><span class='comment'> // default value
-</span>}
+    _ <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='number'>0</span> <span class='comment'>// default value</span>
+}
 </pre>
 
 <p>All the complicated stuff is deeply indented, and the error-handling code is
@@ -369,18 +367,18 @@ biased_match!((g1.body) ~ (Good2(result) )
 return result + val;
 }
 fn main() {}</span><pre id='rust-example-rendered-4' class='rust '>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>biased_match</span> (<span class='comment'>
-    // special case: `let (x) = ...` is illegal, so use `let x = ...` instead
-    </span>( (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>expr</span>) <span class='kw-2'>~</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>pat</span>) <span class='kw'>else</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>err</span>:<span class='ident'>stmt</span> ;
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>biased_match</span> (
+    <span class='comment'>// special case: `let (x) = ...` is illegal, so use `let x = ...` instead</span>
+    ( (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>expr</span>) <span class='kw-2'>~</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>pat</span>) <span class='kw'>else</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>err</span>:<span class='ident'>stmt</span> ;
       <span class='ident'>binds</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bind_res</span>:<span class='ident'>ident</span>
     ) <span class='op'>=&gt;</span> (
         <span class='kw'>let</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bind_res</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span> {
             <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span> <span class='op'>=&gt;</span> ( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bind_res</span> ),
             _ <span class='op'>=&gt;</span> { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>err</span> }
         };
-    );<span class='comment'>
-    // more than one name; use a tuple
-    </span>( (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>expr</span>) <span class='kw-2'>~</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>pat</span>) <span class='kw'>else</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>err</span>:<span class='ident'>stmt</span> ;
+    );
+    <span class='comment'>// more than one name; use a tuple</span>
+    ( (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>expr</span>) <span class='kw-2'>~</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>pat</span>) <span class='kw'>else</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>err</span>:<span class='ident'>stmt</span> ;
       <span class='ident'>binds</span> $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bind_res</span>:<span class='ident'>ident</span> ),<span class='op'>*</span>
     ) <span class='op'>=&gt;</span> (
         <span class='kw'>let</span> ( $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bind_res</span> ),<span class='op'>*</span> ) <span class='op'>=</span> <span class='kw'>match</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span> {
@@ -394,9 +392,9 @@ fn main() {}</span><pre id='rust-example-rendered-4' class='rust '>
               <span class='ident'>binds</span> <span class='ident'>g1</span>, <span class='ident'>val</span> )
 <span class='macro'>biased_match</span><span class='macro'>!</span>((<span class='ident'>g1</span>.<span class='ident'>body</span>) <span class='kw-2'>~</span> (<span class='ident'>Good2</span>(<span class='ident'>result</span>) )
                   <span class='kw'>else</span> { <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;Didn&#39;t get good_2&quot;</span>) };
-              <span class='ident'>binds</span> <span class='ident'>result</span> )<span class='comment'>
-// complicated stuff goes here
-</span><span class='kw'>return</span> <span class='ident'>result</span> <span class='op'>+</span> <span class='ident'>val</span>;
+              <span class='ident'>binds</span> <span class='ident'>result</span> )
+<span class='comment'>// complicated stuff goes here</span>
+<span class='kw'>return</span> <span class='ident'>result</span> <span class='op'>+</span> <span class='ident'>val</span>;
 </pre>
 
 <p>This solves the indentation problem. But if we have a lot of chained matches
@@ -511,39 +509,39 @@ return result + val;
 }
 }</span><pre id='rust-example-rendered-8' class='rust '>
 
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>biased_match_rec</span> (<span class='comment'>
-    // Handle the first layer
-    </span>(   (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>     :<span class='ident'>expr</span>) <span class='kw-2'>~</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>     :<span class='ident'>pat</span>) <span class='kw'>else</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>err</span>     :<span class='ident'>stmt</span> ;
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>biased_match_rec</span> (
+    <span class='comment'>// Handle the first layer</span>
+    (   (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>     :<span class='ident'>expr</span>) <span class='kw-2'>~</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>     :<span class='ident'>pat</span>) <span class='kw'>else</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>err</span>     :<span class='ident'>stmt</span> ;
      $( (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e_rest</span>:<span class='ident'>expr</span>) <span class='kw-2'>~</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p_rest</span>:<span class='ident'>pat</span>) <span class='kw'>else</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>err_rest</span>:<span class='ident'>stmt</span> ; )<span class='op'>*</span>
      <span class='ident'>binds</span> $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bind_res</span>:<span class='ident'>ident</span> ),<span class='op'>*</span>
     ) <span class='op'>=&gt;</span> (
         <span class='kw'>match</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span> {
-            <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span> <span class='op'>=&gt;</span> {<span class='comment'>
-                // Recursively handle the next layer
-                </span><span class='macro'>biased_match_rec</span><span class='macro'>!</span>($( (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e_rest</span>) <span class='kw-2'>~</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p_rest</span>) <span class='kw'>else</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>err_rest</span> ; )<span class='op'>*</span>
+            <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span> <span class='op'>=&gt;</span> {
+                <span class='comment'>// Recursively handle the next layer</span>
+                <span class='macro'>biased_match_rec</span><span class='macro'>!</span>($( (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e_rest</span>) <span class='kw-2'>~</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p_rest</span>) <span class='kw'>else</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>err_rest</span> ; )<span class='op'>*</span>
                                   <span class='ident'>binds</span> $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bind_res</span> ),<span class='op'>*</span>
                 )
             }
             _ <span class='op'>=&gt;</span> { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>err</span> }
         }
-    );<span class='comment'>
-    // Produce the requested values
-    </span>( <span class='ident'>binds</span> $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bind_res</span>:<span class='ident'>ident</span> ),<span class='op'>*</span> ) <span class='op'>=&gt;</span> ( ($( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bind_res</span> ),<span class='op'>*</span>) )
-)<span class='comment'>
+    );
+    <span class='comment'>// Produce the requested values</span>
+    ( <span class='ident'>binds</span> $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bind_res</span>:<span class='ident'>ident</span> ),<span class='op'>*</span> ) <span class='op'>=&gt;</span> ( ($( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bind_res</span> ),<span class='op'>*</span>) )
+)
 
-// Wrap the whole thing in a `let`.
-</span><span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>biased_match</span> (<span class='comment'>
-    // special case: `let (x) = ...` is illegal, so use `let x = ...` instead
-    </span>( $( (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>expr</span>) <span class='kw-2'>~</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>pat</span>) <span class='kw'>else</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>err</span>:<span class='ident'>stmt</span> ; )<span class='op'>*</span>
+<span class='comment'>// Wrap the whole thing in a `let`.</span>
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>biased_match</span> (
+    <span class='comment'>// special case: `let (x) = ...` is illegal, so use `let x = ...` instead</span>
+    ( $( (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>expr</span>) <span class='kw-2'>~</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>pat</span>) <span class='kw'>else</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>err</span>:<span class='ident'>stmt</span> ; )<span class='op'>*</span>
       <span class='ident'>binds</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bind_res</span>:<span class='ident'>ident</span>
     ) <span class='op'>=&gt;</span> (
         <span class='kw'>let</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bind_res</span> <span class='op'>=</span> <span class='macro'>biased_match_rec</span><span class='macro'>!</span>(
             $( (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>) <span class='kw-2'>~</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>) <span class='kw'>else</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>err</span> ; )<span class='op'>*</span>
             <span class='ident'>binds</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bind_res</span>
         );
-    );<span class='comment'>
-    // more than one name: use a tuple
-    </span>( $( (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>expr</span>) <span class='kw-2'>~</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>pat</span>) <span class='kw'>else</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>err</span>:<span class='ident'>stmt</span> ; )<span class='op'>*</span>
+    );
+    <span class='comment'>// more than one name: use a tuple</span>
+    ( $( (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>expr</span>) <span class='kw-2'>~</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>pat</span>) <span class='kw'>else</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>err</span>:<span class='ident'>stmt</span> ; )<span class='op'>*</span>
       <span class='ident'>binds</span>  $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bind_res</span>:<span class='ident'>ident</span> ),<span class='op'>*</span>
     ) <span class='op'>=&gt;</span> (
         <span class='kw'>let</span> ( $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bind_res</span> ),<span class='op'>*</span> ) <span class='op'>=</span> <span class='macro'>biased_match_rec</span><span class='macro'>!</span>(
@@ -557,9 +555,9 @@ return result + val;
 <span class='macro'>biased_match</span><span class='macro'>!</span>(
     (<span class='ident'>x</span>)       <span class='kw-2'>~</span> (<span class='ident'>Good1</span>(<span class='ident'>g1</span>, <span class='ident'>val</span>)) <span class='kw'>else</span> { <span class='kw'>return</span> <span class='number'>0</span> };
     (<span class='ident'>g1</span>.<span class='ident'>body</span>) <span class='kw-2'>~</span> (<span class='ident'>Good2</span>(<span class='ident'>result</span>) ) <span class='kw'>else</span> { <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;Didn&#39;t get Good2&quot;</span>) };
-    <span class='ident'>binds</span> <span class='ident'>val</span>, <span class='ident'>result</span> )<span class='comment'>
-// complicated stuff goes here
-</span><span class='kw'>return</span> <span class='ident'>result</span> <span class='op'>+</span> <span class='ident'>val</span>;
+    <span class='ident'>binds</span> <span class='ident'>val</span>, <span class='ident'>result</span> )
+<span class='comment'>// complicated stuff goes here</span>
+<span class='kw'>return</span> <span class='ident'>result</span> <span class='op'>+</span> <span class='ident'>val</span>;
 </pre>
 
 <p>This technique applies to many cases where transcribing a result all at once is not possible.
@@ -610,9 +608,9 @@ fn main() {
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>macro_rules</span>)]</span>
 
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>loop_x</span> (
-    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>: <span class='ident'>expr</span>) <span class='op'>=&gt;</span> (<span class='comment'>
-        // $e will not interact with this &#39;x
-        </span><span class='lifetime'>&#39;x</span>: <span class='kw'>loop</span> {
+    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>: <span class='ident'>expr</span>) <span class='op'>=&gt;</span> (
+        <span class='comment'>// $e will not interact with this &#39;x</span>
+        <span class='lifetime'>&#39;x</span>: <span class='kw'>loop</span> {
             <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Hello!&quot;</span>);
             <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>
         }

@@ -68,7 +68,7 @@
 \begin{document}
 \maketitle
 
-0.11.0-pre (169c988d09a9d4e46de2b7fead9489e94964c7c7 2014-07-02 18:41:38 +0000)
+0.11.0 (305cf1f1098dc87e346003e6bf7e7cca5705a135 2014-07-10 11:19:20 -0700)
 
 Copyright © 2011-2014 The Rust Project Developers. Licensed under the
 \href{http://www.apache.org/licenses/LICENSE-2.0}{Apache License,
@@ -2782,12 +2782,6 @@ These are functions:
 \item
   \begin{description}
   \itemsep1pt\parskip0pt\parsep0pt
-  \item[\texttt{uniq\_str\_eq}]
-  Compare two owned strings (\texttt{String}) for equality.
-  \end{description}
-\item
-  \begin{description}
-  \itemsep1pt\parskip0pt\parsep0pt
   \item[\texttt{strdup\_uniq}]
   Return a new unique string
   \end{description}
@@ -3279,8 +3273,8 @@ execution. Blocks are just another kind of expression, so blocks,
 statements, expressions, and blocks again can recursively nest inside
 each other to an arbitrary depth.
 
-\hyperdef{}{lvalues-rvalues-and-temporaries}{\paragraph{Lvalues, rvalues
-and temporaries}\label{lvalues-rvalues-and-temporaries}}
+\paragraph{Lvalues, rvalues and
+temporaries}\label{lvalues-rvalues-and-temporaries}
 
 Expressions are divided into two main categories: \emph{lvalues} and
 \emph{rvalues}. Likewise within each expression, sub-expressions may
@@ -3314,7 +3308,7 @@ lifetime of any reference that points to it.
 types}\label{moved-and-copied-types}}
 
 When a \hyperref[memory-slots]{local variable} is used as an
-\hyperref[lvalues-rvalues-and-temporaries]{rvalue} the variable will
+\hyperref[lvaluesux2c-rvalues-and-temporaries]{rvalue} the variable will
 either be moved or copied, depending on its type. For types that contain
 \hyperref[pointer-types]{owning pointers} or values that implement the
 special trait \texttt{Drop}, the variable is moved. All other types are
@@ -3338,7 +3332,7 @@ expressions}\label{path-expressions}}
 
 A \hyperref[paths]{path} used as an expression context denotes either a
 local variable or an item. Path expressions are
-\hyperref[lvalues-rvalues-and-temporaries]{lvalues}.
+\hyperref[lvaluesux2c-rvalues-and-temporaries]{lvalues}.
 
 \subsubsection{Tuple expressions}\label{tuple-expressions}
 
@@ -3464,10 +3458,10 @@ foo().x;
 (Struct {a: 10, b: 20}).a;
 \end{verbatim}
 
-A field access is an \hyperref[lvalues-rvalues-and-temporaries]{lvalue}
-referring to the value of that field. When the type providing the field
-inherits mutabilty, it can be
-\hyperref[assignment-expressions]{assigned} to.
+A field access is an
+\hyperref[lvaluesux2c-rvalues-and-temporaries]{lvalue} referring to the
+value of that field. When the type providing the field inherits
+mutabilty, it can be \hyperref[assignment-expressions]{assigned} to.
 
 Also, if the type of the expression to the left of the dot is a pointer,
 it is automatically dereferenced to make the field access possible.
@@ -3506,7 +3500,8 @@ idx_expr : expr '[' expr ']' ;
 \hyperref[vector-types]{Vector}-typed expressions can be indexed by
 writing a square-bracket-enclosed expression (the index) after them.
 When the vector is mutable, the resulting
-\hyperref[lvalues-rvalues-and-temporaries]{lvalue} can be assigned to.
+\hyperref[lvaluesux2c-rvalues-and-temporaries]{lvalue} can be assigned
+to.
 
 Indices are zero-based, and may be of any integral type. Vector access
 is bounds-checked at run-time. When the check fails, it will put the
@@ -3544,8 +3539,8 @@ prefix operators, before the expression they apply to.
   \end{description}
 
   For pointers to mutable locations, the resulting
-  \hyperref[lvalues-rvalues-and-temporaries]{lvalue} can be assigned to.
-  On non-pointer types, it calls the \texttt{deref} method of the
+  \hyperref[lvaluesux2c-rvalues-and-temporaries]{lvalue} can be assigned
+  to. On non-pointer types, it calls the \texttt{deref} method of the
   \texttt{std::ops::Deref} trait, or the \texttt{deref\_mut} method of
   the \texttt{std::ops::DerefMut} trait (if implemented by the type and
   required for an outer expression that will or could mutate the
@@ -3805,9 +3800,9 @@ fn avg(v: &[f64]) -> f64 {
 expressions}\label{assignment-expressions}}
 
 An \emph{assignment expression} consists of an
-\hyperref[lvalues-rvalues-and-temporaries]{lvalue} expression followed
-by an equals sign (\texttt{=}) and an
-\hyperref[lvalues-rvalues-and-temporaries]{rvalue} expression.
+\hyperref[lvaluesux2c-rvalues-and-temporaries]{lvalue} expression
+followed by an equals sign (\texttt{=}) and an
+\hyperref[lvaluesux2c-rvalues-and-temporaries]{rvalue} expression.
 
 Evaluating an assignment expression
 \hyperref[moved-and-copied-types]{either copies or moves} its right-hand
@@ -4147,14 +4142,14 @@ fn main() {
 \end{verbatim}
 
 A \texttt{match} behaves differently depending on whether or not the
-head expression is an \hyperref[lvalues-rvalues-and-temporaries]{lvalue
-or an rvalue}. If the head expression is an rvalue, it is first
-evaluated into a temporary location, and the resulting value is
-sequentially compared to the patterns in the arms until a match is
-found. The first arm with a matching pattern is chosen as the branch
-target of the \texttt{match}, any variables bound by the pattern are
-assigned to local variables in the arm's block, and control enters the
-block.
+head expression is an
+\hyperref[lvaluesux2c-rvalues-and-temporaries]{lvalue or an rvalue}. If
+the head expression is an rvalue, it is first evaluated into a temporary
+location, and the resulting value is sequentially compared to the
+patterns in the arms until a match is found. The first arm with a
+matching pattern is chosen as the branch target of the \texttt{match},
+any variables bound by the pattern are assigned to local variables in
+the arm's block, and control enters the block.
 
 When the head expression is an lvalue, the match does not allocate a
 temporary location (however, a by-value binding may copy or move from
@@ -4564,7 +4559,7 @@ are four varieties of pointer in Rust:
   References arise by (automatic) conversion from owning pointers,
   managed pointers, or by applying the borrowing operator \texttt{\&} to
   some other value, including
-  \hyperref[lvalues-rvalues-and-temporaries]{lvalues, rvalues or
+  \hyperref[lvaluesux2c-rvalues-and-temporaries]{lvalues, rvalues or
   temporaries}. References are written \texttt{\&content}, or in some
   cases \texttt{\&'f content} for some lifetime-variable \texttt{f}, for
   example \texttt{\&int} means a reference to an integer. Copying a
@@ -4703,15 +4698,15 @@ An example of an object type:
 
 \begin{verbatim}
 trait Printable {
-  fn to_string(&self) -> String;
+  fn stringify(&self) -> String;
 }
 
 impl Printable for int {
-  fn to_string(&self) -> String { self.to_str() }
+  fn stringify(&self) -> String { self.to_string() }
 }
 
 fn print(a: Box<Printable>) {
-   println!("{}", a.to_string());
+   println!("{}", a.stringify());
 }
 
 fn main() {
@@ -4914,8 +4909,8 @@ slots}\label{memory-slots}}
 A task's stack contains slots.
 
 A \emph{slot} is a component of a stack frame, either a function
-parameter, a \hyperref[lvalues-rvalues-and-temporaries]{temporary}, or a
-local variable.
+parameter, a \hyperref[lvaluesux2c-rvalues-and-temporaries]{temporary},
+or a local variable.
 
 A \emph{local variable} (or \emph{stack-local} allocation) holds a value
 directly, allocated within the stack's memory. The value is a part of
@@ -4958,15 +4953,14 @@ the standard library is in use, the type of an owned box is
 An example of an owned box type and value:
 
 \begin{verbatim}
-
 let x: Box<int> = box 10;
 \end{verbatim}
 
-Owned box values exist in 1:1 correspondence with their heap allocation
-copying an owned box value makes a shallow copy of the pointer Rust will
-consider a shallow copy of an owned box to move ownership of the value.
-After a value has been moved, the source location cannot be used unless
-it is reinitialized.
+Owned box values exist in 1:1 correspondence with their heap allocation,
+copying an owned box value makes a shallow copy of the pointer. Rust
+will consider a shallow copy of an owned box to move ownership of the
+value. After a value has been moved, the source location cannot be used
+unless it is reinitialized.
 
 \begin{verbatim}
 let x: Box<int> = box 10;

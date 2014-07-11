@@ -7,8 +7,6 @@
 
     <title>comm_adapters.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -238,17 +236,17 @@
 <span id='196'>196</span>
 <span id='197'>197</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='kw'>use</span> <span class='ident'>clone</span>::<span class='ident'>Clone</span>;
+<span class='kw'>use</span> <span class='ident'>clone</span>::<span class='ident'>Clone</span>;
 <span class='kw'>use</span> <span class='ident'>cmp</span>;
 <span class='kw'>use</span> <span class='ident'>collections</span>::<span class='ident'>Collection</span>;
 <span class='kw'>use</span> <span class='ident'>comm</span>::{<span class='ident'>Sender</span>, <span class='ident'>Receiver</span>};
@@ -278,11 +276,11 @@
 <span class='doccomment'>/// }</span>
 <span class='doccomment'>/// ```</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ChanReader</span> {
-    <span class='ident'>buf</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span>,<span class='comment'>  // A buffer of bytes received but not consumed.
-    </span><span class='ident'>pos</span>: <span class='ident'>uint</span>,<span class='comment'>             // How many of the buffered bytes have already be consumed.
-    </span><span class='ident'>rx</span>: <span class='ident'>Receiver</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span>,<span class='comment'> // The Receiver to pull data from.
-    </span><span class='ident'>closed</span>: <span class='ident'>bool</span>,<span class='comment'>          // Whether the channel this Receiver connects to has been closed.
-</span>}
+    <span class='ident'>buf</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span>,  <span class='comment'>// A buffer of bytes received but not consumed.</span>
+    <span class='ident'>pos</span>: <span class='ident'>uint</span>,             <span class='comment'>// How many of the buffered bytes have already be consumed.</span>
+    <span class='ident'>rx</span>: <span class='ident'>Receiver</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span>, <span class='comment'>// The Receiver to pull data from.</span>
+    <span class='ident'>closed</span>: <span class='ident'>bool</span>,          <span class='comment'>// Whether the channel this Receiver connects to has been closed.</span>
+}
 
 <span class='kw'>impl</span> <span class='ident'>ChanReader</span> {
     <span class='doccomment'>/// Wraps a `Port` in a `ChanReader` structure</span>
@@ -406,10 +404,10 @@
             <span class='prelude-val'>Ok</span>(..) <span class='op'>=&gt;</span> <span class='macro'>fail</span><span class='macro'>!</span>(),
             <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>e</span>.<span class='ident'>kind</span>, <span class='ident'>io</span>::<span class='ident'>EndOfFile</span>),
         }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span>[<span class='number'>7</span>,<span class='number'>8</span>,<span class='number'>6</span>], <span class='ident'>buf</span>.<span class='ident'>as_slice</span>());<span class='comment'>
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span>[<span class='number'>7</span>,<span class='number'>8</span>,<span class='number'>6</span>], <span class='ident'>buf</span>.<span class='ident'>as_slice</span>());
 
-        // Ensure it continues to fail in the same way.
-        </span><span class='kw'>match</span> <span class='ident'>reader</span>.<span class='ident'>read</span>(<span class='ident'>buf</span>.<span class='ident'>as_mut_slice</span>()) {
+        <span class='comment'>// Ensure it continues to fail in the same way.</span>
+        <span class='kw'>match</span> <span class='ident'>reader</span>.<span class='ident'>read</span>(<span class='ident'>buf</span>.<span class='ident'>as_mut_slice</span>()) {
             <span class='prelude-val'>Ok</span>(..) <span class='op'>=&gt;</span> <span class='macro'>fail</span><span class='macro'>!</span>(),
             <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>e</span>.<span class='ident'>kind</span>, <span class='ident'>io</span>::<span class='ident'>EndOfFile</span>),
         }

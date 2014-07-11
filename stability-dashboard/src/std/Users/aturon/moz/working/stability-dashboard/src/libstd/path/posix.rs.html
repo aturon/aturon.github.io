@@ -7,8 +7,6 @@
 
     <title>posix.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -1407,17 +1405,17 @@
 <span id='1365'>1365</span>
 <span id='1366'>1366</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! POSIX file path handling</span>
+<span class='doccomment'>//! POSIX file path handling</span>
 
 <span class='kw'>use</span> <span class='ident'>c_str</span>::{<span class='ident'>CString</span>, <span class='ident'>ToCStr</span>};
 <span class='kw'>use</span> <span class='ident'>clone</span>::<span class='ident'>Clone</span>;
@@ -1446,9 +1444,9 @@
 <span class='doccomment'>/// Represents a POSIX file path</span>
 <span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Path</span> {
-    <span class='ident'>repr</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>,<span class='comment'> // assumed to never be empty or contain NULs
-    </span><span class='ident'>sepidx</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span><span class='comment'> // index of the final separator in repr
-</span>}
+    <span class='ident'>repr</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>, <span class='comment'>// assumed to never be empty or contain NULs</span>
+    <span class='ident'>sepidx</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span> <span class='comment'>// index of the final separator in repr</span>
+}
 
 <span class='doccomment'>/// The standard path separator character</span>
 <span class='kw'>pub</span> <span class='kw'>static</span> <span class='ident'>SEP</span>: <span class='ident'>char</span> <span class='op'>=</span> <span class='string'>&#39;/&#39;</span>;
@@ -1481,20 +1479,20 @@
     <span class='kw'>fn</span> <span class='ident'>from_str</span>(<span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Path</span><span class='op'>&gt;</span> {
         <span class='ident'>Path</span>::<span class='ident'>new_opt</span>(<span class='ident'>s</span>)
     }
-}<span class='comment'>
+}
 
-// FIXME (#12938): Until DST lands, we cannot decompose &amp;str into &amp; and str, so
-// we cannot usefully take ToCStr arguments by reference (without forcing an
-// additional &amp; around &amp;str). So we are instead temporarily adding an instance
-// for &amp;Path, so that we can take ToCStr as owned. When DST lands, the &amp;Path
-// instance should be removed, and arguments bound by ToCStr should be passed by
-// reference.
+<span class='comment'>// FIXME (#12938): Until DST lands, we cannot decompose &amp;str into &amp; and str, so</span>
+<span class='comment'>// we cannot usefully take ToCStr arguments by reference (without forcing an</span>
+<span class='comment'>// additional &amp; around &amp;str). So we are instead temporarily adding an instance</span>
+<span class='comment'>// for &amp;Path, so that we can take ToCStr as owned. When DST lands, the &amp;Path</span>
+<span class='comment'>// instance should be removed, and arguments bound by ToCStr should be passed by</span>
+<span class='comment'>// reference.</span>
 
-</span><span class='kw'>impl</span> <span class='ident'>ToCStr</span> <span class='kw'>for</span> <span class='ident'>Path</span> {
+<span class='kw'>impl</span> <span class='ident'>ToCStr</span> <span class='kw'>for</span> <span class='ident'>Path</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>to_c_str</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>CString</span> {<span class='comment'>
-        // The Path impl guarantees no internal NUL
-        </span><span class='kw'>unsafe</span> { <span class='self'>self</span>.<span class='ident'>to_c_str_unchecked</span>() }
+    <span class='kw'>fn</span> <span class='ident'>to_c_str</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>CString</span> {
+        <span class='comment'>// The Path impl guarantees no internal NUL</span>
+        <span class='kw'>unsafe</span> { <span class='self'>self</span>.<span class='ident'>to_c_str_unchecked</span>() }
     }
 
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
@@ -1555,9 +1553,9 @@
                 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='number'>3</span> <span class='op'>+</span> <span class='ident'>filename</span>.<span class='ident'>len</span>());
                 <span class='ident'>v</span>.<span class='ident'>push_all</span>(<span class='ident'>dot_dot_static</span>);
                 <span class='ident'>v</span>.<span class='ident'>push</span>(<span class='ident'>SEP_BYTE</span>);
-                <span class='ident'>v</span>.<span class='ident'>push_all</span>(<span class='ident'>filename</span>);<span class='comment'>
-                // FIXME: this is slow
-                </span><span class='self'>self</span>.<span class='ident'>repr</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>normalize</span>(<span class='ident'>v</span>.<span class='ident'>as_slice</span>());
+                <span class='ident'>v</span>.<span class='ident'>push_all</span>(<span class='ident'>filename</span>);
+                <span class='comment'>// FIXME: this is slow</span>
+                <span class='self'>self</span>.<span class='ident'>repr</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>normalize</span>(<span class='ident'>v</span>.<span class='ident'>as_slice</span>());
             }
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
                 <span class='self'>self</span>.<span class='ident'>repr</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>normalize</span>(<span class='ident'>filename</span>);
@@ -1566,16 +1564,16 @@
                 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='self'>self</span>.<span class='ident'>repr</span>.<span class='ident'>len</span>() <span class='op'>+</span> <span class='number'>1</span> <span class='op'>+</span> <span class='ident'>filename</span>.<span class='ident'>len</span>());
                 <span class='ident'>v</span>.<span class='ident'>push_all</span>(<span class='self'>self</span>.<span class='ident'>repr</span>.<span class='ident'>as_slice</span>());
                 <span class='ident'>v</span>.<span class='ident'>push</span>(<span class='ident'>SEP_BYTE</span>);
-                <span class='ident'>v</span>.<span class='ident'>push_all</span>(<span class='ident'>filename</span>);<span class='comment'>
-                // FIXME: this is slow
-                </span><span class='self'>self</span>.<span class='ident'>repr</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>normalize</span>(<span class='ident'>v</span>.<span class='ident'>as_slice</span>());
+                <span class='ident'>v</span>.<span class='ident'>push_all</span>(<span class='ident'>filename</span>);
+                <span class='comment'>// FIXME: this is slow</span>
+                <span class='self'>self</span>.<span class='ident'>repr</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>normalize</span>(<span class='ident'>v</span>.<span class='ident'>as_slice</span>());
             }
             <span class='prelude-val'>Some</span>(<span class='ident'>idx</span>) <span class='op'>=&gt;</span> {
                 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='ident'>idx</span> <span class='op'>+</span> <span class='number'>1</span> <span class='op'>+</span> <span class='ident'>filename</span>.<span class='ident'>len</span>());
                 <span class='ident'>v</span>.<span class='ident'>push_all</span>(<span class='self'>self</span>.<span class='ident'>repr</span>.<span class='ident'>slice_to</span>(<span class='ident'>idx</span><span class='op'>+</span><span class='number'>1</span>));
-                <span class='ident'>v</span>.<span class='ident'>push_all</span>(<span class='ident'>filename</span>);<span class='comment'>
-                // FIXME: this is slow
-                </span><span class='self'>self</span>.<span class='ident'>repr</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>normalize</span>(<span class='ident'>v</span>.<span class='ident'>as_slice</span>());
+                <span class='ident'>v</span>.<span class='ident'>push_all</span>(<span class='ident'>filename</span>);
+                <span class='comment'>// FIXME: this is slow</span>
+                <span class='self'>self</span>.<span class='ident'>repr</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>normalize</span>(<span class='ident'>v</span>.<span class='ident'>as_slice</span>());
             }
         }
         <span class='self'>self</span>.<span class='ident'>sepidx</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>repr</span>.<span class='ident'>as_slice</span>().<span class='ident'>rposition_elem</span>(<span class='kw-2'>&amp;</span><span class='ident'>SEP_BYTE</span>);
@@ -1590,9 +1588,9 @@
                 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='self'>self</span>.<span class='ident'>repr</span>.<span class='ident'>len</span>() <span class='op'>+</span> <span class='ident'>path</span>.<span class='ident'>len</span>() <span class='op'>+</span> <span class='number'>1</span>);
                 <span class='ident'>v</span>.<span class='ident'>push_all</span>(<span class='self'>self</span>.<span class='ident'>repr</span>.<span class='ident'>as_slice</span>());
                 <span class='ident'>v</span>.<span class='ident'>push</span>(<span class='ident'>SEP_BYTE</span>);
-                <span class='ident'>v</span>.<span class='ident'>push_all</span>(<span class='ident'>path</span>);<span class='comment'>
-                // FIXME: this is slow
-                </span><span class='self'>self</span>.<span class='ident'>repr</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>normalize</span>(<span class='ident'>v</span>.<span class='ident'>as_slice</span>());
+                <span class='ident'>v</span>.<span class='ident'>push_all</span>(<span class='ident'>path</span>);
+                <span class='comment'>// FIXME: this is slow</span>
+                <span class='self'>self</span>.<span class='ident'>repr</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>normalize</span>(<span class='ident'>v</span>.<span class='ident'>as_slice</span>());
             }
             <span class='self'>self</span>.<span class='ident'>sepidx</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>repr</span>.<span class='ident'>as_slice</span>().<span class='ident'>rposition_elem</span>(<span class='kw-2'>&amp;</span><span class='ident'>SEP_BYTE</span>);
         }
@@ -1680,9 +1678,9 @@
                 <span class='kw'>match</span> (<span class='ident'>ita</span>.<span class='ident'>next</span>(), <span class='ident'>itb</span>.<span class='ident'>next</span>()) {
                     (<span class='prelude-val'>None</span>, _) <span class='op'>=&gt;</span> <span class='kw'>break</span>,
                     (<span class='prelude-val'>Some</span>(<span class='ident'>a</span>), <span class='prelude-val'>Some</span>(<span class='ident'>b</span>)) <span class='kw'>if</span> <span class='ident'>a</span> <span class='op'>==</span> <span class='ident'>b</span> <span class='op'>=&gt;</span> { <span class='kw'>continue</span> },
-                    (<span class='prelude-val'>Some</span>(<span class='ident'>a</span>), _) <span class='kw'>if</span> <span class='ident'>a</span> <span class='op'>==</span> <span class='string'>b&quot;..&quot;</span> <span class='op'>=&gt;</span> {<span class='comment'>
-                        // if ita contains only .. components, it&#39;s an ancestor
-                        </span><span class='kw'>return</span> <span class='ident'>ita</span>.<span class='ident'>all</span>(<span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span> <span class='op'>==</span> <span class='string'>b&quot;..&quot;</span>);
+                    (<span class='prelude-val'>Some</span>(<span class='ident'>a</span>), _) <span class='kw'>if</span> <span class='ident'>a</span> <span class='op'>==</span> <span class='string'>b&quot;..&quot;</span> <span class='op'>=&gt;</span> {
+                        <span class='comment'>// if ita contains only .. components, it&#39;s an ancestor</span>
+                        <span class='kw'>return</span> <span class='ident'>ita</span>.<span class='ident'>all</span>(<span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span> <span class='op'>==</span> <span class='string'>b&quot;..&quot;</span>);
                     }
                     _ <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='boolval'>false</span>
                 }
@@ -1764,9 +1762,9 @@
 
     <span class='doccomment'>/// Returns a normalized byte vector representation of a path, by removing all empty</span>
     <span class='doccomment'>/// components, and unnecessary . and .. components.</span>
-    <span class='kw'>fn</span> <span class='ident'>normalize</span><span class='op'>&lt;</span><span class='ident'>V</span>: <span class='ident'>Vector</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span><span class='op'>+</span><span class='ident'>CloneableVector</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span>(<span class='ident'>v</span>: <span class='ident'>V</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> {<span class='comment'>
-        // borrowck is being very picky
-        </span><span class='kw'>let</span> <span class='ident'>val</span> <span class='op'>=</span> {
+    <span class='kw'>fn</span> <span class='ident'>normalize</span><span class='op'>&lt;</span><span class='ident'>V</span>: <span class='ident'>Vector</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span><span class='op'>+</span><span class='ident'>CloneableVector</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span>(<span class='ident'>v</span>: <span class='ident'>V</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> {
+        <span class='comment'>// borrowck is being very picky</span>
+        <span class='kw'>let</span> <span class='ident'>val</span> <span class='op'>=</span> {
             <span class='kw'>let</span> <span class='ident'>is_abs</span> <span class='op'>=</span> <span class='op'>!</span><span class='ident'>v</span>.<span class='ident'>as_slice</span>().<span class='ident'>is_empty</span>() <span class='op'>&amp;&amp;</span> <span class='ident'>v</span>.<span class='ident'>as_slice</span>()[<span class='number'>0</span>] <span class='op'>==</span> <span class='ident'>SEP_BYTE</span>;
             <span class='kw'>let</span> <span class='ident'>v_</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>is_abs</span> { <span class='ident'>v</span>.<span class='ident'>as_slice</span>().<span class='ident'>slice_from</span>(<span class='number'>1</span>) } <span class='kw'>else</span> { <span class='ident'>v</span>.<span class='ident'>as_slice</span>() };
             <span class='kw'>let</span> <span class='ident'>comps</span> <span class='op'>=</span> <span class='ident'>normalize_helper</span>(<span class='ident'>v_</span>, <span class='ident'>is_abs</span>);
@@ -1810,9 +1808,9 @@
             <span class='self'>self</span>.<span class='ident'>repr</span>.<span class='ident'>slice_from</span>(<span class='number'>1</span>)
         } <span class='kw'>else</span> { <span class='self'>self</span>.<span class='ident'>repr</span>.<span class='ident'>as_slice</span>() };
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='ident'>v</span>.<span class='ident'>split</span>(<span class='ident'>is_sep_byte</span>);
-        <span class='kw'>if</span> <span class='ident'>v</span>.<span class='ident'>is_empty</span>() {<span class='comment'>
-            // consume the empty &quot;&quot; component
-            </span><span class='ident'>ret</span>.<span class='ident'>next</span>();
+        <span class='kw'>if</span> <span class='ident'>v</span>.<span class='ident'>is_empty</span>() {
+            <span class='comment'>// consume the empty &quot;&quot; component</span>
+            <span class='ident'>ret</span>.<span class='ident'>next</span>();
         }
         <span class='ident'>ret</span>
     }
@@ -1822,10 +1820,10 @@
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>str_components</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>StrComponents</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>components</span>().<span class='ident'>map</span>(<span class='ident'>str</span>::<span class='ident'>from_utf8</span>)
     }
-}<span class='comment'>
+}
 
-// None result means the byte vector didn&#39;t need normalizing
-</span><span class='kw'>fn</span> <span class='ident'>normalize_helper</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='ident'>v</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> [<span class='ident'>u8</span>], <span class='ident'>is_abs</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> [<span class='ident'>u8</span>]<span class='op'>&gt;&gt;</span> {
+<span class='comment'>// None result means the byte vector didn&#39;t need normalizing</span>
+<span class='kw'>fn</span> <span class='ident'>normalize_helper</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='ident'>v</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> [<span class='ident'>u8</span>], <span class='ident'>is_abs</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> [<span class='ident'>u8</span>]<span class='op'>&gt;&gt;</span> {
     <span class='kw'>if</span> <span class='ident'>is_abs</span> <span class='op'>&amp;&amp;</span> <span class='ident'>v</span>.<span class='ident'>as_slice</span>().<span class='ident'>is_empty</span>() {
         <span class='kw'>return</span> <span class='prelude-val'>None</span>;
     }
@@ -1954,7 +1952,7 @@
             (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>path</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>disp</span>:<span class='ident'>ident</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>exp</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> (
                 {
                     <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>path</span>);
-                    <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>path</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>disp</span>().<span class='ident'>to_str</span>().<span class='ident'>as_slice</span>() <span class='op'>==</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>exp</span>);
+                    <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>path</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>disp</span>().<span class='ident'>to_string</span>().<span class='ident'>as_slice</span>() <span class='op'>==</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>exp</span>);
                 }
             )
         )
@@ -2518,8 +2516,8 @@
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;a/b/c&quot;</span>, <span class='string'>&quot;a/b/c&quot;</span>, <span class='boolval'>true</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;a/b/c&quot;</span>, <span class='string'>&quot;foo/a/b/c&quot;</span>, <span class='boolval'>false</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;/a/b/c&quot;</span>, <span class='string'>&quot;a/b/c&quot;</span>, <span class='boolval'>true</span>);
-        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;/a/b/c&quot;</span>, <span class='string'>&quot;/a/b/c&quot;</span>, <span class='boolval'>false</span>);<span class='comment'> // child must be relative
-        </span><span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;/a/b/c&quot;</span>, <span class='string'>&quot;foo/a/b/c&quot;</span>, <span class='boolval'>false</span>);
+        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;/a/b/c&quot;</span>, <span class='string'>&quot;/a/b/c&quot;</span>, <span class='boolval'>false</span>); <span class='comment'>// child must be relative</span>
+        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;/a/b/c&quot;</span>, <span class='string'>&quot;foo/a/b/c&quot;</span>, <span class='boolval'>false</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;a/b/c&quot;</span>, <span class='string'>&quot;&quot;</span>, <span class='boolval'>false</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;&quot;</span>, <span class='boolval'>true</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;/a/b/c&quot;</span>, <span class='string'>&quot;d/e/f&quot;</span>, <span class='boolval'>false</span>);
@@ -2639,10 +2637,10 @@
 
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>b</span>: <span class='string'>b&quot;a/b/c&quot;</span>, [<span class='prelude-val'>Some</span>(<span class='string'>&quot;a&quot;</span>), <span class='prelude-val'>Some</span>(<span class='string'>&quot;b&quot;</span>), <span class='prelude-val'>Some</span>(<span class='string'>&quot;c&quot;</span>)]);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>b</span>: <span class='string'>b&quot;/\xFF/a/\x80&quot;</span>, [<span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='string'>&quot;a&quot;</span>), <span class='prelude-val'>None</span>]);
-        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>b</span>: <span class='string'>b&quot;../../foo\xCDbar&quot;</span>, [<span class='prelude-val'>Some</span>(<span class='string'>&quot;..&quot;</span>), <span class='prelude-val'>Some</span>(<span class='string'>&quot;..&quot;</span>), <span class='prelude-val'>None</span>]);<span class='comment'>
-        // str_components is a wrapper around components, so no need to do
-        // the full set of tests
-    </span>}
+        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>b</span>: <span class='string'>b&quot;../../foo\xCDbar&quot;</span>, [<span class='prelude-val'>Some</span>(<span class='string'>&quot;..&quot;</span>), <span class='prelude-val'>Some</span>(<span class='string'>&quot;..&quot;</span>), <span class='prelude-val'>None</span>]);
+        <span class='comment'>// str_components is a wrapper around components, so no need to do</span>
+        <span class='comment'>// the full set of tests</span>
+    }
 }
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>

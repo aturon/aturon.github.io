@@ -7,8 +7,6 @@
 
     <title>mutex.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -631,66 +629,66 @@
 <span id='589'>589</span>
 <span id='590'>590</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! A proper mutex implementation regardless of the &quot;flavor of task&quot; which is</span>
-<span class='doccomment'>//! acquiring the lock.</span><span class='comment'>
+<span class='doccomment'>//! A proper mutex implementation regardless of the &quot;flavor of task&quot; which is</span>
+<span class='doccomment'>//! acquiring the lock.</span>
 
-// # Implementation of Rust mutexes
-//
-// Most answers to the question of &quot;how do I use a mutex&quot; are &quot;use pthreads&quot;,
-// but for Rust this isn&#39;t quite sufficient. Green threads cannot acquire an OS
-// mutex because they can context switch among many OS threads, leading to
-// deadlocks with other green threads.
-//
-// Another problem for green threads grabbing an OS mutex is that POSIX dictates
-// that unlocking a mutex on a different thread from where it was locked is
-// undefined behavior. Remember that green threads can migrate among OS threads,
-// so this would mean that we would have to pin green threads to OS threads,
-// which is less than ideal.
-//
-// ## Using deschedule/reawaken
-//
-// We already have primitives for descheduling/reawakening tasks, so they&#39;re the
-// first obvious choice when implementing a mutex. The idea would be to have a
-// concurrent queue that everyone is pushed on to, and then the owner of the
-// mutex is the one popping from the queue.
-//
-// Unfortunately, this is not very performant for native tasks. The suspected
-// reason for this is that each native thread is suspended on its own condition
-// variable, unique from all the other threads. In this situation, the kernel
-// has no idea what the scheduling semantics are of the user program, so all of
-// the threads are distributed among all cores on the system. This ends up
-// having very expensive wakeups of remote cores high up in the profile when
-// handing off the mutex among native tasks. On the other hand, when using an OS
-// mutex, the kernel knows that all native threads are contended on the same
-// mutex, so they&#39;re in theory all migrated to a single core (fast context
-// switching).
-//
-// ## Mixing implementations
-//
-// From that above information, we have two constraints. The first is that
-// green threads can&#39;t touch os mutexes, and the second is that native tasks
-// pretty much *must* touch an os mutex.
-//
-// As a compromise, the queueing implementation is used for green threads and
-// the os mutex is used for native threads (why not have both?). This ends up
-// leading to fairly decent performance for both native threads and green
-// threads on various workloads (uncontended and contended).
-//
-// The crux of this implementation is an atomic work which is CAS&#39;d on many
-// times in order to manage a few flags about who&#39;s blocking where and whether
-// it&#39;s locked or not.
+<span class='comment'>// # Implementation of Rust mutexes</span>
+<span class='comment'>//</span>
+<span class='comment'>// Most answers to the question of &quot;how do I use a mutex&quot; are &quot;use pthreads&quot;,</span>
+<span class='comment'>// but for Rust this isn&#39;t quite sufficient. Green threads cannot acquire an OS</span>
+<span class='comment'>// mutex because they can context switch among many OS threads, leading to</span>
+<span class='comment'>// deadlocks with other green threads.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Another problem for green threads grabbing an OS mutex is that POSIX dictates</span>
+<span class='comment'>// that unlocking a mutex on a different thread from where it was locked is</span>
+<span class='comment'>// undefined behavior. Remember that green threads can migrate among OS threads,</span>
+<span class='comment'>// so this would mean that we would have to pin green threads to OS threads,</span>
+<span class='comment'>// which is less than ideal.</span>
+<span class='comment'>//</span>
+<span class='comment'>// ## Using deschedule/reawaken</span>
+<span class='comment'>//</span>
+<span class='comment'>// We already have primitives for descheduling/reawakening tasks, so they&#39;re the</span>
+<span class='comment'>// first obvious choice when implementing a mutex. The idea would be to have a</span>
+<span class='comment'>// concurrent queue that everyone is pushed on to, and then the owner of the</span>
+<span class='comment'>// mutex is the one popping from the queue.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Unfortunately, this is not very performant for native tasks. The suspected</span>
+<span class='comment'>// reason for this is that each native thread is suspended on its own condition</span>
+<span class='comment'>// variable, unique from all the other threads. In this situation, the kernel</span>
+<span class='comment'>// has no idea what the scheduling semantics are of the user program, so all of</span>
+<span class='comment'>// the threads are distributed among all cores on the system. This ends up</span>
+<span class='comment'>// having very expensive wakeups of remote cores high up in the profile when</span>
+<span class='comment'>// handing off the mutex among native tasks. On the other hand, when using an OS</span>
+<span class='comment'>// mutex, the kernel knows that all native threads are contended on the same</span>
+<span class='comment'>// mutex, so they&#39;re in theory all migrated to a single core (fast context</span>
+<span class='comment'>// switching).</span>
+<span class='comment'>//</span>
+<span class='comment'>// ## Mixing implementations</span>
+<span class='comment'>//</span>
+<span class='comment'>// From that above information, we have two constraints. The first is that</span>
+<span class='comment'>// green threads can&#39;t touch os mutexes, and the second is that native tasks</span>
+<span class='comment'>// pretty much *must* touch an os mutex.</span>
+<span class='comment'>//</span>
+<span class='comment'>// As a compromise, the queueing implementation is used for green threads and</span>
+<span class='comment'>// the os mutex is used for native threads (why not have both?). This ends up</span>
+<span class='comment'>// leading to fairly decent performance for both native threads and green</span>
+<span class='comment'>// threads on various workloads (uncontended and contended).</span>
+<span class='comment'>//</span>
+<span class='comment'>// The crux of this implementation is an atomic work which is CAS&#39;d on many</span>
+<span class='comment'>// times in order to manage a few flags about who&#39;s blocking where and whether</span>
+<span class='comment'>// it&#39;s locked or not.</span>
 
-</span><span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
+<span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
 
 <span class='kw'>use</span> <span class='ident'>alloc</span>::<span class='ident'>owned</span>::<span class='ident'>Box</span>;
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>atomics</span>;
@@ -729,15 +727,15 @@
 <span class='doccomment'>/// // do some work</span>
 <span class='doccomment'>/// drop(guard); // unlock the lock</span>
 <span class='doccomment'>/// ```</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Mutex</span> {<span class='comment'>
-    // Note that this static mutex is in a *box*, not inlined into the struct
-    // itself. This is done for memory safety reasons with the usage of a
-    // StaticNativeMutex inside the static mutex above. Once a native mutex has
-    // been used once, its address can never change (it can&#39;t be moved). This
-    // mutex type can be safely moved at any time, so to ensure that the native
-    // mutex is used correctly we box the inner lock to give it a constant
-    // address.
-    </span><span class='ident'>lock</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>StaticMutex</span><span class='op'>&gt;</span>,
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Mutex</span> {
+    <span class='comment'>// Note that this static mutex is in a *box*, not inlined into the struct</span>
+    <span class='comment'>// itself. This is done for memory safety reasons with the usage of a</span>
+    <span class='comment'>// StaticNativeMutex inside the static mutex above. Once a native mutex has</span>
+    <span class='comment'>// been used once, its address can never change (it can&#39;t be moved). This</span>
+    <span class='comment'>// mutex type can be safely moved at any time, so to ensure that the native</span>
+    <span class='comment'>// mutex is used correctly we box the inner lock to give it a constant</span>
+    <span class='comment'>// address.</span>
+    <span class='ident'>lock</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>StaticMutex</span><span class='op'>&gt;</span>,
 }
 
 <span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>PartialEq</span>, <span class='ident'>Show</span>)]</span>
@@ -818,15 +816,15 @@
 
 <span class='kw'>impl</span> <span class='ident'>StaticMutex</span> {
     <span class='doccomment'>/// Attempts to grab this lock, see `Mutex::try_lock`</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>try_lock</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Guard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;&gt;</span> {<span class='comment'>
-        // Attempt to steal the mutex from an unlocked state.
-        //
-        // FIXME: this can mess up the fairness of the mutex, seems bad
-        </span><span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>state</span>.<span class='ident'>compare_and_swap</span>(<span class='number'>0</span>, <span class='ident'>LOCKED</span>, <span class='ident'>atomics</span>::<span class='ident'>SeqCst</span>) {
-            <span class='number'>0</span> <span class='op'>=&gt;</span> {<span class='comment'>
-                // After acquiring the mutex, we can safely access the inner
-                // fields.
-                </span><span class='kw'>let</span> <span class='ident'>prev</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>try_lock</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Guard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;&gt;</span> {
+        <span class='comment'>// Attempt to steal the mutex from an unlocked state.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// FIXME: this can mess up the fairness of the mutex, seems bad</span>
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>state</span>.<span class='ident'>compare_and_swap</span>(<span class='number'>0</span>, <span class='ident'>LOCKED</span>, <span class='ident'>atomics</span>::<span class='ident'>SeqCst</span>) {
+            <span class='number'>0</span> <span class='op'>=&gt;</span> {
+                <span class='comment'>// After acquiring the mutex, we can safely access the inner</span>
+                <span class='comment'>// fields.</span>
+                <span class='kw'>let</span> <span class='ident'>prev</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {
                     <span class='ident'>mem</span>::<span class='ident'>replace</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>flavor</span>.<span class='ident'>get</span>(), <span class='ident'>TryLockAcquisition</span>)
                 };
                 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>prev</span>, <span class='ident'>Unlocked</span>);
@@ -837,21 +835,21 @@
     }
 
     <span class='doccomment'>/// Acquires this lock, see `Mutex::lock`</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>lock</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Guard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {<span class='comment'>
-        // First, attempt to steal the mutex from an unlocked state. The &quot;fast
-        // path&quot; needs to have as few atomic instructions as possible, and this
-        // one cmpxchg is already pretty expensive.
-        //
-        // FIXME: this can mess up the fairness of the mutex, seems bad
-        </span><span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>try_lock</span>() {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>lock</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Guard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+        <span class='comment'>// First, attempt to steal the mutex from an unlocked state. The &quot;fast</span>
+        <span class='comment'>// path&quot; needs to have as few atomic instructions as possible, and this</span>
+        <span class='comment'>// one cmpxchg is already pretty expensive.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// FIXME: this can mess up the fairness of the mutex, seems bad</span>
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>try_lock</span>() {
             <span class='prelude-val'>Some</span>(<span class='ident'>guard</span>) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='ident'>guard</span>,
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {}
-        }<span class='comment'>
+        }
 
-        // After we&#39;ve failed the fast path, then we delegate to the differnet
-        // locking protocols for green/native tasks. This will select two tasks
-        // to continue further (one native, one green).
-        </span><span class='kw'>let</span> <span class='ident'>t</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Local</span>::<span class='ident'>take</span>();
+        <span class='comment'>// After we&#39;ve failed the fast path, then we delegate to the different</span>
+        <span class='comment'>// locking protocols for green/native tasks. This will select two tasks</span>
+        <span class='comment'>// to continue further (one native, one green).</span>
+        <span class='kw'>let</span> <span class='ident'>t</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Local</span>::<span class='ident'>take</span>();
         <span class='kw'>let</span> <span class='ident'>can_block</span> <span class='op'>=</span> <span class='ident'>t</span>.<span class='ident'>can_block</span>();
         <span class='kw'>let</span> <span class='ident'>native_bit</span>;
         <span class='kw'>if</span> <span class='ident'>can_block</span> {
@@ -860,40 +858,40 @@
         } <span class='kw'>else</span> {
             <span class='self'>self</span>.<span class='ident'>green_lock</span>(<span class='ident'>t</span>);
             <span class='ident'>native_bit</span> <span class='op'>=</span> <span class='ident'>GREEN_BLOCKED</span>;
-        }<span class='comment'>
+        }
 
-        // After we&#39;ve arbitrated among task types, attempt to re-acquire the
-        // lock (avoids a deschedule). This is very important to do in order to
-        // allow threads coming out of the native_lock function to try their
-        // best to not hit a cvar in deschedule.
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>old</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>state</span>.<span class='ident'>compare_and_swap</span>(<span class='number'>0</span>, <span class='ident'>LOCKED</span>,
+        <span class='comment'>// After we&#39;ve arbitrated among task types, attempt to re-acquire the</span>
+        <span class='comment'>// lock (avoids a deschedule). This is very important to do in order to</span>
+        <span class='comment'>// allow threads coming out of the native_lock function to try their</span>
+        <span class='comment'>// best to not hit a cvar in deschedule.</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>old</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>state</span>.<span class='ident'>compare_and_swap</span>(<span class='number'>0</span>, <span class='ident'>LOCKED</span>,
                                                         <span class='ident'>atomics</span>::<span class='ident'>SeqCst</span>) {
             <span class='number'>0</span> <span class='op'>=&gt;</span> {
                 <span class='kw'>let</span> <span class='ident'>flavor</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>can_block</span> {
                     <span class='ident'>NativeAcquisition</span>
                 } <span class='kw'>else</span> {
                     <span class='ident'>GreenAcquisition</span>
-                };<span class='comment'>
-                // We&#39;ve acquired the lock, so this unsafe access to flavor is
-                // allowed.
-                </span><span class='kw'>unsafe</span> { <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>flavor</span>.<span class='ident'>get</span>() <span class='op'>=</span> <span class='ident'>flavor</span>; }
+                };
+                <span class='comment'>// We&#39;ve acquired the lock, so this unsafe access to flavor is</span>
+                <span class='comment'>// allowed.</span>
+                <span class='kw'>unsafe</span> { <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>flavor</span>.<span class='ident'>get</span>() <span class='op'>=</span> <span class='ident'>flavor</span>; }
                 <span class='kw'>return</span> <span class='ident'>Guard</span>::<span class='ident'>new</span>(<span class='self'>self</span>)
             }
             <span class='ident'>old</span> <span class='op'>=&gt;</span> <span class='ident'>old</span>,
-        };<span class='comment'>
+        };
 
-        // Alright, everything else failed. We need to deschedule ourselves and
-        // flag ourselves as waiting. Note that this case should only happen
-        // regularly in native/green contention. Due to try_lock and the header
-        // of lock stealing the lock, it&#39;s also possible for native/native
-        // contention to hit this location, but as less common.
-        </span><span class='kw'>let</span> <span class='ident'>t</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Local</span>::<span class='ident'>take</span>();
+        <span class='comment'>// Alright, everything else failed. We need to deschedule ourselves and</span>
+        <span class='comment'>// flag ourselves as waiting. Note that this case should only happen</span>
+        <span class='comment'>// regularly in native/green contention. Due to try_lock and the header</span>
+        <span class='comment'>// of lock stealing the lock, it&#39;s also possible for native/native</span>
+        <span class='comment'>// contention to hit this location, but as less common.</span>
+        <span class='kw'>let</span> <span class='ident'>t</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Local</span>::<span class='ident'>take</span>();
         <span class='ident'>t</span>.<span class='ident'>deschedule</span>(<span class='number'>1</span>, <span class='op'>|</span><span class='ident'>task</span><span class='op'>|</span> {
-            <span class='kw'>let</span> <span class='ident'>task</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>task</span>.<span class='ident'>cast_to_uint</span>() };<span class='comment'>
+            <span class='kw'>let</span> <span class='ident'>task</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>task</span>.<span class='ident'>cast_to_uint</span>() };
 
-            // These accesses are protected by the respective native/green
-            // mutexes which were acquired above.
-            </span><span class='kw'>let</span> <span class='ident'>prev</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>can_block</span> {
+            <span class='comment'>// These accesses are protected by the respective native/green</span>
+            <span class='comment'>// mutexes which were acquired above.</span>
+            <span class='kw'>let</span> <span class='ident'>prev</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>can_block</span> {
                 <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>replace</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>native_blocker</span>.<span class='ident'>get</span>(), <span class='ident'>task</span>) }
             } <span class='kw'>else</span> {
                 <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>replace</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>green_blocker</span>.<span class='ident'>get</span>(), <span class='ident'>task</span>) }
@@ -901,12 +899,12 @@
             <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>prev</span>, <span class='number'>0</span>);
 
             <span class='kw'>loop</span> {
-                <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>old</span> <span class='op'>&amp;</span> <span class='ident'>native_bit</span>, <span class='number'>0</span>);<span class='comment'>
-                // If the old state was locked, then we need to flag ourselves
-                // as blocking in the state. If the old state was unlocked, then
-                // we attempt to acquire the mutex. Everything here is a CAS
-                // loop that&#39;ll eventually make progress.
-                </span><span class='kw'>if</span> <span class='ident'>old</span> <span class='op'>&amp;</span> <span class='ident'>LOCKED</span> <span class='op'>!=</span> <span class='number'>0</span> {
+                <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>old</span> <span class='kw-2'>&amp;</span> <span class='ident'>native_bit</span>, <span class='number'>0</span>);
+                <span class='comment'>// If the old state was locked, then we need to flag ourselves</span>
+                <span class='comment'>// as blocking in the state. If the old state was unlocked, then</span>
+                <span class='comment'>// we attempt to acquire the mutex. Everything here is a CAS</span>
+                <span class='comment'>// loop that&#39;ll eventually make progress.</span>
+                <span class='kw'>if</span> <span class='ident'>old</span> <span class='kw-2'>&amp;</span> <span class='ident'>LOCKED</span> <span class='op'>!=</span> <span class='number'>0</span> {
                     <span class='ident'>old</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>state</span>.<span class='ident'>compare_and_swap</span>(<span class='ident'>old</span>,
                                                             <span class='ident'>old</span> <span class='op'>|</span> <span class='ident'>native_bit</span>,
                                                             <span class='ident'>atomics</span>::<span class='ident'>SeqCst</span>) {
@@ -918,11 +916,11 @@
                     <span class='ident'>old</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>state</span>.<span class='ident'>compare_and_swap</span>(<span class='ident'>old</span>,
                                                             <span class='ident'>old</span> <span class='op'>|</span> <span class='ident'>LOCKED</span>,
                                                             <span class='ident'>atomics</span>::<span class='ident'>SeqCst</span>) {
-                        <span class='ident'>n</span> <span class='kw'>if</span> <span class='ident'>n</span> <span class='op'>==</span> <span class='ident'>old</span> <span class='op'>=&gt;</span> {<span class='comment'>
-                            // After acquiring the lock, we have access to the
-                            // flavor field, and we&#39;ve regained access to our
-                            // respective native/green blocker field.
-                            </span><span class='kw'>let</span> <span class='ident'>prev</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>can_block</span> {
+                        <span class='ident'>n</span> <span class='kw'>if</span> <span class='ident'>n</span> <span class='op'>==</span> <span class='ident'>old</span> <span class='op'>=&gt;</span> {
+                            <span class='comment'>// After acquiring the lock, we have access to the</span>
+                            <span class='comment'>// flavor field, and we&#39;ve regained access to our</span>
+                            <span class='comment'>// respective native/green blocker field.</span>
+                            <span class='kw'>let</span> <span class='ident'>prev</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>can_block</span> {
                                 <span class='kw'>unsafe</span> {
                                     <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>native_blocker</span>.<span class='ident'>get</span>() <span class='op'>=</span> <span class='number'>0</span>;
                                     <span class='ident'>mem</span>::<span class='ident'>replace</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>flavor</span>.<span class='ident'>get</span>(),
@@ -947,11 +945,11 @@
         });
 
         <span class='ident'>Guard</span>::<span class='ident'>new</span>(<span class='self'>self</span>)
-    }<span class='comment'>
+    }
 
-    // Tasks which can block are super easy. These tasks just call the blocking
-    // `lock()` function on an OS mutex
-    </span><span class='kw'>fn</span> <span class='ident'>native_lock</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>t</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) {
+    <span class='comment'>// Tasks which can block are super easy. These tasks just call the blocking</span>
+    <span class='comment'>// `lock()` function on an OS mutex</span>
+    <span class='kw'>fn</span> <span class='ident'>native_lock</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>t</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) {
         <span class='ident'>Local</span>::<span class='ident'>put</span>(<span class='ident'>t</span>);
         <span class='kw'>unsafe</span> { <span class='self'>self</span>.<span class='ident'>lock</span>.<span class='ident'>lock_noguard</span>(); }
     }
@@ -960,14 +958,14 @@
         <span class='kw'>unsafe</span> { <span class='self'>self</span>.<span class='ident'>lock</span>.<span class='ident'>unlock_noguard</span>(); }
     }
 
-    <span class='kw'>fn</span> <span class='ident'>green_lock</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>t</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) {<span class='comment'>
-        // Green threads flag their presence with an atomic counter, and if they
-        // fail to be the first to the mutex, they enqueue themselves on a
-        // concurrent internal queue with a stack-allocated node.
-        //
-        // FIXME: There isn&#39;t a cancellation currently of an enqueue, forcing
-        //        the unlocker to spin for a bit.
-        </span><span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>green_cnt</span>.<span class='ident'>fetch_add</span>(<span class='number'>1</span>, <span class='ident'>atomics</span>::<span class='ident'>SeqCst</span>) <span class='op'>==</span> <span class='number'>0</span> {
+    <span class='kw'>fn</span> <span class='ident'>green_lock</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>t</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) {
+        <span class='comment'>// Green threads flag their presence with an atomic counter, and if they</span>
+        <span class='comment'>// fail to be the first to the mutex, they enqueue themselves on a</span>
+        <span class='comment'>// concurrent internal queue with a stack-allocated node.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// FIXME: There isn&#39;t a cancellation currently of an enqueue, forcing</span>
+        <span class='comment'>//        the unlocker to spin for a bit.</span>
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>green_cnt</span>.<span class='ident'>fetch_add</span>(<span class='number'>1</span>, <span class='ident'>atomics</span>::<span class='ident'>SeqCst</span>) <span class='op'>==</span> <span class='number'>0</span> {
             <span class='ident'>Local</span>::<span class='ident'>put</span>(<span class='ident'>t</span>);
             <span class='kw'>return</span>
         }
@@ -982,10 +980,10 @@
         });
     }
 
-    <span class='kw'>fn</span> <span class='ident'>green_unlock</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) {<span class='comment'>
-        // If we&#39;re the only green thread, then no need to check the queue,
-        // otherwise the fixme above forces us to spin for a bit.
-        </span><span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>green_cnt</span>.<span class='ident'>fetch_sub</span>(<span class='number'>1</span>, <span class='ident'>atomics</span>::<span class='ident'>SeqCst</span>) <span class='op'>==</span> <span class='number'>1</span> { <span class='kw'>return</span> }
+    <span class='kw'>fn</span> <span class='ident'>green_unlock</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) {
+        <span class='comment'>// If we&#39;re the only green thread, then no need to check the queue,</span>
+        <span class='comment'>// otherwise the fixme above forces us to spin for a bit.</span>
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>green_cnt</span>.<span class='ident'>fetch_sub</span>(<span class='number'>1</span>, <span class='ident'>atomics</span>::<span class='ident'>SeqCst</span>) <span class='op'>==</span> <span class='number'>1</span> { <span class='kw'>return</span> }
         <span class='kw'>let</span> <span class='ident'>node</span>;
         <span class='kw'>loop</span> {
             <span class='kw'>match</span> <span class='kw'>unsafe</span> { <span class='self'>self</span>.<span class='ident'>q</span>.<span class='ident'>pop</span>() } {
@@ -997,32 +995,32 @@
         <span class='ident'>task</span>.<span class='ident'>wake</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>t</span><span class='op'>|</span> <span class='ident'>t</span>.<span class='ident'>reawaken</span>());
     }
 
-    <span class='kw'>fn</span> <span class='ident'>unlock</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) {<span class='comment'>
-        // Unlocking this mutex is a little tricky. We favor any task that is
-        // manually blocked (not in each of the separate locks) in order to help
-        // provide a little fairness (green threads will wake up the pending
-        // native thread and native threads will wake up the pending green
-        // thread).
-        //
-        // There&#39;s also the question of when we unlock the actual green/native
-        // locking halves as well. If we&#39;re waking up someone, then we can wait
-        // to unlock until we&#39;ve acquired the task to wake up (we&#39;re guaranteed
-        // the mutex memory is still valid when there&#39;s contenders), but as soon
-        // as we don&#39;t find any contenders we must unlock the mutex, and *then*
-        // flag the mutex as unlocked.
-        //
-        // This flagging can fail, leading to another round of figuring out if a
-        // task needs to be woken, and in this case it&#39;s ok that the &quot;mutex
-        // halves&quot; are unlocked, we&#39;re just mainly dealing with the atomic state
-        // of the outer mutex.
-        </span><span class='kw'>let</span> <span class='ident'>flavor</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>replace</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>flavor</span>.<span class='ident'>get</span>(), <span class='ident'>Unlocked</span>) };
+    <span class='kw'>fn</span> <span class='ident'>unlock</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) {
+        <span class='comment'>// Unlocking this mutex is a little tricky. We favor any task that is</span>
+        <span class='comment'>// manually blocked (not in each of the separate locks) in order to help</span>
+        <span class='comment'>// provide a little fairness (green threads will wake up the pending</span>
+        <span class='comment'>// native thread and native threads will wake up the pending green</span>
+        <span class='comment'>// thread).</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// There&#39;s also the question of when we unlock the actual green/native</span>
+        <span class='comment'>// locking halves as well. If we&#39;re waking up someone, then we can wait</span>
+        <span class='comment'>// to unlock until we&#39;ve acquired the task to wake up (we&#39;re guaranteed</span>
+        <span class='comment'>// the mutex memory is still valid when there&#39;s contenders), but as soon</span>
+        <span class='comment'>// as we don&#39;t find any contenders we must unlock the mutex, and *then*</span>
+        <span class='comment'>// flag the mutex as unlocked.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// This flagging can fail, leading to another round of figuring out if a</span>
+        <span class='comment'>// task needs to be woken, and in this case it&#39;s ok that the &quot;mutex</span>
+        <span class='comment'>// halves&quot; are unlocked, we&#39;re just mainly dealing with the atomic state</span>
+        <span class='comment'>// of the outer mutex.</span>
+        <span class='kw'>let</span> <span class='ident'>flavor</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>replace</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>flavor</span>.<span class='ident'>get</span>(), <span class='ident'>Unlocked</span>) };
 
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>state</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>state</span>.<span class='ident'>load</span>(<span class='ident'>atomics</span>::<span class='ident'>SeqCst</span>);
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>unlocked</span> <span class='op'>=</span> <span class='boolval'>false</span>;
         <span class='kw'>let</span> <span class='ident'>task</span>;
         <span class='kw'>loop</span> {
-            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>state</span> <span class='op'>&amp;</span> <span class='ident'>LOCKED</span> <span class='op'>!=</span> <span class='number'>0</span>);
-            <span class='kw'>if</span> <span class='ident'>state</span> <span class='op'>&amp;</span> <span class='ident'>GREEN_BLOCKED</span> <span class='op'>!=</span> <span class='number'>0</span> {
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>state</span> <span class='kw-2'>&amp;</span> <span class='ident'>LOCKED</span> <span class='op'>!=</span> <span class='number'>0</span>);
+            <span class='kw'>if</span> <span class='ident'>state</span> <span class='kw-2'>&amp;</span> <span class='ident'>GREEN_BLOCKED</span> <span class='op'>!=</span> <span class='number'>0</span> {
                 <span class='self'>self</span>.<span class='ident'>unset</span>(<span class='ident'>state</span>, <span class='ident'>GREEN_BLOCKED</span>);
                 <span class='ident'>task</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {
                     <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>flavor</span>.<span class='ident'>get</span>() <span class='op'>=</span> <span class='ident'>GreenAcquisition</span>;
@@ -1030,7 +1028,7 @@
                     <span class='ident'>BlockedTask</span>::<span class='ident'>cast_from_uint</span>(<span class='ident'>task</span>)
                 };
                 <span class='kw'>break</span>;
-            } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>state</span> <span class='op'>&amp;</span> <span class='ident'>NATIVE_BLOCKED</span> <span class='op'>!=</span> <span class='number'>0</span> {
+            } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>state</span> <span class='kw-2'>&amp;</span> <span class='ident'>NATIVE_BLOCKED</span> <span class='op'>!=</span> <span class='number'>0</span> {
                 <span class='self'>self</span>.<span class='ident'>unset</span>(<span class='ident'>state</span>, <span class='ident'>NATIVE_BLOCKED</span>);
                 <span class='ident'>task</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {
                     <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>flavor</span>.<span class='ident'>get</span>() <span class='op'>=</span> <span class='ident'>NativeAcquisition</span>;
@@ -1070,7 +1068,7 @@
     <span class='doccomment'>/// Loops around a CAS to unset the `bit` in `state`</span>
     <span class='kw'>fn</span> <span class='ident'>unset</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='kw-2'>mut</span> <span class='ident'>state</span>: <span class='ident'>uint</span>, <span class='ident'>bit</span>: <span class='ident'>uint</span>) {
         <span class='kw'>loop</span> {
-            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>state</span> <span class='op'>&amp;</span> <span class='ident'>bit</span> <span class='op'>!=</span> <span class='number'>0</span>);
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>state</span> <span class='kw-2'>&amp;</span> <span class='ident'>bit</span> <span class='op'>!=</span> <span class='number'>0</span>);
             <span class='kw'>let</span> <span class='ident'>new</span> <span class='op'>=</span> <span class='ident'>state</span> <span class='op'>^</span> <span class='ident'>bit</span>;
             <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>state</span>.<span class='ident'>compare_and_swap</span>(<span class='ident'>state</span>, <span class='ident'>new</span>, <span class='ident'>atomics</span>::<span class='ident'>SeqCst</span>) {
                 <span class='ident'>n</span> <span class='kw'>if</span> <span class='ident'>n</span> <span class='op'>==</span> <span class='ident'>state</span> <span class='op'>=&gt;</span> <span class='kw'>break</span>,
@@ -1132,10 +1130,10 @@
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>Guard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
     <span class='kw'>fn</span> <span class='ident'>new</span><span class='op'>&lt;</span><span class='lifetime'>&#39;b</span><span class='op'>&gt;</span>(<span class='ident'>lock</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;b</span> <span class='ident'>StaticMutex</span>) <span class='op'>-&gt;</span> <span class='ident'>Guard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;b</span><span class='op'>&gt;</span> {
-        <span class='kw'>if</span> <span class='macro'>cfg</span><span class='macro'>!</span>(<span class='ident'>debug</span>) {<span class='comment'>
-            // once we&#39;ve acquired a lock, it&#39;s ok to access the flavor
-            </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='kw'>unsafe</span> { <span class='op'>*</span><span class='ident'>lock</span>.<span class='ident'>flavor</span>.<span class='ident'>get</span>() <span class='op'>!=</span> <span class='ident'>Unlocked</span> });
-            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>lock</span>.<span class='ident'>state</span>.<span class='ident'>load</span>(<span class='ident'>atomics</span>::<span class='ident'>SeqCst</span>) <span class='op'>&amp;</span> <span class='ident'>LOCKED</span> <span class='op'>!=</span> <span class='number'>0</span>);
+        <span class='kw'>if</span> <span class='macro'>cfg</span><span class='macro'>!</span>(<span class='ident'>debug</span>) {
+            <span class='comment'>// once we&#39;ve acquired a lock, it&#39;s ok to access the flavor</span>
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='kw'>unsafe</span> { <span class='op'>*</span><span class='ident'>lock</span>.<span class='ident'>flavor</span>.<span class='ident'>get</span>() <span class='op'>!=</span> <span class='ident'>Unlocked</span> });
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>lock</span>.<span class='ident'>state</span>.<span class='ident'>load</span>(<span class='ident'>atomics</span>::<span class='ident'>SeqCst</span>) <span class='kw-2'>&amp;</span> <span class='ident'>LOCKED</span> <span class='op'>!=</span> <span class='number'>0</span>);
         }
         <span class='ident'>Guard</span> { <span class='ident'>lock</span>: <span class='ident'>lock</span> }
     }
@@ -1150,11 +1148,11 @@
 }
 
 <span class='kw'>impl</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>Mutex</span> {
-    <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {<span class='comment'>
-        // This is actually safe b/c we know that there is no further usage of
-        // this mutex (it&#39;s up to the user to arrange for a mutex to get
-        // dropped, that&#39;s not our job)
-        </span><span class='kw'>unsafe</span> { <span class='self'>self</span>.<span class='ident'>lock</span>.<span class='ident'>destroy</span>() }
+    <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
+        <span class='comment'>// This is actually safe b/c we know that there is no further usage of</span>
+        <span class='comment'>// this mutex (it&#39;s up to the user to arrange for a mutex to get</span>
+        <span class='comment'>// dropped, that&#39;s not our job)</span>
+        <span class='kw'>unsafe</span> { <span class='self'>self</span>.<span class='ident'>lock</span>.<span class='ident'>destroy</span>() }
     }
 }
 

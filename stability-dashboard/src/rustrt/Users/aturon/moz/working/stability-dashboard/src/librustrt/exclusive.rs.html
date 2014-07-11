@@ -7,8 +7,6 @@
 
     <title>exclusive.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -156,17 +154,17 @@
 <span id='114'>114</span>
 <span id='115'>115</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
+<span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
 
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>ty</span>::<span class='ident'>Unsafe</span>;
 <span class='kw'>use</span> <span class='ident'>mutex</span>;
@@ -185,10 +183,10 @@
 }
 
 <span class='doccomment'>/// An RAII guard returned via `lock`</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ExclusiveGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {<span class='comment'>
-    // FIXME #12808: strange name to try to avoid interfering with
-    // field accesses of the contained type via Deref
-    </span><span class='ident'>_data</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>T</span>,
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ExclusiveGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
+    <span class='comment'>// FIXME #12808: strange name to try to avoid interfering with</span>
+    <span class='comment'>// field accesses of the contained type via Deref</span>
+    <span class='ident'>_data</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>T</span>,
     <span class='ident'>_guard</span>: <span class='ident'>mutex</span>::<span class='ident'>LockGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>,
 }
 
@@ -217,10 +215,10 @@
     }
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>: <span class='ident'>Send</span><span class='op'>&gt;</span> <span class='ident'>ExclusiveGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {<span class='comment'>
-    // The unsafety here should be ok because our loan guarantees that the lock
-    // itself is not moving
-    </span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>signal</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) {
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>: <span class='ident'>Send</span><span class='op'>&gt;</span> <span class='ident'>ExclusiveGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
+    <span class='comment'>// The unsafety here should be ok because our loan guarantees that the lock</span>
+    <span class='comment'>// itself is not moving</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>signal</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) {
         <span class='kw'>unsafe</span> { <span class='self'>self</span>.<span class='ident'>_guard</span>.<span class='ident'>signal</span>() }
     }
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>wait</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) {

@@ -7,8 +7,6 @@
 
     <title>lru_cache.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -389,18 +387,18 @@
 <span id='347'>347</span>
 <span id='348'>348</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
 
-</span><span class='doccomment'>//! A cache that holds a limited number of key-value pairs. When the</span>
+<span class='doccomment'>//! A cache that holds a limited number of key-value pairs. When the</span>
 <span class='doccomment'>//! capacity of the cache is exceeded, the least-recently-used</span>
 <span class='doccomment'>//! (where &quot;used&quot; means a look-up or putting the pair into the cache)</span>
 <span class='doccomment'>//! pair is automatically removed.</span>
@@ -511,9 +509,9 @@
             }
         };
         <span class='kw'>match</span> <span class='ident'>node_opt</span> {
-            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {<span class='comment'>
-                // Existing node, just update LRU position
-                </span><span class='self'>self</span>.<span class='ident'>detach</span>(<span class='ident'>node_ptr</span>);
+            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
+                <span class='comment'>// Existing node, just update LRU position</span>
+                <span class='self'>self</span>.<span class='ident'>detach</span>(<span class='ident'>node_ptr</span>);
                 <span class='self'>self</span>.<span class='ident'>attach</span>(<span class='ident'>node_ptr</span>);
             }
             <span class='prelude-val'>Some</span>(<span class='ident'>node</span>) <span class='op'>=&gt;</span> {
@@ -635,9 +633,9 @@
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>LruCache</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span> {
     <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
         <span class='kw'>unsafe</span> {
-            <span class='kw'>let</span> <span class='ident'>node</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>LruEntry</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;&gt;</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='self'>self</span>.<span class='ident'>head</span>);<span class='comment'>
-            // Prevent compiler from trying to drop the un-initialized field in the sigil node.
-            </span><span class='kw'>let</span> <span class='kw'>box</span> <span class='ident'>LruEntry</span> { <span class='ident'>key</span>: <span class='ident'>k</span>, <span class='ident'>value</span>: <span class='ident'>v</span>, .. } <span class='op'>=</span> <span class='ident'>node</span>;
+            <span class='kw'>let</span> <span class='ident'>node</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>LruEntry</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;&gt;</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='self'>self</span>.<span class='ident'>head</span>);
+            <span class='comment'>// Prevent compiler from trying to drop the un-initialized field in the sigil node.</span>
+            <span class='kw'>let</span> <span class='kw'>box</span> <span class='ident'>LruEntry</span> { <span class='ident'>key</span>: <span class='ident'>k</span>, <span class='ident'>value</span>: <span class='ident'>v</span>, .. } <span class='op'>=</span> <span class='ident'>node</span>;
             <span class='ident'>mem</span>::<span class='ident'>forget</span>(<span class='ident'>k</span>);
             <span class='ident'>mem</span>::<span class='ident'>forget</span>(<span class='ident'>v</span>);
         }
@@ -710,20 +708,20 @@
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_to_str</span>() {
+    <span class='kw'>fn</span> <span class='ident'>test_to_string</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>cache</span>: <span class='ident'>LruCache</span><span class='op'>&lt;</span><span class='ident'>int</span>, <span class='ident'>int</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>LruCache</span>::<span class='ident'>new</span>(<span class='number'>3</span>);
         <span class='ident'>cache</span>.<span class='ident'>put</span>(<span class='number'>1</span>, <span class='number'>10</span>);
         <span class='ident'>cache</span>.<span class='ident'>put</span>(<span class='number'>2</span>, <span class='number'>20</span>);
         <span class='ident'>cache</span>.<span class='ident'>put</span>(<span class='number'>3</span>, <span class='number'>30</span>);
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>to_str</span>(), <span class='string'>&quot;{3: 30, 2: 20, 1: 10}&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;{3: 30, 2: 20, 1: 10}&quot;</span>.<span class='ident'>to_string</span>());
         <span class='ident'>cache</span>.<span class='ident'>put</span>(<span class='number'>2</span>, <span class='number'>22</span>);
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>to_str</span>(), <span class='string'>&quot;{2: 22, 3: 30, 1: 10}&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;{2: 22, 3: 30, 1: 10}&quot;</span>.<span class='ident'>to_string</span>());
         <span class='ident'>cache</span>.<span class='ident'>put</span>(<span class='number'>6</span>, <span class='number'>60</span>);
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>to_str</span>(), <span class='string'>&quot;{6: 60, 2: 22, 3: 30}&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;{6: 60, 2: 22, 3: 30}&quot;</span>.<span class='ident'>to_string</span>());
         <span class='ident'>cache</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='number'>3</span>);
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>to_str</span>(), <span class='string'>&quot;{3: 30, 6: 60, 2: 22}&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;{3: 30, 6: 60, 2: 22}&quot;</span>.<span class='ident'>to_string</span>());
         <span class='ident'>cache</span>.<span class='ident'>change_capacity</span>(<span class='number'>2</span>);
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>to_str</span>(), <span class='string'>&quot;{3: 30, 6: 60}&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;{3: 30, 6: 60}&quot;</span>.<span class='ident'>to_string</span>());
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -734,7 +732,7 @@
         <span class='ident'>cache</span>.<span class='ident'>clear</span>();
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='number'>1</span>).<span class='ident'>is_none</span>());
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='number'>2</span>).<span class='ident'>is_none</span>());
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>to_str</span>(), <span class='string'>&quot;{}&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;{}&quot;</span>.<span class='ident'>to_string</span>());
     }
 }
 </pre>

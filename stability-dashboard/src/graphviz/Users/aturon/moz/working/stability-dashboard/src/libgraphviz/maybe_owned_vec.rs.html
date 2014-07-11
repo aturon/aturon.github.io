@@ -7,8 +7,6 @@
 
     <title>maybe_owned_vec.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -217,38 +215,38 @@
 <span id='175'>175</span>
 <span id='176'>176</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>Collection</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>Collection</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>default</span>::<span class='ident'>Default</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fmt</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>iter</span>::<span class='ident'>FromIterator</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>path</span>::<span class='ident'>BytesContainer</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>slice</span>;<span class='comment'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>slice</span>;
 
-// Note 1: It is not clear whether the flexibility of providing both
-// the `Growable` and `FixedLen` variants is sufficiently useful.
-// Consider restricting to just a two variant enum.
+<span class='comment'>// Note 1: It is not clear whether the flexibility of providing both</span>
+<span class='comment'>// the `Growable` and `FixedLen` variants is sufficiently useful.</span>
+<span class='comment'>// Consider restricting to just a two variant enum.</span>
 
-// Note 2: Once Dynamically Sized Types (DST) lands, it might be
-// reasonable to replace this with something like `enum MaybeOwned&lt;&#39;a,
-// Sized? U&gt;{ Owned(Box&lt;U&gt;), Borrowed(&amp;&#39;a U) }`; and then `U` could be
-// instantiated with `[T]` or `str`, etc.  Of course, that would imply
-// removing the `Growable` variant, which relates to note 1 above.
-// Alternatively, we might add `MaybeOwned` for the general case but
-// keep some form of `MaybeOwnedVector` to avoid unnecessary copying
-// of the contents of `Vec&lt;T&gt;`, since we anticipate that to be a
-// frequent way to dynamically construct a vector.
+<span class='comment'>// Note 2: Once Dynamically Sized Types (DST) lands, it might be</span>
+<span class='comment'>// reasonable to replace this with something like `enum MaybeOwned&lt;&#39;a,</span>
+<span class='comment'>// Sized? U&gt;{ Owned(Box&lt;U&gt;), Borrowed(&amp;&#39;a U) }`; and then `U` could be</span>
+<span class='comment'>// instantiated with `[T]` or `str`, etc.  Of course, that would imply</span>
+<span class='comment'>// removing the `Growable` variant, which relates to note 1 above.</span>
+<span class='comment'>// Alternatively, we might add `MaybeOwned` for the general case but</span>
+<span class='comment'>// keep some form of `MaybeOwnedVector` to avoid unnecessary copying</span>
+<span class='comment'>// of the contents of `Vec&lt;T&gt;`, since we anticipate that to be a</span>
+<span class='comment'>// frequent way to dynamically construct a vector.</span>
 
-</span><span class='doccomment'>/// MaybeOwnedVector&lt;&#39;a,T&gt; abstracts over `Vec&lt;T&gt;`, `&amp;&#39;a [T]`.</span>
+<span class='doccomment'>/// MaybeOwnedVector&lt;&#39;a,T&gt; abstracts over `Vec&lt;T&gt;`, `&amp;&#39;a [T]`.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// Some clients will have a pre-allocated vector ready to hand off in</span>
 <span class='doccomment'>/// a slice; others will want to create the set on the fly and hand</span>
@@ -307,18 +305,18 @@
     <span class='kw'>fn</span> <span class='ident'>equiv</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='ident'>V</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
         <span class='self'>self</span>.<span class='ident'>as_slice</span>() <span class='op'>==</span> <span class='ident'>other</span>.<span class='ident'>as_slice</span>()
     }
-}<span class='comment'>
+}
 
-// The `Vector` trait is provided in the prelude and is implemented on
-// both `&amp;&#39;a [T]` and `Vec&lt;T&gt;`, so it makes sense to try to support it
-// seamlessly.  The other vector related traits from the prelude do
-// not appear to be implemented on both `&amp;&#39;a [T]` and `Vec&lt;T&gt;`.  (It
-// is possible that this is an oversight in some cases.)
-//
-// In any case, with `Vector` in place, the client can just use
-// `as_slice` if they prefer that over `match`.
+<span class='comment'>// The `Vector` trait is provided in the prelude and is implemented on</span>
+<span class='comment'>// both `&amp;&#39;a [T]` and `Vec&lt;T&gt;`, so it makes sense to try to support it</span>
+<span class='comment'>// seamlessly.  The other vector related traits from the prelude do</span>
+<span class='comment'>// not appear to be implemented on both `&amp;&#39;a [T]` and `Vec&lt;T&gt;`.  (It</span>
+<span class='comment'>// is possible that this is an oversight in some cases.)</span>
+<span class='comment'>//</span>
+<span class='comment'>// In any case, with `Vector` in place, the client can just use</span>
+<span class='comment'>// `as_slice` if they prefer that over `match`.</span>
 
-</span><span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;b</span>,<span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>slice</span>::<span class='ident'>Vector</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>MaybeOwnedVector</span><span class='op'>&lt;</span><span class='lifetime'>&#39;b</span>,<span class='ident'>T</span><span class='op'>&gt;</span> {
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;b</span>,<span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>slice</span>::<span class='ident'>Vector</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>MaybeOwnedVector</span><span class='op'>&lt;</span><span class='lifetime'>&#39;b</span>,<span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='kw'>fn</span> <span class='ident'>as_slice</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> [<span class='ident'>T</span>] {
         <span class='kw'>match</span> <span class='self'>self</span> {
             <span class='kw-2'>&amp;</span><span class='ident'>Growable</span>(<span class='kw-2'>ref</span> <span class='ident'>v</span>) <span class='op'>=&gt;</span> <span class='ident'>v</span>.<span class='ident'>as_slice</span>(),
@@ -328,10 +326,10 @@
 }
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>,<span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>FromIterator</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>MaybeOwnedVector</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>,<span class='ident'>T</span><span class='op'>&gt;</span> {
-    <span class='kw'>fn</span> <span class='ident'>from_iter</span><span class='op'>&lt;</span><span class='ident'>I</span>:<span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>(<span class='ident'>iterator</span>: <span class='ident'>I</span>) <span class='op'>-&gt;</span> <span class='ident'>MaybeOwnedVector</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {<span class='comment'>
-        // If we are building from scratch, might as well build the
-        // most flexible variant.
-        </span><span class='ident'>Growable</span>(<span class='ident'>FromIterator</span>::<span class='ident'>from_iter</span>(<span class='ident'>iterator</span>))
+    <span class='kw'>fn</span> <span class='ident'>from_iter</span><span class='op'>&lt;</span><span class='ident'>I</span>:<span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>(<span class='ident'>iterator</span>: <span class='ident'>I</span>) <span class='op'>-&gt;</span> <span class='ident'>MaybeOwnedVector</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+        <span class='comment'>// If we are building from scratch, might as well build the</span>
+        <span class='comment'>// most flexible variant.</span>
+        <span class='ident'>Growable</span>(<span class='ident'>FromIterator</span>::<span class='ident'>from_iter</span>(<span class='ident'>iterator</span>))
     }
 }
 

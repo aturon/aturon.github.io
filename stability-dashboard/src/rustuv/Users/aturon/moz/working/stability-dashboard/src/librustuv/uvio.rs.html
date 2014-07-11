@@ -7,11 +7,9 @@
 
     <title>uvio.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
-    
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
     
 </head>
 <body>
@@ -25,7 +23,7 @@
     
 
     <section class="sidebar">
-        
+        <a href='../../../../../../../../../rustuv/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
         
     </section>
 
@@ -367,17 +365,17 @@
 <span id='325'>325</span>
 <span id='326'>326</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! The implementation of `rtio` for libuv</span>
+<span class='doccomment'>//! The implementation of `rtio` for libuv</span>
 
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>c_str</span>::<span class='ident'>CString</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
@@ -404,10 +402,10 @@
 <span class='kw'>use</span> <span class='ident'>signal</span>::<span class='ident'>SignalWatcher</span>;
 <span class='kw'>use</span> <span class='ident'>timer</span>::<span class='ident'>TimerWatcher</span>;
 <span class='kw'>use</span> <span class='ident'>tty</span>::<span class='ident'>TtyWatcher</span>;
-<span class='kw'>use</span> <span class='ident'>uvll</span>;<span class='comment'>
+<span class='kw'>use</span> <span class='ident'>uvll</span>;
 
-// Obviously an Event Loop is always home.
-</span><span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>UvEventLoop</span> {
+<span class='comment'>// Obviously an Event Loop is always home.</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>UvEventLoop</span> {
     <span class='ident'>uvio</span>: <span class='ident'>UvIoFactory</span>
 }
 
@@ -425,17 +423,17 @@
 }
 
 <span class='kw'>impl</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>UvEventLoop</span> {
-    <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {<span class='comment'>
-        // Must first destroy the pool of handles before we destroy the loop
-        // because otherwise the contained async handle will be destroyed after
-        // the loop is free&#39;d (use-after-free). We also must free the uv handle
-        // after the loop has been closed because during the closing of the loop
-        // the handle is required to be used apparently.
-        //
-        // Lastly, after we&#39;ve closed the pool of handles we pump the event loop
-        // one last time to run any closing callbacks to make sure the loop
-        // shuts down cleanly.
-        </span><span class='kw'>let</span> <span class='ident'>handle</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>uvio</span>.<span class='ident'>handle_pool</span>.<span class='ident'>get_ref</span>().<span class='ident'>handle</span>();
+    <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
+        <span class='comment'>// Must first destroy the pool of handles before we destroy the loop</span>
+        <span class='comment'>// because otherwise the contained async handle will be destroyed after</span>
+        <span class='comment'>// the loop is free&#39;d (use-after-free). We also must free the uv handle</span>
+        <span class='comment'>// after the loop has been closed because during the closing of the loop</span>
+        <span class='comment'>// the handle is required to be used apparently.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// Lastly, after we&#39;ve closed the pool of handles we pump the event loop</span>
+        <span class='comment'>// one last time to run any closing callbacks to make sure the loop</span>
+        <span class='comment'>// shuts down cleanly.</span>
+        <span class='kw'>let</span> <span class='ident'>handle</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>uvio</span>.<span class='ident'>handle_pool</span>.<span class='ident'>get_ref</span>().<span class='ident'>handle</span>();
         <span class='ident'>drop</span>(<span class='self'>self</span>.<span class='ident'>uvio</span>.<span class='ident'>handle_pool</span>.<span class='ident'>take</span>());
         <span class='self'>self</span>.<span class='ident'>run</span>();
 
@@ -497,19 +495,19 @@
 <span class='kw'>impl</span> <span class='ident'>UvIoFactory</span> {
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>uv_loop</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uvll</span>::<span class='ident'>uv_loop_t</span> { <span class='self'>self</span>.<span class='ident'>loop_</span>.<span class='ident'>handle</span> }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>make_handle</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>HomeHandle</span> {<span class='comment'>
-        // It&#39;s understood by the homing code that the &quot;local id&quot; is just the
-        // pointer of the local I/O factory cast to a uint.
-        </span><span class='kw'>let</span> <span class='ident'>id</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute_copy</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) };
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>make_handle</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>HomeHandle</span> {
+        <span class='comment'>// It&#39;s understood by the homing code that the &quot;local id&quot; is just the</span>
+        <span class='comment'>// pointer of the local I/O factory cast to a uint.</span>
+        <span class='kw'>let</span> <span class='ident'>id</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute_copy</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) };
         <span class='ident'>HomeHandle</span>::<span class='ident'>new</span>(<span class='ident'>id</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='op'>*</span><span class='self'>self</span>.<span class='ident'>handle_pool</span>.<span class='ident'>get_mut_ref</span>())
     }
 }
 
-<span class='kw'>impl</span> <span class='ident'>IoFactory</span> <span class='kw'>for</span> <span class='ident'>UvIoFactory</span> {<span class='comment'>
-    // Connect to an address and return a new stream
-    // NB: This blocks the task waiting on the connection.
-    // It would probably be better to return a future
-    </span><span class='kw'>fn</span> <span class='ident'>tcp_connect</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>addr</span>: <span class='ident'>rtio</span>::<span class='ident'>SocketAddr</span>, <span class='ident'>timeout</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>u64</span><span class='op'>&gt;</span>)
+<span class='kw'>impl</span> <span class='ident'>IoFactory</span> <span class='kw'>for</span> <span class='ident'>UvIoFactory</span> {
+    <span class='comment'>// Connect to an address and return a new stream</span>
+    <span class='comment'>// NB: This blocks the task waiting on the connection.</span>
+    <span class='comment'>// It would probably be better to return a future</span>
+    <span class='kw'>fn</span> <span class='ident'>tcp_connect</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>addr</span>: <span class='ident'>rtio</span>::<span class='ident'>SocketAddr</span>, <span class='ident'>timeout</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>u64</span><span class='op'>&gt;</span>)
                    <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>rtio</span>::<span class='ident'>RtioTcpStream</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;&gt;</span> {
         <span class='kw'>match</span> <span class='ident'>TcpWatcher</span>::<span class='ident'>connect</span>(<span class='self'>self</span>, <span class='ident'>addr</span>, <span class='ident'>timeout</span>) {
             <span class='prelude-val'>Ok</span>(<span class='ident'>t</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='kw'>box</span> <span class='ident'>t</span> <span class='kw'>as</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>rtio</span>::<span class='ident'>RtioTcpStream</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>),
@@ -559,9 +557,9 @@
             <span class='ident'>rtio</span>::<span class='ident'>Open</span> <span class='op'>=&gt;</span> <span class='number'>0</span>,
             <span class='ident'>rtio</span>::<span class='ident'>Append</span> <span class='op'>=&gt;</span> <span class='ident'>libc</span>::<span class='ident'>O_APPEND</span>,
             <span class='ident'>rtio</span>::<span class='ident'>Truncate</span> <span class='op'>=&gt;</span> <span class='ident'>libc</span>::<span class='ident'>O_TRUNC</span>,
-        };<span class='comment'>
-        // Opening with a write permission must silently create the file.
-        </span><span class='kw'>let</span> (<span class='ident'>flags</span>, <span class='ident'>mode</span>) <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>fa</span> {
+        };
+        <span class='comment'>// Opening with a write permission must silently create the file.</span>
+        <span class='kw'>let</span> (<span class='ident'>flags</span>, <span class='ident'>mode</span>) <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>fa</span> {
             <span class='ident'>rtio</span>::<span class='ident'>Read</span> <span class='op'>=&gt;</span> (<span class='ident'>flags</span> <span class='op'>|</span> <span class='ident'>libc</span>::<span class='ident'>O_RDONLY</span>, <span class='number'>0</span>),
             <span class='ident'>rtio</span>::<span class='ident'>Write</span> <span class='op'>=&gt;</span> (<span class='ident'>flags</span> <span class='op'>|</span> <span class='ident'>libc</span>::<span class='ident'>O_WRONLY</span> <span class='op'>|</span> <span class='ident'>libc</span>::<span class='ident'>O_CREAT</span>,
                             <span class='ident'>libc</span>::<span class='ident'>S_IRUSR</span> <span class='op'>|</span> <span class='ident'>libc</span>::<span class='ident'>S_IWUSR</span>),
@@ -735,11 +733,11 @@
     <script>
         window.rootPath = "../../../../../../../../../";
         window.currentCrate = "rustuv";
-        window.playgroundUrl = "";
+        window.playgroundUrl = "http://play.rust-lang.org/";
     </script>
     <script src="../../../../../../../../../jquery.js"></script>
     <script src="../../../../../../../../../main.js"></script>
-    
+    <script src="../../../../../../../../../playpen.js"></script>
     <script async src="../../../../../../../../../search-index.js"></script>
 </body>
 </html>

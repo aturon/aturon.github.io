@@ -7,8 +7,6 @@
 
     <title>std::io::net::tcp::TcpListener - Rust</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -41,7 +39,7 @@
     </nav>
 
     <section id='main' class="content struct">
-<h1 class='fqn'>Struct <a href='../../../index.html'>std</a>::<a href='../../index.html'>io</a>::<a href='../index.html'>net</a>::<a href='index.html'>tcp</a>::<a class='struct' href=''>TcpListener</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-35572' href='../../../../src/std/Users/aturon/moz/working/stability-dashboard/src/libstd/io/net/tcp.rs.html#328-330'>[src]</a></span></h1>
+<h1 class='fqn'>Struct <a href='../../../index.html'>std</a>::<a href='../../index.html'>io</a>::<a href='../index.html'>net</a>::<a href='index.html'>tcp</a>::<a class='struct' href=''>TcpListener</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-35711' href='../../../../src/std/Users/aturon/moz/working/stability-dashboard/src/libstd/io/net/tcp.rs.html#328-330'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct TcpListener {
     // some fields omitted
 }</pre><div class='docblock'><p>A structure representing a socket server. This listener is used to create a
@@ -80,27 +78,27 @@ drop(acceptor);
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>TcpListener</span>, <span class='ident'>TcpStream</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>Acceptor</span>, <span class='ident'>Listener</span>};
 
-<span class='kw'>let</span> <span class='ident'>listener</span> <span class='op'>=</span> <span class='ident'>TcpListener</span>::<span class='ident'>bind</span>(<span class='string'>&quot;127.0.0.1&quot;</span>, <span class='number'>80</span>);<span class='comment'>
+<span class='kw'>let</span> <span class='ident'>listener</span> <span class='op'>=</span> <span class='ident'>TcpListener</span>::<span class='ident'>bind</span>(<span class='string'>&quot;127.0.0.1&quot;</span>, <span class='number'>80</span>);
 
-// bind the listener to the specified address
-</span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>acceptor</span> <span class='op'>=</span> <span class='ident'>listener</span>.<span class='ident'>listen</span>();
+<span class='comment'>// bind the listener to the specified address</span>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>acceptor</span> <span class='op'>=</span> <span class='ident'>listener</span>.<span class='ident'>listen</span>();
 
-<span class='kw'>fn</span> <span class='ident'>handle_client</span>(<span class='kw-2'>mut</span> <span class='ident'>stream</span>: <span class='ident'>TcpStream</span>) {<span class='comment'>
-    // ...
-</span>}<span class='comment'>
-// accept connections and process them, spawning a new tasks for each one
-</span><span class='kw'>for</span> <span class='ident'>stream</span> <span class='kw'>in</span> <span class='ident'>acceptor</span>.<span class='ident'>incoming</span>() {
+<span class='kw'>fn</span> <span class='ident'>handle_client</span>(<span class='kw-2'>mut</span> <span class='ident'>stream</span>: <span class='ident'>TcpStream</span>) {
+    <span class='comment'>// ...</span>
+}
+<span class='comment'>// accept connections and process them, spawning a new tasks for each one</span>
+<span class='kw'>for</span> <span class='ident'>stream</span> <span class='kw'>in</span> <span class='ident'>acceptor</span>.<span class='ident'>incoming</span>() {
     <span class='kw'>match</span> <span class='ident'>stream</span> {
-        <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {<span class='comment'> /* connection failed */ </span>}
-        <span class='prelude-val'>Ok</span>(<span class='ident'>stream</span>) <span class='op'>=&gt;</span> <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {<span class='comment'>
-            // connection succeeded
-            </span><span class='ident'>handle_client</span>(<span class='ident'>stream</span>)
+        <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> { <span class='comment'>/* connection failed */</span> }
+        <span class='prelude-val'>Ok</span>(<span class='ident'>stream</span>) <span class='op'>=&gt;</span> <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+            <span class='comment'>// connection succeeded</span>
+            <span class='ident'>handle_client</span>(<span class='ident'>stream</span>)
         })
     }
-}<span class='comment'>
+}
 
-// close the socket server
-</span><span class='ident'>drop</span>(<span class='ident'>acceptor</span>);
+<span class='comment'>// close the socket server</span>
+<span class='ident'>drop</span>(<span class='ident'>acceptor</span>);
 </pre>
 </div><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='struct' href='../../../../std/io/net/tcp/struct.TcpListener.html' title='std::io::net::tcp::TcpListener'>TcpListener</a></code></h3><div class='impl-methods'><h4 id='method.bind' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.bind' class='fnname'>bind</a>(addr: &amp;<a href='../../../primitive.str.html'>str</a>, port: <a href='../../../primitive.u16.html'>u16</a>) -&gt; <a class='type' href='../../../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;<a class='struct' href='../../../../std/io/net/tcp/struct.TcpListener.html' title='std::io::net::tcp::TcpListener'>TcpListener</a>&gt;</code></h4>
 <div class='docblock'><p>Creates a new <code>TcpListener</code> which will be bound to the specified IP

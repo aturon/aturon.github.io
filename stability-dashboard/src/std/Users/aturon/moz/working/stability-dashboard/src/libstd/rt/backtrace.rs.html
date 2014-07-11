@@ -7,8 +7,6 @@
 
     <title>backtrace.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -1065,21 +1063,20 @@
 <span id='1023'>1023</span>
 <span id='1024'>1024</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! Simple backtrace functionality (to print on failure)</span>
+<span class='doccomment'>//! Simple backtrace functionality (to print on failure)</span>
 
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>non_camel_case_types</span>)]</span>
 
-<span class='kw'>use</span> <span class='ident'>char</span>::<span class='ident'>Char</span>;
 <span class='kw'>use</span> <span class='ident'>collections</span>::<span class='ident'>Collection</span>;
 <span class='kw'>use</span> <span class='ident'>from_str</span>::<span class='ident'>from_str</span>;
 <span class='kw'>use</span> <span class='ident'>io</span>::{<span class='ident'>IoResult</span>, <span class='ident'>Writer</span>};
@@ -1089,12 +1086,13 @@
 <span class='kw'>use</span> <span class='ident'>result</span>::{<span class='prelude-val'>Ok</span>, <span class='prelude-val'>Err</span>};
 <span class='kw'>use</span> <span class='ident'>str</span>::<span class='ident'>StrSlice</span>;
 <span class='kw'>use</span> <span class='ident'>sync</span>::<span class='ident'>atomics</span>;
+<span class='kw'>use</span> <span class='ident'>unicode</span>::<span class='ident'>UnicodeChar</span>;
 
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>imp</span>::<span class='ident'>write</span>;<span class='comment'>
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>imp</span>::<span class='ident'>write</span>;
 
-// For now logging is turned off by default, and this function checks to see
-// whether the magical environment variable is present to see if it&#39;s turned on.
-</span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>log_enabled</span>() <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+<span class='comment'>// For now logging is turned off by default, and this function checks to see</span>
+<span class='comment'>// whether the magical environment variable is present to see if it&#39;s turned on.</span>
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>log_enabled</span>() <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>static</span> <span class='kw-2'>mut</span> <span class='ident'>ENABLED</span>: <span class='ident'>atomics</span>::<span class='ident'>AtomicInt</span> <span class='op'>=</span> <span class='ident'>atomics</span>::<span class='ident'>INIT_ATOMIC_INT</span>;
     <span class='kw'>unsafe</span> {
         <span class='kw'>match</span> <span class='ident'>ENABLED</span>.<span class='ident'>load</span>(<span class='ident'>atomics</span>::<span class='ident'>SeqCst</span>) {
@@ -1113,30 +1111,30 @@
 }
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_word_size</span> <span class='op'>=</span> <span class='string'>&quot;64&quot;</span>)]</span> <span class='kw'>static</span> <span class='ident'>HEX_WIDTH</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='number'>18</span>;
-<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_word_size</span> <span class='op'>=</span> <span class='string'>&quot;32&quot;</span>)]</span> <span class='kw'>static</span> <span class='ident'>HEX_WIDTH</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='number'>10</span>;<span class='comment'>
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_word_size</span> <span class='op'>=</span> <span class='string'>&quot;32&quot;</span>)]</span> <span class='kw'>static</span> <span class='ident'>HEX_WIDTH</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='number'>10</span>;
 
-// All rust symbols are in theory lists of &quot;::&quot;-separated identifiers. Some
-// assemblers, however, can&#39;t handle these characters in symbol names. To get
-// around this, we use C++-style mangling. The mangling method is:
-//
-// 1. Prefix the symbol with &quot;_ZN&quot;
-// 2. For each element of the path, emit the length plus the element
-// 3. End the path with &quot;E&quot;
-//
-// For example, &quot;_ZN4testE&quot; =&gt; &quot;test&quot; and &quot;_ZN3foo3bar&quot; =&gt; &quot;foo::bar&quot;.
-//
-// We&#39;re the ones printing our backtraces, so we can&#39;t rely on anything else to
-// demangle our symbols. It&#39;s *much* nicer to look at demangled symbols, so
-// this function is implemented to give us nice pretty output.
-//
-// Note that this demangler isn&#39;t quite as fancy as it could be. We have lots
-// of other information in our symbols like hashes, version, type information,
-// etc. Additionally, this doesn&#39;t handle glue symbols at all.
-</span><span class='kw'>fn</span> <span class='ident'>demangle</span>(<span class='ident'>writer</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Writer</span>, <span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {<span class='comment'>
-    // First validate the symbol. If it doesn&#39;t look like anything we&#39;re
-    // expecting, we just print it literally. Note that we must handle non-rust
-    // symbols because we could have any function in the backtrace.
-    </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>valid</span> <span class='op'>=</span> <span class='boolval'>true</span>;
+<span class='comment'>// All rust symbols are in theory lists of &quot;::&quot;-separated identifiers. Some</span>
+<span class='comment'>// assemblers, however, can&#39;t handle these characters in symbol names. To get</span>
+<span class='comment'>// around this, we use C++-style mangling. The mangling method is:</span>
+<span class='comment'>//</span>
+<span class='comment'>// 1. Prefix the symbol with &quot;_ZN&quot;</span>
+<span class='comment'>// 2. For each element of the path, emit the length plus the element</span>
+<span class='comment'>// 3. End the path with &quot;E&quot;</span>
+<span class='comment'>//</span>
+<span class='comment'>// For example, &quot;_ZN4testE&quot; =&gt; &quot;test&quot; and &quot;_ZN3foo3bar&quot; =&gt; &quot;foo::bar&quot;.</span>
+<span class='comment'>//</span>
+<span class='comment'>// We&#39;re the ones printing our backtraces, so we can&#39;t rely on anything else to</span>
+<span class='comment'>// demangle our symbols. It&#39;s *much* nicer to look at demangled symbols, so</span>
+<span class='comment'>// this function is implemented to give us nice pretty output.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Note that this demangler isn&#39;t quite as fancy as it could be. We have lots</span>
+<span class='comment'>// of other information in our symbols like hashes, version, type information,</span>
+<span class='comment'>// etc. Additionally, this doesn&#39;t handle glue symbols at all.</span>
+<span class='kw'>fn</span> <span class='ident'>demangle</span>(<span class='ident'>writer</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Writer</span>, <span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+    <span class='comment'>// First validate the symbol. If it doesn&#39;t look like anything we&#39;re</span>
+    <span class='comment'>// expecting, we just print it literally. Note that we must handle non-rust</span>
+    <span class='comment'>// symbols because we could have any function in the backtrace.</span>
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>valid</span> <span class='op'>=</span> <span class='boolval'>true</span>;
     <span class='kw'>if</span> <span class='ident'>s</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='number'>4</span> <span class='op'>&amp;&amp;</span> <span class='ident'>s</span>.<span class='ident'>starts_with</span>(<span class='string'>&quot;_ZN&quot;</span>) <span class='op'>&amp;&amp;</span> <span class='ident'>s</span>.<span class='ident'>ends_with</span>(<span class='string'>&quot;E&quot;</span>) {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>chars</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>slice</span>(<span class='number'>3</span>, <span class='ident'>s</span>.<span class='ident'>len</span>() <span class='op'>-</span> <span class='number'>1</span>).<span class='ident'>chars</span>();
         <span class='kw'>while</span> <span class='ident'>valid</span> {
@@ -1157,10 +1155,10 @@
         }
     } <span class='kw'>else</span> {
         <span class='ident'>valid</span> <span class='op'>=</span> <span class='boolval'>false</span>;
-    }<span class='comment'>
+    }
 
-    // Alright, let&#39;s do this.
-    </span><span class='kw'>if</span> <span class='op'>!</span><span class='ident'>valid</span> {
+    <span class='comment'>// Alright, let&#39;s do this.</span>
+    <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>valid</span> {
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>writer</span>.<span class='ident'>write_str</span>(<span class='ident'>s</span>));
     } <span class='kw'>else</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>slice_from</span>(<span class='number'>3</span>);
@@ -1192,9 +1190,9 @@
                             }
 
                         })
-                    )<span class='comment'>
-                    // see src/librustc/back/link.rs for these mappings
-                    </span><span class='macro'>demangle</span><span class='macro'>!</span> (
+                    )
+                    <span class='comment'>// see src/librustc/back/link.rs for these mappings</span>
+                    <span class='macro'>demangle</span><span class='macro'>!</span> (
                         <span class='string'>&quot;$SP$&quot;</span> <span class='op'>=&gt;</span> <span class='string'>&quot;@&quot;</span>,
                         <span class='string'>&quot;$UP$&quot;</span> <span class='op'>=&gt;</span> <span class='string'>&quot;Box&quot;</span>,
                         <span class='string'>&quot;$RP$&quot;</span> <span class='op'>=&gt;</span> <span class='string'>&quot;*&quot;</span>,
@@ -1203,11 +1201,11 @@
                         <span class='string'>&quot;$GT$&quot;</span> <span class='op'>=&gt;</span> <span class='string'>&quot;&gt;&quot;</span>,
                         <span class='string'>&quot;$LP$&quot;</span> <span class='op'>=&gt;</span> <span class='string'>&quot;(&quot;</span>,
                         <span class='string'>&quot;$RP$&quot;</span> <span class='op'>=&gt;</span> <span class='string'>&quot;)&quot;</span>,
-                        <span class='string'>&quot;$C$&quot;</span>  <span class='op'>=&gt;</span> <span class='string'>&quot;,&quot;</span>,<span class='comment'>
+                        <span class='string'>&quot;$C$&quot;</span>  <span class='op'>=&gt;</span> <span class='string'>&quot;,&quot;</span>,
 
-                        // in theory we can demangle any unicode code point, but
-                        // for simplicity we just catch the common ones.
-                        </span><span class='string'>&quot;$x20&quot;</span> <span class='op'>=&gt;</span> <span class='string'>&quot; &quot;</span>,
+                        <span class='comment'>// in theory we can demangle any unicode code point, but</span>
+                        <span class='comment'>// for simplicity we just catch the common ones.</span>
+                        <span class='string'>&quot;$x20&quot;</span> <span class='op'>=&gt;</span> <span class='string'>&quot; &quot;</span>,
                         <span class='string'>&quot;$x27&quot;</span> <span class='op'>=&gt;</span> <span class='string'>&quot;&#39;&quot;</span>,
                         <span class='string'>&quot;$x5b&quot;</span> <span class='op'>=&gt;</span> <span class='string'>&quot;[&quot;</span>,
                         <span class='string'>&quot;$x5d&quot;</span> <span class='op'>=&gt;</span> <span class='string'>&quot;]&quot;</span>
@@ -1328,46 +1326,46 @@
         <span class='kw'>use</span> <span class='ident'>slice</span>::{<span class='ident'>MutableVector</span>};
 
         <span class='kw'>extern</span> {
-            <span class='kw'>fn</span> <span class='ident'>backtrace</span>(<span class='ident'>buf</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>,
+            <span class='kw'>fn</span> <span class='ident'>backtrace</span>(<span class='ident'>buf</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>,
                          <span class='ident'>sz</span>: <span class='ident'>libc</span>::<span class='ident'>c_int</span>) <span class='op'>-&gt;</span> <span class='ident'>libc</span>::<span class='ident'>c_int</span>;
-        }<span class='comment'>
+        }
 
-        // while it doesn&#39;t requires lock for work as everything is
-        // local, it still displays much nicier backtraces when a
-        // couple of tasks fail simultaneously
-        </span><span class='kw'>static</span> <span class='kw-2'>mut</span> <span class='ident'>LOCK</span>: <span class='ident'>StaticNativeMutex</span> <span class='op'>=</span> <span class='ident'>NATIVE_MUTEX_INIT</span>;
+        <span class='comment'>// while it doesn&#39;t requires lock for work as everything is</span>
+        <span class='comment'>// local, it still displays much nicer backtraces when a</span>
+        <span class='comment'>// couple of tasks fail simultaneously</span>
+        <span class='kw'>static</span> <span class='kw-2'>mut</span> <span class='ident'>LOCK</span>: <span class='ident'>StaticNativeMutex</span> <span class='op'>=</span> <span class='ident'>NATIVE_MUTEX_INIT</span>;
         <span class='kw'>let</span> <span class='ident'>_g</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>LOCK</span>.<span class='ident'>lock</span>() };
 
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>w</span>, <span class='string'>&quot;stack backtrace:&quot;</span>));<span class='comment'>
-        // 100 lines should be enough
-        </span><span class='kw'>static</span> <span class='ident'>SIZE</span>: <span class='ident'>libc</span>::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>100</span>;
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span>: [<span class='op'>*</span><span class='kw'>const</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>, ..<span class='ident'>SIZE</span>] <span class='op'>=</span> <span class='kw'>unsafe</span> {<span class='ident'>mem</span>::<span class='ident'>zeroed</span>()};
-        <span class='kw'>let</span> <span class='ident'>cnt</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>backtrace</span>(<span class='ident'>buf</span>.<span class='ident'>as_mut_ptr</span>(), <span class='ident'>SIZE</span>) <span class='kw'>as</span> <span class='ident'>uint</span>};<span class='comment'>
+        <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>w</span>, <span class='string'>&quot;stack backtrace:&quot;</span>));
+        <span class='comment'>// 100 lines should be enough</span>
+        <span class='kw'>static</span> <span class='ident'>SIZE</span>: <span class='ident'>libc</span>::<span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>100</span>;
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span>: [<span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>, ..<span class='ident'>SIZE</span>] <span class='op'>=</span> <span class='kw'>unsafe</span> {<span class='ident'>mem</span>::<span class='ident'>zeroed</span>()};
+        <span class='kw'>let</span> <span class='ident'>cnt</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>backtrace</span>(<span class='ident'>buf</span>.<span class='ident'>as_mut_ptr</span>(), <span class='ident'>SIZE</span>) <span class='kw'>as</span> <span class='ident'>uint</span>};
 
-        // skipping the first one as it is write itself
-        </span><span class='ident'>result</span>::<span class='ident'>fold_</span>(<span class='ident'>range</span>(<span class='number'>1</span>, <span class='ident'>cnt</span>).<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>i</span><span class='op'>|</span> {
+        <span class='comment'>// skipping the first one as it is write itself</span>
+        <span class='ident'>result</span>::<span class='ident'>fold_</span>(<span class='ident'>range</span>(<span class='number'>1</span>, <span class='ident'>cnt</span>).<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>i</span><span class='op'>|</span> {
             <span class='ident'>print</span>(<span class='ident'>w</span>, <span class='ident'>i</span> <span class='kw'>as</span> <span class='ident'>int</span>, <span class='ident'>buf</span>[<span class='ident'>i</span>])
         }))
     }
 
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;ios&quot;</span>, <span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;arm&quot;</span>))]</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>never</span>)]</span><span class='comment'> // if we know this is a function call, we can skip it when
-                     // tracing
-    </span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>write</span>(<span class='ident'>w</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Writer</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>never</span>)]</span> <span class='comment'>// if we know this is a function call, we can skip it when</span>
+                     <span class='comment'>// tracing</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>write</span>(<span class='ident'>w</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Writer</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='kw'>use</span> <span class='ident'>io</span>::<span class='ident'>IoError</span>;
 
         <span class='kw'>struct</span> <span class='ident'>Context</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
             <span class='ident'>idx</span>: <span class='ident'>int</span>,
             <span class='ident'>writer</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>Writer</span>,
             <span class='ident'>last_error</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>IoError</span><span class='op'>&gt;</span>,
-        }<span class='comment'>
+        }
 
-        // When using libbacktrace, we use some necessary global state, so we
-        // need to prevent more than one thread from entering this block. This
-        // is semi-reasonable in terms of printing anyway, and we know that all
-        // I/O done here is blocking I/O, not green I/O, so we don&#39;t have to
-        // worry about this being a native vs green mutex.
-        </span><span class='kw'>static</span> <span class='kw-2'>mut</span> <span class='ident'>LOCK</span>: <span class='ident'>StaticNativeMutex</span> <span class='op'>=</span> <span class='ident'>NATIVE_MUTEX_INIT</span>;
+        <span class='comment'>// When using libbacktrace, we use some necessary global state, so we</span>
+        <span class='comment'>// need to prevent more than one thread from entering this block. This</span>
+        <span class='comment'>// is semi-reasonable in terms of printing anyway, and we know that all</span>
+        <span class='comment'>// I/O done here is blocking I/O, not green I/O, so we don&#39;t have to</span>
+        <span class='comment'>// worry about this being a native vs green mutex.</span>
+        <span class='kw'>static</span> <span class='kw-2'>mut</span> <span class='ident'>LOCK</span>: <span class='ident'>StaticNativeMutex</span> <span class='op'>=</span> <span class='ident'>NATIVE_MUTEX_INIT</span>;
         <span class='kw'>let</span> <span class='ident'>_g</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>LOCK</span>.<span class='ident'>lock</span>() };
 
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>w</span>, <span class='string'>&quot;stack backtrace:&quot;</span>));
@@ -1389,45 +1387,45 @@
         <span class='kw'>extern</span> <span class='kw'>fn</span> <span class='ident'>trace_fn</span>(<span class='ident'>ctx</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uw</span>::<span class='ident'>_Unwind_Context</span>,
                            <span class='ident'>arg</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>) <span class='op'>-&gt;</span> <span class='ident'>uw</span>::<span class='ident'>_Unwind_Reason_Code</span> {
             <span class='kw'>let</span> <span class='ident'>cx</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Context</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>arg</span>) };
-            <span class='kw'>let</span> <span class='ident'>ip</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>uw</span>::<span class='ident'>_Unwind_GetIP</span>(<span class='ident'>ctx</span>) <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span> };<span class='comment'>
-            // dladdr() on osx gets whiny when we use FindEnclosingFunction, and
-            // it appears to work fine without it, so we only use
-            // FindEnclosingFunction on non-osx platforms. In doing so, we get a
-            // slightly more accurate stack trace in the process.
-            //
-            // This is often because failure involves the last instruction of a
-            // function being &quot;call std::rt::begin_unwind&quot;, with no ret
-            // instructions after it. This means that the return instruction
-            // pointer points *outside* of the calling function, and by
-            // unwinding it we go back to the original function.
-            </span><span class='kw'>let</span> <span class='ident'>ip</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='macro'>cfg</span><span class='macro'>!</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;macos&quot;</span>) <span class='op'>||</span> <span class='macro'>cfg</span><span class='macro'>!</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;ios&quot;</span>) {
+            <span class='kw'>let</span> <span class='ident'>ip</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>uw</span>::<span class='ident'>_Unwind_GetIP</span>(<span class='ident'>ctx</span>) <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span> };
+            <span class='comment'>// dladdr() on osx gets whiny when we use FindEnclosingFunction, and</span>
+            <span class='comment'>// it appears to work fine without it, so we only use</span>
+            <span class='comment'>// FindEnclosingFunction on non-osx platforms. In doing so, we get a</span>
+            <span class='comment'>// slightly more accurate stack trace in the process.</span>
+            <span class='comment'>//</span>
+            <span class='comment'>// This is often because failure involves the last instruction of a</span>
+            <span class='comment'>// function being &quot;call std::rt::begin_unwind&quot;, with no ret</span>
+            <span class='comment'>// instructions after it. This means that the return instruction</span>
+            <span class='comment'>// pointer points *outside* of the calling function, and by</span>
+            <span class='comment'>// unwinding it we go back to the original function.</span>
+            <span class='kw'>let</span> <span class='ident'>ip</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='macro'>cfg</span><span class='macro'>!</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;macos&quot;</span>) <span class='op'>||</span> <span class='macro'>cfg</span><span class='macro'>!</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;ios&quot;</span>) {
                 <span class='ident'>ip</span>
             } <span class='kw'>else</span> {
                 <span class='kw'>unsafe</span> { <span class='ident'>uw</span>::<span class='ident'>_Unwind_FindEnclosingFunction</span>(<span class='ident'>ip</span>) }
-            };<span class='comment'>
+            };
 
-            // Don&#39;t print out the first few frames (they&#39;re not user frames)
-            </span><span class='ident'>cx</span>.<span class='ident'>idx</span> <span class='op'>+=</span> <span class='number'>1</span>;
-            <span class='kw'>if</span> <span class='ident'>cx</span>.<span class='ident'>idx</span> <span class='op'>&lt;=</span> <span class='number'>0</span> { <span class='kw'>return</span> <span class='ident'>uw</span>::<span class='ident'>_URC_NO_REASON</span> }<span class='comment'>
-            // Don&#39;t print ginormous backtraces
-            </span><span class='kw'>if</span> <span class='ident'>cx</span>.<span class='ident'>idx</span> <span class='op'>&gt;</span> <span class='number'>100</span> {
+            <span class='comment'>// Don&#39;t print out the first few frames (they&#39;re not user frames)</span>
+            <span class='ident'>cx</span>.<span class='ident'>idx</span> <span class='op'>+=</span> <span class='number'>1</span>;
+            <span class='kw'>if</span> <span class='ident'>cx</span>.<span class='ident'>idx</span> <span class='op'>&lt;=</span> <span class='number'>0</span> { <span class='kw'>return</span> <span class='ident'>uw</span>::<span class='ident'>_URC_NO_REASON</span> }
+            <span class='comment'>// Don&#39;t print ginormous backtraces</span>
+            <span class='kw'>if</span> <span class='ident'>cx</span>.<span class='ident'>idx</span> <span class='op'>&gt;</span> <span class='number'>100</span> {
                 <span class='kw'>match</span> <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>cx</span>.<span class='ident'>writer</span>, <span class='string'>&quot; ... &lt;frames omitted&gt;\n&quot;</span>) {
                     <span class='prelude-val'>Ok</span>(()) <span class='op'>=&gt;</span> {}
                     <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> { <span class='ident'>cx</span>.<span class='ident'>last_error</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>e</span>); }
                 }
                 <span class='kw'>return</span> <span class='ident'>uw</span>::<span class='ident'>_URC_FAILURE</span>
-            }<span class='comment'>
+            }
 
-            // Once we hit an error, stop trying to print more frames
-            </span><span class='kw'>if</span> <span class='ident'>cx</span>.<span class='ident'>last_error</span>.<span class='ident'>is_some</span>() { <span class='kw'>return</span> <span class='ident'>uw</span>::<span class='ident'>_URC_FAILURE</span> }
+            <span class='comment'>// Once we hit an error, stop trying to print more frames</span>
+            <span class='kw'>if</span> <span class='ident'>cx</span>.<span class='ident'>last_error</span>.<span class='ident'>is_some</span>() { <span class='kw'>return</span> <span class='ident'>uw</span>::<span class='ident'>_URC_FAILURE</span> }
 
             <span class='kw'>match</span> <span class='ident'>print</span>(<span class='ident'>cx</span>.<span class='ident'>writer</span>, <span class='ident'>cx</span>.<span class='ident'>idx</span>, <span class='ident'>ip</span>) {
                 <span class='prelude-val'>Ok</span>(()) <span class='op'>=&gt;</span> {}
                 <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> { <span class='ident'>cx</span>.<span class='ident'>last_error</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>e</span>); }
-            }<span class='comment'>
+            }
 
-            // keep going
-            </span><span class='kw'>return</span> <span class='ident'>uw</span>::<span class='ident'>_URC_NO_REASON</span>
+            <span class='comment'>// keep going</span>
+            <span class='kw'>return</span> <span class='ident'>uw</span>::<span class='ident'>_URC_NO_REASON</span>
         }
     }
 
@@ -1465,12 +1463,12 @@
         <span class='kw'>use</span> <span class='ident'>path</span>::<span class='ident'>GenericPath</span>;
         <span class='kw'>use</span> <span class='ident'>ptr</span>::<span class='ident'>RawPtr</span>;
         <span class='kw'>use</span> <span class='ident'>ptr</span>;
-        <span class='kw'>use</span> <span class='ident'>slice</span>::{<span class='ident'>ImmutableVector</span>, <span class='ident'>MutableVector</span>};<span class='comment'>
+        <span class='kw'>use</span> <span class='ident'>slice</span>::{<span class='ident'>ImmutableVector</span>, <span class='ident'>MutableVector</span>};
 
-        ////////////////////////////////////////////////////////////////////////
-        // libbacktrace.h API
-        ////////////////////////////////////////////////////////////////////////
-        </span><span class='kw'>type</span> <span class='ident'>backtrace_syminfo_callback</span> <span class='op'>=</span>
+        <span class='comment'>////////////////////////////////////////////////////////////////////////</span>
+        <span class='comment'>// libbacktrace.h API</span>
+        <span class='comment'>////////////////////////////////////////////////////////////////////////</span>
+        <span class='kw'>type</span> <span class='ident'>backtrace_syminfo_callback</span> <span class='op'>=</span>
             <span class='kw'>extern</span> <span class='string'>&quot;C&quot;</span> <span class='kw'>fn</span>(<span class='ident'>data</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>,
                           <span class='ident'>pc</span>: <span class='ident'>libc</span>::<span class='ident'>uintptr_t</span>,
                           <span class='ident'>symname</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span>,
@@ -1493,16 +1491,16 @@
                                  <span class='ident'>cb</span>: <span class='ident'>backtrace_syminfo_callback</span>,
                                  <span class='ident'>error</span>: <span class='ident'>backtrace_error_callback</span>,
                                  <span class='ident'>data</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>) <span class='op'>-&gt;</span> <span class='ident'>libc</span>::<span class='ident'>c_int</span>;
-        }<span class='comment'>
+        }
 
-        ////////////////////////////////////////////////////////////////////////
-        // helper callbacks
-        ////////////////////////////////////////////////////////////////////////
+        <span class='comment'>////////////////////////////////////////////////////////////////////////</span>
+        <span class='comment'>// helper callbacks</span>
+        <span class='comment'>////////////////////////////////////////////////////////////////////////</span>
 
-        </span><span class='kw'>extern</span> <span class='kw'>fn</span> <span class='ident'>error_cb</span>(<span class='ident'>_data</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>, <span class='ident'>_msg</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span>,
-                           <span class='ident'>_errnum</span>: <span class='ident'>libc</span>::<span class='ident'>c_int</span>) {<span class='comment'>
-            // do nothing for now
-        </span>}
+        <span class='kw'>extern</span> <span class='kw'>fn</span> <span class='ident'>error_cb</span>(<span class='ident'>_data</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>, <span class='ident'>_msg</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span>,
+                           <span class='ident'>_errnum</span>: <span class='ident'>libc</span>::<span class='ident'>c_int</span>) {
+            <span class='comment'>// do nothing for now</span>
+        }
         <span class='kw'>extern</span> <span class='kw'>fn</span> <span class='ident'>syminfo_cb</span>(<span class='ident'>data</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>,
                              <span class='ident'>_pc</span>: <span class='ident'>libc</span>::<span class='ident'>uintptr_t</span>,
                              <span class='ident'>symname</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span>,
@@ -1510,28 +1508,28 @@
                              <span class='ident'>_symsize</span>: <span class='ident'>libc</span>::<span class='ident'>uintptr_t</span>) {
             <span class='kw'>let</span> <span class='ident'>slot</span> <span class='op'>=</span> <span class='ident'>data</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span>;
             <span class='kw'>unsafe</span> { <span class='op'>*</span><span class='ident'>slot</span> <span class='op'>=</span> <span class='ident'>symname</span>; }
-        }<span class='comment'>
+        }
 
-        // The libbacktrace API supports creating a state, but it does not
-        // support destroying a state. I personally take this to mean that a
-        // state is meant to be created and then live forever.
-        //
-        // I would love to register an at_exit() handler which cleans up this
-        // state, but libbacktrace provides no way to do so.
-        //
-        // With these constraints, this function has a statically cached state
-        // that is calculated the first time this is requested. Remember that
-        // backtracing all happens serially (one global lock).
-        //
-        // An additionally oddity in this function is that we initialize the
-        // filename via self_exe_name() to pass to libbacktrace. It turns out
-        // that on linux libbacktrace seamlessly gets the filename of the
-        // current executable, but this fails on freebsd. by always providing
-        // it, we make sure that libbacktrace never has a reason to not look up
-        // the symbols. The libbacktrace API also states that the filename must
-        // be in &quot;permanent memory&quot;, so we copy it to a static and then use the
-        // static as the pointer.
-        </span><span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>init_state</span>() <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>backtrace_state</span> {
+        <span class='comment'>// The libbacktrace API supports creating a state, but it does not</span>
+        <span class='comment'>// support destroying a state. I personally take this to mean that a</span>
+        <span class='comment'>// state is meant to be created and then live forever.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// I would love to register an at_exit() handler which cleans up this</span>
+        <span class='comment'>// state, but libbacktrace provides no way to do so.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// With these constraints, this function has a statically cached state</span>
+        <span class='comment'>// that is calculated the first time this is requested. Remember that</span>
+        <span class='comment'>// backtracing all happens serially (one global lock).</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// An additionally oddity in this function is that we initialize the</span>
+        <span class='comment'>// filename via self_exe_name() to pass to libbacktrace. It turns out</span>
+        <span class='comment'>// that on linux libbacktrace seamlessly gets the filename of the</span>
+        <span class='comment'>// current executable, but this fails on freebsd. by always providing</span>
+        <span class='comment'>// it, we make sure that libbacktrace never has a reason to not look up</span>
+        <span class='comment'>// the symbols. The libbacktrace API also states that the filename must</span>
+        <span class='comment'>// be in &quot;permanent memory&quot;, so we copy it to a static and then use the</span>
+        <span class='comment'>// static as the pointer.</span>
+        <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>init_state</span>() <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>backtrace_state</span> {
             <span class='kw'>static</span> <span class='kw-2'>mut</span> <span class='ident'>STATE</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>backtrace_state</span> <span class='op'>=</span> <span class='number'>0</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>backtrace_state</span>;
             <span class='kw'>static</span> <span class='kw-2'>mut</span> <span class='ident'>LAST_FILENAME</span>: [<span class='ident'>libc</span>::<span class='ident'>c_char</span>, ..<span class='number'>256</span>] <span class='op'>=</span> [<span class='number'>0</span>, ..<span class='number'>256</span>];
             <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>STATE</span>.<span class='ident'>is_null</span>() { <span class='kw'>return</span> <span class='ident'>STATE</span> }
@@ -1558,15 +1556,15 @@
             <span class='ident'>STATE</span> <span class='op'>=</span> <span class='ident'>backtrace_create_state</span>(<span class='ident'>filename</span>, <span class='number'>0</span>, <span class='ident'>error_cb</span>,
                                            <span class='ident'>ptr</span>::<span class='ident'>mut_null</span>());
             <span class='kw'>return</span> <span class='ident'>STATE</span>
-        }<span class='comment'>
+        }
 
-        ////////////////////////////////////////////////////////////////////////
-        // translation
-        ////////////////////////////////////////////////////////////////////////
+        <span class='comment'>////////////////////////////////////////////////////////////////////////</span>
+        <span class='comment'>// translation</span>
+        <span class='comment'>////////////////////////////////////////////////////////////////////////</span>
 
-        // backtrace errors are currently swept under the rug, only I/O
-        // errors are reported
-        </span><span class='kw'>let</span> <span class='ident'>state</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>init_state</span>() };
+        <span class='comment'>// backtrace errors are currently swept under the rug, only I/O</span>
+        <span class='comment'>// errors are reported</span>
+        <span class='kw'>let</span> <span class='ident'>state</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>init_state</span>() };
         <span class='kw'>if</span> <span class='ident'>state</span>.<span class='ident'>is_null</span>() {
             <span class='kw'>return</span> <span class='ident'>output</span>(<span class='ident'>w</span>, <span class='ident'>idx</span>, <span class='ident'>addr</span>, <span class='prelude-val'>None</span>)
         }
@@ -1582,10 +1580,10 @@
         } <span class='kw'>else</span> {
             <span class='ident'>output</span>(<span class='ident'>w</span>, <span class='ident'>idx</span>, <span class='ident'>addr</span>, <span class='prelude-val'>Some</span>(<span class='kw'>unsafe</span> { <span class='ident'>CString</span>::<span class='ident'>new</span>(<span class='ident'>data</span>, <span class='boolval'>false</span>) }))
         }
-    }<span class='comment'>
+    }
 
-    // Finally, after all that work above, we can emit a symbol.
-    </span><span class='kw'>fn</span> <span class='ident'>output</span>(<span class='ident'>w</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Writer</span>, <span class='ident'>idx</span>: <span class='ident'>int</span>, <span class='ident'>addr</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>,
+    <span class='comment'>// Finally, after all that work above, we can emit a symbol.</span>
+    <span class='kw'>fn</span> <span class='ident'>output</span>(<span class='ident'>w</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Writer</span>, <span class='ident'>idx</span>: <span class='ident'>int</span>, <span class='ident'>addr</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>,
               <span class='ident'>s</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>CString</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>w</span>, <span class='string'>&quot;  {:2}: {:2$} - &quot;</span>, <span class='ident'>idx</span>, <span class='ident'>addr</span>, <span class='ident'>super</span>::<span class='ident'>HEX_WIDTH</span>));
         <span class='kw'>match</span> <span class='ident'>s</span>.<span class='ident'>as_ref</span>().<span class='ident'>and_then</span>(<span class='op'>|</span><span class='ident'>c</span><span class='op'>|</span> <span class='ident'>c</span>.<span class='ident'>as_str</span>()) {
@@ -1619,8 +1617,8 @@
             <span class='ident'>_URC_HANDLER_FOUND</span> <span class='op'>=</span> <span class='number'>6</span>,
             <span class='ident'>_URC_INSTALL_CONTEXT</span> <span class='op'>=</span> <span class='number'>7</span>,
             <span class='ident'>_URC_CONTINUE_UNWIND</span> <span class='op'>=</span> <span class='number'>8</span>,
-            <span class='ident'>_URC_FAILURE</span> <span class='op'>=</span> <span class='number'>9</span>,<span class='comment'> // used only by ARM EABI
-        </span>}
+            <span class='ident'>_URC_FAILURE</span> <span class='op'>=</span> <span class='number'>9</span>, <span class='comment'>// used only by ARM EABI</span>
+        }
 
         <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>_Unwind_Context</span> {}
 
@@ -1628,9 +1626,9 @@
                 <span class='kw'>extern</span> <span class='kw'>fn</span>(<span class='ident'>ctx</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>_Unwind_Context</span>,
                           <span class='ident'>arg</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>) <span class='op'>-&gt;</span> <span class='ident'>_Unwind_Reason_Code</span>;
 
-        <span class='kw'>extern</span> {<span class='comment'>
-            // No native _Unwind_Backtrace on iOS
-            </span><span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;ios&quot;</span>, <span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;arm&quot;</span>))]</span>
+        <span class='kw'>extern</span> {
+            <span class='comment'>// No native _Unwind_Backtrace on iOS</span>
+            <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;ios&quot;</span>, <span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;arm&quot;</span>))]</span>
             <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>_Unwind_Backtrace</span>(<span class='ident'>trace</span>: <span class='ident'>_Unwind_Trace_Fn</span>,
                                      <span class='ident'>trace_argument</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>)
                         <span class='op'>-&gt;</span> <span class='ident'>_Unwind_Reason_Code</span>;
@@ -1642,12 +1640,12 @@
                   <span class='ident'>not</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;linux&quot;</span>, <span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;arm&quot;</span>))]</span>
             <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>_Unwind_FindEnclosingFunction</span>(<span class='ident'>pc</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>)
                 <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>;
-        }<span class='comment'>
+        }
 
-        // On android, the function _Unwind_GetIP is a macro, and this is the
-        // expansion of the macro. This is all copy/pasted directly from the
-        // header file with the definition of _Unwind_GetIP.
-        </span><span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;android&quot;</span>)]</span>
+        <span class='comment'>// On android, the function _Unwind_GetIP is a macro, and this is the</span>
+        <span class='comment'>// expansion of the macro. This is all copy/pasted directly from the</span>
+        <span class='comment'>// header file with the definition of _Unwind_GetIP.</span>
+        <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;android&quot;</span>)]</span>
         <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;linux&quot;</span>, <span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;arm&quot;</span>)]</span>
         <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>_Unwind_GetIP</span>(<span class='ident'>ctx</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>_Unwind_Context</span>) <span class='op'>-&gt;</span> <span class='ident'>libc</span>::<span class='ident'>uintptr_t</span> {
             <span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span>
@@ -1688,12 +1686,12 @@
             <span class='kw'>let</span> <span class='ident'>ptr</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>val</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>_Unwind_Word</span>;
             <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>_Unwind_VRS_Get</span>(<span class='ident'>ctx</span>, <span class='ident'>_UVRSC_CORE</span>, <span class='number'>15</span>, <span class='ident'>_UVRSD_UINT32</span>,
                                     <span class='ident'>ptr</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>);
-            (<span class='ident'>val</span> <span class='op'>&amp;</span> <span class='op'>!</span><span class='number'>1</span>) <span class='kw'>as</span> <span class='ident'>libc</span>::<span class='ident'>uintptr_t</span>
-        }<span class='comment'>
+            (<span class='ident'>val</span> <span class='kw-2'>&amp;</span> <span class='op'>!</span><span class='number'>1</span>) <span class='kw'>as</span> <span class='ident'>libc</span>::<span class='ident'>uintptr_t</span>
+        }
 
-        // This function also doesn&#39;t exist on android or arm/linux, so make it
-        // a no-op
-        </span><span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;android&quot;</span>)]</span>
+        <span class='comment'>// This function also doesn&#39;t exist on android or arm/linux, so make it</span>
+        <span class='comment'>// a no-op</span>
+        <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;android&quot;</span>)]</span>
         <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;linux&quot;</span>, <span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;arm&quot;</span>)]</span>
         <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>_Unwind_FindEnclosingFunction</span>(<span class='ident'>pc</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>)
             <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>
@@ -1776,11 +1774,11 @@
         <span class='ident'>Scope</span>: <span class='ident'>libc</span>::<span class='ident'>c_ulong</span>,
         <span class='ident'>Tag</span>: <span class='ident'>libc</span>::<span class='ident'>c_ulong</span>,
         <span class='ident'>NameLen</span>: <span class='ident'>libc</span>::<span class='ident'>c_ulong</span>,
-        <span class='ident'>MaxNameLen</span>: <span class='ident'>libc</span>::<span class='ident'>c_ulong</span>,<span class='comment'>
-        // note that windows has this as 1, but it basically just means that
-        // the name is inline at the end of the struct. For us, we just bump
-        // the struct size up to MAX_SYM_NAME.
-        </span><span class='ident'>Name</span>: [<span class='ident'>libc</span>::<span class='ident'>c_char</span>, ..<span class='ident'>MAX_SYM_NAME</span>],
+        <span class='ident'>MaxNameLen</span>: <span class='ident'>libc</span>::<span class='ident'>c_ulong</span>,
+        <span class='comment'>// note that windows has this as 1, but it basically just means that</span>
+        <span class='comment'>// the name is inline at the end of the struct. For us, we just bump</span>
+        <span class='comment'>// the struct size up to MAX_SYM_NAME.</span>
+        <span class='ident'>Name</span>: [<span class='ident'>libc</span>::<span class='ident'>c_char</span>, ..<span class='ident'>MAX_SYM_NAME</span>],
     }
 
     <span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span>
@@ -1952,8 +1950,8 @@
         }
 
         <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>FLOATING_SAVE_AREA</span> {
-            <span class='ident'>_Dummy</span>: [<span class='ident'>u8</span>, ..<span class='number'>512</span>]<span class='comment'> // FIXME: Fill this out
-        </span>}
+            <span class='ident'>_Dummy</span>: [<span class='ident'>u8</span>, ..<span class='number'>512</span>] <span class='comment'>// FIXME: Fill this out</span>
+        }
 
         <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>init_frame</span>(<span class='ident'>frame</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>super</span>::<span class='ident'>STACKFRAME64</span>,
                           <span class='ident'>ctx</span>: <span class='kw-2'>&amp;</span><span class='ident'>CONTEXT</span>) <span class='op'>-&gt;</span> <span class='ident'>DWORD</span> {
@@ -1976,15 +1974,15 @@
         <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) { (<span class='self'>self</span>.<span class='ident'>SymCleanup</span>)(<span class='self'>self</span>.<span class='ident'>handle</span>); }
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>write</span>(<span class='ident'>w</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Writer</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {<span class='comment'>
-        // According to windows documentation, all dbghelp functions are
-        // single-threaded.
-        </span><span class='kw'>static</span> <span class='kw-2'>mut</span> <span class='ident'>LOCK</span>: <span class='ident'>StaticNativeMutex</span> <span class='op'>=</span> <span class='ident'>NATIVE_MUTEX_INIT</span>;
-        <span class='kw'>let</span> <span class='ident'>_g</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>LOCK</span>.<span class='ident'>lock</span>() };<span class='comment'>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>write</span>(<span class='ident'>w</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Writer</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='comment'>// According to windows documentation, all dbghelp functions are</span>
+        <span class='comment'>// single-threaded.</span>
+        <span class='kw'>static</span> <span class='kw-2'>mut</span> <span class='ident'>LOCK</span>: <span class='ident'>StaticNativeMutex</span> <span class='op'>=</span> <span class='ident'>NATIVE_MUTEX_INIT</span>;
+        <span class='kw'>let</span> <span class='ident'>_g</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>LOCK</span>.<span class='ident'>lock</span>() };
 
-        // Open up dbghelp.dll, we don&#39;t link to it explicitly because it can&#39;t
-        // always be found. Additionally, it&#39;s nice having fewer dependencies.
-        </span><span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;dbghelp.dll&quot;</span>);
+        <span class='comment'>// Open up dbghelp.dll, we don&#39;t link to it explicitly because it can&#39;t</span>
+        <span class='comment'>// always be found. Additionally, it&#39;s nice having fewer dependencies.</span>
+        <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;dbghelp.dll&quot;</span>);
         <span class='kw'>let</span> <span class='ident'>lib</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>DynamicLibrary</span>::<span class='ident'>open</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>)) {
             <span class='prelude-val'>Ok</span>(<span class='ident'>lib</span>) <span class='op'>=&gt;</span> <span class='ident'>lib</span>,
             <span class='prelude-val'>Err</span>(..) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Ok</span>(()),
@@ -1995,29 +1993,29 @@
                 <span class='prelude-val'>Ok</span>(<span class='ident'>f</span>) <span class='op'>=&gt;</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>::<span class='op'>&lt;</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span>(<span class='ident'>f</span>),
                 <span class='prelude-val'>Err</span>(..) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Ok</span>(())
             }
-        }) )<span class='comment'>
+        }) )
 
-        // Fetch the symbols necessary from dbghelp.dll
-        </span><span class='kw'>let</span> <span class='ident'>SymFromAddr</span> <span class='op'>=</span> <span class='macro'>sym</span><span class='macro'>!</span>(<span class='string'>&quot;SymFromAddr&quot;</span>, <span class='ident'>SymFromAddrFn</span>);
+        <span class='comment'>// Fetch the symbols necessary from dbghelp.dll</span>
+        <span class='kw'>let</span> <span class='ident'>SymFromAddr</span> <span class='op'>=</span> <span class='macro'>sym</span><span class='macro'>!</span>(<span class='string'>&quot;SymFromAddr&quot;</span>, <span class='ident'>SymFromAddrFn</span>);
         <span class='kw'>let</span> <span class='ident'>SymInitialize</span> <span class='op'>=</span> <span class='macro'>sym</span><span class='macro'>!</span>(<span class='string'>&quot;SymInitialize&quot;</span>, <span class='ident'>SymInitializeFn</span>);
         <span class='kw'>let</span> <span class='ident'>SymCleanup</span> <span class='op'>=</span> <span class='macro'>sym</span><span class='macro'>!</span>(<span class='string'>&quot;SymCleanup&quot;</span>, <span class='ident'>SymCleanupFn</span>);
-        <span class='kw'>let</span> <span class='ident'>StackWalk64</span> <span class='op'>=</span> <span class='macro'>sym</span><span class='macro'>!</span>(<span class='string'>&quot;StackWalk64&quot;</span>, <span class='ident'>StackWalk64Fn</span>);<span class='comment'>
+        <span class='kw'>let</span> <span class='ident'>StackWalk64</span> <span class='op'>=</span> <span class='macro'>sym</span><span class='macro'>!</span>(<span class='string'>&quot;StackWalk64&quot;</span>, <span class='ident'>StackWalk64Fn</span>);
 
-        // Allocate necessary structures for doing the stack walk
-        </span><span class='kw'>let</span> <span class='ident'>process</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>GetCurrentProcess</span>() };
+        <span class='comment'>// Allocate necessary structures for doing the stack walk</span>
+        <span class='kw'>let</span> <span class='ident'>process</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>GetCurrentProcess</span>() };
         <span class='kw'>let</span> <span class='ident'>thread</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>GetCurrentThread</span>() };
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>context</span>: <span class='ident'>arch</span>::<span class='ident'>CONTEXT</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>intrinsics</span>::<span class='ident'>init</span>() };
         <span class='kw'>unsafe</span> { <span class='ident'>RtlCaptureContext</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>context</span>); }
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>frame</span>: <span class='ident'>STACKFRAME64</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>intrinsics</span>::<span class='ident'>init</span>() };
-        <span class='kw'>let</span> <span class='ident'>image</span> <span class='op'>=</span> <span class='ident'>arch</span>::<span class='ident'>init_frame</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>frame</span>, <span class='kw-2'>&amp;</span><span class='ident'>context</span>);<span class='comment'>
+        <span class='kw'>let</span> <span class='ident'>image</span> <span class='op'>=</span> <span class='ident'>arch</span>::<span class='ident'>init_frame</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>frame</span>, <span class='kw-2'>&amp;</span><span class='ident'>context</span>);
 
-        // Initialize this process&#39;s symbols
-        </span><span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='ident'>SymInitialize</span>(<span class='ident'>process</span>, <span class='number'>0</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>, <span class='ident'>libc</span>::<span class='ident'>TRUE</span>);
+        <span class='comment'>// Initialize this process&#39;s symbols</span>
+        <span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='ident'>SymInitialize</span>(<span class='ident'>process</span>, <span class='number'>0</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>, <span class='ident'>libc</span>::<span class='ident'>TRUE</span>);
         <span class='kw'>if</span> <span class='ident'>ret</span> <span class='op'>!=</span> <span class='ident'>libc</span>::<span class='ident'>TRUE</span> { <span class='kw'>return</span> <span class='prelude-val'>Ok</span>(()) }
-        <span class='kw'>let</span> <span class='ident'>_c</span> <span class='op'>=</span> <span class='ident'>Cleanup</span> { <span class='ident'>handle</span>: <span class='ident'>process</span>, <span class='ident'>SymCleanup</span>: <span class='ident'>SymCleanup</span> };<span class='comment'>
+        <span class='kw'>let</span> <span class='ident'>_c</span> <span class='op'>=</span> <span class='ident'>Cleanup</span> { <span class='ident'>handle</span>: <span class='ident'>process</span>, <span class='ident'>SymCleanup</span>: <span class='ident'>SymCleanup</span> };
 
-        // And now that we&#39;re done with all the setup, do the stack walking!
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='number'>0i</span>;
+        <span class='comment'>// And now that we&#39;re done with all the setup, do the stack walking!</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='number'>0i</span>;
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>w</span>, <span class='string'>&quot;stack backtrace:\n&quot;</span>));
         <span class='kw'>while</span> <span class='ident'>StackWalk64</span>(<span class='ident'>image</span>, <span class='ident'>process</span>, <span class='ident'>thread</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>frame</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>context</span>,
                           <span class='number'>0</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>,

@@ -7,11 +7,9 @@
 
     <title>rustuv::event_loop - Rust</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../main.css">
 
-    
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
     
 </head>
 <body>
@@ -25,7 +23,7 @@
     
 
     <section class="sidebar">
-        
+        <a href='../rustuv/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
         <p class='location'><a href='index.html'>rustuv</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='addrinfo/index.html'>addrinfo</a><a class='mod ' href='async/index.html'>async</a><a class='mod ' href='file/index.html'>file</a><a class='mod ' href='idle/index.html'>idle</a><a class='mod ' href='net/index.html'>net</a><a class='mod ' href='pipe/index.html'>pipe</a><a class='mod ' href='process/index.html'>process</a><a class='mod ' href='signal/index.html'>signal</a><a class='mod ' href='stream/index.html'>stream</a><a class='mod ' href='timer/index.html'>timer</a><a class='mod ' href='tty/index.html'>tty</a><a class='mod ' href='uvio/index.html'>uvio</a><a class='mod ' href='uvll/index.html'>uvll</a></div><div class='block struct'><h2>Structs</h2><a class='struct ' href='struct.ForbidSwitch.html'>ForbidSwitch</a><a class='struct ' href='struct.ForbidUnwind.html'>ForbidUnwind</a><a class='struct ' href='struct.Loop.html'>Loop</a><a class='struct ' href='struct.Request.html'>Request</a><a class='struct ' href='struct.UvError.html'>UvError</a></div><div class='block trait'><h2>Traits</h2><a class='trait ' href='trait.UvHandle.html'>UvHandle</a></div><div class='block fn'><h2>Functions</h2><a class='fn ' href='fn.empty_buf.html'>empty_buf</a><a class='fn current' href='fn.event_loop.html'>event_loop</a><a class='fn ' href='fn.slice_to_uv_buf.html'>slice_to_uv_buf</a><a class='fn ' href='fn.status_to_io_result.html'>status_to_io_result</a><a class='fn ' href='fn.status_to_maybe_uv_error.html'>status_to_maybe_uv_error</a><a class='fn ' href='fn.uv_error_to_io_error.html'>uv_error_to_io_error</a></div>
     </section>
 
@@ -41,7 +39,7 @@
     </nav>
 
     <section id='main' class="content fn">
-<h1 class='fqn'>Function <a href='index.html'>rustuv</a>::<a class='fn' href=''>event_loop</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-22492' href='../src/rustuv/Users/aturon/moz/working/stability-dashboard/src/librustuv/lib.rs.html#128-130'>[src]</a></span></h1>
+<h1 class='fqn'>Function <a href='index.html'>rustuv</a>::<a class='fn' href=''>event_loop</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-22492' href='../src/rustuv/Users/aturon/moz/working/stability-dashboard/src/librustuv/lib.rs.html#132-134'>[src]</a></span></h1>
 <pre class='rust fn'>pub fn event_loop() -&gt; <a class='struct' href='../alloc/owned/struct.Box.html' title='alloc::owned::Box'>Box</a>&lt;<a class='trait' href='../rustrt/rtio/trait.EventLoop.html' title='rustrt::rtio::EventLoop'>EventLoop</a> + <a class='trait' href='../core/kinds/trait.Send.html' title='core::kinds::Send'>Send</a>&gt;</pre><div class='docblock'><p>Creates a new event loop which is powered by libuv</p>
 
 <p>This function is used in tandem with libgreen&#39;s <code>PoolConfig</code> type as a value
@@ -49,7 +47,17 @@ for the <code>event_loop_factory</code> field. Using this function as the event 
 factory will power programs with libuv and enable green threading.</p>
 
 <h1 id="example" class='section-header'><a
-                           href="#example">Example</a></h1><pre class='rust '>
+                           href="#example">Example</a></h1><span id='rust-example-raw-0' class='rusttest'>extern crate rustuv;
+extern crate green;
+
+#[start]
+fn start(argc: int, argv: *const *const u8) -&gt; int {
+    green::start(argc, argv, rustuv::event_loop, main)
+}
+
+fn main() {
+    // this code is running inside of a green task powered by libuv
+}</span><pre id='rust-example-rendered-0' class='rust '>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>rustuv</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>green</span>;
 
@@ -58,9 +66,9 @@ factory will power programs with libuv and enable green threading.</p>
     <span class='ident'>green</span>::<span class='ident'>start</span>(<span class='ident'>argc</span>, <span class='ident'>argv</span>, <span class='ident'>rustuv</span>::<span class='ident'>event_loop</span>, <span class='ident'>main</span>)
 }
 
-<span class='kw'>fn</span> <span class='ident'>main</span>() {<span class='comment'>
-    // this code is running inside of a green task powered by libuv
-</span>}
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='comment'>// this code is running inside of a green task powered by libuv</span>
+}
 </pre>
 </div></section>
     <section id='search' class="content hidden"></section>
@@ -103,11 +111,11 @@ factory will power programs with libuv and enable green threading.</p>
     <script>
         window.rootPath = "../";
         window.currentCrate = "rustuv";
-        window.playgroundUrl = "";
+        window.playgroundUrl = "http://play.rust-lang.org/";
     </script>
     <script src="../jquery.js"></script>
     <script src="../main.js"></script>
-    
+    <script src="../playpen.js"></script>
     <script async src="../search-index.js"></script>
 </body>
 </html>

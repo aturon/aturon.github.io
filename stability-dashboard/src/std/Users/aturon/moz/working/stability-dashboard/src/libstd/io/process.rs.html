@@ -7,8 +7,6 @@
 
     <title>process.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -999,18 +997,20 @@
 <span id='957'>957</span>
 <span id='958'>958</span>
 <span id='959'>959</span>
+<span id='960'>960</span>
+<span id='961'>961</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! Bindings for executing child processes</span>
+<span class='doccomment'>//! Bindings for executing child processes</span>
 
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>experimental</span>)]</span>
 
@@ -1096,10 +1096,11 @@
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// let output = process.stdout.get_mut_ref().read_to_end();</span>
 <span class='doccomment'>/// ```</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Command</span> {<span class='comment'>
-    // The internal data for the builder. Documented by the builder
-    // methods below, and serialized into rt::rtio::ProcessConfig.
-    </span><span class='ident'>program</span>: <span class='ident'>CString</span>,
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Command</span> {
+    <span class='comment'>// The internal data for the builder. Documented by the builder</span>
+    <span class='comment'>// methods below, and serialized into rt::rtio::ProcessConfig.</span>
+    <span class='ident'>program</span>: <span class='ident'>CString</span>,
     <span class='ident'>args</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>CString</span><span class='op'>&gt;</span>,
     <span class='ident'>env</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span>(<span class='ident'>CString</span>, <span class='ident'>CString</span>)<span class='op'>&gt;&gt;</span>,
     <span class='ident'>cwd</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>CString</span><span class='op'>&gt;</span>,
@@ -1110,16 +1111,16 @@
     <span class='ident'>uid</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>,
     <span class='ident'>gid</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>,
     <span class='ident'>detach</span>: <span class='ident'>bool</span>,
-}<span class='comment'>
+}
 
-// FIXME (#12938): Until DST lands, we cannot decompose &amp;str into &amp; and str, so
-// we cannot usefully take ToCStr arguments by reference (without forcing an
-// additional &amp; around &amp;str). So we are instead temporarily adding an instance
-// for &amp;Path, so that we can take ToCStr as owned. When DST lands, the &amp;Path
-// instance should be removed, and arguments bound by ToCStr should be passed by
-// reference. (Here: {new, arg, args, env}.)
+<span class='comment'>// FIXME (#12938): Until DST lands, we cannot decompose &amp;str into &amp; and str, so</span>
+<span class='comment'>// we cannot usefully take ToCStr arguments by reference (without forcing an</span>
+<span class='comment'>// additional &amp; around &amp;str). So we are instead temporarily adding an instance</span>
+<span class='comment'>// for &amp;Path, so that we can take ToCStr as owned. When DST lands, the &amp;Path</span>
+<span class='comment'>// instance should be removed, and arguments bound by ToCStr should be passed by</span>
+<span class='comment'>// reference. (Here: {new, arg, args, env}.)</span>
 
-</span><span class='kw'>impl</span> <span class='ident'>Command</span> {
+<span class='kw'>impl</span> <span class='ident'>Command</span> {
     <span class='doccomment'>/// Constructs a new `Command` for launching the program at</span>
     <span class='doccomment'>/// path `program`, with the following default configuration:</span>
     <span class='doccomment'>///</span>
@@ -1160,16 +1161,16 @@
     }
 
     <span class='doccomment'>/// Sets the environment for the child process (rather than inheriting it</span>
-    <span class='doccomment'>/// from the current process).</span><span class='comment'>
+    <span class='doccomment'>/// from the current process).</span>
 
-    // FIXME (#13851): We should change this interface to allow clients to (1)
-    // build up the env vector incrementally and (2) allow both inheriting the
-    // current process&#39;s environment AND overriding/adding additional
-    // environment variables. The underlying syscalls assume that the
-    // environment has no duplicate names, so we really want to use a hashtable
-    // to compute the environment to pass down to the syscall; resolving issue
-    // #13851 will make it possible to use the standard hashtable.
-    </span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>env</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>:<span class='ident'>ToCStr</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>env</span>: <span class='kw-2'>&amp;</span>[(<span class='ident'>T</span>,<span class='ident'>T</span>)]) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>Command</span> {
+    <span class='comment'>// FIXME (#13851): We should change this interface to allow clients to (1)</span>
+    <span class='comment'>// build up the env vector incrementally and (2) allow both inheriting the</span>
+    <span class='comment'>// current process&#39;s environment AND overriding/adding additional</span>
+    <span class='comment'>// environment variables. The underlying syscalls assume that the</span>
+    <span class='comment'>// environment has no duplicate names, so we really want to use a hashtable</span>
+    <span class='comment'>// to compute the environment to pass down to the syscall; resolving issue</span>
+    <span class='comment'>// #13851 will make it possible to use the standard hashtable.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>env</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>:<span class='ident'>ToCStr</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>env</span>: <span class='kw-2'>&amp;</span>[(<span class='ident'>T</span>,<span class='ident'>T</span>)]) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>Command</span> {
         <span class='self'>self</span>.<span class='ident'>env</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>env</span>.<span class='ident'>iter</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span>(<span class='kw-2'>ref</span> <span class='ident'>name</span>, <span class='kw-2'>ref</span> <span class='ident'>val</span>)<span class='op'>|</span> {
             (<span class='ident'>name</span>.<span class='ident'>to_c_str</span>(), <span class='ident'>val</span>.<span class='ident'>to_c_str</span>())
         }).<span class='ident'>collect</span>());
@@ -1342,6 +1343,7 @@
 }
 
 <span class='doccomment'>/// Describes what to do with a standard io stream for a child process.</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>StdioContainer</span> {
     <span class='doccomment'>/// This stream will be ignored. This is the equivalent of attaching the</span>
     <span class='doccomment'>/// stream to `/dev/null`</span>
@@ -1357,7 +1359,7 @@
     <span class='doccomment'>/// The first boolean argument is whether the pipe is readable, and the</span>
     <span class='doccomment'>/// second is whether it is writable. These properties are from the view of</span>
     <span class='doccomment'>/// the *child* process, not the parent process.</span>
-    <span class='ident'>CreatePipe</span>(<span class='ident'>bool</span><span class='comment'> /* readable */</span>, <span class='ident'>bool</span><span class='comment'> /* writable */</span>),
+    <span class='ident'>CreatePipe</span>(<span class='ident'>bool</span> <span class='comment'>/* readable */</span>, <span class='ident'>bool</span> <span class='comment'>/* writable */</span>),
 }
 
 <span class='doccomment'>/// Describes the result of a process after it has terminated.</span>
@@ -1559,11 +1561,11 @@
 
 <span class='kw'>impl</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>Process</span> {
     <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>forget</span> { <span class='kw'>return</span> }<span class='comment'>
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>forget</span> { <span class='kw'>return</span> }
 
-        // Close all I/O before exiting to ensure that the child doesn&#39;t wait
-        // forever to print some text or something similar.
-        </span><span class='ident'>drop</span>(<span class='self'>self</span>.<span class='ident'>stdin</span>.<span class='ident'>take</span>());
+        <span class='comment'>// Close all I/O before exiting to ensure that the child doesn&#39;t wait</span>
+        <span class='comment'>// forever to print some text or something similar.</span>
+        <span class='ident'>drop</span>(<span class='self'>self</span>.<span class='ident'>stdin</span>.<span class='ident'>take</span>());
         <span class='ident'>drop</span>(<span class='self'>self</span>.<span class='ident'>stdout</span>.<span class='ident'>take</span>());
         <span class='ident'>drop</span>(<span class='self'>self</span>.<span class='ident'>stderr</span>.<span class='ident'>take</span>());
         <span class='ident'>drop</span>(<span class='ident'>mem</span>::<span class='ident'>replace</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>extra_io</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
@@ -1576,11 +1578,11 @@
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>tests</span> {
     <span class='kw'>use</span> <span class='ident'>io</span>::<span class='ident'>process</span>::{<span class='ident'>Command</span>, <span class='ident'>Process</span>};
-    <span class='kw'>use</span> <span class='ident'>prelude</span>::<span class='op'>*</span>;<span class='comment'>
+    <span class='kw'>use</span> <span class='ident'>prelude</span>::<span class='op'>*</span>;
 
-    // FIXME(#10380) these tests should not all be ignored on android.
+    <span class='comment'>// FIXME(#10380) these tests should not all be ignored on android.</span>
 
-    </span><span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>target_os</span><span class='op'>=</span><span class='string'>&quot;android&quot;</span>))]</span>
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>target_os</span><span class='op'>=</span><span class='string'>&quot;android&quot;</span>))]</span>
     <span class='macro'>iotest</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>smoke</span>() {
         <span class='kw'>let</span> <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>Command</span>::<span class='ident'>new</span>(<span class='string'>&quot;true&quot;</span>).<span class='ident'>spawn</span>();
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>p</span>.<span class='ident'>is_ok</span>());
@@ -1617,7 +1619,7 @@
     })
 
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>read_all</span>(<span class='ident'>input</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Reader</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
-        <span class='ident'>input</span>.<span class='ident'>read_to_str</span>().<span class='ident'>unwrap</span>()
+        <span class='ident'>input</span>.<span class='ident'>read_to_string</span>().<span class='ident'>unwrap</span>()
     }
 
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>run_output</span>(<span class='ident'>cmd</span>: <span class='ident'>Command</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
@@ -1684,11 +1686,11 @@
 
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>unix</span>, <span class='ident'>not</span>(<span class='ident'>target_os</span><span class='op'>=</span><span class='string'>&quot;android&quot;</span>))]</span>
     <span class='macro'>iotest</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>uid_to_root_fails</span>() {
-        <span class='kw'>use</span> <span class='ident'>libc</span>;<span class='comment'>
+        <span class='kw'>use</span> <span class='ident'>libc</span>;
 
-        // if we&#39;re already root, this isn&#39;t a valid test. Most of the bots run
-        // as non-root though (android is an exception).
-        </span><span class='kw'>if</span> <span class='kw'>unsafe</span> { <span class='ident'>libc</span>::<span class='ident'>getuid</span>() <span class='op'>==</span> <span class='number'>0</span> } { <span class='kw'>return</span> }
+        <span class='comment'>// if we&#39;re already root, this isn&#39;t a valid test. Most of the bots run</span>
+        <span class='comment'>// as non-root though (android is an exception).</span>
+        <span class='kw'>if</span> <span class='kw'>unsafe</span> { <span class='ident'>libc</span>::<span class='ident'>getuid</span>() <span class='op'>==</span> <span class='number'>0</span> } { <span class='kw'>return</span> }
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>Command</span>::<span class='ident'>new</span>(<span class='string'>&quot;/bin/ls&quot;</span>).<span class='ident'>uid</span>(<span class='number'>0</span>).<span class='ident'>gid</span>(<span class='number'>0</span>).<span class='ident'>spawn</span>().<span class='ident'>is_err</span>());
     })
 
@@ -1715,9 +1717,9 @@
         <span class='kw'>let</span> <span class='ident'>output_str</span> <span class='op'>=</span> <span class='ident'>str</span>::<span class='ident'>from_utf8</span>(<span class='ident'>output</span>.<span class='ident'>as_slice</span>()).<span class='ident'>unwrap</span>();
 
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>status</span>.<span class='ident'>success</span>());
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>output_str</span>.<span class='ident'>trim</span>().<span class='ident'>to_string</span>(), <span class='string'>&quot;hello&quot;</span>.<span class='ident'>to_string</span>());<span class='comment'>
-        // FIXME #7224
-        </span><span class='kw'>if</span> <span class='op'>!</span><span class='ident'>running_on_valgrind</span>() {
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>output_str</span>.<span class='ident'>trim</span>().<span class='ident'>to_string</span>(), <span class='string'>&quot;hello&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='comment'>// FIXME #7224</span>
+        <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>running_on_valgrind</span>() {
             <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>error</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>());
         }
     })
@@ -1752,9 +1754,9 @@
         <span class='kw'>let</span> <span class='ident'>output_str</span> <span class='op'>=</span> <span class='ident'>str</span>::<span class='ident'>from_utf8</span>(<span class='ident'>output</span>.<span class='ident'>as_slice</span>()).<span class='ident'>unwrap</span>();
 
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>status</span>.<span class='ident'>success</span>());
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>output_str</span>.<span class='ident'>trim</span>().<span class='ident'>to_string</span>(), <span class='string'>&quot;hello&quot;</span>.<span class='ident'>to_string</span>());<span class='comment'>
-        // FIXME #7224
-        </span><span class='kw'>if</span> <span class='op'>!</span><span class='ident'>running_on_valgrind</span>() {
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>output_str</span>.<span class='ident'>trim</span>().<span class='ident'>to_string</span>(), <span class='string'>&quot;hello&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='comment'>// FIXME #7224</span>
+        <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>running_on_valgrind</span>() {
             <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>error</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>());
         }
     })
@@ -1794,10 +1796,10 @@
     })
 
     <span class='macro'>iotest</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>test_change_working_directory</span>() {
-        <span class='kw'>use</span> <span class='ident'>os</span>;<span class='comment'>
-        // test changing to the parent of os::getcwd() because we know
-        // the path exists (and os::getcwd() is not expected to be root)
-        </span><span class='kw'>let</span> <span class='ident'>parent_dir</span> <span class='op'>=</span> <span class='ident'>os</span>::<span class='ident'>getcwd</span>().<span class='ident'>dir_path</span>();
+        <span class='kw'>use</span> <span class='ident'>os</span>;
+        <span class='comment'>// test changing to the parent of os::getcwd() because we know</span>
+        <span class='comment'>// the path exists (and os::getcwd() is not expected to be root)</span>
+        <span class='kw'>let</span> <span class='ident'>parent_dir</span> <span class='op'>=</span> <span class='ident'>os</span>::<span class='ident'>getcwd</span>().<span class='ident'>dir_path</span>();
         <span class='kw'>let</span> <span class='ident'>prog</span> <span class='op'>=</span> <span class='ident'>pwd_cmd</span>().<span class='ident'>cwd</span>(<span class='kw-2'>&amp;</span><span class='ident'>parent_dir</span>).<span class='ident'>spawn</span>().<span class='ident'>unwrap</span>();
 
         <span class='kw'>let</span> <span class='ident'>output</span> <span class='op'>=</span> <span class='ident'>str</span>::<span class='ident'>from_utf8</span>(<span class='ident'>prog</span>.<span class='ident'>wait_with_output</span>().<span class='ident'>unwrap</span>()
@@ -1839,9 +1841,9 @@
                                         .<span class='ident'>output</span>.<span class='ident'>as_slice</span>()).<span class='ident'>unwrap</span>().<span class='ident'>to_string</span>();
 
         <span class='kw'>let</span> <span class='ident'>r</span> <span class='op'>=</span> <span class='ident'>os</span>::<span class='ident'>env</span>();
-        <span class='kw'>for</span> <span class='kw-2'>&amp;</span>(<span class='kw-2'>ref</span> <span class='ident'>k</span>, <span class='kw-2'>ref</span> <span class='ident'>v</span>) <span class='kw'>in</span> <span class='ident'>r</span>.<span class='ident'>iter</span>() {<span class='comment'>
-            // don&#39;t check windows magical empty-named variables
-            </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>k</span>.<span class='ident'>is_empty</span>() <span class='op'>||</span>
+        <span class='kw'>for</span> <span class='kw-2'>&amp;</span>(<span class='kw-2'>ref</span> <span class='ident'>k</span>, <span class='kw-2'>ref</span> <span class='ident'>v</span>) <span class='kw'>in</span> <span class='ident'>r</span>.<span class='ident'>iter</span>() {
+            <span class='comment'>// don&#39;t check windows magical empty-named variables</span>
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>k</span>.<span class='ident'>is_empty</span>() <span class='op'>||</span>
                     <span class='ident'>output</span>.<span class='ident'>as_slice</span>()
                           .<span class='ident'>contains</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}={}&quot;</span>, <span class='op'>*</span><span class='ident'>k</span>, <span class='op'>*</span><span class='ident'>v</span>).<span class='ident'>as_slice</span>()));
         }
@@ -1857,9 +1859,9 @@
                                    .<span class='ident'>unwrap</span>().<span class='ident'>to_string</span>();
 
         <span class='kw'>let</span> <span class='ident'>r</span> <span class='op'>=</span> <span class='ident'>os</span>::<span class='ident'>env</span>();
-        <span class='kw'>for</span> <span class='kw-2'>&amp;</span>(<span class='kw-2'>ref</span> <span class='ident'>k</span>, <span class='kw-2'>ref</span> <span class='ident'>v</span>) <span class='kw'>in</span> <span class='ident'>r</span>.<span class='ident'>iter</span>() {<span class='comment'>
-            // don&#39;t check android RANDOM variables
-            </span><span class='kw'>if</span> <span class='op'>*</span><span class='ident'>k</span> <span class='op'>!=</span> <span class='string'>&quot;RANDOM&quot;</span>.<span class='ident'>to_string</span>() {
+        <span class='kw'>for</span> <span class='kw-2'>&amp;</span>(<span class='kw-2'>ref</span> <span class='ident'>k</span>, <span class='kw-2'>ref</span> <span class='ident'>v</span>) <span class='kw'>in</span> <span class='ident'>r</span>.<span class='ident'>iter</span>() {
+            <span class='comment'>// don&#39;t check android RANDOM variables</span>
+            <span class='kw'>if</span> <span class='op'>*</span><span class='ident'>k</span> <span class='op'>!=</span> <span class='string'>&quot;RANDOM&quot;</span>.<span class='ident'>to_string</span>() {
                 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>output</span>.<span class='ident'>as_slice</span>()
                               .<span class='ident'>contains</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}={}&quot;</span>,
                                                 <span class='op'>*</span><span class='ident'>k</span>,
@@ -1887,11 +1889,11 @@
         <span class='ident'>Command</span>::<span class='ident'>new</span>(<span class='string'>&quot;sleep&quot;</span>).<span class='ident'>arg</span>(<span class='string'>&quot;1000&quot;</span>).<span class='ident'>spawn</span>().<span class='ident'>unwrap</span>()
     }
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>windows</span>)]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>sleeper</span>() <span class='op'>-&gt;</span> <span class='ident'>Process</span> {<span class='comment'>
-        // There&#39;s a `timeout` command on windows, but it doesn&#39;t like having
-        // its output piped, so instead just ping ourselves a few times with
-        // gaps in between so we&#39;re sure this process is alive for awhile
-        </span><span class='ident'>Command</span>::<span class='ident'>new</span>(<span class='string'>&quot;ping&quot;</span>).<span class='ident'>arg</span>(<span class='string'>&quot;127.0.0.1&quot;</span>).<span class='ident'>arg</span>(<span class='string'>&quot;-n&quot;</span>).<span class='ident'>arg</span>(<span class='string'>&quot;1000&quot;</span>).<span class='ident'>spawn</span>().<span class='ident'>unwrap</span>()
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>sleeper</span>() <span class='op'>-&gt;</span> <span class='ident'>Process</span> {
+        <span class='comment'>// There&#39;s a `timeout` command on windows, but it doesn&#39;t like having</span>
+        <span class='comment'>// its output piped, so instead just ping ourselves a few times with</span>
+        <span class='comment'>// gaps in between so we&#39;re sure this process is alive for awhile</span>
+        <span class='ident'>Command</span>::<span class='ident'>new</span>(<span class='string'>&quot;ping&quot;</span>).<span class='ident'>arg</span>(<span class='string'>&quot;127.0.0.1&quot;</span>).<span class='ident'>arg</span>(<span class='string'>&quot;-n&quot;</span>).<span class='ident'>arg</span>(<span class='string'>&quot;1000&quot;</span>).<span class='ident'>spawn</span>().<span class='ident'>unwrap</span>()
     }
 
     <span class='macro'>iotest</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>test_kill</span>() {

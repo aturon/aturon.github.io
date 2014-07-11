@@ -7,8 +7,6 @@
 
     <title>future.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -276,17 +274,17 @@
 <span id='234'>234</span>
 <span id='235'>235</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2012-2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2012-2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>/*!
+<span class='doccomment'>/*!
  * A type representing values that may be computed concurrently and
  * operations for working with them.
  *
@@ -409,9 +407,9 @@
 
         <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
 
-        <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {<span class='comment'>
-            // Don&#39;t fail if the other end has hung up
-            </span><span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>tx</span>.<span class='ident'>send_opt</span>(<span class='ident'>blk</span>());
+        <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+            <span class='comment'>// Don&#39;t fail if the other end has hung up</span>
+            <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>tx</span>.<span class='ident'>send_opt</span>(<span class='ident'>blk</span>());
         });
 
         <span class='ident'>Future</span>::<span class='ident'>from_receiver</span>(<span class='ident'>rx</span>)
@@ -498,17 +496,17 @@
                 <span class='kw'>let</span> <span class='ident'>Bomb</span>(<span class='kw-2'>ref</span> <span class='ident'>tx</span>) <span class='op'>=</span> <span class='op'>*</span><span class='self'>self</span>;
                 <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='ident'>task</span>::<span class='ident'>failing</span>());
             }
-        }<span class='comment'>
+        }
 
-        // Spawn a future, but drop it immediately. When we receive the result
-        // later on, we should never view the task as having failed.
-        </span><span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
+        <span class='comment'>// Spawn a future, but drop it immediately. When we receive the result</span>
+        <span class='comment'>// later on, we should never view the task as having failed.</span>
+        <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
         <span class='ident'>drop</span>(<span class='ident'>Future</span>::<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
             <span class='ident'>LOCAL</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='ident'>Bomb</span>(<span class='ident'>tx</span>)));
-        }));<span class='comment'>
+        }));
 
-        // Make sure the future didn&#39;t fail the task.
-        </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>rx</span>.<span class='ident'>recv</span>());
+        <span class='comment'>// Make sure the future didn&#39;t fail the task.</span>
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>rx</span>.<span class='ident'>recv</span>());
     }
 }
 </pre>

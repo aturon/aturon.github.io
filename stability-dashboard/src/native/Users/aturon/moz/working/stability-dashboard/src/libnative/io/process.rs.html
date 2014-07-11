@@ -7,8 +7,6 @@
 
     <title>process.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -1257,17 +1255,17 @@
 <span id='1215'>1215</span>
 <span id='1216'>1216</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='kw'>use</span> <span class='ident'>libc</span>::{<span class='ident'>pid_t</span>, <span class='ident'>c_void</span>, <span class='ident'>c_int</span>};
+<span class='kw'>use</span> <span class='ident'>libc</span>::{<span class='ident'>pid_t</span>, <span class='ident'>c_void</span>, <span class='ident'>c_int</span>};
 <span class='kw'>use</span> <span class='ident'>libc</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>c_str</span>::<span class='ident'>CString</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>;
@@ -1325,9 +1323,9 @@
     <span class='doccomment'>/// the runtime for sleeping just this current task.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>spawn</span>(<span class='ident'>cfg</span>: <span class='ident'>ProcessConfig</span>)
         <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>(<span class='ident'>Process</span>, <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>file</span>::<span class='ident'>FileDesc</span><span class='op'>&gt;&gt;</span>)<span class='op'>&gt;</span>
-    {<span class='comment'>
-        // right now we only handle stdin/stdout/stderr.
-        </span><span class='kw'>if</span> <span class='ident'>cfg</span>.<span class='ident'>extra_io</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='number'>0</span> {
+    {
+        <span class='comment'>// right now we only handle stdin/stdout/stderr.</span>
+        <span class='kw'>if</span> <span class='ident'>cfg</span>.<span class='ident'>extra_io</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='number'>0</span> {
             <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>super</span>::<span class='ident'>unimpl</span>());
         }
 
@@ -1391,11 +1389,11 @@
         <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>exit_code</span> {
             <span class='prelude-val'>Some</span>(<span class='ident'>code</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>code</span>),
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
-                <span class='kw'>let</span> <span class='ident'>code</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>waitpid</span>(<span class='self'>self</span>.<span class='ident'>pid</span>, <span class='self'>self</span>.<span class='ident'>deadline</span>));<span class='comment'>
-                // On windows, waitpid will never return a signal. If a signal
-                // was successfully delivered to the process, however, we can
-                // consider it as having died via a signal.
-                </span><span class='kw'>let</span> <span class='ident'>code</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>exit_signal</span> {
+                <span class='kw'>let</span> <span class='ident'>code</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>waitpid</span>(<span class='self'>self</span>.<span class='ident'>pid</span>, <span class='self'>self</span>.<span class='ident'>deadline</span>));
+                <span class='comment'>// On windows, waitpid will never return a signal. If a signal</span>
+                <span class='comment'>// was successfully delivered to the process, however, we can</span>
+                <span class='comment'>// consider it as having died via a signal.</span>
+                <span class='kw'>let</span> <span class='ident'>code</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>exit_signal</span> {
                     <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>code</span>,
                     <span class='prelude-val'>Some</span>(<span class='ident'>signal</span>) <span class='kw'>if</span> <span class='macro'>cfg</span><span class='macro'>!</span>(<span class='ident'>windows</span>) <span class='op'>=&gt;</span> <span class='ident'>rtio</span>::<span class='ident'>ExitSignal</span>(<span class='ident'>signal</span>),
                     <span class='prelude-val'>Some</span>(..) <span class='op'>=&gt;</span> <span class='ident'>code</span>,
@@ -1408,35 +1406,35 @@
 
     <span class='kw'>fn</span> <span class='ident'>kill</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>signum</span>: <span class='ident'>int</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>unix</span>)]</span> <span class='kw'>use</span> <span class='ident'>ERROR</span> <span class='op'>=</span> <span class='ident'>libc</span>::<span class='ident'>EINVAL</span>;
-        <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>windows</span>)]</span> <span class='kw'>use</span> <span class='ident'>ERROR</span> <span class='op'>=</span> <span class='ident'>libc</span>::<span class='ident'>ERROR_NOTHING_TO_TERMINATE</span>;<span class='comment'>
+        <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>windows</span>)]</span> <span class='kw'>use</span> <span class='ident'>ERROR</span> <span class='op'>=</span> <span class='ident'>libc</span>::<span class='ident'>ERROR_NOTHING_TO_TERMINATE</span>;
 
-        // On linux (and possibly other unices), a process that has exited will
-        // continue to accept signals because it is &quot;defunct&quot;. The delivery of
-        // signals will only fail once the child has been reaped. For this
-        // reason, if the process hasn&#39;t exited yet, then we attempt to collect
-        // their status with WNOHANG.
-        </span><span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>exit_code</span>.<span class='ident'>is_none</span>() {
+        <span class='comment'>// On linux (and possibly other unices), a process that has exited will</span>
+        <span class='comment'>// continue to accept signals because it is &quot;defunct&quot;. The delivery of</span>
+        <span class='comment'>// signals will only fail once the child has been reaped. For this</span>
+        <span class='comment'>// reason, if the process hasn&#39;t exited yet, then we attempt to collect</span>
+        <span class='comment'>// their status with WNOHANG.</span>
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>exit_code</span>.<span class='ident'>is_none</span>() {
             <span class='kw'>match</span> <span class='ident'>waitpid_nowait</span>(<span class='self'>self</span>.<span class='ident'>pid</span>) {
                 <span class='prelude-val'>Some</span>(<span class='ident'>code</span>) <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>exit_code</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>code</span>); }
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {}
             }
-        }<span class='comment'>
+        }
 
-        // if the process has finished, and therefore had waitpid called,
-        // and we kill it, then on unix we might ending up killing a
-        // newer process that happens to have the same (re-used) id
-        </span><span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>exit_code</span> {
+        <span class='comment'>// if the process has finished, and therefore had waitpid called,</span>
+        <span class='comment'>// and we kill it, then on unix we might ending up killing a</span>
+        <span class='comment'>// newer process that happens to have the same (re-used) id</span>
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>exit_code</span> {
             <span class='prelude-val'>Some</span>(..) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>IoError</span> {
                 <span class='ident'>code</span>: <span class='ident'>ERROR</span> <span class='kw'>as</span> <span class='ident'>uint</span>,
                 <span class='ident'>extra</span>: <span class='number'>0</span>,
-                <span class='ident'>detail</span>: <span class='prelude-val'>Some</span>(<span class='string'>&quot;can&#39;t kill an exited process&quot;</span>.<span class='ident'>to_str</span>()),
+                <span class='ident'>detail</span>: <span class='prelude-val'>Some</span>(<span class='string'>&quot;can&#39;t kill an exited process&quot;</span>.<span class='ident'>to_string</span>()),
             }),
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {}
-        }<span class='comment'>
+        }
 
-        // A successfully delivered signal that isn&#39;t 0 (just a poll for being
-        // alive) is recorded for windows (see wait())
-        </span><span class='kw'>match</span> <span class='kw'>unsafe</span> { <span class='ident'>killpid</span>(<span class='self'>self</span>.<span class='ident'>pid</span>, <span class='ident'>signum</span>) } {
+        <span class='comment'>// A successfully delivered signal that isn&#39;t 0 (just a poll for being</span>
+        <span class='comment'>// alive) is recorded for windows (see wait())</span>
+        <span class='kw'>match</span> <span class='kw'>unsafe</span> { <span class='ident'>killpid</span>(<span class='self'>self</span>.<span class='ident'>pid</span>, <span class='ident'>signum</span>) } {
             <span class='prelude-val'>Ok</span>(()) <span class='kw'>if</span> <span class='ident'>signum</span> <span class='op'>==</span> <span class='number'>0</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(()),
             <span class='prelude-val'>Ok</span>(()) <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>exit_signal</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>signum</span>); <span class='prelude-val'>Ok</span>(()) }
             <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>),
@@ -1489,9 +1487,9 @@
     <span class='kw'>if</span> <span class='ident'>handle</span>.<span class='ident'>is_null</span>() {
         <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>super</span>::<span class='ident'>last_error</span>())
     }
-    <span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>signal</span> {<span class='comment'>
-        // test for existence on signal 0
-        </span><span class='number'>0</span> <span class='op'>=&gt;</span> {
+    <span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>signal</span> {
+        <span class='comment'>// test for existence on signal 0</span>
+        <span class='number'>0</span> <span class='op'>=&gt;</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>status</span> <span class='op'>=</span> <span class='number'>0</span>;
             <span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='ident'>libc</span>::<span class='ident'>GetExitCodeProcess</span>(<span class='ident'>handle</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>status</span>);
             <span class='kw'>if</span> <span class='ident'>ret</span> <span class='op'>==</span> <span class='number'>0</span> {
@@ -1506,8 +1504,8 @@
                 <span class='prelude-val'>Ok</span>(())
             }
         }
-        <span class='number'>15</span> <span class='op'>|</span> <span class='number'>9</span> <span class='op'>=&gt;</span> {<span class='comment'> // sigterm or sigkill
-            </span><span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='ident'>libc</span>::<span class='ident'>TerminateProcess</span>(<span class='ident'>handle</span>, <span class='number'>1</span>);
+        <span class='number'>15</span> <span class='op'>|</span> <span class='number'>9</span> <span class='op'>=&gt;</span> { <span class='comment'>// sigterm or sigkill</span>
+            <span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='ident'>libc</span>::<span class='ident'>TerminateProcess</span>(<span class='ident'>handle</span>, <span class='number'>1</span>);
             <span class='ident'>super</span>::<span class='ident'>mkerr_winbool</span>(<span class='ident'>ret</span>)
         }
         _ <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>IoError</span> {
@@ -1560,7 +1558,7 @@
         <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>IoError</span> {
             <span class='ident'>code</span>: <span class='ident'>libc</span>::<span class='ident'>ERROR_CALL_NOT_IMPLEMENTED</span> <span class='kw'>as</span> <span class='ident'>uint</span>,
             <span class='ident'>extra</span>: <span class='number'>0</span>,
-            <span class='ident'>detail</span>: <span class='prelude-val'>Some</span>(<span class='string'>&quot;unsupported gid/uid requested on windows&quot;</span>.<span class='ident'>to_str</span>()),
+            <span class='ident'>detail</span>: <span class='prelude-val'>Some</span>(<span class='string'>&quot;unsupported gid/uid requested on windows&quot;</span>.<span class='ident'>to_string</span>()),
         })
     }
 
@@ -1569,12 +1567,12 @@
         <span class='ident'>si</span>.<span class='ident'>cb</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>size_of</span>::<span class='op'>&lt;</span><span class='ident'>STARTUPINFO</span><span class='op'>&gt;</span>() <span class='kw'>as</span> <span class='ident'>DWORD</span>;
         <span class='ident'>si</span>.<span class='ident'>dwFlags</span> <span class='op'>=</span> <span class='ident'>STARTF_USESTDHANDLES</span>;
 
-        <span class='kw'>let</span> <span class='ident'>cur_proc</span> <span class='op'>=</span> <span class='ident'>GetCurrentProcess</span>();<span class='comment'>
+        <span class='kw'>let</span> <span class='ident'>cur_proc</span> <span class='op'>=</span> <span class='ident'>GetCurrentProcess</span>();
 
-        // Similarly to unix, we don&#39;t actually leave holes for the stdio file
-        // descriptors, but rather open up /dev/null equivalents. These
-        // equivalents are drawn from libuv&#39;s windows process spawning.
-        </span><span class='kw'>let</span> <span class='ident'>set_fd</span> <span class='op'>=</span> <span class='op'>|</span><span class='ident'>fd</span>: <span class='kw-2'>&amp;</span><span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>file</span>::<span class='ident'>FileDesc</span><span class='op'>&gt;</span>, <span class='ident'>slot</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>HANDLE</span>,
+        <span class='comment'>// Similarly to unix, we don&#39;t actually leave holes for the stdio file</span>
+        <span class='comment'>// descriptors, but rather open up /dev/null equivalents. These</span>
+        <span class='comment'>// equivalents are drawn from libuv&#39;s windows process spawning.</span>
+        <span class='kw'>let</span> <span class='ident'>set_fd</span> <span class='op'>=</span> <span class='op'>|</span><span class='ident'>fd</span>: <span class='kw-2'>&amp;</span><span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>file</span>::<span class='ident'>FileDesc</span><span class='op'>&gt;</span>, <span class='ident'>slot</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>HANDLE</span>,
                       <span class='ident'>is_stdin</span>: <span class='ident'>bool</span><span class='op'>|</span> {
             <span class='kw'>match</span> <span class='op'>*</span><span class='ident'>fd</span> {
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
@@ -1623,10 +1621,10 @@
 
         <span class='kw'>let</span> <span class='ident'>cmd_str</span> <span class='op'>=</span> <span class='ident'>make_command_line</span>(<span class='ident'>cfg</span>.<span class='ident'>program</span>, <span class='ident'>cfg</span>.<span class='ident'>args</span>);
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>pi</span> <span class='op'>=</span> <span class='ident'>zeroed_process_information</span>();
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>create_err</span> <span class='op'>=</span> <span class='prelude-val'>None</span>;<span class='comment'>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>create_err</span> <span class='op'>=</span> <span class='prelude-val'>None</span>;
 
-        // stolen from the libuv code.
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>flags</span> <span class='op'>=</span> <span class='ident'>libc</span>::<span class='ident'>CREATE_UNICODE_ENVIRONMENT</span>;
+        <span class='comment'>// stolen from the libuv code.</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>flags</span> <span class='op'>=</span> <span class='ident'>libc</span>::<span class='ident'>CREATE_UNICODE_ENVIRONMENT</span>;
         <span class='kw'>if</span> <span class='ident'>cfg</span>.<span class='ident'>detach</span> {
             <span class='ident'>flags</span> <span class='op'>|=</span> <span class='ident'>libc</span>::<span class='ident'>DETACHED_PROCESS</span> <span class='op'>|</span> <span class='ident'>libc</span>::<span class='ident'>CREATE_NEW_PROCESS_GROUP</span>;
         }
@@ -1655,14 +1653,14 @@
         <span class='kw'>match</span> <span class='ident'>create_err</span> {
             <span class='prelude-val'>Some</span>(<span class='ident'>err</span>) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>err</span>),
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {}
-        }<span class='comment'>
+        }
 
-        // We close the thread handle because we don&#39;t care about keeping the
-        // thread id valid, and we aren&#39;t keeping the thread handle around to be
-        // able to close it later. We don&#39;t close the process handle however
-        // because std::we want the process id to stay valid at least until the
-        // calling code closes the process handle.
-        </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>CloseHandle</span>(<span class='ident'>pi</span>.<span class='ident'>hThread</span>) <span class='op'>!=</span> <span class='number'>0</span>);
+        <span class='comment'>// We close the thread handle because we don&#39;t care about keeping the</span>
+        <span class='comment'>// thread id valid, and we aren&#39;t keeping the thread handle around to be</span>
+        <span class='comment'>// able to close it later. We don&#39;t close the process handle however</span>
+        <span class='comment'>// because std::we want the process id to stay valid at least until the</span>
+        <span class='comment'>// calling code closes the process handle.</span>
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>CloseHandle</span>(<span class='ident'>pi</span>.<span class='ident'>hThread</span>) <span class='op'>!=</span> <span class='number'>0</span>);
 
         <span class='prelude-val'>Ok</span>(<span class='ident'>SpawnProcessResult</span> {
             <span class='ident'>pid</span>: <span class='ident'>pi</span>.<span class='ident'>dwProcessId</span> <span class='kw'>as</span> <span class='ident'>pid_t</span>,
@@ -1733,17 +1731,17 @@
 
     <span class='kw'>fn</span> <span class='ident'>append_char_at</span>(<span class='ident'>cmd</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>String</span>, <span class='ident'>arg</span>: <span class='kw-2'>&amp;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>char</span><span class='op'>&gt;</span>, <span class='ident'>i</span>: <span class='ident'>uint</span>) {
         <span class='kw'>match</span> <span class='op'>*</span><span class='ident'>arg</span>.<span class='ident'>get</span>(<span class='ident'>i</span>) {
-            <span class='string'>&#39;&quot;&#39;</span> <span class='op'>=&gt;</span> {<span class='comment'>
-                // Escape quotes.
-                </span><span class='ident'>cmd</span>.<span class='ident'>push_str</span>(<span class='string'>&quot;\\\&quot;&quot;</span>);
+            <span class='string'>&#39;&quot;&#39;</span> <span class='op'>=&gt;</span> {
+                <span class='comment'>// Escape quotes.</span>
+                <span class='ident'>cmd</span>.<span class='ident'>push_str</span>(<span class='string'>&quot;\\\&quot;&quot;</span>);
             }
             <span class='string'>&#39;\\&#39;</span> <span class='op'>=&gt;</span> {
-                <span class='kw'>if</span> <span class='ident'>backslash_run_ends_in_quote</span>(<span class='ident'>arg</span>, <span class='ident'>i</span>) {<span class='comment'>
-                    // Double all backslashes that are in runs before quotes.
-                    </span><span class='ident'>cmd</span>.<span class='ident'>push_str</span>(<span class='string'>&quot;\\\\&quot;</span>);
-                } <span class='kw'>else</span> {<span class='comment'>
-                    // Pass other backslashes through unescaped.
-                    </span><span class='ident'>cmd</span>.<span class='ident'>push_char</span>(<span class='string'>&#39;\\&#39;</span>);
+                <span class='kw'>if</span> <span class='ident'>backslash_run_ends_in_quote</span>(<span class='ident'>arg</span>, <span class='ident'>i</span>) {
+                    <span class='comment'>// Double all backslashes that are in runs before quotes.</span>
+                    <span class='ident'>cmd</span>.<span class='ident'>push_str</span>(<span class='string'>&quot;\\\\&quot;</span>);
+                } <span class='kw'>else</span> {
+                    <span class='comment'>// Pass other backslashes through unescaped.</span>
+                    <span class='ident'>cmd</span>.<span class='ident'>push_char</span>(<span class='string'>&#39;\\&#39;</span>);
                 }
             }
             <span class='ident'>c</span> <span class='op'>=&gt;</span> {
@@ -1802,11 +1800,11 @@
 
     <span class='ident'>with_envp</span>(<span class='ident'>cfg</span>.<span class='ident'>env</span>, <span class='kw'>proc</span>(<span class='ident'>envp</span>) {
         <span class='ident'>with_argv</span>(<span class='ident'>cfg</span>.<span class='ident'>program</span>, <span class='ident'>cfg</span>.<span class='ident'>args</span>, <span class='kw'>proc</span>(<span class='ident'>argv</span>) <span class='kw'>unsafe</span> {
-            <span class='kw'>let</span> (<span class='kw-2'>mut</span> <span class='ident'>input</span>, <span class='kw-2'>mut</span> <span class='ident'>output</span>) <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>pipe</span>());<span class='comment'>
+            <span class='kw'>let</span> (<span class='kw-2'>mut</span> <span class='ident'>input</span>, <span class='kw-2'>mut</span> <span class='ident'>output</span>) <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>pipe</span>());
 
-            // We may use this in the child, so perform allocations before the
-            // fork
-            </span><span class='kw'>let</span> <span class='ident'>devnull</span> <span class='op'>=</span> <span class='string'>&quot;/dev/null&quot;</span>.<span class='ident'>to_c_str</span>();
+            <span class='comment'>// We may use this in the child, so perform allocations before the</span>
+            <span class='comment'>// fork</span>
+            <span class='kw'>let</span> <span class='ident'>devnull</span> <span class='op'>=</span> <span class='string'>&quot;/dev/null&quot;</span>.<span class='ident'>to_c_str</span>();
 
             <span class='ident'>set_cloexec</span>(<span class='ident'>output</span>.<span class='ident'>fd</span>());
 
@@ -1836,38 +1834,38 @@
                     }
                     <span class='prelude-val'>Ok</span>(..) <span class='op'>=&gt;</span> <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;short read on the cloexec pipe&quot;</span>),
                 };
-            }<span class='comment'>
-            // And at this point we&#39;ve reached a special time in the life of the
-            // child. The child must now be considered hamstrung and unable to
-            // do anything other than syscalls really. Consider the following
-            // scenario:
-            //
-            //      1. Thread A of process 1 grabs the malloc() mutex
-            //      2. Thread B of process 1 forks(), creating thread C
-            //      3. Thread C of process 2 then attempts to malloc()
-            //      4. The memory of process 2 is the same as the memory of
-            //         process 1, so the mutex is locked.
-            //
-            // This situation looks a lot like deadlock, right? It turns out
-            // that this is what pthread_atfork() takes care of, which is
-            // presumably implemented across platforms. The first thing that
-            // threads to *before* forking is to do things like grab the malloc
-            // mutex, and then after the fork they unlock it.
-            //
-            // Despite this information, libnative&#39;s spawn has been witnessed to
-            // deadlock on both OSX and FreeBSD. I&#39;m not entirely sure why, but
-            // all collected backtraces point at malloc/free traffic in the
-            // child spawned process.
-            //
-            // For this reason, the block of code below should contain 0
-            // invocations of either malloc of free (or their related friends).
-            //
-            // As an example of not having malloc/free traffic, we don&#39;t close
-            // this file descriptor by dropping the FileDesc (which contains an
-            // allocation). Instead we just close it manually. This will never
-            // have the drop glue anyway because this code never returns (the
-            // child will either exec() or invoke libc::exit)
-            </span><span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>libc</span>::<span class='ident'>close</span>(<span class='ident'>input</span>.<span class='ident'>fd</span>());
+            }
+            <span class='comment'>// And at this point we&#39;ve reached a special time in the life of the</span>
+            <span class='comment'>// child. The child must now be considered hamstrung and unable to</span>
+            <span class='comment'>// do anything other than syscalls really. Consider the following</span>
+            <span class='comment'>// scenario:</span>
+            <span class='comment'>//</span>
+            <span class='comment'>//      1. Thread A of process 1 grabs the malloc() mutex</span>
+            <span class='comment'>//      2. Thread B of process 1 forks(), creating thread C</span>
+            <span class='comment'>//      3. Thread C of process 2 then attempts to malloc()</span>
+            <span class='comment'>//      4. The memory of process 2 is the same as the memory of</span>
+            <span class='comment'>//         process 1, so the mutex is locked.</span>
+            <span class='comment'>//</span>
+            <span class='comment'>// This situation looks a lot like deadlock, right? It turns out</span>
+            <span class='comment'>// that this is what pthread_atfork() takes care of, which is</span>
+            <span class='comment'>// presumably implemented across platforms. The first thing that</span>
+            <span class='comment'>// threads to *before* forking is to do things like grab the malloc</span>
+            <span class='comment'>// mutex, and then after the fork they unlock it.</span>
+            <span class='comment'>//</span>
+            <span class='comment'>// Despite this information, libnative&#39;s spawn has been witnessed to</span>
+            <span class='comment'>// deadlock on both OSX and FreeBSD. I&#39;m not entirely sure why, but</span>
+            <span class='comment'>// all collected backtraces point at malloc/free traffic in the</span>
+            <span class='comment'>// child spawned process.</span>
+            <span class='comment'>//</span>
+            <span class='comment'>// For this reason, the block of code below should contain 0</span>
+            <span class='comment'>// invocations of either malloc of free (or their related friends).</span>
+            <span class='comment'>//</span>
+            <span class='comment'>// As an example of not having malloc/free traffic, we don&#39;t close</span>
+            <span class='comment'>// this file descriptor by dropping the FileDesc (which contains an</span>
+            <span class='comment'>// allocation). Instead we just close it manually. This will never</span>
+            <span class='comment'>// have the drop glue anyway because this code never returns (the</span>
+            <span class='comment'>// child will either exec() or invoke libc::exit)</span>
+            <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>libc</span>::<span class='ident'>close</span>(<span class='ident'>input</span>.<span class='ident'>fd</span>());
 
             <span class='kw'>fn</span> <span class='ident'>fail</span>(<span class='ident'>output</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>file</span>::<span class='ident'>FileDesc</span>) <span class='op'>-&gt;</span> <span class='op'>!</span> {
                 <span class='kw'>let</span> <span class='ident'>errno</span> <span class='op'>=</span> <span class='ident'>os</span>::<span class='ident'>errno</span>();
@@ -1881,14 +1879,14 @@
                 <span class='kw'>unsafe</span> { <span class='ident'>libc</span>::<span class='ident'>_exit</span>(<span class='number'>1</span>) }
             }
 
-            <span class='ident'>rustrt</span>::<span class='ident'>rust_unset_sigprocmask</span>();<span class='comment'>
+            <span class='ident'>rustrt</span>::<span class='ident'>rust_unset_sigprocmask</span>();
 
-            // If a stdio file descriptor is set to be ignored (via a -1 file
-            // descriptor), then we don&#39;t actually close it, but rather open
-            // up /dev/null into that file descriptor. Otherwise, the first file
-            // descriptor opened up in the child would be numbered as one of the
-            // stdio file descriptors, which is likely to wreak havoc.
-            </span><span class='kw'>let</span> <span class='ident'>setup</span> <span class='op'>=</span> <span class='op'>|</span><span class='ident'>src</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>file</span>::<span class='ident'>FileDesc</span><span class='op'>&gt;</span>, <span class='ident'>dst</span>: <span class='ident'>c_int</span><span class='op'>|</span> {
+            <span class='comment'>// If a stdio file descriptor is set to be ignored (via a -1 file</span>
+            <span class='comment'>// descriptor), then we don&#39;t actually close it, but rather open</span>
+            <span class='comment'>// up /dev/null into that file descriptor. Otherwise, the first file</span>
+            <span class='comment'>// descriptor opened up in the child would be numbered as one of the</span>
+            <span class='comment'>// stdio file descriptors, which is likely to wreak havoc.</span>
+            <span class='kw'>let</span> <span class='ident'>setup</span> <span class='op'>=</span> <span class='op'>|</span><span class='ident'>src</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>file</span>::<span class='ident'>FileDesc</span><span class='op'>&gt;</span>, <span class='ident'>dst</span>: <span class='ident'>c_int</span><span class='op'>|</span> {
                 <span class='kw'>let</span> <span class='ident'>src</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>src</span> {
                     <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
                         <span class='kw'>let</span> <span class='ident'>flags</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>dst</span> <span class='op'>==</span> <span class='ident'>libc</span>::<span class='ident'>STDIN_FILENO</span> {
@@ -1899,11 +1897,11 @@
                         <span class='ident'>libc</span>::<span class='ident'>open</span>(<span class='ident'>devnull</span>.<span class='ident'>as_ptr</span>(), <span class='ident'>flags</span>, <span class='number'>0</span>)
                     }
                     <span class='prelude-val'>Some</span>(<span class='ident'>obj</span>) <span class='op'>=&gt;</span> {
-                        <span class='kw'>let</span> <span class='ident'>fd</span> <span class='op'>=</span> <span class='ident'>obj</span>.<span class='ident'>fd</span>();<span class='comment'>
-                        // Leak the memory and the file descriptor. We&#39;re in the
-                        // child now an all our resources are going to be
-                        // cleaned up very soon
-                        </span><span class='ident'>mem</span>::<span class='ident'>forget</span>(<span class='ident'>obj</span>);
+                        <span class='kw'>let</span> <span class='ident'>fd</span> <span class='op'>=</span> <span class='ident'>obj</span>.<span class='ident'>fd</span>();
+                        <span class='comment'>// Leak the memory and the file descriptor. We&#39;re in the</span>
+                        <span class='comment'>// child now an all our resources are going to be</span>
+                        <span class='comment'>// cleaned up very soon</span>
+                        <span class='ident'>mem</span>::<span class='ident'>forget</span>(<span class='ident'>obj</span>);
                         <span class='ident'>fd</span>
                     }
                 };
@@ -1912,10 +1910,10 @@
 
             <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>setup</span>(<span class='ident'>in_fd</span>, <span class='ident'>libc</span>::<span class='ident'>STDIN_FILENO</span>) { <span class='ident'>fail</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>output</span>) }
             <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>setup</span>(<span class='ident'>out_fd</span>, <span class='ident'>libc</span>::<span class='ident'>STDOUT_FILENO</span>) { <span class='ident'>fail</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>output</span>) }
-            <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>setup</span>(<span class='ident'>err_fd</span>, <span class='ident'>libc</span>::<span class='ident'>STDERR_FILENO</span>) { <span class='ident'>fail</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>output</span>) }<span class='comment'>
+            <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>setup</span>(<span class='ident'>err_fd</span>, <span class='ident'>libc</span>::<span class='ident'>STDERR_FILENO</span>) { <span class='ident'>fail</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>output</span>) }
 
-            // close all other fds
-            </span><span class='kw'>for</span> <span class='ident'>fd</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>3</span>, <span class='ident'>getdtablesize</span>()).<span class='ident'>rev</span>() {
+            <span class='comment'>// close all other fds</span>
+            <span class='kw'>for</span> <span class='ident'>fd</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>3</span>, <span class='ident'>getdtablesize</span>()).<span class='ident'>rev</span>() {
                 <span class='kw'>if</span> <span class='ident'>fd</span> <span class='op'>!=</span> <span class='ident'>output</span>.<span class='ident'>fd</span>() {
                     <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>close</span>(<span class='ident'>fd</span> <span class='kw'>as</span> <span class='ident'>c_int</span>);
                 }
@@ -1930,15 +1928,15 @@
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {}
             }
             <span class='kw'>match</span> <span class='ident'>cfg</span>.<span class='ident'>uid</span> {
-                <span class='prelude-val'>Some</span>(<span class='ident'>u</span>) <span class='op'>=&gt;</span> {<span class='comment'>
-                    // When dropping privileges from root, the `setgroups` call
-                    // will remove any extraneous groups. If we don&#39;t call this,
-                    // then even though our uid has dropped, we may still have
-                    // groups that enable us to do super-user things. This will
-                    // fail if we aren&#39;t root, so don&#39;t bother checking the
-                    // return value, this is just done as an optimistic
-                    // privilege dropping function.
-                    </span><span class='kw'>extern</span> {
+                <span class='prelude-val'>Some</span>(<span class='ident'>u</span>) <span class='op'>=&gt;</span> {
+                    <span class='comment'>// When dropping privileges from root, the `setgroups` call</span>
+                    <span class='comment'>// will remove any extraneous groups. If we don&#39;t call this,</span>
+                    <span class='comment'>// then even though our uid has dropped, we may still have</span>
+                    <span class='comment'>// groups that enable us to do super-user things. This will</span>
+                    <span class='comment'>// fail if we aren&#39;t root, so don&#39;t bother checking the</span>
+                    <span class='comment'>// return value, this is just done as an optimistic</span>
+                    <span class='comment'>// privilege dropping function.</span>
+                    <span class='kw'>extern</span> {
                         <span class='kw'>fn</span> <span class='ident'>setgroups</span>(<span class='ident'>ngroups</span>: <span class='ident'>libc</span>::<span class='ident'>c_int</span>,
                                      <span class='ident'>ptr</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>) <span class='op'>-&gt;</span> <span class='ident'>libc</span>::<span class='ident'>c_int</span>;
                     }
@@ -1950,11 +1948,11 @@
                 }
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {}
             }
-            <span class='kw'>if</span> <span class='ident'>cfg</span>.<span class='ident'>detach</span> {<span class='comment'>
-                // Don&#39;t check the error of setsid because it fails if we&#39;re the
-                // process leader already. We just forked so it shouldn&#39;t return
-                // error, but ignore it anyway.
-                </span><span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>libc</span>::<span class='ident'>setsid</span>();
+            <span class='kw'>if</span> <span class='ident'>cfg</span>.<span class='ident'>detach</span> {
+                <span class='comment'>// Don&#39;t check the error of setsid because it fails if we&#39;re the</span>
+                <span class='comment'>// process leader already. We just forked so it shouldn&#39;t return</span>
+                <span class='comment'>// error, but ignore it anyway.</span>
+                <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>libc</span>::<span class='ident'>setsid</span>();
             }
             <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>dirp</span>.<span class='ident'>is_null</span>() <span class='op'>&amp;&amp;</span> <span class='ident'>chdir</span>(<span class='ident'>dirp</span>) <span class='op'>==</span> <span class='op'>-</span><span class='number'>1</span> {
                 <span class='ident'>fail</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>output</span>);
@@ -1971,31 +1969,31 @@
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>unix</span>)]</span>
 <span class='kw'>fn</span> <span class='ident'>with_argv</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>prog</span>: <span class='kw-2'>&amp;</span><span class='ident'>CString</span>, <span class='ident'>args</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>CString</span>],
                 <span class='ident'>cb</span>: <span class='kw'>proc</span>(<span class='op'>*</span><span class='kw'>const</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span> {
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>ptrs</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='op'>*</span><span class='kw'>const</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='ident'>args</span>.<span class='ident'>len</span>()<span class='op'>+</span><span class='number'>1</span>);<span class='comment'>
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>ptrs</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='op'>*</span><span class='kw'>const</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='ident'>args</span>.<span class='ident'>len</span>()<span class='op'>+</span><span class='number'>1</span>);
 
-    // Convert the CStrings into an array of pointers. Note: the
-    // lifetime of the various CStrings involved is guaranteed to be
-    // larger than the lifetime of our invocation of cb, but this is
-    // technically unsafe as the callback could leak these pointers
-    // out of our scope.
-    </span><span class='ident'>ptrs</span>.<span class='ident'>push</span>(<span class='ident'>prog</span>.<span class='ident'>as_ptr</span>());
-    <span class='ident'>ptrs</span>.<span class='ident'>extend</span>(<span class='ident'>args</span>.<span class='ident'>iter</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>tmp</span><span class='op'>|</span> <span class='ident'>tmp</span>.<span class='ident'>as_ptr</span>()));<span class='comment'>
+    <span class='comment'>// Convert the CStrings into an array of pointers. Note: the</span>
+    <span class='comment'>// lifetime of the various CStrings involved is guaranteed to be</span>
+    <span class='comment'>// larger than the lifetime of our invocation of cb, but this is</span>
+    <span class='comment'>// technically unsafe as the callback could leak these pointers</span>
+    <span class='comment'>// out of our scope.</span>
+    <span class='ident'>ptrs</span>.<span class='ident'>push</span>(<span class='ident'>prog</span>.<span class='ident'>as_ptr</span>());
+    <span class='ident'>ptrs</span>.<span class='ident'>extend</span>(<span class='ident'>args</span>.<span class='ident'>iter</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>tmp</span><span class='op'>|</span> <span class='ident'>tmp</span>.<span class='ident'>as_ptr</span>()));
 
-    // Add a terminating null pointer (required by libc).
-    </span><span class='ident'>ptrs</span>.<span class='ident'>push</span>(<span class='ident'>ptr</span>::<span class='ident'>null</span>());
+    <span class='comment'>// Add a terminating null pointer (required by libc).</span>
+    <span class='ident'>ptrs</span>.<span class='ident'>push</span>(<span class='ident'>ptr</span>::<span class='ident'>null</span>());
 
     <span class='ident'>cb</span>(<span class='ident'>ptrs</span>.<span class='ident'>as_ptr</span>())
 }
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>unix</span>)]</span>
 <span class='kw'>fn</span> <span class='ident'>with_envp</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>env</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span>[(<span class='ident'>CString</span>, <span class='ident'>CString</span>)]<span class='op'>&gt;</span>,
-                <span class='ident'>cb</span>: <span class='kw'>proc</span>(<span class='op'>*</span><span class='kw'>const</span> <span class='ident'>c_void</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span> {<span class='comment'>
-    // On posixy systems we can pass a char** for envp, which is a
-    // null-terminated array of &quot;k=v\0&quot; strings. Since we must create
-    // these strings locally, yet expose a raw pointer to them, we
-    // create a temporary vector to own the CStrings that outlives the
-    // call to cb.
-    </span><span class='kw'>match</span> <span class='ident'>env</span> {
+                <span class='ident'>cb</span>: <span class='kw'>proc</span>(<span class='op'>*</span><span class='kw'>const</span> <span class='ident'>c_void</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span> {
+    <span class='comment'>// On posixy systems we can pass a char** for envp, which is a</span>
+    <span class='comment'>// null-terminated array of &quot;k=v\0&quot; strings. Since we must create</span>
+    <span class='comment'>// these strings locally, yet expose a raw pointer to them, we</span>
+    <span class='comment'>// create a temporary vector to own the CStrings that outlives the</span>
+    <span class='comment'>// call to cb.</span>
+    <span class='kw'>match</span> <span class='ident'>env</span> {
         <span class='prelude-val'>Some</span>(<span class='ident'>env</span>) <span class='op'>=&gt;</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>tmps</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='ident'>env</span>.<span class='ident'>len</span>());
 
@@ -2003,12 +2001,12 @@
                 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>kv</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
                 <span class='ident'>kv</span>.<span class='ident'>push_all</span>(<span class='ident'>pair</span>.<span class='ident'>ref0</span>().<span class='ident'>as_bytes_no_nul</span>());
                 <span class='ident'>kv</span>.<span class='ident'>push</span>(<span class='string'>&#39;=&#39;</span> <span class='kw'>as</span> <span class='ident'>u8</span>);
-                <span class='ident'>kv</span>.<span class='ident'>push_all</span>(<span class='ident'>pair</span>.<span class='ident'>ref1</span>().<span class='ident'>as_bytes</span>());<span class='comment'> // includes terminal \0
-                </span><span class='ident'>tmps</span>.<span class='ident'>push</span>(<span class='ident'>kv</span>);
-            }<span class='comment'>
+                <span class='ident'>kv</span>.<span class='ident'>push_all</span>(<span class='ident'>pair</span>.<span class='ident'>ref1</span>().<span class='ident'>as_bytes</span>()); <span class='comment'>// includes terminal \0</span>
+                <span class='ident'>tmps</span>.<span class='ident'>push</span>(<span class='ident'>kv</span>);
+            }
 
-            // As with `with_argv`, this is unsafe, since cb could leak the pointers.
-            </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>ptrs</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='op'>*</span><span class='kw'>const</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span><span class='op'>&gt;</span> <span class='op'>=</span>
+            <span class='comment'>// As with `with_argv`, this is unsafe, since cb could leak the pointers.</span>
+            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>ptrs</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='op'>*</span><span class='kw'>const</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span><span class='op'>&gt;</span> <span class='op'>=</span>
                 <span class='ident'>tmps</span>.<span class='ident'>iter</span>()
                     .<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>tmp</span><span class='op'>|</span> <span class='ident'>tmp</span>.<span class='ident'>as_ptr</span>() <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span>)
                     .<span class='ident'>collect</span>();
@@ -2021,11 +2019,11 @@
 }
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>windows</span>)]</span>
-<span class='kw'>fn</span> <span class='ident'>with_envp</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>env</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span>[(<span class='ident'>CString</span>, <span class='ident'>CString</span>)]<span class='op'>&gt;</span>, <span class='ident'>cb</span>: <span class='op'>|</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>c_void</span><span class='op'>|</span> <span class='op'>-&gt;</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span> {<span class='comment'>
-    // On win32 we pass an &quot;environment block&quot; which is not a char**, but
-    // rather a concatenation of null-terminated k=v\0 sequences, with a final
-    // \0 to terminate.
-    </span><span class='kw'>match</span> <span class='ident'>env</span> {
+<span class='kw'>fn</span> <span class='ident'>with_envp</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>env</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span>[(<span class='ident'>CString</span>, <span class='ident'>CString</span>)]<span class='op'>&gt;</span>, <span class='ident'>cb</span>: <span class='op'>|</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>c_void</span><span class='op'>|</span> <span class='op'>-&gt;</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span> {
+    <span class='comment'>// On win32 we pass an &quot;environment block&quot; which is not a char**, but</span>
+    <span class='comment'>// rather a concatenation of null-terminated k=v\0 sequences, with a final</span>
+    <span class='comment'>// \0 to terminate.</span>
+    <span class='kw'>match</span> <span class='ident'>env</span> {
         <span class='prelude-val'>Some</span>(<span class='ident'>env</span>) <span class='op'>=&gt;</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>blk</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
 
@@ -2068,9 +2066,9 @@
 }
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>unix</span>)]</span>
-<span class='kw'>fn</span> <span class='ident'>free_handle</span>(<span class='ident'>_handle</span>: <span class='op'>*</span><span class='kw-2'>mut</span> ()) {<span class='comment'>
-    // unix has no process handle object, just a pid
-</span>}
+<span class='kw'>fn</span> <span class='ident'>free_handle</span>(<span class='ident'>_handle</span>: <span class='op'>*</span><span class='kw-2'>mut</span> ()) {
+    <span class='comment'>// unix has no process handle object, just a pid</span>
+}
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>unix</span>)]</span>
 <span class='kw'>fn</span> <span class='ident'>translate_status</span>(<span class='ident'>status</span>: <span class='ident'>c_int</span>) <span class='op'>-&gt;</span> <span class='ident'>rtio</span>::<span class='ident'>ProcessExit</span> {
@@ -2078,18 +2076,18 @@
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;linux&quot;</span>)]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;android&quot;</span>)]</span>
     <span class='kw'>mod</span> <span class='ident'>imp</span> {
-        <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>WIFEXITED</span>(<span class='ident'>status</span>: <span class='ident'>i32</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { (<span class='ident'>status</span> <span class='op'>&amp;</span> <span class='number'>0xff</span>) <span class='op'>==</span> <span class='number'>0</span> }
-        <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>WEXITSTATUS</span>(<span class='ident'>status</span>: <span class='ident'>i32</span>) <span class='op'>-&gt;</span> <span class='ident'>i32</span> { (<span class='ident'>status</span> <span class='op'>&gt;&gt;</span> <span class='number'>8</span>) <span class='op'>&amp;</span> <span class='number'>0xff</span> }
-        <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>WTERMSIG</span>(<span class='ident'>status</span>: <span class='ident'>i32</span>) <span class='op'>-&gt;</span> <span class='ident'>i32</span> { <span class='ident'>status</span> <span class='op'>&amp;</span> <span class='number'>0x7f</span> }
+        <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>WIFEXITED</span>(<span class='ident'>status</span>: <span class='ident'>i32</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { (<span class='ident'>status</span> <span class='kw-2'>&amp;</span> <span class='number'>0xff</span>) <span class='op'>==</span> <span class='number'>0</span> }
+        <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>WEXITSTATUS</span>(<span class='ident'>status</span>: <span class='ident'>i32</span>) <span class='op'>-&gt;</span> <span class='ident'>i32</span> { (<span class='ident'>status</span> <span class='op'>&gt;&gt;</span> <span class='number'>8</span>) <span class='kw-2'>&amp;</span> <span class='number'>0xff</span> }
+        <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>WTERMSIG</span>(<span class='ident'>status</span>: <span class='ident'>i32</span>) <span class='op'>-&gt;</span> <span class='ident'>i32</span> { <span class='ident'>status</span> <span class='kw-2'>&amp;</span> <span class='number'>0x7f</span> }
     }
 
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;macos&quot;</span>)]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;ios&quot;</span>)]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;freebsd&quot;</span>)]</span>
     <span class='kw'>mod</span> <span class='ident'>imp</span> {
-        <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>WIFEXITED</span>(<span class='ident'>status</span>: <span class='ident'>i32</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { (<span class='ident'>status</span> <span class='op'>&amp;</span> <span class='number'>0x7f</span>) <span class='op'>==</span> <span class='number'>0</span> }
+        <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>WIFEXITED</span>(<span class='ident'>status</span>: <span class='ident'>i32</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { (<span class='ident'>status</span> <span class='kw-2'>&amp;</span> <span class='number'>0x7f</span>) <span class='op'>==</span> <span class='number'>0</span> }
         <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>WEXITSTATUS</span>(<span class='ident'>status</span>: <span class='ident'>i32</span>) <span class='op'>-&gt;</span> <span class='ident'>i32</span> { <span class='ident'>status</span> <span class='op'>&gt;&gt;</span> <span class='number'>8</span> }
-        <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>WTERMSIG</span>(<span class='ident'>status</span>: <span class='ident'>i32</span>) <span class='op'>-&gt;</span> <span class='ident'>i32</span> { <span class='ident'>status</span> <span class='op'>&amp;</span> <span class='number'>0o177</span> }
+        <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>WTERMSIG</span>(<span class='ident'>status</span>: <span class='ident'>i32</span>) <span class='op'>-&gt;</span> <span class='ident'>i32</span> { <span class='ident'>status</span> <span class='kw-2'>&amp;</span> <span class='number'>0o177</span> }
     }
 
     <span class='kw'>if</span> <span class='ident'>imp</span>::<span class='ident'>WIFEXITED</span>(<span class='ident'>status</span>) {
@@ -2182,47 +2180,47 @@
             <span class='op'>-</span><span class='number'>1</span> <span class='op'>=&gt;</span> <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;unknown waitpid error: {}&quot;</span>, <span class='ident'>super</span>::<span class='ident'>last_error</span>().<span class='ident'>code</span>),
             _ <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>translate_status</span>(<span class='ident'>status</span>)),
         }
-    }<span class='comment'>
+    }
 
-    // On unix, wait() and its friends have no timeout parameters, so there is
-    // no way to time out a thread in wait(). From some googling and some
-    // thinking, it appears that there are a few ways to handle timeouts in
-    // wait(), but the only real reasonable one for a multi-threaded program is
-    // to listen for SIGCHLD.
-    //
-    // With this in mind, the waiting mechanism with a timeout barely uses
-    // waitpid() at all. There are a few times that waitpid() is invoked with
-    // WNOHANG, but otherwise all the necessary blocking is done by waiting for
-    // a SIGCHLD to arrive (and that blocking has a timeout). Note, however,
-    // that waitpid() is still used to actually reap the child.
-    //
-    // Signal handling is super tricky in general, and this is no exception. Due
-    // to the async nature of SIGCHLD, we use the self-pipe trick to transmit
-    // data out of the signal handler to the rest of the application. The first
-    // idea would be to have each thread waiting with a timeout to read this
-    // output file descriptor, but a write() is akin to a signal(), not a
-    // broadcast(), so it would only wake up one thread, and possibly the wrong
-    // thread. Hence a helper thread is used.
-    //
-    // The helper thread here is responsible for farming requests for a
-    // waitpid() with a timeout, and then processing all of the wait requests.
-    // By guaranteeing that only this helper thread is reading half of the
-    // self-pipe, we&#39;re sure that we&#39;ll never lose a SIGCHLD. This helper thread
-    // is also responsible for select() to wait for incoming messages or
-    // incoming SIGCHLD messages, along with passing an appropriate timeout to
-    // select() to wake things up as necessary.
-    //
-    // The ordering of the following statements is also very purposeful. First,
-    // we must be guaranteed that the helper thread is booted and available to
-    // receive SIGCHLD signals, and then we must also ensure that we do a
-    // nonblocking waitpid() at least once before we go ask the sigchld helper.
-    // This prevents the race where the child exits, we boot the helper, and
-    // then we ask for the child&#39;s exit status (never seeing a sigchld).
-    //
-    // The actual communication between the helper thread and this thread is
-    // quite simple, just a channel moving data around.
+    <span class='comment'>// On unix, wait() and its friends have no timeout parameters, so there is</span>
+    <span class='comment'>// no way to time out a thread in wait(). From some googling and some</span>
+    <span class='comment'>// thinking, it appears that there are a few ways to handle timeouts in</span>
+    <span class='comment'>// wait(), but the only real reasonable one for a multi-threaded program is</span>
+    <span class='comment'>// to listen for SIGCHLD.</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// With this in mind, the waiting mechanism with a timeout barely uses</span>
+    <span class='comment'>// waitpid() at all. There are a few times that waitpid() is invoked with</span>
+    <span class='comment'>// WNOHANG, but otherwise all the necessary blocking is done by waiting for</span>
+    <span class='comment'>// a SIGCHLD to arrive (and that blocking has a timeout). Note, however,</span>
+    <span class='comment'>// that waitpid() is still used to actually reap the child.</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// Signal handling is super tricky in general, and this is no exception. Due</span>
+    <span class='comment'>// to the async nature of SIGCHLD, we use the self-pipe trick to transmit</span>
+    <span class='comment'>// data out of the signal handler to the rest of the application. The first</span>
+    <span class='comment'>// idea would be to have each thread waiting with a timeout to read this</span>
+    <span class='comment'>// output file descriptor, but a write() is akin to a signal(), not a</span>
+    <span class='comment'>// broadcast(), so it would only wake up one thread, and possibly the wrong</span>
+    <span class='comment'>// thread. Hence a helper thread is used.</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// The helper thread here is responsible for farming requests for a</span>
+    <span class='comment'>// waitpid() with a timeout, and then processing all of the wait requests.</span>
+    <span class='comment'>// By guaranteeing that only this helper thread is reading half of the</span>
+    <span class='comment'>// self-pipe, we&#39;re sure that we&#39;ll never lose a SIGCHLD. This helper thread</span>
+    <span class='comment'>// is also responsible for select() to wait for incoming messages or</span>
+    <span class='comment'>// incoming SIGCHLD messages, along with passing an appropriate timeout to</span>
+    <span class='comment'>// select() to wake things up as necessary.</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// The ordering of the following statements is also very purposeful. First,</span>
+    <span class='comment'>// we must be guaranteed that the helper thread is booted and available to</span>
+    <span class='comment'>// receive SIGCHLD signals, and then we must also ensure that we do a</span>
+    <span class='comment'>// nonblocking waitpid() at least once before we go ask the sigchld helper.</span>
+    <span class='comment'>// This prevents the race where the child exits, we boot the helper, and</span>
+    <span class='comment'>// then we ask for the child&#39;s exit status (never seeing a sigchld).</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// The actual communication between the helper thread and this thread is</span>
+    <span class='comment'>// quite simple, just a channel moving data around.</span>
 
-    </span><span class='kw'>unsafe</span> { <span class='ident'>HELPER</span>.<span class='ident'>boot</span>(<span class='ident'>register_sigchld</span>, <span class='ident'>waitpid_helper</span>) }
+    <span class='kw'>unsafe</span> { <span class='ident'>HELPER</span>.<span class='ident'>boot</span>(<span class='ident'>register_sigchld</span>, <span class='ident'>waitpid_helper</span>) }
 
     <span class='kw'>match</span> <span class='ident'>waitpid_nowait</span>(<span class='ident'>pid</span>) {
         <span class='prelude-val'>Some</span>(<span class='ident'>ret</span>) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Ok</span>(<span class='ident'>ret</span>),
@@ -2234,14 +2232,14 @@
     <span class='kw'>return</span> <span class='kw'>match</span> <span class='ident'>rx</span>.<span class='ident'>recv_opt</span>() {
         <span class='prelude-val'>Ok</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>e</span>),
         <span class='prelude-val'>Err</span>(()) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>util</span>::<span class='ident'>timeout</span>(<span class='string'>&quot;wait timed out&quot;</span>)),
-    };<span class='comment'>
+    };
 
-    // Register a new SIGCHLD handler, returning the reading half of the
-    // self-pipe plus the old handler registered (return value of sigaction).
-    //
-    // Be sure to set up the self-pipe first because as soon as we register a
-    // handler we&#39;re going to start receiving signals.
-    </span><span class='kw'>fn</span> <span class='ident'>register_sigchld</span>() <span class='op'>-&gt;</span> (<span class='ident'>libc</span>::<span class='ident'>c_int</span>, <span class='ident'>c</span>::<span class='ident'>sigaction</span>) {
+    <span class='comment'>// Register a new SIGCHLD handler, returning the reading half of the</span>
+    <span class='comment'>// self-pipe plus the old handler registered (return value of sigaction).</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// Be sure to set up the self-pipe first because as soon as we register a</span>
+    <span class='comment'>// handler we&#39;re going to start receiving signals.</span>
+    <span class='kw'>fn</span> <span class='ident'>register_sigchld</span>() <span class='op'>-&gt;</span> (<span class='ident'>libc</span>::<span class='ident'>c_int</span>, <span class='ident'>c</span>::<span class='ident'>sigaction</span>) {
         <span class='kw'>unsafe</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>pipes</span> <span class='op'>=</span> [<span class='number'>0</span>, ..<span class='number'>2</span>];
             <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>libc</span>::<span class='ident'>pipe</span>(<span class='ident'>pipes</span>.<span class='ident'>as_mut_ptr</span>()), <span class='number'>0</span>);
@@ -2256,10 +2254,10 @@
             <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>c</span>::<span class='ident'>sigaction</span>(<span class='ident'>c</span>::<span class='ident'>SIGCHLD</span>, <span class='kw-2'>&amp;</span><span class='ident'>new</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>old</span>), <span class='number'>0</span>);
             (<span class='ident'>pipes</span>[<span class='number'>0</span>], <span class='ident'>old</span>)
         }
-    }<span class='comment'>
+    }
 
-    // Helper thread for processing SIGCHLD messages
-    </span><span class='kw'>fn</span> <span class='ident'>waitpid_helper</span>(<span class='ident'>input</span>: <span class='ident'>libc</span>::<span class='ident'>c_int</span>,
+    <span class='comment'>// Helper thread for processing SIGCHLD messages</span>
+    <span class='kw'>fn</span> <span class='ident'>waitpid_helper</span>(<span class='ident'>input</span>: <span class='ident'>libc</span>::<span class='ident'>c_int</span>,
                       <span class='ident'>messages</span>: <span class='ident'>Receiver</span><span class='op'>&lt;</span><span class='ident'>Req</span><span class='op'>&gt;</span>,
                       (<span class='ident'>read_fd</span>, <span class='ident'>old</span>): (<span class='ident'>libc</span>::<span class='ident'>c_int</span>, <span class='ident'>c</span>::<span class='ident'>sigaction</span>)) {
         <span class='ident'>util</span>::<span class='ident'>set_nonblocking</span>(<span class='ident'>input</span>, <span class='boolval'>true</span>).<span class='ident'>ok</span>().<span class='ident'>unwrap</span>();
@@ -2268,13 +2266,13 @@
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>active</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='op'>&lt;</span>(<span class='ident'>libc</span>::<span class='ident'>pid_t</span>, <span class='ident'>Sender</span><span class='op'>&lt;</span><span class='ident'>rtio</span>::<span class='ident'>ProcessExit</span><span class='op'>&gt;</span>, <span class='ident'>u64</span>)<span class='op'>&gt;</span>::<span class='ident'>new</span>();
         <span class='kw'>let</span> <span class='ident'>max</span> <span class='op'>=</span> <span class='ident'>cmp</span>::<span class='ident'>max</span>(<span class='ident'>input</span>, <span class='ident'>read_fd</span>) <span class='op'>+</span> <span class='number'>1</span>;
 
-        <span class='lifetime'>&#39;outer</span>: <span class='kw'>loop</span> {<span class='comment'>
-            // Figure out the timeout of our syscall-to-happen. If we&#39;re waiting
-            // for some processes, then they&#39;ll have a timeout, otherwise we
-            // wait indefinitely for a message to arrive.
-            //
-            // FIXME: sure would be nice to not have to scan the entire array
-            </span><span class='kw'>let</span> <span class='ident'>min</span> <span class='op'>=</span> <span class='ident'>active</span>.<span class='ident'>iter</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>a</span><span class='op'>|</span> <span class='op'>*</span><span class='ident'>a</span>.<span class='ident'>ref2</span>()).<span class='ident'>enumerate</span>().<span class='ident'>min_by</span>(<span class='op'>|</span><span class='ident'>p</span><span class='op'>|</span> {
+        <span class='lifetime'>&#39;outer</span>: <span class='kw'>loop</span> {
+            <span class='comment'>// Figure out the timeout of our syscall-to-happen. If we&#39;re waiting</span>
+            <span class='comment'>// for some processes, then they&#39;ll have a timeout, otherwise we</span>
+            <span class='comment'>// wait indefinitely for a message to arrive.</span>
+            <span class='comment'>//</span>
+            <span class='comment'>// FIXME: sure would be nice to not have to scan the entire array</span>
+            <span class='kw'>let</span> <span class='ident'>min</span> <span class='op'>=</span> <span class='ident'>active</span>.<span class='ident'>iter</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>a</span><span class='op'>|</span> <span class='op'>*</span><span class='ident'>a</span>.<span class='ident'>ref2</span>()).<span class='ident'>enumerate</span>().<span class='ident'>min_by</span>(<span class='op'>|</span><span class='ident'>p</span><span class='op'>|</span> {
                 <span class='ident'>p</span>.<span class='ident'>val1</span>()
             });
             <span class='kw'>let</span> (<span class='ident'>p</span>, <span class='ident'>idx</span>) <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>min</span> {
@@ -2285,30 +2283,30 @@
                     (<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>tv</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> _, <span class='ident'>idx</span>)
                 }
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> (<span class='ident'>ptr</span>::<span class='ident'>mut_null</span>(), <span class='op'>-</span><span class='number'>1</span>),
-            };<span class='comment'>
+            };
 
-            // Wait for something to happen
-            </span><span class='ident'>c</span>::<span class='ident'>fd_set</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>set</span>, <span class='ident'>input</span>);
+            <span class='comment'>// Wait for something to happen</span>
+            <span class='ident'>c</span>::<span class='ident'>fd_set</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>set</span>, <span class='ident'>input</span>);
             <span class='ident'>c</span>::<span class='ident'>fd_set</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>set</span>, <span class='ident'>read_fd</span>);
             <span class='kw'>match</span> <span class='kw'>unsafe</span> { <span class='ident'>c</span>::<span class='ident'>select</span>(<span class='ident'>max</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>set</span>, <span class='ident'>ptr</span>::<span class='ident'>mut_null</span>(),
-                                     <span class='ident'>ptr</span>::<span class='ident'>mut_null</span>(), <span class='ident'>p</span>) } {<span class='comment'>
-                // interrupted, retry
-                </span><span class='op'>-</span><span class='number'>1</span> <span class='kw'>if</span> <span class='ident'>os</span>::<span class='ident'>errno</span>() <span class='op'>==</span> <span class='ident'>libc</span>::<span class='ident'>EINTR</span> <span class='kw'>as</span> <span class='ident'>int</span> <span class='op'>=&gt;</span> <span class='kw'>continue</span>,<span class='comment'>
+                                     <span class='ident'>ptr</span>::<span class='ident'>mut_null</span>(), <span class='ident'>p</span>) } {
+                <span class='comment'>// interrupted, retry</span>
+                <span class='op'>-</span><span class='number'>1</span> <span class='kw'>if</span> <span class='ident'>os</span>::<span class='ident'>errno</span>() <span class='op'>==</span> <span class='ident'>libc</span>::<span class='ident'>EINTR</span> <span class='kw'>as</span> <span class='ident'>int</span> <span class='op'>=&gt;</span> <span class='kw'>continue</span>,
 
-                // We read something, break out and process
-                </span><span class='number'>1</span> <span class='op'>|</span> <span class='number'>2</span> <span class='op'>=&gt;</span> {}<span class='comment'>
+                <span class='comment'>// We read something, break out and process</span>
+                <span class='number'>1</span> <span class='op'>|</span> <span class='number'>2</span> <span class='op'>=&gt;</span> {}
 
-                // Timeout, the pending request is removed
-                </span><span class='number'>0</span> <span class='op'>=&gt;</span> {
+                <span class='comment'>// Timeout, the pending request is removed</span>
+                <span class='number'>0</span> <span class='op'>=&gt;</span> {
                     <span class='ident'>drop</span>(<span class='ident'>active</span>.<span class='ident'>remove</span>(<span class='ident'>idx</span>));
                     <span class='kw'>continue</span>
                 }
 
                 <span class='ident'>n</span> <span class='op'>=&gt;</span> <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;error in select {} ({})&quot;</span>, <span class='ident'>os</span>::<span class='ident'>errno</span>(), <span class='ident'>n</span>),
-            }<span class='comment'>
+            }
 
-            // Process any pending messages
-            </span><span class='kw'>if</span> <span class='ident'>drain</span>(<span class='ident'>input</span>) {
+            <span class='comment'>// Process any pending messages</span>
+            <span class='kw'>if</span> <span class='ident'>drain</span>(<span class='ident'>input</span>) {
                 <span class='kw'>loop</span> {
                     <span class='kw'>match</span> <span class='ident'>messages</span>.<span class='ident'>try_recv</span>() {
                         <span class='prelude-val'>Ok</span>(<span class='ident'>NewChild</span>(<span class='ident'>pid</span>, <span class='ident'>tx</span>, <span class='ident'>deadline</span>)) <span class='op'>=&gt;</span> {
@@ -2321,59 +2319,59 @@
                         <span class='prelude-val'>Err</span>(<span class='ident'>comm</span>::<span class='ident'>Empty</span>) <span class='op'>=&gt;</span> <span class='kw'>break</span>,
                     }
                 }
-            }<span class='comment'>
+            }
 
-            // If a child exited (somehow received SIGCHLD), then poll all
-            // children to see if any of them exited.
-            //
-            // We also attempt to be responsible netizens when dealing with
-            // SIGCHLD by invoking any previous SIGCHLD handler instead of just
-            // ignoring any previous SIGCHLD handler. Note that we don&#39;t provide
-            // a 1:1 mapping of our handler invocations to the previous handler
-            // invocations because we drain the `read_fd` entirely. This is
-            // probably OK because the kernel is already allowed to coalesce
-            // simultaneous signals, we&#39;re just doing some extra coalescing.
-            //
-            // Another point of note is that this likely runs the signal handler
-            // on a different thread than the one that received the signal. I
-            // *think* this is ok at this time.
-            //
-            // The main reason for doing this is to allow stdtest to run native
-            // tests as well. Both libgreen and libnative are running around
-            // with process timeouts, but libgreen should get there first
-            // (currently libuv doesn&#39;t handle old signal handlers).
-            </span><span class='kw'>if</span> <span class='ident'>drain</span>(<span class='ident'>read_fd</span>) {
+            <span class='comment'>// If a child exited (somehow received SIGCHLD), then poll all</span>
+            <span class='comment'>// children to see if any of them exited.</span>
+            <span class='comment'>//</span>
+            <span class='comment'>// We also attempt to be responsible netizens when dealing with</span>
+            <span class='comment'>// SIGCHLD by invoking any previous SIGCHLD handler instead of just</span>
+            <span class='comment'>// ignoring any previous SIGCHLD handler. Note that we don&#39;t provide</span>
+            <span class='comment'>// a 1:1 mapping of our handler invocations to the previous handler</span>
+            <span class='comment'>// invocations because we drain the `read_fd` entirely. This is</span>
+            <span class='comment'>// probably OK because the kernel is already allowed to coalesce</span>
+            <span class='comment'>// simultaneous signals, we&#39;re just doing some extra coalescing.</span>
+            <span class='comment'>//</span>
+            <span class='comment'>// Another point of note is that this likely runs the signal handler</span>
+            <span class='comment'>// on a different thread than the one that received the signal. I</span>
+            <span class='comment'>// *think* this is ok at this time.</span>
+            <span class='comment'>//</span>
+            <span class='comment'>// The main reason for doing this is to allow stdtest to run native</span>
+            <span class='comment'>// tests as well. Both libgreen and libnative are running around</span>
+            <span class='comment'>// with process timeouts, but libgreen should get there first</span>
+            <span class='comment'>// (currently libuv doesn&#39;t handle old signal handlers).</span>
+            <span class='kw'>if</span> <span class='ident'>drain</span>(<span class='ident'>read_fd</span>) {
                 <span class='kw'>let</span> <span class='ident'>i</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>old</span>.<span class='ident'>sa_handler</span>) };
                 <span class='kw'>if</span> <span class='ident'>i</span> <span class='op'>!=</span> <span class='number'>0</span> {
-                    <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>old</span>.<span class='ident'>sa_flags</span> <span class='op'>&amp;</span> <span class='ident'>c</span>::<span class='ident'>SA_SIGINFO</span> <span class='op'>==</span> <span class='number'>0</span>);
+                    <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>old</span>.<span class='ident'>sa_flags</span> <span class='kw-2'>&amp;</span> <span class='ident'>c</span>::<span class='ident'>SA_SIGINFO</span> <span class='op'>==</span> <span class='number'>0</span>);
                     (<span class='ident'>old</span>.<span class='ident'>sa_handler</span>)(<span class='ident'>c</span>::<span class='ident'>SIGCHLD</span>);
-                }<span class='comment'>
+                }
 
-                // FIXME: sure would be nice to not have to scan the entire
-                //        array...
-                </span><span class='ident'>active</span>.<span class='ident'>retain</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span>(<span class='ident'>pid</span>, <span class='kw-2'>ref</span> <span class='ident'>tx</span>, _)<span class='op'>|</span> {
+                <span class='comment'>// FIXME: sure would be nice to not have to scan the entire</span>
+                <span class='comment'>//        array...</span>
+                <span class='ident'>active</span>.<span class='ident'>retain</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span>(<span class='ident'>pid</span>, <span class='kw-2'>ref</span> <span class='ident'>tx</span>, _)<span class='op'>|</span> {
                     <span class='kw'>match</span> <span class='ident'>waitpid_nowait</span>(<span class='ident'>pid</span>) {
                         <span class='prelude-val'>Some</span>(<span class='ident'>msg</span>) <span class='op'>=&gt;</span> { <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='ident'>msg</span>); <span class='boolval'>false</span> }
                         <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
                     }
                 });
             }
-        }<span class='comment'>
+        }
 
-        // Once this helper thread is done, we re-register the old sigchld
-        // handler and close our intermediate file descriptors.
-        </span><span class='kw'>unsafe</span> {
+        <span class='comment'>// Once this helper thread is done, we re-register the old sigchld</span>
+        <span class='comment'>// handler and close our intermediate file descriptors.</span>
+        <span class='kw'>unsafe</span> {
             <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>c</span>::<span class='ident'>sigaction</span>(<span class='ident'>c</span>::<span class='ident'>SIGCHLD</span>, <span class='kw-2'>&amp;</span><span class='ident'>old</span>, <span class='ident'>ptr</span>::<span class='ident'>mut_null</span>()), <span class='number'>0</span>);
             <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>libc</span>::<span class='ident'>close</span>(<span class='ident'>read_fd</span>);
             <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>libc</span>::<span class='ident'>close</span>(<span class='ident'>WRITE_FD</span>);
             <span class='ident'>WRITE_FD</span> <span class='op'>=</span> <span class='op'>-</span><span class='number'>1</span>;
         }
-    }<span class='comment'>
+    }
 
-    // Drain all pending data from the file descriptor, returning if any data
-    // could be drained. This requires that the file descriptor is in
-    // nonblocking mode.
-    </span><span class='kw'>fn</span> <span class='ident'>drain</span>(<span class='ident'>fd</span>: <span class='ident'>libc</span>::<span class='ident'>c_int</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+    <span class='comment'>// Drain all pending data from the file descriptor, returning if any data</span>
+    <span class='comment'>// could be drained. This requires that the file descriptor is in</span>
+    <span class='comment'>// nonblocking mode.</span>
+    <span class='kw'>fn</span> <span class='ident'>drain</span>(<span class='ident'>fd</span>: <span class='ident'>libc</span>::<span class='ident'>c_int</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='boolval'>false</span>;
         <span class='kw'>loop</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> [<span class='number'>0u8</span>, ..<span class='number'>1</span>];
@@ -2387,36 +2385,36 @@
                 <span class='ident'>n</span> <span class='op'>=&gt;</span> <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;bad read {} ({})&quot;</span>, <span class='ident'>os</span>::<span class='ident'>last_os_error</span>(), <span class='ident'>n</span>),
             }
         }
-    }<span class='comment'>
+    }
 
-    // Signal handler for SIGCHLD signals, must be async-signal-safe!
-    //
-    // This function will write to the writing half of the &quot;self pipe&quot; to wake
-    // up the helper thread if it&#39;s waiting. Note that this write must be
-    // nonblocking because if it blocks and the reader is the thread we
-    // interrupted, then we&#39;ll deadlock.
-    //
-    // When writing, if the write returns EWOULDBLOCK then we choose to ignore
-    // it. At that point we&#39;re guaranteed that there&#39;s something in the pipe
-    // which will wake up the other end at some point, so we just allow this
-    // signal to be coalesced with the pending signals on the pipe.
-    </span><span class='kw'>extern</span> <span class='kw'>fn</span> <span class='ident'>sigchld_handler</span>(<span class='ident'>_signum</span>: <span class='ident'>libc</span>::<span class='ident'>c_int</span>) {
+    <span class='comment'>// Signal handler for SIGCHLD signals, must be async-signal-safe!</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// This function will write to the writing half of the &quot;self pipe&quot; to wake</span>
+    <span class='comment'>// up the helper thread if it&#39;s waiting. Note that this write must be</span>
+    <span class='comment'>// nonblocking because if it blocks and the reader is the thread we</span>
+    <span class='comment'>// interrupted, then we&#39;ll deadlock.</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// When writing, if the write returns EWOULDBLOCK then we choose to ignore</span>
+    <span class='comment'>// it. At that point we&#39;re guaranteed that there&#39;s something in the pipe</span>
+    <span class='comment'>// which will wake up the other end at some point, so we just allow this</span>
+    <span class='comment'>// signal to be coalesced with the pending signals on the pipe.</span>
+    <span class='kw'>extern</span> <span class='kw'>fn</span> <span class='ident'>sigchld_handler</span>(<span class='ident'>_signum</span>: <span class='ident'>libc</span>::<span class='ident'>c_int</span>) {
         <span class='kw'>let</span> <span class='ident'>msg</span> <span class='op'>=</span> <span class='number'>1i</span>;
         <span class='kw'>match</span> <span class='kw'>unsafe</span> {
             <span class='ident'>libc</span>::<span class='ident'>write</span>(<span class='ident'>WRITE_FD</span>, <span class='kw-2'>&amp;</span><span class='ident'>msg</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> _ <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>, <span class='number'>1</span>)
         } {
             <span class='number'>1</span> <span class='op'>=&gt;</span> {}
-            <span class='op'>-</span><span class='number'>1</span> <span class='kw'>if</span> <span class='ident'>util</span>::<span class='ident'>wouldblock</span>() <span class='op'>=&gt;</span> {}<span class='comment'> // see above comments
-            </span><span class='ident'>n</span> <span class='op'>=&gt;</span> <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;bad error on write fd: {} {}&quot;</span>, <span class='ident'>n</span>, <span class='ident'>os</span>::<span class='ident'>errno</span>()),
+            <span class='op'>-</span><span class='number'>1</span> <span class='kw'>if</span> <span class='ident'>util</span>::<span class='ident'>wouldblock</span>() <span class='op'>=&gt;</span> {} <span class='comment'>// see above comments</span>
+            <span class='ident'>n</span> <span class='op'>=&gt;</span> <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;bad error on write fd: {} {}&quot;</span>, <span class='ident'>n</span>, <span class='ident'>os</span>::<span class='ident'>errno</span>()),
         }
     }
 }
 
 <span class='kw'>fn</span> <span class='ident'>waitpid_nowait</span>(<span class='ident'>pid</span>: <span class='ident'>pid_t</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>rtio</span>::<span class='ident'>ProcessExit</span><span class='op'>&gt;</span> {
-    <span class='kw'>return</span> <span class='ident'>waitpid_os</span>(<span class='ident'>pid</span>);<span class='comment'>
+    <span class='kw'>return</span> <span class='ident'>waitpid_os</span>(<span class='ident'>pid</span>);
 
-    // This code path isn&#39;t necessary on windows
-    </span><span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>windows</span>)]</span>
+    <span class='comment'>// This code path isn&#39;t necessary on windows</span>
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>windows</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>waitpid_os</span>(<span class='ident'>_pid</span>: <span class='ident'>pid_t</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>rtio</span>::<span class='ident'>ProcessExit</span><span class='op'>&gt;</span> { <span class='prelude-val'>None</span> }
 
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>unix</span>)]</span>

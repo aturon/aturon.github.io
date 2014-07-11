@@ -7,8 +7,6 @@
 
     <title>hashmap.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -2560,21 +2558,18 @@
 <span id='2518'>2518</span>
 <span id='2519'>2519</span>
 <span id='2520'>2520</span>
-<span id='2521'>2521</span>
-<span id='2522'>2522</span>
-<span id='2523'>2523</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! Unordered containers, implemented as hash-tables (`HashSet` and `HashMap` types)</span>
+<span class='doccomment'>//! Unordered containers, implemented as hash-tables (`HashSet` and `HashMap` types)</span>
 
 <span class='kw'>use</span> <span class='ident'>clone</span>::<span class='ident'>Clone</span>;
 <span class='kw'>use</span> <span class='ident'>cmp</span>::{<span class='ident'>max</span>, <span class='ident'>Eq</span>, <span class='ident'>Equiv</span>, <span class='ident'>PartialEq</span>};
@@ -2724,17 +2719,17 @@
     <span class='doccomment'>/// This function wraps up `hash_keyed` to be the only way outside this</span>
     <span class='doccomment'>/// module to generate a SafeHash.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>make_hash</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Hash</span><span class='op'>&lt;</span><span class='ident'>S</span><span class='op'>&gt;</span>, <span class='ident'>S</span>, <span class='ident'>H</span>: <span class='ident'>Hasher</span><span class='op'>&lt;</span><span class='ident'>S</span><span class='op'>&gt;&gt;</span>(<span class='ident'>hasher</span>: <span class='kw-2'>&amp;</span><span class='ident'>H</span>, <span class='ident'>t</span>: <span class='kw-2'>&amp;</span><span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>SafeHash</span> {
-        <span class='kw'>match</span> <span class='ident'>hasher</span>.<span class='ident'>hash</span>(<span class='ident'>t</span>) {<span class='comment'>
-            // This constant is exceedingly likely to hash to the same
-            // bucket, but it won&#39;t be counted as empty!
-            </span><span class='ident'>EMPTY_BUCKET</span> <span class='op'>=&gt;</span> <span class='ident'>SafeHash</span> { <span class='ident'>hash</span>: <span class='number'>0x8000_0000_0000_0000</span> },
+        <span class='kw'>match</span> <span class='ident'>hasher</span>.<span class='ident'>hash</span>(<span class='ident'>t</span>) {
+            <span class='comment'>// This constant is exceedingly likely to hash to the same</span>
+            <span class='comment'>// bucket, but it won&#39;t be counted as empty!</span>
+            <span class='ident'>EMPTY_BUCKET</span> <span class='op'>=&gt;</span> <span class='ident'>SafeHash</span> { <span class='ident'>hash</span>: <span class='number'>0x8000_0000_0000_0000</span> },
             <span class='ident'>h</span>            <span class='op'>=&gt;</span> <span class='ident'>SafeHash</span> { <span class='ident'>hash</span>: <span class='ident'>h</span> },
         }
     }
 
     <span class='kw'>fn</span> <span class='ident'>round_up_to_next</span>(<span class='ident'>unrounded</span>: <span class='ident'>uint</span>, <span class='ident'>target_alignment</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>uint</span> {
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>is_power_of_two</span>(<span class='ident'>target_alignment</span>));
-        (<span class='ident'>unrounded</span> <span class='op'>+</span> <span class='ident'>target_alignment</span> <span class='op'>-</span> <span class='number'>1</span>) <span class='op'>&amp;</span> <span class='op'>!</span>(<span class='ident'>target_alignment</span> <span class='op'>-</span> <span class='number'>1</span>)
+        (<span class='ident'>unrounded</span> <span class='op'>+</span> <span class='ident'>target_alignment</span> <span class='op'>-</span> <span class='number'>1</span>) <span class='kw-2'>&amp;</span> <span class='op'>!</span>(<span class='ident'>target_alignment</span> <span class='op'>-</span> <span class='number'>1</span>)
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -2745,11 +2740,11 @@
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>round_up_to_next</span>(<span class='number'>3</span>, <span class='number'>4</span>), <span class='number'>4</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>round_up_to_next</span>(<span class='number'>4</span>, <span class='number'>4</span>), <span class='number'>4</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>round_up_to_next</span>(<span class='number'>5</span>, <span class='number'>4</span>), <span class='number'>8</span>);
-    }<span class='comment'>
+    }
 
-    // Returns a tuple of (minimum required malloc alignment, hash_offset,
-    // key_offset, val_offset, array_size), from the start of a mallocated array.
-    </span><span class='kw'>fn</span> <span class='ident'>calculate_offsets</span>(
+    <span class='comment'>// Returns a tuple of (minimum required malloc alignment, hash_offset,</span>
+    <span class='comment'>// key_offset, val_offset, array_size), from the start of a mallocated array.</span>
+    <span class='kw'>fn</span> <span class='ident'>calculate_offsets</span>(
         <span class='ident'>hash_size</span>: <span class='ident'>uint</span>, <span class='ident'>hash_align</span>: <span class='ident'>uint</span>,
         <span class='ident'>keys_size</span>: <span class='ident'>uint</span>, <span class='ident'>keys_align</span>: <span class='ident'>uint</span>,
         <span class='ident'>vals_size</span>: <span class='ident'>uint</span>, <span class='ident'>vals_align</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> (<span class='ident'>uint</span>, <span class='ident'>uint</span>, <span class='ident'>uint</span>, <span class='ident'>uint</span>, <span class='ident'>uint</span>) {
@@ -2785,17 +2780,17 @@
             <span class='kw'>let</span> <span class='ident'>keys_size</span> <span class='op'>=</span> <span class='ident'>capacity</span>.<span class='ident'>checked_mul</span>(<span class='kw-2'>&amp;</span><span class='ident'>size_of</span>::<span class='op'>&lt;</span> <span class='ident'>K</span> <span class='op'>&gt;</span>())
                                     .<span class='ident'>expect</span>(<span class='string'>&quot;capacity overflow&quot;</span>);
             <span class='kw'>let</span> <span class='ident'>vals_size</span> <span class='op'>=</span> <span class='ident'>capacity</span>.<span class='ident'>checked_mul</span>(<span class='kw-2'>&amp;</span><span class='ident'>size_of</span>::<span class='op'>&lt;</span> <span class='ident'>V</span> <span class='op'>&gt;</span>())
-                                    .<span class='ident'>expect</span>(<span class='string'>&quot;capacity overflow&quot;</span>);<span class='comment'>
+                                    .<span class='ident'>expect</span>(<span class='string'>&quot;capacity overflow&quot;</span>);
 
-            // Allocating hashmaps is a little tricky. We need to allocate three
-            // arrays, but since we know their sizes and alignments up front,
-            // we just allocate a single array, and then have the subarrays
-            // point into it.
-            //
-            // This is great in theory, but in practice getting the alignment
-            // right is a little subtle. Therefore, calculating offsets has been
-            // factored out into a different function.
-            </span><span class='kw'>let</span> (<span class='ident'>malloc_alignment</span>, <span class='ident'>hash_offset</span>, <span class='ident'>keys_offset</span>, <span class='ident'>vals_offset</span>, <span class='ident'>size</span>) <span class='op'>=</span>
+            <span class='comment'>// Allocating hashmaps is a little tricky. We need to allocate three</span>
+            <span class='comment'>// arrays, but since we know their sizes and alignments up front,</span>
+            <span class='comment'>// we just allocate a single array, and then have the subarrays</span>
+            <span class='comment'>// point into it.</span>
+            <span class='comment'>//</span>
+            <span class='comment'>// This is great in theory, but in practice getting the alignment</span>
+            <span class='comment'>// right is a little subtle. Therefore, calculating offsets has been</span>
+            <span class='comment'>// factored out into a different function.</span>
+            <span class='kw'>let</span> (<span class='ident'>malloc_alignment</span>, <span class='ident'>hash_offset</span>, <span class='ident'>keys_offset</span>, <span class='ident'>vals_offset</span>, <span class='ident'>size</span>) <span class='op'>=</span>
                 <span class='ident'>calculate_offsets</span>(
                     <span class='ident'>hashes_size</span>, <span class='ident'>min_align_of</span>::<span class='op'>&lt;</span><span class='ident'>u64</span><span class='op'>&gt;</span>(),
                     <span class='ident'>keys_size</span>,   <span class='ident'>min_align_of</span>::<span class='op'>&lt;</span> <span class='ident'>K</span> <span class='op'>&gt;</span>(),
@@ -2860,8 +2855,7 @@
 
             <span class='kw'>unsafe</span> {
                 <span class='macro'>debug_assert</span><span class='macro'>!</span>(<span class='op'>*</span><span class='self'>self</span>.<span class='ident'>hashes</span>.<span class='ident'>offset</span>(<span class='ident'>idx</span>) <span class='op'>!=</span> <span class='ident'>EMPTY_BUCKET</span>);
-                (<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>keys</span>.<span class='ident'>offset</span>(<span class='ident'>idx</span>),
-                 <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>vals</span>.<span class='ident'>offset</span>(<span class='ident'>idx</span>))
+                (<span class='kw-2'>&amp;</span><span class='op'>*</span><span class='self'>self</span>.<span class='ident'>keys</span>.<span class='ident'>offset</span>(<span class='ident'>idx</span>), <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='self'>self</span>.<span class='ident'>vals</span>.<span class='ident'>offset</span>(<span class='ident'>idx</span>))
             }
         }
 
@@ -2872,8 +2866,7 @@
 
             <span class='kw'>unsafe</span> {
                 <span class='macro'>debug_assert</span><span class='macro'>!</span>(<span class='op'>*</span><span class='self'>self</span>.<span class='ident'>hashes</span>.<span class='ident'>offset</span>(<span class='ident'>idx</span>) <span class='op'>!=</span> <span class='ident'>EMPTY_BUCKET</span>);
-                (<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span>     <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>keys</span>.<span class='ident'>offset</span>(<span class='ident'>idx</span>),
-                 <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>vals</span>.<span class='ident'>offset</span>(<span class='ident'>idx</span>))
+                (<span class='kw-2'>&amp;</span><span class='op'>*</span><span class='self'>self</span>.<span class='ident'>keys</span>.<span class='ident'>offset</span>(<span class='ident'>idx</span>), <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>vals</span>.<span class='ident'>offset</span>(<span class='ident'>idx</span>))
             }
         }
 
@@ -2885,8 +2878,7 @@
             <span class='kw'>unsafe</span> {
                 <span class='macro'>debug_assert</span><span class='macro'>!</span>(<span class='op'>*</span><span class='self'>self</span>.<span class='ident'>hashes</span>.<span class='ident'>offset</span>(<span class='ident'>idx</span>) <span class='op'>!=</span> <span class='ident'>EMPTY_BUCKET</span>);
                 (<span class='ident'>transmute</span>(<span class='self'>self</span>.<span class='ident'>hashes</span>.<span class='ident'>offset</span>(<span class='ident'>idx</span>)),
-                 <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>keys</span>.<span class='ident'>offset</span>(<span class='ident'>idx</span>),
-                 <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>vals</span>.<span class='ident'>offset</span>(<span class='ident'>idx</span>))
+                 <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>keys</span>.<span class='ident'>offset</span>(<span class='ident'>idx</span>), <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>vals</span>.<span class='ident'>offset</span>(<span class='ident'>idx</span>))
             }
         }
 
@@ -2922,10 +2914,10 @@
             <span class='kw'>unsafe</span> {
                 <span class='macro'>debug_assert</span><span class='macro'>!</span>(<span class='op'>*</span><span class='self'>self</span>.<span class='ident'>hashes</span>.<span class='ident'>offset</span>(<span class='ident'>idx</span>) <span class='op'>!=</span> <span class='ident'>EMPTY_BUCKET</span>);
 
-                <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>hashes</span>.<span class='ident'>offset</span>(<span class='ident'>idx</span>) <span class='op'>=</span> <span class='ident'>EMPTY_BUCKET</span>;<span class='comment'>
+                <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>hashes</span>.<span class='ident'>offset</span>(<span class='ident'>idx</span>) <span class='op'>=</span> <span class='ident'>EMPTY_BUCKET</span>;
 
-                // Drop the mutable constraint.
-                </span><span class='kw'>let</span> <span class='ident'>keys</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>keys</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>K</span>;
+                <span class='comment'>// Drop the mutable constraint.</span>
+                <span class='kw'>let</span> <span class='ident'>keys</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>keys</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>K</span>;
                 <span class='kw'>let</span> <span class='ident'>vals</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>vals</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>V</span>;
 
                 <span class='kw'>let</span> <span class='ident'>k</span> <span class='op'>=</span> <span class='ident'>ptr</span>::<span class='ident'>read</span>(<span class='ident'>keys</span>.<span class='ident'>offset</span>(<span class='ident'>idx</span>));
@@ -2959,18 +2951,18 @@
         <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>move_iter</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>MoveEntries</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span> {
             <span class='ident'>MoveEntries</span> { <span class='ident'>table</span>: <span class='self'>self</span>, <span class='ident'>idx</span>: <span class='number'>0</span> }
         }
-    }<span class='comment'>
+    }
 
-    // `read_all_mut` casts a `*u64` to a `*SafeHash`. Since we statically
-    // ensure that a `FullIndex` points to an index with a non-zero hash,
-    // and a `SafeHash` is just a `u64` with a different name, this is
-    // safe.
-    //
-    // This test ensures that a `SafeHash` really IS the same size as a
-    // `u64`. If you need to change the size of `SafeHash` (and
-    // consequently made this test fail), `read_all_mut` needs to be
-    // modified to no longer assume this.
-    </span><span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='comment'>// `read_all_mut` casts a `*u64` to a `*SafeHash`. Since we statically</span>
+    <span class='comment'>// ensure that a `FullIndex` points to an index with a non-zero hash,</span>
+    <span class='comment'>// and a `SafeHash` is just a `u64` with a different name, this is</span>
+    <span class='comment'>// safe.</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// This test ensures that a `SafeHash` really IS the same size as a</span>
+    <span class='comment'>// `u64`. If you need to change the size of `SafeHash` (and</span>
+    <span class='comment'>// consequently made this test fail), `read_all_mut` needs to be</span>
+    <span class='comment'>// modified to no longer assume this.</span>
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>can_alias_safehash_as_u64</span>() {
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>size_of</span>::<span class='op'>&lt;</span><span class='ident'>SafeHash</span><span class='op'>&gt;</span>(), <span class='ident'>size_of</span>::<span class='op'>&lt;</span><span class='ident'>u64</span><span class='op'>&gt;</span>())
     }
@@ -3026,11 +3018,11 @@
                 <span class='self'>self</span>.<span class='ident'>idx</span> <span class='op'>+=</span> <span class='number'>1</span>;
 
                 <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>peek</span>(<span class='ident'>i</span>) {
-                    <span class='ident'>Empty</span>(_)  <span class='op'>=&gt;</span> {},<span class='comment'>
-                    // the transmute here fixes:
-                    // error: lifetime of `self` is too short to guarantee its contents
-                    //        can be safely reborrowed
-                    </span><span class='ident'>Full</span>(<span class='ident'>idx</span>) <span class='op'>=&gt;</span> <span class='kw'>unsafe</span> {
+                    <span class='ident'>Empty</span>(_)  <span class='op'>=&gt;</span> {},
+                    <span class='comment'>// the transmute here fixes:</span>
+                    <span class='comment'>// error: lifetime of `self` is too short to guarantee its contents</span>
+                    <span class='comment'>//        can be safely reborrowed</span>
+                    <span class='ident'>Full</span>(<span class='ident'>idx</span>) <span class='op'>=&gt;</span> <span class='kw'>unsafe</span> {
                         <span class='self'>self</span>.<span class='ident'>elems_seen</span> <span class='op'>+=</span> <span class='number'>1</span>;
                         <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>transmute</span>(<span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>read_mut</span>(<span class='kw-2'>&amp;</span><span class='ident'>idx</span>)));
                     }
@@ -3100,13 +3092,13 @@
 
     <span class='attribute'>#[<span class='ident'>unsafe_destructor</span>]</span>
     <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>RawTable</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span> {
-        <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {<span class='comment'>
-            // This is in reverse because we&#39;re likely to have partially taken
-            // some elements out with `.move_iter()` from the front.
-            </span><span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_step_inclusive</span>(<span class='self'>self</span>.<span class='ident'>capacity</span> <span class='kw'>as</span> <span class='ident'>int</span> <span class='op'>-</span> <span class='number'>1</span>, <span class='number'>0</span>, <span class='op'>-</span><span class='number'>1</span>) {<span class='comment'>
-                // Check if the size is 0, so we don&#39;t do a useless scan when
-                // dropping empty tables such as on resize.
-                </span><span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>size</span> <span class='op'>==</span> <span class='number'>0</span> { <span class='kw'>break</span> }
+        <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
+            <span class='comment'>// This is in reverse because we&#39;re likely to have partially taken</span>
+            <span class='comment'>// some elements out with `.move_iter()` from the front.</span>
+            <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_step_inclusive</span>(<span class='self'>self</span>.<span class='ident'>capacity</span> <span class='kw'>as</span> <span class='ident'>int</span> <span class='op'>-</span> <span class='number'>1</span>, <span class='number'>0</span>, <span class='op'>-</span><span class='number'>1</span>) {
+                <span class='comment'>// Check if the size is 0, so we don&#39;t do a useless scan when</span>
+                <span class='comment'>// dropping empty tables such as on resize.</span>
+                <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>size</span> <span class='op'>==</span> <span class='number'>0</span> { <span class='kw'>break</span> }
 
                 <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>peek</span>(<span class='ident'>i</span> <span class='kw'>as</span> <span class='ident'>uint</span>) {
                     <span class='ident'>Empty</span>(_)  <span class='op'>=&gt;</span> {},
@@ -3125,10 +3117,10 @@
                                                                <span class='ident'>vals_size</span>, <span class='ident'>min_align_of</span>::<span class='op'>&lt;</span><span class='ident'>V</span><span class='op'>&gt;</span>());
 
                 <span class='kw'>unsafe</span> {
-                    <span class='ident'>deallocate</span>(<span class='self'>self</span>.<span class='ident'>hashes</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span>, <span class='ident'>size</span>, <span class='ident'>align</span>);<span class='comment'>
-                    // Remember how everything was allocated out of one buffer
-                    // during initialization? We only need one call to free here.
-                </span>}
+                    <span class='ident'>deallocate</span>(<span class='self'>self</span>.<span class='ident'>hashes</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span>, <span class='ident'>size</span>, <span class='ident'>align</span>);
+                    <span class='comment'>// Remember how everything was allocated out of one buffer</span>
+                    <span class='comment'>// during initialization? We only need one call to free here.</span>
+                }
 
                 <span class='self'>self</span>.<span class='ident'>hashes</span> <span class='op'>=</span> <span class='ident'>RawPtr</span>::<span class='ident'>null</span>();
             }
@@ -3137,9 +3129,9 @@
 }
 
 <span class='kw'>static</span> <span class='ident'>INITIAL_LOG2_CAP</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='number'>5</span>;
-<span class='kw'>static</span> <span class='ident'>INITIAL_CAPACITY</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='number'>1</span> <span class='op'>&lt;&lt;</span> <span class='ident'>INITIAL_LOG2_CAP</span>;<span class='comment'> // 2^5
+<span class='kw'>static</span> <span class='ident'>INITIAL_CAPACITY</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='number'>1</span> <span class='op'>&lt;&lt;</span> <span class='ident'>INITIAL_LOG2_CAP</span>; <span class='comment'>// 2^5</span>
 
-</span><span class='doccomment'>/// The default behavior of HashMap implements a load factor of 90.9%.</span>
+<span class='doccomment'>/// The default behavior of HashMap implements a load factor of 90.9%.</span>
 <span class='doccomment'>/// This behavior is characterized by the following conditions:</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// - if `size * 1.1 &lt; cap &lt; size * 4` then shouldn&#39;t resize</span>
@@ -3168,77 +3160,77 @@
     <span class='kw'>fn</span> <span class='ident'>reserve</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>new_capacity</span>: <span class='ident'>uint</span>) {
         <span class='self'>self</span>.<span class='ident'>minimum_capacity2</span> <span class='op'>=</span> <span class='ident'>new_capacity</span> <span class='op'>&lt;&lt;</span> <span class='number'>1</span>;
     }
-}<span class='comment'>
+}
 
-// The main performance trick in this hashmap is called Robin Hood Hashing.
-// It gains its excellent performance from one key invariant:
-//
-//    If an insertion collides with an existing element, and that elements
-//    &quot;probe distance&quot; (how far away the element is from its ideal location)
-//    is higher than how far we&#39;ve already probed, swap the elements.
-//
-// This massively lowers variance in probe distance, and allows us to get very
-// high load factors with good performance. The 90% load factor I use is rather
-// conservative.
-//
-// &gt; Why a load factor of approximately 90%?
-//
-// In general, all the distances to initial buckets will converge on the mean.
-// At a load factor of α, the odds of finding the target bucket after k
-// probes is approximately 1-α^k. If we set this equal to 50% (since we converge
-// on the mean) and set k=8 (64-byte cache line / 8-byte hash), α=0.92. I round
-// this down to make the math easier on the CPU and avoid its FPU.
-// Since on average we start the probing in the middle of a cache line, this
-// strategy pulls in two cache lines of hashes on every lookup. I think that&#39;s
-// pretty good, but if you want to trade off some space, it could go down to one
-// cache line on average with an α of 0.84.
-//
-// &gt; Wait, what? Where did you get 1-α^k from?
-//
-// On the first probe, your odds of a collision with an existing element is α.
-// The odds of doing this twice in a row is approximately α^2. For three times,
-// α^3, etc. Therefore, the odds of colliding k times is α^k. The odds of NOT
-// colliding after k tries is 1-α^k.
-//
-// Future Improvements (FIXME!)
-// ============================
-//
-// Allow the load factor to be changed dynamically and/or at initialization.
-//
-// Also, would it be possible for us to reuse storage when growing the
-// underlying table? This is exactly the use case for &#39;realloc&#39;, and may
-// be worth exploring.
-//
-// Future Optimizations (FIXME!)
-// =============================
-//
-// The paper cited below mentions an implementation which keeps track of the
-// distance-to-initial-bucket histogram. I&#39;m suspicious of this approach because
-// it requires maintaining an internal map. If this map were replaced with a
-// hashmap, it would be faster, but now our data structure is self-referential
-// and blows up. Also, this allows very good first guesses, but array accesses
-// are no longer linear and in one direction, as we have now. There is also
-// memory and cache pressure that this map would entail that would be very
-// difficult to properly see in a microbenchmark.
-//
-// Another possible design choice that I made without any real reason is
-// parameterizing the raw table over keys and values. Technically, all we need
-// is the size and alignment of keys and values, and the code should be just as
-// efficient (well, we might need one for power-of-two size and one for not...).
-// This has the potential to reduce code bloat in rust executables, without
-// really losing anything except 4 words (key size, key alignment, val size,
-// val alignment) which can be passed in to every call of a `RawTable` function.
-// This would definitely be an avenue worth exploring if people start complaining
-// about the size of rust executables.
-//
-// There&#39;s also an &quot;optimization&quot; that has been omitted regarding how the
-// hashtable allocates. The vector type has set the expectation that a hashtable
-// which never has an element inserted should not allocate. I&#39;m suspicious of
-// implementing this for hashtables, because supporting it has no performance
-// benefit over using an `Option&lt;HashMap&lt;K, V&gt;&gt;`, and is significantly more
-// complicated.
+<span class='comment'>// The main performance trick in this hashmap is called Robin Hood Hashing.</span>
+<span class='comment'>// It gains its excellent performance from one key invariant:</span>
+<span class='comment'>//</span>
+<span class='comment'>//    If an insertion collides with an existing element, and that elements</span>
+<span class='comment'>//    &quot;probe distance&quot; (how far away the element is from its ideal location)</span>
+<span class='comment'>//    is higher than how far we&#39;ve already probed, swap the elements.</span>
+<span class='comment'>//</span>
+<span class='comment'>// This massively lowers variance in probe distance, and allows us to get very</span>
+<span class='comment'>// high load factors with good performance. The 90% load factor I use is rather</span>
+<span class='comment'>// conservative.</span>
+<span class='comment'>//</span>
+<span class='comment'>// &gt; Why a load factor of approximately 90%?</span>
+<span class='comment'>//</span>
+<span class='comment'>// In general, all the distances to initial buckets will converge on the mean.</span>
+<span class='comment'>// At a load factor of α, the odds of finding the target bucket after k</span>
+<span class='comment'>// probes is approximately 1-α^k. If we set this equal to 50% (since we converge</span>
+<span class='comment'>// on the mean) and set k=8 (64-byte cache line / 8-byte hash), α=0.92. I round</span>
+<span class='comment'>// this down to make the math easier on the CPU and avoid its FPU.</span>
+<span class='comment'>// Since on average we start the probing in the middle of a cache line, this</span>
+<span class='comment'>// strategy pulls in two cache lines of hashes on every lookup. I think that&#39;s</span>
+<span class='comment'>// pretty good, but if you want to trade off some space, it could go down to one</span>
+<span class='comment'>// cache line on average with an α of 0.84.</span>
+<span class='comment'>//</span>
+<span class='comment'>// &gt; Wait, what? Where did you get 1-α^k from?</span>
+<span class='comment'>//</span>
+<span class='comment'>// On the first probe, your odds of a collision with an existing element is α.</span>
+<span class='comment'>// The odds of doing this twice in a row is approximately α^2. For three times,</span>
+<span class='comment'>// α^3, etc. Therefore, the odds of colliding k times is α^k. The odds of NOT</span>
+<span class='comment'>// colliding after k tries is 1-α^k.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Future Improvements (FIXME!)</span>
+<span class='comment'>// ============================</span>
+<span class='comment'>//</span>
+<span class='comment'>// Allow the load factor to be changed dynamically and/or at initialization.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Also, would it be possible for us to reuse storage when growing the</span>
+<span class='comment'>// underlying table? This is exactly the use case for &#39;realloc&#39;, and may</span>
+<span class='comment'>// be worth exploring.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Future Optimizations (FIXME!)</span>
+<span class='comment'>// =============================</span>
+<span class='comment'>//</span>
+<span class='comment'>// The paper cited below mentions an implementation which keeps track of the</span>
+<span class='comment'>// distance-to-initial-bucket histogram. I&#39;m suspicious of this approach because</span>
+<span class='comment'>// it requires maintaining an internal map. If this map were replaced with a</span>
+<span class='comment'>// hashmap, it would be faster, but now our data structure is self-referential</span>
+<span class='comment'>// and blows up. Also, this allows very good first guesses, but array accesses</span>
+<span class='comment'>// are no longer linear and in one direction, as we have now. There is also</span>
+<span class='comment'>// memory and cache pressure that this map would entail that would be very</span>
+<span class='comment'>// difficult to properly see in a microbenchmark.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Another possible design choice that I made without any real reason is</span>
+<span class='comment'>// parameterizing the raw table over keys and values. Technically, all we need</span>
+<span class='comment'>// is the size and alignment of keys and values, and the code should be just as</span>
+<span class='comment'>// efficient (well, we might need one for power-of-two size and one for not...).</span>
+<span class='comment'>// This has the potential to reduce code bloat in rust executables, without</span>
+<span class='comment'>// really losing anything except 4 words (key size, key alignment, val size,</span>
+<span class='comment'>// val alignment) which can be passed in to every call of a `RawTable` function.</span>
+<span class='comment'>// This would definitely be an avenue worth exploring if people start complaining</span>
+<span class='comment'>// about the size of rust executables.</span>
+<span class='comment'>//</span>
+<span class='comment'>// There&#39;s also an &quot;optimization&quot; that has been omitted regarding how the</span>
+<span class='comment'>// hashtable allocates. The vector type has set the expectation that a hashtable</span>
+<span class='comment'>// which never has an element inserted should not allocate. I&#39;m suspicious of</span>
+<span class='comment'>// implementing this for hashtables, because supporting it has no performance</span>
+<span class='comment'>// benefit over using an `Option&lt;HashMap&lt;K, V&gt;&gt;`, and is significantly more</span>
+<span class='comment'>// complicated.</span>
 
-</span><span class='doccomment'>/// A hash map implementation which uses linear probing with Robin</span>
+<span class='doccomment'>/// A hash map implementation which uses linear probing with Robin</span>
 <span class='doccomment'>/// Hood bucket stealing.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// The hashes are all keyed by the task-local random number generator</span>
@@ -3297,39 +3289,39 @@
 <span class='doccomment'>/// }</span>
 <span class='doccomment'>/// ```</span>
 <span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span>, <span class='ident'>H</span> <span class='op'>=</span> <span class='ident'>RandomSipHasher</span><span class='op'>&gt;</span> {<span class='comment'>
-    // All hashes are keyed on these values, to prevent hash collision attacks.
-    </span><span class='ident'>hasher</span>: <span class='ident'>H</span>,
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span>, <span class='ident'>H</span> <span class='op'>=</span> <span class='ident'>RandomSipHasher</span><span class='op'>&gt;</span> {
+    <span class='comment'>// All hashes are keyed on these values, to prevent hash collision attacks.</span>
+    <span class='ident'>hasher</span>: <span class='ident'>H</span>,
 
-    <span class='ident'>table</span>: <span class='ident'>table</span>::<span class='ident'>RawTable</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span>,<span class='comment'>
+    <span class='ident'>table</span>: <span class='ident'>table</span>::<span class='ident'>RawTable</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span>,
 
-    // We keep this at the end since it might as well have tail padding.
-    </span><span class='ident'>resize_policy</span>: <span class='ident'>DefaultResizePolicy</span>,
+    <span class='comment'>// We keep this at the end since it might as well have tail padding.</span>
+    <span class='ident'>resize_policy</span>: <span class='ident'>DefaultResizePolicy</span>,
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>K</span>: <span class='ident'>Eq</span> <span class='op'>+</span> <span class='ident'>Hash</span><span class='op'>&lt;</span><span class='ident'>S</span><span class='op'>&gt;</span>, <span class='ident'>V</span>, <span class='ident'>S</span>, <span class='ident'>H</span>: <span class='ident'>Hasher</span><span class='op'>&lt;</span><span class='ident'>S</span><span class='op'>&gt;&gt;</span> <span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span>, <span class='ident'>H</span><span class='op'>&gt;</span> {<span class='comment'>
-    // Probe the `idx`th bucket for a given hash, returning the index of the
-    // target bucket.
-    //
-    // This exploits the power-of-two size of the hashtable. As long as this
-    // is always true, we can use a bitmask of cap-1 to do modular arithmetic.
-    //
-    // Prefer using this with increasing values of `idx` rather than repeatedly
-    // calling `probe_next`. This reduces data-dependencies between loops, which
-    // can help the optimizer, and certainly won&#39;t hurt it. `probe_next` is
-    // simply for convenience, and is no more efficient than `probe`.
-    </span><span class='kw'>fn</span> <span class='ident'>probe</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>hash</span>: <span class='kw-2'>&amp;</span><span class='ident'>table</span>::<span class='ident'>SafeHash</span>, <span class='ident'>idx</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>uint</span> {
-        <span class='kw'>let</span> <span class='ident'>hash_mask</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>capacity</span>() <span class='op'>-</span> <span class='number'>1</span>;<span class='comment'>
-
-        // So I heard a rumor that unsigned overflow is safe in rust..
-        </span>((<span class='ident'>hash</span>.<span class='ident'>inspect</span>() <span class='kw'>as</span> <span class='ident'>uint</span>) <span class='op'>+</span> <span class='ident'>idx</span>) <span class='op'>&amp;</span> <span class='ident'>hash_mask</span>
-    }<span class='comment'>
-
-    // Generate the next probe in a sequence. Prefer using &#39;probe&#39; by itself,
-    // but this can sometimes be useful.
-    </span><span class='kw'>fn</span> <span class='ident'>probe_next</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>probe</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>uint</span> {
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>K</span>: <span class='ident'>Eq</span> <span class='op'>+</span> <span class='ident'>Hash</span><span class='op'>&lt;</span><span class='ident'>S</span><span class='op'>&gt;</span>, <span class='ident'>V</span>, <span class='ident'>S</span>, <span class='ident'>H</span>: <span class='ident'>Hasher</span><span class='op'>&lt;</span><span class='ident'>S</span><span class='op'>&gt;&gt;</span> <span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span>, <span class='ident'>H</span><span class='op'>&gt;</span> {
+    <span class='comment'>// Probe the `idx`th bucket for a given hash, returning the index of the</span>
+    <span class='comment'>// target bucket.</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// This exploits the power-of-two size of the hashtable. As long as this</span>
+    <span class='comment'>// is always true, we can use a bitmask of cap-1 to do modular arithmetic.</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// Prefer using this with increasing values of `idx` rather than repeatedly</span>
+    <span class='comment'>// calling `probe_next`. This reduces data-dependencies between loops, which</span>
+    <span class='comment'>// can help the optimizer, and certainly won&#39;t hurt it. `probe_next` is</span>
+    <span class='comment'>// simply for convenience, and is no more efficient than `probe`.</span>
+    <span class='kw'>fn</span> <span class='ident'>probe</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>hash</span>: <span class='kw-2'>&amp;</span><span class='ident'>table</span>::<span class='ident'>SafeHash</span>, <span class='ident'>idx</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>uint</span> {
         <span class='kw'>let</span> <span class='ident'>hash_mask</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>capacity</span>() <span class='op'>-</span> <span class='number'>1</span>;
-        (<span class='ident'>probe</span> <span class='op'>+</span> <span class='number'>1</span>) <span class='op'>&amp;</span> <span class='ident'>hash_mask</span>
+
+        <span class='comment'>// So I heard a rumor that unsigned overflow is safe in rust..</span>
+        ((<span class='ident'>hash</span>.<span class='ident'>inspect</span>() <span class='kw'>as</span> <span class='ident'>uint</span>) <span class='op'>+</span> <span class='ident'>idx</span>) <span class='kw-2'>&amp;</span> <span class='ident'>hash_mask</span>
+    }
+
+    <span class='comment'>// Generate the next probe in a sequence. Prefer using &#39;probe&#39; by itself,</span>
+    <span class='comment'>// but this can sometimes be useful.</span>
+    <span class='kw'>fn</span> <span class='ident'>probe_next</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>probe</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>uint</span> {
+        <span class='kw'>let</span> <span class='ident'>hash_mask</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>capacity</span>() <span class='op'>-</span> <span class='number'>1</span>;
+        (<span class='ident'>probe</span> <span class='op'>+</span> <span class='number'>1</span>) <span class='kw-2'>&amp;</span> <span class='ident'>hash_mask</span>
     }
 
     <span class='kw'>fn</span> <span class='ident'>make_hash</span><span class='op'>&lt;</span><span class='ident'>X</span>: <span class='ident'>Hash</span><span class='op'>&lt;</span><span class='ident'>S</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>x</span>: <span class='kw-2'>&amp;</span><span class='ident'>X</span>) <span class='op'>-&gt;</span> <span class='ident'>table</span>::<span class='ident'>SafeHash</span> {
@@ -3341,19 +3333,19 @@
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// In the cited blog posts above, this is called the &quot;distance to</span>
     <span class='doccomment'>/// initial bucket&quot;, or DIB.</span>
-    <span class='kw'>fn</span> <span class='ident'>bucket_distance</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>index_of_elem</span>: <span class='kw-2'>&amp;</span><span class='ident'>table</span>::<span class='ident'>FullIndex</span>) <span class='op'>-&gt;</span> <span class='ident'>uint</span> {<span class='comment'>
-        // where the hash of the element that happens to reside at
-        // `index_of_elem` tried to place itself first.
-        </span><span class='kw'>let</span> <span class='ident'>first_probe_index</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>probe</span>(<span class='kw-2'>&amp;</span><span class='ident'>index_of_elem</span>.<span class='ident'>hash</span>(), <span class='number'>0</span>);
+    <span class='kw'>fn</span> <span class='ident'>bucket_distance</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>index_of_elem</span>: <span class='kw-2'>&amp;</span><span class='ident'>table</span>::<span class='ident'>FullIndex</span>) <span class='op'>-&gt;</span> <span class='ident'>uint</span> {
+        <span class='comment'>// where the hash of the element that happens to reside at</span>
+        <span class='comment'>// `index_of_elem` tried to place itself first.</span>
+        <span class='kw'>let</span> <span class='ident'>first_probe_index</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>probe</span>(<span class='kw-2'>&amp;</span><span class='ident'>index_of_elem</span>.<span class='ident'>hash</span>(), <span class='number'>0</span>);
 
         <span class='kw'>let</span> <span class='ident'>raw_index</span> <span class='op'>=</span> <span class='ident'>index_of_elem</span>.<span class='ident'>raw_index</span>();
 
-        <span class='kw'>if</span> <span class='ident'>first_probe_index</span> <span class='op'>&lt;=</span> <span class='ident'>raw_index</span> {<span class='comment'>
-             // probe just went forward
-            </span><span class='ident'>raw_index</span> <span class='op'>-</span> <span class='ident'>first_probe_index</span>
-        } <span class='kw'>else</span> {<span class='comment'>
-            // probe wrapped around the hashtable
-            </span><span class='ident'>raw_index</span> <span class='op'>+</span> (<span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>capacity</span>() <span class='op'>-</span> <span class='ident'>first_probe_index</span>)
+        <span class='kw'>if</span> <span class='ident'>first_probe_index</span> <span class='op'>&lt;=</span> <span class='ident'>raw_index</span> {
+             <span class='comment'>// probe just went forward</span>
+            <span class='ident'>raw_index</span> <span class='op'>-</span> <span class='ident'>first_probe_index</span>
+        } <span class='kw'>else</span> {
+            <span class='comment'>// probe wrapped around the hashtable</span>
+            <span class='ident'>raw_index</span> <span class='op'>+</span> (<span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>capacity</span>() <span class='op'>-</span> <span class='ident'>first_probe_index</span>)
         }
     }
 
@@ -3364,21 +3356,21 @@
             <span class='kw'>let</span> <span class='ident'>probe</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>probe</span>(<span class='ident'>hash</span>, <span class='ident'>num_probes</span>);
 
             <span class='kw'>let</span> <span class='ident'>idx</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>peek</span>(<span class='ident'>probe</span>) {
-                <span class='ident'>table</span>::<span class='ident'>Empty</span>(_)  <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>None</span>,<span class='comment'> // hit an empty bucket
-                </span><span class='ident'>table</span>::<span class='ident'>Full</span>(<span class='ident'>idx</span>) <span class='op'>=&gt;</span> <span class='ident'>idx</span>
-            };<span class='comment'>
+                <span class='ident'>table</span>::<span class='ident'>Empty</span>(_)  <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>None</span>, <span class='comment'>// hit an empty bucket</span>
+                <span class='ident'>table</span>::<span class='ident'>Full</span>(<span class='ident'>idx</span>) <span class='op'>=&gt;</span> <span class='ident'>idx</span>
+            };
 
-            // We can finish the search early if we hit any bucket
-            // with a lower distance to initial bucket than we&#39;ve probed.
-            </span><span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>bucket_distance</span>(<span class='kw-2'>&amp;</span><span class='ident'>idx</span>) <span class='op'>&lt;</span> <span class='ident'>num_probes</span> { <span class='kw'>return</span> <span class='prelude-val'>None</span> }<span class='comment'>
+            <span class='comment'>// We can finish the search early if we hit any bucket</span>
+            <span class='comment'>// with a lower distance to initial bucket than we&#39;ve probed.</span>
+            <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>bucket_distance</span>(<span class='kw-2'>&amp;</span><span class='ident'>idx</span>) <span class='op'>&lt;</span> <span class='ident'>num_probes</span> { <span class='kw'>return</span> <span class='prelude-val'>None</span> }
 
-            // If the hash doesn&#39;t match, it can&#39;t be this one..
-            </span><span class='kw'>if</span> <span class='op'>*</span><span class='ident'>hash</span> <span class='op'>!=</span> <span class='ident'>idx</span>.<span class='ident'>hash</span>() { <span class='kw'>continue</span> }
+            <span class='comment'>// If the hash doesn&#39;t match, it can&#39;t be this one..</span>
+            <span class='kw'>if</span> <span class='op'>*</span><span class='ident'>hash</span> <span class='op'>!=</span> <span class='ident'>idx</span>.<span class='ident'>hash</span>() { <span class='kw'>continue</span> }
 
-            <span class='kw'>let</span> (<span class='ident'>k</span>, _) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>read</span>(<span class='kw-2'>&amp;</span><span class='ident'>idx</span>);<span class='comment'>
+            <span class='kw'>let</span> (<span class='ident'>k</span>, _) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>read</span>(<span class='kw-2'>&amp;</span><span class='ident'>idx</span>);
 
-            // If the key doesn&#39;t match, it can&#39;t be this one..
-            </span><span class='kw'>if</span> <span class='op'>!</span><span class='ident'>is_match</span>(<span class='ident'>k</span>) { <span class='kw'>continue</span> }
+            <span class='comment'>// If the key doesn&#39;t match, it can&#39;t be this one..</span>
+            <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>is_match</span>(<span class='ident'>k</span>) { <span class='kw'>continue</span> }
 
             <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>idx</span>);
         }
@@ -3408,18 +3400,18 @@
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>probe</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>probe_next</span>(<span class='ident'>starting_probe</span>);
             <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>size</span>()) {
                 <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>peek</span>(<span class='ident'>probe</span>) {
-                    <span class='ident'>table</span>::<span class='ident'>Empty</span>(_) <span class='op'>=&gt;</span> {},<span class='comment'> // empty bucket. this is the end of our shifting.
-                    </span><span class='ident'>table</span>::<span class='ident'>Full</span>(<span class='ident'>idx</span>) <span class='op'>=&gt;</span> {<span class='comment'>
-                        // Bucket that isn&#39;t us, which has a non-zero probe distance.
-                        // This isn&#39;t the ending index, so keep searching.
-                        </span><span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>bucket_distance</span>(<span class='kw-2'>&amp;</span><span class='ident'>idx</span>) <span class='op'>!=</span> <span class='number'>0</span> {
+                    <span class='ident'>table</span>::<span class='ident'>Empty</span>(_) <span class='op'>=&gt;</span> {}, <span class='comment'>// empty bucket. this is the end of our shifting.</span>
+                    <span class='ident'>table</span>::<span class='ident'>Full</span>(<span class='ident'>idx</span>) <span class='op'>=&gt;</span> {
+                        <span class='comment'>// Bucket that isn&#39;t us, which has a non-zero probe distance.</span>
+                        <span class='comment'>// This isn&#39;t the ending index, so keep searching.</span>
+                        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>bucket_distance</span>(<span class='kw-2'>&amp;</span><span class='ident'>idx</span>) <span class='op'>!=</span> <span class='number'>0</span> {
                             <span class='ident'>probe</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>probe_next</span>(<span class='ident'>probe</span>);
                             <span class='kw'>continue</span>;
-                        }<span class='comment'>
+                        }
 
-                        // if we do have a bucket_distance of zero, we&#39;re at the end
-                        // of what we need to shift.
-                    </span>}
+                        <span class='comment'>// if we do have a bucket_distance of zero, we&#39;re at the end</span>
+                        <span class='comment'>// of what we need to shift.</span>
+                    }
                 }
                 <span class='kw'>break</span>;
             }
@@ -3430,21 +3422,21 @@
         <span class='kw'>let</span> (_, _, <span class='ident'>retval</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>take</span>(<span class='ident'>starting_index</span>);
 
         <span class='kw'>let</span> <span class='kw-2'>mut</span>      <span class='ident'>probe</span> <span class='op'>=</span> <span class='ident'>starting_probe</span>;
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>next_probe</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>probe_next</span>(<span class='ident'>probe</span>);<span class='comment'>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>next_probe</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>probe_next</span>(<span class='ident'>probe</span>);
 
-        // backwards-shift all the elements after our newly-deleted one.
-        </span><span class='kw'>while</span> <span class='ident'>next_probe</span> <span class='op'>!=</span> <span class='ident'>ending_probe</span> {
+        <span class='comment'>// backwards-shift all the elements after our newly-deleted one.</span>
+        <span class='kw'>while</span> <span class='ident'>next_probe</span> <span class='op'>!=</span> <span class='ident'>ending_probe</span> {
             <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>peek</span>(<span class='ident'>next_probe</span>) {
-                <span class='ident'>table</span>::<span class='ident'>Empty</span>(_) <span class='op'>=&gt;</span> {<span class='comment'>
-                    // nothing to shift in. just empty it out.
-                    </span><span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>peek</span>(<span class='ident'>probe</span>) {
+                <span class='ident'>table</span>::<span class='ident'>Empty</span>(_) <span class='op'>=&gt;</span> {
+                    <span class='comment'>// nothing to shift in. just empty it out.</span>
+                    <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>peek</span>(<span class='ident'>probe</span>) {
                         <span class='ident'>table</span>::<span class='ident'>Empty</span>(_) <span class='op'>=&gt;</span> {},
                         <span class='ident'>table</span>::<span class='ident'>Full</span>(<span class='ident'>idx</span>) <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>take</span>(<span class='ident'>idx</span>); }
                     }
                 },
-                <span class='ident'>table</span>::<span class='ident'>Full</span>(<span class='ident'>next_idx</span>) <span class='op'>=&gt;</span> {<span class='comment'>
-                    // something to shift. move it over!
-                    </span><span class='kw'>let</span> <span class='ident'>next_hash</span> <span class='op'>=</span> <span class='ident'>next_idx</span>.<span class='ident'>hash</span>();
+                <span class='ident'>table</span>::<span class='ident'>Full</span>(<span class='ident'>next_idx</span>) <span class='op'>=&gt;</span> {
+                    <span class='comment'>// something to shift. move it over!</span>
+                    <span class='kw'>let</span> <span class='ident'>next_hash</span> <span class='op'>=</span> <span class='ident'>next_idx</span>.<span class='ident'>hash</span>();
                     <span class='kw'>let</span> (_, <span class='ident'>next_key</span>, <span class='ident'>next_val</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>take</span>(<span class='ident'>next_idx</span>);
                     <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>peek</span>(<span class='ident'>probe</span>) {
                         <span class='ident'>table</span>::<span class='ident'>Empty</span>(<span class='ident'>idx</span>) <span class='op'>=&gt;</span> {
@@ -3460,18 +3452,18 @@
 
             <span class='ident'>probe</span> <span class='op'>=</span> <span class='ident'>next_probe</span>;
             <span class='ident'>next_probe</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>probe_next</span>(<span class='ident'>next_probe</span>);
-        }<span class='comment'>
+        }
 
-        // Done the backwards shift, but there&#39;s still an element left!
-        // Empty it out.
-        </span><span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>peek</span>(<span class='ident'>probe</span>) {
+        <span class='comment'>// Done the backwards shift, but there&#39;s still an element left!</span>
+        <span class='comment'>// Empty it out.</span>
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>peek</span>(<span class='ident'>probe</span>) {
             <span class='ident'>table</span>::<span class='ident'>Empty</span>(_) <span class='op'>=&gt;</span> {},
             <span class='ident'>table</span>::<span class='ident'>Full</span>(<span class='ident'>idx</span>) <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>take</span>(<span class='ident'>idx</span>); }
-        }<span class='comment'>
+        }
 
-        // Now we&#39;re done all our shifting. Return the value we grabbed
-        // earlier.
-        </span><span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>retval</span>);
+        <span class='comment'>// Now we&#39;re done all our shifting. Return the value we grabbed</span>
+        <span class='comment'>// earlier.</span>
+        <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>retval</span>);
     }
 
     <span class='doccomment'>/// Like `pop`, but can operate on any type that is equivalent to a key.</span>
@@ -3501,10 +3493,10 @@
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>K</span>: <span class='ident'>Eq</span> <span class='op'>+</span> <span class='ident'>Hash</span><span class='op'>&lt;</span><span class='ident'>S</span><span class='op'>&gt;</span>, <span class='ident'>V</span>, <span class='ident'>S</span>, <span class='ident'>H</span>: <span class='ident'>Hasher</span><span class='op'>&lt;</span><span class='ident'>S</span><span class='op'>&gt;&gt;</span> <span class='ident'>Mutable</span> <span class='kw'>for</span> <span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span>, <span class='ident'>H</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Clear the map, removing all key-value pairs. Keeps the allocated memory</span>
     <span class='doccomment'>/// for reuse.</span>
-    <span class='kw'>fn</span> <span class='ident'>clear</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {<span class='comment'>
-        // Prevent reallocations from happening from now on. Makes it possible
-        // for the map to be reused but has a downside: reserves permanently.
-        </span><span class='self'>self</span>.<span class='ident'>resize_policy</span>.<span class='ident'>reserve</span>(<span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>size</span>());
+    <span class='kw'>fn</span> <span class='ident'>clear</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
+        <span class='comment'>// Prevent reallocations from happening from now on. Makes it possible</span>
+        <span class='comment'>// for the map to be reused but has a downside: reserves permanently.</span>
+        <span class='self'>self</span>.<span class='ident'>resize_policy</span>.<span class='ident'>reserve</span>(<span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>size</span>());
 
         <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0</span>, <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>capacity</span>()) {
             <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>peek</span>(<span class='ident'>i</span>) {
@@ -3548,9 +3540,9 @@
             <span class='kw'>let</span> <span class='ident'>probe</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>probe</span>(<span class='kw-2'>&amp;</span><span class='ident'>hash</span>, <span class='ident'>dib</span>);
 
             <span class='kw'>let</span> <span class='ident'>idx</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>peek</span>(<span class='ident'>probe</span>) {
-                <span class='ident'>table</span>::<span class='ident'>Empty</span>(<span class='ident'>idx</span>) <span class='op'>=&gt;</span> {<span class='comment'>
-                    // Found a hole!
-                    </span><span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>put</span>(<span class='ident'>idx</span>, <span class='ident'>hash</span>, <span class='ident'>k</span>, <span class='ident'>v</span>);
+                <span class='ident'>table</span>::<span class='ident'>Empty</span>(<span class='ident'>idx</span>) <span class='op'>=&gt;</span> {
+                    <span class='comment'>// Found a hole!</span>
+                    <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>put</span>(<span class='ident'>idx</span>, <span class='ident'>hash</span>, <span class='ident'>k</span>, <span class='ident'>v</span>);
                     <span class='kw'>return</span> <span class='prelude-val'>None</span>;
                 },
                 <span class='ident'>table</span>::<span class='ident'>Full</span>(<span class='ident'>idx</span>) <span class='op'>=&gt;</span> <span class='ident'>idx</span>
@@ -3558,25 +3550,25 @@
 
             <span class='kw'>if</span> <span class='ident'>idx</span>.<span class='ident'>hash</span>() <span class='op'>==</span> <span class='ident'>hash</span> {
                 <span class='kw'>let</span> (<span class='ident'>bucket_k</span>, <span class='ident'>bucket_v</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>read_mut</span>(<span class='kw-2'>&amp;</span><span class='ident'>idx</span>);
-                <span class='kw'>if</span> <span class='ident'>k</span> <span class='op'>==</span> <span class='op'>*</span><span class='ident'>bucket_k</span> {<span class='comment'>
-                    // Found an existing value.
-                    </span><span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>replace</span>(<span class='ident'>bucket_v</span>, <span class='ident'>v</span>));
+                <span class='kw'>if</span> <span class='ident'>k</span> <span class='op'>==</span> <span class='op'>*</span><span class='ident'>bucket_k</span> {
+                    <span class='comment'>// Found an existing value.</span>
+                    <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>replace</span>(<span class='ident'>bucket_v</span>, <span class='ident'>v</span>));
                 }
             }
 
             <span class='kw'>let</span> <span class='ident'>probe_dib</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>bucket_distance</span>(<span class='kw-2'>&amp;</span><span class='ident'>idx</span>);
 
-            <span class='kw'>if</span> <span class='ident'>probe_dib</span> <span class='op'>&lt;</span> <span class='ident'>dib</span> {<span class='comment'>
-                // Found a luckier bucket. This implies that the key does not
-                // already exist in the hashtable. Just do a robin hood
-                // insertion, then.
-                </span><span class='self'>self</span>.<span class='ident'>robin_hood</span>(<span class='ident'>idx</span>, <span class='ident'>probe_dib</span>, <span class='ident'>hash</span>, <span class='ident'>k</span>, <span class='ident'>v</span>);
+            <span class='kw'>if</span> <span class='ident'>probe_dib</span> <span class='op'>&lt;</span> <span class='ident'>dib</span> {
+                <span class='comment'>// Found a luckier bucket. This implies that the key does not</span>
+                <span class='comment'>// already exist in the hashtable. Just do a robin hood</span>
+                <span class='comment'>// insertion, then.</span>
+                <span class='self'>self</span>.<span class='ident'>robin_hood</span>(<span class='ident'>idx</span>, <span class='ident'>probe_dib</span>, <span class='ident'>hash</span>, <span class='ident'>k</span>, <span class='ident'>v</span>);
                 <span class='kw'>return</span> <span class='prelude-val'>None</span>;
             }
-        }<span class='comment'>
+        }
 
-        // We really shouldn&#39;t be here.
-        </span><span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;Internal HashMap error: Out of space.&quot;</span>);
+        <span class='comment'>// We really shouldn&#39;t be here.</span>
+        <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;Internal HashMap error: Out of space.&quot;</span>);
     }
 
     <span class='kw'>fn</span> <span class='ident'>pop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>k</span>: <span class='kw-2'>&amp;</span><span class='ident'>K</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>V</span><span class='op'>&gt;</span> {
@@ -3677,10 +3669,10 @@
     <span class='doccomment'>/// new_size elements.</span>
     <span class='kw'>fn</span> <span class='ident'>make_some_room</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>new_size</span>: <span class='ident'>uint</span>) {
         <span class='kw'>let</span> (<span class='ident'>grow_at</span>, <span class='ident'>shrink_at</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>resize_policy</span>.<span class='ident'>capacity_range</span>(<span class='ident'>new_size</span>);
-        <span class='kw'>let</span> <span class='ident'>cap</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>capacity</span>();<span class='comment'>
+        <span class='kw'>let</span> <span class='ident'>cap</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>capacity</span>();
 
-        // An invalid value shouldn&#39;t make us run out of space.
-        </span><span class='macro'>debug_assert</span><span class='macro'>!</span>(<span class='ident'>grow_at</span> <span class='op'>&gt;=</span> <span class='ident'>new_size</span>);
+        <span class='comment'>// An invalid value shouldn&#39;t make us run out of space.</span>
+        <span class='macro'>debug_assert</span><span class='macro'>!</span>(<span class='ident'>grow_at</span> <span class='op'>&gt;=</span> <span class='ident'>new_size</span>);
 
         <span class='kw'>if</span> <span class='ident'>cap</span> <span class='op'>&lt;=</span> <span class='ident'>grow_at</span> {
             <span class='kw'>let</span> <span class='ident'>new_capacity</span> <span class='op'>=</span> <span class='ident'>cap</span> <span class='op'>&lt;&lt;</span> <span class='number'>1</span>;
@@ -3715,18 +3707,18 @@
 
             <span class='kw'>for</span> <span class='ident'>dib</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='ident'>dib_param</span> <span class='op'>+</span> <span class='number'>1</span>, <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>size</span>()) {
                 <span class='kw'>let</span> <span class='ident'>full_index</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>peek</span>(<span class='ident'>probe</span>) {
-                    <span class='ident'>table</span>::<span class='ident'>Empty</span>(<span class='ident'>idx</span>) <span class='op'>=&gt;</span> {<span class='comment'>
-                        // Finally. A hole!
-                        </span><span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>put</span>(<span class='ident'>idx</span>, <span class='ident'>old_hash</span>, <span class='ident'>old_key</span>, <span class='ident'>old_val</span>);
+                    <span class='ident'>table</span>::<span class='ident'>Empty</span>(<span class='ident'>idx</span>) <span class='op'>=&gt;</span> {
+                        <span class='comment'>// Finally. A hole!</span>
+                        <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>put</span>(<span class='ident'>idx</span>, <span class='ident'>old_hash</span>, <span class='ident'>old_key</span>, <span class='ident'>old_val</span>);
                         <span class='kw'>return</span>;
                     },
                     <span class='ident'>table</span>::<span class='ident'>Full</span>(<span class='ident'>idx</span>) <span class='op'>=&gt;</span> <span class='ident'>idx</span>
                 };
 
-                <span class='kw'>let</span> <span class='ident'>probe_dib</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>bucket_distance</span>(<span class='kw-2'>&amp;</span><span class='ident'>full_index</span>);<span class='comment'>
+                <span class='kw'>let</span> <span class='ident'>probe_dib</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>bucket_distance</span>(<span class='kw-2'>&amp;</span><span class='ident'>full_index</span>);
 
-                // Robin hood! Steal the spot.
-                </span><span class='kw'>if</span> <span class='ident'>probe_dib</span> <span class='op'>&lt;</span> <span class='ident'>dib</span> {
+                <span class='comment'>// Robin hood! Steal the spot.</span>
+                <span class='kw'>if</span> <span class='ident'>probe_dib</span> <span class='op'>&lt;</span> <span class='ident'>dib</span> {
                     <span class='ident'>index</span> <span class='op'>=</span> <span class='ident'>full_index</span>;
                     <span class='ident'>dib_param</span> <span class='op'>=</span> <span class='ident'>probe_dib</span>;
                     <span class='ident'>hash</span> <span class='op'>=</span> <span class='ident'>old_hash</span>;
@@ -3755,9 +3747,9 @@
             <span class='kw'>let</span> <span class='ident'>probe</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>probe</span>(<span class='kw-2'>&amp;</span><span class='ident'>hash</span>, <span class='ident'>dib</span>);
 
             <span class='kw'>let</span> <span class='ident'>idx</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>peek</span>(<span class='ident'>probe</span>) {
-                <span class='ident'>table</span>::<span class='ident'>Empty</span>(<span class='ident'>idx</span>) <span class='op'>=&gt;</span> {<span class='comment'>
-                    // Found a hole!
-                    </span><span class='kw'>let</span> <span class='ident'>fullidx</span>  <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>put</span>(<span class='ident'>idx</span>, <span class='ident'>hash</span>, <span class='ident'>k</span>, <span class='ident'>v</span>);
+                <span class='ident'>table</span>::<span class='ident'>Empty</span>(<span class='ident'>idx</span>) <span class='op'>=&gt;</span> {
+                    <span class='comment'>// Found a hole!</span>
+                    <span class='kw'>let</span> <span class='ident'>fullidx</span>  <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>put</span>(<span class='ident'>idx</span>, <span class='ident'>hash</span>, <span class='ident'>k</span>, <span class='ident'>v</span>);
                     <span class='kw'>let</span> (_, <span class='ident'>val</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>read_mut</span>(<span class='kw-2'>&amp;</span><span class='ident'>fullidx</span>);
                     <span class='kw'>return</span> <span class='ident'>val</span>;
                 },
@@ -3765,25 +3757,25 @@
             };
 
             <span class='kw'>if</span> <span class='ident'>idx</span>.<span class='ident'>hash</span>() <span class='op'>==</span> <span class='ident'>hash</span> {
-                <span class='kw'>let</span> (<span class='ident'>bucket_k</span>, <span class='ident'>bucket_v</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>read_mut</span>(<span class='kw-2'>&amp;</span><span class='ident'>idx</span>);<span class='comment'>
-                // FIXME #12147 the conditional return confuses
-                // borrowck if we return bucket_v directly
-                </span><span class='kw'>let</span> <span class='ident'>bv</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>V</span> <span class='op'>=</span> <span class='ident'>bucket_v</span>;
-                <span class='kw'>if</span> <span class='ident'>k</span> <span class='op'>==</span> <span class='op'>*</span><span class='ident'>bucket_k</span> {<span class='comment'>
-                    // Key already exists. Get its reference.
-                    </span><span class='kw'>return</span> <span class='kw'>unsafe</span> {<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='ident'>bv</span>};
+                <span class='kw'>let</span> (<span class='ident'>bucket_k</span>, <span class='ident'>bucket_v</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>read_mut</span>(<span class='kw-2'>&amp;</span><span class='ident'>idx</span>);
+                <span class='comment'>// FIXME #12147 the conditional return confuses</span>
+                <span class='comment'>// borrowck if we return bucket_v directly</span>
+                <span class='kw'>let</span> <span class='ident'>bv</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>V</span> <span class='op'>=</span> <span class='ident'>bucket_v</span>;
+                <span class='kw'>if</span> <span class='ident'>k</span> <span class='op'>==</span> <span class='op'>*</span><span class='ident'>bucket_k</span> {
+                    <span class='comment'>// Key already exists. Get its reference.</span>
+                    <span class='kw'>return</span> <span class='kw'>unsafe</span> {<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='ident'>bv</span>};
                 }
             }
 
             <span class='kw'>let</span> <span class='ident'>probe_dib</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>bucket_distance</span>(<span class='kw-2'>&amp;</span><span class='ident'>idx</span>);
 
-            <span class='kw'>if</span>  <span class='ident'>probe_dib</span> <span class='op'>&lt;</span> <span class='ident'>dib</span> {<span class='comment'>
-                // Found a luckier bucket than me. Better steal his spot.
-                </span><span class='self'>self</span>.<span class='ident'>robin_hood</span>(<span class='ident'>idx</span>, <span class='ident'>probe_dib</span>, <span class='ident'>hash</span>, <span class='ident'>k</span>, <span class='ident'>v</span>);<span class='comment'>
+            <span class='kw'>if</span>  <span class='ident'>probe_dib</span> <span class='op'>&lt;</span> <span class='ident'>dib</span> {
+                <span class='comment'>// Found a luckier bucket than me. Better steal his spot.</span>
+                <span class='self'>self</span>.<span class='ident'>robin_hood</span>(<span class='ident'>idx</span>, <span class='ident'>probe_dib</span>, <span class='ident'>hash</span>, <span class='ident'>k</span>, <span class='ident'>v</span>);
 
-                // Now that it&#39;s stolen, just read the value&#39;s pointer
-                // right out of the table!
-                </span><span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>peek</span>(<span class='ident'>probe</span>) {
+                <span class='comment'>// Now that it&#39;s stolen, just read the value&#39;s pointer</span>
+                <span class='comment'>// right out of the table!</span>
+                <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>peek</span>(<span class='ident'>probe</span>) {
                     <span class='ident'>table</span>::<span class='ident'>Empty</span>(_)  <span class='op'>=&gt;</span> <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;Just stole a spot, but now that spot&#39;s empty.&quot;</span>),
                     <span class='ident'>table</span>::<span class='ident'>Full</span>(<span class='ident'>idx</span>) <span class='op'>=&gt;</span> {
                         <span class='kw'>let</span> (_, <span class='ident'>v</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>table</span>.<span class='ident'>read_mut</span>(<span class='kw-2'>&amp;</span><span class='ident'>idx</span>);
@@ -3791,10 +3783,10 @@
                     }
                 }
             }
-        }<span class='comment'>
+        }
 
-        // We really shouldn&#39;t be here.
-        </span><span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;Internal HashMap error: Out of space.&quot;</span>);
+        <span class='comment'>// We really shouldn&#39;t be here.</span>
+        <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;Internal HashMap error: Out of space.&quot;</span>);
     }
 
     <span class='doccomment'>/// Inserts an element which has already been hashed, returning a reference</span>
@@ -4219,11 +4211,11 @@
     <span class='kw'>fn</span> <span class='ident'>default</span>() <span class='op'>-&gt;</span> <span class='ident'>HashSet</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>H</span><span class='op'>&gt;</span> {
         <span class='ident'>HashSet</span>::<span class='ident'>with_hasher</span>(<span class='ident'>Default</span>::<span class='ident'>default</span>())
     }
-}<span class='comment'>
+}
 
-// `Repeat` is used to feed the filter closure an explicit capture
-// of a reference to the other set
-</span><span class='doccomment'>/// Set operations iterator</span>
+<span class='comment'>// `Repeat` is used to feed the filter closure an explicit capture</span>
+<span class='comment'>// of a reference to the other set</span>
+<span class='doccomment'>/// Set operations iterator</span>
 <span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>SetAlgebraItems</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>, <span class='ident'>H</span><span class='op'>&gt;</span> <span class='op'>=</span>
     <span class='ident'>FilterMap</span><span class='op'>&lt;</span><span class='lifetime'>&#39;static</span>, (<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>HashSet</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>H</span><span class='op'>&gt;</span>, <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>T</span>), <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>T</span>,
               <span class='ident'>Zip</span><span class='op'>&lt;</span><span class='ident'>Repeat</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>HashSet</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>H</span><span class='op'>&gt;&gt;</span>, <span class='ident'>SetItems</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>;
@@ -4361,11 +4353,11 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_lots_of_insertions</span>() {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();<span class='comment'>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
 
-        // Try this a few times to make sure we never screw up the hashmap&#39;s
-        // internal state.
-        </span><span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0i</span>, <span class='number'>10</span>) {
+        <span class='comment'>// Try this a few times to make sure we never screw up the hashmap&#39;s</span>
+        <span class='comment'>// internal state.</span>
+        <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0i</span>, <span class='number'>10</span>) {
             <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>m</span>.<span class='ident'>is_empty</span>());
 
             <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>1i</span>, <span class='number'>1000</span>) {
@@ -4384,10 +4376,10 @@
 
             <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>1001i</span>, <span class='number'>2000</span>) {
                 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>m</span>.<span class='ident'>contains_key</span>(<span class='kw-2'>&amp;</span><span class='ident'>i</span>));
-            }<span class='comment'>
+            }
 
-            // remove forwards
-            </span><span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>1i</span>, <span class='number'>1000</span>) {
+            <span class='comment'>// remove forwards</span>
+            <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>1i</span>, <span class='number'>1000</span>) {
                 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>m</span>.<span class='ident'>remove</span>(<span class='kw-2'>&amp;</span><span class='ident'>i</span>));
 
                 <span class='kw'>for</span> <span class='ident'>j</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>1</span>, <span class='ident'>i</span>) {
@@ -4405,10 +4397,10 @@
 
             <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>1i</span>, <span class='number'>1000</span>) {
                 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>m</span>.<span class='ident'>insert</span>(<span class='ident'>i</span>, <span class='ident'>i</span>));
-            }<span class='comment'>
+            }
 
-            // remove backwards
-            </span><span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_step_inclusive</span>(<span class='number'>1000i</span>, <span class='number'>1</span>, <span class='op'>-</span><span class='number'>1</span>) {
+            <span class='comment'>// remove backwards</span>
+            <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_step_inclusive</span>(<span class='number'>1000i</span>, <span class='number'>1</span>, <span class='op'>-</span><span class='number'>1</span>) {
                 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>m</span>.<span class='ident'>remove</span>(<span class='kw-2'>&amp;</span><span class='ident'>i</span>));
 
                 <span class='kw'>for</span> <span class='ident'>j</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='ident'>i</span>, <span class='number'>1000</span>) {
@@ -4930,10 +4922,10 @@
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_eq</span>() {<span class='comment'>
-        // These constants once happened to expose a bug in insert().
-        // I&#39;m keeping them around to prevent a regression.
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>s1</span> <span class='op'>=</span> <span class='ident'>HashSet</span>::<span class='ident'>new</span>();
+    <span class='kw'>fn</span> <span class='ident'>test_eq</span>() {
+        <span class='comment'>// These constants once happened to expose a bug in insert().</span>
+        <span class='comment'>// I&#39;m keeping them around to prevent a regression.</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>s1</span> <span class='op'>=</span> <span class='ident'>HashSet</span>::<span class='ident'>new</span>();
 
         <span class='ident'>s1</span>.<span class='ident'>insert</span>(<span class='number'>1i</span>);
         <span class='ident'>s1</span>.<span class='ident'>insert</span>(<span class='number'>2</span>);

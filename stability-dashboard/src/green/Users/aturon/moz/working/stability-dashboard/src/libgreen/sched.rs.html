@@ -7,8 +7,6 @@
 
     <title>sched.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -1580,17 +1578,17 @@
 <span id='1538'>1538</span>
 <span id='1539'>1539</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rt</span>::<span class='ident'>local</span>::<span class='ident'>Local</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rt</span>::<span class='ident'>mutex</span>::<span class='ident'>NativeMutex</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rt</span>::<span class='ident'>rtio</span>::{<span class='ident'>RemoteCallback</span>, <span class='ident'>PausableIdleCallback</span>, <span class='ident'>Callback</span>, <span class='ident'>EventLoop</span>};
@@ -1672,16 +1670,16 @@
     <span class='ident'>yield_check_count</span>: <span class='ident'>uint</span>,
     <span class='doccomment'>/// A flag to tell the scheduler loop it needs to do some stealing</span>
     <span class='doccomment'>/// in order to introduce randomness as part of a yield</span>
-    <span class='ident'>steal_for_yield</span>: <span class='ident'>bool</span>,<span class='comment'>
+    <span class='ident'>steal_for_yield</span>: <span class='ident'>bool</span>,
 
-    // n.b. currently destructors of an object are run in top-to-bottom in order
-    //      of field declaration. Due to its nature, the pausable idle callback
-    //      must have some sort of handle to the event loop, so it needs to get
-    //      destroyed before the event loop itself. For this reason, we destroy
-    //      the event loop last to ensure that any unsafe references to it are
-    //      destroyed before it&#39;s actually destroyed.
+    <span class='comment'>// n.b. currently destructors of an object are run in top-to-bottom in order</span>
+    <span class='comment'>//      of field declaration. Due to its nature, the pausable idle callback</span>
+    <span class='comment'>//      must have some sort of handle to the event loop, so it needs to get</span>
+    <span class='comment'>//      destroyed before the event loop itself. For this reason, we destroy</span>
+    <span class='comment'>//      the event loop last to ensure that any unsafe references to it are</span>
+    <span class='comment'>//      destroyed before it&#39;s actually destroyed.</span>
 
-    </span><span class='doccomment'>/// The event loop used to drive the scheduler and perform I/O</span>
+    <span class='doccomment'>/// The event loop used to drive the scheduler and perform I/O</span>
     <span class='kw'>pub</span> <span class='ident'>event_loop</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>EventLoop</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>,
 }
 
@@ -1700,11 +1698,11 @@
     <span class='ident'>r</span> <span class='op'>%</span> <span class='ident'>MAX_YIELD_CHECKS</span> <span class='op'>+</span> <span class='number'>1</span>
 }
 
-<span class='kw'>impl</span> <span class='ident'>Scheduler</span> {<span class='comment'>
+<span class='kw'>impl</span> <span class='ident'>Scheduler</span> {
 
-    // * Initialization Functions
+    <span class='comment'>// * Initialization Functions</span>
 
-    </span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>pool_id</span>: <span class='ident'>uint</span>,
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>pool_id</span>: <span class='ident'>uint</span>,
                <span class='ident'>event_loop</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>EventLoop</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>,
                <span class='ident'>work_queue</span>: <span class='ident'>deque</span>::<span class='ident'>Worker</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;&gt;</span>,
                <span class='ident'>work_queues</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>deque</span>::<span class='ident'>Stealer</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>,
@@ -1753,129 +1751,129 @@
         <span class='ident'>sched</span>.<span class='ident'>yield_check_count</span> <span class='op'>=</span> <span class='ident'>reset_yield_check</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>sched</span>.<span class='ident'>rng</span>);
 
         <span class='kw'>return</span> <span class='ident'>sched</span>;
-    }<span class='comment'>
+    }
 
-    // FIXME: This may eventually need to be refactored so that
-    // the scheduler itself doesn&#39;t have to call event_loop.run.
-    // That will be important for embedding the runtime into external
-    // event loops.
+    <span class='comment'>// FIXME: This may eventually need to be refactored so that</span>
+    <span class='comment'>// the scheduler itself doesn&#39;t have to call event_loop.run.</span>
+    <span class='comment'>// That will be important for embedding the runtime into external</span>
+    <span class='comment'>// event loops.</span>
 
-    // Take a main task to run, and a scheduler to run it in. Create a
-    // scheduler task and bootstrap into it.
-    </span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>bootstrap</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>) {<span class='comment'>
+    <span class='comment'>// Take a main task to run, and a scheduler to run it in. Create a</span>
+    <span class='comment'>// scheduler task and bootstrap into it.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>bootstrap</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>) {
 
-        // Build an Idle callback.
-        </span><span class='kw'>let</span> <span class='ident'>cb</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>SchedRunner</span> <span class='kw'>as</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Callback</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>;
-        <span class='self'>self</span>.<span class='ident'>idle_callback</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='self'>self</span>.<span class='ident'>event_loop</span>.<span class='ident'>pausable_idle_callback</span>(<span class='ident'>cb</span>));<span class='comment'>
+        <span class='comment'>// Build an Idle callback.</span>
+        <span class='kw'>let</span> <span class='ident'>cb</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>SchedRunner</span> <span class='kw'>as</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Callback</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>;
+        <span class='self'>self</span>.<span class='ident'>idle_callback</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='self'>self</span>.<span class='ident'>event_loop</span>.<span class='ident'>pausable_idle_callback</span>(<span class='ident'>cb</span>));
 
-        // Create a task for the scheduler with an empty context.
-        </span><span class='kw'>let</span> <span class='ident'>sched_task</span> <span class='op'>=</span> <span class='ident'>GreenTask</span>::<span class='ident'>new_typed</span>(<span class='prelude-val'>Some</span>(<span class='ident'>Coroutine</span>::<span class='ident'>empty</span>()),
-                                              <span class='ident'>TypeSched</span>);<span class='comment'>
+        <span class='comment'>// Create a task for the scheduler with an empty context.</span>
+        <span class='kw'>let</span> <span class='ident'>sched_task</span> <span class='op'>=</span> <span class='ident'>GreenTask</span>::<span class='ident'>new_typed</span>(<span class='prelude-val'>Some</span>(<span class='ident'>Coroutine</span>::<span class='ident'>empty</span>()),
+                                              <span class='ident'>TypeSched</span>);
 
-        // Before starting our first task, make sure the idle callback
-        // is active. As we do not start in the sleep state this is
-        // important.
-        </span><span class='self'>self</span>.<span class='ident'>idle_callback</span>.<span class='ident'>get_mut_ref</span>().<span class='ident'>resume</span>();<span class='comment'>
+        <span class='comment'>// Before starting our first task, make sure the idle callback</span>
+        <span class='comment'>// is active. As we do not start in the sleep state this is</span>
+        <span class='comment'>// important.</span>
+        <span class='self'>self</span>.<span class='ident'>idle_callback</span>.<span class='ident'>get_mut_ref</span>().<span class='ident'>resume</span>();
 
-        // Now, as far as all the scheduler state is concerned, we are inside
-        // the &quot;scheduler&quot; context. The scheduler immediately hands over control
-        // to the event loop, and this will only exit once the event loop no
-        // longer has any references (handles or I/O objects).
-        </span><span class='macro'>rtdebug</span><span class='macro'>!</span>(<span class='string'>&quot;starting scheduler {}&quot;</span>, <span class='self'>self</span>.<span class='ident'>sched_id</span>());
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>sched_task</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>run</span>(<span class='ident'>sched_task</span>);<span class='comment'>
+        <span class='comment'>// Now, as far as all the scheduler state is concerned, we are inside</span>
+        <span class='comment'>// the &quot;scheduler&quot; context. The scheduler immediately hands over control</span>
+        <span class='comment'>// to the event loop, and this will only exit once the event loop no</span>
+        <span class='comment'>// longer has any references (handles or I/O objects).</span>
+        <span class='macro'>rtdebug</span><span class='macro'>!</span>(<span class='string'>&quot;starting scheduler {}&quot;</span>, <span class='self'>self</span>.<span class='ident'>sched_id</span>());
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>sched_task</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>run</span>(<span class='ident'>sched_task</span>);
 
-        // Close the idle callback.
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>sched</span> <span class='op'>=</span> <span class='ident'>sched_task</span>.<span class='ident'>sched</span>.<span class='ident'>take_unwrap</span>();
-        <span class='ident'>sched</span>.<span class='ident'>idle_callback</span>.<span class='ident'>take</span>();<span class='comment'>
-        // Make one go through the loop to run the close callback.
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>stask</span> <span class='op'>=</span> <span class='ident'>sched</span>.<span class='ident'>run</span>(<span class='ident'>sched_task</span>);<span class='comment'>
+        <span class='comment'>// Close the idle callback.</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>sched</span> <span class='op'>=</span> <span class='ident'>sched_task</span>.<span class='ident'>sched</span>.<span class='ident'>take_unwrap</span>();
+        <span class='ident'>sched</span>.<span class='ident'>idle_callback</span>.<span class='ident'>take</span>();
+        <span class='comment'>// Make one go through the loop to run the close callback.</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>stask</span> <span class='op'>=</span> <span class='ident'>sched</span>.<span class='ident'>run</span>(<span class='ident'>sched_task</span>);
 
-        // Now that we are done with the scheduler, clean up the
-        // scheduler task. Do so by removing it from TLS and manually
-        // cleaning up the memory it uses. As we didn&#39;t actually call
-        // task.run() on the scheduler task we never get through all
-        // the cleanup code it runs.
-        </span><span class='macro'>rtdebug</span><span class='macro'>!</span>(<span class='string'>&quot;stopping scheduler {}&quot;</span>, <span class='ident'>stask</span>.<span class='ident'>sched</span>.<span class='ident'>get_ref</span>().<span class='ident'>sched_id</span>());<span class='comment'>
+        <span class='comment'>// Now that we are done with the scheduler, clean up the</span>
+        <span class='comment'>// scheduler task. Do so by removing it from TLS and manually</span>
+        <span class='comment'>// cleaning up the memory it uses. As we didn&#39;t actually call</span>
+        <span class='comment'>// task.run() on the scheduler task we never get through all</span>
+        <span class='comment'>// the cleanup code it runs.</span>
+        <span class='macro'>rtdebug</span><span class='macro'>!</span>(<span class='string'>&quot;stopping scheduler {}&quot;</span>, <span class='ident'>stask</span>.<span class='ident'>sched</span>.<span class='ident'>get_ref</span>().<span class='ident'>sched_id</span>());
 
-        // Should not have any messages
-        </span><span class='kw'>let</span> <span class='ident'>message</span> <span class='op'>=</span> <span class='ident'>stask</span>.<span class='ident'>sched</span>.<span class='ident'>get_mut_ref</span>().<span class='ident'>message_queue</span>.<span class='ident'>pop</span>();
+        <span class='comment'>// Should not have any messages</span>
+        <span class='kw'>let</span> <span class='ident'>message</span> <span class='op'>=</span> <span class='ident'>stask</span>.<span class='ident'>sched</span>.<span class='ident'>get_mut_ref</span>().<span class='ident'>message_queue</span>.<span class='ident'>pop</span>();
         <span class='macro'>rtassert</span><span class='macro'>!</span>(<span class='kw'>match</span> <span class='ident'>message</span> { <span class='ident'>msgq</span>::<span class='ident'>Empty</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>, _ <span class='op'>=&gt;</span> <span class='boolval'>false</span> });
 
         <span class='ident'>stask</span>.<span class='ident'>task</span>.<span class='ident'>get_mut_ref</span>().<span class='ident'>destroyed</span> <span class='op'>=</span> <span class='boolval'>true</span>;
-    }<span class='comment'>
+    }
 
-    // This does not return a scheduler, as the scheduler is placed
-    // inside the task.
-    </span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>run</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>stask</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span> {<span class='comment'>
+    <span class='comment'>// This does not return a scheduler, as the scheduler is placed</span>
+    <span class='comment'>// inside the task.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>run</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>stask</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span> {
 
-        // This is unsafe because we need to place the scheduler, with
-        // the event_loop inside, inside our task. But we still need a
-        // mutable reference to the event_loop to give it the &quot;run&quot;
-        // command.
-        </span><span class='kw'>unsafe</span> {
-            <span class='kw'>let</span> <span class='ident'>event_loop</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>EventLoop</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>event_loop</span>;<span class='comment'>
-            // Our scheduler must be in the task before the event loop
-            // is started.
-            </span><span class='ident'>stask</span>.<span class='ident'>put_with_sched</span>(<span class='self'>self</span>);
+        <span class='comment'>// This is unsafe because we need to place the scheduler, with</span>
+        <span class='comment'>// the event_loop inside, inside our task. But we still need a</span>
+        <span class='comment'>// mutable reference to the event_loop to give it the &quot;run&quot;</span>
+        <span class='comment'>// command.</span>
+        <span class='kw'>unsafe</span> {
+            <span class='kw'>let</span> <span class='ident'>event_loop</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>EventLoop</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>event_loop</span>;
+            <span class='comment'>// Our scheduler must be in the task before the event loop</span>
+            <span class='comment'>// is started.</span>
+            <span class='ident'>stask</span>.<span class='ident'>put_with_sched</span>(<span class='self'>self</span>);
             (<span class='op'>*</span><span class='ident'>event_loop</span>).<span class='ident'>run</span>();
-        }<span class='comment'>
+        }
 
-        //  This is a serious code smell, but this function could be done away
-        //  with if necessary. The ownership of `stask` was transferred into
-        //  local storage just before the event loop ran, so it is possible to
-        //  transmute `stask` as a uint across the running of the event loop to
-        //  re-acquire ownership here.
-        //
-        // This would involve removing the Task from TLS, removing the runtime,
-        // forgetting the runtime, and then putting the task into `stask`. For
-        // now, because we have `GreenTask::convert`, I chose to take this
-        // method for cleanliness. This function is *not* a fundamental reason
-        // why this function should exist.
-        </span><span class='ident'>GreenTask</span>::<span class='ident'>convert</span>(<span class='ident'>Local</span>::<span class='ident'>take</span>())
-    }<span class='comment'>
+        <span class='comment'>//  This is a serious code smell, but this function could be done away</span>
+        <span class='comment'>//  with if necessary. The ownership of `stask` was transferred into</span>
+        <span class='comment'>//  local storage just before the event loop ran, so it is possible to</span>
+        <span class='comment'>//  transmute `stask` as a uint across the running of the event loop to</span>
+        <span class='comment'>//  re-acquire ownership here.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// This would involve removing the Task from TLS, removing the runtime,</span>
+        <span class='comment'>// forgetting the runtime, and then putting the task into `stask`. For</span>
+        <span class='comment'>// now, because we have `GreenTask::convert`, I chose to take this</span>
+        <span class='comment'>// method for cleanliness. This function is *not* a fundamental reason</span>
+        <span class='comment'>// why this function should exist.</span>
+        <span class='ident'>GreenTask</span>::<span class='ident'>convert</span>(<span class='ident'>Local</span>::<span class='ident'>take</span>())
+    }
 
-    // * Execution Functions - Core Loop Logic
+    <span class='comment'>// * Execution Functions - Core Loop Logic</span>
 
-    // This function is run from the idle callback on the uv loop, indicating
-    // that there are no I/O events pending. When this function returns, we will
-    // fall back to epoll() in the uv event loop, waiting for more things to
-    // happen. We may come right back off epoll() if the idle callback is still
-    // active, in which case we&#39;re truly just polling to see if I/O events are
-    // complete.
-    //
-    // The model for this function is to execute as much work as possible while
-    // still fairly considering I/O tasks. Falling back to epoll() frequently is
-    // often quite expensive, so we attempt to avoid it as much as possible. If
-    // we have any active I/O on the event loop, then we&#39;re forced to fall back
-    // to epoll() in order to provide fairness, but as long as we&#39;re doing work
-    // and there&#39;s no active I/O, we can continue to do work.
-    //
-    // If we try really hard to do some work, but no work is available to be
-    // done, then we fall back to epoll() to block this thread waiting for more
-    // work (instead of busy waiting).
-    </span><span class='kw'>fn</span> <span class='ident'>run_sched_once</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>stask</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) {<span class='comment'>
-        // Make sure that we&#39;re not lying in that the `stask` argument is indeed
-        // the scheduler task for this scheduler.
-        </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>sched_task</span>.<span class='ident'>is_none</span>());<span class='comment'>
+    <span class='comment'>// This function is run from the idle callback on the uv loop, indicating</span>
+    <span class='comment'>// that there are no I/O events pending. When this function returns, we will</span>
+    <span class='comment'>// fall back to epoll() in the uv event loop, waiting for more things to</span>
+    <span class='comment'>// happen. We may come right back off epoll() if the idle callback is still</span>
+    <span class='comment'>// active, in which case we&#39;re truly just polling to see if I/O events are</span>
+    <span class='comment'>// complete.</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// The model for this function is to execute as much work as possible while</span>
+    <span class='comment'>// still fairly considering I/O tasks. Falling back to epoll() frequently is</span>
+    <span class='comment'>// often quite expensive, so we attempt to avoid it as much as possible. If</span>
+    <span class='comment'>// we have any active I/O on the event loop, then we&#39;re forced to fall back</span>
+    <span class='comment'>// to epoll() in order to provide fairness, but as long as we&#39;re doing work</span>
+    <span class='comment'>// and there&#39;s no active I/O, we can continue to do work.</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// If we try really hard to do some work, but no work is available to be</span>
+    <span class='comment'>// done, then we fall back to epoll() to block this thread waiting for more</span>
+    <span class='comment'>// work (instead of busy waiting).</span>
+    <span class='kw'>fn</span> <span class='ident'>run_sched_once</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>stask</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) {
+        <span class='comment'>// Make sure that we&#39;re not lying in that the `stask` argument is indeed</span>
+        <span class='comment'>// the scheduler task for this scheduler.</span>
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>sched_task</span>.<span class='ident'>is_none</span>());
 
-        // Assume that we need to continue idling unless we reach the
-        // end of this function without performing an action.
-        </span><span class='self'>self</span>.<span class='ident'>idle_callback</span>.<span class='ident'>get_mut_ref</span>().<span class='ident'>resume</span>();<span class='comment'>
+        <span class='comment'>// Assume that we need to continue idling unless we reach the</span>
+        <span class='comment'>// end of this function without performing an action.</span>
+        <span class='self'>self</span>.<span class='ident'>idle_callback</span>.<span class='ident'>get_mut_ref</span>().<span class='ident'>resume</span>();
 
-        // First we check for scheduler messages, these are higher
-        // priority than regular tasks.
-        </span><span class='kw'>let</span> (<span class='kw-2'>mut</span> <span class='ident'>sched</span>, <span class='kw-2'>mut</span> <span class='ident'>stask</span>, <span class='kw-2'>mut</span> <span class='ident'>did_work</span>) <span class='op'>=</span>
-            <span class='self'>self</span>.<span class='ident'>interpret_message_queue</span>(<span class='ident'>stask</span>, <span class='ident'>DontTryTooHard</span>);<span class='comment'>
+        <span class='comment'>// First we check for scheduler messages, these are higher</span>
+        <span class='comment'>// priority than regular tasks.</span>
+        <span class='kw'>let</span> (<span class='kw-2'>mut</span> <span class='ident'>sched</span>, <span class='kw-2'>mut</span> <span class='ident'>stask</span>, <span class='kw-2'>mut</span> <span class='ident'>did_work</span>) <span class='op'>=</span>
+            <span class='self'>self</span>.<span class='ident'>interpret_message_queue</span>(<span class='ident'>stask</span>, <span class='ident'>DontTryTooHard</span>);
 
-        // After processing a message, we consider doing some more work on the
-        // event loop. The &quot;keep going&quot; condition changes after the first
-        // iteration because we don&#39;t want to spin here infinitely.
-        //
-        // Once we start doing work we can keep doing work so long as the
-        // iteration does something. Note that we don&#39;t want to starve the
-        // message queue here, so each iteration when we&#39;re done working we
-        // check the message queue regardless of whether we did work or not.
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>keep_going</span> <span class='op'>=</span> <span class='op'>!</span><span class='ident'>did_work</span> <span class='op'>||</span> <span class='op'>!</span><span class='ident'>sched</span>.<span class='ident'>event_loop</span>.<span class='ident'>has_active_io</span>();
+        <span class='comment'>// After processing a message, we consider doing some more work on the</span>
+        <span class='comment'>// event loop. The &quot;keep going&quot; condition changes after the first</span>
+        <span class='comment'>// iteration because we don&#39;t want to spin here infinitely.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// Once we start doing work we can keep doing work so long as the</span>
+        <span class='comment'>// iteration does something. Note that we don&#39;t want to starve the</span>
+        <span class='comment'>// message queue here, so each iteration when we&#39;re done working we</span>
+        <span class='comment'>// check the message queue regardless of whether we did work or not.</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>keep_going</span> <span class='op'>=</span> <span class='op'>!</span><span class='ident'>did_work</span> <span class='op'>||</span> <span class='op'>!</span><span class='ident'>sched</span>.<span class='ident'>event_loop</span>.<span class='ident'>has_active_io</span>();
         <span class='kw'>while</span> <span class='ident'>keep_going</span> {
             <span class='kw'>let</span> (<span class='ident'>a</span>, <span class='ident'>b</span>, <span class='ident'>c</span>) <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>sched</span>.<span class='ident'>do_work</span>(<span class='ident'>stask</span>) {
                 (<span class='ident'>sched</span>, <span class='ident'>task</span>, <span class='boolval'>false</span>) <span class='op'>=&gt;</span> {
@@ -1889,72 +1887,72 @@
             };
             <span class='ident'>sched</span> <span class='op'>=</span> <span class='ident'>a</span>;
             <span class='ident'>stask</span> <span class='op'>=</span> <span class='ident'>b</span>;
-            <span class='ident'>did_work</span> <span class='op'>=</span> <span class='ident'>c</span>;<span class='comment'>
+            <span class='ident'>did_work</span> <span class='op'>=</span> <span class='ident'>c</span>;
 
-            // We only keep going if we managed to do something productive and
-            // also don&#39;t have any active I/O. If we didn&#39;t do anything, we
-            // should consider going to sleep, and if we have active I/O we need
-            // to poll for completion.
-            </span><span class='ident'>keep_going</span> <span class='op'>=</span> <span class='ident'>did_work</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='ident'>sched</span>.<span class='ident'>event_loop</span>.<span class='ident'>has_active_io</span>();
-        }<span class='comment'>
+            <span class='comment'>// We only keep going if we managed to do something productive and</span>
+            <span class='comment'>// also don&#39;t have any active I/O. If we didn&#39;t do anything, we</span>
+            <span class='comment'>// should consider going to sleep, and if we have active I/O we need</span>
+            <span class='comment'>// to poll for completion.</span>
+            <span class='ident'>keep_going</span> <span class='op'>=</span> <span class='ident'>did_work</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='ident'>sched</span>.<span class='ident'>event_loop</span>.<span class='ident'>has_active_io</span>();
+        }
 
-        // If we ever did some work, then we shouldn&#39;t put our scheduler
-        // entirely to sleep just yet. Leave the idle callback active and fall
-        // back to epoll() to see what&#39;s going on.
-        </span><span class='kw'>if</span> <span class='ident'>did_work</span> {
+        <span class='comment'>// If we ever did some work, then we shouldn&#39;t put our scheduler</span>
+        <span class='comment'>// entirely to sleep just yet. Leave the idle callback active and fall</span>
+        <span class='comment'>// back to epoll() to see what&#39;s going on.</span>
+        <span class='kw'>if</span> <span class='ident'>did_work</span> {
             <span class='kw'>return</span> <span class='ident'>stask</span>.<span class='ident'>put_with_sched</span>(<span class='ident'>sched</span>);
-        }<span class='comment'>
+        }
 
-        // If we got here then there was no work to do.
-        // Generate a SchedHandle and push it to the sleeper list so
-        // somebody can wake us up later.
-        </span><span class='kw'>if</span> <span class='op'>!</span><span class='ident'>sched</span>.<span class='ident'>sleepy</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='ident'>sched</span>.<span class='ident'>no_sleep</span> {
+        <span class='comment'>// If we got here then there was no work to do.</span>
+        <span class='comment'>// Generate a SchedHandle and push it to the sleeper list so</span>
+        <span class='comment'>// somebody can wake us up later.</span>
+        <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>sched</span>.<span class='ident'>sleepy</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='ident'>sched</span>.<span class='ident'>no_sleep</span> {
             <span class='macro'>rtdebug</span><span class='macro'>!</span>(<span class='string'>&quot;scheduler has no work to do, going to sleep&quot;</span>);
             <span class='ident'>sched</span>.<span class='ident'>sleepy</span> <span class='op'>=</span> <span class='boolval'>true</span>;
             <span class='kw'>let</span> <span class='ident'>handle</span> <span class='op'>=</span> <span class='ident'>sched</span>.<span class='ident'>make_handle</span>();
-            <span class='ident'>sched</span>.<span class='ident'>sleeper_list</span>.<span class='ident'>push</span>(<span class='ident'>handle</span>);<span class='comment'>
-            // Since we are sleeping, deactivate the idle callback.
-            </span><span class='ident'>sched</span>.<span class='ident'>idle_callback</span>.<span class='ident'>get_mut_ref</span>().<span class='ident'>pause</span>();
+            <span class='ident'>sched</span>.<span class='ident'>sleeper_list</span>.<span class='ident'>push</span>(<span class='ident'>handle</span>);
+            <span class='comment'>// Since we are sleeping, deactivate the idle callback.</span>
+            <span class='ident'>sched</span>.<span class='ident'>idle_callback</span>.<span class='ident'>get_mut_ref</span>().<span class='ident'>pause</span>();
         } <span class='kw'>else</span> {
-            <span class='macro'>rtdebug</span><span class='macro'>!</span>(<span class='string'>&quot;not sleeping, already doing so or no_sleep set&quot;</span>);<span class='comment'>
-            // We may not be sleeping, but we still need to deactivate
-            // the idle callback.
-            </span><span class='ident'>sched</span>.<span class='ident'>idle_callback</span>.<span class='ident'>get_mut_ref</span>().<span class='ident'>pause</span>();
-        }<span class='comment'>
+            <span class='macro'>rtdebug</span><span class='macro'>!</span>(<span class='string'>&quot;not sleeping, already doing so or no_sleep set&quot;</span>);
+            <span class='comment'>// We may not be sleeping, but we still need to deactivate</span>
+            <span class='comment'>// the idle callback.</span>
+            <span class='ident'>sched</span>.<span class='ident'>idle_callback</span>.<span class='ident'>get_mut_ref</span>().<span class='ident'>pause</span>();
+        }
 
-        // Finished a cycle without using the Scheduler. Place it back
-        // in TLS.
-        </span><span class='ident'>stask</span>.<span class='ident'>put_with_sched</span>(<span class='ident'>sched</span>);
-    }<span class='comment'>
+        <span class='comment'>// Finished a cycle without using the Scheduler. Place it back</span>
+        <span class='comment'>// in TLS.</span>
+        <span class='ident'>stask</span>.<span class='ident'>put_with_sched</span>(<span class='ident'>sched</span>);
+    }
 
-    // This function returns None if the scheduler is &quot;used&quot;, or it
-    // returns the still-available scheduler. At this point all
-    // message-handling will count as a turn of work, and as a result
-    // return None.
-    </span><span class='kw'>fn</span> <span class='ident'>interpret_message_queue</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>stask</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>,
+    <span class='comment'>// This function returns None if the scheduler is &quot;used&quot;, or it</span>
+    <span class='comment'>// returns the still-available scheduler. At this point all</span>
+    <span class='comment'>// message-handling will count as a turn of work, and as a result</span>
+    <span class='comment'>// return None.</span>
+    <span class='kw'>fn</span> <span class='ident'>interpret_message_queue</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>stask</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>,
                                <span class='ident'>effort</span>: <span class='ident'>EffortLevel</span>)
             <span class='op'>-&gt;</span> (<span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>, <span class='ident'>bool</span>)
     {
 
         <span class='kw'>let</span> <span class='ident'>msg</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>effort</span> <span class='op'>==</span> <span class='ident'>DontTryTooHard</span> {
             <span class='self'>self</span>.<span class='ident'>message_queue</span>.<span class='ident'>casual_pop</span>()
-        } <span class='kw'>else</span> {<span class='comment'>
-            // When popping our message queue, we could see an &quot;inconsistent&quot;
-            // state which means that we *should* be able to pop data, but we
-            // are unable to at this time. Our options are:
-            //
-            //  1. Spin waiting for data
-            //  2. Ignore this and pretend we didn&#39;t find a message
-            //
-            // If we choose route 1, then if the pusher in question is currently
-            // pre-empted, we&#39;re going to take up our entire time slice just
-            // spinning on this queue. If we choose route 2, then the pusher in
-            // question is still guaranteed to make a send() on its async
-            // handle, so we will guaranteed wake up and see its message at some
-            // point.
-            //
-            // I have chosen to take route #2.
-            </span><span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>message_queue</span>.<span class='ident'>pop</span>() {
+        } <span class='kw'>else</span> {
+            <span class='comment'>// When popping our message queue, we could see an &quot;inconsistent&quot;</span>
+            <span class='comment'>// state which means that we *should* be able to pop data, but we</span>
+            <span class='comment'>// are unable to at this time. Our options are:</span>
+            <span class='comment'>//</span>
+            <span class='comment'>//  1. Spin waiting for data</span>
+            <span class='comment'>//  2. Ignore this and pretend we didn&#39;t find a message</span>
+            <span class='comment'>//</span>
+            <span class='comment'>// If we choose route 1, then if the pusher in question is currently</span>
+            <span class='comment'>// pre-empted, we&#39;re going to take up our entire time slice just</span>
+            <span class='comment'>// spinning on this queue. If we choose route 2, then the pusher in</span>
+            <span class='comment'>// question is still guaranteed to make a send() on its async</span>
+            <span class='comment'>// handle, so we will guaranteed wake up and see its message at some</span>
+            <span class='comment'>// point.</span>
+            <span class='comment'>//</span>
+            <span class='comment'>// I have chosen to take route #2.</span>
+            <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>message_queue</span>.<span class='ident'>pop</span>() {
                 <span class='ident'>msgq</span>::<span class='ident'>Data</span>(<span class='ident'>t</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>(<span class='ident'>t</span>),
                 <span class='ident'>msgq</span>::<span class='ident'>Empty</span> <span class='op'>|</span> <span class='ident'>msgq</span>::<span class='ident'>Inconsistent</span> <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>
             }
@@ -1974,10 +1972,10 @@
                                       <span class='ident'>Scheduler</span>::<span class='ident'>resume_task_immediately_cl</span>);
                 (<span class='ident'>sched</span>, <span class='ident'>task</span>, <span class='boolval'>true</span>)
             }
-            <span class='prelude-val'>Some</span>(<span class='ident'>RunOnce</span>(<span class='ident'>task</span>)) <span class='op'>=&gt;</span> {<span class='comment'>
-                // bypass the process_task logic to force running this task once
-                // on this home scheduler. This is often used for I/O (homing).
-                </span><span class='kw'>let</span> (<span class='ident'>sched</span>, <span class='ident'>task</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>resume_task_immediately</span>(<span class='ident'>stask</span>, <span class='ident'>task</span>);
+            <span class='prelude-val'>Some</span>(<span class='ident'>RunOnce</span>(<span class='ident'>task</span>)) <span class='op'>=&gt;</span> {
+                <span class='comment'>// bypass the process_task logic to force running this task once</span>
+                <span class='comment'>// on this home scheduler. This is often used for I/O (homing).</span>
+                <span class='kw'>let</span> (<span class='ident'>sched</span>, <span class='ident'>task</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>resume_task_immediately</span>(<span class='ident'>stask</span>, <span class='ident'>task</span>);
                 (<span class='ident'>sched</span>, <span class='ident'>task</span>, <span class='boolval'>true</span>)
             }
             <span class='prelude-val'>Some</span>(<span class='ident'>Wake</span>) <span class='op'>=&gt;</span> {
@@ -1986,11 +1984,11 @@
             }
             <span class='prelude-val'>Some</span>(<span class='ident'>Shutdown</span>) <span class='op'>=&gt;</span> {
                 <span class='macro'>rtdebug</span><span class='macro'>!</span>(<span class='string'>&quot;shutting down&quot;</span>);
-                <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>sleepy</span> {<span class='comment'>
-                    // There may be an outstanding handle on the
-                    // sleeper list.  Pop them all to make sure that&#39;s
-                    // not the case.
-                    </span><span class='kw'>loop</span> {
+                <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>sleepy</span> {
+                    <span class='comment'>// There may be an outstanding handle on the</span>
+                    <span class='comment'>// sleeper list.  Pop them all to make sure that&#39;s</span>
+                    <span class='comment'>// not the case.</span>
+                    <span class='kw'>loop</span> {
                         <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>sleeper_list</span>.<span class='ident'>pop</span>() {
                             <span class='prelude-val'>Some</span>(<span class='ident'>handle</span>) <span class='op'>=&gt;</span> {
                                 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>handle</span> <span class='op'>=</span> <span class='ident'>handle</span>;
@@ -1999,10 +1997,10 @@
                             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>break</span>
                         }
                     }
-                }<span class='comment'>
-                // No more sleeping. After there are no outstanding
-                // event loop references we will shut down.
-                </span><span class='self'>self</span>.<span class='ident'>no_sleep</span> <span class='op'>=</span> <span class='boolval'>true</span>;
+                }
+                <span class='comment'>// No more sleeping. After there are no outstanding</span>
+                <span class='comment'>// event loop references we will shut down.</span>
+                <span class='self'>self</span>.<span class='ident'>no_sleep</span> <span class='op'>=</span> <span class='boolval'>true</span>;
                 <span class='self'>self</span>.<span class='ident'>sleepy</span> <span class='op'>=</span> <span class='boolval'>false</span>;
                 (<span class='self'>self</span>, <span class='ident'>stask</span>, <span class='boolval'>true</span>)
             }
@@ -2030,18 +2028,18 @@
                 (<span class='self'>self</span>, <span class='ident'>stask</span>, <span class='boolval'>false</span>)
             }
         }
-    }<span class='comment'>
+    }
 
-    // Workstealing: In this iteration of the runtime each scheduler
-    // thread has a distinct work queue. When no work is available
-    // locally, make a few attempts to steal work from the queues of
-    // other scheduler threads. If a few steals fail we end up in the
-    // old &quot;no work&quot; path which is fine.
+    <span class='comment'>// Workstealing: In this iteration of the runtime each scheduler</span>
+    <span class='comment'>// thread has a distinct work queue. When no work is available</span>
+    <span class='comment'>// locally, make a few attempts to steal work from the queues of</span>
+    <span class='comment'>// other scheduler threads. If a few steals fail we end up in the</span>
+    <span class='comment'>// old &quot;no work&quot; path which is fine.</span>
 
-    // First step in the process is to find a task. This function does
-    // that by first checking the local queue, and if there is no work
-    // there, trying to steal from the remote work queues.
-    </span><span class='kw'>fn</span> <span class='ident'>find_work</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;&gt;</span> {
+    <span class='comment'>// First step in the process is to find a task. This function does</span>
+    <span class='comment'>// that by first checking the local queue, and if there is no work</span>
+    <span class='comment'>// there, trying to steal from the remote work queues.</span>
+    <span class='kw'>fn</span> <span class='ident'>find_work</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;&gt;</span> {
         <span class='macro'>rtdebug</span><span class='macro'>!</span>(<span class='string'>&quot;scheduler looking for work&quot;</span>);
         <span class='kw'>if</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>steal_for_yield</span> {
             <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>work_queue</span>.<span class='ident'>pop</span>() {
@@ -2054,32 +2052,32 @@
                     <span class='kw'>return</span> <span class='self'>self</span>.<span class='ident'>try_steals</span>();
                 }
             }
-        } <span class='kw'>else</span> {<span class='comment'>
-            // During execution of the last task, it performed a &#39;yield&#39;,
-            // so we&#39;re doing some work stealing in order to introduce some
-            // scheduling randomness. Otherwise we would just end up popping
-            // that same task again. This is pretty lame and is to work around
-            // the problem that work stealing is not designed for &#39;non-strict&#39;
-            // (non-fork-join) task parallelism.
-            </span><span class='self'>self</span>.<span class='ident'>steal_for_yield</span> <span class='op'>=</span> <span class='boolval'>false</span>;
+        } <span class='kw'>else</span> {
+            <span class='comment'>// During execution of the last task, it performed a &#39;yield&#39;,</span>
+            <span class='comment'>// so we&#39;re doing some work stealing in order to introduce some</span>
+            <span class='comment'>// scheduling randomness. Otherwise we would just end up popping</span>
+            <span class='comment'>// that same task again. This is pretty lame and is to work around</span>
+            <span class='comment'>// the problem that work stealing is not designed for &#39;non-strict&#39;</span>
+            <span class='comment'>// (non-fork-join) task parallelism.</span>
+            <span class='self'>self</span>.<span class='ident'>steal_for_yield</span> <span class='op'>=</span> <span class='boolval'>false</span>;
             <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>try_steals</span>() {
                 <span class='prelude-val'>Some</span>(<span class='ident'>task</span>) <span class='op'>=&gt;</span> {
                     <span class='macro'>rtdebug</span><span class='macro'>!</span>(<span class='string'>&quot;stole a task after yielding&quot;</span>);
                     <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>task</span>);
                 }
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
-                    <span class='macro'>rtdebug</span><span class='macro'>!</span>(<span class='string'>&quot;did not steal a task after yielding&quot;</span>);<span class='comment'>
-                    // Back to business
-                    </span><span class='kw'>return</span> <span class='self'>self</span>.<span class='ident'>find_work</span>();
+                    <span class='macro'>rtdebug</span><span class='macro'>!</span>(<span class='string'>&quot;did not steal a task after yielding&quot;</span>);
+                    <span class='comment'>// Back to business</span>
+                    <span class='kw'>return</span> <span class='self'>self</span>.<span class='ident'>find_work</span>();
                 }
             }
         }
-    }<span class='comment'>
+    }
 
-    // Try stealing from all queues the scheduler knows about. This
-    // naive implementation can steal from our own queue or from other
-    // special schedulers.
-    </span><span class='kw'>fn</span> <span class='ident'>try_steals</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;&gt;</span> {
+    <span class='comment'>// Try stealing from all queues the scheduler knows about. This</span>
+    <span class='comment'>// naive implementation can steal from our own queue or from other</span>
+    <span class='comment'>// special schedulers.</span>
+    <span class='kw'>fn</span> <span class='ident'>try_steals</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>work_queues</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>work_queues</span>;
         <span class='kw'>let</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='ident'>work_queues</span>.<span class='ident'>len</span>();
         <span class='kw'>let</span> <span class='ident'>start_index</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>rng</span>.<span class='ident'>gen_range</span>(<span class='number'>0</span>, <span class='ident'>len</span>);
@@ -2094,12 +2092,12 @@
         };
         <span class='macro'>rtdebug</span><span class='macro'>!</span>(<span class='string'>&quot;giving up on stealing&quot;</span>);
         <span class='kw'>return</span> <span class='prelude-val'>None</span>;
-    }<span class='comment'>
+    }
 
-    // * Task Routing Functions - Make sure tasks send up in the right
-    // place.
+    <span class='comment'>// * Task Routing Functions - Make sure tasks send up in the right</span>
+    <span class='comment'>// place.</span>
 
-    </span><span class='kw'>fn</span> <span class='ident'>process_task</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>,
+    <span class='kw'>fn</span> <span class='ident'>process_task</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>,
                     <span class='ident'>cur</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>,
                     <span class='kw-2'>mut</span> <span class='ident'>next</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>,
                     <span class='ident'>schedule_fn</span>: <span class='ident'>SchedulingFn</span>)
@@ -2160,59 +2158,59 @@
     <span class='doccomment'>/// Pushes the task onto the work stealing queue and tells the</span>
     <span class='doccomment'>/// event loop to run it later. Always use this instead of pushing</span>
     <span class='doccomment'>/// to the work queue directly.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>enqueue_task</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) {<span class='comment'>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>enqueue_task</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) {
 
-        // We push the task onto our local queue clone.
-        </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>task</span>.<span class='ident'>is_sched</span>());
+        <span class='comment'>// We push the task onto our local queue clone.</span>
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>task</span>.<span class='ident'>is_sched</span>());
         <span class='self'>self</span>.<span class='ident'>work_queue</span>.<span class='ident'>push</span>(<span class='ident'>task</span>);
         <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>idle_callback</span> {
             <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>idle</span>) <span class='op'>=&gt;</span> <span class='ident'>idle</span>.<span class='ident'>resume</span>(),
-            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {}<span class='comment'> // allow enqueuing before the scheduler starts
-        </span>}<span class='comment'>
+            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {} <span class='comment'>// allow enqueuing before the scheduler starts</span>
+        }
 
-        // We&#39;ve made work available. Notify a
-        // sleeping scheduler.
+        <span class='comment'>// We&#39;ve made work available. Notify a</span>
+        <span class='comment'>// sleeping scheduler.</span>
 
-        </span><span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>sleeper_list</span>.<span class='ident'>casual_pop</span>() {
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>sleeper_list</span>.<span class='ident'>casual_pop</span>() {
             <span class='prelude-val'>Some</span>(<span class='ident'>handle</span>) <span class='op'>=&gt;</span> {
                 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>handle</span> <span class='op'>=</span> <span class='ident'>handle</span>;
                 <span class='ident'>handle</span>.<span class='ident'>send</span>(<span class='ident'>Wake</span>)
             }
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> { (<span class='comment'>/* pass */</span>) }
         };
-    }<span class='comment'>
+    }
 
-    // * Core Context Switching Functions
+    <span class='comment'>// * Core Context Switching Functions</span>
 
-    // The primary function for changing contexts. In the current
-    // design the scheduler is just a slightly modified GreenTask, so
-    // all context swaps are from GreenTask to GreenTask. The only difference
-    // between the various cases is where the inputs come from, and
-    // what is done with the resulting task. That is specified by the
-    // cleanup function f, which takes the scheduler and the
-    // old task as inputs.
+    <span class='comment'>// The primary function for changing contexts. In the current</span>
+    <span class='comment'>// design the scheduler is just a slightly modified GreenTask, so</span>
+    <span class='comment'>// all context swaps are from GreenTask to GreenTask. The only difference</span>
+    <span class='comment'>// between the various cases is where the inputs come from, and</span>
+    <span class='comment'>// what is done with the resulting task. That is specified by the</span>
+    <span class='comment'>// cleanup function f, which takes the scheduler and the</span>
+    <span class='comment'>// old task as inputs.</span>
 
-    </span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>change_task_context</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>,
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>change_task_context</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>,
                                <span class='kw-2'>mut</span> <span class='ident'>current_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>,
                                <span class='kw-2'>mut</span> <span class='ident'>next_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>,
                                <span class='ident'>f</span>: <span class='op'>|</span><span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Scheduler</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span><span class='op'>|</span>)
                                <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>f_opaque</span> <span class='op'>=</span> <span class='ident'>ClosureConverter</span>::<span class='ident'>from_fn</span>(<span class='ident'>f</span>);
 
-        <span class='kw'>let</span> <span class='ident'>current_task_dupe</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='ident'>current_task</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>GreenTask</span>;<span class='comment'>
+        <span class='kw'>let</span> <span class='ident'>current_task_dupe</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='ident'>current_task</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>GreenTask</span>;
 
-        // The current task is placed inside an enum with the cleanup
-        // function. This enum is then placed inside the scheduler.
-        </span><span class='self'>self</span>.<span class='ident'>cleanup_job</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>CleanupJob</span>::<span class='ident'>new</span>(<span class='ident'>current_task</span>, <span class='ident'>f_opaque</span>));<span class='comment'>
+        <span class='comment'>// The current task is placed inside an enum with the cleanup</span>
+        <span class='comment'>// function. This enum is then placed inside the scheduler.</span>
+        <span class='self'>self</span>.<span class='ident'>cleanup_job</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>CleanupJob</span>::<span class='ident'>new</span>(<span class='ident'>current_task</span>, <span class='ident'>f_opaque</span>));
 
-        // The scheduler is then placed inside the next task.
-        </span><span class='ident'>next_task</span>.<span class='ident'>sched</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='self'>self</span>);<span class='comment'>
+        <span class='comment'>// The scheduler is then placed inside the next task.</span>
+        <span class='ident'>next_task</span>.<span class='ident'>sched</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='self'>self</span>);
 
-        // However we still need an internal mutable pointer to the
-        // original task. The strategy here was &quot;arrange memory, then
-        // get pointers&quot;, so we crawl back up the chain using
-        // transmute to eliminate borrowck errors.
-        </span><span class='kw'>unsafe</span> {
+        <span class='comment'>// However we still need an internal mutable pointer to the</span>
+        <span class='comment'>// original task. The strategy here was &quot;arrange memory, then</span>
+        <span class='comment'>// get pointers&quot;, so we crawl back up the chain using</span>
+        <span class='comment'>// transmute to eliminate borrowck errors.</span>
+        <span class='kw'>unsafe</span> {
 
             <span class='kw'>let</span> <span class='ident'>sched</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Scheduler</span> <span class='op'>=</span>
                 <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='kw-2'>&amp;</span><span class='op'>*</span><span class='op'>*</span><span class='ident'>next_task</span>.<span class='ident'>sched</span>.<span class='ident'>get_mut_ref</span>());
@@ -2223,43 +2221,43 @@
             };
 
             <span class='kw'>let</span> (<span class='ident'>current_task_context</span>, <span class='ident'>next_task_context</span>) <span class='op'>=</span>
-                <span class='ident'>Scheduler</span>::<span class='ident'>get_contexts</span>(<span class='ident'>current_task</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='ident'>next_task</span>);<span class='comment'>
+                <span class='ident'>Scheduler</span>::<span class='ident'>get_contexts</span>(<span class='ident'>current_task</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='ident'>next_task</span>);
 
-            // Done with everything - put the next task in TLS. This
-            // works because due to transmute the borrow checker
-            // believes that we have no internal pointers to
-            // next_task.
-            </span><span class='ident'>mem</span>::<span class='ident'>forget</span>(<span class='ident'>next_task</span>);<span class='comment'>
+            <span class='comment'>// Done with everything - put the next task in TLS. This</span>
+            <span class='comment'>// works because due to transmute the borrow checker</span>
+            <span class='comment'>// believes that we have no internal pointers to</span>
+            <span class='comment'>// next_task.</span>
+            <span class='ident'>mem</span>::<span class='ident'>forget</span>(<span class='ident'>next_task</span>);
 
-            // The raw context swap operation. The next action taken
-            // will be running the cleanup job from the context of the
-            // next task.
-            </span><span class='ident'>Context</span>::<span class='ident'>swap</span>(<span class='ident'>current_task_context</span>, <span class='ident'>next_task_context</span>);
-        }<span class='comment'>
+            <span class='comment'>// The raw context swap operation. The next action taken</span>
+            <span class='comment'>// will be running the cleanup job from the context of the</span>
+            <span class='comment'>// next task.</span>
+            <span class='ident'>Context</span>::<span class='ident'>swap</span>(<span class='ident'>current_task_context</span>, <span class='ident'>next_task_context</span>);
+        }
 
-        // When the context swaps back to this task we immediately
-        // run the cleanup job, as expected by the previously called
-        // swap_contexts function.
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>current_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {
+        <span class='comment'>// When the context swaps back to this task we immediately</span>
+        <span class='comment'>// run the cleanup job, as expected by the previously called</span>
+        <span class='comment'>// swap_contexts function.</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>current_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {
             <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>current_task_dupe</span>)
         };
-        <span class='ident'>current_task</span>.<span class='ident'>sched</span>.<span class='ident'>get_mut_ref</span>().<span class='ident'>run_cleanup_job</span>();<span class='comment'>
+        <span class='ident'>current_task</span>.<span class='ident'>sched</span>.<span class='ident'>get_mut_ref</span>().<span class='ident'>run_cleanup_job</span>();
 
-        // See the comments in switch_running_tasks_and_then for why a lock
-        // is acquired here. This is the resumption points and the &quot;bounce&quot;
-        // that it is referring to.
-        </span><span class='kw'>unsafe</span> {
+        <span class='comment'>// See the comments in switch_running_tasks_and_then for why a lock</span>
+        <span class='comment'>// is acquired here. This is the resumption points and the &quot;bounce&quot;</span>
+        <span class='comment'>// that it is referring to.</span>
+        <span class='kw'>unsafe</span> {
             <span class='kw'>let</span> <span class='ident'>_guard</span> <span class='op'>=</span> <span class='ident'>current_task</span>.<span class='ident'>nasty_deschedule_lock</span>.<span class='ident'>lock</span>();
         }
         <span class='kw'>return</span> <span class='ident'>current_task</span>;
-    }<span class='comment'>
+    }
 
-    // Returns a mutable reference to both contexts involved in this
-    // swap. This is unsafe - we are getting mutable internal
-    // references to keep even when we don&#39;t own the tasks. It looks
-    // kinda safe because we are doing transmutes before passing in
-    // the arguments.
-    </span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_contexts</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='ident'>current_task</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>GreenTask</span>,
+    <span class='comment'>// Returns a mutable reference to both contexts involved in this</span>
+    <span class='comment'>// swap. This is unsafe - we are getting mutable internal</span>
+    <span class='comment'>// references to keep even when we don&#39;t own the tasks. It looks</span>
+    <span class='comment'>// kinda safe because we are doing transmutes before passing in</span>
+    <span class='comment'>// the arguments.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_contexts</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='ident'>current_task</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>GreenTask</span>,
                             <span class='ident'>next_task</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>GreenTask</span>)
         <span class='op'>-&gt;</span> (<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>Context</span>, <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>Context</span>)
     {
@@ -2271,11 +2269,11 @@
             (<span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>current_task_context</span>),
              <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>next_task_context</span>))
         }
-    }<span class='comment'>
+    }
 
-    // * Context Swapping Helpers - Here be ugliness!
+    <span class='comment'>// * Context Swapping Helpers - Here be ugliness!</span>
 
-    </span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>resume_task_immediately</span>(<span class='kw-2'>~</span><span class='self'>self</span>,
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>resume_task_immediately</span>(<span class='kw-2'>~</span><span class='self'>self</span>,
                                    <span class='ident'>cur</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>,
                                    <span class='ident'>next</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>)
                                    <span class='op'>-&gt;</span> (<span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) {
@@ -2317,38 +2315,38 @@
     <span class='doccomment'>/// has returned.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>deschedule_running_task_and_then</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>,
                                             <span class='ident'>cur</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>,
-                                            <span class='ident'>f</span>: <span class='op'>|</span><span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Scheduler</span>, <span class='ident'>BlockedTask</span><span class='op'>|</span>) {<span class='comment'>
-        // Trickier - we need to get the scheduler task out of self
-        // and use it as the destination.
-        </span><span class='kw'>let</span> <span class='ident'>stask</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>sched_task</span>.<span class='ident'>take_unwrap</span>();<span class='comment'>
-        // Otherwise this is the same as below.
-        </span><span class='self'>self</span>.<span class='ident'>switch_running_tasks_and_then</span>(<span class='ident'>cur</span>, <span class='ident'>stask</span>, <span class='ident'>f</span>)
+                                            <span class='ident'>f</span>: <span class='op'>|</span><span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Scheduler</span>, <span class='ident'>BlockedTask</span><span class='op'>|</span>) {
+        <span class='comment'>// Trickier - we need to get the scheduler task out of self</span>
+        <span class='comment'>// and use it as the destination.</span>
+        <span class='kw'>let</span> <span class='ident'>stask</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>sched_task</span>.<span class='ident'>take_unwrap</span>();
+        <span class='comment'>// Otherwise this is the same as below.</span>
+        <span class='self'>self</span>.<span class='ident'>switch_running_tasks_and_then</span>(<span class='ident'>cur</span>, <span class='ident'>stask</span>, <span class='ident'>f</span>)
     }
 
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>switch_running_tasks_and_then</span>(<span class='kw-2'>~</span><span class='self'>self</span>,
                                          <span class='ident'>cur</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>,
                                          <span class='ident'>next</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>,
-                                         <span class='ident'>f</span>: <span class='op'>|</span><span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Scheduler</span>, <span class='ident'>BlockedTask</span><span class='op'>|</span>) {<span class='comment'>
-        // And here comes one of the sad moments in which a lock is used in a
-        // core portion of the rust runtime. As always, this is highly
-        // undesirable, so there&#39;s a good reason behind it.
-        //
-        // There is an excellent outline of the problem in issue #8132, and it&#39;s
-        // summarized in that `f` is executed on a sched task, but its
-        // environment is on the previous task. If `f` relinquishes ownership of
-        // the BlockedTask, then it may introduce a race where `f` is using the
-        // environment as well as the code after the &#39;deschedule&#39; block.
-        //
-        // The solution we have chosen to adopt for now is to acquire a
-        // task-local lock around this block. The resumption of the task in
-        // context switching will bounce on the lock, thereby waiting for this
-        // block to finish, eliminating the race mentioned above.
-        // fail!(&quot;should never return!&quot;);
-        //
-        // To actually maintain a handle to the lock, we use an unsafe pointer
-        // to it, but we&#39;re guaranteed that the task won&#39;t exit until we&#39;ve
-        // unlocked the lock so there&#39;s no worry of this memory going away.
-        </span><span class='kw'>let</span> <span class='ident'>cur</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>change_task_context</span>(<span class='ident'>cur</span>, <span class='ident'>next</span>, <span class='op'>|</span><span class='ident'>sched</span>, <span class='kw-2'>mut</span> <span class='ident'>task</span><span class='op'>|</span> {
+                                         <span class='ident'>f</span>: <span class='op'>|</span><span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Scheduler</span>, <span class='ident'>BlockedTask</span><span class='op'>|</span>) {
+        <span class='comment'>// And here comes one of the sad moments in which a lock is used in a</span>
+        <span class='comment'>// core portion of the rust runtime. As always, this is highly</span>
+        <span class='comment'>// undesirable, so there&#39;s a good reason behind it.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// There is an excellent outline of the problem in issue #8132, and it&#39;s</span>
+        <span class='comment'>// summarized in that `f` is executed on a sched task, but its</span>
+        <span class='comment'>// environment is on the previous task. If `f` relinquishes ownership of</span>
+        <span class='comment'>// the BlockedTask, then it may introduce a race where `f` is using the</span>
+        <span class='comment'>// environment as well as the code after the &#39;deschedule&#39; block.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// The solution we have chosen to adopt for now is to acquire a</span>
+        <span class='comment'>// task-local lock around this block. The resumption of the task in</span>
+        <span class='comment'>// context switching will bounce on the lock, thereby waiting for this</span>
+        <span class='comment'>// block to finish, eliminating the race mentioned above.</span>
+        <span class='comment'>// fail!(&quot;should never return!&quot;);</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// To actually maintain a handle to the lock, we use an unsafe pointer</span>
+        <span class='comment'>// to it, but we&#39;re guaranteed that the task won&#39;t exit until we&#39;ve</span>
+        <span class='comment'>// unlocked the lock so there&#39;s no worry of this memory going away.</span>
+        <span class='kw'>let</span> <span class='ident'>cur</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>change_task_context</span>(<span class='ident'>cur</span>, <span class='ident'>next</span>, <span class='op'>|</span><span class='ident'>sched</span>, <span class='kw-2'>mut</span> <span class='ident'>task</span><span class='op'>|</span> {
             <span class='kw'>let</span> <span class='ident'>lock</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>NativeMutex</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>task</span>.<span class='ident'>nasty_deschedule_lock</span>;
             <span class='kw'>unsafe</span> {
                 <span class='kw'>let</span> <span class='ident'>_guard</span> <span class='op'>=</span> (<span class='op'>*</span><span class='ident'>lock</span>).<span class='ident'>lock</span>();
@@ -2371,16 +2369,16 @@
             }
         });
         (<span class='ident'>cur</span>.<span class='ident'>sched</span>.<span class='ident'>take_unwrap</span>(), <span class='ident'>cur</span>)
-    }<span class='comment'>
+    }
 
-    // * Task Context Helpers
+    <span class='comment'>// * Task Context Helpers</span>
 
-    </span><span class='doccomment'>/// Called by a running task to end execution, after which it will</span>
+    <span class='doccomment'>/// Called by a running task to end execution, after which it will</span>
     <span class='doccomment'>/// be recycled by the scheduler for reuse in a new task.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>terminate_current_task</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>cur</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='op'>!</span> {<span class='comment'>
-        // Similar to deschedule running task and then, but cannot go through
-        // the task-blocking path. The task is already dying.
-        </span><span class='kw'>let</span> <span class='ident'>stask</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>sched_task</span>.<span class='ident'>take_unwrap</span>();
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>terminate_current_task</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>cur</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='op'>!</span> {
+        <span class='comment'>// Similar to deschedule running task and then, but cannot go through</span>
+        <span class='comment'>// the task-blocking path. The task is already dying.</span>
+        <span class='kw'>let</span> <span class='ident'>stask</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>sched_task</span>.<span class='ident'>take_unwrap</span>();
         <span class='kw'>let</span> <span class='ident'>_cur</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>change_task_context</span>(<span class='ident'>cur</span>, <span class='ident'>stask</span>, <span class='op'>|</span><span class='ident'>sched</span>, <span class='kw-2'>mut</span> <span class='ident'>dead_task</span><span class='op'>|</span> {
             <span class='kw'>let</span> <span class='ident'>coroutine</span> <span class='op'>=</span> <span class='ident'>dead_task</span>.<span class='ident'>coroutine</span>.<span class='ident'>take_unwrap</span>();
             <span class='ident'>coroutine</span>.<span class='ident'>recycle</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>sched</span>.<span class='ident'>stack_pool</span>);
@@ -2405,17 +2403,17 @@
     <span class='doccomment'>/// to introduce some amount of randomness to the scheduler. Currently the</span>
     <span class='doccomment'>/// randomness is a result of performing a round of work stealing (which</span>
     <span class='doccomment'>/// may end up stealing from the current scheduler).</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>yield_now</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>cur</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) {<span class='comment'>
-        // Async handles trigger the scheduler by calling yield_now on the local
-        // task, which eventually gets us to here. See comments in SchedRunner
-        // for more info on this.
-        </span><span class='kw'>if</span> <span class='ident'>cur</span>.<span class='ident'>is_sched</span>() {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>yield_now</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>cur</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) {
+        <span class='comment'>// Async handles trigger the scheduler by calling yield_now on the local</span>
+        <span class='comment'>// task, which eventually gets us to here. See comments in SchedRunner</span>
+        <span class='comment'>// for more info on this.</span>
+        <span class='kw'>if</span> <span class='ident'>cur</span>.<span class='ident'>is_sched</span>() {
             <span class='macro'>assert</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>sched_task</span>.<span class='ident'>is_none</span>());
             <span class='self'>self</span>.<span class='ident'>run_sched_once</span>(<span class='ident'>cur</span>);
         } <span class='kw'>else</span> {
-            <span class='self'>self</span>.<span class='ident'>yield_check_count</span> <span class='op'>=</span> <span class='ident'>reset_yield_check</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>rng</span>);<span class='comment'>
-            // Tell the scheduler to start stealing on the next iteration
-            </span><span class='self'>self</span>.<span class='ident'>steal_for_yield</span> <span class='op'>=</span> <span class='boolval'>true</span>;
+            <span class='self'>self</span>.<span class='ident'>yield_check_count</span> <span class='op'>=</span> <span class='ident'>reset_yield_check</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>rng</span>);
+            <span class='comment'>// Tell the scheduler to start stealing on the next iteration</span>
+            <span class='self'>self</span>.<span class='ident'>steal_for_yield</span> <span class='op'>=</span> <span class='boolval'>true</span>;
             <span class='kw'>let</span> <span class='ident'>stask</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>sched_task</span>.<span class='ident'>take_unwrap</span>();
             <span class='kw'>let</span> <span class='ident'>cur</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>change_task_context</span>(<span class='ident'>cur</span>, <span class='ident'>stask</span>, <span class='op'>|</span><span class='ident'>sched</span>, <span class='ident'>task</span><span class='op'>|</span> {
                 <span class='ident'>sched</span>.<span class='ident'>enqueue_task</span>(<span class='ident'>task</span>);
@@ -2424,36 +2422,36 @@
         }
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>maybe_yield</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>cur</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) {<span class='comment'>
-        // It&#39;s possible for sched tasks to possibly call this function, and it
-        // just means that they&#39;re likely sending on channels (which
-        // occasionally call this function). Sched tasks follow different paths
-        // when executing yield_now(), which may possibly trip the assertion
-        // below. For this reason, we just have sched tasks bail out soon.
-        //
-        // Sched tasks have no need to yield anyway because as soon as they
-        // return they&#39;ll yield to other threads by falling back to the event
-        // loop. Additionally, we completely control sched tasks, so we can make
-        // sure that they never execute more than enough code.
-        </span><span class='kw'>if</span> <span class='ident'>cur</span>.<span class='ident'>is_sched</span>() {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>maybe_yield</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>cur</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) {
+        <span class='comment'>// It&#39;s possible for sched tasks to possibly call this function, and it</span>
+        <span class='comment'>// just means that they&#39;re likely sending on channels (which</span>
+        <span class='comment'>// occasionally call this function). Sched tasks follow different paths</span>
+        <span class='comment'>// when executing yield_now(), which may possibly trip the assertion</span>
+        <span class='comment'>// below. For this reason, we just have sched tasks bail out soon.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// Sched tasks have no need to yield anyway because as soon as they</span>
+        <span class='comment'>// return they&#39;ll yield to other threads by falling back to the event</span>
+        <span class='comment'>// loop. Additionally, we completely control sched tasks, so we can make</span>
+        <span class='comment'>// sure that they never execute more than enough code.</span>
+        <span class='kw'>if</span> <span class='ident'>cur</span>.<span class='ident'>is_sched</span>() {
             <span class='kw'>return</span> <span class='ident'>cur</span>.<span class='ident'>put_with_sched</span>(<span class='self'>self</span>)
-        }<span class='comment'>
+        }
 
-        // The number of times to do the yield check before yielding, chosen
-        // arbitrarily.
-        </span><span class='macro'>rtassert</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>yield_check_count</span> <span class='op'>&gt;</span> <span class='number'>0</span>);
+        <span class='comment'>// The number of times to do the yield check before yielding, chosen</span>
+        <span class='comment'>// arbitrarily.</span>
+        <span class='macro'>rtassert</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>yield_check_count</span> <span class='op'>&gt;</span> <span class='number'>0</span>);
         <span class='self'>self</span>.<span class='ident'>yield_check_count</span> <span class='op'>-=</span> <span class='number'>1</span>;
         <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>yield_check_count</span> <span class='op'>==</span> <span class='number'>0</span> {
             <span class='self'>self</span>.<span class='ident'>yield_now</span>(<span class='ident'>cur</span>);
         } <span class='kw'>else</span> {
             <span class='ident'>cur</span>.<span class='ident'>put_with_sched</span>(<span class='self'>self</span>);
         }
-    }<span class='comment'>
+    }
 
 
-    // * Utility Functions
+    <span class='comment'>// * Utility Functions</span>
 
-    </span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>sched_id</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>uint</span> { <span class='self'>self</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>Scheduler</span> <span class='kw'>as</span> <span class='ident'>uint</span> }
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>sched_id</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>uint</span> { <span class='self'>self</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>Scheduler</span> <span class='kw'>as</span> <span class='ident'>uint</span> }
 
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>run_cleanup_job</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
         <span class='kw'>let</span> <span class='ident'>cleanup_job</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>cleanup_job</span>.<span class='ident'>take_unwrap</span>();
@@ -2469,11 +2467,11 @@
             <span class='ident'>sched_id</span>: <span class='self'>self</span>.<span class='ident'>sched_id</span>()
         }
     }
-}<span class='comment'>
+}
 
-// Supporting types
+<span class='comment'>// Supporting types</span>
 
-</span><span class='kw'>type</span> <span class='ident'>SchedulingFn</span> <span class='op'>=</span> <span class='kw'>fn</span>(<span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>)
+<span class='kw'>type</span> <span class='ident'>SchedulingFn</span> <span class='op'>=</span> <span class='kw'>fn</span>(<span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>)
                        <span class='op'>-&gt;</span> (<span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>);
 
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>SchedMessage</span> {
@@ -2501,18 +2499,18 @@
 <span class='kw'>struct</span> <span class='ident'>SchedRunner</span>;
 
 <span class='kw'>impl</span> <span class='ident'>Callback</span> <span class='kw'>for</span> <span class='ident'>SchedRunner</span> {
-    <span class='kw'>fn</span> <span class='ident'>call</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {<span class='comment'>
-        // In theory, this function needs to invoke the `run_sched_once`
-        // function on the scheduler. Sadly, we have no context here, except for
-        // knowledge of the local `Task`. In order to avoid a call to
-        // `GreenTask::convert`, we just call `yield_now` and the scheduler will
-        // detect when a sched task performs a yield vs a green task performing
-        // a yield (and act accordingly).
-        //
-        // This function could be converted to `GreenTask::convert` if
-        // absolutely necessary, but for cleanliness it is much better to not
-        // use the conversion function.
-        </span><span class='kw'>let</span> <span class='ident'>task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Local</span>::<span class='ident'>take</span>();
+    <span class='kw'>fn</span> <span class='ident'>call</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
+        <span class='comment'>// In theory, this function needs to invoke the `run_sched_once`</span>
+        <span class='comment'>// function on the scheduler. Sadly, we have no context here, except for</span>
+        <span class='comment'>// knowledge of the local `Task`. In order to avoid a call to</span>
+        <span class='comment'>// `GreenTask::convert`, we just call `yield_now` and the scheduler will</span>
+        <span class='comment'>// detect when a sched task performs a yield vs a green task performing</span>
+        <span class='comment'>// a yield (and act accordingly).</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// This function could be converted to `GreenTask::convert` if</span>
+        <span class='comment'>// absolutely necessary, but for cleanliness it is much better to not</span>
+        <span class='comment'>// use the conversion function.</span>
+        <span class='kw'>let</span> <span class='ident'>task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Local</span>::<span class='ident'>take</span>();
         <span class='ident'>task</span>.<span class='ident'>yield_now</span>();
     }
 }
@@ -2534,11 +2532,11 @@
         <span class='kw'>let</span> <span class='ident'>CleanupJob</span> { <span class='ident'>task</span>: <span class='ident'>task</span>, <span class='ident'>f</span>: <span class='ident'>f</span> } <span class='op'>=</span> <span class='self'>self</span>;
         <span class='ident'>f</span>.<span class='ident'>to_fn</span>()(<span class='ident'>sched</span>, <span class='ident'>task</span>)
     }
-}<span class='comment'>
+}
 
-// FIXME: Some hacks to put a || closure in Scheduler without borrowck
-// complaining
-</span><span class='kw'>type</span> <span class='ident'>UnsafeTaskReceiver</span> <span class='op'>=</span> <span class='ident'>raw</span>::<span class='ident'>Closure</span>;
+<span class='comment'>// FIXME: Some hacks to put a || closure in Scheduler without borrowck</span>
+<span class='comment'>// complaining</span>
+<span class='kw'>type</span> <span class='ident'>UnsafeTaskReceiver</span> <span class='op'>=</span> <span class='ident'>raw</span>::<span class='ident'>Closure</span>;
 <span class='kw'>trait</span> <span class='ident'>ClosureConverter</span> {
     <span class='kw'>fn</span> <span class='ident'>from_fn</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Scheduler</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span><span class='op'>|</span>) <span class='op'>-&gt;</span> <span class='ident'>Self</span>;
     <span class='kw'>fn</span> <span class='ident'>to_fn</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>|</span><span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Scheduler</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span><span class='op'>|</span>;
@@ -2550,14 +2548,14 @@
     <span class='kw'>fn</span> <span class='ident'>to_fn</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>|</span><span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Scheduler</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span><span class='op'>|</span> {
         <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='self'>self</span>) }
     }
-}<span class='comment'>
+}
 
-// On unix, we read randomness straight from /dev/urandom, but the
-// default constructor of an XorShiftRng does this via io::fs, which
-// relies on the scheduler existing, so we have to manually load
-// randomness. Windows has its own C API for this, so we don&#39;t need to
-// worry there.
-</span><span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>windows</span>)]</span>
+<span class='comment'>// On unix, we read randomness straight from /dev/urandom, but the</span>
+<span class='comment'>// default constructor of an XorShiftRng does this via io::fs, which</span>
+<span class='comment'>// relies on the scheduler existing, so we have to manually load</span>
+<span class='comment'>// randomness. Windows has its own C API for this, so we don&#39;t need to</span>
+<span class='comment'>// worry there.</span>
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>windows</span>)]</span>
 <span class='kw'>fn</span> <span class='ident'>new_sched_rng</span>() <span class='op'>-&gt;</span> <span class='ident'>XorShiftRng</span> {
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rand</span>::<span class='ident'>OsRng</span>;
     <span class='kw'>match</span> <span class='ident'>OsRng</span>::<span class='ident'>new</span>() {
@@ -2653,10 +2651,10 @@
     <span class='kw'>fn</span> <span class='ident'>multiple_task_test</span>() {
         <span class='kw'>let</span> <span class='ident'>total</span> <span class='op'>=</span> <span class='number'>10</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>task_run_count</span> <span class='op'>=</span> <span class='number'>0</span>;
-        <span class='kw'>let</span> <span class='ident'>task_run_count_ptr</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uint</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>task_run_count</span>;<span class='comment'>
-        // with only one thread this is safe to run in without worries of
-        // contention.
-        </span><span class='ident'>run</span>(<span class='kw'>proc</span>() {
+        <span class='kw'>let</span> <span class='ident'>task_run_count_ptr</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uint</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>task_run_count</span>;
+        <span class='comment'>// with only one thread this is safe to run in without worries of</span>
+        <span class='comment'>// contention.</span>
+        <span class='ident'>run</span>(<span class='kw'>proc</span>() {
             <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='ident'>total</span>) {
                 <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
                     <span class='kw'>unsafe</span> { <span class='op'>*</span><span class='ident'>task_run_count_ptr</span> <span class='op'>=</span> <span class='op'>*</span><span class='ident'>task_run_count_ptr</span> <span class='op'>+</span> <span class='number'>1</span>};
@@ -2682,11 +2680,11 @@
             })
         });
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>task_run_count</span> <span class='op'>==</span> <span class='number'>3</span>);
-    }<span class='comment'>
+    }
 
-    // A very simple test that confirms that a task executing on the
-    // home scheduler notices that it is home.
-    </span><span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='comment'>// A very simple test that confirms that a task executing on the</span>
+    <span class='comment'>// home scheduler notices that it is home.</span>
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_home_sched</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>pool</span> <span class='op'>=</span> <span class='ident'>pool</span>();
 
@@ -2711,12 +2709,12 @@
         <span class='ident'>drx</span>.<span class='ident'>recv</span>();
 
         <span class='ident'>pool</span>.<span class='ident'>shutdown</span>();
-    }<span class='comment'>
+    }
 
-    // An advanced test that checks all four possible states that a
-    // (task,sched) can be in regarding homes.
+    <span class='comment'>// An advanced test that checks all four possible states that a</span>
+    <span class='comment'>// (task,sched) can be in regarding homes.</span>
 
-    </span><span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_schedule_home_states</span>() {
         <span class='kw'>use</span> <span class='ident'>sleeper_list</span>::<span class='ident'>SleeperList</span>;
         <span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>Shutdown</span>, <span class='ident'>Scheduler</span>, <span class='ident'>SchedHandle</span>};
@@ -2729,10 +2727,10 @@
             <span class='kw'>let</span> (<span class='ident'>normal_worker</span>, <span class='ident'>normal_stealer</span>) <span class='op'>=</span> <span class='ident'>pool</span>.<span class='ident'>deque</span>();
             <span class='kw'>let</span> (<span class='ident'>special_worker</span>, <span class='ident'>special_stealer</span>) <span class='op'>=</span> <span class='ident'>pool</span>.<span class='ident'>deque</span>();
             <span class='kw'>let</span> <span class='ident'>queues</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>normal_stealer</span>, <span class='ident'>special_stealer</span>];
-            <span class='kw'>let</span> (<span class='ident'>_p</span>, <span class='ident'>state</span>) <span class='op'>=</span> <span class='ident'>TaskState</span>::<span class='ident'>new</span>();<span class='comment'>
+            <span class='kw'>let</span> (<span class='ident'>_p</span>, <span class='ident'>state</span>) <span class='op'>=</span> <span class='ident'>TaskState</span>::<span class='ident'>new</span>();
 
-            // Our normal scheduler
-            </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>normal_sched</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>Scheduler</span>::<span class='ident'>new</span>(
+            <span class='comment'>// Our normal scheduler</span>
+            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>normal_sched</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>Scheduler</span>::<span class='ident'>new</span>(
                 <span class='number'>1</span>,
                 <span class='ident'>basic</span>::<span class='ident'>event_loop</span>(),
                 <span class='ident'>normal_worker</span>,
@@ -2741,10 +2739,10 @@
                 <span class='ident'>state</span>.<span class='ident'>clone</span>());
 
             <span class='kw'>let</span> <span class='ident'>normal_handle</span> <span class='op'>=</span> <span class='ident'>normal_sched</span>.<span class='ident'>make_handle</span>();
-            <span class='kw'>let</span> <span class='ident'>friend_handle</span> <span class='op'>=</span> <span class='ident'>normal_sched</span>.<span class='ident'>make_handle</span>();<span class='comment'>
+            <span class='kw'>let</span> <span class='ident'>friend_handle</span> <span class='op'>=</span> <span class='ident'>normal_sched</span>.<span class='ident'>make_handle</span>();
 
-            // Our special scheduler
-            </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>special_sched</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>Scheduler</span>::<span class='ident'>new_special</span>(
+            <span class='comment'>// Our special scheduler</span>
+            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>special_sched</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>Scheduler</span>::<span class='ident'>new_special</span>(
                 <span class='number'>1</span>,
                 <span class='ident'>basic</span>::<span class='ident'>event_loop</span>(),
                 <span class='ident'>special_worker</span>,
@@ -2757,17 +2755,17 @@
             <span class='kw'>let</span> <span class='ident'>special_handle</span> <span class='op'>=</span> <span class='ident'>special_sched</span>.<span class='ident'>make_handle</span>();
 
             <span class='kw'>let</span> <span class='ident'>t1_handle</span> <span class='op'>=</span> <span class='ident'>special_sched</span>.<span class='ident'>make_handle</span>();
-            <span class='kw'>let</span> <span class='ident'>t4_handle</span> <span class='op'>=</span> <span class='ident'>special_sched</span>.<span class='ident'>make_handle</span>();<span class='comment'>
+            <span class='kw'>let</span> <span class='ident'>t4_handle</span> <span class='op'>=</span> <span class='ident'>special_sched</span>.<span class='ident'>make_handle</span>();
 
-            // Four test tasks:
-            //   1) task is home on special
-            //   2) task not homed, sched doesn&#39;t care
-            //   3) task not homed, sched requeues
-            //   4) task not home, send home
+            <span class='comment'>// Four test tasks:</span>
+            <span class='comment'>//   1) task is home on special</span>
+            <span class='comment'>//   2) task not homed, sched doesn&#39;t care</span>
+            <span class='comment'>//   3) task not homed, sched requeues</span>
+            <span class='comment'>//   4) task not home, send home</span>
 
-            // Grab both the scheduler and the task from TLS and check if the
-            // task is executing on an appropriate scheduler.
-            </span><span class='kw'>fn</span> <span class='ident'>on_appropriate_sched</span>() <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+            <span class='comment'>// Grab both the scheduler and the task from TLS and check if the</span>
+            <span class='comment'>// task is executing on an appropriate scheduler.</span>
+            <span class='kw'>fn</span> <span class='ident'>on_appropriate_sched</span>() <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
                 <span class='kw'>use</span> <span class='ident'>task</span>::{<span class='ident'>TypeGreen</span>, <span class='ident'>TypeSched</span>, <span class='ident'>HomeSched</span>};
                 <span class='kw'>let</span> <span class='ident'>task</span> <span class='op'>=</span> <span class='ident'>GreenTask</span>::<span class='ident'>convert</span>(<span class='ident'>Local</span>::<span class='ident'>take</span>());
                 <span class='kw'>let</span> <span class='ident'>sched_id</span> <span class='op'>=</span> <span class='ident'>task</span>.<span class='ident'>sched</span>.<span class='ident'>get_ref</span>().<span class='ident'>sched_id</span>();
@@ -2805,10 +2803,10 @@
             <span class='kw'>let</span> <span class='ident'>task4</span> <span class='op'>=</span> <span class='ident'>GreenTask</span>::<span class='ident'>new_homed</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>special_sched</span>.<span class='ident'>stack_pool</span>,
                                              <span class='prelude-val'>None</span>, <span class='ident'>HomeSched</span>(<span class='ident'>t4_handle</span>), <span class='kw'>proc</span>() {
                 <span class='macro'>rtassert</span><span class='macro'>!</span>(<span class='ident'>on_appropriate_sched</span>());
-            });<span class='comment'>
+            });
 
-            // Signal from the special task that we are done.
-            </span><span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>::<span class='op'>&lt;</span>()<span class='op'>&gt;</span>();
+            <span class='comment'>// Signal from the special task that we are done.</span>
+            <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>::<span class='op'>&lt;</span>()<span class='op'>&gt;</span>();
 
             <span class='kw'>fn</span> <span class='ident'>run</span>(<span class='ident'>next</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) {
                 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>task</span> <span class='op'>=</span> <span class='ident'>GreenTask</span>::<span class='ident'>convert</span>(<span class='ident'>Local</span>::<span class='ident'>take</span>());
@@ -2843,31 +2841,31 @@
             <span class='ident'>normal_thread</span>.<span class='ident'>join</span>();
             <span class='ident'>special_thread</span>.<span class='ident'>join</span>();
         }).<span class='ident'>join</span>();
-    }<span class='comment'>
+    }
 
-    //#[test]
-    //fn test_stress_schedule_task_states() {
-    //    if util::limit_thread_creation_due_to_osx_and_valgrind() { return; }
-    //    let n = stress_factor() * 120;
-    //    for _ in range(0, n as int) {
-    //        test_schedule_home_states();
-    //    }
-    //}
+    <span class='comment'>//#[test]</span>
+    <span class='comment'>//fn test_stress_schedule_task_states() {</span>
+    <span class='comment'>//    if util::limit_thread_creation_due_to_osx_and_valgrind() { return; }</span>
+    <span class='comment'>//    let n = stress_factor() * 120;</span>
+    <span class='comment'>//    for _ in range(0, n as int) {</span>
+    <span class='comment'>//        test_schedule_home_states();</span>
+    <span class='comment'>//    }</span>
+    <span class='comment'>//}</span>
 
-    </span><span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_io_callback</span>() {
         <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>timer</span>;
 
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>pool</span> <span class='op'>=</span> <span class='ident'>SchedPool</span>::<span class='ident'>new</span>(<span class='ident'>PoolConfig</span> {
             <span class='ident'>threads</span>: <span class='number'>2</span>,
             <span class='ident'>event_loop_factory</span>: <span class='ident'>rustuv</span>::<span class='ident'>event_loop</span>,
-        });<span class='comment'>
+        });
 
-        // This is a regression test that when there are no schedulable tasks in
-        // the work queue, but we are performing I/O, that once we do put
-        // something in the work queue again the scheduler picks it up and
-        // doesn&#39;t exit before emptying the work queue
-        </span><span class='ident'>pool</span>.<span class='ident'>spawn</span>(<span class='ident'>TaskOpts</span>::<span class='ident'>new</span>(), <span class='kw'>proc</span>() {
+        <span class='comment'>// This is a regression test that when there are no schedulable tasks in</span>
+        <span class='comment'>// the work queue, but we are performing I/O, that once we do put</span>
+        <span class='comment'>// something in the work queue again the scheduler picks it up and</span>
+        <span class='comment'>// doesn&#39;t exit before emptying the work queue</span>
+        <span class='ident'>pool</span>.<span class='ident'>spawn</span>(<span class='ident'>TaskOpts</span>::<span class='ident'>new</span>(), <span class='kw'>proc</span>() {
             <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
                 <span class='ident'>timer</span>::<span class='ident'>sleep</span>(<span class='number'>10</span>);
             });
@@ -2900,11 +2898,11 @@
 
         <span class='ident'>pool1</span>.<span class='ident'>shutdown</span>();
         <span class='ident'>pool2</span>.<span class='ident'>shutdown</span>();
-    }<span class='comment'>
+    }
 
-    // A regression test that the final message is always handled.
-    // Used to deadlock because Shutdown was never recvd.
-    </span><span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='comment'>// A regression test that the final message is always handled.</span>
+    <span class='comment'>// Used to deadlock because Shutdown was never recvd.</span>
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>no_missed_messages</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>pool</span> <span class='op'>=</span> <span class='ident'>pool</span>();
 
@@ -2987,10 +2985,10 @@
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>start_closure_dtor</span>() {<span class='comment'>
-        // Regression test that the `start` task entrypoint can
-        // contain dtors that use task resources
-        </span><span class='ident'>run</span>(<span class='kw'>proc</span>() {
+    <span class='kw'>fn</span> <span class='ident'>start_closure_dtor</span>() {
+        <span class='comment'>// Regression test that the `start` task entrypoint can</span>
+        <span class='comment'>// contain dtors that use task resources</span>
+        <span class='ident'>run</span>(<span class='kw'>proc</span>() {
             <span class='kw'>struct</span> <span class='ident'>S</span> { <span class='ident'>field</span>: () }
 
             <span class='kw'>impl</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>S</span> {
@@ -3010,15 +3008,15 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>dont_starve_1</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>pool</span> <span class='op'>=</span> <span class='ident'>SchedPool</span>::<span class='ident'>new</span>(<span class='ident'>PoolConfig</span> {
-            <span class='ident'>threads</span>: <span class='number'>2</span>,<span class='comment'> // this must be &gt; 1
-            </span><span class='ident'>event_loop_factory</span>: <span class='ident'>basic</span>::<span class='ident'>event_loop</span>,
+            <span class='ident'>threads</span>: <span class='number'>2</span>, <span class='comment'>// this must be &gt; 1</span>
+            <span class='ident'>event_loop_factory</span>: <span class='ident'>basic</span>::<span class='ident'>event_loop</span>,
         });
         <span class='ident'>pool</span>.<span class='ident'>spawn</span>(<span class='ident'>TaskOpts</span>::<span class='ident'>new</span>(), <span class='kw'>proc</span>() {
-            <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();<span class='comment'>
+            <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
 
-            // This task should not be able to starve the sender;
-            // The sender should get stolen to another thread.
-            </span><span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+            <span class='comment'>// This task should not be able to starve the sender;</span>
+            <span class='comment'>// The sender should get stolen to another thread.</span>
+            <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
                 <span class='kw'>while</span> <span class='ident'>rx</span>.<span class='ident'>try_recv</span>().<span class='ident'>is_err</span>() { }
             });
 
@@ -3031,11 +3029,11 @@
     <span class='kw'>fn</span> <span class='ident'>dont_starve_2</span>() {
         <span class='ident'>run</span>(<span class='kw'>proc</span>() {
             <span class='kw'>let</span> (<span class='ident'>tx1</span>, <span class='ident'>rx1</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
-            <span class='kw'>let</span> (<span class='ident'>tx2</span>, <span class='ident'>_rx2</span>) <span class='op'>=</span> <span class='ident'>channel</span>();<span class='comment'>
+            <span class='kw'>let</span> (<span class='ident'>tx2</span>, <span class='ident'>_rx2</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
 
-            // This task should not be able to starve the other task.
-            // The sends should eventually yield.
-            </span><span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+            <span class='comment'>// This task should not be able to starve the other task.</span>
+            <span class='comment'>// The sends should eventually yield.</span>
+            <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
                 <span class='kw'>while</span> <span class='ident'>rx1</span>.<span class='ident'>try_recv</span>().<span class='ident'>is_err</span>() {
                     <span class='ident'>tx2</span>.<span class='ident'>send</span>(());
                 }
@@ -3043,11 +3041,11 @@
 
             <span class='ident'>tx1</span>.<span class='ident'>send</span>(());
         });
-    }<span class='comment'>
+    }
 
-    // Regression test for a logic bug that would cause single-threaded
-    // schedulers to sleep forever after yielding and stealing another task.
-    </span><span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='comment'>// Regression test for a logic bug that would cause single-threaded</span>
+    <span class='comment'>// schedulers to sleep forever after yielding and stealing another task.</span>
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>single_threaded_yield</span>() {
         <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>task</span>::<span class='ident'>deschedule</span>;
         <span class='ident'>run</span>(<span class='kw'>proc</span>() {
@@ -3058,11 +3056,11 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_spawn_sched_blocking</span>() {
         <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rt</span>::<span class='ident'>mutex</span>::{<span class='ident'>StaticNativeMutex</span>, <span class='ident'>NATIVE_MUTEX_INIT</span>};
-        <span class='kw'>static</span> <span class='kw-2'>mut</span> <span class='ident'>LOCK</span>: <span class='ident'>StaticNativeMutex</span> <span class='op'>=</span> <span class='ident'>NATIVE_MUTEX_INIT</span>;<span class='comment'>
+        <span class='kw'>static</span> <span class='kw-2'>mut</span> <span class='ident'>LOCK</span>: <span class='ident'>StaticNativeMutex</span> <span class='op'>=</span> <span class='ident'>NATIVE_MUTEX_INIT</span>;
 
-        // Testing that a task in one scheduler can block in foreign code
-        // without affecting other schedulers
-        </span><span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>20</span>) {
+        <span class='comment'>// Testing that a task in one scheduler can block in foreign code</span>
+        <span class='comment'>// without affecting other schedulers</span>
+        <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>20</span>) {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>pool</span> <span class='op'>=</span> <span class='ident'>pool</span>();
             <span class='kw'>let</span> (<span class='ident'>start_tx</span>, <span class='ident'>start_rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
             <span class='kw'>let</span> (<span class='ident'>fin_tx</span>, <span class='ident'>fin_rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
@@ -3073,18 +3071,18 @@
                     <span class='kw'>let</span> <span class='ident'>guard</span> <span class='op'>=</span> <span class='ident'>LOCK</span>.<span class='ident'>lock</span>();
 
                     <span class='ident'>start_tx</span>.<span class='ident'>send</span>(());
-                    <span class='ident'>guard</span>.<span class='ident'>wait</span>();<span class='comment'>   // block the scheduler thread
-                    </span><span class='ident'>guard</span>.<span class='ident'>signal</span>();<span class='comment'> // let them know we have the lock
-                </span>}
+                    <span class='ident'>guard</span>.<span class='ident'>wait</span>();   <span class='comment'>// block the scheduler thread</span>
+                    <span class='ident'>guard</span>.<span class='ident'>signal</span>(); <span class='comment'>// let them know we have the lock</span>
+                }
 
                 <span class='ident'>fin_tx</span>.<span class='ident'>send</span>(());
             })));
             <span class='ident'>drop</span>(<span class='ident'>handle</span>);
 
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>handle</span> <span class='op'>=</span> <span class='ident'>pool</span>.<span class='ident'>spawn_sched</span>();
-            <span class='ident'>handle</span>.<span class='ident'>send</span>(<span class='ident'>PinnedTask</span>(<span class='ident'>pool</span>.<span class='ident'>task</span>(<span class='ident'>TaskOpts</span>::<span class='ident'>new</span>(), <span class='kw'>proc</span>() {<span class='comment'>
-                // Wait until the other task has its lock
-                </span><span class='ident'>start_rx</span>.<span class='ident'>recv</span>();
+            <span class='ident'>handle</span>.<span class='ident'>send</span>(<span class='ident'>PinnedTask</span>(<span class='ident'>pool</span>.<span class='ident'>task</span>(<span class='ident'>TaskOpts</span>::<span class='ident'>new</span>(), <span class='kw'>proc</span>() {
+                <span class='comment'>// Wait until the other task has its lock</span>
+                <span class='ident'>start_rx</span>.<span class='ident'>recv</span>();
 
                 <span class='kw'>fn</span> <span class='ident'>pingpong</span>(<span class='ident'>po</span>: <span class='kw-2'>&amp;</span><span class='ident'>Receiver</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>, <span class='ident'>ch</span>: <span class='kw-2'>&amp;</span><span class='ident'>Sender</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>) {
                     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>val</span> <span class='op'>=</span> <span class='number'>20</span>;
@@ -3107,9 +3105,9 @@
                 <span class='ident'>pingpong</span>(<span class='kw-2'>&amp;</span><span class='ident'>parent_rx</span>, <span class='kw-2'>&amp;</span><span class='ident'>child_tx</span>);
                 <span class='kw'>unsafe</span> {
                     <span class='kw'>let</span> <span class='ident'>guard</span> <span class='op'>=</span> <span class='ident'>LOCK</span>.<span class='ident'>lock</span>();
-                    <span class='ident'>guard</span>.<span class='ident'>signal</span>();<span class='comment'>   // wakeup waiting scheduler
-                    </span><span class='ident'>guard</span>.<span class='ident'>wait</span>();<span class='comment'>     // wait for them to grab the lock
-                </span>}
+                    <span class='ident'>guard</span>.<span class='ident'>signal</span>();   <span class='comment'>// wakeup waiting scheduler</span>
+                    <span class='ident'>guard</span>.<span class='ident'>wait</span>();     <span class='comment'>// wait for them to grab the lock</span>
+                }
             })));
             <span class='ident'>drop</span>(<span class='ident'>handle</span>);
 

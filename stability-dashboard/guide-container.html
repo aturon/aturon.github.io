@@ -8,8 +8,6 @@
     <link rel="stylesheet" type="text/css" href="rust.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
-<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400'
-        rel='stylesheet' type='text/css'>
 
 
 </head>
@@ -23,9 +21,9 @@
 
     <div id="versioninfo">
   <img src="http://www.rust-lang.org/logos/rust-logo-32x32-blk.png" width="32" height="32" alt><br>
-  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.11.0-pre</span><br>
-  <a href="http://github.com/rust-lang/rust/commit/169c988d09a9d4e46de2b7fead9489e94964c7c7"
-    class="hash white-sticker">169c988d</a>
+  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.11.0</span><br>
+  <a href="http://github.com/rust-lang/rust/commit/305cf1f1098dc87e346003e6bf7e7cca5705a135"
+    class="hash white-sticker">305cf1f1</a>
 </div>
 
 
@@ -222,13 +220,13 @@ modification of the container through another handle.</p>
 }</span><pre id='rust-example-rendered-2' class='rust '>
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>xs</span> <span class='op'>=</span> [<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
 {
-    <span class='kw'>let</span> <span class='ident'>_it</span> <span class='op'>=</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>();<span class='comment'>
+    <span class='kw'>let</span> <span class='ident'>_it</span> <span class='op'>=</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>();
 
-    // the vector is frozen for this scope, the compiler will statically
-    // prevent modification
-</span>}<span class='comment'>
-// the vector becomes unfrozen again at the end of the scope
-</span></pre>
+    <span class='comment'>// the vector is frozen for this scope, the compiler will statically</span>
+    <span class='comment'>// prevent modification</span>
+}
+<span class='comment'>// the vector becomes unfrozen again at the end of the scope</span>
+</pre>
 
 <p>These semantics are due to most container iterators being implemented with <code>&amp;</code>
 and <code>&amp;mut</code>.</p>
@@ -300,14 +298,14 @@ never call its underlying iterator again once <code>None</code> has been returne
 {
     <span class='kw'>let</span> <span class='ident'>it</span> <span class='op'>=</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>().<span class='ident'>scan</span>((), <span class='op'>|</span>_, <span class='ident'>x</span><span class='op'>|</span> {
         <span class='ident'>calls</span> <span class='op'>+=</span> <span class='number'>1</span>;
-        <span class='kw'>if</span> <span class='op'>*</span><span class='ident'>x</span> <span class='op'>&lt;</span> <span class='number'>3</span> { <span class='prelude-val'>Some</span>(<span class='ident'>x</span>) } <span class='kw'>else</span> { <span class='prelude-val'>None</span> }});<span class='comment'>
+        <span class='kw'>if</span> <span class='op'>*</span><span class='ident'>x</span> <span class='op'>&lt;</span> <span class='number'>3</span> { <span class='prelude-val'>Some</span>(<span class='ident'>x</span>) } <span class='kw'>else</span> { <span class='prelude-val'>None</span> }});
 
-    // the iterator will only yield 1 and 2 before returning None
-    // If we were to call it 5 times, calls would end up as 5, despite
-    // only 2 values being yielded (and therefore 3 unique calls being
-    // made). The fuse() adaptor can fix this.
+    <span class='comment'>// the iterator will only yield 1 and 2 before returning None</span>
+    <span class='comment'>// If we were to call it 5 times, calls would end up as 5, despite</span>
+    <span class='comment'>// only 2 values being yielded (and therefore 3 unique calls being</span>
+    <span class='comment'>// made). The fuse() adaptor can fix this.</span>
 
-    </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>it</span> <span class='op'>=</span> <span class='ident'>it</span>.<span class='ident'>fuse</span>();
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>it</span> <span class='op'>=</span> <span class='ident'>it</span>.<span class='ident'>fuse</span>();
     <span class='ident'>it</span>.<span class='ident'>next</span>();
     <span class='ident'>it</span>.<span class='ident'>next</span>();
     <span class='ident'>it</span>.<span class='ident'>next</span>();
@@ -331,12 +329,12 @@ never call its underlying iterator again once <code>None</code> has been returne
     }
 }</span><pre id='rust-example-rendered-6' class='rust '>
 <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0i</span>, <span class='number'>5</span>) {
-  <span class='macro'>print</span><span class='macro'>!</span>(<span class='string'>&quot;{} &quot;</span>, <span class='ident'>i</span>)<span class='comment'> // prints &quot;0 1 2 3 4&quot;
-</span>}
+  <span class='macro'>print</span><span class='macro'>!</span>(<span class='string'>&quot;{} &quot;</span>, <span class='ident'>i</span>) <span class='comment'>// prints &quot;0 1 2 3 4&quot;</span>
+}
 
-<span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>std</span>::<span class='ident'>iter</span>::<span class='ident'>range_inclusive</span>(<span class='number'>0i</span>, <span class='number'>5</span>) {<span class='comment'> // needs explicit import
-  </span><span class='macro'>print</span><span class='macro'>!</span>(<span class='string'>&quot;{} &quot;</span>, <span class='ident'>i</span>)<span class='comment'> // prints &quot;0 1 2 3 4 5&quot;
-</span>}
+<span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>std</span>::<span class='ident'>iter</span>::<span class='ident'>range_inclusive</span>(<span class='number'>0i</span>, <span class='number'>5</span>) { <span class='comment'>// needs explicit import</span>
+  <span class='macro'>print</span><span class='macro'>!</span>(<span class='string'>&quot;{} &quot;</span>, <span class='ident'>i</span>) <span class='comment'>// prints &quot;0 1 2 3 4 5&quot;</span>
+}
 </pre>
 
 <p>The <code>for</code> keyword can be used as sugar for iterating through any iterator:</p>
@@ -353,15 +351,15 @@ never call its underlying iterator again once <code>None</code> has been returne
         println!(&quot;{}&quot;, *x)
     }
 }</span><pre id='rust-example-rendered-7' class='rust '>
-<span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> [<span class='number'>2u</span>, <span class='number'>3</span>, <span class='number'>5</span>, <span class='number'>7</span>, <span class='number'>11</span>, <span class='number'>13</span>, <span class='number'>17</span>];<span class='comment'>
+<span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> [<span class='number'>2u</span>, <span class='number'>3</span>, <span class='number'>5</span>, <span class='number'>7</span>, <span class='number'>11</span>, <span class='number'>13</span>, <span class='number'>17</span>];
 
-// print out all the elements in the vector
-</span><span class='kw'>for</span> <span class='ident'>x</span> <span class='kw'>in</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>() {
+<span class='comment'>// print out all the elements in the vector</span>
+<span class='kw'>for</span> <span class='ident'>x</span> <span class='kw'>in</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>() {
     <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='op'>*</span><span class='ident'>x</span>)
-}<span class='comment'>
+}
 
-// print out all but the first 3 elements in the vector
-</span><span class='kw'>for</span> <span class='ident'>x</span> <span class='kw'>in</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>().<span class='ident'>skip</span>(<span class='number'>3</span>) {
+<span class='comment'>// print out all but the first 3 elements in the vector</span>
+<span class='kw'>for</span> <span class='ident'>x</span> <span class='kw'>in</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>().<span class='ident'>skip</span>(<span class='number'>3</span>) {
     <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='op'>*</span><span class='ident'>x</span>)
 }
 </pre>
@@ -391,25 +389,25 @@ also advance the state of an iterator in a mutable location:</p>
     assert!(it.next().is_none());
 }</span><pre id='rust-example-rendered-8' class='rust '>
 <span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> [<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>, <span class='number'>5</span>];
-<span class='kw'>let</span> <span class='ident'>ys</span> <span class='op'>=</span> [<span class='string'>&quot;foo&quot;</span>, <span class='string'>&quot;bar&quot;</span>, <span class='string'>&quot;baz&quot;</span>, <span class='string'>&quot;foobar&quot;</span>];<span class='comment'>
+<span class='kw'>let</span> <span class='ident'>ys</span> <span class='op'>=</span> [<span class='string'>&quot;foo&quot;</span>, <span class='string'>&quot;bar&quot;</span>, <span class='string'>&quot;baz&quot;</span>, <span class='string'>&quot;foobar&quot;</span>];
 
-// create an iterator yielding tuples of elements from both vectors
-</span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>it</span> <span class='op'>=</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>().<span class='ident'>zip</span>(<span class='ident'>ys</span>.<span class='ident'>iter</span>());<span class='comment'>
+<span class='comment'>// create an iterator yielding tuples of elements from both vectors</span>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>it</span> <span class='op'>=</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>().<span class='ident'>zip</span>(<span class='ident'>ys</span>.<span class='ident'>iter</span>());
 
-// print out the pairs of elements up to (&amp;3, &amp;&quot;baz&quot;)
-</span><span class='kw'>for</span> (<span class='ident'>x</span>, <span class='ident'>y</span>) <span class='kw'>in</span> <span class='ident'>it</span> {
+<span class='comment'>// print out the pairs of elements up to (&amp;3, &amp;&quot;baz&quot;)</span>
+<span class='kw'>for</span> (<span class='ident'>x</span>, <span class='ident'>y</span>) <span class='kw'>in</span> <span class='ident'>it</span> {
     <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{} {}&quot;</span>, <span class='op'>*</span><span class='ident'>x</span>, <span class='op'>*</span><span class='ident'>y</span>);
 
     <span class='kw'>if</span> <span class='op'>*</span><span class='ident'>x</span> <span class='op'>==</span> <span class='number'>3</span> {
         <span class='kw'>break</span>;
     }
-}<span class='comment'>
+}
 
-// yield and print the last pair from the iterator
-</span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;last: {}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>next</span>());<span class='comment'>
+<span class='comment'>// yield and print the last pair from the iterator</span>
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;last: {}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>next</span>());
 
-// the iterator is now fully consumed
-</span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>it</span>.<span class='ident'>next</span>().<span class='ident'>is_none</span>());
+<span class='comment'>// the iterator is now fully consumed</span>
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>it</span>.<span class='ident'>next</span>().<span class='ident'>is_none</span>());
 </pre>
 
 <h2 id="conversion" class='section-header'><a
@@ -548,12 +546,12 @@ returning another <code>DoubleEndedIterator</code> with <code>next</code> and <c
 }</span><pre id='rust-example-rendered-13' class='rust '>
 <span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> [<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>, <span class='number'>5</span>, <span class='number'>6</span>];
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>it</span> <span class='op'>=</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>();
-<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>next</span>());<span class='comment'> // prints `Some(1)`
-</span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>next</span>());<span class='comment'> // prints `Some(2)`
-</span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>next_back</span>());<span class='comment'> // prints `Some(6)`
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>next</span>()); <span class='comment'>// prints `Some(1)`</span>
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>next</span>()); <span class='comment'>// prints `Some(2)`</span>
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>next_back</span>()); <span class='comment'>// prints `Some(6)`</span>
 
-// prints `5`, `4` and `3`
-</span><span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='ident'>x</span> <span class='kw'>in</span> <span class='ident'>it</span>.<span class='ident'>rev</span>() {
+<span class='comment'>// prints `5`, `4` and `3`</span>
+<span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='ident'>x</span> <span class='kw'>in</span> <span class='ident'>it</span>.<span class='ident'>rev</span>() {
     <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>x</span>)
 }
 </pre>
@@ -576,10 +574,10 @@ returning another <code>DoubleEndedIterator</code> with <code>next</code> and <c
 <span class='kw'>let</span> <span class='ident'>ys</span> <span class='op'>=</span> [<span class='number'>5i</span>, <span class='number'>6</span>, <span class='number'>7</span>, <span class='number'>8</span>];
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>it</span> <span class='op'>=</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>().<span class='ident'>chain</span>(<span class='ident'>ys</span>.<span class='ident'>iter</span>()).<span class='ident'>map</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span> <span class='op'>*</span> <span class='number'>2</span>);
 
-<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>next</span>());<span class='comment'> // prints `Some(2)`
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>next</span>()); <span class='comment'>// prints `Some(2)`</span>
 
-// prints `16`, `14`, `12`, `10`, `8`, `6`, `4`
-</span><span class='kw'>for</span> <span class='ident'>x</span> <span class='kw'>in</span> <span class='ident'>it</span>.<span class='ident'>rev</span>() {
+<span class='comment'>// prints `16`, `14`, `12`, `10`, `8`, `6`, `4`</span>
+<span class='kw'>for</span> <span class='ident'>x</span> <span class='kw'>in</span> <span class='ident'>it</span>.<span class='ident'>rev</span>() {
     <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>x</span>);
 }
 </pre>
@@ -626,20 +624,20 @@ underlying iterators are.</p>
 <span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> [<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>, <span class='number'>5</span>];
 <span class='kw'>let</span> <span class='ident'>ys</span> <span class='op'>=</span> [<span class='number'>7i</span>, <span class='number'>9</span>, <span class='number'>11</span>];
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>it</span> <span class='op'>=</span> <span class='ident'>xs</span>.<span class='ident'>iter</span>().<span class='ident'>chain</span>(<span class='ident'>ys</span>.<span class='ident'>iter</span>());
-<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>idx</span>(<span class='number'>0</span>));<span class='comment'> // prints `Some(1)`
-</span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>idx</span>(<span class='number'>5</span>));<span class='comment'> // prints `Some(7)`
-</span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>idx</span>(<span class='number'>7</span>));<span class='comment'> // prints `Some(11)`
-</span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>idx</span>(<span class='number'>8</span>));<span class='comment'> // prints `None`
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>idx</span>(<span class='number'>0</span>)); <span class='comment'>// prints `Some(1)`</span>
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>idx</span>(<span class='number'>5</span>)); <span class='comment'>// prints `Some(7)`</span>
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>idx</span>(<span class='number'>7</span>)); <span class='comment'>// prints `Some(11)`</span>
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>idx</span>(<span class='number'>8</span>)); <span class='comment'>// prints `None`</span>
 
-// yield two elements from the beginning, and one from the end
-</span><span class='ident'>it</span>.<span class='ident'>next</span>();
+<span class='comment'>// yield two elements from the beginning, and one from the end</span>
+<span class='ident'>it</span>.<span class='ident'>next</span>();
 <span class='ident'>it</span>.<span class='ident'>next</span>();
 <span class='ident'>it</span>.<span class='ident'>next_back</span>();
 
-<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>idx</span>(<span class='number'>0</span>));<span class='comment'> // prints `Some(3)`
-</span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>idx</span>(<span class='number'>4</span>));<span class='comment'> // prints `Some(9)`
-</span><span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>idx</span>(<span class='number'>6</span>));<span class='comment'> // prints `None`
-</span></pre>
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>idx</span>(<span class='number'>0</span>)); <span class='comment'>// prints `Some(3)`</span>
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>idx</span>(<span class='number'>4</span>)); <span class='comment'>// prints `Some(9)`</span>
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>it</span>.<span class='ident'>idx</span>(<span class='number'>6</span>)); <span class='comment'>// prints `None`</span>
+</pre>
 
     <script type="text/javascript">
         window.playgroundUrl = "http://play.rust-lang.org/";

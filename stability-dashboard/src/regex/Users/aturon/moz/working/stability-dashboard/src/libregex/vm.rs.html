@@ -7,8 +7,6 @@
 
     <title>vm.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -616,42 +614,42 @@
 <span id='574'>574</span>
 <span id='575'>575</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-// FIXME: Currently, the VM simulates an NFA. It would be nice to have another
-// VM that simulates a DFA.
-//
-// According to Russ Cox[1], a DFA performs better than an NFA, principally
-// because it reuses states previously computed by the machine *and* doesn&#39;t
-// keep track of capture groups. The drawback of a DFA (aside from its
-// complexity) is that it can&#39;t accurately return the locations of submatches.
-// The NFA *can* do that. (This is my understanding anyway.)
-//
-// Cox suggests that a DFA ought to be used to answer &quot;does this match&quot; and
-// &quot;where does it match&quot; questions. (In the latter, the starting position of
-// the match is computed by executing the regex backwards.) Cox also suggests
-// that a DFA should be run when asking &quot;where are the submatches&quot;, which can
-// 1) quickly answer &quot;no&quot; is there&#39;s no match and 2) discover the substring
-// that matches, which means running the NFA on smaller input.
-//
-// Currently, the NFA simulation implemented below does some dirty tricks to
-// avoid tracking capture groups when they aren&#39;t needed (which only works
-// for &#39;is_match&#39;, not &#39;find&#39;). This is a half-measure, but does provide some
-// perf improvement.
-//
-// AFAIK, the DFA/NFA approach is implemented in RE2/C++ but *not* in RE2/Go.
-//
-// [1] - http://swtch.com/~rsc/regex/regex3.html
+<span class='comment'>// FIXME: Currently, the VM simulates an NFA. It would be nice to have another</span>
+<span class='comment'>// VM that simulates a DFA.</span>
+<span class='comment'>//</span>
+<span class='comment'>// According to Russ Cox[1], a DFA performs better than an NFA, principally</span>
+<span class='comment'>// because it reuses states previously computed by the machine *and* doesn&#39;t</span>
+<span class='comment'>// keep track of capture groups. The drawback of a DFA (aside from its</span>
+<span class='comment'>// complexity) is that it can&#39;t accurately return the locations of submatches.</span>
+<span class='comment'>// The NFA *can* do that. (This is my understanding anyway.)</span>
+<span class='comment'>//</span>
+<span class='comment'>// Cox suggests that a DFA ought to be used to answer &quot;does this match&quot; and</span>
+<span class='comment'>// &quot;where does it match&quot; questions. (In the latter, the starting position of</span>
+<span class='comment'>// the match is computed by executing the regex backwards.) Cox also suggests</span>
+<span class='comment'>// that a DFA should be run when asking &quot;where are the submatches&quot;, which can</span>
+<span class='comment'>// 1) quickly answer &quot;no&quot; is there&#39;s no match and 2) discover the substring</span>
+<span class='comment'>// that matches, which means running the NFA on smaller input.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Currently, the NFA simulation implemented below does some dirty tricks to</span>
+<span class='comment'>// avoid tracking capture groups when they aren&#39;t needed (which only works</span>
+<span class='comment'>// for &#39;is_match&#39;, not &#39;find&#39;). This is a half-measure, but does provide some</span>
+<span class='comment'>// perf improvement.</span>
+<span class='comment'>//</span>
+<span class='comment'>// AFAIK, the DFA/NFA approach is implemented in RE2/C++ but *not* in RE2/Go.</span>
+<span class='comment'>//</span>
+<span class='comment'>// [1] - http://swtch.com/~rsc/regex/regex3.html</span>
 
-</span><span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cmp</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cmp</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>slice</span>::<span class='ident'>MutableVector</span>;
 <span class='kw'>use</span> <span class='ident'>compile</span>::{
@@ -660,7 +658,7 @@
     <span class='ident'>Save</span>, <span class='ident'>Jump</span>, <span class='ident'>Split</span>,
 };
 <span class='kw'>use</span> <span class='ident'>parse</span>::{<span class='ident'>FLAG_NOCASE</span>, <span class='ident'>FLAG_MULTI</span>, <span class='ident'>FLAG_DOTNL</span>, <span class='ident'>FLAG_NEGATED</span>};
-<span class='kw'>use</span> <span class='ident'>parse</span>::<span class='ident'>unicode</span>::<span class='ident'>PERLW</span>;
+<span class='kw'>use</span> <span class='ident'>unicode</span>::<span class='ident'>regex</span>::<span class='ident'>PERLW</span>;
 
 <span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>CaptureLocs</span> <span class='op'>=</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;&gt;</span>;
 
@@ -734,34 +732,34 @@
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>clist</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Threads</span>::<span class='ident'>new</span>(<span class='self'>self</span>.<span class='ident'>which</span>, <span class='ident'>ninsts</span>, <span class='ident'>ncaps</span>);
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>nlist</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Threads</span>::<span class='ident'>new</span>(<span class='self'>self</span>.<span class='ident'>which</span>, <span class='ident'>ninsts</span>, <span class='ident'>ncaps</span>);
 
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>groups</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>from_elem</span>(<span class='ident'>ncaps</span> <span class='op'>*</span> <span class='number'>2</span>, <span class='prelude-val'>None</span>);<span class='comment'>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>groups</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>from_elem</span>(<span class='ident'>ncaps</span> <span class='op'>*</span> <span class='number'>2</span>, <span class='prelude-val'>None</span>);
 
-        // Determine if the expression starts with a &#39;^&#39; so we can avoid
-        // simulating .*?
-        // Make sure multi-line mode isn&#39;t enabled for it, otherwise we can&#39;t
-        // drop the initial .*?
-        </span><span class='kw'>let</span> <span class='ident'>prefix_anchor</span> <span class='op'>=</span>
+        <span class='comment'>// Determine if the expression starts with a &#39;^&#39; so we can avoid</span>
+        <span class='comment'>// simulating .*?</span>
+        <span class='comment'>// Make sure multi-line mode isn&#39;t enabled for it, otherwise we can&#39;t</span>
+        <span class='comment'>// drop the initial .*?</span>
+        <span class='kw'>let</span> <span class='ident'>prefix_anchor</span> <span class='op'>=</span>
             <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>prog</span>.<span class='ident'>insts</span>.<span class='ident'>get</span>(<span class='number'>1</span>) {
-                <span class='ident'>EmptyBegin</span>(<span class='ident'>flags</span>) <span class='kw'>if</span> <span class='ident'>flags</span> <span class='op'>&amp;</span> <span class='ident'>FLAG_MULTI</span> <span class='op'>==</span> <span class='number'>0</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
+                <span class='ident'>EmptyBegin</span>(<span class='ident'>flags</span>) <span class='kw'>if</span> <span class='ident'>flags</span> <span class='kw-2'>&amp;</span> <span class='ident'>FLAG_MULTI</span> <span class='op'>==</span> <span class='number'>0</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
                 _ <span class='op'>=&gt;</span> <span class='boolval'>false</span>,
             };
 
         <span class='self'>self</span>.<span class='ident'>ic</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>start</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>next_ic</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>chars</span>.<span class='ident'>set</span>(<span class='self'>self</span>.<span class='ident'>start</span>);
         <span class='kw'>while</span> <span class='self'>self</span>.<span class='ident'>ic</span> <span class='op'>&lt;=</span> <span class='self'>self</span>.<span class='ident'>end</span> {
-            <span class='kw'>if</span> <span class='ident'>clist</span>.<span class='ident'>size</span> <span class='op'>==</span> <span class='number'>0</span> {<span class='comment'>
-                // We have a match and we&#39;re done exploring alternatives.
-                // Time to quit.
-                </span><span class='kw'>if</span> <span class='ident'>matched</span> {
+            <span class='kw'>if</span> <span class='ident'>clist</span>.<span class='ident'>size</span> <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='comment'>// We have a match and we&#39;re done exploring alternatives.</span>
+                <span class='comment'>// Time to quit.</span>
+                <span class='kw'>if</span> <span class='ident'>matched</span> {
                     <span class='kw'>break</span>
-                }<span class='comment'>
+                }
 
-                // If there are no threads to try, then we&#39;ll have to start
-                // over at the beginning of the regex.
-                // BUT, if there&#39;s a literal prefix for the program, try to
-                // jump ahead quickly. If it can&#39;t be found, then we can bail
-                // out early.
-                </span><span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>prog</span>.<span class='ident'>prefix</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='number'>0</span> <span class='op'>&amp;&amp;</span> <span class='ident'>clist</span>.<span class='ident'>size</span> <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='comment'>// If there are no threads to try, then we&#39;ll have to start</span>
+                <span class='comment'>// over at the beginning of the regex.</span>
+                <span class='comment'>// BUT, if there&#39;s a literal prefix for the program, try to</span>
+                <span class='comment'>// jump ahead quickly. If it can&#39;t be found, then we can bail</span>
+                <span class='comment'>// out early.</span>
+                <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>prog</span>.<span class='ident'>prefix</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='number'>0</span> <span class='op'>&amp;&amp;</span> <span class='ident'>clist</span>.<span class='ident'>size</span> <span class='op'>==</span> <span class='number'>0</span> {
                     <span class='kw'>let</span> <span class='ident'>needle</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>prog</span>.<span class='ident'>prefix</span>.<span class='ident'>as_slice</span>().<span class='ident'>as_bytes</span>();
                     <span class='kw'>let</span> <span class='ident'>haystack</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>input</span>.<span class='ident'>as_bytes</span>().<span class='ident'>slice_from</span>(<span class='self'>self</span>.<span class='ident'>ic</span>);
                     <span class='kw'>match</span> <span class='ident'>find_prefix</span>(<span class='ident'>needle</span>, <span class='ident'>haystack</span>) {
@@ -772,19 +770,19 @@
                         }
                     }
                 }
-            }<span class='comment'>
+            }
 
-            // This simulates a preceding &#39;.*?&#39; for every regex by adding
-            // a state starting at the current position in the input for the
-            // beginning of the program only if we don&#39;t already have a match.
-            </span><span class='kw'>if</span> <span class='ident'>clist</span>.<span class='ident'>size</span> <span class='op'>==</span> <span class='number'>0</span> <span class='op'>||</span> (<span class='op'>!</span><span class='ident'>prefix_anchor</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='ident'>matched</span>) {
+            <span class='comment'>// This simulates a preceding &#39;.*?&#39; for every regex by adding</span>
+            <span class='comment'>// a state starting at the current position in the input for the</span>
+            <span class='comment'>// beginning of the program only if we don&#39;t already have a match.</span>
+            <span class='kw'>if</span> <span class='ident'>clist</span>.<span class='ident'>size</span> <span class='op'>==</span> <span class='number'>0</span> <span class='op'>||</span> (<span class='op'>!</span><span class='ident'>prefix_anchor</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='ident'>matched</span>) {
                 <span class='self'>self</span>.<span class='ident'>add</span>(<span class='ident'>clist</span>, <span class='number'>0</span>, <span class='ident'>groups</span>.<span class='ident'>as_mut_slice</span>())
-            }<span class='comment'>
+            }
 
-            // Now we try to read the next character.
-            // As a result, the &#39;step&#39; method will look at the previous
-            // character.
-            </span><span class='self'>self</span>.<span class='ident'>ic</span> <span class='op'>=</span> <span class='ident'>next_ic</span>;
+            <span class='comment'>// Now we try to read the next character.</span>
+            <span class='comment'>// As a result, the &#39;step&#39; method will look at the previous</span>
+            <span class='comment'>// character.</span>
+            <span class='self'>self</span>.<span class='ident'>ic</span> <span class='op'>=</span> <span class='ident'>next_ic</span>;
             <span class='ident'>next_ic</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>chars</span>.<span class='ident'>advance</span>();
 
             <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0</span>, <span class='ident'>clist</span>.<span class='ident'>size</span>) {
@@ -830,15 +828,15 @@
                 }
             }
             <span class='ident'>OneChar</span>(<span class='ident'>c</span>, <span class='ident'>flags</span>) <span class='op'>=&gt;</span> {
-                <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>char_eq</span>(<span class='ident'>flags</span> <span class='op'>&amp;</span> <span class='ident'>FLAG_NOCASE</span> <span class='op'>&gt;</span> <span class='number'>0</span>, <span class='self'>self</span>.<span class='ident'>chars</span>.<span class='ident'>prev</span>, <span class='ident'>c</span>) {
+                <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>char_eq</span>(<span class='ident'>flags</span> <span class='kw-2'>&amp;</span> <span class='ident'>FLAG_NOCASE</span> <span class='op'>&gt;</span> <span class='number'>0</span>, <span class='self'>self</span>.<span class='ident'>chars</span>.<span class='ident'>prev</span>, <span class='ident'>c</span>) {
                     <span class='self'>self</span>.<span class='ident'>add</span>(<span class='ident'>nlist</span>, <span class='ident'>pc</span><span class='op'>+</span><span class='number'>1</span>, <span class='ident'>caps</span>);
                 }
             }
             <span class='ident'>CharClass</span>(<span class='kw-2'>ref</span> <span class='ident'>ranges</span>, <span class='ident'>flags</span>) <span class='op'>=&gt;</span> {
                 <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>chars</span>.<span class='ident'>prev</span>.<span class='ident'>is_some</span>() {
                     <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>chars</span>.<span class='ident'>prev</span>.<span class='ident'>unwrap</span>();
-                    <span class='kw'>let</span> <span class='ident'>negate</span> <span class='op'>=</span> <span class='ident'>flags</span> <span class='op'>&amp;</span> <span class='ident'>FLAG_NEGATED</span> <span class='op'>&gt;</span> <span class='number'>0</span>;
-                    <span class='kw'>let</span> <span class='ident'>casei</span> <span class='op'>=</span> <span class='ident'>flags</span> <span class='op'>&amp;</span> <span class='ident'>FLAG_NOCASE</span> <span class='op'>&gt;</span> <span class='number'>0</span>;
+                    <span class='kw'>let</span> <span class='ident'>negate</span> <span class='op'>=</span> <span class='ident'>flags</span> <span class='kw-2'>&amp;</span> <span class='ident'>FLAG_NEGATED</span> <span class='op'>&gt;</span> <span class='number'>0</span>;
+                    <span class='kw'>let</span> <span class='ident'>casei</span> <span class='op'>=</span> <span class='ident'>flags</span> <span class='kw-2'>&amp;</span> <span class='ident'>FLAG_NOCASE</span> <span class='op'>&gt;</span> <span class='number'>0</span>;
                     <span class='kw'>let</span> <span class='ident'>found</span> <span class='op'>=</span> <span class='ident'>ranges</span>.<span class='ident'>as_slice</span>();
                     <span class='kw'>let</span> <span class='ident'>found</span> <span class='op'>=</span> <span class='ident'>found</span>.<span class='ident'>bsearch</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>rc</span><span class='op'>|</span> <span class='ident'>class_cmp</span>(<span class='ident'>casei</span>, <span class='ident'>c</span>, <span class='ident'>rc</span>));
                     <span class='kw'>let</span> <span class='ident'>found</span> <span class='op'>=</span> <span class='ident'>found</span>.<span class='ident'>is_some</span>();
@@ -848,7 +846,7 @@
                 }
             }
             <span class='ident'>Any</span>(<span class='ident'>flags</span>) <span class='op'>=&gt;</span> {
-                <span class='kw'>if</span> <span class='ident'>flags</span> <span class='op'>&amp;</span> <span class='ident'>FLAG_DOTNL</span> <span class='op'>&gt;</span> <span class='number'>0</span>
+                <span class='kw'>if</span> <span class='ident'>flags</span> <span class='kw-2'>&amp;</span> <span class='ident'>FLAG_DOTNL</span> <span class='op'>&gt;</span> <span class='number'>0</span>
                    <span class='op'>||</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>char_eq</span>(<span class='boolval'>false</span>, <span class='self'>self</span>.<span class='ident'>chars</span>.<span class='ident'>prev</span>, <span class='string'>&#39;\n&#39;</span>) {
                     <span class='self'>self</span>.<span class='ident'>add</span>(<span class='ident'>nlist</span>, <span class='ident'>pc</span><span class='op'>+</span><span class='number'>1</span>, <span class='ident'>caps</span>)
                 }
@@ -862,24 +860,24 @@
     <span class='kw'>fn</span> <span class='ident'>add</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>nlist</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Threads</span>, <span class='ident'>pc</span>: <span class='ident'>uint</span>, <span class='ident'>groups</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> [<span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>]) {
         <span class='kw'>if</span> <span class='ident'>nlist</span>.<span class='ident'>contains</span>(<span class='ident'>pc</span>) {
             <span class='kw'>return</span>
-        }<span class='comment'>
-        // We have to add states to the threads list even if their empty.
-        // TL;DR - It prevents cycles.
-        // If we didn&#39;t care about cycles, we&#39;d *only* add threads that
-        // correspond to non-jumping instructions (OneChar, Any, Match, etc.).
-        // But, it&#39;s possible for valid regexs (like &#39;(a*)*&#39;) to result in
-        // a cycle in the instruction list. e.g., We&#39;ll keep chasing the Split
-        // instructions forever.
-        // So we add these instructions to our thread queue, but in the main
-        // VM loop, we look for them but simply ignore them.
-        // Adding them to the queue prevents them from being revisited so we
-        // can avoid cycles (and the inevitable stack overflow).
-        //
-        // We make a minor optimization by indicating that the state is &quot;empty&quot;
-        // so that its capture groups are not filled in.
-        </span><span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>prog</span>.<span class='ident'>insts</span>.<span class='ident'>get</span>(<span class='ident'>pc</span>) {
+        }
+        <span class='comment'>// We have to add states to the threads list even if their empty.</span>
+        <span class='comment'>// TL;DR - It prevents cycles.</span>
+        <span class='comment'>// If we didn&#39;t care about cycles, we&#39;d *only* add threads that</span>
+        <span class='comment'>// correspond to non-jumping instructions (OneChar, Any, Match, etc.).</span>
+        <span class='comment'>// But, it&#39;s possible for valid regexs (like &#39;(a*)*&#39;) to result in</span>
+        <span class='comment'>// a cycle in the instruction list. e.g., We&#39;ll keep chasing the Split</span>
+        <span class='comment'>// instructions forever.</span>
+        <span class='comment'>// So we add these instructions to our thread queue, but in the main</span>
+        <span class='comment'>// VM loop, we look for them but simply ignore them.</span>
+        <span class='comment'>// Adding them to the queue prevents them from being revisited so we</span>
+        <span class='comment'>// can avoid cycles (and the inevitable stack overflow).</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// We make a minor optimization by indicating that the state is &quot;empty&quot;</span>
+        <span class='comment'>// so that its capture groups are not filled in.</span>
+        <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>prog</span>.<span class='ident'>insts</span>.<span class='ident'>get</span>(<span class='ident'>pc</span>) {
             <span class='ident'>EmptyBegin</span>(<span class='ident'>flags</span>) <span class='op'>=&gt;</span> {
-                <span class='kw'>let</span> <span class='ident'>multi</span> <span class='op'>=</span> <span class='ident'>flags</span> <span class='op'>&amp;</span> <span class='ident'>FLAG_MULTI</span> <span class='op'>&gt;</span> <span class='number'>0</span>;
+                <span class='kw'>let</span> <span class='ident'>multi</span> <span class='op'>=</span> <span class='ident'>flags</span> <span class='kw-2'>&amp;</span> <span class='ident'>FLAG_MULTI</span> <span class='op'>&gt;</span> <span class='number'>0</span>;
                 <span class='ident'>nlist</span>.<span class='ident'>add</span>(<span class='ident'>pc</span>, <span class='ident'>groups</span>, <span class='boolval'>true</span>);
                 <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>chars</span>.<span class='ident'>is_begin</span>()
                    <span class='op'>||</span> (<span class='ident'>multi</span> <span class='op'>&amp;&amp;</span> <span class='self'>self</span>.<span class='ident'>char_is</span>(<span class='self'>self</span>.<span class='ident'>chars</span>.<span class='ident'>prev</span>, <span class='string'>&#39;\n&#39;</span>)) {
@@ -887,7 +885,7 @@
                 }
             }
             <span class='ident'>EmptyEnd</span>(<span class='ident'>flags</span>) <span class='op'>=&gt;</span> {
-                <span class='kw'>let</span> <span class='ident'>multi</span> <span class='op'>=</span> <span class='ident'>flags</span> <span class='op'>&amp;</span> <span class='ident'>FLAG_MULTI</span> <span class='op'>&gt;</span> <span class='number'>0</span>;
+                <span class='kw'>let</span> <span class='ident'>multi</span> <span class='op'>=</span> <span class='ident'>flags</span> <span class='kw-2'>&amp;</span> <span class='ident'>FLAG_MULTI</span> <span class='op'>&gt;</span> <span class='number'>0</span>;
                 <span class='ident'>nlist</span>.<span class='ident'>add</span>(<span class='ident'>pc</span>, <span class='ident'>groups</span>, <span class='boolval'>true</span>);
                 <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>chars</span>.<span class='ident'>is_end</span>()
                    <span class='op'>||</span> (<span class='ident'>multi</span> <span class='op'>&amp;&amp;</span> <span class='self'>self</span>.<span class='ident'>char_is</span>(<span class='self'>self</span>.<span class='ident'>chars</span>.<span class='ident'>cur</span>, <span class='string'>&#39;\n&#39;</span>)) {
@@ -896,7 +894,7 @@
             }
             <span class='ident'>EmptyWordBoundary</span>(<span class='ident'>flags</span>) <span class='op'>=&gt;</span> {
                 <span class='ident'>nlist</span>.<span class='ident'>add</span>(<span class='ident'>pc</span>, <span class='ident'>groups</span>, <span class='boolval'>true</span>);
-                <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>chars</span>.<span class='ident'>is_word_boundary</span>() <span class='op'>==</span> <span class='op'>!</span>(<span class='ident'>flags</span> <span class='op'>&amp;</span> <span class='ident'>FLAG_NEGATED</span> <span class='op'>&gt;</span> <span class='number'>0</span>) {
+                <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>chars</span>.<span class='ident'>is_word_boundary</span>() <span class='op'>==</span> <span class='op'>!</span>(<span class='ident'>flags</span> <span class='kw-2'>&amp;</span> <span class='ident'>FLAG_NEGATED</span> <span class='op'>&gt;</span> <span class='number'>0</span>) {
                     <span class='self'>self</span>.<span class='ident'>add</span>(<span class='ident'>nlist</span>, <span class='ident'>pc</span> <span class='op'>+</span> <span class='number'>1</span>, <span class='ident'>groups</span>)
                 }
             }
@@ -931,14 +929,14 @@
                 <span class='ident'>nlist</span>.<span class='ident'>add</span>(<span class='ident'>pc</span>, <span class='ident'>groups</span>, <span class='boolval'>false</span>);
             }
         }
-    }<span class='comment'>
+    }
 
-    // FIXME: For case insensitive comparisons, it uses the uppercase
-    // character and tests for equality. IIUC, this does not generalize to
-    // all of Unicode. I believe we need to check the entire fold for each
-    // character. This will be easy to add if and when it gets added to Rust&#39;s
-    // standard library.
-    </span><span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='comment'>// FIXME: For case insensitive comparisons, it uses the uppercase</span>
+    <span class='comment'>// character and tests for equality. IIUC, this does not generalize to</span>
+    <span class='comment'>// all of Unicode. I believe we need to check the entire fold for each</span>
+    <span class='comment'>// character. This will be easy to add if and when it gets added to Rust&#39;s</span>
+    <span class='comment'>// standard library.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>char_eq</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>casei</span>: <span class='ident'>bool</span>, <span class='ident'>textc</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>char</span><span class='op'>&gt;</span>, <span class='ident'>regc</span>: <span class='ident'>char</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
         <span class='kw'>match</span> <span class='ident'>textc</span> {
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='boolval'>false</span>,
@@ -1059,15 +1057,15 @@
     <span class='ident'>size</span>: <span class='ident'>uint</span>,
 }
 
-<span class='kw'>impl</span> <span class='ident'>Threads</span> {<span class='comment'>
-    // This is using a wicked neat trick to provide constant time lookup
-    // for threads in the queue using a sparse set. A queue of threads is
-    // allocated once with maximal size when the VM initializes and is reused
-    // throughout execution. That is, there should be zero allocation during
-    // the execution of a VM.
-    //
-    // See http://research.swtch.com/sparse for the deets.
-    </span><span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>which</span>: <span class='ident'>MatchKind</span>, <span class='ident'>num_insts</span>: <span class='ident'>uint</span>, <span class='ident'>ncaps</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>Threads</span> {
+<span class='kw'>impl</span> <span class='ident'>Threads</span> {
+    <span class='comment'>// This is using a wicked neat trick to provide constant time lookup</span>
+    <span class='comment'>// for threads in the queue using a sparse set. A queue of threads is</span>
+    <span class='comment'>// allocated once with maximal size when the VM initializes and is reused</span>
+    <span class='comment'>// throughout execution. That is, there should be zero allocation during</span>
+    <span class='comment'>// the execution of a VM.</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// See http://research.swtch.com/sparse for the deets.</span>
+    <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>which</span>: <span class='ident'>MatchKind</span>, <span class='ident'>num_insts</span>: <span class='ident'>uint</span>, <span class='ident'>ncaps</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>Threads</span> {
         <span class='ident'>Threads</span> {
             <span class='ident'>which</span>: <span class='ident'>which</span>,
             <span class='ident'>queue</span>: <span class='ident'>Vec</span>::<span class='ident'>from_fn</span>(<span class='ident'>num_insts</span>, <span class='op'>|</span>_<span class='op'>|</span> {
@@ -1127,9 +1125,9 @@
     <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>c</span> {
         <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='boolval'>false</span>,
         <span class='prelude-val'>Some</span>(<span class='ident'>c</span>) <span class='op'>=&gt;</span> <span class='ident'>c</span>,
-    };<span class='comment'>
-    // Try the common ASCII case before invoking binary search.
-    </span><span class='kw'>match</span> <span class='ident'>c</span> {
+    };
+    <span class='comment'>// Try the common ASCII case before invoking binary search.</span>
+    <span class='kw'>match</span> <span class='ident'>c</span> {
         <span class='string'>&#39;_&#39;</span> <span class='op'>|</span> <span class='string'>&#39;0&#39;</span> .. <span class='string'>&#39;9&#39;</span> <span class='op'>|</span> <span class='string'>&#39;a&#39;</span> .. <span class='string'>&#39;z&#39;</span> <span class='op'>|</span> <span class='string'>&#39;A&#39;</span> .. <span class='string'>&#39;Z&#39;</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
         _ <span class='op'>=&gt;</span> <span class='ident'>PERLW</span>.<span class='ident'>bsearch</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span>(<span class='ident'>start</span>, <span class='ident'>end</span>)<span class='op'>|</span> {
             <span class='kw'>if</span> <span class='ident'>c</span> <span class='op'>&gt;=</span> <span class='ident'>start</span> <span class='op'>&amp;&amp;</span> <span class='ident'>c</span> <span class='op'>&lt;=</span> <span class='ident'>end</span> {
@@ -1153,15 +1151,15 @@
 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
 <span class='kw'>fn</span> <span class='ident'>class_cmp</span>(<span class='ident'>casei</span>: <span class='ident'>bool</span>, <span class='kw-2'>mut</span> <span class='ident'>textc</span>: <span class='ident'>char</span>,
              (<span class='kw-2'>mut</span> <span class='ident'>start</span>, <span class='kw-2'>mut</span> <span class='ident'>end</span>): (<span class='ident'>char</span>, <span class='ident'>char</span>)) <span class='op'>-&gt;</span> <span class='ident'>Ordering</span> {
-    <span class='kw'>if</span> <span class='ident'>casei</span> {<span class='comment'>
-        // FIXME: This is pretty ridiculous. All of this case conversion
-        // can be moved outside this function:
-        // 1) textc should be uppercased outside the bsearch.
-        // 2) the character class itself should be uppercased either in the
-        //    parser or the compiler.
-        // FIXME: This is too simplistic for correct Unicode support.
-        //        See also: char_eq
-        </span><span class='ident'>textc</span> <span class='op'>=</span> <span class='ident'>textc</span>.<span class='ident'>to_uppercase</span>();
+    <span class='kw'>if</span> <span class='ident'>casei</span> {
+        <span class='comment'>// FIXME: This is pretty ridiculous. All of this case conversion</span>
+        <span class='comment'>// can be moved outside this function:</span>
+        <span class='comment'>// 1) textc should be uppercased outside the bsearch.</span>
+        <span class='comment'>// 2) the character class itself should be uppercased either in the</span>
+        <span class='comment'>//    parser or the compiler.</span>
+        <span class='comment'>// FIXME: This is too simplistic for correct Unicode support.</span>
+        <span class='comment'>//        See also: char_eq</span>
+        <span class='ident'>textc</span> <span class='op'>=</span> <span class='ident'>textc</span>.<span class='ident'>to_uppercase</span>();
         <span class='ident'>start</span> <span class='op'>=</span> <span class='ident'>start</span>.<span class='ident'>to_uppercase</span>();
         <span class='ident'>end</span> <span class='op'>=</span> <span class='ident'>end</span>.<span class='ident'>to_uppercase</span>();
     }

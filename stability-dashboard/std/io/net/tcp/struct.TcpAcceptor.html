@@ -7,8 +7,6 @@
 
     <title>std::io::net::tcp::TcpAcceptor - Rust</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -41,7 +39,7 @@
     </nav>
 
     <section id='main' class="content struct">
-<h1 class='fqn'>Struct <a href='../../../index.html'>std</a>::<a href='../../index.html'>io</a>::<a href='../index.html'>net</a>::<a href='index.html'>tcp</a>::<a class='struct' href=''>TcpAcceptor</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-35714' href='../../../../src/std/Users/aturon/moz/working/stability-dashboard/src/libstd/io/net/tcp.rs.html#384-386'>[src]</a></span></h1>
+<h1 class='fqn'>Struct <a href='../../../index.html'>std</a>::<a href='../../index.html'>io</a>::<a href='../index.html'>net</a>::<a href='index.html'>tcp</a>::<a class='struct' href=''>TcpAcceptor</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-35853' href='../../../../src/std/Users/aturon/moz/working/stability-dashboard/src/libstd/io/net/tcp.rs.html#384-386'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct TcpAcceptor {
     // some fields omitted
 }</pre><div class='docblock'><p>The accepting half of a TCP socket server. This structure is created through
@@ -92,23 +90,23 @@ not block in this case).</p>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>TcpListener</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>Listener</span>, <span class='ident'>Acceptor</span>, <span class='ident'>TimedOut</span>};
 
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>TcpListener</span>::<span class='ident'>bind</span>(<span class='string'>&quot;127.0.0.1&quot;</span>, <span class='number'>8482</span>).<span class='ident'>listen</span>().<span class='ident'>unwrap</span>();<span class='comment'>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>TcpListener</span>::<span class='ident'>bind</span>(<span class='string'>&quot;127.0.0.1&quot;</span>, <span class='number'>8482</span>).<span class='ident'>listen</span>().<span class='ident'>unwrap</span>();
 
-// After 100ms have passed, all accepts will fail
-</span><span class='ident'>a</span>.<span class='ident'>set_timeout</span>(<span class='prelude-val'>Some</span>(<span class='number'>100</span>));
+<span class='comment'>// After 100ms have passed, all accepts will fail</span>
+<span class='ident'>a</span>.<span class='ident'>set_timeout</span>(<span class='prelude-val'>Some</span>(<span class='number'>100</span>));
 
 <span class='kw'>match</span> <span class='ident'>a</span>.<span class='ident'>accept</span>() {
     <span class='prelude-val'>Ok</span>(..) <span class='op'>=&gt;</span> <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;accepted a socket&quot;</span>),
     <span class='prelude-val'>Err</span>(<span class='kw-2'>ref</span> <span class='ident'>e</span>) <span class='kw'>if</span> <span class='ident'>e</span>.<span class='ident'>kind</span> <span class='op'>==</span> <span class='ident'>TimedOut</span> <span class='op'>=&gt;</span> { <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;timed out!&quot;</span>); }
     <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;err: {}&quot;</span>, <span class='ident'>e</span>),
-}<span class='comment'>
+}
 
-// Reset the timeout and try again
-</span><span class='ident'>a</span>.<span class='ident'>set_timeout</span>(<span class='prelude-val'>Some</span>(<span class='number'>100</span>));
-<span class='kw'>let</span> <span class='ident'>socket</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>accept</span>();<span class='comment'>
+<span class='comment'>// Reset the timeout and try again</span>
+<span class='ident'>a</span>.<span class='ident'>set_timeout</span>(<span class='prelude-val'>Some</span>(<span class='number'>100</span>));
+<span class='kw'>let</span> <span class='ident'>socket</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>accept</span>();
 
-// Clear the timeout and block indefinitely waiting for a connection
-</span><span class='ident'>a</span>.<span class='ident'>set_timeout</span>(<span class='prelude-val'>None</span>);
+<span class='comment'>// Clear the timeout and block indefinitely waiting for a connection</span>
+<span class='ident'>a</span>.<span class='ident'>set_timeout</span>(<span class='prelude-val'>None</span>);
 <span class='kw'>let</span> <span class='ident'>socket</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>accept</span>();
 </pre>
 </div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../../../std/io/trait.Acceptor.html' title='std::io::Acceptor'>Acceptor</a>&lt;<a class='struct' href='../../../../std/io/net/tcp/struct.TcpStream.html' title='std::io::net::tcp::TcpStream'>TcpStream</a>&gt; for <a class='struct' href='../../../../std/io/net/tcp/struct.TcpAcceptor.html' title='std::io::net::tcp::TcpAcceptor'>TcpAcceptor</a></code></h3><div class='impl-methods'><h4 id='method.accept' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.accept' class='fnname'>accept</a>(&amp;mut self) -&gt; <a class='type' href='../../../../std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;<a class='struct' href='../../../../std/io/net/tcp/struct.TcpStream.html' title='std::io::net::tcp::TcpStream'>TcpStream</a>&gt;</code></h4>

@@ -7,8 +7,6 @@
 
     <title>cell.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -426,17 +424,17 @@
 <span id='384'>384</span>
 <span id='385'>385</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2012-2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2012-2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! Shareable mutable containers.</span>
+<span class='doccomment'>//! Shareable mutable containers.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! Values of the `Cell` and `RefCell` types may be mutated through</span>
 <span class='doccomment'>//! shared references (i.e. the common `&amp;T` type), whereas most Rust</span>
@@ -577,13 +575,13 @@
 <span class='doccomment'>//!     }</span>
 <span class='doccomment'>//! }</span>
 <span class='doccomment'>//! ```</span>
-<span class='doccomment'>//!</span><span class='comment'>
-// FIXME: Explain difference between Cell and RefCell
-// FIXME: Downsides to interior mutability
-// FIXME: Can&#39;t be shared between threads. Dynamic borrows
-// FIXME: Relationship to Atomic types and RWLock
+<span class='doccomment'>//!</span>
+<span class='comment'>// FIXME: Explain difference between Cell and RefCell</span>
+<span class='comment'>// FIXME: Downsides to interior mutability</span>
+<span class='comment'>// FIXME: Can&#39;t be shared between threads. Dynamic borrows</span>
+<span class='comment'>// FIXME: Relationship to Atomic types and RWLock</span>
 
-</span><span class='kw'>use</span> <span class='ident'>clone</span>::<span class='ident'>Clone</span>;
+<span class='kw'>use</span> <span class='ident'>clone</span>::<span class='ident'>Clone</span>;
 <span class='kw'>use</span> <span class='ident'>cmp</span>::<span class='ident'>PartialEq</span>;
 <span class='kw'>use</span> <span class='ident'>kinds</span>::{<span class='ident'>marker</span>, <span class='ident'>Copy</span>};
 <span class='kw'>use</span> <span class='ident'>ops</span>::{<span class='ident'>Deref</span>, <span class='ident'>DerefMut</span>, <span class='ident'>Drop</span>};
@@ -639,11 +637,11 @@
     <span class='ident'>borrow</span>: <span class='ident'>Cell</span><span class='op'>&lt;</span><span class='ident'>BorrowFlag</span><span class='op'>&gt;</span>,
     <span class='ident'>nocopy</span>: <span class='ident'>marker</span>::<span class='ident'>NoCopy</span>,
     <span class='ident'>noshare</span>: <span class='ident'>marker</span>::<span class='ident'>NoShare</span>,
-}<span class='comment'>
+}
 
-// Values [1, MAX-1] represent the number of `Ref` active
-// (will not outgrow its range since `uint` is the size of the address space)
-</span><span class='kw'>type</span> <span class='ident'>BorrowFlag</span> <span class='op'>=</span> <span class='ident'>uint</span>;
+<span class='comment'>// Values [1, MAX-1] represent the number of `Ref` active</span>
+<span class='comment'>// (will not outgrow its range since `uint` is the size of the address space)</span>
+<span class='kw'>type</span> <span class='ident'>BorrowFlag</span> <span class='op'>=</span> <span class='ident'>uint</span>;
 <span class='kw'>static</span> <span class='ident'>UNUSED</span>: <span class='ident'>BorrowFlag</span> <span class='op'>=</span> <span class='number'>0</span>;
 <span class='kw'>static</span> <span class='ident'>WRITING</span>: <span class='ident'>BorrowFlag</span> <span class='op'>=</span> <span class='op'>-</span><span class='number'>1</span>;
 
@@ -741,10 +739,10 @@
 }
 
 <span class='doccomment'>/// Wraps a borrowed reference to a value in a `RefCell` box.</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Ref</span><span class='op'>&lt;</span><span class='lifetime'>&#39;b</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {<span class='comment'>
-    // FIXME #12808: strange name to try to avoid interfering with
-    // field accesses of the contained type via Deref
-    </span><span class='ident'>_parent</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;b</span> <span class='ident'>RefCell</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Ref</span><span class='op'>&lt;</span><span class='lifetime'>&#39;b</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
+    <span class='comment'>// FIXME #12808: strange name to try to avoid interfering with</span>
+    <span class='comment'>// field accesses of the contained type via Deref</span>
+    <span class='ident'>_parent</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;b</span> <span class='ident'>RefCell</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>
 }
 
 <span class='attribute'>#[<span class='ident'>unsafe_destructor</span>]</span>
@@ -770,10 +768,10 @@
 <span class='doccomment'>/// A `Clone` implementation would interfere with the widespread</span>
 <span class='doccomment'>/// use of `r.borrow().clone()` to clone the contents of a `RefCell`.</span>
 <span class='attribute'>#[<span class='ident'>experimental</span>]</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>clone_ref</span><span class='op'>&lt;</span><span class='lifetime'>&#39;b</span>, <span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>orig</span>: <span class='kw-2'>&amp;</span><span class='ident'>Ref</span><span class='op'>&lt;</span><span class='lifetime'>&#39;b</span>, <span class='ident'>T</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Ref</span><span class='op'>&lt;</span><span class='lifetime'>&#39;b</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {<span class='comment'>
-    // Since this Ref exists, we know the borrow flag
-    // is not set to WRITING.
-    </span><span class='kw'>let</span> <span class='ident'>borrow</span> <span class='op'>=</span> <span class='ident'>orig</span>.<span class='ident'>_parent</span>.<span class='ident'>borrow</span>.<span class='ident'>get</span>();
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>clone_ref</span><span class='op'>&lt;</span><span class='lifetime'>&#39;b</span>, <span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>orig</span>: <span class='kw-2'>&amp;</span><span class='ident'>Ref</span><span class='op'>&lt;</span><span class='lifetime'>&#39;b</span>, <span class='ident'>T</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Ref</span><span class='op'>&lt;</span><span class='lifetime'>&#39;b</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
+    <span class='comment'>// Since this Ref exists, we know the borrow flag</span>
+    <span class='comment'>// is not set to WRITING.</span>
+    <span class='kw'>let</span> <span class='ident'>borrow</span> <span class='op'>=</span> <span class='ident'>orig</span>.<span class='ident'>_parent</span>.<span class='ident'>borrow</span>.<span class='ident'>get</span>();
     <span class='macro'>debug_assert</span><span class='macro'>!</span>(<span class='ident'>borrow</span> <span class='op'>!=</span> <span class='ident'>WRITING</span> <span class='op'>&amp;&amp;</span> <span class='ident'>borrow</span> <span class='op'>!=</span> <span class='ident'>UNUSED</span>);
     <span class='ident'>orig</span>.<span class='ident'>_parent</span>.<span class='ident'>borrow</span>.<span class='ident'>set</span>(<span class='ident'>borrow</span> <span class='op'>+</span> <span class='number'>1</span>);
 
@@ -783,10 +781,10 @@
 }
 
 <span class='doccomment'>/// Wraps a mutable borrowed reference to a value in a `RefCell` box.</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>RefMut</span><span class='op'>&lt;</span><span class='lifetime'>&#39;b</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {<span class='comment'>
-    // FIXME #12808: strange name to try to avoid interfering with
-    // field accesses of the contained type via Deref
-    </span><span class='ident'>_parent</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;b</span> <span class='ident'>RefCell</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>RefMut</span><span class='op'>&lt;</span><span class='lifetime'>&#39;b</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
+    <span class='comment'>// FIXME #12808: strange name to try to avoid interfering with</span>
+    <span class='comment'>// field accesses of the contained type via Deref</span>
+    <span class='ident'>_parent</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;b</span> <span class='ident'>RefCell</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>
 }
 
 <span class='attribute'>#[<span class='ident'>unsafe_destructor</span>]</span>

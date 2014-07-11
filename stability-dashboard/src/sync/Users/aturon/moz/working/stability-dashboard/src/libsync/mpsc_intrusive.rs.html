@@ -7,8 +7,6 @@
 
     <title>mpsc_intrusive.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -210,28 +208,28 @@
  * The views and conclusions contained in the software and documentation are
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Dmitry Vyukov.
- */
+ */</span>
 
-</span><span class='doccomment'>//! A mostly lock-free multi-producer, single consumer queue.</span>
+<span class='doccomment'>//! A mostly lock-free multi-producer, single consumer queue.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! This module implements an intrusive MPSC queue. This queue is incredibly</span>
 <span class='doccomment'>//! unsafe (due to use of unsafe pointers for nodes), and hence is not public.</span>
 
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>experimental</span>]</span><span class='comment'>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>experimental</span>]</span>
 
-// http://www.1024cores.net/home/lock-free-algorithms
-//                         /queues/intrusive-mpsc-node-based-queue
+<span class='comment'>// http://www.1024cores.net/home/lock-free-algorithms</span>
+<span class='comment'>//                         /queues/intrusive-mpsc-node-based-queue</span>
 
-</span><span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
+<span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
 
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>atomics</span>;
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>mem</span>;
-<span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>ty</span>::<span class='ident'>Unsafe</span>;<span class='comment'>
+<span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>ty</span>::<span class='ident'>Unsafe</span>;
 
-// NB: all links are done as AtomicUint instead of AtomicPtr to allow for static
-// initialization.
+<span class='comment'>// NB: all links are done as AtomicUint instead of AtomicPtr to allow for static</span>
+<span class='comment'>// initialization.</span>
 
-</span><span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='kw'>pub</span> <span class='ident'>next</span>: <span class='ident'>atomics</span>::<span class='ident'>AtomicUint</span>,
     <span class='kw'>pub</span> <span class='ident'>data</span>: <span class='ident'>T</span>,
 }
@@ -259,12 +257,12 @@
 
     <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>push</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>node</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) {
         (<span class='op'>*</span><span class='ident'>node</span>).<span class='ident'>next</span>.<span class='ident'>store</span>(<span class='number'>0</span>, <span class='ident'>atomics</span>::<span class='ident'>Release</span>);
-        <span class='kw'>let</span> <span class='ident'>prev</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>head</span>.<span class='ident'>swap</span>(<span class='ident'>node</span> <span class='kw'>as</span> <span class='ident'>uint</span>, <span class='ident'>atomics</span>::<span class='ident'>AcqRel</span>);<span class='comment'>
+        <span class='kw'>let</span> <span class='ident'>prev</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>head</span>.<span class='ident'>swap</span>(<span class='ident'>node</span> <span class='kw'>as</span> <span class='ident'>uint</span>, <span class='ident'>atomics</span>::<span class='ident'>AcqRel</span>);
 
-        // Note that this code is slightly modified to allow static
-        // initialization of these queues with rust&#39;s flavor of static
-        // initialization.
-        </span><span class='kw'>if</span> <span class='ident'>prev</span> <span class='op'>==</span> <span class='number'>0</span> {
+        <span class='comment'>// Note that this code is slightly modified to allow static</span>
+        <span class='comment'>// initialization of these queues with rust&#39;s flavor of static</span>
+        <span class='comment'>// initialization.</span>
+        <span class='kw'>if</span> <span class='ident'>prev</span> <span class='op'>==</span> <span class='number'>0</span> {
             <span class='self'>self</span>.<span class='ident'>stub</span>.<span class='ident'>next</span>.<span class='ident'>store</span>(<span class='ident'>node</span> <span class='kw'>as</span> <span class='ident'>uint</span>, <span class='ident'>atomics</span>::<span class='ident'>Release</span>);
         } <span class='kw'>else</span> {
             <span class='kw'>let</span> <span class='ident'>prev</span> <span class='op'>=</span> <span class='ident'>prev</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>;

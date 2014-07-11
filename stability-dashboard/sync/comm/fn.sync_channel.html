@@ -7,8 +7,6 @@
 
     <title>sync::comm::sync_channel - Rust</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -73,14 +71,14 @@ fn main() {
     assert_eq!(rx.recv(), 1i);
     assert_eq!(rx.recv(), 2i);
 }</span><pre id='rust-example-rendered-0' class='rust '>
-<span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>sync_channel</span>(<span class='number'>1</span>);<span class='comment'>
+<span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>sync_channel</span>(<span class='number'>1</span>);
 
-// this returns immediately
-</span><span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='number'>1i</span>);
+<span class='comment'>// this returns immediately</span>
+<span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='number'>1i</span>);
 
-<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {<span class='comment'>
-    // this will block until the previous message has been received
-    </span><span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='number'>2i</span>);
+<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+    <span class='comment'>// this will block until the previous message has been received</span>
+    <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='number'>2i</span>);
 });
 
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>rx</span>.<span class='ident'>recv</span>(), <span class='number'>1i</span>);

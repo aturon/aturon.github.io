@@ -7,8 +7,6 @@
 
     <title>gamma.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -456,17 +454,17 @@
 <span id='414'>414</span>
 <span id='415'>415</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! The Gamma and derived distributions.</span>
+<span class='doccomment'>//! The Gamma and derived distributions.</span>
 
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>num</span>::<span class='ident'>Float</span>;
 
@@ -513,14 +511,14 @@
     <span class='ident'>Large</span>(<span class='ident'>GammaLargeShape</span>),
     <span class='ident'>One</span>(<span class='ident'>Exp</span>),
     <span class='ident'>Small</span>(<span class='ident'>GammaSmallShape</span>)
-}<span class='comment'>
+}
 
-// These two helpers could be made public, but saving the
-// match-on-Gamma-enum branch from using them directly (e.g. if one
-// knows that the shape is always &gt; 1) doesn&#39;t appear to be much
-// faster.
+<span class='comment'>// These two helpers could be made public, but saving the</span>
+<span class='comment'>// match-on-Gamma-enum branch from using them directly (e.g. if one</span>
+<span class='comment'>// knows that the shape is always &gt; 1) doesn&#39;t appear to be much</span>
+<span class='comment'>// faster.</span>
 
-</span><span class='doccomment'>/// Gamma distribution where the shape parameter is less than 1.</span>
+<span class='doccomment'>/// Gamma distribution where the shape parameter is less than 1.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// Note, samples from this require a compulsory floating-point `pow`</span>
 <span class='doccomment'>/// call, which makes it significantly slower than sampling from a</span>
@@ -613,8 +611,8 @@
         <span class='kw'>loop</span> {
             <span class='kw'>let</span> <span class='ident'>StandardNormal</span>(<span class='ident'>x</span>) <span class='op'>=</span> <span class='ident'>rng</span>.<span class='ident'>gen</span>::<span class='op'>&lt;</span><span class='ident'>StandardNormal</span><span class='op'>&gt;</span>();
             <span class='kw'>let</span> <span class='ident'>v_cbrt</span> <span class='op'>=</span> <span class='number'>1.0</span> <span class='op'>+</span> <span class='self'>self</span>.<span class='ident'>c</span> <span class='op'>*</span> <span class='ident'>x</span>;
-            <span class='kw'>if</span> <span class='ident'>v_cbrt</span> <span class='op'>&lt;=</span> <span class='number'>0.0</span> {<span class='comment'> // a^3 &lt;= 0 iff a &lt;= 0
-                </span><span class='kw'>continue</span>
+            <span class='kw'>if</span> <span class='ident'>v_cbrt</span> <span class='op'>&lt;=</span> <span class='number'>0.0</span> { <span class='comment'>// a^3 &lt;= 0 iff a &lt;= 0</span>
+                <span class='kw'>continue</span>
             }
 
             <span class='kw'>let</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='ident'>v_cbrt</span> <span class='op'>*</span> <span class='ident'>v_cbrt</span> <span class='op'>*</span> <span class='ident'>v_cbrt</span>;
@@ -651,11 +649,11 @@
     <span class='ident'>repr</span>: <span class='ident'>ChiSquaredRepr</span>,
 }
 
-<span class='kw'>enum</span> <span class='ident'>ChiSquaredRepr</span> {<span class='comment'>
-    // k == 1, Gamma(alpha, ..) is particularly slow for alpha &lt; 1,
-    // e.g. when alpha = 1/2 as it would be for this case, so special-
-    // casing and using the definition of N(0,1)^2 is faster.
-    </span><span class='ident'>DoFExactlyOne</span>,
+<span class='kw'>enum</span> <span class='ident'>ChiSquaredRepr</span> {
+    <span class='comment'>// k == 1, Gamma(alpha, ..) is particularly slow for alpha &lt; 1,</span>
+    <span class='comment'>// e.g. when alpha = 1/2 as it would be for this case, so special-</span>
+    <span class='comment'>// casing and using the definition of N(0,1)^2 is faster.</span>
+    <span class='ident'>DoFExactlyOne</span>,
     <span class='ident'>DoFAnythingElse</span>(<span class='ident'>Gamma</span>),
 }
 
@@ -678,9 +676,9 @@
 <span class='kw'>impl</span> <span class='ident'>IndependentSample</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>ChiSquared</span> {
     <span class='kw'>fn</span> <span class='ident'>ind_sample</span><span class='op'>&lt;</span><span class='ident'>R</span>: <span class='ident'>Rng</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>rng</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>R</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span> {
         <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>repr</span> {
-            <span class='ident'>DoFExactlyOne</span> <span class='op'>=&gt;</span> {<span class='comment'>
-                // k == 1 =&gt; N(0,1)^2
-                </span><span class='kw'>let</span> <span class='ident'>StandardNormal</span>(<span class='ident'>norm</span>) <span class='op'>=</span> <span class='ident'>rng</span>.<span class='ident'>gen</span>::<span class='op'>&lt;</span><span class='ident'>StandardNormal</span><span class='op'>&gt;</span>();
+            <span class='ident'>DoFExactlyOne</span> <span class='op'>=&gt;</span> {
+                <span class='comment'>// k == 1 =&gt; N(0,1)^2</span>
+                <span class='kw'>let</span> <span class='ident'>StandardNormal</span>(<span class='ident'>norm</span>) <span class='op'>=</span> <span class='ident'>rng</span>.<span class='ident'>gen</span>::<span class='op'>&lt;</span><span class='ident'>StandardNormal</span><span class='op'>&gt;</span>();
                 <span class='ident'>norm</span> <span class='op'>*</span> <span class='ident'>norm</span>
             }
             <span class='ident'>DoFAnythingElse</span>(<span class='kw-2'>ref</span> <span class='ident'>g</span>) <span class='op'>=&gt;</span> <span class='ident'>g</span>.<span class='ident'>ind_sample</span>(<span class='ident'>rng</span>)
@@ -706,10 +704,10 @@
 <span class='doccomment'>/// ```</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>FisherF</span> {
     <span class='ident'>numer</span>: <span class='ident'>ChiSquared</span>,
-    <span class='ident'>denom</span>: <span class='ident'>ChiSquared</span>,<span class='comment'>
-    // denom_dof / numer_dof so that this can just be a straight
-    // multiplication, rather than a division.
-    </span><span class='ident'>dof_ratio</span>: <span class='ident'>f64</span>,
+    <span class='ident'>denom</span>: <span class='ident'>ChiSquared</span>,
+    <span class='comment'>// denom_dof / numer_dof so that this can just be a straight</span>
+    <span class='comment'>// multiplication, rather than a division.</span>
+    <span class='ident'>dof_ratio</span>: <span class='ident'>f64</span>,
 }
 
 <span class='kw'>impl</span> <span class='ident'>FisherF</span> {

@@ -7,8 +7,6 @@
 
     <title>extensions.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -597,25 +595,26 @@
 <span id='555'>555</span>
 <span id='556'>556</span>
 <span id='557'>557</span>
+<span id='558'>558</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! Utility mixins that apply to all Readers and Writers</span>
+<span class='doccomment'>//! Utility mixins that apply to all Readers and Writers</span>
 
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>missing_doc</span>)]</span><span class='comment'>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>missing_doc</span>)]</span>
 
-// FIXME: Not sure how this should be structured
-// FIXME: Iteration should probably be considered separately
+<span class='comment'>// FIXME: Not sure how this should be structured</span>
+<span class='comment'>// FIXME: Iteration should probably be considered separately</span>
 
-</span><span class='kw'>use</span> <span class='ident'>collections</span>::<span class='ident'>Collection</span>;
+<span class='kw'>use</span> <span class='ident'>collections</span>::<span class='ident'>Collection</span>;
 <span class='kw'>use</span> <span class='ident'>iter</span>::<span class='ident'>Iterator</span>;
 <span class='kw'>use</span> <span class='ident'>option</span>::{<span class='prelude-ty'>Option</span>, <span class='prelude-val'>Some</span>, <span class='prelude-val'>None</span>};
 <span class='kw'>use</span> <span class='ident'>result</span>::{<span class='prelude-val'>Ok</span>, <span class='prelude-val'>Err</span>};
@@ -677,10 +676,10 @@
 <span class='doccomment'>/// This function returns the value returned by the callback, for convenience.</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>u64_to_le_bytes</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>n</span>: <span class='ident'>u64</span>, <span class='ident'>size</span>: <span class='ident'>uint</span>, <span class='ident'>f</span>: <span class='op'>|</span><span class='ident'>v</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]<span class='op'>|</span> <span class='op'>-&gt;</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span> {
     <span class='kw'>use</span> <span class='ident'>mem</span>::{<span class='ident'>to_le16</span>, <span class='ident'>to_le32</span>, <span class='ident'>to_le64</span>};
-    <span class='kw'>use</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>;<span class='comment'>
+    <span class='kw'>use</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>;
 
-    // LLVM fails to properly optimize this when using shifts instead of the to_le* intrinsics
-    </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>size</span> <span class='op'>&lt;=</span> <span class='number'>8u</span>);
+    <span class='comment'>// LLVM fails to properly optimize this when using shifts instead of the to_le* intrinsics</span>
+    <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>size</span> <span class='op'>&lt;=</span> <span class='number'>8u</span>);
     <span class='kw'>match</span> <span class='ident'>size</span> {
       <span class='number'>1u</span> <span class='op'>=&gt;</span> <span class='ident'>f</span>(<span class='kw-2'>&amp;</span>[<span class='ident'>n</span> <span class='kw'>as</span> <span class='ident'>u8</span>]),
       <span class='number'>2u</span> <span class='op'>=&gt;</span> <span class='ident'>f</span>(<span class='kw'>unsafe</span> { <span class='ident'>transmute</span>::<span class='op'>&lt;</span>_, [<span class='ident'>u8</span>, ..<span class='number'>2</span>]<span class='op'>&gt;</span>(<span class='ident'>to_le16</span>(<span class='ident'>n</span> <span class='kw'>as</span> <span class='ident'>u16</span>)) }),
@@ -692,7 +691,7 @@
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='ident'>size</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='ident'>n</span>;
         <span class='kw'>while</span> <span class='ident'>i</span> <span class='op'>&gt;</span> <span class='number'>0u</span> {
-            <span class='ident'>bytes</span>.<span class='ident'>push</span>((<span class='ident'>n</span> <span class='op'>&amp;</span> <span class='number'>255_u64</span>) <span class='kw'>as</span> <span class='ident'>u8</span>);
+            <span class='ident'>bytes</span>.<span class='ident'>push</span>((<span class='ident'>n</span> <span class='kw-2'>&amp;</span> <span class='number'>255_u64</span>) <span class='kw'>as</span> <span class='ident'>u8</span>);
             <span class='ident'>n</span> <span class='op'>&gt;&gt;=</span> <span class='number'>8</span>;
             <span class='ident'>i</span> <span class='op'>-=</span> <span class='number'>1u</span>;
         }
@@ -717,10 +716,10 @@
 <span class='doccomment'>/// This function returns the value returned by the callback, for convenience.</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>u64_to_be_bytes</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>n</span>: <span class='ident'>u64</span>, <span class='ident'>size</span>: <span class='ident'>uint</span>, <span class='ident'>f</span>: <span class='op'>|</span><span class='ident'>v</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]<span class='op'>|</span> <span class='op'>-&gt;</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span> {
     <span class='kw'>use</span> <span class='ident'>mem</span>::{<span class='ident'>to_be16</span>, <span class='ident'>to_be32</span>, <span class='ident'>to_be64</span>};
-    <span class='kw'>use</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>;<span class='comment'>
+    <span class='kw'>use</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>;
 
-    // LLVM fails to properly optimize this when using shifts instead of the to_be* intrinsics
-    </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>size</span> <span class='op'>&lt;=</span> <span class='number'>8u</span>);
+    <span class='comment'>// LLVM fails to properly optimize this when using shifts instead of the to_be* intrinsics</span>
+    <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>size</span> <span class='op'>&lt;=</span> <span class='number'>8u</span>);
     <span class='kw'>match</span> <span class='ident'>size</span> {
       <span class='number'>1u</span> <span class='op'>=&gt;</span> <span class='ident'>f</span>(<span class='kw-2'>&amp;</span>[<span class='ident'>n</span> <span class='kw'>as</span> <span class='ident'>u8</span>]),
       <span class='number'>2u</span> <span class='op'>=&gt;</span> <span class='ident'>f</span>(<span class='kw'>unsafe</span> { <span class='ident'>transmute</span>::<span class='op'>&lt;</span>_, [<span class='ident'>u8</span>, ..<span class='number'>2</span>]<span class='op'>&gt;</span>(<span class='ident'>to_be16</span>(<span class='ident'>n</span> <span class='kw'>as</span> <span class='ident'>u16</span>)) }),
@@ -1037,17 +1036,17 @@
         }
 
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>reader</span> <span class='op'>=</span> <span class='ident'>MemReader</span>::<span class='ident'>new</span>(<span class='ident'>writer</span>.<span class='ident'>unwrap</span>());
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>ints</span>.<span class='ident'>iter</span>() {<span class='comment'>
-            // this tests that the sign extension is working
-            // (comparing the values as i32 would not test this)
-            </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>reader</span>.<span class='ident'>read_be_int_n</span>(<span class='number'>4</span>).<span class='ident'>unwrap</span>() <span class='op'>==</span> <span class='op'>*</span><span class='ident'>i</span> <span class='kw'>as</span> <span class='ident'>i64</span>);
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>ints</span>.<span class='ident'>iter</span>() {
+            <span class='comment'>// this tests that the sign extension is working</span>
+            <span class='comment'>// (comparing the values as i32 would not test this)</span>
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>reader</span>.<span class='ident'>read_be_int_n</span>(<span class='number'>4</span>).<span class='ident'>unwrap</span>() <span class='op'>==</span> <span class='op'>*</span><span class='ident'>i</span> <span class='kw'>as</span> <span class='ident'>i64</span>);
         }
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_read_f32</span>() {<span class='comment'>
-        //big-endian floating-point 8.1250
-        </span><span class='kw'>let</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0x41</span>, <span class='number'>0x02</span>, <span class='number'>0x00</span>, <span class='number'>0x00</span>];
+    <span class='kw'>fn</span> <span class='ident'>test_read_f32</span>() {
+        <span class='comment'>//big-endian floating-point 8.1250</span>
+        <span class='kw'>let</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0x41</span>, <span class='number'>0x02</span>, <span class='number'>0x00</span>, <span class='number'>0x00</span>];
 
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>writer</span> <span class='op'>=</span> <span class='ident'>MemWriter</span>::<span class='ident'>new</span>();
         <span class='ident'>writer</span>.<span class='ident'>write</span>(<span class='ident'>buf</span>.<span class='ident'>as_slice</span>()).<span class='ident'>unwrap</span>();
@@ -1074,10 +1073,10 @@
     <span class='kw'>fn</span> <span class='ident'>test_u64_from_be_bytes</span>() {
         <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>u64_from_be_bytes</span>;
 
-        <span class='kw'>let</span> <span class='ident'>buf</span> <span class='op'>=</span> [<span class='number'>0x01</span>, <span class='number'>0x02</span>, <span class='number'>0x03</span>, <span class='number'>0x04</span>, <span class='number'>0x05</span>, <span class='number'>0x06</span>, <span class='number'>0x07</span>, <span class='number'>0x08</span>, <span class='number'>0x09</span>];<span class='comment'>
+        <span class='kw'>let</span> <span class='ident'>buf</span> <span class='op'>=</span> [<span class='number'>0x01</span>, <span class='number'>0x02</span>, <span class='number'>0x03</span>, <span class='number'>0x04</span>, <span class='number'>0x05</span>, <span class='number'>0x06</span>, <span class='number'>0x07</span>, <span class='number'>0x08</span>, <span class='number'>0x09</span>];
 
-        // Aligned access
-        </span><span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>u64_from_be_bytes</span>(<span class='ident'>buf</span>, <span class='number'>0</span>, <span class='number'>0</span>), <span class='number'>0</span>);
+        <span class='comment'>// Aligned access</span>
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>u64_from_be_bytes</span>(<span class='ident'>buf</span>, <span class='number'>0</span>, <span class='number'>0</span>), <span class='number'>0</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>u64_from_be_bytes</span>(<span class='ident'>buf</span>, <span class='number'>0</span>, <span class='number'>1</span>), <span class='number'>0x01</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>u64_from_be_bytes</span>(<span class='ident'>buf</span>, <span class='number'>0</span>, <span class='number'>2</span>), <span class='number'>0x0102</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>u64_from_be_bytes</span>(<span class='ident'>buf</span>, <span class='number'>0</span>, <span class='number'>3</span>), <span class='number'>0x010203</span>);
@@ -1085,10 +1084,10 @@
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>u64_from_be_bytes</span>(<span class='ident'>buf</span>, <span class='number'>0</span>, <span class='number'>5</span>), <span class='number'>0x0102030405</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>u64_from_be_bytes</span>(<span class='ident'>buf</span>, <span class='number'>0</span>, <span class='number'>6</span>), <span class='number'>0x010203040506</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>u64_from_be_bytes</span>(<span class='ident'>buf</span>, <span class='number'>0</span>, <span class='number'>7</span>), <span class='number'>0x01020304050607</span>);
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>u64_from_be_bytes</span>(<span class='ident'>buf</span>, <span class='number'>0</span>, <span class='number'>8</span>), <span class='number'>0x0102030405060708</span>);<span class='comment'>
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>u64_from_be_bytes</span>(<span class='ident'>buf</span>, <span class='number'>0</span>, <span class='number'>8</span>), <span class='number'>0x0102030405060708</span>);
 
-        // Unaligned access
-        </span><span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>u64_from_be_bytes</span>(<span class='ident'>buf</span>, <span class='number'>1</span>, <span class='number'>0</span>), <span class='number'>0</span>);
+        <span class='comment'>// Unaligned access</span>
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>u64_from_be_bytes</span>(<span class='ident'>buf</span>, <span class='number'>1</span>, <span class='number'>0</span>), <span class='number'>0</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>u64_from_be_bytes</span>(<span class='ident'>buf</span>, <span class='number'>1</span>, <span class='number'>1</span>), <span class='number'>0x02</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>u64_from_be_bytes</span>(<span class='ident'>buf</span>, <span class='number'>1</span>, <span class='number'>2</span>), <span class='number'>0x0203</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>u64_from_be_bytes</span>(<span class='ident'>buf</span>, <span class='number'>1</span>, <span class='number'>3</span>), <span class='number'>0x020304</span>);
@@ -1108,14 +1107,15 @@
     <span class='kw'>use</span> <span class='ident'>prelude</span>::<span class='op'>*</span>;
     <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>test</span>::<span class='ident'>Bencher</span>;
 
+    <span class='comment'>// why is this a macro? wouldn&#39;t an inlined function work just as well?</span>
     <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>u64_from_be_bytes_bench_impl</span>(
-        (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>size</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>stride</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>start_index</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span>
+        (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>b</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>size</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>stride</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>start_index</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span>
         ({
             <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>u64_from_be_bytes</span>;
 
             <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>from_fn</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>stride</span><span class='op'>*</span><span class='number'>100</span><span class='op'>+</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>start_index</span>, <span class='op'>|</span><span class='ident'>i</span><span class='op'>|</span> <span class='ident'>i</span> <span class='kw'>as</span> <span class='ident'>u8</span>);
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>sum</span> <span class='op'>=</span> <span class='number'>0u64</span>;
-            <span class='ident'>b</span>.<span class='ident'>iter</span>(<span class='op'>||</span> {
+            <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>b</span>.<span class='ident'>iter</span>(<span class='op'>||</span> {
                 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>start_index</span>;
                 <span class='kw'>while</span> <span class='ident'>i</span> <span class='op'>&lt;</span> <span class='ident'>data</span>.<span class='ident'>len</span>() {
                     <span class='ident'>sum</span> <span class='op'>+=</span> <span class='ident'>u64_from_be_bytes</span>(<span class='ident'>data</span>.<span class='ident'>as_slice</span>(), <span class='ident'>i</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>size</span>);
@@ -1127,32 +1127,32 @@
 
     <span class='attribute'>#[<span class='ident'>bench</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>u64_from_be_bytes_4_aligned</span>(<span class='ident'>b</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Bencher</span>) {
-        <span class='macro'>u64_from_be_bytes_bench_impl</span><span class='macro'>!</span>(<span class='number'>4</span>, <span class='number'>4</span>, <span class='number'>0</span>);
+        <span class='macro'>u64_from_be_bytes_bench_impl</span><span class='macro'>!</span>(<span class='ident'>b</span>, <span class='number'>4</span>, <span class='number'>4</span>, <span class='number'>0</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>bench</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>u64_from_be_bytes_4_unaligned</span>(<span class='ident'>b</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Bencher</span>) {
-        <span class='macro'>u64_from_be_bytes_bench_impl</span><span class='macro'>!</span>(<span class='number'>4</span>, <span class='number'>4</span>, <span class='number'>1</span>);
+        <span class='macro'>u64_from_be_bytes_bench_impl</span><span class='macro'>!</span>(<span class='ident'>b</span>, <span class='number'>4</span>, <span class='number'>4</span>, <span class='number'>1</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>bench</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>u64_from_be_bytes_7_aligned</span>(<span class='ident'>b</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Bencher</span>) {
-        <span class='macro'>u64_from_be_bytes_bench_impl</span><span class='macro'>!</span>(<span class='number'>7</span>, <span class='number'>8</span>, <span class='number'>0</span>);
+        <span class='macro'>u64_from_be_bytes_bench_impl</span><span class='macro'>!</span>(<span class='ident'>b</span>, <span class='number'>7</span>, <span class='number'>8</span>, <span class='number'>0</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>bench</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>u64_from_be_bytes_7_unaligned</span>(<span class='ident'>b</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Bencher</span>) {
-        <span class='macro'>u64_from_be_bytes_bench_impl</span><span class='macro'>!</span>(<span class='number'>7</span>, <span class='number'>8</span>, <span class='number'>1</span>);
+        <span class='macro'>u64_from_be_bytes_bench_impl</span><span class='macro'>!</span>(<span class='ident'>b</span>, <span class='number'>7</span>, <span class='number'>8</span>, <span class='number'>1</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>bench</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>u64_from_be_bytes_8_aligned</span>(<span class='ident'>b</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Bencher</span>) {
-        <span class='macro'>u64_from_be_bytes_bench_impl</span><span class='macro'>!</span>(<span class='number'>8</span>, <span class='number'>8</span>, <span class='number'>0</span>);
+        <span class='macro'>u64_from_be_bytes_bench_impl</span><span class='macro'>!</span>(<span class='ident'>b</span>, <span class='number'>8</span>, <span class='number'>8</span>, <span class='number'>0</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>bench</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>u64_from_be_bytes_8_unaligned</span>(<span class='ident'>b</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Bencher</span>) {
-        <span class='macro'>u64_from_be_bytes_bench_impl</span><span class='macro'>!</span>(<span class='number'>8</span>, <span class='number'>8</span>, <span class='number'>1</span>);
+        <span class='macro'>u64_from_be_bytes_bench_impl</span><span class='macro'>!</span>(<span class='ident'>b</span>, <span class='number'>8</span>, <span class='number'>8</span>, <span class='number'>1</span>);
     }
 }
 </pre>

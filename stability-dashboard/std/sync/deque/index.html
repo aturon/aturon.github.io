@@ -7,8 +7,6 @@
 
     <title>std::sync::deque - Rust</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -79,18 +77,18 @@ and deallocation portions. Otherwise all operations are lock-free.</p>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>deque</span>::<span class='ident'>BufferPool</span>;
 
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>pool</span> <span class='op'>=</span> <span class='ident'>BufferPool</span>::<span class='ident'>new</span>();
-<span class='kw'>let</span> (<span class='kw-2'>mut</span> <span class='ident'>worker</span>, <span class='kw-2'>mut</span> <span class='ident'>stealer</span>) <span class='op'>=</span> <span class='ident'>pool</span>.<span class='ident'>deque</span>();<span class='comment'>
+<span class='kw'>let</span> (<span class='kw-2'>mut</span> <span class='ident'>worker</span>, <span class='kw-2'>mut</span> <span class='ident'>stealer</span>) <span class='op'>=</span> <span class='ident'>pool</span>.<span class='ident'>deque</span>();
 
-// Only the worker may push/pop
-</span><span class='ident'>worker</span>.<span class='ident'>push</span>(<span class='number'>1i</span>);
-<span class='ident'>worker</span>.<span class='ident'>pop</span>();<span class='comment'>
+<span class='comment'>// Only the worker may push/pop</span>
+<span class='ident'>worker</span>.<span class='ident'>push</span>(<span class='number'>1i</span>);
+<span class='ident'>worker</span>.<span class='ident'>pop</span>();
 
-// Stealers take data from the other end of the deque
-</span><span class='ident'>worker</span>.<span class='ident'>push</span>(<span class='number'>1i</span>);
-<span class='ident'>stealer</span>.<span class='ident'>steal</span>();<span class='comment'>
+<span class='comment'>// Stealers take data from the other end of the deque</span>
+<span class='ident'>worker</span>.<span class='ident'>push</span>(<span class='number'>1i</span>);
+<span class='ident'>stealer</span>.<span class='ident'>steal</span>();
 
-// Stealers can be cloned to have many stealers stealing in parallel
-</span><span class='ident'>worker</span>.<span class='ident'>push</span>(<span class='number'>1i</span>);
+<span class='comment'>// Stealers can be cloned to have many stealers stealing in parallel</span>
+<span class='ident'>worker</span>.<span class='ident'>push</span>(<span class='number'>1i</span>);
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>stealer2</span> <span class='op'>=</span> <span class='ident'>stealer</span>.<span class='ident'>clone</span>();
 <span class='ident'>stealer2</span>.<span class='ident'>steal</span>();
 </pre>

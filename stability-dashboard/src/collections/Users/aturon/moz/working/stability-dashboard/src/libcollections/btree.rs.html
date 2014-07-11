@@ -7,8 +7,6 @@
 
     <title>btree.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -954,22 +952,21 @@
 <span id='912'>912</span>
 <span id='913'>913</span>
 <span id='914'>914</span>
-<span id='915'>915</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
-//
-// btree.rs
-//
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
+<span class='comment'>//</span>
+<span class='comment'>// btree.rs</span>
+<span class='comment'>//</span>
 
-</span><span class='doccomment'>//! Starting implementation of a btree for rust.</span>
+<span class='doccomment'>//! Starting implementation of a btree for rust.</span>
 <span class='doccomment'>//! Structure inspired by github user davidhalperin&#39;s gist.</span>
 
 <span class='doccomment'>///A B-tree contains a root node (which contains a vector of elements),</span>
@@ -1018,12 +1015,12 @@
             <span class='ident'>upper_bound</span>: <span class='number'>2</span> <span class='op'>*</span> <span class='ident'>lb</span>
         }
     }
-}<span class='comment'>
+}
 
-//We would probably want to remove the dependence on the Clone trait in the future.
-//It is here as a crutch to ensure values can be passed around through the tree&#39;s nodes
-//especially during insertions and deletions.
-</span><span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>K</span>: <span class='ident'>Clone</span> <span class='op'>+</span> <span class='ident'>Ord</span>, <span class='ident'>V</span>: <span class='ident'>Clone</span><span class='op'>&gt;</span> <span class='ident'>BTree</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span> {
+<span class='comment'>//We would probably want to remove the dependence on the Clone trait in the future.</span>
+<span class='comment'>//It is here as a crutch to ensure values can be passed around through the tree&#39;s nodes</span>
+<span class='comment'>//especially during insertions and deletions.</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>K</span>: <span class='ident'>Clone</span> <span class='op'>+</span> <span class='ident'>Ord</span>, <span class='ident'>V</span>: <span class='ident'>Clone</span><span class='op'>&gt;</span> <span class='ident'>BTree</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span> {
     <span class='doccomment'>///Returns the value of a given key, which may not exist in the tree.</span>
     <span class='doccomment'>///Calls the root node&#39;s get method.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get</span>(<span class='self'>self</span>, <span class='ident'>k</span>: <span class='ident'>K</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>V</span><span class='op'>&gt;</span> {
@@ -1082,22 +1079,22 @@
     <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
         <span class='self'>self</span>.<span class='ident'>root</span>.<span class='ident'>fmt</span>(<span class='ident'>f</span>)
     }
-}<span class='comment'>
+}
 
 
-//Node types
-//A node is either a LeafNode or a BranchNode, which contain either a Leaf or a Branch.
-//Branches contain BranchElts, which contain a left child (another node) and a key-value
-//pair.  Branches also contain the rightmost child of the elements in the array.
-//Leaves contain LeafElts, which do not have children.
-</span><span class='kw'>enum</span> <span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span> {
+<span class='comment'>//Node types</span>
+<span class='comment'>//A node is either a LeafNode or a BranchNode, which contain either a Leaf or a Branch.</span>
+<span class='comment'>//Branches contain BranchElts, which contain a left child (another node) and a key-value</span>
+<span class='comment'>//pair.  Branches also contain the rightmost child of the elements in the array.</span>
+<span class='comment'>//Leaves contain LeafElts, which do not have children.</span>
+<span class='kw'>enum</span> <span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span> {
     <span class='ident'>LeafNode</span>(<span class='ident'>Leaf</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span>),
     <span class='ident'>BranchNode</span>(<span class='ident'>Branch</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span>)
-}<span class='comment'>
+}
 
 
-//Node functions/methods
-</span><span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>K</span>: <span class='ident'>Ord</span>, <span class='ident'>V</span><span class='op'>&gt;</span> <span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span> {
+<span class='comment'>//Node functions/methods</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>K</span>: <span class='ident'>Ord</span>, <span class='ident'>V</span><span class='op'>&gt;</span> <span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span> {
     <span class='doccomment'>///Creates a new leaf node given a vector of elements.</span>
     <span class='kw'>fn</span> <span class='ident'>new_leaf</span>(<span class='ident'>vec</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>LeafElt</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>K</span>,<span class='ident'>V</span><span class='op'>&gt;</span> {
         <span class='ident'>LeafNode</span>(<span class='ident'>Leaf</span>::<span class='ident'>new</span>(<span class='ident'>vec</span>))
@@ -1223,17 +1220,17 @@
             <span class='ident'>BranchNode</span>(<span class='kw-2'>ref</span> <span class='ident'>branch</span>) <span class='op'>=&gt;</span> <span class='ident'>branch</span>.<span class='ident'>fmt</span>(<span class='ident'>f</span>),
         }
     }
-}<span class='comment'>
+}
 
 
-//A leaf is a vector with elements that contain no children.  A leaf also
-//does not contain a rightmost child.
-</span><span class='kw'>struct</span> <span class='ident'>Leaf</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span> {
+<span class='comment'>//A leaf is a vector with elements that contain no children.  A leaf also</span>
+<span class='comment'>//does not contain a rightmost child.</span>
+<span class='kw'>struct</span> <span class='ident'>Leaf</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span> {
     <span class='ident'>elts</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>LeafElt</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;&gt;</span>
-}<span class='comment'>
+}
 
-//Vector of values with children, plus a rightmost child (greater than all)
-</span><span class='kw'>struct</span> <span class='ident'>Branch</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span> {
+<span class='comment'>//Vector of values with children, plus a rightmost child (greater than all)</span>
+<span class='kw'>struct</span> <span class='ident'>Branch</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span> {
     <span class='ident'>elts</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>BranchElt</span><span class='op'>&lt;</span><span class='ident'>K</span>,<span class='ident'>V</span><span class='op'>&gt;&gt;</span>,
     <span class='ident'>rightmost_child</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;&gt;</span>,
 }
@@ -1315,15 +1312,15 @@
     <span class='doccomment'>///Uses clone() to facilitate inserting new elements into a tree.</span>
     <span class='kw'>fn</span> <span class='ident'>insert</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>k</span>: <span class='ident'>K</span>, <span class='ident'>v</span>: <span class='ident'>V</span>, <span class='ident'>ub</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> (<span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span>, <span class='ident'>bool</span>) {
         <span class='kw'>let</span> <span class='ident'>to_insert</span> <span class='op'>=</span> <span class='ident'>LeafElt</span>::<span class='ident'>new</span>(<span class='ident'>k</span>, <span class='ident'>v</span>);
-        <span class='kw'>let</span> <span class='ident'>index</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>bsearch_leaf</span>(<span class='ident'>to_insert</span>.<span class='ident'>clone</span>().<span class='ident'>key</span>);<span class='comment'>
-        //Check index to see whether we actually inserted the element into the vector.
-        </span><span class='kw'>match</span> <span class='ident'>index</span> {<span class='comment'>
-            //If the index is None, the new element already exists in the vector.
-            </span><span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
+        <span class='kw'>let</span> <span class='ident'>index</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>bsearch_leaf</span>(<span class='ident'>to_insert</span>.<span class='ident'>clone</span>().<span class='ident'>key</span>);
+        <span class='comment'>//Check index to see whether we actually inserted the element into the vector.</span>
+        <span class='kw'>match</span> <span class='ident'>index</span> {
+            <span class='comment'>//If the index is None, the new element already exists in the vector.</span>
+            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
                 <span class='kw'>return</span> (<span class='ident'>Node</span>::<span class='ident'>new_leaf</span>(<span class='self'>self</span>.<span class='ident'>clone</span>().<span class='ident'>elts</span>), <span class='boolval'>false</span>);
-            }<span class='comment'>
-            //If there is an index, insert at that index.
-            </span>_ <span class='op'>=&gt;</span> {
+            }
+            <span class='comment'>//If there is an index, insert at that index.</span>
+            _ <span class='op'>=&gt;</span> {
                 <span class='kw'>if</span> <span class='ident'>index</span>.<span class='ident'>unwrap</span>() <span class='op'>&gt;=</span> <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>len</span>() {
                     <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>push</span>(<span class='ident'>to_insert</span>.<span class='ident'>clone</span>());
                 }
@@ -1331,10 +1328,10 @@
                     <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>insert</span>(<span class='ident'>index</span>.<span class='ident'>unwrap</span>(), <span class='ident'>to_insert</span>.<span class='ident'>clone</span>());
                 }
             }
-        }<span class='comment'>
-        //If we have overfilled the vector (by making its size greater than the
-        //upper bound), we return a new Branch with one element and two children.
-        </span><span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='ident'>ub</span> {
+        }
+        <span class='comment'>//If we have overfilled the vector (by making its size greater than the</span>
+        <span class='comment'>//upper bound), we return a new Branch with one element and two children.</span>
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='ident'>ub</span> {
             <span class='kw'>let</span> <span class='ident'>midpoint_opt</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>remove</span>(<span class='ident'>ub</span> <span class='op'>/</span> <span class='number'>2</span>);
             <span class='kw'>let</span> <span class='ident'>midpoint</span> <span class='op'>=</span> <span class='ident'>midpoint_opt</span>.<span class='ident'>unwrap</span>();
             <span class='kw'>let</span> (<span class='ident'>left_leaf</span>, <span class='ident'>right_leaf</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>partition</span>(<span class='op'>|</span><span class='ident'>le</span><span class='op'>|</span>
@@ -1475,10 +1472,10 @@
     <span class='kw'>fn</span> <span class='ident'>insert</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>k</span>: <span class='ident'>K</span>, <span class='ident'>v</span>: <span class='ident'>V</span>, <span class='ident'>ub</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> (<span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span>, <span class='ident'>bool</span>) {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>new_branch</span> <span class='op'>=</span> <span class='ident'>Node</span>::<span class='ident'>new_branch</span>(<span class='self'>self</span>.<span class='ident'>clone</span>().<span class='ident'>elts</span>, <span class='self'>self</span>.<span class='ident'>clone</span>().<span class='ident'>rightmost_child</span>);
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>outcome</span> <span class='op'>=</span> <span class='boolval'>false</span>;
-        <span class='kw'>let</span> <span class='ident'>index</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>new_branch</span>.<span class='ident'>bsearch_node</span>(<span class='ident'>k</span>.<span class='ident'>clone</span>());<span class='comment'>
-        //First, find which path down the tree will lead to the appropriate leaf
-        //for the key-value pair.
-        </span><span class='kw'>match</span> <span class='ident'>index</span>.<span class='ident'>clone</span>() {
+        <span class='kw'>let</span> <span class='ident'>index</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>new_branch</span>.<span class='ident'>bsearch_node</span>(<span class='ident'>k</span>.<span class='ident'>clone</span>());
+        <span class='comment'>//First, find which path down the tree will lead to the appropriate leaf</span>
+        <span class='comment'>//for the key-value pair.</span>
+        <span class='kw'>match</span> <span class='ident'>index</span>.<span class='ident'>clone</span>() {
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
                 <span class='kw'>return</span> (<span class='ident'>Node</span>::<span class='ident'>new_branch</span>(<span class='self'>self</span>.<span class='ident'>clone</span>().<span class='ident'>elts</span>,
                                          <span class='self'>self</span>.<span class='ident'>clone</span>().<span class='ident'>rightmost_child</span>),
@@ -1498,13 +1495,13 @@
                                                                                  <span class='ident'>ub</span>.<span class='ident'>clone</span>());
                     <span class='ident'>new_branch</span> <span class='op'>=</span> <span class='ident'>new_outcome</span>.<span class='ident'>clone</span>().<span class='ident'>val0</span>();
                     <span class='ident'>outcome</span> <span class='op'>=</span> <span class='ident'>new_outcome</span>.<span class='ident'>val1</span>();
-                }<span class='comment'>
-                //Check to see whether a branch or a leaf was returned from the
-                //tree traversal.
-                </span><span class='kw'>match</span> <span class='ident'>new_branch</span>.<span class='ident'>clone</span>() {<span class='comment'>
-                    //If we have a leaf, we do not need to resize the tree,
-                    //so we can return false.
-                    </span><span class='ident'>LeafNode</span>(..) <span class='op'>=&gt;</span> {
+                }
+                <span class='comment'>//Check to see whether a branch or a leaf was returned from the</span>
+                <span class='comment'>//tree traversal.</span>
+                <span class='kw'>match</span> <span class='ident'>new_branch</span>.<span class='ident'>clone</span>() {
+                    <span class='comment'>//If we have a leaf, we do not need to resize the tree,</span>
+                    <span class='comment'>//so we can return false.</span>
+                    <span class='ident'>LeafNode</span>(..) <span class='op'>=&gt;</span> {
                         <span class='kw'>if</span> <span class='ident'>index</span>.<span class='ident'>unwrap</span>() <span class='op'>==</span> <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>len</span>() {
                             <span class='self'>self</span>.<span class='ident'>rightmost_child</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>new_branch</span>.<span class='ident'>clone</span>();
                         }
@@ -1514,18 +1511,18 @@
                         <span class='kw'>return</span> (<span class='ident'>Node</span>::<span class='ident'>new_branch</span>(<span class='self'>self</span>.<span class='ident'>clone</span>().<span class='ident'>elts</span>,
                                                  <span class='self'>self</span>.<span class='ident'>clone</span>().<span class='ident'>rightmost_child</span>),
                                 <span class='boolval'>true</span>);
-                    }<span class='comment'>
-                    //If we have a branch, we might need to refactor the tree.
-                    </span><span class='ident'>BranchNode</span>(..) <span class='op'>=&gt;</span> {}
+                    }
+                    <span class='comment'>//If we have a branch, we might need to refactor the tree.</span>
+                    <span class='ident'>BranchNode</span>(..) <span class='op'>=&gt;</span> {}
                 }
             }
-        }<span class='comment'>
-        //If we inserted something into the tree, do the following:
-        </span><span class='kw'>if</span> <span class='ident'>outcome</span> {
-            <span class='kw'>match</span> <span class='ident'>new_branch</span>.<span class='ident'>clone</span>() {<span class='comment'>
-                //If we have a new leaf node, integrate it into the current branch
-                //and return it, saying we have inserted a new element.
-                </span><span class='ident'>LeafNode</span>(..) <span class='op'>=&gt;</span> {
+        }
+        <span class='comment'>//If we inserted something into the tree, do the following:</span>
+        <span class='kw'>if</span> <span class='ident'>outcome</span> {
+            <span class='kw'>match</span> <span class='ident'>new_branch</span>.<span class='ident'>clone</span>() {
+                <span class='comment'>//If we have a new leaf node, integrate it into the current branch</span>
+                <span class='comment'>//and return it, saying we have inserted a new element.</span>
+                <span class='ident'>LeafNode</span>(..) <span class='op'>=&gt;</span> {
                     <span class='kw'>if</span> <span class='ident'>index</span>.<span class='ident'>unwrap</span>() <span class='op'>==</span> <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>len</span>() {
                         <span class='self'>self</span>.<span class='ident'>rightmost_child</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>new_branch</span>;
                     }
@@ -1535,10 +1532,10 @@
                     <span class='kw'>return</span> (<span class='ident'>Node</span>::<span class='ident'>new_branch</span>(<span class='self'>self</span>.<span class='ident'>clone</span>().<span class='ident'>elts</span>,
                                              <span class='self'>self</span>.<span class='ident'>clone</span>().<span class='ident'>rightmost_child</span>),
                             <span class='boolval'>true</span>);
-                }<span class='comment'>
-                //If we have a new branch node, attempt to insert it into the tree
-                //as with the key-value pair, then check to see if the node is overfull.
-                </span><span class='ident'>BranchNode</span>(<span class='ident'>branch</span>) <span class='op'>=&gt;</span> {
+                }
+                <span class='comment'>//If we have a new branch node, attempt to insert it into the tree</span>
+                <span class='comment'>//as with the key-value pair, then check to see if the node is overfull.</span>
+                <span class='ident'>BranchNode</span>(<span class='ident'>branch</span>) <span class='op'>=&gt;</span> {
                     <span class='kw'>let</span> <span class='ident'>new_elt</span> <span class='op'>=</span> <span class='ident'>branch</span>.<span class='ident'>elts</span>.<span class='ident'>get</span>(<span class='number'>0</span>).<span class='ident'>clone</span>();
                     <span class='kw'>let</span> <span class='ident'>new_elt_index</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>bsearch_branch</span>(<span class='ident'>new_elt</span>.<span class='ident'>clone</span>().<span class='ident'>key</span>);
                     <span class='kw'>match</span> <span class='ident'>new_elt_index</span> {
@@ -1559,10 +1556,10 @@
                         }
                     }
                 }
-            }<span class='comment'>
-            //If the current node is overfilled, create a new branch with one element
-            //and two children.
-            </span><span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='ident'>ub</span> {
+            }
+            <span class='comment'>//If the current node is overfilled, create a new branch with one element</span>
+            <span class='comment'>//and two children.</span>
+            <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='ident'>ub</span> {
                 <span class='kw'>let</span> <span class='ident'>midpoint</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>remove</span>(<span class='ident'>ub</span> <span class='op'>/</span> <span class='number'>2</span>).<span class='ident'>unwrap</span>();
                 <span class='kw'>let</span> (<span class='ident'>new_left</span>, <span class='ident'>new_right</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>clone</span>().<span class='ident'>elts</span>.<span class='ident'>partition</span>(<span class='op'>|</span><span class='ident'>le</span><span class='op'>|</span>
                                                                 <span class='ident'>midpoint</span>.<span class='ident'>key</span>.<span class='ident'>cmp</span>(<span class='kw-2'>&amp;</span><span class='ident'>le</span>.<span class='ident'>key</span>)
@@ -1623,16 +1620,16 @@
         }
         <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot; // rightmost child: ({}) &quot;</span>, <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>rightmost_child</span>)
     }
-}<span class='comment'>
+}
 
-//A LeafElt contains no left child, but a key-value pair.
-</span><span class='kw'>struct</span> <span class='ident'>LeafElt</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span> {
+<span class='comment'>//A LeafElt contains no left child, but a key-value pair.</span>
+<span class='kw'>struct</span> <span class='ident'>LeafElt</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span> {
     <span class='ident'>key</span>: <span class='ident'>K</span>,
     <span class='ident'>value</span>: <span class='ident'>V</span>
-}<span class='comment'>
+}
 
-//A BranchElt has a left child in insertion to a key-value pair.
-</span><span class='kw'>struct</span> <span class='ident'>BranchElt</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span> {
+<span class='comment'>//A BranchElt has a left child in insertion to a key-value pair.</span>
+<span class='kw'>struct</span> <span class='ident'>BranchElt</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;</span> {
     <span class='ident'>left</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>K</span>, <span class='ident'>V</span><span class='op'>&gt;&gt;</span>,
     <span class='ident'>key</span>: <span class='ident'>K</span>,
     <span class='ident'>value</span>: <span class='ident'>V</span>
@@ -1738,15 +1735,14 @@
 <span class='kw'>mod</span> <span class='ident'>test_btree</span> {
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
 
-    <span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>BTree</span>, <span class='ident'>Node</span>, <span class='ident'>LeafElt</span>};<span class='comment'>
+    <span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>BTree</span>, <span class='ident'>Node</span>, <span class='ident'>LeafElt</span>};
 
-    //Tests the functionality of the insert methods (which are unfinished).
-    </span><span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='comment'>//Tests the functionality of the insert methods (which are unfinished).</span>
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>insert_test_one</span>() {
         <span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>BTree</span>::<span class='ident'>new</span>(<span class='number'>1i</span>, <span class='string'>&quot;abc&quot;</span>.<span class='ident'>to_string</span>(), <span class='number'>2</span>);
-        <span class='kw'>let</span> <span class='ident'>is_insert</span> <span class='op'>=</span> <span class='ident'>b</span>.<span class='ident'>insert</span>(<span class='number'>2i</span>, <span class='string'>&quot;xyz&quot;</span>.<span class='ident'>to_string</span>());<span class='comment'>
-        //println!(&quot;{}&quot;, is_insert.clone().to_str());
-        </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>is_insert</span>.<span class='ident'>root</span>.<span class='ident'>is_leaf</span>());
+        <span class='kw'>let</span> <span class='ident'>is_insert</span> <span class='op'>=</span> <span class='ident'>b</span>.<span class='ident'>insert</span>(<span class='number'>2i</span>, <span class='string'>&quot;xyz&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>is_insert</span>.<span class='ident'>root</span>.<span class='ident'>is_leaf</span>());
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -1755,9 +1751,9 @@
         <span class='kw'>let</span> <span class='ident'>leaf_elt_2</span> <span class='op'>=</span> <span class='ident'>LeafElt</span>::<span class='ident'>new</span>(<span class='number'>2i</span>, <span class='string'>&quot;bbb&quot;</span>.<span class='ident'>to_string</span>());
         <span class='kw'>let</span> <span class='ident'>leaf_elt_3</span> <span class='op'>=</span> <span class='ident'>LeafElt</span>::<span class='ident'>new</span>(<span class='number'>3i</span>, <span class='string'>&quot;ccc&quot;</span>.<span class='ident'>to_string</span>());
         <span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='ident'>Node</span>::<span class='ident'>new_leaf</span>(<span class='macro'>vec</span><span class='macro'>!</span>(<span class='ident'>leaf_elt_1</span>, <span class='ident'>leaf_elt_2</span>, <span class='ident'>leaf_elt_3</span>));
-        <span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>BTree</span>::<span class='ident'>new_with_node_len</span>(<span class='ident'>n</span>, <span class='number'>3</span>, <span class='number'>2</span>);<span class='comment'>
-        //println!(&quot;{}&quot;, b.clone().insert(4, &quot;ddd&quot;.to_string()).to_str());
-        </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>b</span>.<span class='ident'>insert</span>(<span class='number'>4</span>, <span class='string'>&quot;ddd&quot;</span>.<span class='ident'>to_string</span>()).<span class='ident'>root</span>.<span class='ident'>is_leaf</span>());
+        <span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>BTree</span>::<span class='ident'>new_with_node_len</span>(<span class='ident'>n</span>, <span class='number'>3</span>, <span class='number'>2</span>);
+        <span class='comment'>//println!(&quot;{}&quot;, b.clone().insert(4, &quot;ddd&quot;.to_string()).to_string());</span>
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>b</span>.<span class='ident'>insert</span>(<span class='number'>4</span>, <span class='string'>&quot;ddd&quot;</span>.<span class='ident'>to_string</span>()).<span class='ident'>root</span>.<span class='ident'>is_leaf</span>());
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -1767,9 +1763,9 @@
         <span class='kw'>let</span> <span class='ident'>leaf_elt_3</span> <span class='op'>=</span> <span class='ident'>LeafElt</span>::<span class='ident'>new</span>(<span class='number'>3i</span>, <span class='string'>&quot;ccc&quot;</span>.<span class='ident'>to_string</span>());
         <span class='kw'>let</span> <span class='ident'>leaf_elt_4</span> <span class='op'>=</span> <span class='ident'>LeafElt</span>::<span class='ident'>new</span>(<span class='number'>4i</span>, <span class='string'>&quot;ddd&quot;</span>.<span class='ident'>to_string</span>());
         <span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='ident'>Node</span>::<span class='ident'>new_leaf</span>(<span class='macro'>vec</span><span class='macro'>!</span>(<span class='ident'>leaf_elt_1</span>, <span class='ident'>leaf_elt_2</span>, <span class='ident'>leaf_elt_3</span>, <span class='ident'>leaf_elt_4</span>));
-        <span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>BTree</span>::<span class='ident'>new_with_node_len</span>(<span class='ident'>n</span>, <span class='number'>3</span>, <span class='number'>2</span>);<span class='comment'>
-        //println!(&quot;{}&quot;, b.clone().insert(5, &quot;eee&quot;.to_string()).to_str());
-        </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>b</span>.<span class='ident'>insert</span>(<span class='number'>5</span>, <span class='string'>&quot;eee&quot;</span>.<span class='ident'>to_string</span>()).<span class='ident'>root</span>.<span class='ident'>is_leaf</span>());
+        <span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>BTree</span>::<span class='ident'>new_with_node_len</span>(<span class='ident'>n</span>, <span class='number'>3</span>, <span class='number'>2</span>);
+        <span class='comment'>//println!(&quot;{}&quot;, b.clone().insert(5, &quot;eee&quot;.to_string()).to_string());</span>
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>b</span>.<span class='ident'>insert</span>(<span class='number'>5</span>, <span class='string'>&quot;eee&quot;</span>.<span class='ident'>to_string</span>()).<span class='ident'>root</span>.<span class='ident'>is_leaf</span>());
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -1784,9 +1780,9 @@
         <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>b</span>.<span class='ident'>clone</span>().<span class='ident'>insert</span>(<span class='number'>6</span>, <span class='string'>&quot;fff&quot;</span>.<span class='ident'>to_string</span>());
         <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>b</span>.<span class='ident'>clone</span>().<span class='ident'>insert</span>(<span class='number'>7</span>, <span class='string'>&quot;ggg&quot;</span>.<span class='ident'>to_string</span>());
         <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>b</span>.<span class='ident'>clone</span>().<span class='ident'>insert</span>(<span class='number'>8</span>, <span class='string'>&quot;hhh&quot;</span>.<span class='ident'>to_string</span>());
-        <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>b</span>.<span class='ident'>clone</span>().<span class='ident'>insert</span>(<span class='number'>0</span>, <span class='string'>&quot;omg&quot;</span>.<span class='ident'>to_string</span>());<span class='comment'>
-        //println!(&quot;{}&quot;, b.clone().to_str());
-        </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>b</span>.<span class='ident'>root</span>.<span class='ident'>is_leaf</span>());
+        <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>b</span>.<span class='ident'>clone</span>().<span class='ident'>insert</span>(<span class='number'>0</span>, <span class='string'>&quot;omg&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='comment'>//println!(&quot;{}&quot;, b.clone().to_string());</span>
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>b</span>.<span class='ident'>root</span>.<span class='ident'>is_leaf</span>());
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -1821,53 +1817,53 @@
         <span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='ident'>Node</span>::<span class='ident'>new_leaf</span>(<span class='macro'>vec</span><span class='macro'>!</span>(<span class='ident'>leaf_elt_1</span>, <span class='ident'>leaf_elt_2</span>, <span class='ident'>leaf_elt_3</span>, <span class='ident'>leaf_elt_4</span>));
         <span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>BTree</span>::<span class='ident'>new_with_node_len</span>(<span class='ident'>n</span>, <span class='number'>3</span>, <span class='number'>2</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='prelude-val'>Some</span>(<span class='number'>4</span>), <span class='ident'>b</span>.<span class='ident'>root</span>.<span class='ident'>bsearch_node</span>(<span class='number'>800</span>));
-    }<span class='comment'>
+    }
 
-    //Tests the functionality of the get method.
-    </span><span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='comment'>//Tests the functionality of the get method.</span>
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>get_test</span>() {
         <span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>BTree</span>::<span class='ident'>new</span>(<span class='number'>1i</span>, <span class='string'>&quot;abc&quot;</span>.<span class='ident'>to_string</span>(), <span class='number'>2</span>);
         <span class='kw'>let</span> <span class='ident'>val</span> <span class='op'>=</span> <span class='ident'>b</span>.<span class='ident'>get</span>(<span class='number'>1</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>val</span>, <span class='prelude-val'>Some</span>(<span class='string'>&quot;abc&quot;</span>.<span class='ident'>to_string</span>()));
-    }<span class='comment'>
+    }
 
-    //Tests the BTree&#39;s clone() method.
-    </span><span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='comment'>//Tests the BTree&#39;s clone() method.</span>
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>btree_clone_test</span>() {
         <span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>BTree</span>::<span class='ident'>new</span>(<span class='number'>1i</span>, <span class='string'>&quot;abc&quot;</span>.<span class='ident'>to_string</span>(), <span class='number'>2</span>);
         <span class='kw'>let</span> <span class='ident'>b2</span> <span class='op'>=</span> <span class='ident'>b</span>.<span class='ident'>clone</span>();
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>b</span>.<span class='ident'>root</span> <span class='op'>==</span> <span class='ident'>b2</span>.<span class='ident'>root</span>)
-    }<span class='comment'>
+    }
 
-    //Tests the BTree&#39;s cmp() method when one node is &quot;less than&quot; another.
-    </span><span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='comment'>//Tests the BTree&#39;s cmp() method when one node is &quot;less than&quot; another.</span>
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>btree_cmp_test_less</span>() {
         <span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>BTree</span>::<span class='ident'>new</span>(<span class='number'>1i</span>, <span class='string'>&quot;abc&quot;</span>.<span class='ident'>to_string</span>(), <span class='number'>2</span>);
         <span class='kw'>let</span> <span class='ident'>b2</span> <span class='op'>=</span> <span class='ident'>BTree</span>::<span class='ident'>new</span>(<span class='number'>2i</span>, <span class='string'>&quot;bcd&quot;</span>.<span class='ident'>to_string</span>(), <span class='number'>2</span>);
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>b</span>.<span class='ident'>cmp</span>(<span class='kw-2'>&amp;</span><span class='ident'>b2</span>) <span class='op'>==</span> <span class='kw-2'>&amp;</span><span class='ident'>Less</span>)
-    }<span class='comment'>
+    }
 
-    //Tests the BTree&#39;s cmp() method when two nodes are equal.
-    </span><span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='comment'>//Tests the BTree&#39;s cmp() method when two nodes are equal.</span>
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>btree_cmp_test_eq</span>() {
         <span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>BTree</span>::<span class='ident'>new</span>(<span class='number'>1i</span>, <span class='string'>&quot;abc&quot;</span>.<span class='ident'>to_string</span>(), <span class='number'>2</span>);
         <span class='kw'>let</span> <span class='ident'>b2</span> <span class='op'>=</span> <span class='ident'>BTree</span>::<span class='ident'>new</span>(<span class='number'>1i</span>, <span class='string'>&quot;bcd&quot;</span>.<span class='ident'>to_string</span>(), <span class='number'>2</span>);
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>b</span>.<span class='ident'>cmp</span>(<span class='kw-2'>&amp;</span><span class='ident'>b2</span>) <span class='op'>==</span> <span class='kw-2'>&amp;</span><span class='ident'>Equal</span>)
-    }<span class='comment'>
+    }
 
-    //Tests the BTree&#39;s cmp() method when one node is &quot;greater than&quot; another.
-    </span><span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='comment'>//Tests the BTree&#39;s cmp() method when one node is &quot;greater than&quot; another.</span>
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>btree_cmp_test_greater</span>() {
         <span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>BTree</span>::<span class='ident'>new</span>(<span class='number'>1i</span>, <span class='string'>&quot;abc&quot;</span>.<span class='ident'>to_string</span>(), <span class='number'>2</span>);
         <span class='kw'>let</span> <span class='ident'>b2</span> <span class='op'>=</span> <span class='ident'>BTree</span>::<span class='ident'>new</span>(<span class='number'>2i</span>, <span class='string'>&quot;bcd&quot;</span>.<span class='ident'>to_string</span>(), <span class='number'>2</span>);
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>b2</span>.<span class='ident'>cmp</span>(<span class='kw-2'>&amp;</span><span class='ident'>b</span>) <span class='op'>==</span> <span class='kw-2'>&amp;</span><span class='ident'>Greater</span>)
-    }<span class='comment'>
+    }
 
-    //Tests the BTree&#39;s to_str() method.
-    </span><span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='comment'>//Tests the BTree&#39;s to_string() method.</span>
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>btree_tostr_test</span>() {
         <span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>BTree</span>::<span class='ident'>new</span>(<span class='number'>1i</span>, <span class='string'>&quot;abc&quot;</span>.<span class='ident'>to_string</span>(), <span class='number'>2</span>);
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>b</span>.<span class='ident'>to_str</span>(), <span class='string'>&quot;Key: 1, value: abc;&quot;</span>.<span class='ident'>to_string</span>())
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>b</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;Key: 1, value: abc;&quot;</span>.<span class='ident'>to_string</span>())
     }
 
 }

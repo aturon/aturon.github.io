@@ -7,8 +7,6 @@
 
     <title>serialize::json - Rust</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -41,7 +39,7 @@
     </nav>
 
     <section id='main' class="content mod">
-<h1 class='fqn'>Module <a href='../index.html'>serialize</a>::<a class='mod' href=''>json</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-28666' href='../../src/serialize/Users/aturon/moz/working/stability-dashboard/src/libserialize/json.rs.html#14-3282'>[src]</a></span></h1>
+<h1 class='fqn'>Module <a href='../index.html'>serialize</a>::<a class='mod' href=''>json</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-28857' href='../../src/serialize/Users/aturon/moz/working/stability-dashboard/src/libserialize/json.rs.html#14-3332'>[src]</a></span></h1>
 <div class='docblock'><p>JSON parsing and serialization</p>
 
 <h1 id="what-is-json?" class='section-header'><a
@@ -142,8 +140,8 @@ fn main() {
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>serialize</span>;
 <span class='kw'>use</span> <span class='ident'>serialize</span>::<span class='ident'>json</span>;
 
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Decodable</span>, <span class='ident'>Encodable</span>)]</span><span class='comment'> //generate Decodable, Encodable impl.
-</span><span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>TestStruct1</span>  {
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Decodable</span>, <span class='ident'>Encodable</span>)]</span> <span class='comment'>//generate Decodable, Encodable impl.</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>TestStruct1</span>  {
     <span class='ident'>data_int</span>: <span class='ident'>u8</span>,
     <span class='ident'>data_str</span>: <span class='ident'>String</span>,
     <span class='ident'>data_vector</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>,
@@ -151,13 +149,13 @@ fn main() {
 
 <span class='kw'>fn</span> <span class='ident'>main</span>() {
     <span class='kw'>let</span> <span class='ident'>object</span> <span class='op'>=</span> <span class='ident'>TestStruct1</span>
-         {<span class='ident'>data_int</span>: <span class='number'>1</span>, <span class='ident'>data_str</span>:<span class='string'>&quot;toto&quot;</span>.<span class='ident'>to_string</span>(), <span class='ident'>data_vector</span>:<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>2</span>,<span class='number'>3</span>,<span class='number'>4</span>,<span class='number'>5</span>]};<span class='comment'>
+         {<span class='ident'>data_int</span>: <span class='number'>1</span>, <span class='ident'>data_str</span>:<span class='string'>&quot;toto&quot;</span>.<span class='ident'>to_string</span>(), <span class='ident'>data_vector</span>:<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>2</span>,<span class='number'>3</span>,<span class='number'>4</span>,<span class='number'>5</span>]};
 
-    // Serialize using `json::encode`
-    </span><span class='kw'>let</span> <span class='ident'>encoded</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>encode</span>(<span class='kw-2'>&amp;</span><span class='ident'>object</span>);<span class='comment'>
+    <span class='comment'>// Serialize using `json::encode`</span>
+    <span class='kw'>let</span> <span class='ident'>encoded</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>encode</span>(<span class='kw-2'>&amp;</span><span class='ident'>object</span>);
 
-    // Deserialize using `json::decode`
-    </span><span class='kw'>let</span> <span class='ident'>decoded</span>: <span class='ident'>TestStruct1</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>decode</span>(<span class='ident'>encoded</span>.<span class='ident'>as_slice</span>()).<span class='ident'>unwrap</span>();
+    <span class='comment'>// Deserialize using `json::decode`</span>
+    <span class='kw'>let</span> <span class='ident'>decoded</span>: <span class='ident'>TestStruct1</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>decode</span>(<span class='ident'>encoded</span>.<span class='ident'>as_slice</span>()).<span class='ident'>unwrap</span>();
 }
 </pre>
 
@@ -190,7 +188,7 @@ fn main() {
     // Serialize using `ToJson`
     let test2 = TestStruct1 {data_int: 1, data_str:&quot;toto&quot;.to_string(), data_vector:vec![2,3,4,5]};
     let tjson: json::Json = test2.to_json();
-    let json_str: String = tjson.to_str();
+    let json_str: String = tjson.to_string();
 
     // Deserialize like before
     let decoded: TestStruct1 = json::decode(json_str.as_slice()).unwrap();
@@ -216,14 +214,14 @@ fn main() {
     }
 }
 
-<span class='kw'>fn</span> <span class='ident'>main</span>() {<span class='comment'>
-    // Serialize using `ToJson`
-    </span><span class='kw'>let</span> <span class='ident'>test2</span> <span class='op'>=</span> <span class='ident'>TestStruct1</span> {<span class='ident'>data_int</span>: <span class='number'>1</span>, <span class='ident'>data_str</span>:<span class='string'>&quot;toto&quot;</span>.<span class='ident'>to_string</span>(), <span class='ident'>data_vector</span>:<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>2</span>,<span class='number'>3</span>,<span class='number'>4</span>,<span class='number'>5</span>]};
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='comment'>// Serialize using `ToJson`</span>
+    <span class='kw'>let</span> <span class='ident'>test2</span> <span class='op'>=</span> <span class='ident'>TestStruct1</span> {<span class='ident'>data_int</span>: <span class='number'>1</span>, <span class='ident'>data_str</span>:<span class='string'>&quot;toto&quot;</span>.<span class='ident'>to_string</span>(), <span class='ident'>data_vector</span>:<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>2</span>,<span class='number'>3</span>,<span class='number'>4</span>,<span class='number'>5</span>]};
     <span class='kw'>let</span> <span class='ident'>tjson</span>: <span class='ident'>json</span>::<span class='ident'>Json</span> <span class='op'>=</span> <span class='ident'>test2</span>.<span class='ident'>to_json</span>();
-    <span class='kw'>let</span> <span class='ident'>json_str</span>: <span class='ident'>String</span> <span class='op'>=</span> <span class='ident'>tjson</span>.<span class='ident'>to_str</span>();<span class='comment'>
+    <span class='kw'>let</span> <span class='ident'>json_str</span>: <span class='ident'>String</span> <span class='op'>=</span> <span class='ident'>tjson</span>.<span class='ident'>to_string</span>();
 
-    // Deserialize like before
-    </span><span class='kw'>let</span> <span class='ident'>decoded</span>: <span class='ident'>TestStruct1</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>decode</span>(<span class='ident'>json_str</span>.<span class='ident'>as_slice</span>()).<span class='ident'>unwrap</span>();
+    <span class='comment'>// Deserialize like before</span>
+    <span class='kw'>let</span> <span class='ident'>decoded</span>: <span class='ident'>TestStruct1</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>decode</span>(<span class='ident'>json_str</span>.<span class='ident'>as_slice</span>()).<span class='ident'>unwrap</span>();
 }
 </pre>
 </div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
@@ -345,6 +343,12 @@ StackElements compositing the stack that represents foo.bar[3].x</p>
                                title='serialize::json::error_str'>error_str</a></td>
                         <td class='docblock short'><p>Returns a readable error string for a given error code.</p>
 </td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.escape_bytes.html'
+                               title='serialize::json::escape_bytes'>escape_bytes</a></td>
+                        <td class='docblock short'></td>
                     </tr>
                 
                     <tr>

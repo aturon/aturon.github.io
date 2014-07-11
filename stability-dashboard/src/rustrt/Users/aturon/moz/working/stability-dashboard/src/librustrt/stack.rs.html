@@ -7,8 +7,6 @@
 
     <title>stack.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -360,17 +358,17 @@
 <span id='318'>318</span>
 <span id='319'>319</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! Rust stack-limit management</span>
+<span class='doccomment'>//! Rust stack-limit management</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! Currently Rust uses a segmented-stack-like scheme in order to detect stack</span>
 <span class='doccomment'>//! overflow for rust tasks. In this scheme, the prologue of all functions are</span>
@@ -384,38 +382,38 @@
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! This function is an unstable module because this scheme for stack overflow</span>
 <span class='doccomment'>//! detection is not guaranteed to continue in the future. Usage of this module</span>
-<span class='doccomment'>//! is discouraged unless absolutely necessary.</span><span class='comment'>
+<span class='doccomment'>//! is discouraged unless absolutely necessary.</span>
 
-// iOS related notes
-//
-// It is possible to implement it using idea from
-// http://www.opensource.apple.com/source/Libc/Libc-825.40.1/pthreads/pthread_machdep.h
-//
-// In short: _pthread_{get,set}_specific_direct allows extremely fast
-// access, exactly what is required for segmented stack
-// There is a pool of reserved slots for Apple internal use (0..119)
-// First dynamic allocated pthread key starts with 257 (on iOS7)
-// So using slot 149 should be pretty safe ASSUMING space is reserved
-// for every key &lt; first dynamic key
-//
-// There is also an opportunity to steal keys reserved for Garbage Collection
-// ranges 80..89 and 110..119, especially considering the fact Garbage Collection
-// never supposed to work on iOS. But as everybody knows it - there is a chance
-// that those slots will be re-used, like it happened with key 95 (moved from
-// JavaScriptCore to CoreText)
-//
-// Unfortunately Apple rejected patch to LLVM which generated
-// corresponding prolog, decision was taken to disable segmented
-// stack support on iOS.
+<span class='comment'>// iOS related notes</span>
+<span class='comment'>//</span>
+<span class='comment'>// It is possible to implement it using idea from</span>
+<span class='comment'>// http://www.opensource.apple.com/source/Libc/Libc-825.40.1/pthreads/pthread_machdep.h</span>
+<span class='comment'>//</span>
+<span class='comment'>// In short: _pthread_{get,set}_specific_direct allows extremely fast</span>
+<span class='comment'>// access, exactly what is required for segmented stack</span>
+<span class='comment'>// There is a pool of reserved slots for Apple internal use (0..119)</span>
+<span class='comment'>// First dynamic allocated pthread key starts with 257 (on iOS7)</span>
+<span class='comment'>// So using slot 149 should be pretty safe ASSUMING space is reserved</span>
+<span class='comment'>// for every key &lt; first dynamic key</span>
+<span class='comment'>//</span>
+<span class='comment'>// There is also an opportunity to steal keys reserved for Garbage Collection</span>
+<span class='comment'>// ranges 80..89 and 110..119, especially considering the fact Garbage Collection</span>
+<span class='comment'>// never supposed to work on iOS. But as everybody knows it - there is a chance</span>
+<span class='comment'>// that those slots will be re-used, like it happened with key 95 (moved from</span>
+<span class='comment'>// JavaScriptCore to CoreText)</span>
+<span class='comment'>//</span>
+<span class='comment'>// Unfortunately Apple rejected patch to LLVM which generated</span>
+<span class='comment'>// corresponding prolog, decision was taken to disable segmented</span>
+<span class='comment'>// stack support on iOS.</span>
 
-</span><span class='kw'>pub</span> <span class='kw'>static</span> <span class='ident'>RED_ZONE</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='number'>20</span> <span class='op'>*</span> <span class='number'>1024</span>;
+<span class='kw'>pub</span> <span class='kw'>static</span> <span class='ident'>RED_ZONE</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='number'>20</span> <span class='op'>*</span> <span class='number'>1024</span>;
 
 <span class='doccomment'>/// This function is invoked from rust&#39;s current __morestack function. Segmented</span>
 <span class='doccomment'>/// stacks are currently not enabled as segmented stacks, but rather one giant</span>
 <span class='doccomment'>/// stack segment. This means that whenever we run out of stack, we want to</span>
 <span class='doccomment'>/// truly consider it to be stack overflow rather than allocating a new stack.</span>
-<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>test</span>))]</span><span class='comment'> // in testing, use the original libstd&#39;s version
-</span><span class='attribute'>#[<span class='ident'>lang</span> <span class='op'>=</span> <span class='string'>&quot;stack_exhausted&quot;</span>]</span>
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>test</span>))]</span> <span class='comment'>// in testing, use the original libstd&#39;s version</span>
+<span class='attribute'>#[<span class='ident'>lang</span> <span class='op'>=</span> <span class='string'>&quot;stack_exhausted&quot;</span>]</span>
 <span class='kw'>extern</span> <span class='kw'>fn</span> <span class='ident'>stack_exhausted</span>() {
     <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
     <span class='kw'>use</span> <span class='ident'>alloc</span>::<span class='ident'>owned</span>::<span class='ident'>Box</span>;
@@ -423,95 +421,95 @@
     <span class='kw'>use</span> <span class='ident'>task</span>::<span class='ident'>Task</span>;
     <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>intrinsics</span>;
 
-    <span class='kw'>unsafe</span> {<span class='comment'>
-        // We&#39;re calling this function because the stack just ran out. We need
-        // to call some other rust functions, but if we invoke the functions
-        // right now it&#39;ll just trigger this handler being called again. In
-        // order to alleviate this, we move the stack limit to be inside of the
-        // red zone that was allocated for exactly this reason.
-        </span><span class='kw'>let</span> <span class='ident'>limit</span> <span class='op'>=</span> <span class='ident'>get_sp_limit</span>();
-        <span class='ident'>record_sp_limit</span>(<span class='ident'>limit</span> <span class='op'>-</span> <span class='ident'>RED_ZONE</span> <span class='op'>/</span> <span class='number'>2</span>);<span class='comment'>
+    <span class='kw'>unsafe</span> {
+        <span class='comment'>// We&#39;re calling this function because the stack just ran out. We need</span>
+        <span class='comment'>// to call some other rust functions, but if we invoke the functions</span>
+        <span class='comment'>// right now it&#39;ll just trigger this handler being called again. In</span>
+        <span class='comment'>// order to alleviate this, we move the stack limit to be inside of the</span>
+        <span class='comment'>// red zone that was allocated for exactly this reason.</span>
+        <span class='kw'>let</span> <span class='ident'>limit</span> <span class='op'>=</span> <span class='ident'>get_sp_limit</span>();
+        <span class='ident'>record_sp_limit</span>(<span class='ident'>limit</span> <span class='op'>-</span> <span class='ident'>RED_ZONE</span> <span class='op'>/</span> <span class='number'>2</span>);
 
-        // This probably isn&#39;t the best course of action. Ideally one would want
-        // to unwind the stack here instead of just aborting the entire process.
-        // This is a tricky problem, however. There&#39;s a few things which need to
-        // be considered:
-        //
-        //  1. We&#39;re here because of a stack overflow, yet unwinding will run
-        //     destructors and hence arbitrary code. What if that code overflows
-        //     the stack? One possibility is to use the above allocation of an
-        //     extra 10k to hope that we don&#39;t hit the limit, and if we do then
-        //     abort the whole program. Not the best, but kind of hard to deal
-        //     with unless we want to switch stacks.
-        //
-        //  2. LLVM will optimize functions based on whether they can unwind or
-        //     not. It will flag functions with &#39;nounwind&#39; if it believes that
-        //     the function cannot trigger unwinding, but if we do unwind on
-        //     stack overflow then it means that we could unwind in any function
-        //     anywhere. We would have to make sure that LLVM only places the
-        //     nounwind flag on functions which don&#39;t call any other functions.
-        //
-        //  3. The function that overflowed may have owned arguments. These
-        //     arguments need to have their destructors run, but we haven&#39;t even
-        //     begun executing the function yet, so unwinding will not run the
-        //     any landing pads for these functions. If this is ignored, then
-        //     the arguments will just be leaked.
-        //
-        // Exactly what to do here is a very delicate topic, and is possibly
-        // still up in the air for what exactly to do. Some relevant issues:
-        //
-        //  #3555 - out-of-stack failure leaks arguments
-        //  #3695 - should there be a stack limit?
-        //  #9855 - possible strategies which could be taken
-        //  #9854 - unwinding on windows through __morestack has never worked
-        //  #2361 - possible implementation of not using landing pads
+        <span class='comment'>// This probably isn&#39;t the best course of action. Ideally one would want</span>
+        <span class='comment'>// to unwind the stack here instead of just aborting the entire process.</span>
+        <span class='comment'>// This is a tricky problem, however. There&#39;s a few things which need to</span>
+        <span class='comment'>// be considered:</span>
+        <span class='comment'>//</span>
+        <span class='comment'>//  1. We&#39;re here because of a stack overflow, yet unwinding will run</span>
+        <span class='comment'>//     destructors and hence arbitrary code. What if that code overflows</span>
+        <span class='comment'>//     the stack? One possibility is to use the above allocation of an</span>
+        <span class='comment'>//     extra 10k to hope that we don&#39;t hit the limit, and if we do then</span>
+        <span class='comment'>//     abort the whole program. Not the best, but kind of hard to deal</span>
+        <span class='comment'>//     with unless we want to switch stacks.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>//  2. LLVM will optimize functions based on whether they can unwind or</span>
+        <span class='comment'>//     not. It will flag functions with &#39;nounwind&#39; if it believes that</span>
+        <span class='comment'>//     the function cannot trigger unwinding, but if we do unwind on</span>
+        <span class='comment'>//     stack overflow then it means that we could unwind in any function</span>
+        <span class='comment'>//     anywhere. We would have to make sure that LLVM only places the</span>
+        <span class='comment'>//     nounwind flag on functions which don&#39;t call any other functions.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>//  3. The function that overflowed may have owned arguments. These</span>
+        <span class='comment'>//     arguments need to have their destructors run, but we haven&#39;t even</span>
+        <span class='comment'>//     begun executing the function yet, so unwinding will not run the</span>
+        <span class='comment'>//     any landing pads for these functions. If this is ignored, then</span>
+        <span class='comment'>//     the arguments will just be leaked.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// Exactly what to do here is a very delicate topic, and is possibly</span>
+        <span class='comment'>// still up in the air for what exactly to do. Some relevant issues:</span>
+        <span class='comment'>//</span>
+        <span class='comment'>//  #3555 - out-of-stack failure leaks arguments</span>
+        <span class='comment'>//  #3695 - should there be a stack limit?</span>
+        <span class='comment'>//  #9855 - possible strategies which could be taken</span>
+        <span class='comment'>//  #9854 - unwinding on windows through __morestack has never worked</span>
+        <span class='comment'>//  #2361 - possible implementation of not using landing pads</span>
 
-        </span><span class='kw'>let</span> <span class='ident'>task</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;&gt;</span> <span class='op'>=</span> <span class='ident'>Local</span>::<span class='ident'>try_take</span>();
+        <span class='kw'>let</span> <span class='ident'>task</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;&gt;</span> <span class='op'>=</span> <span class='ident'>Local</span>::<span class='ident'>try_take</span>();
         <span class='kw'>let</span> <span class='ident'>name</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>task</span> {
             <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>task</span>) <span class='op'>=&gt;</span> {
                 <span class='ident'>task</span>.<span class='ident'>name</span>.<span class='ident'>as_ref</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>n</span><span class='op'>|</span> <span class='ident'>n</span>.<span class='ident'>as_slice</span>())
             }
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>
         };
-        <span class='kw'>let</span> <span class='ident'>name</span> <span class='op'>=</span> <span class='ident'>name</span>.<span class='ident'>unwrap_or</span>(<span class='string'>&quot;&lt;unknown&gt;&quot;</span>);<span class='comment'>
+        <span class='kw'>let</span> <span class='ident'>name</span> <span class='op'>=</span> <span class='ident'>name</span>.<span class='ident'>unwrap_or</span>(<span class='string'>&quot;&lt;unknown&gt;&quot;</span>);
 
-        // See the message below for why this is not emitted to the
-        // task&#39;s logger. This has the additional conundrum of the
-        // logger may not be initialized just yet, meaning that an FFI
-        // call would happen to initialized it (calling out to libuv),
-        // and the FFI call needs 2MB of stack when we just ran out.
-        </span><span class='macro'>rterrln</span><span class='macro'>!</span>(<span class='string'>&quot;task &#39;{}&#39; has overflowed its stack&quot;</span>, <span class='ident'>name</span>);
+        <span class='comment'>// See the message below for why this is not emitted to the</span>
+        <span class='comment'>// task&#39;s logger. This has the additional conundrum of the</span>
+        <span class='comment'>// logger may not be initialized just yet, meaning that an FFI</span>
+        <span class='comment'>// call would happen to initialized it (calling out to libuv),</span>
+        <span class='comment'>// and the FFI call needs 2MB of stack when we just ran out.</span>
+        <span class='macro'>rterrln</span><span class='macro'>!</span>(<span class='string'>&quot;task &#39;{}&#39; has overflowed its stack&quot;</span>, <span class='ident'>name</span>);
 
         <span class='ident'>intrinsics</span>::<span class='ident'>abort</span>();
     }
 }
 
 <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>record_stack_bounds</span>(<span class='ident'>stack_lo</span>: <span class='ident'>uint</span>, <span class='ident'>stack_hi</span>: <span class='ident'>uint</span>) {<span class='comment'>
-    // When the old runtime had segmented stacks, it used a calculation that was
-    // &quot;limit + RED_ZONE + FUDGE&quot;. The red zone was for things like dynamic
-    // symbol resolution, llvm function calls, etc. In theory this red zone
-    // value is 0, but it matters far less when we have gigantic stacks because
-    // we don&#39;t need to be so exact about our stack budget. The &quot;fudge factor&quot;
-    // was because LLVM doesn&#39;t emit a stack check for functions &lt; 256 bytes in
-    // size. Again though, we have giant stacks, so we round all these
-    // calculations up to the nice round number of 20k.
-    </span><span class='ident'>record_sp_limit</span>(<span class='ident'>stack_lo</span> <span class='op'>+</span> <span class='ident'>RED_ZONE</span>);
+<span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>record_stack_bounds</span>(<span class='ident'>stack_lo</span>: <span class='ident'>uint</span>, <span class='ident'>stack_hi</span>: <span class='ident'>uint</span>) {
+    <span class='comment'>// When the old runtime had segmented stacks, it used a calculation that was</span>
+    <span class='comment'>// &quot;limit + RED_ZONE + FUDGE&quot;. The red zone was for things like dynamic</span>
+    <span class='comment'>// symbol resolution, llvm function calls, etc. In theory this red zone</span>
+    <span class='comment'>// value is 0, but it matters far less when we have gigantic stacks because</span>
+    <span class='comment'>// we don&#39;t need to be so exact about our stack budget. The &quot;fudge factor&quot;</span>
+    <span class='comment'>// was because LLVM doesn&#39;t emit a stack check for functions &lt; 256 bytes in</span>
+    <span class='comment'>// size. Again though, we have giant stacks, so we round all these</span>
+    <span class='comment'>// calculations up to the nice round number of 20k.</span>
+    <span class='ident'>record_sp_limit</span>(<span class='ident'>stack_lo</span> <span class='op'>+</span> <span class='ident'>RED_ZONE</span>);
 
     <span class='kw'>return</span> <span class='ident'>target_record_stack_bounds</span>(<span class='ident'>stack_lo</span>, <span class='ident'>stack_hi</span>);
 
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>windows</span>))]</span> <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86_64&quot;</span>))]</span> <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
     <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>target_record_stack_bounds</span>(<span class='ident'>_stack_lo</span>: <span class='ident'>uint</span>, <span class='ident'>_stack_hi</span>: <span class='ident'>uint</span>) {}
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>windows</span>, <span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86_64&quot;</span>)]</span> <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-    <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>target_record_stack_bounds</span>(<span class='ident'>stack_lo</span>: <span class='ident'>uint</span>, <span class='ident'>stack_hi</span>: <span class='ident'>uint</span>) {<span class='comment'>
-        // Windows compiles C functions which may check the stack bounds. This
-        // means that if we want to perform valid FFI on windows, then we need
-        // to ensure that the stack bounds are what they truly are for this
-        // task. More info can be found at:
-        //   https://github.com/rust-lang/rust/issues/3445#issuecomment-26114839
-        //
-        // stack range is at TIB: %gs:0x08 (top) and %gs:0x10 (bottom)
-        </span><span class='macro'>asm</span><span class='macro'>!</span>(<span class='string'>&quot;mov $0, %gs:0x08&quot;</span> :: <span class='string'>&quot;r&quot;</span>(<span class='ident'>stack_hi</span>) :: <span class='string'>&quot;volatile&quot;</span>);
+    <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>target_record_stack_bounds</span>(<span class='ident'>stack_lo</span>: <span class='ident'>uint</span>, <span class='ident'>stack_hi</span>: <span class='ident'>uint</span>) {
+        <span class='comment'>// Windows compiles C functions which may check the stack bounds. This</span>
+        <span class='comment'>// means that if we want to perform valid FFI on windows, then we need</span>
+        <span class='comment'>// to ensure that the stack bounds are what they truly are for this</span>
+        <span class='comment'>// task. More info can be found at:</span>
+        <span class='comment'>//   https://github.com/rust-lang/rust/issues/3445#issuecomment-26114839</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// stack range is at TIB: %gs:0x08 (top) and %gs:0x10 (bottom)</span>
+        <span class='macro'>asm</span><span class='macro'>!</span>(<span class='string'>&quot;mov $0, %gs:0x08&quot;</span> :: <span class='string'>&quot;r&quot;</span>(<span class='ident'>stack_hi</span>) :: <span class='string'>&quot;volatile&quot;</span>);
         <span class='macro'>asm</span><span class='macro'>!</span>(<span class='string'>&quot;mov $0, %gs:0x10&quot;</span> :: <span class='string'>&quot;r&quot;</span>(<span class='ident'>stack_lo</span>) :: <span class='string'>&quot;volatile&quot;</span>);
     }
 }
@@ -532,10 +530,10 @@
 <span class='doccomment'>/// invocation (if they were an actual function call).</span>
 <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>record_sp_limit</span>(<span class='ident'>limit</span>: <span class='ident'>uint</span>) {
-    <span class='kw'>return</span> <span class='ident'>target_record_sp_limit</span>(<span class='ident'>limit</span>);<span class='comment'>
+    <span class='kw'>return</span> <span class='ident'>target_record_sp_limit</span>(<span class='ident'>limit</span>);
 
-    // x86-64
-    </span><span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86_64&quot;</span>, <span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;macos&quot;</span>)]</span>
+    <span class='comment'>// x86-64</span>
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86_64&quot;</span>, <span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;macos&quot;</span>)]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86_64&quot;</span>, <span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;ios&quot;</span>)]</span> <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
     <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>target_record_sp_limit</span>(<span class='ident'>limit</span>: <span class='ident'>uint</span>) {
         <span class='macro'>asm</span><span class='macro'>!</span>(<span class='string'>&quot;movq $$0x60+90*8, %rsi
@@ -546,19 +544,19 @@
         <span class='macro'>asm</span><span class='macro'>!</span>(<span class='string'>&quot;movq $0, %fs:112&quot;</span> :: <span class='string'>&quot;r&quot;</span>(<span class='ident'>limit</span>) :: <span class='string'>&quot;volatile&quot;</span>)
     }
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86_64&quot;</span>, <span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;win32&quot;</span>)]</span> <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-    <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>target_record_sp_limit</span>(<span class='ident'>limit</span>: <span class='ident'>uint</span>) {<span class='comment'>
-        // see: http://en.wikipedia.org/wiki/Win32_Thread_Information_Block
-        // store this inside of the &quot;arbitrary data slot&quot;, but double the size
-        // because this is 64 bit instead of 32 bit
-        </span><span class='macro'>asm</span><span class='macro'>!</span>(<span class='string'>&quot;movq $0, %gs:0x28&quot;</span> :: <span class='string'>&quot;r&quot;</span>(<span class='ident'>limit</span>) :: <span class='string'>&quot;volatile&quot;</span>)
+    <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>target_record_sp_limit</span>(<span class='ident'>limit</span>: <span class='ident'>uint</span>) {
+        <span class='comment'>// see: http://en.wikipedia.org/wiki/Win32_Thread_Information_Block</span>
+        <span class='comment'>// store this inside of the &quot;arbitrary data slot&quot;, but double the size</span>
+        <span class='comment'>// because this is 64 bit instead of 32 bit</span>
+        <span class='macro'>asm</span><span class='macro'>!</span>(<span class='string'>&quot;movq $0, %gs:0x28&quot;</span> :: <span class='string'>&quot;r&quot;</span>(<span class='ident'>limit</span>) :: <span class='string'>&quot;volatile&quot;</span>)
     }
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86_64&quot;</span>, <span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;freebsd&quot;</span>)]</span> <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
     <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>target_record_sp_limit</span>(<span class='ident'>limit</span>: <span class='ident'>uint</span>) {
         <span class='macro'>asm</span><span class='macro'>!</span>(<span class='string'>&quot;movq $0, %fs:24&quot;</span> :: <span class='string'>&quot;r&quot;</span>(<span class='ident'>limit</span>) :: <span class='string'>&quot;volatile&quot;</span>)
-    }<span class='comment'>
+    }
 
-    // x86
-    </span><span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86&quot;</span>, <span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;macos&quot;</span>)]</span>
+    <span class='comment'>// x86</span>
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86&quot;</span>, <span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;macos&quot;</span>)]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86&quot;</span>, <span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;ios&quot;</span>)]</span> <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
     <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>target_record_sp_limit</span>(<span class='ident'>limit</span>: <span class='ident'>uint</span>) {
         <span class='macro'>asm</span><span class='macro'>!</span>(<span class='string'>&quot;movl $$0x48+90*4, %eax
@@ -570,15 +568,15 @@
         <span class='macro'>asm</span><span class='macro'>!</span>(<span class='string'>&quot;movl $0, %gs:48&quot;</span> :: <span class='string'>&quot;r&quot;</span>(<span class='ident'>limit</span>) :: <span class='string'>&quot;volatile&quot;</span>)
     }
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86&quot;</span>, <span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;win32&quot;</span>)]</span> <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-    <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>target_record_sp_limit</span>(<span class='ident'>limit</span>: <span class='ident'>uint</span>) {<span class='comment'>
-        // see: http://en.wikipedia.org/wiki/Win32_Thread_Information_Block
-        // store this inside of the &quot;arbitrary data slot&quot;
-        </span><span class='macro'>asm</span><span class='macro'>!</span>(<span class='string'>&quot;movl $0, %fs:0x14&quot;</span> :: <span class='string'>&quot;r&quot;</span>(<span class='ident'>limit</span>) :: <span class='string'>&quot;volatile&quot;</span>)
-    }<span class='comment'>
+    <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>target_record_sp_limit</span>(<span class='ident'>limit</span>: <span class='ident'>uint</span>) {
+        <span class='comment'>// see: http://en.wikipedia.org/wiki/Win32_Thread_Information_Block</span>
+        <span class='comment'>// store this inside of the &quot;arbitrary data slot&quot;</span>
+        <span class='macro'>asm</span><span class='macro'>!</span>(<span class='string'>&quot;movl $0, %fs:0x14&quot;</span> :: <span class='string'>&quot;r&quot;</span>(<span class='ident'>limit</span>) :: <span class='string'>&quot;volatile&quot;</span>)
+    }
 
-    // mips, arm - Some brave soul can port these to inline asm, but it&#39;s over
-    //             my head personally
-    </span><span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;mips&quot;</span>)]</span>
+    <span class='comment'>// mips, arm - Some brave soul can port these to inline asm, but it&#39;s over</span>
+    <span class='comment'>//             my head personally</span>
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;mips&quot;</span>)]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;mipsel&quot;</span>)]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;arm&quot;</span>, <span class='ident'>not</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;ios&quot;</span>))]</span> <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
     <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>target_record_sp_limit</span>(<span class='ident'>limit</span>: <span class='ident'>uint</span>) {
@@ -587,10 +585,10 @@
         <span class='kw'>extern</span> {
             <span class='kw'>fn</span> <span class='ident'>record_sp_limit</span>(<span class='ident'>limit</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>c_void</span>);
         }
-    }<span class='comment'>
+    }
 
-    // iOS segmented stack is disabled for now, see related notes
-    </span><span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;arm&quot;</span>, <span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;ios&quot;</span>)]</span> <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
+    <span class='comment'>// iOS segmented stack is disabled for now, see related notes</span>
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;arm&quot;</span>, <span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;ios&quot;</span>)]</span> <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
     <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>target_record_sp_limit</span>(_: <span class='ident'>uint</span>) {
     }
 }
@@ -605,10 +603,10 @@
 <span class='doccomment'>/// therefore be called in a &quot;we&#39;re out of stack&quot; situation.</span>
 <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>get_sp_limit</span>() <span class='op'>-&gt;</span> <span class='ident'>uint</span> {
-    <span class='kw'>return</span> <span class='ident'>target_get_sp_limit</span>();<span class='comment'>
+    <span class='kw'>return</span> <span class='ident'>target_get_sp_limit</span>();
 
-    // x86-64
-    </span><span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86_64&quot;</span>, <span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;macos&quot;</span>)]</span>
+    <span class='comment'>// x86-64</span>
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86_64&quot;</span>, <span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;macos&quot;</span>)]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86_64&quot;</span>, <span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;ios&quot;</span>)]</span> <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
     <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>target_get_sp_limit</span>() <span class='op'>-&gt;</span> <span class='ident'>uint</span> {
         <span class='kw'>let</span> <span class='ident'>limit</span>;
@@ -633,10 +631,10 @@
         <span class='kw'>let</span> <span class='ident'>limit</span>;
         <span class='macro'>asm</span><span class='macro'>!</span>(<span class='string'>&quot;movq %fs:24, $0&quot;</span> : <span class='string'>&quot;=r&quot;</span>(<span class='ident'>limit</span>) ::: <span class='string'>&quot;volatile&quot;</span>);
         <span class='kw'>return</span> <span class='ident'>limit</span>;
-    }<span class='comment'>
+    }
 
-    // x86
-    </span><span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86&quot;</span>, <span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;macos&quot;</span>)]</span>
+    <span class='comment'>// x86</span>
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86&quot;</span>, <span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;macos&quot;</span>)]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86&quot;</span>, <span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;ios&quot;</span>)]</span> <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
     <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>target_get_sp_limit</span>() <span class='op'>-&gt;</span> <span class='ident'>uint</span> {
         <span class='kw'>let</span> <span class='ident'>limit</span>;
@@ -656,11 +654,11 @@
         <span class='kw'>let</span> <span class='ident'>limit</span>;
         <span class='macro'>asm</span><span class='macro'>!</span>(<span class='string'>&quot;movl %fs:0x14, $0&quot;</span> : <span class='string'>&quot;=r&quot;</span>(<span class='ident'>limit</span>) ::: <span class='string'>&quot;volatile&quot;</span>);
         <span class='kw'>return</span> <span class='ident'>limit</span>;
-    }<span class='comment'>
+    }
 
-    // mips, arm - Some brave soul can port these to inline asm, but it&#39;s over
-    //             my head personally
-    </span><span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;mips&quot;</span>)]</span>
+    <span class='comment'>// mips, arm - Some brave soul can port these to inline asm, but it&#39;s over</span>
+    <span class='comment'>//             my head personally</span>
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;mips&quot;</span>)]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;mipsel&quot;</span>)]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;arm&quot;</span>, <span class='ident'>not</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;ios&quot;</span>))]</span> <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
     <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>target_get_sp_limit</span>() <span class='op'>-&gt;</span> <span class='ident'>uint</span> {
@@ -669,12 +667,12 @@
         <span class='kw'>extern</span> {
             <span class='kw'>fn</span> <span class='ident'>get_sp_limit</span>() <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>c_void</span>;
         }
-    }<span class='comment'>
+    }
 
-    // iOS doesn&#39;t support segmented stacks yet. This function might
-    // be called by runtime though so it is unsafe to mark it as
-    // unreachable, let&#39;s return a fixed constant.
-    </span><span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;arm&quot;</span>, <span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;ios&quot;</span>)]</span> <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
+    <span class='comment'>// iOS doesn&#39;t support segmented stacks yet. This function might</span>
+    <span class='comment'>// be called by runtime though so it is unsafe to mark it as</span>
+    <span class='comment'>// unreachable, let&#39;s return a fixed constant.</span>
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;arm&quot;</span>, <span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;ios&quot;</span>)]</span> <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
     <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>target_get_sp_limit</span>() <span class='op'>-&gt;</span> <span class='ident'>uint</span> {
         <span class='number'>1024</span>
     }

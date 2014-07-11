@@ -20,6 +20,27 @@
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 % use microtype if available
 \IfFileExists{microtype.sty}{\usepackage{microtype}}{}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\newenvironment{Shaded}{}{}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{{#1}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{{#1}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
 \ifxetex
   \usepackage[setpagesize=false, % page size defined by xetex
               unicode=false, % unicode breaks when used with xetex
@@ -47,7 +68,7 @@
 \begin{document}
 \maketitle
 
-0.11.0-pre (169c988d09a9d4e46de2b7fead9489e94964c7c7 2014-07-02 18:41:38 +0000)
+0.11.0 (305cf1f1098dc87e346003e6bf7e7cca5705a135 2014-07-10 11:19:20 -0700)
 
 Copyright © 2011-2014 The Rust Project Developers. Licensed under the
 \href{http://www.apache.org/licenses/LICENSE-2.0}{Apache License,
@@ -155,7 +176,7 @@ If you've got Rust installed, you can open up a shell, and type this:
 
 You should see some output that looks something like this:
 
-\texttt{\{ignore\} rustc 0.11.0-pre (443a1cd 2014-06-08 14:56:52 -0700) host: x86\_64-unknown-linux-gnu}
+\texttt{\{ignore\} rustc 0.11.0-pre (443a1cd 2014-06-08 14:56:52 -0700)}
 
 If you did, Rust has been installed successfully! Congrats!
 
@@ -225,7 +246,7 @@ Success! Let's go over what just happened in detail.
 
 \begin{verbatim}
 fn main() {
-   
+
 }
 \end{verbatim}
 
@@ -329,13 +350,7 @@ like Rust, and so it is still a work in progress. However, it is already
 good enough to use for many Rust projects, and so it is assumed that
 Rust projects will use Cargo from the beginning.
 
-Programmers love car analogies, so I've got a good one for you to think
-about the relationship between \texttt{cargo} and \texttt{rustc}:
-\texttt{rustc} is like a car, and \texttt{cargo} is like a robotic
-driver. You can drive your car yourself, of course, but isn't it just
-easier to let a computer drive it for you?
-
-Anyway, Cargo manages three things: building your code, downloading the
+Cargo manages three things: building your code, downloading the
 dependencies your code needs, and building the dependencies your code
 needs. At first, your program doesn't have any dependencies, so we'll
 only be using the first part of its functionality. Eventually, we'll add
@@ -430,7 +445,7 @@ library (though we could do both!), as well as what it is named.
 
 Once you have this file in place, we should be ready to build! Try this:
 
-\texttt{\{bash\} \$ cargo build    Compiling hello\_world v0.1.0 (file:/home/yourname/projects/hello\_world) \$ ./target/hello\_world  Hello, world!}
+\texttt{\{bash\} \$ cargo build    Compiling hello\_world v0.1.0 (file:/home/yourname/projects/hello\_world) \$ ./target/hello\_world Hello, world!}
 
 Bam! We build our project with \texttt{cargo build}, and run it with
 \texttt{./target/hello\_world}. This hasn't bought us a whole lot over
@@ -537,8 +552,37 @@ We can add the type if we want to. Types come after a colon
 
 If I asked you to read this out loud to the rest of the class, you'd say
 ``\texttt{x} is a binding with the type \texttt{int} and the value
-\texttt{five}.'' Rust requires you to initialize the binding with a
-value before you're allowed to use it. If we try\ldots{}
+\texttt{five}.''
+
+By default, bindings are \textbf{immutable}. This code will not compile:
+
+\texttt{\{ignore\} let x = 5i; x = 10i;}
+
+It will give you this error:
+
+\texttt{\{ignore,notrust\} error: re-assignment of immutable variable `x`      x = 10i;      \^{}\textasciitilde{}\textasciitilde{}\textasciitilde{}\textasciitilde{}\textasciitilde{}\textasciitilde{}}
+
+If you want a binding to be mutable, you can use \texttt{mut}:
+
+\texttt{\{rust\} let mut x = 5i; x = 10i;}
+
+There is no single reason that bindings are immutable by default, but we
+can think about it through one of Rust's primary focuses: safety. If you
+forget to say \texttt{mut}, the compiler will catch it, and let you know
+that you have mutated something you may not have cared to mutate. If
+bindings were mutable by default, the compiler would not be able to tell
+you this. If you \emph{did} intend mutation, then the solution is quite
+easy: add \texttt{mut}.
+
+There are other good reasons to avoid mutable state when possible, but
+they're out of the scope of this guide. In general, you can often avoid
+explicit mutation, and so it is preferable in Rust. That said,
+sometimes, mutation is what you need, so it's not verboten.
+
+Let's get back to bindings. Rust variable bindings have one more aspect
+that differs from other languages: bindings are required to be
+initialized with a value before you're allowed to use it. If we
+try\ldots{}
 
 \texttt{\{ignore\} let x;}
 
@@ -613,19 +657,607 @@ that, we need to learn our next concept: \texttt{if}.
 
 \subsection{If}\label{if}
 
+Rust's take on \texttt{if} is not particularly complex, but it's much
+more like the \texttt{if} you'll find in a dynamically typed language
+than in a more traditional systems language. So let's talk about it, to
+make sure you grasp the nuances.
+
+\texttt{if} is a specific form of a more general concept, the `branch.'
+The name comes from a branch in a tree: a decision point, where
+depending on a choice, multiple paths can be taken.
+
+In the case of \texttt{if}, there is one choice that leads down two
+paths:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{let} \NormalTok{x = }\DecValTok{5i}\NormalTok{;}
+
+\KeywordTok{if} \NormalTok{x == }\DecValTok{5i} \NormalTok{\{}
+    \OtherTok{println!}\NormalTok{(}\StringTok{"x is five!"}\NormalTok{);}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+If we changed the value of \texttt{x} to something else, this line would
+not print. More specifically, if the expression after the \texttt{if}
+evaluates to \texttt{true}, then the block is executed. If it's
+\texttt{false}, then it is not.
+
+If you want something to happen in the \texttt{false} case, use an
+\texttt{else}:
+
+\begin{verbatim}
+let x = 5i;
+
+if x == 5i {
+    println!("x is five!");
+} else {
+    println!("x is not five :(");
+}
+\end{verbatim}
+
+This is all pretty standard. However, you can also do this:
+
+\begin{verbatim}
+let x = 5i;
+
+let y = if x == 5i {
+    10i
+} else {
+    15i
+};
+\end{verbatim}
+
+Which we can (and probably should) write like this:
+
+\begin{verbatim}
+let x = 5i;
+
+let y = if x == 5i { 10i } else { 15i };
+\end{verbatim}
+
+This reveals two interesting things about Rust: it is an
+expression-based language, and semicolons are different than in other
+`curly brace and semicolon'-based languages. These two things are
+related.
+
+\subsubsection{Expressions
+vs.~Statements}\label{expressions-vs.statements}
+
+Rust is primarily an expression based language. There are only two kinds
+of statements, and everything else is an expression.
+
+So what's the difference? Expressions return a value, and statements do
+not. In many languages, \texttt{if} is a statement, and therefore,
+\texttt{let x = if ...} would make no sense. But in Rust, \texttt{if} is
+an expression, which means that it returns a value. We can then use this
+value to initialize the binding.
+
+Speaking of which, bindings are a kind of the first of Rust's two
+statements. The proper name is a \textbf{declaration statement}. So far,
+\texttt{let} is the only kind of declaration statement we've seen. Let's
+talk about that some more.
+
+In some languages, variable bindings can be written as expressions, not
+just statements. Like Ruby:
+
+\texttt{\{ruby\} x = y = 5}
+
+In Rust, however, using \texttt{let} to introduce a binding is
+\emph{not} an expression. The following will produce a compile-time
+error:
+
+\texttt{\{ignore\} let x = (let y = 5i); // found `let` in ident position}
+
+The compiler is telling us here that it was expecting to see the
+beginning of an expression, and a \texttt{let} can only begin a
+statement, not an expression.
+
+However, assigning to a variable binding is an expression:
+
+\texttt{\{rust\} let x; let y = x = 5i;}
+
+In this case, we have an assignment expression (\texttt{x = 5}) whose
+value is being used as part of a \texttt{let} declaration statement
+(\texttt{let y = ...}).
+
+The second kind of statement in Rust is the \textbf{expression
+statement}. Its purpose is to turn any expression into a statement. In
+practical terms, Rust's grammar expects statements to follow other
+statements. This means that you use semicolons to separate expressions
+from each other. This means that Rust looks a lot like most other
+languages that require you to use semicolons at the end of every line,
+and you will see semicolons at the end of almost every line of Rust code
+you see.
+
+What is this exception that makes us say `almost?' You saw it already,
+in this code:
+
+\begin{verbatim}
+let x = 5i;
+
+let y: int = if x == 5i { 10i } else { 15i };
+\end{verbatim}
+
+Note that I've added the type annotation to \texttt{y}, to specify
+explicitly that I want \texttt{y} to be an integer.
+
+This is not the same as this, which won't compile:
+
+```\{ignore\} let x = 5i;
+
+let y: int = if x == 5 \{ 10i; \} else \{ 15i; \}; ```
+
+Note the semicolons after the 10 and 15. Rust will give us the following
+error:
+
+\texttt{\{ignore,notrust\} error: mismatched types: expected `int` but found `()` (expected int but found ())}
+
+We expected an integer, but we got \texttt{()}. \texttt{()} is
+pronounced `unit', and is a special type in Rust's type system.
+\texttt{()} is different than \texttt{null} in other languages, because
+\texttt{()} is distinct from other types. For example, in C,
+\texttt{null} is a valid value for a variable of type \texttt{int}. In
+Rust, \texttt{()} is \emph{not} a valid value for a variable of type
+\texttt{int}. It's only a valid value for variables of the type
+\texttt{()}, which aren't very useful. Remember how we said statements
+don't return a value? Well, that's the purpose of unit in this case. The
+semicolon turns any expression into a statement by throwing away its
+value and returning unit instead.
+
+There's one more time in which you won't see a semicolon at the end of a
+line of Rust code. For that, we'll need our next concept: functions.
+
 \subsection{Functions}\label{functions}
 
-return
+You've already seen one function so far, the \texttt{main} function:
 
-comments
+\texttt{\{rust\} fn main() \{ \}}
+
+This is the simplest possible function declaration. As we mentioned
+before, \texttt{fn} says `this is a function,' followed by the name,
+some parenthesis because this function takes no arguments, and then some
+curly braces to indicate the body. Here's a function named \texttt{foo}:
+
+\texttt{\{rust\} fn foo() \{ \}}
+
+So, what about taking arguments? Here's a function that prints a number:
+
+\texttt{\{rust\} fn print\_number(x: int) \{     println!("x is: \{\}", x); \}}
+
+Here's a complete program that uses \texttt{print\_number}:
+
+```\{rust\} fn main() \{ print\_number(5); \}
+
+fn print\_number(x: int) \{ println!(``x is: \{\}'', x); \} ```
+
+As you can see, function arguments work very similar to \texttt{let}
+declarations: you add a type to the argument name, after a colon.
+
+Here's a complete program that adds two numbers together and prints
+them:
+
+```\{rust\} fn main() \{ print\_sum(5, 6); \}
+
+fn print\_sum(x: int, y: int) \{ println!(``sum is: \{\}'', x + y); \}
+```
+
+You separate arguments with a comma, both when you call the function, as
+well as when you declare it.
+
+Unlike \texttt{let}, you \emph{must} declare the types of function
+arguments. This does not work:
+
+\texttt{\{ignore\} fn print\_number(x, y) \{     println!("x is: \{\}", x + y); \}}
+
+You get this error:
+
+\texttt{\{ignore,notrust\} hello.rs:5:18: 5:19 error: expected `:` but found `,` hello.rs:5 fn print\_number(x, y) \{}
+
+This is a deliberate design decision. While full-program inference is
+possible, languages which have it, like Haskell, often suggest that
+documenting your types explicitly is a best-practice. We agree that
+forcing functions to declare types while allowing for inference inside
+of function bodies is a wonderful compromise between full inference and
+no inference.
+
+What about returning a value? Here's a function that adds one to an
+integer:
+
+\texttt{\{rust\} fn add\_one(x: int) -\textgreater{} int \{     x + 1 \}}
+
+Rust functions return exactly one value, and you declare the type after
+an `arrow', which is a dash (\texttt{-}) followed by a greater-than sign
+(\texttt{\textgreater{}}).
+
+You'll note the lack of a semicolon here. If we added it in:
+
+\texttt{\{ignore\} fn add\_one(x: int) -\textgreater{} int \{     x + 1; \}}
+
+We would get an error:
+
+```\{ignore,notrust\} error: not all control paths return a value fn
+add\_one(x: int) -\textgreater{} int \{ x + 1; \}
+
+note: consider removing this semicolon: x + 1; \^{} ```
+
+Remember our earlier discussions about semicolons and \texttt{()}? Our
+function claims to return an \texttt{int}, but with a semicolon, it
+would return \texttt{()} instead. Rust realizes this probably isn't what
+we want, and suggests removing the semicolon.
+
+This is very much like our \texttt{if} statement before: the result of
+the block (\texttt{\{\}}) is the value of the expression. Other
+expression-oriented languages, such as Ruby, work like this, but it's a
+bit unusual in the systems programming world. When people first learn
+about this, they usually assume that it introduces bugs. But because
+Rust's type system is so strong, and because unit is its own unique
+type, we have never seen an issue where adding or removing a semicolon
+in a return position would cause a bug.
+
+But what about early returns? Rust does have a keyword for that,
+\texttt{return}:
+
+```\{rust\} fn foo(x: int) -\textgreater{} int \{ if x \textless{} 5 \{
+return x; \}
+
+\begin{verbatim}
+x + 1
+\end{verbatim}
+
+\} ```
+
+Using a \texttt{return} as the last line of a function works, but is
+considered poor style:
+
+```\{rust\} fn foo(x: int) -\textgreater{} int \{ if x \textless{} 5 \{
+return x; \}
+
+\begin{verbatim}
+return x + 1;
+\end{verbatim}
+
+\} ```
+
+There are some additional ways to define functions, but they involve
+features that we haven't learned about yet, so let's just leave it at
+that for now.
+
+\subsection{Comments}\label{comments}
+
+Now that we have some functions, it's a good idea to learn about
+comments. Comments are notes that you leave to other programmers to help
+explain things about your code. The compiler mostly ignores them.
+
+Rust has two kinds of comments that you should care about: \textbf{line
+comment}s and \textbf{doc comment}s.
+
+```\{rust\} // Line comments are anything after `//' and extend to the
+end of the line.
+
+let x = 5i; // this is also a line comment.
+
+// If you have a long explanation for something, you can put line
+comments next // to each other. Put a space between the // and your
+comment so that it's // more readable. ```
+
+The other kind of comment is a doc comment. Doc comments use
+\texttt{///} instead of \texttt{//}, and support Markdown notation
+inside:
+
+\texttt{\{rust\} /// `hello` is a function that prints a greeting that is personalized based on /// the name given. /// /// \# Arguments /// /// * `name` - The name of the person you'd like to greet. /// /// \# Example /// ///}rust
+/// let name = ``Steve''; /// hello(name); // prints ``Hello, Steve!''
+///
+\texttt{fn hello(name: \&str) \{     println!("Hello, \{\}!", name); \}}
+
+When writing doc comments, adding sections for any arguments, return
+values, and providing some examples of usage is very, very helpful.
+
+You can use the \texttt{rustdoc} tool to generate HTML documentation
+from these doc comments. We will talk more about \texttt{rustdoc} when
+we get to modules, as generally, you want to export documentation for a
+full module.
 
 \subsection{Compound Data Types}\label{compound-data-types}
 
-Tuples
+Rust, like many programming languages, has a number of different data
+types that are built-in. You've already done some simple work with
+integers and strings, but next, let's talk about some more complicated
+ways of storing data.
 
-Structs
+\subsubsection{Tuples}\label{tuples}
 
-Enums
+The first compound data type we're going to talk about are called
+\textbf{tuple}s. Tuples are an ordered list of a fixed size. Like this:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{let} \NormalTok{x = (}\DecValTok{1i}\NormalTok{, }\StringTok{"hello"}\NormalTok{);}
+\end{Highlighting}
+\end{Shaded}
+
+The parenthesis and commas form this two-length tuple. Here's the same
+code, but with the type annotated:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{let} \NormalTok{x: (}\KeywordTok{int}\NormalTok{, &}\KeywordTok{str}\NormalTok{) = (}\DecValTok{1}\NormalTok{, }\StringTok{"hello"}\NormalTok{);}
+\end{Highlighting}
+\end{Shaded}
+
+As you can see, the type of a tuple looks just like the tuple, but with
+each position having a type name rather than the value. Careful readers
+will also note that tuples are heterogeneous: we have an \texttt{int}
+and a \texttt{\&str} in this tuple. You haven't seen \texttt{\&str} as a
+type before, and we'll discuss the details of strings later. In systems
+programming languages, strings are a bit more complex than in other
+languages. For now, just read \texttt{\&str} as ``a string slice,'' and
+we'll learn more soon.
+
+You can access the fields in a tuple through a \textbf{destructuring
+let}. Here's an example:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{let} \NormalTok{(x, y, z) = (}\DecValTok{1i}\NormalTok{, }\DecValTok{2i}\NormalTok{, }\DecValTok{3i}\NormalTok{);}
+
+\OtherTok{println!}\NormalTok{(}\StringTok{"x is \{\}"}\NormalTok{, x);}
+\end{Highlighting}
+\end{Shaded}
+
+Remember before when I said the left hand side of a \texttt{let}
+statement was more powerful than just assigning a binding? Here we are.
+We can put a pattern on the left hand side of the \texttt{let}, and if
+it matches up to the right hand side, we can assign multiple bindings at
+once. In this case, \texttt{let} `destructures,' or `breaks up,' the
+tuple, and assigns the bits to three bindings.
+
+This pattern is very powerful, and we'll see it repeated more later.
+
+The last thing to say about tuples is that they are only equivalent if
+the arity, types, and values are all identical.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{let} \NormalTok{x = (}\DecValTok{1i}\NormalTok{, }\DecValTok{2i}\NormalTok{, }\DecValTok{3i}\NormalTok{);}
+\KeywordTok{let} \NormalTok{y = (}\DecValTok{2i}\NormalTok{, }\DecValTok{3i}\NormalTok{, }\DecValTok{4i}\NormalTok{);}
+
+\KeywordTok{if} \NormalTok{x == y \{}
+    \OtherTok{println!}\NormalTok{(}\StringTok{"yes"}\NormalTok{);}
+\NormalTok{\} }\KeywordTok{else} \NormalTok{\{}
+    \OtherTok{println!}\NormalTok{(}\StringTok{"no"}\NormalTok{);}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+This will print \texttt{no}, as the values aren't equal.
+
+One other use of tuples is to return multiple values from a function:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{fn} \NormalTok{next_two(x: }\KeywordTok{int}\NormalTok{) -> (}\KeywordTok{int}\NormalTok{, }\KeywordTok{int}\NormalTok{) \{ (x + }\DecValTok{1i}\NormalTok{, x + }\DecValTok{2i}\NormalTok{) \}}
+
+\KeywordTok{fn} \NormalTok{main() \{}
+    \KeywordTok{let} \NormalTok{(x, y) = next_two(}\DecValTok{5i}\NormalTok{);}
+    \OtherTok{println!}\NormalTok{(}\StringTok{"x, y = \{\}, \{\}"}\NormalTok{, x, y);}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+Even though Rust functions can only return one value, a tuple \emph{is}
+one value, that happens to be made up of two. You can also see in this
+example how you can destructure a pattern returned by a function, as
+well.
+
+Tuples are a very simple data structure, and so are not often what you
+want. Let's move on to their bigger sibling, structs.
+
+\subsubsection{Structs}\label{structs}
+
+A struct is another form of a `record type,' just like a tuple. There's
+a difference: structs give each element that they contain a name, called
+a `field' or a `member.' Check it out:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{struct} \NormalTok{Point \{}
+    \NormalTok{x: }\KeywordTok{int}\NormalTok{,}
+    \NormalTok{y: }\KeywordTok{int}\NormalTok{,}
+\NormalTok{\}}
+
+\KeywordTok{fn} \NormalTok{main() \{}
+    \KeywordTok{let} \NormalTok{origin = Point \{ x: }\DecValTok{0i}\NormalTok{, y:  }\DecValTok{0i} \NormalTok{\};}
+
+    \OtherTok{println!}\NormalTok{(}\StringTok{"The origin is at (\{\}, \{\})"}\NormalTok{, origin.x, origin.y);}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+There's a lot going on here, so let's break it down. We declare a struct
+with the \texttt{struct} keyword, and then with a name. By convention,
+structs begin with a capital letter and are also camel cased:
+\texttt{PointInSpace}, not \texttt{Point\_In\_Space}.
+
+We can create an instance of our struct via \texttt{let}, as usual, but
+we use a \texttt{key: value} style syntax to set each field. The order
+doesn't need to be the same as in the original declaration.
+
+Finally, because fields have names, we can access the field through dot
+notation: \texttt{origin.x}.
+
+The values in structs are immutable, like other bindings in Rust.
+However, you can use \texttt{mut} to make them mutable:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{struct} \NormalTok{Point \{}
+    \NormalTok{x: }\KeywordTok{int}\NormalTok{,}
+    \NormalTok{y: }\KeywordTok{int}\NormalTok{,}
+\NormalTok{\}}
+
+\KeywordTok{fn} \NormalTok{main() \{}
+    \KeywordTok{let} \KeywordTok{mut} \NormalTok{point = Point \{ x: }\DecValTok{0i}\NormalTok{, y:  }\DecValTok{0i} \NormalTok{\};}
+
+    \NormalTok{point.x = }\DecValTok{5}\NormalTok{;}
+
+    \OtherTok{println!}\NormalTok{(}\StringTok{"The point is at (\{\}, \{\})"}\NormalTok{, point.x, point.y);}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+This will print \texttt{The point is at (5, 0)}.
+
+\subsubsection{Tuple Structs and
+Newtypes}\label{tuple-structs-and-newtypes}
+
+Rust has another data type that's like a hybrid between a tuple and a
+struct, called a \textbf{tuple struct}. Tuple structs do have a name,
+but their fields don't:
+
+\begin{verbatim}
+struct Color(int, int, int);
+struct Point(int, int, int);
+\end{verbatim}
+
+These two will not be equal, even if they have the same values:
+
+\texttt{\{rust,ignore\} let black  = Color(0, 0, 0); let origin = Point(0, 0, 0);}
+
+It is almost always better to use a struct than a tuple struct. We would
+write \texttt{Color} and \texttt{Point} like this instead:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{struct} \NormalTok{Color \{}
+    \NormalTok{red: }\KeywordTok{int}\NormalTok{,}
+    \NormalTok{blue: }\KeywordTok{int}\NormalTok{,}
+    \NormalTok{green: }\KeywordTok{int}\NormalTok{,}
+\NormalTok{\}}
+
+\KeywordTok{struct} \NormalTok{Point \{}
+    \NormalTok{x: }\KeywordTok{int}\NormalTok{,}
+    \NormalTok{y: }\KeywordTok{int}\NormalTok{,}
+    \NormalTok{z: }\KeywordTok{int}\NormalTok{,}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+Now, we have actual names, rather than positions. Good names are
+important, and with a struct, we have actual names.
+
+There \emph{is} one case when a tuple struct is very useful, though, and
+that's a tuple struct with only one element. We call this a `newtype,'
+because it lets you create a new type that's a synonym for another one:
+
+\begin{verbatim}
+struct Inches(int);
+struct Centimeters(int);
+
+let length = Inches(10);
+
+let Inches(integer_length) = length;
+println!("length is {} inches", integer_length);
+\end{verbatim}
+
+As you can see here, you can extract the inner integer type through a
+destructuring \texttt{let}.
+
+\subsubsection{Enums}\label{enums}
+
+Finally, Rust has a ``sum type'', an \textbf{enum}. Enums are an
+incredibly useful feature of Rust, and are used throughout the standard
+library. Enums look like this:
+
+\begin{verbatim}
+enum Ordering {
+    Less,
+    Equal,
+    Greater,
+}
+\end{verbatim}
+
+This is an enum that is provided by the Rust standard library. An
+\texttt{Ordering} can only be \emph{one} of \texttt{Less},
+\texttt{Equal}, or \texttt{Greater} at any given time. Here's an
+example:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{let} \NormalTok{x = }\DecValTok{5i}\NormalTok{;}
+\KeywordTok{let} \NormalTok{y = }\DecValTok{10i}\NormalTok{;}
+
+\KeywordTok{let} \NormalTok{ordering = x.cmp(&y);}
+
+\KeywordTok{if} \NormalTok{ordering == Less \{}
+    \OtherTok{println!}\NormalTok{(}\StringTok{"less"}\NormalTok{);}
+\NormalTok{\} }\KeywordTok{else} \KeywordTok{if} \NormalTok{ordering == Greater \{}
+    \OtherTok{println!}\NormalTok{(}\StringTok{"greater"}\NormalTok{);}
+\NormalTok{\} }\KeywordTok{else} \KeywordTok{if} \NormalTok{ordering == Equal \{}
+    \OtherTok{println!}\NormalTok{(}\StringTok{"equal"}\NormalTok{);}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\texttt{cmp} is a function that compares two things, and returns an
+\texttt{Ordering}. The call looks a little bit strange: rather than
+\texttt{cmp(x, y)}, we say \texttt{x.cmp(\&y)}. We haven't covered
+methods and references yet, so it should look a little bit foreign.
+Right now, just pretend it says \texttt{cmp(x, y)}, and we'll get to
+those details soon.
+
+The \texttt{ordering} variable has the type \texttt{Ordering}, and so
+contains one of the three values. We can then do a bunch of
+\texttt{if}/\texttt{else} comparisons to check which one it is.
+
+However, repeated \texttt{if}/\texttt{else} comparisons get quite
+tedious. Rust has a feature that not only makes them nicer to read, but
+also makes sure that you never miss a case. Before we get to that,
+though, let's talk about another kind of enum: one with values.
+
+This enum has two variants, one of which has a value.:
+
+\begin{verbatim}
+enum OptionalInt {
+    Value(int),
+    Missing
+}
+
+fn main() {
+    let x = Value(5);
+    let y = Missing;
+
+    match x {
+        Value(n) => println!("x is {:d}", n),
+        Missing  => println!("x is missing!"),
+    }
+
+    match y {
+        Value(n) => println!("y is {:d}", n),
+        Missing  => println!("y is missing!"),
+    }
+}
+\end{verbatim}
+
+This enum represents an \texttt{int} that we may or may not have. In the
+\texttt{Missing} case, we have no value, but in the \texttt{Value} case,
+we do. This enum is specific to \texttt{int}s, though. We can make it
+usable by any type, but we haven't quite gotten there yet!
+
+You can have any number of values in an enum:
+
+\begin{verbatim}
+enum OptionalColor {
+    Color(int, int, int),
+    Missing
+}
+\end{verbatim}
+
+Enums with values are quite useful, but as I mentioned, they're even
+more useful when they're generic across types. But before we get to
+generics, let's talk about how to fix this big \texttt{if}/\texttt{else}
+statements we've been writing. We'll do that with \texttt{match}.
 
 \subsection{Match}\label{match}
 

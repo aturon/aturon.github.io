@@ -7,8 +7,6 @@
 
     <title>mpmc_bounded_queue.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -286,14 +284,14 @@
  * The views and conclusions contained in the software and documentation are
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Dmitry Vyukov.
- */
+ */</span>
 
-</span><span class='attribute'>#<span class='op'>!</span>[<span class='ident'>experimental</span>]</span>
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>missing_doc</span>, <span class='ident'>dead_code</span>)]</span><span class='comment'>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>experimental</span>]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>missing_doc</span>, <span class='ident'>dead_code</span>)]</span>
 
-// http://www.1024cores.net/home/lock-free-algorithms/queues/bounded-mpmc-queue
+<span class='comment'>// http://www.1024cores.net/home/lock-free-algorithms/queues/bounded-mpmc-queue</span>
 
-</span><span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
+<span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
 
 <span class='kw'>use</span> <span class='ident'>alloc</span>::<span class='ident'>arc</span>::<span class='ident'>Arc</span>;
 <span class='kw'>use</span> <span class='ident'>collections</span>::<span class='ident'>Vec</span>;
@@ -324,12 +322,12 @@
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Send</span><span class='op'>&gt;</span> <span class='ident'>State</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='kw'>fn</span> <span class='ident'>with_capacity</span>(<span class='ident'>capacity</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>State</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>capacity</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>capacity</span> <span class='op'>&lt;</span> <span class='number'>2</span> <span class='op'>||</span> (<span class='ident'>capacity</span> <span class='op'>&amp;</span> (<span class='ident'>capacity</span> <span class='op'>-</span> <span class='number'>1</span>)) <span class='op'>!=</span> <span class='number'>0</span> {
+        <span class='kw'>let</span> <span class='ident'>capacity</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>capacity</span> <span class='op'>&lt;</span> <span class='number'>2</span> <span class='op'>||</span> (<span class='ident'>capacity</span> <span class='kw-2'>&amp;</span> (<span class='ident'>capacity</span> <span class='op'>-</span> <span class='number'>1</span>)) <span class='op'>!=</span> <span class='number'>0</span> {
             <span class='kw'>if</span> <span class='ident'>capacity</span> <span class='op'>&lt;</span> <span class='number'>2</span> {
                 <span class='number'>2u</span>
-            } <span class='kw'>else</span> {<span class='comment'>
-                // use next power of 2 as capacity
-                </span><span class='ident'>next_power_of_two</span>(<span class='ident'>capacity</span>)
+            } <span class='kw'>else</span> {
+                <span class='comment'>// use next power of 2 as capacity</span>
+                <span class='ident'>next_power_of_two</span>(<span class='ident'>capacity</span>)
             }
         } <span class='kw'>else</span> {
             <span class='ident'>capacity</span>
@@ -353,7 +351,7 @@
         <span class='kw'>let</span> <span class='ident'>mask</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>mask</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>pos</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>enqueue_pos</span>.<span class='ident'>load</span>(<span class='ident'>Relaxed</span>);
         <span class='kw'>loop</span> {
-            <span class='kw'>let</span> <span class='ident'>node</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>buffer</span>.<span class='ident'>get</span>(<span class='ident'>pos</span> <span class='op'>&amp;</span> <span class='ident'>mask</span>);
+            <span class='kw'>let</span> <span class='ident'>node</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>buffer</span>.<span class='ident'>get</span>(<span class='ident'>pos</span> <span class='kw-2'>&amp;</span> <span class='ident'>mask</span>);
             <span class='kw'>let</span> <span class='ident'>seq</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { (<span class='op'>*</span><span class='ident'>node</span>.<span class='ident'>get</span>()).<span class='ident'>sequence</span>.<span class='ident'>load</span>(<span class='ident'>Acquire</span>) };
             <span class='kw'>let</span> <span class='ident'>diff</span>: <span class='ident'>int</span> <span class='op'>=</span> <span class='ident'>seq</span> <span class='kw'>as</span> <span class='ident'>int</span> <span class='op'>-</span> <span class='ident'>pos</span> <span class='kw'>as</span> <span class='ident'>int</span>;
 
@@ -381,7 +379,7 @@
         <span class='kw'>let</span> <span class='ident'>mask</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>mask</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>pos</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>dequeue_pos</span>.<span class='ident'>load</span>(<span class='ident'>Relaxed</span>);
         <span class='kw'>loop</span> {
-            <span class='kw'>let</span> <span class='ident'>node</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>buffer</span>.<span class='ident'>get</span>(<span class='ident'>pos</span> <span class='op'>&amp;</span> <span class='ident'>mask</span>);
+            <span class='kw'>let</span> <span class='ident'>node</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>buffer</span>.<span class='ident'>get</span>(<span class='ident'>pos</span> <span class='kw-2'>&amp;</span> <span class='ident'>mask</span>);
             <span class='kw'>let</span> <span class='ident'>seq</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { (<span class='op'>*</span><span class='ident'>node</span>.<span class='ident'>get</span>()).<span class='ident'>sequence</span>.<span class='ident'>load</span>(<span class='ident'>Acquire</span>) };
             <span class='kw'>let</span> <span class='ident'>diff</span>: <span class='ident'>int</span> <span class='op'>=</span> <span class='ident'>seq</span> <span class='kw'>as</span> <span class='ident'>int</span> <span class='op'>-</span> (<span class='ident'>pos</span> <span class='op'>+</span> <span class='number'>1</span>) <span class='kw'>as</span> <span class='ident'>int</span>;
             <span class='kw'>if</span> <span class='ident'>diff</span> <span class='op'>==</span> <span class='number'>0</span> {

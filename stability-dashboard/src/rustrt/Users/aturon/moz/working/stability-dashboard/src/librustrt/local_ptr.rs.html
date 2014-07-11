@@ -7,8 +7,6 @@
 
     <title>local_ptr.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -446,17 +444,17 @@
 <span id='404'>404</span>
 <span id='405'>405</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! Access to a single thread-local pointer.</span>
+<span class='doccomment'>//! Access to a single thread-local pointer.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! The runtime will use this for storing Box&lt;Task&gt;.</span>
 <span class='doccomment'>//!</span>
@@ -470,9 +468,9 @@
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>mem</span>;
 <span class='kw'>use</span> <span class='ident'>alloc</span>::<span class='ident'>owned</span>::<span class='ident'>Box</span>;
 
-<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>windows</span>)]</span><span class='comment'>               // mingw-w32 doesn&#39;t like thread_local things
-</span><span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;android&quot;</span>)]</span><span class='comment'> // see #10686
-</span><span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;ios&quot;</span>)]</span>
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>windows</span>)]</span>               <span class='comment'>// mingw-w32 doesn&#39;t like thread_local things</span>
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;android&quot;</span>)]</span> <span class='comment'>// see #10686</span>
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;ios&quot;</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>native</span>::{<span class='ident'>init</span>, <span class='ident'>cleanup</span>, <span class='ident'>put</span>, <span class='ident'>take</span>, <span class='ident'>try_take</span>, <span class='ident'>unsafe_take</span>, <span class='ident'>exists</span>,
                        <span class='ident'>unsafe_borrow</span>, <span class='ident'>try_unsafe_borrow</span>};
 
@@ -546,66 +544,66 @@
 
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>init</span>() {}
 
-    <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>cleanup</span>() {}<span class='comment'>
+    <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>cleanup</span>() {}
 
-    // Rationale for all of these functions being inline(never)
-    //
-    // The #[thread_local] annotation gets propagated all the way through to
-    // LLVM, meaning the global is specially treated by LLVM to lower it to an
-    // efficient sequence of instructions. This also involves dealing with fun
-    // stuff in object files and whatnot. Regardless, it turns out this causes
-    // trouble with green threads and lots of optimizations turned on. The
-    // following case study was done on linux x86_64, but I would imagine that
-    // other platforms are similar.
-    //
-    // On linux, the instruction sequence for loading the tls pointer global
-    // looks like:
-    //
-    //      mov %fs:0x0, %rax
-    //      mov -0x8(%rax), %rbx
-    //
-    // This code leads me to believe that (%fs:0x0) is a table, and then the
-    // table contains the TLS values for the process. Hence, the slot at offset
-    // -0x8 is the task TLS pointer. This leads us to the conclusion that this
-    // table is the actual thread local part of each thread. The kernel sets up
-    // the fs segment selector to point at the right region of memory for each
-    // thread.
-    //
-    // Optimizations lead me to believe that this code is lowered to these
-    // instructions in the LLVM codegen passes, because you&#39;ll see code like
-    // this when everything is optimized:
-    //
-    //      mov %fs:0x0, %r14
-    //      mov -0x8(%r14), %rbx
-    //      // do something with %rbx, the rust Task pointer
-    //
-    //      ... // &lt;- do more things
-    //
-    //      mov -0x8(%r14), %rbx
-    //      // do something else with %rbx
-    //
-    // Note that the optimization done here is that the first load is not
-    // duplicated during the lower instructions. This means that the %fs:0x0
-    // memory location is only dereferenced once.
-    //
-    // Normally, this is actually a good thing! With green threads, however,
-    // it&#39;s very possible for the code labeled &quot;do more things&quot; to context
-    // switch to another thread. If this happens, then we *must* re-load %fs:0x0
-    // because it&#39;s changed (we&#39;re on a different thread). If we don&#39;t re-load
-    // the table location, then we&#39;ll be reading the original thread&#39;s TLS
-    // values, not our thread&#39;s TLS values.
-    //
-    // Hence, we never inline these functions. By never inlining, we&#39;re
-    // guaranteed that loading the table is a local decision which is forced to
-    // *always* happen.
+    <span class='comment'>// Rationale for all of these functions being inline(never)</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// The #[thread_local] annotation gets propagated all the way through to</span>
+    <span class='comment'>// LLVM, meaning the global is specially treated by LLVM to lower it to an</span>
+    <span class='comment'>// efficient sequence of instructions. This also involves dealing with fun</span>
+    <span class='comment'>// stuff in object files and whatnot. Regardless, it turns out this causes</span>
+    <span class='comment'>// trouble with green threads and lots of optimizations turned on. The</span>
+    <span class='comment'>// following case study was done on linux x86_64, but I would imagine that</span>
+    <span class='comment'>// other platforms are similar.</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// On linux, the instruction sequence for loading the tls pointer global</span>
+    <span class='comment'>// looks like:</span>
+    <span class='comment'>//</span>
+    <span class='comment'>//      mov %fs:0x0, %rax</span>
+    <span class='comment'>//      mov -0x8(%rax), %rbx</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// This code leads me to believe that (%fs:0x0) is a table, and then the</span>
+    <span class='comment'>// table contains the TLS values for the process. Hence, the slot at offset</span>
+    <span class='comment'>// -0x8 is the task TLS pointer. This leads us to the conclusion that this</span>
+    <span class='comment'>// table is the actual thread local part of each thread. The kernel sets up</span>
+    <span class='comment'>// the fs segment selector to point at the right region of memory for each</span>
+    <span class='comment'>// thread.</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// Optimizations lead me to believe that this code is lowered to these</span>
+    <span class='comment'>// instructions in the LLVM codegen passes, because you&#39;ll see code like</span>
+    <span class='comment'>// this when everything is optimized:</span>
+    <span class='comment'>//</span>
+    <span class='comment'>//      mov %fs:0x0, %r14</span>
+    <span class='comment'>//      mov -0x8(%r14), %rbx</span>
+    <span class='comment'>//      // do something with %rbx, the rust Task pointer</span>
+    <span class='comment'>//</span>
+    <span class='comment'>//      ... // &lt;- do more things</span>
+    <span class='comment'>//</span>
+    <span class='comment'>//      mov -0x8(%r14), %rbx</span>
+    <span class='comment'>//      // do something else with %rbx</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// Note that the optimization done here is that the first load is not</span>
+    <span class='comment'>// duplicated during the lower instructions. This means that the %fs:0x0</span>
+    <span class='comment'>// memory location is only dereferenced once.</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// Normally, this is actually a good thing! With green threads, however,</span>
+    <span class='comment'>// it&#39;s very possible for the code labeled &quot;do more things&quot; to context</span>
+    <span class='comment'>// switch to another thread. If this happens, then we *must* re-load %fs:0x0</span>
+    <span class='comment'>// because it&#39;s changed (we&#39;re on a different thread). If we don&#39;t re-load</span>
+    <span class='comment'>// the table location, then we&#39;ll be reading the original thread&#39;s TLS</span>
+    <span class='comment'>// values, not our thread&#39;s TLS values.</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// Hence, we never inline these functions. By never inlining, we&#39;re</span>
+    <span class='comment'>// guaranteed that loading the table is a local decision which is forced to</span>
+    <span class='comment'>// *always* happen.</span>
 
-    </span><span class='doccomment'>/// Give a pointer to thread-local storage.</span>
+    <span class='doccomment'>/// Give a pointer to thread-local storage.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// # Safety note</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// Does not validate the pointer type.</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>never</span>)]</span><span class='comment'> // see comments above
-    </span><span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>put</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>sched</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) {
+    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>never</span>)]</span> <span class='comment'>// see comments above</span>
+    <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>put</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>sched</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) {
         <span class='ident'>RT_TLS_PTR</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>sched</span>)
     }
 
@@ -614,13 +612,13 @@
     <span class='doccomment'>/// # Safety note</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// Does not validate the pointer type.</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>never</span>)]</span><span class='comment'> // see comments above
-    </span><span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>take</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>() <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>never</span>)]</span> <span class='comment'>// see comments above</span>
+    <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>take</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>() <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>ptr</span> <span class='op'>=</span> <span class='ident'>RT_TLS_PTR</span>;
         <span class='macro'>rtassert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>ptr</span>.<span class='ident'>is_null</span>());
-        <span class='kw'>let</span> <span class='ident'>ptr</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>ptr</span>);<span class='comment'>
-        // can&#39;t use `as`, due to type not matching with `cfg(test)`
-        </span><span class='ident'>RT_TLS_PTR</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='number'>0u</span>);
+        <span class='kw'>let</span> <span class='ident'>ptr</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>ptr</span>);
+        <span class='comment'>// can&#39;t use `as`, due to type not matching with `cfg(test)`</span>
+        <span class='ident'>RT_TLS_PTR</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='number'>0u</span>);
         <span class='ident'>ptr</span>
     }
 
@@ -629,15 +627,15 @@
     <span class='doccomment'>/// # Safety note</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// Does not validate the pointer type.</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>never</span>)]</span><span class='comment'> // see comments above
-    </span><span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>try_take</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span> {
+    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>never</span>)]</span> <span class='comment'>// see comments above</span>
+    <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>try_take</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>ptr</span> <span class='op'>=</span> <span class='ident'>RT_TLS_PTR</span>;
         <span class='kw'>if</span> <span class='ident'>ptr</span>.<span class='ident'>is_null</span>() {
             <span class='prelude-val'>None</span>
         } <span class='kw'>else</span> {
-            <span class='kw'>let</span> <span class='ident'>ptr</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>ptr</span>);<span class='comment'>
-            // can&#39;t use `as`, due to type not matching with `cfg(test)`
-            </span><span class='ident'>RT_TLS_PTR</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='number'>0u</span>);
+            <span class='kw'>let</span> <span class='ident'>ptr</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>ptr</span>);
+            <span class='comment'>// can&#39;t use `as`, due to type not matching with `cfg(test)`</span>
+            <span class='ident'>RT_TLS_PTR</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='number'>0u</span>);
             <span class='prelude-val'>Some</span>(<span class='ident'>ptr</span>)
         }
     }
@@ -648,29 +646,29 @@
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// Does not validate the pointer type.</span>
     <span class='doccomment'>/// Leaves the old pointer in TLS for speed.</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>never</span>)]</span><span class='comment'> // see comments above
-    </span><span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>unsafe_take</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>() <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>never</span>)]</span> <span class='comment'>// see comments above</span>
+    <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>unsafe_take</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>() <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>RT_TLS_PTR</span>)
     }
 
     <span class='doccomment'>/// Check whether there is a thread-local pointer installed.</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>never</span>)]</span><span class='comment'> // see comments above
-    </span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>exists</span>() <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>never</span>)]</span> <span class='comment'>// see comments above</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>exists</span>() <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
         <span class='kw'>unsafe</span> {
             <span class='ident'>RT_TLS_PTR</span>.<span class='ident'>is_not_null</span>()
         }
     }
 
-    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>never</span>)]</span><span class='comment'> // see comments above
-    </span><span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>unsafe_borrow</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>() <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span> {
+    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>never</span>)]</span> <span class='comment'>// see comments above</span>
+    <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>unsafe_borrow</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>() <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span> {
         <span class='kw'>if</span> <span class='ident'>RT_TLS_PTR</span>.<span class='ident'>is_null</span>() {
             <span class='macro'>rtabort</span><span class='macro'>!</span>(<span class='string'>&quot;thread-local pointer is null. bogus!&quot;</span>);
         }
         <span class='ident'>RT_TLS_PTR</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span>
     }
 
-    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>never</span>)]</span><span class='comment'> // see comments above
-    </span><span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>try_unsafe_borrow</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span><span class='op'>&gt;</span> {
+    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>never</span>)]</span> <span class='comment'>// see comments above</span>
+    <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>try_unsafe_borrow</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='kw'>if</span> <span class='ident'>RT_TLS_PTR</span>.<span class='ident'>is_null</span>() {
             <span class='prelude-val'>None</span>
         } <span class='kw'>else</span> {
@@ -824,18 +822,18 @@
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>test</span>))]</span>
     <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>visible_private_types</span>)]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>maybe_tls_key</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>tls</span>::<span class='ident'>Key</span><span class='op'>&gt;</span> {
-        <span class='kw'>unsafe</span> {<span class='comment'>
-            // NB: This is a little racy because, while the key is
-            // initialized under a mutex and it&#39;s assumed to be initialized
-            // in the Scheduler ctor by any thread that needs to use it,
-            // we are not accessing the key under a mutex.  Threads that
-            // are not using the new Scheduler but still *want to check*
-            // whether they are running under a new Scheduler may see a 0
-            // value here that is in the process of being initialized in
-            // another thread. I think this is fine since the only action
-            // they could take if it was initialized would be to check the
-            // thread-local value and see that it&#39;s not set.
-            </span><span class='kw'>if</span> <span class='ident'>RT_TLS_KEY</span> <span class='op'>!=</span> <span class='op'>-</span><span class='number'>1</span> {
+        <span class='kw'>unsafe</span> {
+            <span class='comment'>// NB: This is a little racy because, while the key is</span>
+            <span class='comment'>// initialized under a mutex and it&#39;s assumed to be initialized</span>
+            <span class='comment'>// in the Scheduler ctor by any thread that needs to use it,</span>
+            <span class='comment'>// we are not accessing the key under a mutex.  Threads that</span>
+            <span class='comment'>// are not using the new Scheduler but still *want to check*</span>
+            <span class='comment'>// whether they are running under a new Scheduler may see a 0</span>
+            <span class='comment'>// value here that is in the process of being initialized in</span>
+            <span class='comment'>// another thread. I think this is fine since the only action</span>
+            <span class='comment'>// they could take if it was initialized would be to check the</span>
+            <span class='comment'>// thread-local value and see that it&#39;s not set.</span>
+            <span class='kw'>if</span> <span class='ident'>RT_TLS_KEY</span> <span class='op'>!=</span> <span class='op'>-</span><span class='number'>1</span> {
                 <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>RT_TLS_KEY</span>);
             } <span class='kw'>else</span> {
                 <span class='kw'>return</span> <span class='prelude-val'>None</span>;

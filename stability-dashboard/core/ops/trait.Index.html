@@ -7,8 +7,6 @@
 
     <title>core::ops::Index - Rust</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -26,7 +24,7 @@
 
     <section class="sidebar">
         <a href='../../core/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
-        <p class='location'><a href='../index.html'>core</a>&#8203;::<a href='index.html'>ops</a></p><div class='block trait'><h2>Traits</h2><a class='trait ' href='trait.Add.html'>Add</a><a class='trait ' href='trait.BitAnd.html'>BitAnd</a><a class='trait ' href='trait.BitOr.html'>BitOr</a><a class='trait ' href='trait.BitXor.html'>BitXor</a><a class='trait ' href='trait.Deref.html'>Deref</a><a class='trait ' href='trait.DerefMut.html'>DerefMut</a><a class='trait ' href='trait.Div.html'>Div</a><a class='trait ' href='trait.Drop.html'>Drop</a><a class='trait ' href='trait.Fn.html'>Fn</a><a class='trait ' href='trait.FnMut.html'>FnMut</a><a class='trait ' href='trait.FnOnce.html'>FnOnce</a><a class='trait current' href='trait.Index.html'>Index</a><a class='trait ' href='trait.Mul.html'>Mul</a><a class='trait ' href='trait.Neg.html'>Neg</a><a class='trait ' href='trait.Not.html'>Not</a><a class='trait ' href='trait.Rem.html'>Rem</a><a class='trait ' href='trait.Shl.html'>Shl</a><a class='trait ' href='trait.Shr.html'>Shr</a><a class='trait ' href='trait.Sub.html'>Sub</a></div>
+        <p class='location'><a href='../index.html'>core</a>&#8203;::<a href='index.html'>ops</a></p><div class='block trait'><h2>Traits</h2><a class='trait ' href='trait.Add.html'>Add</a><a class='trait ' href='trait.BitAnd.html'>BitAnd</a><a class='trait ' href='trait.BitOr.html'>BitOr</a><a class='trait ' href='trait.BitXor.html'>BitXor</a><a class='trait ' href='trait.Deref.html'>Deref</a><a class='trait ' href='trait.DerefMut.html'>DerefMut</a><a class='trait ' href='trait.Div.html'>Div</a><a class='trait ' href='trait.Drop.html'>Drop</a><a class='trait ' href='trait.Fn.html'>Fn</a><a class='trait ' href='trait.FnMut.html'>FnMut</a><a class='trait ' href='trait.FnOnce.html'>FnOnce</a><a class='trait current' href='trait.Index.html'>Index</a><a class='trait ' href='trait.IndexMut.html'>IndexMut</a><a class='trait ' href='trait.Mul.html'>Mul</a><a class='trait ' href='trait.Neg.html'>Neg</a><a class='trait ' href='trait.Not.html'>Not</a><a class='trait ' href='trait.Rem.html'>Rem</a><a class='trait ' href='trait.Shl.html'>Shl</a><a class='trait ' href='trait.Shr.html'>Shr</a><a class='trait ' href='trait.Sub.html'>Sub</a></div>
     </section>
 
     <nav class="sub">
@@ -41,11 +39,11 @@
     </nav>
 
     <section id='main' class="content trait">
-<h1 class='fqn'>Trait <a href='../index.html'>core</a>::<a href='index.html'>ops</a>::<a class='trait' href=''>Index</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-26433' href='../../src/core/Users/aturon/moz/working/stability-dashboard/src/libcore/ops.rs.html#639-642'>[src]</a></span></h1>
+<h1 class='fqn'>Trait <a href='../index.html'>core</a>::<a href='index.html'>ops</a>::<a class='trait' href=''>Index</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-26394' href='../../src/core/Users/aturon/moz/working/stability-dashboard/src/libcore/ops.rs.html#639-642'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait Index&lt;Index, Result&gt; {
-    fn <a href='#tymethod.index' class='fnname'>index</a>(&amp;self, index: &amp;Index) -&gt; Result;
+    fn <a href='#tymethod.index' class='fnname'>index</a>&lt;'a&gt;(&amp;'a self, index: &amp;Index) -&gt; &amp;'a Result;
 }</pre><div class='docblock'><p>The <code>Index</code> trait is used to specify the functionality of indexing operations
-like <code>arr[idx]</code>.</p>
+like <code>arr[idx]</code> when used in an immutable context.</p>
 
 <h1 id="example" class='section-header'><a
                            href="#example">Example</a></h1>
@@ -54,9 +52,9 @@ calling <code>index</code>, and therefore, <code>main</code> prints <code>Indexi
 <span id='rust-example-raw-0' class='rusttest'>struct Foo;
 
 impl Index&lt;Foo, Foo&gt; for Foo {
-    fn index(&amp;self, _rhs: &amp;Foo) -&gt; Foo {
+    fn index&lt;&#39;a&gt;(&amp;&#39;a self, _rhs: &amp;Foo) -&gt; &amp;&#39;a Foo {
         println!(&quot;Indexing!&quot;);
-        *self
+        self
     }
 }
 
@@ -66,9 +64,9 @@ fn main() {
 <span class='kw'>struct</span> <span class='ident'>Foo</span>;
 
 <span class='kw'>impl</span> <span class='ident'>Index</span><span class='op'>&lt;</span><span class='ident'>Foo</span>, <span class='ident'>Foo</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>Foo</span> {
-    <span class='kw'>fn</span> <span class='ident'>index</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>_rhs</span>: <span class='kw-2'>&amp;</span><span class='ident'>Foo</span>) <span class='op'>-&gt;</span> <span class='ident'>Foo</span> {
+    <span class='kw'>fn</span> <span class='ident'>index</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>, <span class='ident'>_rhs</span>: <span class='kw-2'>&amp;</span><span class='ident'>Foo</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>Foo</span> {
         <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Indexing!&quot;</span>);
-        <span class='op'>*</span><span class='self'>self</span>
+        <span class='self'>self</span>
     }
 }
 
@@ -79,7 +77,7 @@ fn main() {
 </div>
             <h2 id='required-methods'>Required Methods</h2>
             <div class='methods'>
-        <h3 id='tymethod.index' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.index' class='fnname'>index</a>(&amp;self, index: &amp;Index) -&gt; Result</code></h3><div class='docblock'><p>The method for the indexing (<code>Foo[Bar]</code>) operation</p>
+        <h3 id='tymethod.index' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.index' class='fnname'>index</a>&lt;'a&gt;(&amp;'a self, index: &amp;Index) -&gt; &amp;'a Result</code></h3><div class='docblock'><p>The method for the indexing (<code>Foo[Bar]</code>) operation</p>
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>

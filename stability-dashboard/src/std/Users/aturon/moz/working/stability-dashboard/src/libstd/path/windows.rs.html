@@ -7,8 +7,6 @@
 
     <title>windows.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -2384,18 +2382,19 @@
 <span id='2342'>2342</span>
 <span id='2343'>2343</span>
 <span id='2344'>2344</span>
+<span id='2345'>2345</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! Windows file path handling</span>
+<span class='doccomment'>//! Windows file path handling</span>
 
 <span class='kw'>use</span> <span class='ident'>ascii</span>::<span class='ident'>AsciiCast</span>;
 <span class='kw'>use</span> <span class='ident'>c_str</span>::{<span class='ident'>CString</span>, <span class='ident'>ToCStr</span>};
@@ -2411,6 +2410,7 @@
 <span class='kw'>use</span> <span class='ident'>slice</span>::{<span class='ident'>Vector</span>, <span class='ident'>ImmutableVector</span>};
 <span class='kw'>use</span> <span class='ident'>str</span>::{<span class='ident'>CharSplits</span>, <span class='ident'>Str</span>, <span class='ident'>StrAllocating</span>, <span class='ident'>StrVector</span>, <span class='ident'>StrSlice</span>};
 <span class='kw'>use</span> <span class='ident'>string</span>::<span class='ident'>String</span>;
+<span class='kw'>use</span> <span class='ident'>unicode</span>::<span class='ident'>UnicodeChar</span>;
 <span class='kw'>use</span> <span class='ident'>vec</span>::<span class='ident'>Vec</span>;
 
 <span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>contains_nul</span>, <span class='ident'>BytesContainer</span>, <span class='ident'>GenericPath</span>, <span class='ident'>GenericPathUnsafe</span>};
@@ -2426,46 +2426,46 @@
 <span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>Components</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Map</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span><span class='op'>&gt;</span>, <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> [<span class='ident'>u8</span>],
                                     <span class='ident'>StrComponents</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;&gt;</span>;
 
-<span class='doccomment'>/// Represents a Windows path</span><span class='comment'>
-// Notes for Windows path impl:
-// The MAX_PATH is 260, but 253 is the practical limit due to some API bugs
-// See http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247.aspx for good information
-// about windows paths.
-// That same page puts a bunch of restrictions on allowed characters in a path.
-// `\foo.txt` means &quot;relative to current drive&quot;, but will not be considered to be absolute here
-// as `∃P | P.join(&quot;\foo.txt&quot;) != &quot;\foo.txt&quot;`.
-// `C:` is interesting, that means &quot;the current directory on drive C&quot;.
-// Long absolute paths need to have \\?\ prefix (or, for UNC, \\?\UNC\). I think that can be
-// ignored for now, though, and only added in a hypothetical .to_pwstr() function.
-// However, if a path is parsed that has \\?\, this needs to be preserved as it disables the
-// processing of &quot;.&quot; and &quot;..&quot; components and / as a separator.
-// Experimentally, \\?\foo is not the same thing as \foo.
-// Also, \\foo is not valid either (certainly not equivalent to \foo).
-// Similarly, C:\\Users is not equivalent to C:\Users, although C:\Users\\foo is equivalent
-// to C:\Users\foo. In fact the command prompt treats C:\\foo\bar as UNC path. But it might be
-// best to just ignore that and normalize it to C:\foo\bar.
-//
-// Based on all this, I think the right approach is to do the following:
-// * Require valid utf-8 paths. Windows API may use WCHARs, but we don&#39;t, and utf-8 is convertible
-// to UTF-16 anyway (though does Windows use UTF-16 or UCS-2? Not sure).
-// * Parse the prefixes \\?\UNC\, \\?\, and \\.\ explicitly.
-// * If \\?\UNC\, treat following two path components as server\share. Don&#39;t error for missing
-//   server\share.
-// * If \\?\, parse disk from following component, if present. Don&#39;t error for missing disk.
-// * If \\.\, treat rest of path as just regular components. I don&#39;t know how . and .. are handled
-//   here, they probably aren&#39;t, but I&#39;m not going to worry about that.
-// * Else if starts with \\, treat following two components as server\share. Don&#39;t error for missing
-//   server\share.
-// * Otherwise, attempt to parse drive from start of path.
-//
-// The only error condition imposed here is valid utf-8. All other invalid paths are simply
-// preserved by the data structure; let the Windows API error out on them.
-</span><span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
+<span class='doccomment'>/// Represents a Windows path</span>
+<span class='comment'>// Notes for Windows path impl:</span>
+<span class='comment'>// The MAX_PATH is 260, but 253 is the practical limit due to some API bugs</span>
+<span class='comment'>// See http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247.aspx for good information</span>
+<span class='comment'>// about windows paths.</span>
+<span class='comment'>// That same page puts a bunch of restrictions on allowed characters in a path.</span>
+<span class='comment'>// `\foo.txt` means &quot;relative to current drive&quot;, but will not be considered to be absolute here</span>
+<span class='comment'>// as `∃P | P.join(&quot;\foo.txt&quot;) != &quot;\foo.txt&quot;`.</span>
+<span class='comment'>// `C:` is interesting, that means &quot;the current directory on drive C&quot;.</span>
+<span class='comment'>// Long absolute paths need to have \\?\ prefix (or, for UNC, \\?\UNC\). I think that can be</span>
+<span class='comment'>// ignored for now, though, and only added in a hypothetical .to_pwstr() function.</span>
+<span class='comment'>// However, if a path is parsed that has \\?\, this needs to be preserved as it disables the</span>
+<span class='comment'>// processing of &quot;.&quot; and &quot;..&quot; components and / as a separator.</span>
+<span class='comment'>// Experimentally, \\?\foo is not the same thing as \foo.</span>
+<span class='comment'>// Also, \\foo is not valid either (certainly not equivalent to \foo).</span>
+<span class='comment'>// Similarly, C:\\Users is not equivalent to C:\Users, although C:\Users\\foo is equivalent</span>
+<span class='comment'>// to C:\Users\foo. In fact the command prompt treats C:\\foo\bar as UNC path. But it might be</span>
+<span class='comment'>// best to just ignore that and normalize it to C:\foo\bar.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Based on all this, I think the right approach is to do the following:</span>
+<span class='comment'>// * Require valid utf-8 paths. Windows API may use WCHARs, but we don&#39;t, and utf-8 is convertible</span>
+<span class='comment'>// to UTF-16 anyway (though does Windows use UTF-16 or UCS-2? Not sure).</span>
+<span class='comment'>// * Parse the prefixes \\?\UNC\, \\?\, and \\.\ explicitly.</span>
+<span class='comment'>// * If \\?\UNC\, treat following two path components as server\share. Don&#39;t error for missing</span>
+<span class='comment'>//   server\share.</span>
+<span class='comment'>// * If \\?\, parse disk from following component, if present. Don&#39;t error for missing disk.</span>
+<span class='comment'>// * If \\.\, treat rest of path as just regular components. I don&#39;t know how . and .. are handled</span>
+<span class='comment'>//   here, they probably aren&#39;t, but I&#39;m not going to worry about that.</span>
+<span class='comment'>// * Else if starts with \\, treat following two components as server\share. Don&#39;t error for missing</span>
+<span class='comment'>//   server\share.</span>
+<span class='comment'>// * Otherwise, attempt to parse drive from start of path.</span>
+<span class='comment'>//</span>
+<span class='comment'>// The only error condition imposed here is valid utf-8. All other invalid paths are simply</span>
+<span class='comment'>// preserved by the data structure; let the Windows API error out on them.</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Path</span> {
-    <span class='ident'>repr</span>: <span class='ident'>String</span>,<span class='comment'> // assumed to never be empty
-    </span><span class='ident'>prefix</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>PathPrefix</span><span class='op'>&gt;</span>,
-    <span class='ident'>sepidx</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span><span class='comment'> // index of the final separator in the non-prefix portion of repr
-</span>}
+    <span class='ident'>repr</span>: <span class='ident'>String</span>, <span class='comment'>// assumed to never be empty</span>
+    <span class='ident'>prefix</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>PathPrefix</span><span class='op'>&gt;</span>,
+    <span class='ident'>sepidx</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span> <span class='comment'>// index of the final separator in the non-prefix portion of repr</span>
+}
 
 <span class='kw'>impl</span> <span class='ident'>PartialEq</span> <span class='kw'>for</span> <span class='ident'>Path</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
@@ -2480,20 +2480,20 @@
     <span class='kw'>fn</span> <span class='ident'>from_str</span>(<span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Path</span><span class='op'>&gt;</span> {
         <span class='ident'>Path</span>::<span class='ident'>new_opt</span>(<span class='ident'>s</span>)
     }
-}<span class='comment'>
+}
 
-// FIXME (#12938): Until DST lands, we cannot decompose &amp;str into &amp; and str, so
-// we cannot usefully take ToCStr arguments by reference (without forcing an
-// additional &amp; around &amp;str). So we are instead temporarily adding an instance
-// for &amp;Path, so that we can take ToCStr as owned. When DST lands, the &amp;Path
-// instance should be removed, and arguments bound by ToCStr should be passed by
-// reference.
+<span class='comment'>// FIXME (#12938): Until DST lands, we cannot decompose &amp;str into &amp; and str, so</span>
+<span class='comment'>// we cannot usefully take ToCStr arguments by reference (without forcing an</span>
+<span class='comment'>// additional &amp; around &amp;str). So we are instead temporarily adding an instance</span>
+<span class='comment'>// for &amp;Path, so that we can take ToCStr as owned. When DST lands, the &amp;Path</span>
+<span class='comment'>// instance should be removed, and arguments bound by ToCStr should be passed by</span>
+<span class='comment'>// reference.</span>
 
-</span><span class='kw'>impl</span> <span class='ident'>ToCStr</span> <span class='kw'>for</span> <span class='ident'>Path</span> {
+<span class='kw'>impl</span> <span class='ident'>ToCStr</span> <span class='kw'>for</span> <span class='ident'>Path</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>to_c_str</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>CString</span> {<span class='comment'>
-        // The Path impl guarantees no internal NUL
-        </span><span class='kw'>unsafe</span> { <span class='self'>self</span>.<span class='ident'>to_c_str_unchecked</span>() }
+    <span class='kw'>fn</span> <span class='ident'>to_c_str</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>CString</span> {
+        <span class='comment'>// The Path impl guarantees no internal NUL</span>
+        <span class='kw'>unsafe</span> { <span class='self'>self</span>.<span class='ident'>to_c_str_unchecked</span>() }
     }
 
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
@@ -2523,9 +2523,9 @@
 
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>hash</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, _: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>S</span>) {<span class='comment'>
-        // No-op because the `hash` implementation will be wrong.
-    </span>}
+    <span class='kw'>fn</span> <span class='ident'>hash</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, _: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>S</span>) {
+        <span class='comment'>// No-op because the `hash` implementation will be wrong.</span>
+    }
 }
 
 <span class='kw'>impl</span> <span class='ident'>BytesContainer</span> <span class='kw'>for</span> <span class='ident'>Path</span> {
@@ -2626,14 +2626,14 @@
     <span class='doccomment'>/// as if it were absolute and will replace the receiver outright.</span>
     <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>push_unchecked</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>BytesContainer</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>path</span>: <span class='ident'>T</span>) {
         <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>path</span>.<span class='ident'>container_as_str</span>().<span class='ident'>unwrap</span>();
-        <span class='kw'>fn</span> <span class='ident'>is_vol_abs</span>(<span class='ident'>path</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>prefix</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>PathPrefix</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {<span class='comment'>
-            // assume prefix is Some(DiskPrefix)
-            </span><span class='kw'>let</span> <span class='ident'>rest</span> <span class='op'>=</span> <span class='ident'>path</span>.<span class='ident'>slice_from</span>(<span class='ident'>prefix_len</span>(<span class='ident'>prefix</span>));
+        <span class='kw'>fn</span> <span class='ident'>is_vol_abs</span>(<span class='ident'>path</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>prefix</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>PathPrefix</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+            <span class='comment'>// assume prefix is Some(DiskPrefix)</span>
+            <span class='kw'>let</span> <span class='ident'>rest</span> <span class='op'>=</span> <span class='ident'>path</span>.<span class='ident'>slice_from</span>(<span class='ident'>prefix_len</span>(<span class='ident'>prefix</span>));
             <span class='op'>!</span><span class='ident'>rest</span>.<span class='ident'>is_empty</span>() <span class='op'>&amp;&amp;</span> <span class='ident'>rest</span>.<span class='ident'>as_bytes</span>()[<span class='number'>0</span>].<span class='ident'>is_ascii</span>() <span class='op'>&amp;&amp;</span> <span class='ident'>is_sep</span>(<span class='ident'>rest</span>.<span class='ident'>as_bytes</span>()[<span class='number'>0</span>] <span class='kw'>as</span> <span class='ident'>char</span>)
         }
-        <span class='kw'>fn</span> <span class='ident'>shares_volume</span>(<span class='ident'>me</span>: <span class='kw-2'>&amp;</span><span class='ident'>Path</span>, <span class='ident'>path</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {<span class='comment'>
-            // path is assumed to have a prefix of Some(DiskPrefix)
-            </span><span class='kw'>let</span> <span class='ident'>repr</span> <span class='op'>=</span> <span class='ident'>me</span>.<span class='ident'>repr</span>.<span class='ident'>as_slice</span>();
+        <span class='kw'>fn</span> <span class='ident'>shares_volume</span>(<span class='ident'>me</span>: <span class='kw-2'>&amp;</span><span class='ident'>Path</span>, <span class='ident'>path</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+            <span class='comment'>// path is assumed to have a prefix of Some(DiskPrefix)</span>
+            <span class='kw'>let</span> <span class='ident'>repr</span> <span class='op'>=</span> <span class='ident'>me</span>.<span class='ident'>repr</span>.<span class='ident'>as_slice</span>();
             <span class='kw'>match</span> <span class='ident'>me</span>.<span class='ident'>prefix</span> {
                 <span class='prelude-val'>Some</span>(<span class='ident'>DiskPrefix</span>) <span class='op'>=&gt;</span> {
                     <span class='ident'>repr</span>.<span class='ident'>as_bytes</span>()[<span class='number'>0</span>] <span class='op'>==</span> <span class='ident'>path</span>.<span class='ident'>as_bytes</span>()[<span class='number'>0</span>].<span class='ident'>to_ascii</span>().<span class='ident'>to_upper</span>().<span class='ident'>to_byte</span>()
@@ -2658,17 +2658,17 @@
             <span class='ident'>me</span>.<span class='ident'>prefix</span> <span class='op'>=</span> <span class='ident'>prefix</span>;
             <span class='ident'>me</span>.<span class='ident'>update_sepidx</span>();
         }
-        <span class='kw'>fn</span> <span class='ident'>append_path</span>(<span class='ident'>me</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Path</span>, <span class='ident'>path</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) {<span class='comment'>
-            // appends a path that has no prefix
-            // if me is verbatim, we need to pre-normalize the new path
-            </span><span class='kw'>let</span> <span class='ident'>path_</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>is_verbatim</span>(<span class='ident'>me</span>) { <span class='ident'>Path</span>::<span class='ident'>normalize__</span>(<span class='ident'>path</span>, <span class='prelude-val'>None</span>) }
+        <span class='kw'>fn</span> <span class='ident'>append_path</span>(<span class='ident'>me</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Path</span>, <span class='ident'>path</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) {
+            <span class='comment'>// appends a path that has no prefix</span>
+            <span class='comment'>// if me is verbatim, we need to pre-normalize the new path</span>
+            <span class='kw'>let</span> <span class='ident'>path_</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>is_verbatim</span>(<span class='ident'>me</span>) { <span class='ident'>Path</span>::<span class='ident'>normalize__</span>(<span class='ident'>path</span>, <span class='prelude-val'>None</span>) }
                         <span class='kw'>else</span> { <span class='prelude-val'>None</span> };
             <span class='kw'>let</span> <span class='ident'>pathlen</span> <span class='op'>=</span> <span class='ident'>path_</span>.<span class='ident'>as_ref</span>().<span class='ident'>map_or</span>(<span class='ident'>path</span>.<span class='ident'>len</span>(), <span class='op'>|</span><span class='ident'>p</span><span class='op'>|</span> <span class='ident'>p</span>.<span class='ident'>len</span>());
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>with_capacity</span>(<span class='ident'>me</span>.<span class='ident'>repr</span>.<span class='ident'>len</span>() <span class='op'>+</span> <span class='number'>1</span> <span class='op'>+</span> <span class='ident'>pathlen</span>);
             <span class='ident'>s</span>.<span class='ident'>push_str</span>(<span class='ident'>me</span>.<span class='ident'>repr</span>.<span class='ident'>as_slice</span>());
-            <span class='kw'>let</span> <span class='ident'>plen</span> <span class='op'>=</span> <span class='ident'>me</span>.<span class='ident'>prefix_len</span>();<span class='comment'>
-            // if me is &quot;C:&quot; we don&#39;t want to add a path separator
-            </span><span class='kw'>match</span> <span class='ident'>me</span>.<span class='ident'>prefix</span> {
+            <span class='kw'>let</span> <span class='ident'>plen</span> <span class='op'>=</span> <span class='ident'>me</span>.<span class='ident'>prefix_len</span>();
+            <span class='comment'>// if me is &quot;C:&quot; we don&#39;t want to add a path separator</span>
+            <span class='kw'>match</span> <span class='ident'>me</span>.<span class='ident'>prefix</span> {
                 <span class='prelude-val'>Some</span>(<span class='ident'>DiskPrefix</span>) <span class='kw'>if</span> <span class='ident'>me</span>.<span class='ident'>repr</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='ident'>plen</span> <span class='op'>=&gt;</span> (),
                 _ <span class='kw'>if</span> <span class='op'>!</span>(<span class='ident'>me</span>.<span class='ident'>repr</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='ident'>plen</span> <span class='op'>&amp;&amp;</span> <span class='ident'>me</span>.<span class='ident'>repr</span>.<span class='ident'>as_bytes</span>()[<span class='ident'>me</span>.<span class='ident'>repr</span>.<span class='ident'>len</span>()<span class='op'>-</span><span class='number'>1</span>] <span class='op'>==</span> <span class='ident'>SEP_BYTE</span>) <span class='op'>=&gt;</span> {
                     <span class='ident'>s</span>.<span class='ident'>push_char</span>(<span class='ident'>SEP</span>);
@@ -2685,29 +2685,29 @@
         <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>path</span>.<span class='ident'>is_empty</span>() {
             <span class='kw'>let</span> <span class='ident'>prefix</span> <span class='op'>=</span> <span class='ident'>parse_prefix</span>(<span class='ident'>path</span>);
             <span class='kw'>match</span> <span class='ident'>prefix</span> {
-                <span class='prelude-val'>Some</span>(<span class='ident'>DiskPrefix</span>) <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>is_vol_abs</span>(<span class='ident'>path</span>, <span class='ident'>prefix</span>) <span class='op'>&amp;&amp;</span> <span class='ident'>shares_volume</span>(<span class='self'>self</span>, <span class='ident'>path</span>) <span class='op'>=&gt;</span> {<span class='comment'>
-                    // cwd-relative path, self is on the same volume
-                    </span><span class='ident'>append_path</span>(<span class='self'>self</span>, <span class='ident'>path</span>.<span class='ident'>slice_from</span>(<span class='ident'>prefix_len</span>(<span class='ident'>prefix</span>)));
+                <span class='prelude-val'>Some</span>(<span class='ident'>DiskPrefix</span>) <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>is_vol_abs</span>(<span class='ident'>path</span>, <span class='ident'>prefix</span>) <span class='op'>&amp;&amp;</span> <span class='ident'>shares_volume</span>(<span class='self'>self</span>, <span class='ident'>path</span>) <span class='op'>=&gt;</span> {
+                    <span class='comment'>// cwd-relative path, self is on the same volume</span>
+                    <span class='ident'>append_path</span>(<span class='self'>self</span>, <span class='ident'>path</span>.<span class='ident'>slice_from</span>(<span class='ident'>prefix_len</span>(<span class='ident'>prefix</span>)));
                 }
-                <span class='prelude-val'>Some</span>(_) <span class='op'>=&gt;</span> {<span class='comment'>
-                    // absolute path, or cwd-relative and self is not same volume
-                    </span><span class='ident'>replace_path</span>(<span class='self'>self</span>, <span class='ident'>path</span>, <span class='ident'>prefix</span>);
+                <span class='prelude-val'>Some</span>(_) <span class='op'>=&gt;</span> {
+                    <span class='comment'>// absolute path, or cwd-relative and self is not same volume</span>
+                    <span class='ident'>replace_path</span>(<span class='self'>self</span>, <span class='ident'>path</span>, <span class='ident'>prefix</span>);
                 }
-                <span class='prelude-val'>None</span> <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>path</span>.<span class='ident'>is_empty</span>() <span class='op'>&amp;&amp;</span> <span class='ident'>is_sep_</span>(<span class='self'>self</span>.<span class='ident'>prefix</span>, <span class='ident'>path</span>.<span class='ident'>as_bytes</span>()[<span class='number'>0</span>]) <span class='op'>=&gt;</span> {<span class='comment'>
-                    // volume-relative path
-                    </span><span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>prefix</span>.<span class='ident'>is_some</span>() {<span class='comment'>
-                        // truncate self down to the prefix, then append
-                        </span><span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>prefix_len</span>();
+                <span class='prelude-val'>None</span> <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>path</span>.<span class='ident'>is_empty</span>() <span class='op'>&amp;&amp;</span> <span class='ident'>is_sep_</span>(<span class='self'>self</span>.<span class='ident'>prefix</span>, <span class='ident'>path</span>.<span class='ident'>as_bytes</span>()[<span class='number'>0</span>]) <span class='op'>=&gt;</span> {
+                    <span class='comment'>// volume-relative path</span>
+                    <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>prefix</span>.<span class='ident'>is_some</span>() {
+                        <span class='comment'>// truncate self down to the prefix, then append</span>
+                        <span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>prefix_len</span>();
                         <span class='self'>self</span>.<span class='ident'>repr</span>.<span class='ident'>truncate</span>(<span class='ident'>n</span>);
                         <span class='ident'>append_path</span>(<span class='self'>self</span>, <span class='ident'>path</span>);
-                    } <span class='kw'>else</span> {<span class='comment'>
-                        // we have no prefix, so nothing to be relative to
-                        </span><span class='ident'>replace_path</span>(<span class='self'>self</span>, <span class='ident'>path</span>, <span class='ident'>prefix</span>);
+                    } <span class='kw'>else</span> {
+                        <span class='comment'>// we have no prefix, so nothing to be relative to</span>
+                        <span class='ident'>replace_path</span>(<span class='self'>self</span>, <span class='ident'>path</span>, <span class='ident'>prefix</span>);
                     }
                 }
-                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {<span class='comment'>
-                    // relative path
-                    </span><span class='ident'>append_path</span>(<span class='self'>self</span>, <span class='ident'>path</span>);
+                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
+                    <span class='comment'>// relative path</span>
+                    <span class='ident'>append_path</span>(<span class='self'>self</span>, <span class='ident'>path</span>);
                 }
             }
         }
@@ -2796,15 +2796,15 @@
     <span class='doccomment'>/// See `GenericPath::filestem_str` for info.</span>
     <span class='doccomment'>/// Always returns a `Some` value if `filestem` returns a `Some` value.</span>
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>filestem_str</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span><span class='op'>&gt;</span> {<span class='comment'>
-        // filestem() returns a byte vector that&#39;s guaranteed valid UTF-8
-        </span><span class='self'>self</span>.<span class='ident'>filestem</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>t</span><span class='op'>|</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>t</span>) })
+    <span class='kw'>fn</span> <span class='ident'>filestem_str</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span><span class='op'>&gt;</span> {
+        <span class='comment'>// filestem() returns a byte vector that&#39;s guaranteed valid UTF-8</span>
+        <span class='self'>self</span>.<span class='ident'>filestem</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>t</span><span class='op'>|</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>t</span>) })
     }
 
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>extension_str</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span><span class='op'>&gt;</span> {<span class='comment'>
-        // extension() returns a byte vector that&#39;s guaranteed valid UTF-8
-        </span><span class='self'>self</span>.<span class='ident'>extension</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>t</span><span class='op'>|</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>t</span>) })
+    <span class='kw'>fn</span> <span class='ident'>extension_str</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span><span class='op'>&gt;</span> {
+        <span class='comment'>// extension() returns a byte vector that&#39;s guaranteed valid UTF-8</span>
+        <span class='self'>self</span>.<span class='ident'>extension</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>t</span><span class='op'>|</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>t</span>) })
     }
 
     <span class='kw'>fn</span> <span class='ident'>dir_path</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Path</span> {
@@ -2897,9 +2897,9 @@
                 <span class='kw'>match</span> (<span class='ident'>ita</span>.<span class='ident'>next</span>(), <span class='ident'>itb</span>.<span class='ident'>next</span>()) {
                     (<span class='prelude-val'>None</span>, _) <span class='op'>=&gt;</span> <span class='kw'>break</span>,
                     (<span class='prelude-val'>Some</span>(<span class='ident'>a</span>), <span class='prelude-val'>Some</span>(<span class='ident'>b</span>)) <span class='kw'>if</span> <span class='ident'>a</span> <span class='op'>==</span> <span class='ident'>b</span> <span class='op'>=&gt;</span> { <span class='kw'>continue</span> },
-                    (<span class='prelude-val'>Some</span>(<span class='ident'>a</span>), _) <span class='kw'>if</span> <span class='ident'>a</span> <span class='op'>==</span> <span class='string'>&quot;..&quot;</span> <span class='op'>=&gt;</span> {<span class='comment'>
-                        // if ita contains only .. components, it&#39;s an ancestor
-                        </span><span class='kw'>return</span> <span class='ident'>ita</span>.<span class='ident'>all</span>(<span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span> <span class='op'>==</span> <span class='string'>&quot;..&quot;</span>);
+                    (<span class='prelude-val'>Some</span>(<span class='ident'>a</span>), _) <span class='kw'>if</span> <span class='ident'>a</span> <span class='op'>==</span> <span class='string'>&quot;..&quot;</span> <span class='op'>=&gt;</span> {
+                        <span class='comment'>// if ita contains only .. components, it&#39;s an ancestor</span>
+                        <span class='kw'>return</span> <span class='ident'>ita</span>.<span class='ident'>all</span>(<span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span> <span class='op'>==</span> <span class='string'>&quot;..&quot;</span>);
                     }
                     _ <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='boolval'>false</span>
                 }
@@ -2913,13 +2913,13 @@
             <span class='ident'>s</span> <span class='op'>==</span> <span class='string'>&quot;.&quot;</span> <span class='op'>||</span> <span class='ident'>s</span> <span class='op'>==</span> <span class='string'>&quot;..&quot;</span> <span class='op'>||</span> <span class='ident'>s</span>.<span class='ident'>contains_char</span>(<span class='ident'>SEP2</span>)
         }
 
-        <span class='kw'>if</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>equiv_prefix</span>(<span class='ident'>base</span>) {<span class='comment'>
-            // prefixes differ
-            </span><span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_absolute</span>() {
+        <span class='kw'>if</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>equiv_prefix</span>(<span class='ident'>base</span>) {
+            <span class='comment'>// prefixes differ</span>
+            <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_absolute</span>() {
                 <span class='prelude-val'>Some</span>(<span class='self'>self</span>.<span class='ident'>clone</span>())
-            } <span class='kw'>else</span> <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>prefix</span> <span class='op'>==</span> <span class='prelude-val'>Some</span>(<span class='ident'>DiskPrefix</span>) <span class='op'>&amp;&amp;</span> <span class='ident'>base</span>.<span class='ident'>prefix</span> <span class='op'>==</span> <span class='prelude-val'>Some</span>(<span class='ident'>DiskPrefix</span>) {<span class='comment'>
-                // both drives, drive letters must differ or they&#39;d be equiv
-                </span><span class='prelude-val'>Some</span>(<span class='self'>self</span>.<span class='ident'>clone</span>())
+            } <span class='kw'>else</span> <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>prefix</span> <span class='op'>==</span> <span class='prelude-val'>Some</span>(<span class='ident'>DiskPrefix</span>) <span class='op'>&amp;&amp;</span> <span class='ident'>base</span>.<span class='ident'>prefix</span> <span class='op'>==</span> <span class='prelude-val'>Some</span>(<span class='ident'>DiskPrefix</span>) {
+                <span class='comment'>// both drives, drive letters must differ or they&#39;d be equiv</span>
+                <span class='prelude-val'>Some</span>(<span class='self'>self</span>.<span class='ident'>clone</span>())
             } <span class='kw'>else</span> {
                 <span class='prelude-val'>None</span>
             }
@@ -3079,9 +3079,9 @@
         }
     }
 
-    <span class='kw'>fn</span> <span class='ident'>normalize_</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>StrAllocating</span><span class='op'>&gt;</span>(<span class='ident'>s</span>: <span class='ident'>S</span>) <span class='op'>-&gt;</span> (<span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>PathPrefix</span><span class='op'>&gt;</span>, <span class='ident'>String</span>) {<span class='comment'>
-        // make borrowck happy
-        </span><span class='kw'>let</span> (<span class='ident'>prefix</span>, <span class='ident'>val</span>) <span class='op'>=</span> {
+    <span class='kw'>fn</span> <span class='ident'>normalize_</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>StrAllocating</span><span class='op'>&gt;</span>(<span class='ident'>s</span>: <span class='ident'>S</span>) <span class='op'>-&gt;</span> (<span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>PathPrefix</span><span class='op'>&gt;</span>, <span class='ident'>String</span>) {
+        <span class='comment'>// make borrowck happy</span>
+        <span class='kw'>let</span> (<span class='ident'>prefix</span>, <span class='ident'>val</span>) <span class='op'>=</span> {
             <span class='kw'>let</span> <span class='ident'>prefix</span> <span class='op'>=</span> <span class='ident'>parse_prefix</span>(<span class='ident'>s</span>.<span class='ident'>as_slice</span>());
             <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>normalize__</span>(<span class='ident'>s</span>.<span class='ident'>as_slice</span>(), <span class='ident'>prefix</span>);
             (<span class='ident'>prefix</span>, <span class='ident'>path</span>)
@@ -3093,12 +3093,12 @@
     }
 
     <span class='kw'>fn</span> <span class='ident'>normalize__</span>(<span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>prefix</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>PathPrefix</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
-        <span class='kw'>if</span> <span class='ident'>prefix_is_verbatim</span>(<span class='ident'>prefix</span>) {<span class='comment'>
-            // don&#39;t do any normalization
-            </span><span class='kw'>match</span> <span class='ident'>prefix</span> {
-                <span class='prelude-val'>Some</span>(<span class='ident'>VerbatimUNCPrefix</span>(<span class='ident'>x</span>, <span class='number'>0</span>)) <span class='kw'>if</span> <span class='ident'>s</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>8</span> <span class='op'>+</span> <span class='ident'>x</span> <span class='op'>=&gt;</span> {<span class='comment'>
-                    // the server component has no trailing &#39;\&#39;
-                    </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='ident'>s</span>);
+        <span class='kw'>if</span> <span class='ident'>prefix_is_verbatim</span>(<span class='ident'>prefix</span>) {
+            <span class='comment'>// don&#39;t do any normalization</span>
+            <span class='kw'>match</span> <span class='ident'>prefix</span> {
+                <span class='prelude-val'>Some</span>(<span class='ident'>VerbatimUNCPrefix</span>(<span class='ident'>x</span>, <span class='number'>0</span>)) <span class='kw'>if</span> <span class='ident'>s</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>8</span> <span class='op'>+</span> <span class='ident'>x</span> <span class='op'>=&gt;</span> {
+                    <span class='comment'>// the server component has no trailing &#39;\&#39;</span>
+                    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='ident'>s</span>);
                     <span class='ident'>s</span>.<span class='ident'>push_char</span>(<span class='ident'>SEP</span>);
                     <span class='prelude-val'>Some</span>(<span class='ident'>s</span>)
                 }
@@ -3135,9 +3135,9 @@
                                                      .<span class='ident'>to_upper</span>()
                                                      .<span class='ident'>to_byte</span>();
                                 }
-                                <span class='kw'>if</span> <span class='ident'>is_abs</span> {<span class='comment'>
-                                    // normalize C:/ to C:\
-                                    </span><span class='kw'>unsafe</span> {
+                                <span class='kw'>if</span> <span class='ident'>is_abs</span> {
+                                    <span class='comment'>// normalize C:/ to C:\</span>
+                                    <span class='kw'>unsafe</span> {
                                         <span class='op'>*</span><span class='ident'>s</span>.<span class='ident'>as_mut_vec</span>().<span class='ident'>get_mut</span>(<span class='number'>2</span>) <span class='op'>=</span> <span class='ident'>SEP_BYTE</span>;
                                     }
                                 }
@@ -3216,14 +3216,14 @@
 
     <span class='kw'>fn</span> <span class='ident'>prefix_len</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>uint</span> {
         <span class='ident'>prefix_len</span>(<span class='self'>self</span>.<span class='ident'>prefix</span>)
-    }<span class='comment'>
+    }
 
-    // Returns a tuple (before, after, end) where before is the index of the separator
-    // and after is the index just after the separator.
-    // end is the length of the string, normally, or the index of the final character if it is
-    // a non-semantic trailing separator in a verbatim string.
-    // If the prefix is considered the separator, before and after are the same.
-    </span><span class='kw'>fn</span> <span class='ident'>sepidx_or_prefix_len</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span>(<span class='ident'>uint</span>,<span class='ident'>uint</span>,<span class='ident'>uint</span>)<span class='op'>&gt;</span> {
+    <span class='comment'>// Returns a tuple (before, after, end) where before is the index of the separator</span>
+    <span class='comment'>// and after is the index just after the separator.</span>
+    <span class='comment'>// end is the length of the string, normally, or the index of the final character if it is</span>
+    <span class='comment'>// a non-semantic trailing separator in a verbatim string.</span>
+    <span class='comment'>// If the prefix is considered the separator, before and after are the same.</span>
+    <span class='kw'>fn</span> <span class='ident'>sepidx_or_prefix_len</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span>(<span class='ident'>uint</span>,<span class='ident'>uint</span>,<span class='ident'>uint</span>)<span class='op'>&gt;</span> {
         <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>sepidx</span> {
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>prefix_len</span>() { <span class='number'>0</span> <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>, <span class='ident'>x</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>((<span class='ident'>x</span>,<span class='ident'>x</span>,<span class='self'>self</span>.<span class='ident'>repr</span>.<span class='ident'>len</span>())) },
             <span class='prelude-val'>Some</span>(<span class='ident'>x</span>) <span class='op'>=&gt;</span> {
@@ -3286,22 +3286,22 @@
     <span class='kw'>let</span> <span class='ident'>new_path</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>path</span>.<span class='ident'>prefix</span> {
         <span class='prelude-val'>Some</span>(<span class='ident'>VerbatimPrefix</span>(_)) <span class='op'>|</span> <span class='prelude-val'>Some</span>(<span class='ident'>DeviceNSPrefix</span>(_)) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>None</span>,
         <span class='prelude-val'>Some</span>(<span class='ident'>UNCPrefix</span>(_,_)) <span class='op'>|</span> <span class='prelude-val'>Some</span>(<span class='ident'>DiskPrefix</span>) <span class='op'>|</span> <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>path</span>.<span class='ident'>clone</span>()),
-        <span class='prelude-val'>Some</span>(<span class='ident'>VerbatimDiskPrefix</span>) <span class='op'>=&gt;</span> {<span class='comment'>
-            // \\?\D:\
-            </span><span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='ident'>repr</span>.<span class='ident'>slice_from</span>(<span class='number'>4</span>))
+        <span class='prelude-val'>Some</span>(<span class='ident'>VerbatimDiskPrefix</span>) <span class='op'>=&gt;</span> {
+            <span class='comment'>// \\?\D:\</span>
+            <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='ident'>repr</span>.<span class='ident'>slice_from</span>(<span class='number'>4</span>))
         }
-        <span class='prelude-val'>Some</span>(<span class='ident'>VerbatimUNCPrefix</span>(_,_)) <span class='op'>=&gt;</span> {<span class='comment'>
-            // \\?\UNC\server\share
-            </span><span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>r&quot;\{}&quot;</span>, <span class='ident'>repr</span>.<span class='ident'>slice_from</span>(<span class='number'>7</span>)))
+        <span class='prelude-val'>Some</span>(<span class='ident'>VerbatimUNCPrefix</span>(_,_)) <span class='op'>=&gt;</span> {
+            <span class='comment'>// \\?\UNC\server\share</span>
+            <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>r&quot;\{}&quot;</span>, <span class='ident'>repr</span>.<span class='ident'>slice_from</span>(<span class='number'>7</span>)))
         }
     };
-    <span class='kw'>if</span> <span class='ident'>new_path</span>.<span class='ident'>prefix</span>.<span class='ident'>is_none</span>() {<span class='comment'>
-        // \\?\UNC\server is a VerbatimUNCPrefix
-        // but \\server is nothing
-        </span><span class='kw'>return</span> <span class='prelude-val'>None</span>;
-    }<span class='comment'>
-    // now ensure normalization didn&#39;t change anything
-    </span><span class='kw'>if</span> <span class='ident'>repr</span>.<span class='ident'>slice_from</span>(<span class='ident'>path</span>.<span class='ident'>prefix_len</span>()) <span class='op'>==</span>
+    <span class='kw'>if</span> <span class='ident'>new_path</span>.<span class='ident'>prefix</span>.<span class='ident'>is_none</span>() {
+        <span class='comment'>// \\?\UNC\server is a VerbatimUNCPrefix</span>
+        <span class='comment'>// but \\server is nothing</span>
+        <span class='kw'>return</span> <span class='prelude-val'>None</span>;
+    }
+    <span class='comment'>// now ensure normalization didn&#39;t change anything</span>
+    <span class='kw'>if</span> <span class='ident'>repr</span>.<span class='ident'>slice_from</span>(<span class='ident'>path</span>.<span class='ident'>prefix_len</span>()) <span class='op'>==</span>
         <span class='ident'>new_path</span>.<span class='ident'>repr</span>.<span class='ident'>as_slice</span>().<span class='ident'>slice_from</span>(<span class='ident'>new_path</span>.<span class='ident'>prefix_len</span>()) {
         <span class='prelude-val'>Some</span>(<span class='ident'>new_path</span>)
     } <span class='kw'>else</span> {
@@ -3365,50 +3365,50 @@
 }
 
 <span class='kw'>fn</span> <span class='ident'>parse_prefix</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>mut</span> <span class='ident'>path</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>PathPrefix</span><span class='op'>&gt;</span> {
-    <span class='kw'>if</span> <span class='ident'>path</span>.<span class='ident'>starts_with</span>(<span class='string'>&quot;\\\\&quot;</span>) {<span class='comment'>
-        // \\
-        </span><span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>path</span>.<span class='ident'>slice_from</span>(<span class='number'>2</span>);
-        <span class='kw'>if</span> <span class='ident'>path</span>.<span class='ident'>starts_with</span>(<span class='string'>&quot;?\\&quot;</span>) {<span class='comment'>
-            // \\?\
-            </span><span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>path</span>.<span class='ident'>slice_from</span>(<span class='number'>2</span>);
-            <span class='kw'>if</span> <span class='ident'>path</span>.<span class='ident'>starts_with</span>(<span class='string'>&quot;UNC\\&quot;</span>) {<span class='comment'>
-                // \\?\UNC\server\share
-                </span><span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>path</span>.<span class='ident'>slice_from</span>(<span class='number'>4</span>);
+    <span class='kw'>if</span> <span class='ident'>path</span>.<span class='ident'>starts_with</span>(<span class='string'>&quot;\\\\&quot;</span>) {
+        <span class='comment'>// \\</span>
+        <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>path</span>.<span class='ident'>slice_from</span>(<span class='number'>2</span>);
+        <span class='kw'>if</span> <span class='ident'>path</span>.<span class='ident'>starts_with</span>(<span class='string'>&quot;?\\&quot;</span>) {
+            <span class='comment'>// \\?\</span>
+            <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>path</span>.<span class='ident'>slice_from</span>(<span class='number'>2</span>);
+            <span class='kw'>if</span> <span class='ident'>path</span>.<span class='ident'>starts_with</span>(<span class='string'>&quot;UNC\\&quot;</span>) {
+                <span class='comment'>// \\?\UNC\server\share</span>
+                <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>path</span>.<span class='ident'>slice_from</span>(<span class='number'>4</span>);
                 <span class='kw'>let</span> (<span class='ident'>idx_a</span>, <span class='ident'>idx_b</span>) <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>parse_two_comps</span>(<span class='ident'>path</span>, <span class='ident'>is_sep_verbatim</span>) {
                     <span class='prelude-val'>Some</span>(<span class='ident'>x</span>) <span class='op'>=&gt;</span> <span class='ident'>x</span>,
                     <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> (<span class='ident'>path</span>.<span class='ident'>len</span>(), <span class='number'>0</span>)
                 };
                 <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>VerbatimUNCPrefix</span>(<span class='ident'>idx_a</span>, <span class='ident'>idx_b</span>));
-            } <span class='kw'>else</span> {<span class='comment'>
-                // \\?\path
-                </span><span class='kw'>let</span> <span class='ident'>idx</span> <span class='op'>=</span> <span class='ident'>path</span>.<span class='ident'>find</span>(<span class='string'>&#39;\\&#39;</span>);
+            } <span class='kw'>else</span> {
+                <span class='comment'>// \\?\path</span>
+                <span class='kw'>let</span> <span class='ident'>idx</span> <span class='op'>=</span> <span class='ident'>path</span>.<span class='ident'>find</span>(<span class='string'>&#39;\\&#39;</span>);
                 <span class='kw'>if</span> <span class='ident'>idx</span> <span class='op'>==</span> <span class='prelude-val'>Some</span>(<span class='number'>2</span>) <span class='op'>&amp;&amp;</span> <span class='ident'>path</span>.<span class='ident'>as_bytes</span>()[<span class='number'>1</span>] <span class='op'>==</span> <span class='string'>&#39;:&#39;</span> <span class='kw'>as</span> <span class='ident'>u8</span> {
                     <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>path</span>.<span class='ident'>as_bytes</span>()[<span class='number'>0</span>];
-                    <span class='kw'>if</span> <span class='ident'>c</span>.<span class='ident'>is_ascii</span>() <span class='op'>&amp;&amp;</span> ::<span class='ident'>char</span>::<span class='ident'>is_alphabetic</span>(<span class='ident'>c</span> <span class='kw'>as</span> <span class='ident'>char</span>) {<span class='comment'>
-                        // \\?\C:\ path
-                        </span><span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>VerbatimDiskPrefix</span>);
+                    <span class='kw'>if</span> <span class='ident'>c</span>.<span class='ident'>is_ascii</span>() <span class='op'>&amp;&amp;</span> (<span class='ident'>c</span> <span class='kw'>as</span> <span class='ident'>char</span>).<span class='ident'>is_alphabetic</span>() {
+                        <span class='comment'>// \\?\C:\ path</span>
+                        <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>VerbatimDiskPrefix</span>);
                     }
                 }
                 <span class='kw'>let</span> <span class='ident'>idx</span> <span class='op'>=</span> <span class='ident'>idx</span>.<span class='ident'>unwrap_or</span>(<span class='ident'>path</span>.<span class='ident'>len</span>());
                 <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>VerbatimPrefix</span>(<span class='ident'>idx</span>));
             }
-        } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>path</span>.<span class='ident'>starts_with</span>(<span class='string'>&quot;.\\&quot;</span>) {<span class='comment'>
-            // \\.\path
-            </span><span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>path</span>.<span class='ident'>slice_from</span>(<span class='number'>2</span>);
+        } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>path</span>.<span class='ident'>starts_with</span>(<span class='string'>&quot;.\\&quot;</span>) {
+            <span class='comment'>// \\.\path</span>
+            <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>path</span>.<span class='ident'>slice_from</span>(<span class='number'>2</span>);
             <span class='kw'>let</span> <span class='ident'>idx</span> <span class='op'>=</span> <span class='ident'>path</span>.<span class='ident'>find</span>(<span class='string'>&#39;\\&#39;</span>).<span class='ident'>unwrap_or</span>(<span class='ident'>path</span>.<span class='ident'>len</span>());
             <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>DeviceNSPrefix</span>(<span class='ident'>idx</span>));
         }
         <span class='kw'>match</span> <span class='ident'>parse_two_comps</span>(<span class='ident'>path</span>, <span class='ident'>is_sep</span>) {
-            <span class='prelude-val'>Some</span>((<span class='ident'>idx_a</span>, <span class='ident'>idx_b</span>)) <span class='kw'>if</span> <span class='ident'>idx_a</span> <span class='op'>&gt;</span> <span class='number'>0</span> <span class='op'>&amp;&amp;</span> <span class='ident'>idx_b</span> <span class='op'>&gt;</span> <span class='number'>0</span> <span class='op'>=&gt;</span> {<span class='comment'>
-                // \\server\share
-                </span><span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>UNCPrefix</span>(<span class='ident'>idx_a</span>, <span class='ident'>idx_b</span>));
+            <span class='prelude-val'>Some</span>((<span class='ident'>idx_a</span>, <span class='ident'>idx_b</span>)) <span class='kw'>if</span> <span class='ident'>idx_a</span> <span class='op'>&gt;</span> <span class='number'>0</span> <span class='op'>&amp;&amp;</span> <span class='ident'>idx_b</span> <span class='op'>&gt;</span> <span class='number'>0</span> <span class='op'>=&gt;</span> {
+                <span class='comment'>// \\server\share</span>
+                <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>UNCPrefix</span>(<span class='ident'>idx_a</span>, <span class='ident'>idx_b</span>));
             }
             _ <span class='op'>=&gt;</span> ()
         }
-    } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>path</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='number'>1</span> <span class='op'>&amp;&amp;</span> <span class='ident'>path</span>.<span class='ident'>as_bytes</span>()[<span class='number'>1</span>] <span class='op'>==</span> <span class='string'>&#39;:&#39;</span> <span class='kw'>as</span> <span class='ident'>u8</span> {<span class='comment'>
-        // C:
-        </span><span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>path</span>.<span class='ident'>as_bytes</span>()[<span class='number'>0</span>];
-        <span class='kw'>if</span> <span class='ident'>c</span>.<span class='ident'>is_ascii</span>() <span class='op'>&amp;&amp;</span> ::<span class='ident'>char</span>::<span class='ident'>is_alphabetic</span>(<span class='ident'>c</span> <span class='kw'>as</span> <span class='ident'>char</span>) {
+    } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>path</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='number'>1</span> <span class='op'>&amp;&amp;</span> <span class='ident'>path</span>.<span class='ident'>as_bytes</span>()[<span class='number'>1</span>] <span class='op'>==</span> <span class='string'>&#39;:&#39;</span> <span class='kw'>as</span> <span class='ident'>u8</span> {
+        <span class='comment'>// C:</span>
+        <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>path</span>.<span class='ident'>as_bytes</span>()[<span class='number'>0</span>];
+        <span class='kw'>if</span> <span class='ident'>c</span>.<span class='ident'>is_ascii</span>() <span class='op'>&amp;&amp;</span> (<span class='ident'>c</span> <span class='kw'>as</span> <span class='ident'>char</span>).<span class='ident'>is_alphabetic</span>() {
             <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>DiskPrefix</span>);
         }
     }
@@ -3424,10 +3424,10 @@
         <span class='kw'>let</span> <span class='ident'>idx_b</span> <span class='op'>=</span> <span class='ident'>path</span>.<span class='ident'>find</span>(<span class='ident'>f</span>).<span class='ident'>unwrap_or</span>(<span class='ident'>path</span>.<span class='ident'>len</span>());
         <span class='prelude-val'>Some</span>((<span class='ident'>idx_a</span>, <span class='ident'>idx_b</span>))
     }
-}<span class='comment'>
+}
 
-// None result means the string didn&#39;t need normalizing
-</span><span class='kw'>fn</span> <span class='ident'>normalize_helper</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>, <span class='ident'>prefix</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>PathPrefix</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> (<span class='ident'>bool</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span><span class='op'>&gt;&gt;</span>) {
+<span class='comment'>// None result means the string didn&#39;t need normalizing</span>
+<span class='kw'>fn</span> <span class='ident'>normalize_helper</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>, <span class='ident'>prefix</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>PathPrefix</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> (<span class='ident'>bool</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span><span class='op'>&gt;&gt;</span>) {
     <span class='kw'>let</span> <span class='ident'>f</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>prefix_is_verbatim</span>(<span class='ident'>prefix</span>) { <span class='ident'>is_sep</span> } <span class='kw'>else</span> { <span class='ident'>is_sep_verbatim</span> };
     <span class='kw'>let</span> <span class='ident'>is_abs</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='ident'>prefix_len</span>(<span class='ident'>prefix</span>) <span class='op'>&amp;&amp;</span> <span class='ident'>f</span>(<span class='ident'>s</span>.<span class='ident'>char_at</span>(<span class='ident'>prefix_len</span>(<span class='ident'>prefix</span>)));
     <span class='kw'>let</span> <span class='ident'>s_</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>slice_from</span>(<span class='ident'>prefix_len</span>(<span class='ident'>prefix</span>));
@@ -3437,8 +3437,8 @@
         <span class='kw'>return</span> (<span class='ident'>is_abs</span>, <span class='kw'>match</span> <span class='ident'>prefix</span> {
             <span class='prelude-val'>Some</span>(<span class='ident'>DiskPrefix</span>) <span class='op'>|</span> <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> (<span class='kw'>if</span> <span class='ident'>is_sep_verbatim</span>(<span class='ident'>s</span>.<span class='ident'>char_at</span>(<span class='ident'>prefix_len</span>(<span class='ident'>prefix</span>))) { <span class='prelude-val'>None</span> }
                                         <span class='kw'>else</span> { <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[]) }),
-            <span class='prelude-val'>Some</span>(_) <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[]),<span class='comment'> // need to trim the trailing separator
-        </span>});
+            <span class='prelude-val'>Some</span>(_) <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[]), <span class='comment'>// need to trim the trailing separator</span>
+        });
     }
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>comps</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[];
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>n_up</span> <span class='op'>=</span> <span class='number'>0u</span>;
@@ -3476,8 +3476,8 @@
 <span class='kw'>fn</span> <span class='ident'>prefix_is_verbatim</span>(<span class='ident'>p</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>PathPrefix</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>match</span> <span class='ident'>p</span> {
         <span class='prelude-val'>Some</span>(<span class='ident'>VerbatimPrefix</span>(_)) <span class='op'>|</span> <span class='prelude-val'>Some</span>(<span class='ident'>VerbatimUNCPrefix</span>(_,_)) <span class='op'>|</span> <span class='prelude-val'>Some</span>(<span class='ident'>VerbatimDiskPrefix</span>) <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
-        <span class='prelude-val'>Some</span>(<span class='ident'>DeviceNSPrefix</span>(_)) <span class='op'>=&gt;</span> <span class='boolval'>true</span>,<span class='comment'> // not really sure, but I think so
-        </span>_ <span class='op'>=&gt;</span> <span class='boolval'>false</span>
+        <span class='prelude-val'>Some</span>(<span class='ident'>DeviceNSPrefix</span>(_)) <span class='op'>=&gt;</span> <span class='boolval'>true</span>, <span class='comment'>// not really sure, but I think so</span>
+        _ <span class='op'>=&gt;</span> <span class='boolval'>false</span>
     }
 }
 
@@ -3655,12 +3655,12 @@
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;\\\\?\\UNC\\server/share&quot;</span>), <span class='string'>&quot;\\\\?\\UNC\\server/share\\&quot;</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;\\\\?\\UNC\\server&quot;</span>), <span class='string'>&quot;\\\\?\\UNC\\server\\&quot;</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;\\\\?\\UNC\\&quot;</span>), <span class='string'>&quot;\\\\?\\UNC\\\\&quot;</span>);
-        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;\\\\?\\UNC&quot;</span>), <span class='string'>&quot;\\\\?\\UNC&quot;</span>);<span class='comment'>
+        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;\\\\?\\UNC&quot;</span>), <span class='string'>&quot;\\\\?\\UNC&quot;</span>);
 
-        // I&#39;m not sure whether \\.\foo/bar should normalize to \\.\foo\bar
-        // as information is sparse and this isn&#39;t really googleable.
-        // I&#39;m going to err on the side of not normalizing it, as this skips the filesystem
-        </span><span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;\\\\.\\foo/bar&quot;</span>), <span class='string'>&quot;\\\\.\\foo/bar&quot;</span>);
+        <span class='comment'>// I&#39;m not sure whether \\.\foo/bar should normalize to \\.\foo\bar</span>
+        <span class='comment'>// as information is sparse and this isn&#39;t really googleable.</span>
+        <span class='comment'>// I&#39;m going to err on the side of not normalizing it, as this skips the filesystem</span>
+        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;\\\\.\\foo/bar&quot;</span>), <span class='string'>&quot;\\\\.\\foo/bar&quot;</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;\\\\.\\foo\\bar&quot;</span>), <span class='string'>&quot;\\\\.\\foo\\bar&quot;</span>);
     }
 
@@ -3701,9 +3701,9 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_display_str</span>() {
         <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;foo&quot;</span>);
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>path</span>.<span class='ident'>display</span>().<span class='ident'>to_str</span>(), <span class='string'>&quot;foo&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>path</span>.<span class='ident'>display</span>().<span class='ident'>to_string</span>(), <span class='string'>&quot;foo&quot;</span>.<span class='ident'>to_string</span>());
         <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>b&quot;\\&quot;</span>);
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>path</span>.<span class='ident'>filename_display</span>().<span class='ident'>to_str</span>(), <span class='string'>&quot;&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>path</span>.<span class='ident'>filename_display</span>().<span class='ident'>to_string</span>(), <span class='string'>&quot;&quot;</span>.<span class='ident'>to_string</span>());
 
         <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;foo&quot;</span>);
         <span class='kw'>let</span> <span class='ident'>mo</span> <span class='op'>=</span> <span class='ident'>path</span>.<span class='ident'>display</span>().<span class='ident'>as_maybe_owned</span>();
@@ -3835,10 +3835,10 @@
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;..bar&quot;</span>, <span class='ident'>filestem_str</span>, <span class='string'>&quot;.&quot;</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;hi\\there..txt&quot;</span>, <span class='ident'>filestem_str</span>, <span class='string'>&quot;there.&quot;</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;..&quot;</span>, <span class='ident'>filestem_str</span>, <span class='prelude-val'>None</span>, <span class='ident'>opt</span>);
-        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;..\\..&quot;</span>, <span class='ident'>filestem_str</span>, <span class='prelude-val'>None</span>, <span class='ident'>opt</span>);<span class='comment'>
-        // filestem is based on filename, so we don&#39;t need the full set of prefix tests
+        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;..\\..&quot;</span>, <span class='ident'>filestem_str</span>, <span class='prelude-val'>None</span>, <span class='ident'>opt</span>);
+        <span class='comment'>// filestem is based on filename, so we don&#39;t need the full set of prefix tests</span>
 
-        </span><span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>v</span>: <span class='string'>b&quot;hi\\there.txt&quot;</span>, <span class='ident'>extension</span>, <span class='prelude-val'>Some</span>(<span class='string'>b&quot;txt&quot;</span>));
+        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>v</span>: <span class='string'>b&quot;hi\\there.txt&quot;</span>, <span class='ident'>extension</span>, <span class='prelude-val'>Some</span>(<span class='string'>b&quot;txt&quot;</span>));
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>v</span>: <span class='string'>b&quot;hi\\there&quot;</span>, <span class='ident'>extension</span>, <span class='prelude-val'>None</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;hi\\there.txt&quot;</span>, <span class='ident'>extension_str</span>, <span class='prelude-val'>Some</span>(<span class='string'>&quot;txt&quot;</span>), <span class='ident'>opt</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;hi\\there&quot;</span>, <span class='ident'>extension_str</span>, <span class='prelude-val'>None</span>, <span class='ident'>opt</span>);
@@ -3851,9 +3851,9 @@
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;..bar&quot;</span>, <span class='ident'>extension_str</span>, <span class='prelude-val'>Some</span>(<span class='string'>&quot;bar&quot;</span>), <span class='ident'>opt</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;hi\\there..txt&quot;</span>, <span class='ident'>extension_str</span>, <span class='prelude-val'>Some</span>(<span class='string'>&quot;txt&quot;</span>), <span class='ident'>opt</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;..&quot;</span>, <span class='ident'>extension_str</span>, <span class='prelude-val'>None</span>, <span class='ident'>opt</span>);
-        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;..\\..&quot;</span>, <span class='ident'>extension_str</span>, <span class='prelude-val'>None</span>, <span class='ident'>opt</span>);<span class='comment'>
-        // extension is based on filename, so we don&#39;t need the full set of prefix tests
-    </span>}
+        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;..\\..&quot;</span>, <span class='ident'>extension_str</span>, <span class='prelude-val'>None</span>, <span class='ident'>opt</span>);
+        <span class='comment'>// extension is based on filename, so we don&#39;t need the full set of prefix tests</span>
+    }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_push</span>() {
@@ -3873,19 +3873,19 @@
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;a\\b\\c&quot;</span>, <span class='string'>&quot;..&quot;</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\a\\b\\c&quot;</span>, <span class='string'>&quot;d&quot;</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;a\\b&quot;</span>, <span class='string'>&quot;c\\d&quot;</span>);
-        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;a\\b&quot;</span>, <span class='string'>&quot;\\c\\d&quot;</span>);<span class='comment'>
-        // this is just a sanity-check test. push and join share an implementation,
-        // so there&#39;s no need for the full set of prefix tests
+        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;a\\b&quot;</span>, <span class='string'>&quot;\\c\\d&quot;</span>);
+        <span class='comment'>// this is just a sanity-check test. push and join share an implementation,</span>
+        <span class='comment'>// so there&#39;s no need for the full set of prefix tests</span>
 
-        // we do want to check one odd case though to ensure the prefix is re-parsed
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;\\\\?\\C:&quot;</span>);
+        <span class='comment'>// we do want to check one odd case though to ensure the prefix is re-parsed</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;\\\\?\\C:&quot;</span>);
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>prefix</span>(<span class='kw-2'>&amp;</span><span class='ident'>p</span>) <span class='op'>==</span> <span class='prelude-val'>Some</span>(<span class='ident'>VerbatimPrefix</span>(<span class='number'>2</span>)));
         <span class='ident'>p</span>.<span class='ident'>push</span>(<span class='string'>&quot;foo&quot;</span>);
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>prefix</span>(<span class='kw-2'>&amp;</span><span class='ident'>p</span>) <span class='op'>==</span> <span class='prelude-val'>Some</span>(<span class='ident'>VerbatimDiskPrefix</span>));
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>.<span class='ident'>as_str</span>(), <span class='prelude-val'>Some</span>(<span class='string'>&quot;\\\\?\\C:\\foo&quot;</span>));<span class='comment'>
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>.<span class='ident'>as_str</span>(), <span class='prelude-val'>Some</span>(<span class='string'>&quot;\\\\?\\C:\\foo&quot;</span>));
 
-        // and another with verbatim non-normalized paths
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;\\\\?\\C:\\a\\&quot;</span>);
+        <span class='comment'>// and another with verbatim non-normalized paths</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;\\\\?\\C:\\a\\&quot;</span>);
         <span class='ident'>p</span>.<span class='ident'>push</span>(<span class='string'>&quot;foo&quot;</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>p</span>.<span class='ident'>as_str</span>(), <span class='prelude-val'>Some</span>(<span class='string'>&quot;\\\\?\\C:\\a\\foo&quot;</span>));
     }
@@ -3935,12 +3935,12 @@
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\\\?\\UNC\\server&quot;</span>, <span class='string'>&quot;foo&quot;</span>, <span class='string'>&quot;\\\\?\\UNC\\server\\\\foo&quot;</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;C:\\a&quot;</span>, <span class='string'>&quot;\\\\?\\UNC\\server\\share&quot;</span>, <span class='string'>&quot;\\\\?\\UNC\\server\\share&quot;</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\\\.\\foo\\bar&quot;</span>, <span class='string'>&quot;baz&quot;</span>, <span class='string'>&quot;\\\\.\\foo\\bar\\baz&quot;</span>);
-        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\\\.\\foo\\bar&quot;</span>, <span class='string'>&quot;C:a&quot;</span>, <span class='string'>&quot;C:a&quot;</span>);<span class='comment'>
-        // again, not sure about the following, but I&#39;m assuming \\.\ should be verbatim
-        </span><span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\\\.\\foo&quot;</span>, <span class='string'>&quot;..\\bar&quot;</span>, <span class='string'>&quot;\\\\.\\foo\\..\\bar&quot;</span>);
+        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\\\.\\foo\\bar&quot;</span>, <span class='string'>&quot;C:a&quot;</span>, <span class='string'>&quot;C:a&quot;</span>);
+        <span class='comment'>// again, not sure about the following, but I&#39;m assuming \\.\ should be verbatim</span>
+        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\\\.\\foo&quot;</span>, <span class='string'>&quot;..\\bar&quot;</span>, <span class='string'>&quot;\\\\.\\foo\\..\\bar&quot;</span>);
 
-        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\\\?\\C:&quot;</span>, <span class='string'>&quot;foo&quot;</span>, <span class='string'>&quot;\\\\?\\C:\\foo&quot;</span>);<span class='comment'> // this is a weird one
-    </span>}
+        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\\\?\\C:&quot;</span>, <span class='string'>&quot;foo&quot;</span>, <span class='string'>&quot;\\\\?\\C:\\foo&quot;</span>); <span class='comment'>// this is a weird one</span>
+    }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_push_many</span>() {
@@ -4055,10 +4055,10 @@
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;.&quot;</span>).<span class='ident'>join</span>(<span class='string'>&quot;a\\b&quot;</span>), <span class='string'>&quot;a\\b&quot;</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;\\&quot;</span>).<span class='ident'>join</span>(<span class='string'>&quot;a\\b&quot;</span>), <span class='string'>&quot;\\a\\b&quot;</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>v</span>: <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>b&quot;a\\b\\c&quot;</span>).<span class='ident'>join</span>(<span class='string'>b&quot;..&quot;</span>), <span class='string'>b&quot;a\\b&quot;</span>);
-        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>v</span>: <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>b&quot;\\a\\b\\c&quot;</span>).<span class='ident'>join</span>(<span class='string'>b&quot;d&quot;</span>), <span class='string'>b&quot;\\a\\b\\c\\d&quot;</span>);<span class='comment'>
-        // full join testing is covered under test_push_path, so no need for
-        // the full set of prefix tests
-    </span>}
+        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>v</span>: <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>b&quot;\\a\\b\\c&quot;</span>).<span class='ident'>join</span>(<span class='string'>b&quot;d&quot;</span>), <span class='string'>b&quot;\\a\\b\\c\\d&quot;</span>);
+        <span class='comment'>// full join testing is covered under test_push_path, so no need for</span>
+        <span class='comment'>// the full set of prefix tests</span>
+    }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_join_path</span>() {
@@ -4078,10 +4078,10 @@
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;a\\b&quot;</span>, <span class='string'>&quot;c\\d&quot;</span>, <span class='string'>&quot;a\\b\\c\\d&quot;</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;a\\b&quot;</span>, <span class='string'>&quot;\\c\\d&quot;</span>, <span class='string'>&quot;\\c\\d&quot;</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;.&quot;</span>, <span class='string'>&quot;a\\b&quot;</span>, <span class='string'>&quot;a\\b&quot;</span>);
-        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\&quot;</span>, <span class='string'>&quot;a\\b&quot;</span>, <span class='string'>&quot;\\a\\b&quot;</span>);<span class='comment'>
-        // join is implemented using push, so there&#39;s no need for
-        // the full set of prefix tests
-    </span>}
+        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\&quot;</span>, <span class='string'>&quot;a\\b&quot;</span>, <span class='string'>&quot;\\a\\b&quot;</span>);
+        <span class='comment'>// join is implemented using push, so there&#39;s no need for</span>
+        <span class='comment'>// the full set of prefix tests</span>
+    }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_join_many</span>() {
@@ -4192,9 +4192,9 @@
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\&quot;</span>, <span class='ident'>with_extension</span>, <span class='string'>&quot;txt&quot;</span>, <span class='string'>&quot;\\&quot;</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\&quot;</span>, <span class='ident'>with_extension</span>, <span class='string'>&quot;.&quot;</span>, <span class='string'>&quot;\\&quot;</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\&quot;</span>, <span class='ident'>with_extension</span>, <span class='string'>&quot;..&quot;</span>, <span class='string'>&quot;\\&quot;</span>);
-        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;.&quot;</span>, <span class='ident'>with_extension</span>, <span class='string'>&quot;txt&quot;</span>, <span class='string'>&quot;.&quot;</span>);<span class='comment'>
-        // extension setter calls filename setter internally, no need for extended tests
-    </span>}
+        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;.&quot;</span>, <span class='ident'>with_extension</span>, <span class='string'>&quot;txt&quot;</span>, <span class='string'>&quot;.&quot;</span>);
+        <span class='comment'>// extension setter calls filename setter internally, no need for extended tests</span>
+    }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_setters</span>() {
@@ -4235,11 +4235,11 @@
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;hi\\there&quot;</span>, <span class='ident'>set_extension</span>, <span class='ident'>with_extension</span>, <span class='string'>&quot;txt&quot;</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;hi\\there.txt&quot;</span>, <span class='ident'>set_extension</span>, <span class='ident'>with_extension</span>, <span class='string'>&quot;&quot;</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;hi\\there&quot;</span>, <span class='ident'>set_extension</span>, <span class='ident'>with_extension</span>, <span class='string'>&quot;&quot;</span>);
-        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;.&quot;</span>, <span class='ident'>set_extension</span>, <span class='ident'>with_extension</span>, <span class='string'>&quot;txt&quot;</span>);<span class='comment'>
+        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;.&quot;</span>, <span class='ident'>set_extension</span>, <span class='ident'>with_extension</span>, <span class='string'>&quot;txt&quot;</span>);
 
-        // with_ helpers use the setter internally, so the tests for the with_ helpers
-        // will suffice. No need for the full set of prefix tests.
-    </span>}
+        <span class='comment'>// with_ helpers use the setter internally, so the tests for the with_ helpers</span>
+        <span class='comment'>// will suffice. No need for the full set of prefix tests.</span>
+    }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_getters</span>() {
@@ -4289,10 +4289,10 @@
               <span class='prelude-val'>Some</span>(<span class='string'>&quot;there&quot;</span>), <span class='prelude-val'>Some</span>(<span class='string'>&quot;&quot;</span>));
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;hi\\.there&quot;</span>), <span class='prelude-val'>Some</span>(<span class='string'>&quot;.there&quot;</span>), <span class='prelude-val'>Some</span>(<span class='string'>&quot;hi&quot;</span>), <span class='prelude-val'>Some</span>(<span class='string'>&quot;.there&quot;</span>), <span class='prelude-val'>None</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;hi\\..there&quot;</span>), <span class='prelude-val'>Some</span>(<span class='string'>&quot;..there&quot;</span>), <span class='prelude-val'>Some</span>(<span class='string'>&quot;hi&quot;</span>),
-              <span class='prelude-val'>Some</span>(<span class='string'>&quot;.&quot;</span>), <span class='prelude-val'>Some</span>(<span class='string'>&quot;there&quot;</span>));<span class='comment'>
+              <span class='prelude-val'>Some</span>(<span class='string'>&quot;.&quot;</span>), <span class='prelude-val'>Some</span>(<span class='string'>&quot;there&quot;</span>));
 
-        // these are already tested in test_components, so no need for extended tests
-    </span>}
+        <span class='comment'>// these are already tested in test_components, so no need for extended tests</span>
+    }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_dir_path</span>() {
@@ -4301,11 +4301,11 @@
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;\\hi&quot;</span>).<span class='ident'>dir_path</span>(), <span class='string'>&quot;\\&quot;</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;\\&quot;</span>).<span class='ident'>dir_path</span>(), <span class='string'>&quot;\\&quot;</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;..&quot;</span>).<span class='ident'>dir_path</span>(), <span class='string'>&quot;..&quot;</span>);
-        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;..\\..&quot;</span>).<span class='ident'>dir_path</span>(), <span class='string'>&quot;..\\..&quot;</span>);<span class='comment'>
+        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;..\\..&quot;</span>).<span class='ident'>dir_path</span>(), <span class='string'>&quot;..\\..&quot;</span>);
 
-        // dir_path is just dirname interpreted as a path.
-        // No need for extended tests
-    </span>}
+        <span class='comment'>// dir_path is just dirname interpreted as a path.</span>
+        <span class='comment'>// No need for extended tests</span>
+    }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_is_absolute</span>() {
@@ -4342,8 +4342,8 @@
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='string'>&quot;\\\\server\\share\\a\\b.txt&quot;</span>, <span class='boolval'>true</span>, <span class='boolval'>false</span>, <span class='boolval'>false</span>, <span class='boolval'>false</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='string'>&quot;\\\\?\\a\\b\\c.txt&quot;</span>, <span class='boolval'>true</span>, <span class='boolval'>false</span>, <span class='boolval'>false</span>, <span class='boolval'>false</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='string'>&quot;\\\\?\\C:\\a\\b.txt&quot;</span>, <span class='boolval'>true</span>, <span class='boolval'>false</span>, <span class='boolval'>false</span>, <span class='boolval'>false</span>);
-        <span class='macro'>t</span><span class='macro'>!</span>(<span class='string'>&quot;\\\\?\\C:a\\b.txt&quot;</span>, <span class='boolval'>true</span>, <span class='boolval'>false</span>, <span class='boolval'>false</span>, <span class='boolval'>false</span>);<span class='comment'> // NB: not equivalent to C:a\b.txt
-        </span><span class='macro'>t</span><span class='macro'>!</span>(<span class='string'>&quot;\\\\?\\UNC\\server\\share\\a\\b.txt&quot;</span>, <span class='boolval'>true</span>, <span class='boolval'>false</span>, <span class='boolval'>false</span>, <span class='boolval'>false</span>);
+        <span class='macro'>t</span><span class='macro'>!</span>(<span class='string'>&quot;\\\\?\\C:a\\b.txt&quot;</span>, <span class='boolval'>true</span>, <span class='boolval'>false</span>, <span class='boolval'>false</span>, <span class='boolval'>false</span>); <span class='comment'>// NB: not equivalent to C:a\b.txt</span>
+        <span class='macro'>t</span><span class='macro'>!</span>(<span class='string'>&quot;\\\\?\\UNC\\server\\share\\a\\b.txt&quot;</span>, <span class='boolval'>true</span>, <span class='boolval'>false</span>, <span class='boolval'>false</span>, <span class='boolval'>false</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='string'>&quot;\\\\.\\a\\b&quot;</span>, <span class='boolval'>true</span>, <span class='boolval'>false</span>, <span class='boolval'>false</span>, <span class='boolval'>false</span>);
     }
 
@@ -4411,8 +4411,8 @@
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\\\?\\C:\\foo\\bar&quot;</span>, <span class='string'>&quot;\\\\?\\C:\\foo\\bar\\baz&quot;</span>, <span class='boolval'>true</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\\\?\\C:\\foo\\bar\\baz&quot;</span>, <span class='string'>&quot;\\\\?\\C:\\foo\\bar&quot;</span>, <span class='boolval'>false</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\\\?\\C:\\&quot;</span>, <span class='string'>&quot;\\\\?\\C:\\foo&quot;</span>, <span class='boolval'>true</span>);
-        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\\\?\\C:&quot;</span>, <span class='string'>&quot;\\\\?\\C:\\&quot;</span>, <span class='boolval'>false</span>);<span class='comment'> // this is a weird one
-        </span><span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\\\?\\C:\\&quot;</span>, <span class='string'>&quot;\\\\?\\C:&quot;</span>, <span class='boolval'>false</span>);
+        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\\\?\\C:&quot;</span>, <span class='string'>&quot;\\\\?\\C:\\&quot;</span>, <span class='boolval'>false</span>); <span class='comment'>// this is a weird one</span>
+        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\\\?\\C:\\&quot;</span>, <span class='string'>&quot;\\\\?\\C:&quot;</span>, <span class='boolval'>false</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\\\?\\C:\\a&quot;</span>, <span class='string'>&quot;\\\\?\\c:\\a\\b&quot;</span>, <span class='boolval'>true</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\\\?\\c:\\a&quot;</span>, <span class='string'>&quot;\\\\?\\C:\\a\\b&quot;</span>, <span class='boolval'>true</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\\\?\\C:\\a&quot;</span>, <span class='string'>&quot;\\\\?\\D:\\a\\b&quot;</span>, <span class='boolval'>false</span>);
@@ -4470,8 +4470,8 @@
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;a\\b\\c&quot;</span>, <span class='string'>&quot;a\\b\\c&quot;</span>, <span class='boolval'>true</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;a\\b\\c&quot;</span>, <span class='string'>&quot;foo\\a\\b\\c&quot;</span>, <span class='boolval'>false</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\a\\b\\c&quot;</span>, <span class='string'>&quot;a\\b\\c&quot;</span>, <span class='boolval'>true</span>);
-        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\a\\b\\c&quot;</span>, <span class='string'>&quot;\\a\\b\\c&quot;</span>, <span class='boolval'>false</span>);<span class='comment'> // child must be relative
-        </span><span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\a\\b\\c&quot;</span>, <span class='string'>&quot;foo\\a\\b\\c&quot;</span>, <span class='boolval'>false</span>);
+        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\a\\b\\c&quot;</span>, <span class='string'>&quot;\\a\\b\\c&quot;</span>, <span class='boolval'>false</span>); <span class='comment'>// child must be relative</span>
+        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\a\\b\\c&quot;</span>, <span class='string'>&quot;foo\\a\\b\\c&quot;</span>, <span class='boolval'>false</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;a\\b\\c&quot;</span>, <span class='string'>&quot;&quot;</span>, <span class='boolval'>false</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;&quot;</span>, <span class='boolval'>true</span>);
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;\\a\\b\\c&quot;</span>, <span class='string'>&quot;d\\e\\f&quot;</span>, <span class='boolval'>false</span>);
@@ -4691,9 +4691,9 @@
         )
 
         <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;a\\b\\c&quot;</span>, [<span class='string'>b&quot;a&quot;</span>, <span class='string'>b&quot;b&quot;</span>, <span class='string'>b&quot;c&quot;</span>]);
-        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;.&quot;</span>, [<span class='string'>b&quot;.&quot;</span>]);<span class='comment'>
-        // since this is really a wrapper around str_components, those tests suffice
-    </span>}
+        <span class='macro'>t</span><span class='macro'>!</span>(<span class='ident'>s</span>: <span class='string'>&quot;.&quot;</span>, [<span class='string'>b&quot;.&quot;</span>]);
+        <span class='comment'>// since this is really a wrapper around str_components, those tests suffice</span>
+    }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_make_non_verbatim</span>() {

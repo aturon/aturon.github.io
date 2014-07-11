@@ -7,8 +7,6 @@
 
     <title>timer.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -409,17 +407,17 @@
 <span id='367'>367</span>
 <span id='368'>368</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>/*!
+<span class='doccomment'>/*!
 
 Synchronous Timers
 
@@ -629,9 +627,9 @@ and create receivers which will receive notifications after a period of time.
     <span class='macro'>iotest</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>test_io_timer_oneshot_then_sleep</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>timer</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>().<span class='ident'>unwrap</span>();
         <span class='kw'>let</span> <span class='ident'>rx</span> <span class='op'>=</span> <span class='ident'>timer</span>.<span class='ident'>oneshot</span>(<span class='number'>100000000000</span>);
-        <span class='ident'>timer</span>.<span class='ident'>sleep</span>(<span class='number'>1</span>);<span class='comment'> // this should invalidate rx
+        <span class='ident'>timer</span>.<span class='ident'>sleep</span>(<span class='number'>1</span>); <span class='comment'>// this should invalidate rx</span>
 
-        </span><span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>rx</span>.<span class='ident'>recv_opt</span>(), <span class='prelude-val'>Err</span>(()));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>rx</span>.<span class='ident'>recv_opt</span>(), <span class='prelude-val'>Err</span>(()));
     })
 
     <span class='macro'>iotest</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>test_io_timer_sleep_periodic</span>() {
@@ -706,22 +704,22 @@ and create receivers which will receive notifications after a period of time.
         <span class='macro'>fail</span><span class='macro'>!</span>();
     } <span class='attribute'>#[<span class='ident'>should_fail</span>]</span>)
 
-    <span class='macro'>iotest</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>closing_channel_during_drop_doesnt_kill_everything</span>() {<span class='comment'>
-        // see issue #10375
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>timer</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>().<span class='ident'>unwrap</span>();
+    <span class='macro'>iotest</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>closing_channel_during_drop_doesnt_kill_everything</span>() {
+        <span class='comment'>// see issue #10375</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>timer</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>().<span class='ident'>unwrap</span>();
         <span class='kw'>let</span> <span class='ident'>timer_rx</span> <span class='op'>=</span> <span class='ident'>timer</span>.<span class='ident'>periodic</span>(<span class='number'>1000</span>);
 
         <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
             <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>timer_rx</span>.<span class='ident'>recv_opt</span>();
-        });<span class='comment'>
+        });
 
-        // when we drop the TimerWatcher we&#39;re going to destroy the channel,
-        // which must wake up the task on the other end
-    </span>})
+        <span class='comment'>// when we drop the TimerWatcher we&#39;re going to destroy the channel,</span>
+        <span class='comment'>// which must wake up the task on the other end</span>
+    })
 
-    <span class='macro'>iotest</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>reset_doesnt_switch_tasks</span>() {<span class='comment'>
-        // similar test to the one above.
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>timer</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>().<span class='ident'>unwrap</span>();
+    <span class='macro'>iotest</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>reset_doesnt_switch_tasks</span>() {
+        <span class='comment'>// similar test to the one above.</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>timer</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>().<span class='ident'>unwrap</span>();
         <span class='kw'>let</span> <span class='ident'>timer_rx</span> <span class='op'>=</span> <span class='ident'>timer</span>.<span class='ident'>periodic</span>(<span class='number'>1000</span>);
 
         <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
@@ -731,9 +729,9 @@ and create receivers which will receive notifications after a period of time.
         <span class='ident'>timer</span>.<span class='ident'>oneshot</span>(<span class='number'>1</span>);
     })
 
-    <span class='macro'>iotest</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>reset_doesnt_switch_tasks2</span>() {<span class='comment'>
-        // similar test to the one above.
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>timer</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>().<span class='ident'>unwrap</span>();
+    <span class='macro'>iotest</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>reset_doesnt_switch_tasks2</span>() {
+        <span class='comment'>// similar test to the one above.</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>timer</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>().<span class='ident'>unwrap</span>();
         <span class='kw'>let</span> <span class='ident'>timer_rx</span> <span class='op'>=</span> <span class='ident'>timer</span>.<span class='ident'>periodic</span>(<span class='number'>1000</span>);
 
         <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
@@ -762,19 +760,19 @@ and create receivers which will receive notifications after a period of time.
     <span class='macro'>iotest</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>receiver_goes_away_oneshot</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>timer1</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>().<span class='ident'>unwrap</span>();
         <span class='ident'>timer1</span>.<span class='ident'>oneshot</span>(<span class='number'>1</span>);
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>timer2</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>().<span class='ident'>unwrap</span>();<span class='comment'>
-        // while sleeping, the previous timer should fire and not have its
-        // callback do something terrible.
-        </span><span class='ident'>timer2</span>.<span class='ident'>sleep</span>(<span class='number'>2</span>);
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>timer2</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>().<span class='ident'>unwrap</span>();
+        <span class='comment'>// while sleeping, the previous timer should fire and not have its</span>
+        <span class='comment'>// callback do something terrible.</span>
+        <span class='ident'>timer2</span>.<span class='ident'>sleep</span>(<span class='number'>2</span>);
     })
 
     <span class='macro'>iotest</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>receiver_goes_away_period</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>timer1</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>().<span class='ident'>unwrap</span>();
         <span class='ident'>timer1</span>.<span class='ident'>periodic</span>(<span class='number'>1</span>);
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>timer2</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>().<span class='ident'>unwrap</span>();<span class='comment'>
-        // while sleeping, the previous timer should fire and not have its
-        // callback do something terrible.
-        </span><span class='ident'>timer2</span>.<span class='ident'>sleep</span>(<span class='number'>2</span>);
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>timer2</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>().<span class='ident'>unwrap</span>();
+        <span class='comment'>// while sleeping, the previous timer should fire and not have its</span>
+        <span class='comment'>// callback do something terrible.</span>
+        <span class='ident'>timer2</span>.<span class='ident'>sleep</span>(<span class='number'>2</span>);
     })
 }
 </pre>

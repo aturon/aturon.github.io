@@ -7,8 +7,6 @@
 
     <title>simple.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -134,17 +132,17 @@
 <span id='92'>92</span>
 <span id='93'>93</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! A small module implementing a simple &quot;runtime&quot; used for bootstrapping a rust</span>
+<span class='doccomment'>//! A small module implementing a simple &quot;runtime&quot; used for bootstrapping a rust</span>
 <span class='doccomment'>//! scheduler pool and then interacting with it.</span>
 
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>any</span>::<span class='ident'>Any</span>;
@@ -160,21 +158,21 @@
     <span class='ident'>awoken</span>: <span class='ident'>bool</span>,
 }
 
-<span class='kw'>impl</span> <span class='ident'>Runtime</span> <span class='kw'>for</span> <span class='ident'>SimpleTask</span> {<span class='comment'>
-    // Implement the simple tasks of descheduling and rescheduling, but only in
-    // a simple number of cases.
-    </span><span class='kw'>fn</span> <span class='ident'>deschedule</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>times</span>: <span class='ident'>uint</span>, <span class='kw-2'>mut</span> <span class='ident'>cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>,
+<span class='kw'>impl</span> <span class='ident'>Runtime</span> <span class='kw'>for</span> <span class='ident'>SimpleTask</span> {
+    <span class='comment'>// Implement the simple tasks of descheduling and rescheduling, but only in</span>
+    <span class='comment'>// a simple number of cases.</span>
+    <span class='kw'>fn</span> <span class='ident'>deschedule</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>times</span>: <span class='ident'>uint</span>, <span class='kw-2'>mut</span> <span class='ident'>cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>,
                   <span class='ident'>f</span>: <span class='op'>|</span><span class='ident'>BlockedTask</span><span class='op'>|</span> <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>BlockedTask</span><span class='op'>&gt;</span>) {
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>times</span> <span class='op'>==</span> <span class='number'>1</span>);
 
         <span class='kw'>let</span> <span class='ident'>me</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>SimpleTask</span>;
         <span class='kw'>let</span> <span class='ident'>cur_dupe</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='ident'>cur_task</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Task</span>;
         <span class='ident'>cur_task</span>.<span class='ident'>put_runtime</span>(<span class='self'>self</span>);
-        <span class='kw'>let</span> <span class='ident'>task</span> <span class='op'>=</span> <span class='ident'>BlockedTask</span>::<span class='ident'>block</span>(<span class='ident'>cur_task</span>);<span class='comment'>
+        <span class='kw'>let</span> <span class='ident'>task</span> <span class='op'>=</span> <span class='ident'>BlockedTask</span>::<span class='ident'>block</span>(<span class='ident'>cur_task</span>);
 
-        // See libnative/task.rs for what&#39;s going on here with the `awoken`
-        // field and the while loop around wait()
-        </span><span class='kw'>unsafe</span> {
+        <span class='comment'>// See libnative/task.rs for what&#39;s going on here with the `awoken`</span>
+        <span class='comment'>// field and the while loop around wait()</span>
+        <span class='kw'>unsafe</span> {
             <span class='kw'>let</span> <span class='ident'>guard</span> <span class='op'>=</span> (<span class='op'>*</span><span class='ident'>me</span>).<span class='ident'>lock</span>.<span class='ident'>lock</span>();
             (<span class='op'>*</span><span class='ident'>me</span>).<span class='ident'>awoken</span> <span class='op'>=</span> <span class='boolval'>false</span>;
             <span class='kw'>match</span> <span class='ident'>f</span>(<span class='ident'>task</span>) {
@@ -199,13 +197,13 @@
             (<span class='op'>*</span><span class='ident'>me</span>).<span class='ident'>awoken</span> <span class='op'>=</span> <span class='boolval'>true</span>;
             <span class='ident'>guard</span>.<span class='ident'>signal</span>();
         }
-    }<span class='comment'>
+    }
 
-    // These functions are all unimplemented and fail as a result. This is on
-    // purpose. A &quot;simple task&quot; is just that, a very simple task that can&#39;t
-    // really do a whole lot. The only purpose of the task is to get us off our
-    // feet and running.
-    </span><span class='kw'>fn</span> <span class='ident'>yield_now</span>(<span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>_cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) { <span class='macro'>fail</span><span class='macro'>!</span>() }
+    <span class='comment'>// These functions are all unimplemented and fail as a result. This is on</span>
+    <span class='comment'>// purpose. A &quot;simple task&quot; is just that, a very simple task that can&#39;t</span>
+    <span class='comment'>// really do a whole lot. The only purpose of the task is to get us off our</span>
+    <span class='comment'>// feet and running.</span>
+    <span class='kw'>fn</span> <span class='ident'>yield_now</span>(<span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>_cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) { <span class='macro'>fail</span><span class='macro'>!</span>() }
     <span class='kw'>fn</span> <span class='ident'>maybe_yield</span>(<span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>_cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) { <span class='macro'>fail</span><span class='macro'>!</span>() }
     <span class='kw'>fn</span> <span class='ident'>spawn_sibling</span>(<span class='kw-2'>~</span><span class='self'>self</span>,
                      <span class='ident'>_cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>,

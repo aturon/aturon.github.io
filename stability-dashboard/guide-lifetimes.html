@@ -8,8 +8,6 @@
     <link rel="stylesheet" type="text/css" href="rust.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
-<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400'
-        rel='stylesheet' type='text/css'>
 
 
 </head>
@@ -23,9 +21,9 @@
 
     <div id="versioninfo">
   <img src="http://www.rust-lang.org/logos/rust-logo-32x32-blk.png" width="32" height="32" alt><br>
-  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.11.0-pre</span><br>
-  <a href="http://github.com/rust-lang/rust/commit/169c988d09a9d4e46de2b7fead9489e94964c7c7"
-    class="hash white-sticker">169c988d</a>
+  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.11.0</span><br>
+  <a href="http://github.com/rust-lang/rust/commit/305cf1f1098dc87e346003e6bf7e7cca5705a135"
+    class="hash white-sticker">305cf1f1</a>
 </div>
 
 
@@ -187,9 +185,9 @@ for <code>Rectangle</code>:</p>
     struct Size {w: f64, h: f64} // as before
     struct Rectangle {origin: Point, size: Size}
 }</span><pre id='rust-example-rendered-7' class='rust '>
-<span class='kw'>struct</span> <span class='ident'>Point</span> {<span class='ident'>x</span>: <span class='ident'>f64</span>, <span class='ident'>y</span>: <span class='ident'>f64</span>}<span class='comment'> // as before
-</span><span class='kw'>struct</span> <span class='ident'>Size</span> {<span class='ident'>w</span>: <span class='ident'>f64</span>, <span class='ident'>h</span>: <span class='ident'>f64</span>}<span class='comment'> // as before
-</span><span class='kw'>struct</span> <span class='ident'>Rectangle</span> {<span class='ident'>origin</span>: <span class='ident'>Point</span>, <span class='ident'>size</span>: <span class='ident'>Size</span>}
+<span class='kw'>struct</span> <span class='ident'>Point</span> {<span class='ident'>x</span>: <span class='ident'>f64</span>, <span class='ident'>y</span>: <span class='ident'>f64</span>} <span class='comment'>// as before</span>
+<span class='kw'>struct</span> <span class='ident'>Size</span> {<span class='ident'>w</span>: <span class='ident'>f64</span>, <span class='ident'>h</span>: <span class='ident'>f64</span>} <span class='comment'>// as before</span>
+<span class='kw'>struct</span> <span class='ident'>Rectangle</span> {<span class='ident'>origin</span>: <span class='ident'>Point</span>, <span class='ident'>size</span>: <span class='ident'>Size</span>}
 </pre>
 
 <p>Now, as before, we can define rectangles in a few different ways:</p>
@@ -258,12 +256,12 @@ the following function is legal:</p>
 <span class='kw'>fn</span> <span class='ident'>example3</span>() <span class='op'>-&gt;</span> <span class='ident'>int</span> {
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>Foo</span> {<span class='ident'>f</span>: <span class='number'>3</span>};
     <span class='kw'>if</span> <span class='ident'>some_condition</span>() {
-        <span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>x</span>.<span class='ident'>f</span>;<span class='comment'>      // -+ L
-        </span><span class='kw'>return</span> <span class='op'>*</span><span class='ident'>y</span>;<span class='comment'>         //  |
-    </span>}<span class='comment'>                      // -+
-    </span><span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>Foo</span> {<span class='ident'>f</span>: <span class='number'>4</span>};<span class='comment'>
-    // ...
-</span>}
+        <span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>x</span>.<span class='ident'>f</span>;      <span class='comment'>// -+ L</span>
+        <span class='kw'>return</span> <span class='op'>*</span><span class='ident'>y</span>;         <span class='comment'>//  |</span>
+    }                      <span class='comment'>// -+</span>
+    <span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>Foo</span> {<span class='ident'>f</span>: <span class='number'>4</span>};
+    <span class='comment'>// ...</span>
+}
 </pre>
 
 <p>Here, the interior of the variable <code>x</code> is being borrowed
@@ -288,8 +286,8 @@ rejected by the compiler):</p>
 <span class='kw'>fn</span> <span class='ident'>example3</span>() <span class='op'>-&gt;</span> <span class='ident'>int</span> {
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>X</span> {<span class='ident'>f</span>: <span class='number'>3</span>};
     <span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>x</span>.<span class='ident'>f</span>;
-    <span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>X</span> {<span class='ident'>f</span>: <span class='number'>4</span>};<span class='comment'>  // Error reported here.
-    </span><span class='op'>*</span><span class='ident'>y</span>
+    <span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>X</span> {<span class='ident'>f</span>: <span class='number'>4</span>};  <span class='comment'>// Error reported here.</span>
+    <span class='op'>*</span><span class='ident'>y</span>
 }
 </pre>
 
@@ -350,9 +348,9 @@ mutations. This time, we&#39;ll use an analogy to illustrate the concept.</p>
     };
 
     <span class='kw'>let</span> <span class='ident'>owner_age</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>house</span>.<span class='ident'>owner</span>.<span class='ident'>age</span>;
-    <span class='ident'>house</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>House</span> {<span class='ident'>owner</span>: <span class='kw'>box</span> <span class='ident'>Person</span> {<span class='ident'>age</span>: <span class='number'>40</span>}};<span class='comment'>  // Error reported here.
-    </span><span class='ident'>house</span>.<span class='ident'>owner</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>Person</span> {<span class='ident'>age</span>: <span class='number'>50</span>};<span class='comment'>               // Error reported here.
-    </span><span class='op'>*</span><span class='ident'>owner_age</span>
+    <span class='ident'>house</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>House</span> {<span class='ident'>owner</span>: <span class='kw'>box</span> <span class='ident'>Person</span> {<span class='ident'>age</span>: <span class='number'>40</span>}};  <span class='comment'>// Error reported here.</span>
+    <span class='ident'>house</span>.<span class='ident'>owner</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>Person</span> {<span class='ident'>age</span>: <span class='number'>50</span>};               <span class='comment'>// Error reported here.</span>
+    <span class='op'>*</span><span class='ident'>owner_age</span>
 }
 </pre>
 
@@ -380,12 +378,12 @@ and circles:</p>
         Rectangle(Point, Size)  // upper-left, dimensions
     }
 }</span><pre id='rust-example-rendered-13' class='rust '>
-<span class='kw'>struct</span> <span class='ident'>Point</span> {<span class='ident'>x</span>: <span class='ident'>f64</span>, <span class='ident'>y</span>: <span class='ident'>f64</span>};<span class='comment'> // as before
-</span><span class='kw'>struct</span> <span class='ident'>Size</span> {<span class='ident'>w</span>: <span class='ident'>f64</span>, <span class='ident'>h</span>: <span class='ident'>f64</span>};<span class='comment'> // as before
-</span><span class='kw'>enum</span> <span class='ident'>Shape</span> {
-    <span class='ident'>Circle</span>(<span class='ident'>Point</span>, <span class='ident'>f64</span>),<span class='comment'>   // origin, radius
-    </span><span class='ident'>Rectangle</span>(<span class='ident'>Point</span>, <span class='ident'>Size</span>)<span class='comment'>  // upper-left, dimensions
-</span>}
+<span class='kw'>struct</span> <span class='ident'>Point</span> {<span class='ident'>x</span>: <span class='ident'>f64</span>, <span class='ident'>y</span>: <span class='ident'>f64</span>}; <span class='comment'>// as before</span>
+<span class='kw'>struct</span> <span class='ident'>Size</span> {<span class='ident'>w</span>: <span class='ident'>f64</span>, <span class='ident'>h</span>: <span class='ident'>f64</span>}; <span class='comment'>// as before</span>
+<span class='kw'>enum</span> <span class='ident'>Shape</span> {
+    <span class='ident'>Circle</span>(<span class='ident'>Point</span>, <span class='ident'>f64</span>),   <span class='comment'>// origin, radius</span>
+    <span class='ident'>Rectangle</span>(<span class='ident'>Point</span>, <span class='ident'>Size</span>)  <span class='comment'>// upper-left, dimensions</span>
+}
 </pre>
 
 <p>Now we might write a function to compute the area of a shape. This
@@ -537,8 +535,8 @@ time one that does not compile:</p>
 }</span><pre id='rust-example-rendered-16' class='rust '>
 <span class='kw'>struct</span> <span class='ident'>Point</span> {<span class='ident'>x</span>: <span class='ident'>f64</span>, <span class='ident'>y</span>: <span class='ident'>f64</span>}
 <span class='kw'>fn</span> <span class='ident'>get_x_sh</span>(<span class='ident'>p</span>: <span class='kw-2'>&amp;</span><span class='ident'>Point</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>f64</span> {
-    <span class='kw-2'>&amp;</span><span class='ident'>p</span>.<span class='ident'>x</span><span class='comment'> // Error reported here
-</span>}
+    <span class='kw-2'>&amp;</span><span class='ident'>p</span>.<span class='ident'>x</span> <span class='comment'>// Error reported here</span>
+}
 </pre>
 
 <p>Here, the function <code>get_x_sh()</code> takes a reference as input and
@@ -623,15 +621,15 @@ example:</p>
     }                                                    //  |-+
                                                          // -+
 }</span><pre id='rust-example-rendered-18' class='rust '>
-<span class='comment'>                                                     // -+ r
-</span><span class='kw'>fn</span> <span class='ident'>select_based_on_unit_circle</span><span class='op'>&lt;</span><span class='lifetime'>&#39;r</span>, <span class='ident'>T</span><span class='op'>&gt;</span>(<span class='comment'>               //  |-+ B
-    </span><span class='ident'>threshold</span>: <span class='ident'>f64</span>, <span class='ident'>a</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='ident'>T</span>, <span class='ident'>b</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='ident'>T</span> {<span class='comment'>   //  | |
-                                                     //  | |
-    </span><span class='kw'>let</span> <span class='ident'>shape</span> <span class='op'>=</span> <span class='ident'>Circle</span>(<span class='ident'>Point</span> {<span class='ident'>x</span>: <span class='number'>0.</span>, <span class='ident'>y</span>: <span class='number'>0.</span>}, <span class='number'>1.</span>);<span class='comment'>    //  | |
-    </span><span class='ident'>select</span>(<span class='kw-2'>&amp;</span><span class='ident'>shape</span>, <span class='ident'>threshold</span>, <span class='ident'>a</span>, <span class='ident'>b</span>)<span class='comment'>                  //  | |
-</span>}<span class='comment'>                                                    //  |-+
-                                                     // -+
-</span></pre>
+                                                     <span class='comment'>// -+ r</span>
+<span class='kw'>fn</span> <span class='ident'>select_based_on_unit_circle</span><span class='op'>&lt;</span><span class='lifetime'>&#39;r</span>, <span class='ident'>T</span><span class='op'>&gt;</span>(               <span class='comment'>//  |-+ B</span>
+    <span class='ident'>threshold</span>: <span class='ident'>f64</span>, <span class='ident'>a</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='ident'>T</span>, <span class='ident'>b</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='ident'>T</span> {   <span class='comment'>//  | |</span>
+                                                     <span class='comment'>//  | |</span>
+    <span class='kw'>let</span> <span class='ident'>shape</span> <span class='op'>=</span> <span class='ident'>Circle</span>(<span class='ident'>Point</span> {<span class='ident'>x</span>: <span class='number'>0.</span>, <span class='ident'>y</span>: <span class='number'>0.</span>}, <span class='number'>1.</span>);    <span class='comment'>//  | |</span>
+    <span class='ident'>select</span>(<span class='kw-2'>&amp;</span><span class='ident'>shape</span>, <span class='ident'>threshold</span>, <span class='ident'>a</span>, <span class='ident'>b</span>)                  <span class='comment'>//  | |</span>
+}                                                    <span class='comment'>//  |-+</span>
+                                                     <span class='comment'>// -+</span>
+</pre>
 
 <p>In this call to <code>select()</code>, the lifetime of the first parameter shape
 is B, the function body. Both of the second two parameters <code>a</code> and <code>b</code>

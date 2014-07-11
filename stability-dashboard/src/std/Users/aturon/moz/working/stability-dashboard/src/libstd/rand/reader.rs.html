@@ -7,8 +7,6 @@
 
     <title>reader.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -162,17 +160,17 @@
 <span id='120'>120</span>
 <span id='121'>121</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! A wrapper around any Reader to treat it as an RNG.</span>
+<span class='doccomment'>//! A wrapper around any Reader to treat it as an RNG.</span>
 
 <span class='kw'>use</span> <span class='ident'>collections</span>::<span class='ident'>Collection</span>;
 <span class='kw'>use</span> <span class='ident'>io</span>::<span class='ident'>Reader</span>;
@@ -207,19 +205,19 @@
 }
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>R</span>: <span class='ident'>Reader</span><span class='op'>&gt;</span> <span class='ident'>Rng</span> <span class='kw'>for</span> <span class='ident'>ReaderRng</span><span class='op'>&lt;</span><span class='ident'>R</span><span class='op'>&gt;</span> {
-    <span class='kw'>fn</span> <span class='ident'>next_u32</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>u32</span> {<span class='comment'>
-        // This is designed for speed: reading a LE integer on a LE
-        // platform just involves blitting the bytes into the memory
-        // of the u32, similarly for BE on BE; avoiding byteswapping.
-        </span><span class='kw'>if</span> <span class='macro'>cfg</span><span class='macro'>!</span>(<span class='ident'>target_endian</span><span class='op'>=</span><span class='string'>&quot;little&quot;</span>) {
+    <span class='kw'>fn</span> <span class='ident'>next_u32</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>u32</span> {
+        <span class='comment'>// This is designed for speed: reading a LE integer on a LE</span>
+        <span class='comment'>// platform just involves blitting the bytes into the memory</span>
+        <span class='comment'>// of the u32, similarly for BE on BE; avoiding byteswapping.</span>
+        <span class='kw'>if</span> <span class='macro'>cfg</span><span class='macro'>!</span>(<span class='ident'>target_endian</span><span class='op'>=</span><span class='string'>&quot;little&quot;</span>) {
             <span class='self'>self</span>.<span class='ident'>reader</span>.<span class='ident'>read_le_u32</span>().<span class='ident'>unwrap</span>()
         } <span class='kw'>else</span> {
             <span class='self'>self</span>.<span class='ident'>reader</span>.<span class='ident'>read_be_u32</span>().<span class='ident'>unwrap</span>()
         }
     }
-    <span class='kw'>fn</span> <span class='ident'>next_u64</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>u64</span> {<span class='comment'>
-        // see above for explanation.
-        </span><span class='kw'>if</span> <span class='macro'>cfg</span><span class='macro'>!</span>(<span class='ident'>target_endian</span><span class='op'>=</span><span class='string'>&quot;little&quot;</span>) {
+    <span class='kw'>fn</span> <span class='ident'>next_u64</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>u64</span> {
+        <span class='comment'>// see above for explanation.</span>
+        <span class='kw'>if</span> <span class='macro'>cfg</span><span class='macro'>!</span>(<span class='ident'>target_endian</span><span class='op'>=</span><span class='string'>&quot;little&quot;</span>) {
             <span class='self'>self</span>.<span class='ident'>reader</span>.<span class='ident'>read_le_u64</span>().<span class='ident'>unwrap</span>()
         } <span class='kw'>else</span> {
             <span class='self'>self</span>.<span class='ident'>reader</span>.<span class='ident'>read_be_u64</span>().<span class='ident'>unwrap</span>()
@@ -244,9 +242,9 @@
     <span class='kw'>use</span> <span class='ident'>rand</span>::<span class='ident'>Rng</span>;
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_reader_rng_u64</span>() {<span class='comment'>
-        // transmute from the target to avoid endianness concerns.
-        </span><span class='kw'>let</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0u8</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>1</span>,
+    <span class='kw'>fn</span> <span class='ident'>test_reader_rng_u64</span>() {
+        <span class='comment'>// transmute from the target to avoid endianness concerns.</span>
+        <span class='kw'>let</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0u8</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>1</span>,
                      <span class='number'>0</span>  , <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>2</span>,
                      <span class='number'>0</span>,   <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>3</span>];
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>rng</span> <span class='op'>=</span> <span class='ident'>ReaderRng</span>::<span class='ident'>new</span>(<span class='ident'>MemReader</span>::<span class='ident'>new</span>(<span class='ident'>v</span>));

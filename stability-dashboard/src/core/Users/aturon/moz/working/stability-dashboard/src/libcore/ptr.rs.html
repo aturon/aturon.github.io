@@ -7,8 +7,6 @@
 
     <title>ptr.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -502,96 +500,20 @@
 <span id='460'>460</span>
 <span id='461'>461</span>
 <span id='462'>462</span>
-<span id='463'>463</span>
-<span id='464'>464</span>
-<span id='465'>465</span>
-<span id='466'>466</span>
-<span id='467'>467</span>
-<span id='468'>468</span>
-<span id='469'>469</span>
-<span id='470'>470</span>
-<span id='471'>471</span>
-<span id='472'>472</span>
-<span id='473'>473</span>
-<span id='474'>474</span>
-<span id='475'>475</span>
-<span id='476'>476</span>
-<span id='477'>477</span>
-<span id='478'>478</span>
-<span id='479'>479</span>
-<span id='480'>480</span>
-<span id='481'>481</span>
-<span id='482'>482</span>
-<span id='483'>483</span>
-<span id='484'>484</span>
-<span id='485'>485</span>
-<span id='486'>486</span>
-<span id='487'>487</span>
-<span id='488'>488</span>
-<span id='489'>489</span>
-<span id='490'>490</span>
-<span id='491'>491</span>
-<span id='492'>492</span>
-<span id='493'>493</span>
-<span id='494'>494</span>
-<span id='495'>495</span>
-<span id='496'>496</span>
-<span id='497'>497</span>
-<span id='498'>498</span>
-<span id='499'>499</span>
-<span id='500'>500</span>
-<span id='501'>501</span>
-<span id='502'>502</span>
-<span id='503'>503</span>
-<span id='504'>504</span>
-<span id='505'>505</span>
-<span id='506'>506</span>
-<span id='507'>507</span>
-<span id='508'>508</span>
-<span id='509'>509</span>
-<span id='510'>510</span>
-<span id='511'>511</span>
-<span id='512'>512</span>
-<span id='513'>513</span>
-<span id='514'>514</span>
-<span id='515'>515</span>
-<span id='516'>516</span>
-<span id='517'>517</span>
-<span id='518'>518</span>
-<span id='519'>519</span>
-<span id='520'>520</span>
-<span id='521'>521</span>
-<span id='522'>522</span>
-<span id='523'>523</span>
-<span id='524'>524</span>
-<span id='525'>525</span>
-<span id='526'>526</span>
-<span id='527'>527</span>
-<span id='528'>528</span>
-<span id='529'>529</span>
-<span id='530'>530</span>
-<span id='531'>531</span>
-<span id='532'>532</span>
-<span id='533'>533</span>
-<span id='534'>534</span>
-<span id='535'>535</span>
-<span id='536'>536</span>
-<span id='537'>537</span>
-<span id='538'>538</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-// FIXME: talk about offset, copy_memory, copy_nonoverlapping_memory
+<span class='comment'>// FIXME: talk about offset, copy_memory, copy_nonoverlapping_memory</span>
 
-</span><span class='doccomment'>//! Operations on unsafe pointers, `*const T`, and `*mut T`.</span>
+<span class='doccomment'>//! Operations on unsafe pointers, `*const T`, and `*mut T`.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! Working with unsafe pointers in Rust is uncommon,</span>
 <span class='doccomment'>//! typically limited to a few patterns.</span>
@@ -676,6 +598,10 @@
 
 <span class='kw'>use</span> <span class='ident'>cmp</span>::{<span class='ident'>PartialEq</span>, <span class='ident'>Eq</span>, <span class='ident'>PartialOrd</span>, <span class='ident'>Equiv</span>, <span class='ident'>Ordering</span>, <span class='ident'>Less</span>, <span class='ident'>Equal</span>, <span class='ident'>Greater</span>};
 
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>intrinsics</span>::<span class='ident'>copy_memory</span>;
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>intrinsics</span>::<span class='ident'>copy_nonoverlapping_memory</span>;
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>intrinsics</span>::<span class='ident'>set_memory</span>;
+
 <span class='doccomment'>/// Create a null pointer.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// # Example</span>
@@ -704,86 +630,6 @@
 <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;may need a different name after pending changes to pointer types&quot;</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>mut_null</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>() <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span> { <span class='number'>0</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span> }
 
-<span class='doccomment'>/// Copies data from one location to another.</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// Copies `count` elements (not bytes) from `src` to `dst`. The source</span>
-<span class='doccomment'>/// and destination may overlap.</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// `copy_memory` is semantically equivalent to C&#39;s `memmove`.</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// # Example</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// Efficiently create a Rust vector from an unsafe buffer:</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// ```</span>
-<span class='doccomment'>/// use std::ptr;</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// unsafe fn from_buf_raw&lt;T&gt;(ptr: *const T, elts: uint) -&gt; Vec&lt;T&gt; {</span>
-<span class='doccomment'>///     let mut dst = Vec::with_capacity(elts);</span>
-<span class='doccomment'>///     dst.set_len(elts);</span>
-<span class='doccomment'>///     ptr::copy_memory(dst.as_mut_ptr(), ptr, elts);</span>
-<span class='doccomment'>///     dst</span>
-<span class='doccomment'>/// }</span>
-<span class='doccomment'>/// ```</span>
-<span class='doccomment'>///</span>
-<span class='attribute'>#[<span class='ident'>inline</span>]</span>
-<span class='attribute'>#[<span class='ident'>unstable</span>]</span>
-<span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>copy_memory</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>dst</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span>, <span class='ident'>src</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>T</span>, <span class='ident'>count</span>: <span class='ident'>uint</span>) {
-    <span class='ident'>intrinsics</span>::<span class='ident'>copy_memory</span>(<span class='ident'>dst</span>, <span class='ident'>src</span>, <span class='ident'>count</span>)
-}
-
-<span class='doccomment'>/// Copies data from one location to another.</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// Copies `count` elements (not bytes) from `src` to `dst`. The source</span>
-<span class='doccomment'>/// and destination may *not* overlap.</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// `copy_nonoverlapping_memory` is semantically equivalent to C&#39;s `memcpy`.</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// # Example</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// A safe swap function:</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// ```</span>
-<span class='doccomment'>/// use std::mem;</span>
-<span class='doccomment'>/// use std::ptr;</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// fn swap&lt;T&gt;(x: &amp;mut T, y: &amp;mut T) {</span>
-<span class='doccomment'>///     unsafe {</span>
-<span class='doccomment'>///         // Give ourselves some scratch space to work with</span>
-<span class='doccomment'>///         let mut t: T = mem::uninitialized();</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>///         // Perform the swap, `&amp;mut` pointers never alias</span>
-<span class='doccomment'>///         ptr::copy_nonoverlapping_memory(&amp;mut t, &amp;*x, 1);</span>
-<span class='doccomment'>///         ptr::copy_nonoverlapping_memory(x, &amp;*y, 1);</span>
-<span class='doccomment'>///         ptr::copy_nonoverlapping_memory(y, &amp;t, 1);</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>///         // y and t now point to the same thing, but we need to completely forget `tmp`</span>
-<span class='doccomment'>///         // because it&#39;s no longer relevant.</span>
-<span class='doccomment'>///         mem::forget(t);</span>
-<span class='doccomment'>///     }</span>
-<span class='doccomment'>/// }</span>
-<span class='doccomment'>/// ```</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// # Safety Note</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// If the source and destination overlap then the behavior of this</span>
-<span class='doccomment'>/// function is undefined.</span>
-<span class='attribute'>#[<span class='ident'>inline</span>]</span>
-<span class='attribute'>#[<span class='ident'>unstable</span>]</span>
-<span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>copy_nonoverlapping_memory</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>dst</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span>,
-                                            <span class='ident'>src</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>T</span>,
-                                            <span class='ident'>count</span>: <span class='ident'>uint</span>) {
-    <span class='ident'>intrinsics</span>::<span class='ident'>copy_nonoverlapping_memory</span>(<span class='ident'>dst</span>, <span class='ident'>src</span>, <span class='ident'>count</span>)
-}
-
-<span class='doccomment'>/// Invokes memset on the specified pointer, setting `count * size_of::&lt;T&gt;()`</span>
-<span class='doccomment'>/// bytes of memory starting at `dst` to `c`.</span>
-<span class='attribute'>#[<span class='ident'>inline</span>]</span>
-<span class='attribute'>#[<span class='ident'>experimental</span> <span class='op'>=</span> <span class='string'>&quot;uncertain about naming and semantics&quot;</span>]</span>
-<span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>set_memory</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>dst</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span>, <span class='ident'>c</span>: <span class='ident'>u8</span>, <span class='ident'>count</span>: <span class='ident'>uint</span>) {
-    <span class='ident'>intrinsics</span>::<span class='ident'>set_memory</span>(<span class='ident'>dst</span>, <span class='ident'>c</span>, <span class='ident'>count</span>)
-}
-
 <span class='doccomment'>/// Zeroes out `count * size_of::&lt;T&gt;` bytes of memory at `dst`</span>
 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
 <span class='attribute'>#[<span class='ident'>experimental</span> <span class='op'>=</span> <span class='string'>&quot;uncertain about naming and semantics&quot;</span>]</span>
@@ -796,19 +642,19 @@
 <span class='doccomment'>/// deinitialising either. They may overlap.</span>
 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
 <span class='attribute'>#[<span class='ident'>unstable</span>]</span>
-<span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>swap</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>x</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span>, <span class='ident'>y</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span>) {<span class='comment'>
-    // Give ourselves some scratch space to work with
-    </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>tmp</span>: <span class='ident'>T</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>uninitialized</span>();
-    <span class='kw'>let</span> <span class='ident'>t</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>tmp</span>;<span class='comment'>
+<span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>swap</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>x</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span>, <span class='ident'>y</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span>) {
+    <span class='comment'>// Give ourselves some scratch space to work with</span>
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>tmp</span>: <span class='ident'>T</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>uninitialized</span>();
+    <span class='kw'>let</span> <span class='ident'>t</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>tmp</span>;
 
-    // Perform the swap
-    </span><span class='ident'>copy_nonoverlapping_memory</span>(<span class='ident'>t</span>, <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>x</span>, <span class='number'>1</span>);
-    <span class='ident'>copy_memory</span>(<span class='ident'>x</span>, <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>y</span>, <span class='number'>1</span>);<span class='comment'> // `x` and `y` may overlap
-    </span><span class='ident'>copy_nonoverlapping_memory</span>(<span class='ident'>y</span>, <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>t</span>, <span class='number'>1</span>);<span class='comment'>
+    <span class='comment'>// Perform the swap</span>
+    <span class='ident'>copy_nonoverlapping_memory</span>(<span class='ident'>t</span>, <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>x</span>, <span class='number'>1</span>);
+    <span class='ident'>copy_memory</span>(<span class='ident'>x</span>, <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>y</span>, <span class='number'>1</span>); <span class='comment'>// `x` and `y` may overlap</span>
+    <span class='ident'>copy_nonoverlapping_memory</span>(<span class='ident'>y</span>, <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>t</span>, <span class='number'>1</span>);
 
-    // y and t now point to the same thing, but we need to completely forget `tmp`
-    // because it&#39;s no longer relevant.
-    </span><span class='ident'>mem</span>::<span class='ident'>forget</span>(<span class='ident'>tmp</span>);
+    <span class='comment'>// y and t now point to the same thing, but we need to completely forget `tmp`</span>
+    <span class='comment'>// because it&#39;s no longer relevant.</span>
+    <span class='ident'>mem</span>::<span class='ident'>forget</span>(<span class='ident'>tmp</span>);
 }
 
 <span class='doccomment'>/// Replace the value at a mutable location with a new one, returning the old</span>
@@ -816,8 +662,8 @@
 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
 <span class='attribute'>#[<span class='ident'>unstable</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>replace</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>dest</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span>, <span class='kw-2'>mut</span> <span class='ident'>src</span>: <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span> {
-    <span class='ident'>mem</span>::<span class='ident'>swap</span>(<span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>dest</span>), <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>src</span>);<span class='comment'> // cannot overlap
-    </span><span class='ident'>src</span>
+    <span class='ident'>mem</span>::<span class='ident'>swap</span>(<span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>dest</span>), <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>src</span>); <span class='comment'>// cannot overlap</span>
+    <span class='ident'>src</span>
 }
 
 <span class='doccomment'>/// Reads the value from `*src` and returns it.</span>
@@ -834,12 +680,12 @@
 <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
 <span class='attribute'>#[<span class='ident'>experimental</span>]</span>
 <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>experimental</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>read_and_zero</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>dest</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span> {<span class='comment'>
-    // Copy the data out from `dest`:
-    </span><span class='kw'>let</span> <span class='ident'>tmp</span> <span class='op'>=</span> <span class='ident'>read</span>(<span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>dest</span>);<span class='comment'>
+<span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>read_and_zero</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>dest</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span> {
+    <span class='comment'>// Copy the data out from `dest`:</span>
+    <span class='kw'>let</span> <span class='ident'>tmp</span> <span class='op'>=</span> <span class='ident'>read</span>(<span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>dest</span>);
 
-    // Now zero out `dest`:
-    </span><span class='ident'>zero_memory</span>(<span class='ident'>dest</span>, <span class='number'>1</span>);
+    <span class='comment'>// Now zero out `dest`:</span>
+    <span class='ident'>zero_memory</span>(<span class='ident'>dest</span>, <span class='number'>1</span>);
 
     <span class='ident'>tmp</span>
 }
@@ -864,9 +710,9 @@
                                      <span class='ident'>cb</span>: <span class='op'>|</span><span class='op'>*</span><span class='kw'>const</span> <span class='ident'>T</span><span class='op'>|</span>) {
     <span class='kw'>if</span> <span class='ident'>arr</span>.<span class='ident'>is_null</span>() {
         <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;ptr::array_each_with_len failure: arr input is null pointer&quot;</span>);
-    }<span class='comment'>
-    //let start_ptr = *arr;
-    </span><span class='kw'>for</span> <span class='ident'>e</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0</span>, <span class='ident'>len</span>) {
+    }
+    <span class='comment'>//let start_ptr = *arr;</span>
+    <span class='kw'>for</span> <span class='ident'>e</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0</span>, <span class='ident'>len</span>) {
         <span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='ident'>arr</span>.<span class='ident'>offset</span>(<span class='ident'>e</span> <span class='kw'>as</span> <span class='ident'>int</span>);
         <span class='ident'>cb</span>(<span class='op'>*</span><span class='ident'>n</span>);
     }
@@ -982,10 +828,10 @@
             <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='op'>*</span><span class='op'>*</span><span class='self'>self</span>)
         }
     }
-}<span class='comment'>
+}
 
-// Equality for pointers
-</span><span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>PartialEq</span> <span class='kw'>for</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>T</span> {
+<span class='comment'>// Equality for pointers</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>PartialEq</span> <span class='kw'>for</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>T</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>eq</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='kw'>const</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
         <span class='op'>*</span><span class='self'>self</span> <span class='op'>==</span> <span class='op'>*</span><span class='ident'>other</span>
@@ -1005,10 +851,10 @@
     <span class='kw'>fn</span> <span class='ident'>ne</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>eq</span>(<span class='ident'>other</span>) }
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>Eq</span> <span class='kw'>for</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span> {}<span class='comment'>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>Eq</span> <span class='kw'>for</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span> {}
 
-// Equivalence for pointers
-</span><span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>Equiv</span><span class='op'>&lt;</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>T</span> {
+<span class='comment'>// Equivalence for pointers</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>Equiv</span><span class='op'>&lt;</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>T</span> {
     <span class='kw'>fn</span> <span class='ident'>equiv</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
         <span class='self'>self</span>.<span class='ident'>to_uint</span>() <span class='op'>==</span> <span class='ident'>other</span>.<span class='ident'>to_uint</span>()
     }
@@ -1032,10 +878,10 @@
     <span class='kw'>fn</span> <span class='ident'>clone</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span> {
         <span class='op'>*</span><span class='self'>self</span>
     }
-}<span class='comment'>
+}
 
-// Equality for extern &quot;C&quot; fn pointers
-</span><span class='kw'>mod</span> <span class='ident'>externfnpointers</span> {
+<span class='comment'>// Equality for extern &quot;C&quot; fn pointers</span>
+<span class='kw'>mod</span> <span class='ident'>externfnpointers</span> {
     <span class='kw'>use</span> <span class='ident'>mem</span>;
     <span class='kw'>use</span> <span class='ident'>cmp</span>::<span class='ident'>PartialEq</span>;
 
@@ -1065,10 +911,10 @@
     <span class='macro'>fnptreq</span><span class='macro'>!</span>(<span class='ident'>A</span>,<span class='ident'>B</span>,<span class='ident'>C</span>)
     <span class='macro'>fnptreq</span><span class='macro'>!</span>(<span class='ident'>A</span>,<span class='ident'>B</span>,<span class='ident'>C</span>,<span class='ident'>D</span>)
     <span class='macro'>fnptreq</span><span class='macro'>!</span>(<span class='ident'>A</span>,<span class='ident'>B</span>,<span class='ident'>C</span>,<span class='ident'>D</span>,<span class='ident'>E</span>)
-}<span class='comment'>
+}
 
-// Comparison for pointers
-</span><span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>PartialOrd</span> <span class='kw'>for</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>T</span> {
+<span class='comment'>// Comparison for pointers</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>PartialOrd</span> <span class='kw'>for</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>T</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>partial_cmp</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='kw'>const</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Ordering</span><span class='op'>&gt;</span> {
         <span class='kw'>if</span> <span class='self'>self</span> <span class='op'>&lt;</span> <span class='ident'>other</span> {

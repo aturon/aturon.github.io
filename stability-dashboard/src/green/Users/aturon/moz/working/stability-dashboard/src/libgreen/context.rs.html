@@ -7,8 +7,6 @@
 
     <title>context.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -348,29 +346,29 @@
 <span id='306'>306</span>
 <span id='307'>307</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='kw'>use</span> <span class='ident'>stack</span>::<span class='ident'>Stack</span>;
+<span class='kw'>use</span> <span class='ident'>stack</span>::<span class='ident'>Stack</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>uint</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>::<span class='ident'>transmute</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rt</span>::<span class='ident'>stack</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>raw</span>;<span class='comment'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>raw</span>;
 
-// FIXME #7761: Registers is boxed so that it is 16-byte aligned, for storing
-// SSE regs.  It would be marginally better not to do this. In C++ we
-// use an attribute on a struct.
-// FIXME #7761: It would be nice to define regs as `Box&lt;Option&lt;Registers&gt;&gt;`
-// since the registers are sometimes empty, but the discriminant would
-// then misalign the regs again.
-</span><span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Context</span> {
+<span class='comment'>// FIXME #7761: Registers is boxed so that it is 16-byte aligned, for storing</span>
+<span class='comment'>// SSE regs.  It would be marginally better not to do this. In C++ we</span>
+<span class='comment'>// use an attribute on a struct.</span>
+<span class='comment'>// FIXME #7761: It would be nice to define regs as `Box&lt;Option&lt;Registers&gt;&gt;`</span>
+<span class='comment'>// since the registers are sometimes empty, but the discriminant would</span>
+<span class='comment'>// then misalign the regs again.</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Context</span> {
     <span class='doccomment'>/// Hold the registers while the task or scheduler is suspended</span>
     <span class='ident'>regs</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Registers</span><span class='op'>&gt;</span>,
     <span class='doccomment'>/// Lower bound and upper bound for the stack</span>
@@ -400,23 +398,23 @@
                <span class='ident'>stack</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Stack</span>) <span class='op'>-&gt;</span> <span class='ident'>Context</span> {
 
         <span class='kw'>let</span> <span class='ident'>sp</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>uint</span> <span class='op'>=</span> <span class='ident'>stack</span>.<span class='ident'>end</span>();
-        <span class='kw'>let</span> <span class='ident'>sp</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uint</span> <span class='op'>=</span> <span class='ident'>sp</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uint</span>;<span class='comment'>
-        // Save and then immediately load the current context,
-        // which we will then modify to call the given function when restored
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>regs</span> <span class='op'>=</span> <span class='ident'>new_regs</span>();
+        <span class='kw'>let</span> <span class='ident'>sp</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uint</span> <span class='op'>=</span> <span class='ident'>sp</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uint</span>;
+        <span class='comment'>// Save and then immediately load the current context,</span>
+        <span class='comment'>// which we will then modify to call the given function when restored</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>regs</span> <span class='op'>=</span> <span class='ident'>new_regs</span>();
 
         <span class='ident'>initialize_call_frame</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='ident'>regs</span>,
                               <span class='ident'>init</span>,
                               <span class='ident'>arg</span>,
                               <span class='kw'>unsafe</span> { <span class='ident'>transmute</span>(<span class='ident'>start</span>) },
-                              <span class='ident'>sp</span>);<span class='comment'>
+                              <span class='ident'>sp</span>);
 
-        // Scheduler tasks don&#39;t have a stack in the &quot;we allocated it&quot; sense,
-        // but rather they run on pthreads stacks. We have complete control over
-        // them in terms of the code running on them (and hopefully they don&#39;t
-        // overflow). Additionally, their coroutine stacks are listed as being
-        // zero-length, so that&#39;s how we detect what&#39;s what here.
-        </span><span class='kw'>let</span> <span class='ident'>stack_base</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>uint</span> <span class='op'>=</span> <span class='ident'>stack</span>.<span class='ident'>start</span>();
+        <span class='comment'>// Scheduler tasks don&#39;t have a stack in the &quot;we allocated it&quot; sense,</span>
+        <span class='comment'>// but rather they run on pthreads stacks. We have complete control over</span>
+        <span class='comment'>// them in terms of the code running on them (and hopefully they don&#39;t</span>
+        <span class='comment'>// overflow). Additionally, their coroutine stacks are listed as being</span>
+        <span class='comment'>// zero-length, so that&#39;s how we detect what&#39;s what here.</span>
+        <span class='kw'>let</span> <span class='ident'>stack_base</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>uint</span> <span class='op'>=</span> <span class='ident'>stack</span>.<span class='ident'>start</span>();
         <span class='kw'>let</span> <span class='ident'>bounds</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>sp</span> <span class='kw'>as</span> <span class='ident'>uint</span> <span class='op'>==</span> <span class='ident'>stack_base</span> <span class='kw'>as</span> <span class='ident'>uint</span> {
             <span class='prelude-val'>None</span>
         } <span class='kw'>else</span> {
@@ -426,15 +424,15 @@
             <span class='ident'>regs</span>: <span class='ident'>regs</span>,
             <span class='ident'>stack_bounds</span>: <span class='ident'>bounds</span>,
         }
-    }<span class='comment'>
+    }
 
-    /* Switch contexts
+    <span class='comment'>/* Switch contexts
 
     Suspend the current execution context and resume another by
     saving the registers values of the executing thread to a Context
     then loading the registers from a previously saved Context.
-    */
-    </span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>swap</span>(<span class='ident'>out_context</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Context</span>, <span class='ident'>in_context</span>: <span class='kw-2'>&amp;</span><span class='ident'>Context</span>) {
+    */</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>swap</span>(<span class='ident'>out_context</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Context</span>, <span class='ident'>in_context</span>: <span class='kw-2'>&amp;</span><span class='ident'>Context</span>) {
         <span class='macro'>rtdebug</span><span class='macro'>!</span>(<span class='string'>&quot;swapping contexts&quot;</span>);
         <span class='kw'>let</span> <span class='ident'>out_regs</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Registers</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>out_context</span> {
             <span class='kw-2'>&amp;</span><span class='ident'>Context</span> { <span class='ident'>regs</span>: <span class='kw'>box</span> <span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>r</span>, .. } <span class='op'>=&gt;</span> <span class='ident'>r</span>
@@ -445,19 +443,19 @@
 
         <span class='macro'>rtdebug</span><span class='macro'>!</span>(<span class='string'>&quot;noting the stack limit and doing raw swap&quot;</span>);
 
-        <span class='kw'>unsafe</span> {<span class='comment'>
-            // Right before we switch to the new context, set the new context&#39;s
-            // stack limit in the OS-specified TLS slot. This also  means that
-            // we cannot call any more rust functions after record_stack_bounds
-            // returns because they would all likely fail due to the limit being
-            // invalid for the current task. Lucky for us `rust_swap_registers`
-            // is a C function so we don&#39;t have to worry about that!
-            </span><span class='kw'>match</span> <span class='ident'>in_context</span>.<span class='ident'>stack_bounds</span> {
-                <span class='prelude-val'>Some</span>((<span class='ident'>lo</span>, <span class='ident'>hi</span>)) <span class='op'>=&gt;</span> <span class='ident'>stack</span>::<span class='ident'>record_stack_bounds</span>(<span class='ident'>lo</span>, <span class='ident'>hi</span>),<span class='comment'>
-                // If we&#39;re going back to one of the original contexts or
-                // something that&#39;s possibly not a &quot;normal task&quot;, then reset
-                // the stack limit to 0 to make morestack never fail
-                </span><span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>stack</span>::<span class='ident'>record_stack_bounds</span>(<span class='number'>0</span>, <span class='ident'>uint</span>::<span class='ident'>MAX</span>),
+        <span class='kw'>unsafe</span> {
+            <span class='comment'>// Right before we switch to the new context, set the new context&#39;s</span>
+            <span class='comment'>// stack limit in the OS-specified TLS slot. This also  means that</span>
+            <span class='comment'>// we cannot call any more rust functions after record_stack_bounds</span>
+            <span class='comment'>// returns because they would all likely fail due to the limit being</span>
+            <span class='comment'>// invalid for the current task. Lucky for us `rust_swap_registers`</span>
+            <span class='comment'>// is a C function so we don&#39;t have to worry about that!</span>
+            <span class='kw'>match</span> <span class='ident'>in_context</span>.<span class='ident'>stack_bounds</span> {
+                <span class='prelude-val'>Some</span>((<span class='ident'>lo</span>, <span class='ident'>hi</span>)) <span class='op'>=&gt;</span> <span class='ident'>stack</span>::<span class='ident'>record_stack_bounds</span>(<span class='ident'>lo</span>, <span class='ident'>hi</span>),
+                <span class='comment'>// If we&#39;re going back to one of the original contexts or</span>
+                <span class='comment'>// something that&#39;s possibly not a &quot;normal task&quot;, then reset</span>
+                <span class='comment'>// the stack limit to 0 to make morestack never fail</span>
+                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>stack</span>::<span class='ident'>record_stack_bounds</span>(<span class='number'>0</span>, <span class='ident'>uint</span>::<span class='ident'>MAX</span>),
             }
             <span class='ident'>rust_swap_registers</span>(<span class='ident'>out_regs</span>, <span class='ident'>in_regs</span>)
         }
@@ -467,32 +465,32 @@
 <span class='attribute'>#[<span class='ident'>link</span>(<span class='ident'>name</span> <span class='op'>=</span> <span class='string'>&quot;context_switch&quot;</span>, <span class='ident'>kind</span> <span class='op'>=</span> <span class='string'>&quot;static&quot;</span>)]</span>
 <span class='kw'>extern</span> {
     <span class='kw'>fn</span> <span class='ident'>rust_swap_registers</span>(<span class='ident'>out_regs</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Registers</span>, <span class='ident'>in_regs</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>Registers</span>);
-}<span class='comment'>
+}
 
-// Register contexts used in various architectures
-//
-// These structures all represent a context of one task throughout its
-// execution. Each struct is a representation of the architecture&#39;s register
-// set. When swapping between tasks, these register sets are used to save off
-// the current registers into one struct, and load them all from another.
-//
-// Note that this is only used for context switching, which means that some of
-// the registers may go unused. For example, for architectures with
-// callee/caller saved registers, the context will only reflect the callee-saved
-// registers. This is because the caller saved registers are already stored
-// elsewhere on the stack (if it was necessary anyway).
-//
-// Additionally, there may be fields on various architectures which are unused
-// entirely because they only reflect what is theoretically possible for a
-// &quot;complete register set&quot; to show, but user-space cannot alter these registers.
-// An example of this would be the segment selectors for x86.
-//
-// These structures/functions are roughly in-sync with the source files inside
-// of src/rt/arch/$arch. The only currently used function from those folders is
-// the `rust_swap_registers` function, but that&#39;s only because for now segmented
-// stacks are disabled.
+<span class='comment'>// Register contexts used in various architectures</span>
+<span class='comment'>//</span>
+<span class='comment'>// These structures all represent a context of one task throughout its</span>
+<span class='comment'>// execution. Each struct is a representation of the architecture&#39;s register</span>
+<span class='comment'>// set. When swapping between tasks, these register sets are used to save off</span>
+<span class='comment'>// the current registers into one struct, and load them all from another.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Note that this is only used for context switching, which means that some of</span>
+<span class='comment'>// the registers may go unused. For example, for architectures with</span>
+<span class='comment'>// callee/caller saved registers, the context will only reflect the callee-saved</span>
+<span class='comment'>// registers. This is because the caller saved registers are already stored</span>
+<span class='comment'>// elsewhere on the stack (if it was necessary anyway).</span>
+<span class='comment'>//</span>
+<span class='comment'>// Additionally, there may be fields on various architectures which are unused</span>
+<span class='comment'>// entirely because they only reflect what is theoretically possible for a</span>
+<span class='comment'>// &quot;complete register set&quot; to show, but user-space cannot alter these registers.</span>
+<span class='comment'>// An example of this would be the segment selectors for x86.</span>
+<span class='comment'>//</span>
+<span class='comment'>// These structures/functions are roughly in-sync with the source files inside</span>
+<span class='comment'>// of src/rt/arch/$arch. The only currently used function from those folders is</span>
+<span class='comment'>// the `rust_swap_registers` function, but that&#39;s only because for now segmented</span>
+<span class='comment'>// stacks are disabled.</span>
 
-</span><span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86&quot;</span>)]</span>
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86&quot;</span>)]</span>
 <span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span>
 <span class='kw'>struct</span> <span class='ident'>Registers</span> {
     <span class='ident'>eax</span>: <span class='ident'>u32</span>, <span class='ident'>ebx</span>: <span class='ident'>u32</span>, <span class='ident'>ecx</span>: <span class='ident'>u32</span>, <span class='ident'>edx</span>: <span class='ident'>u32</span>,
@@ -513,29 +511,29 @@
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86&quot;</span>)]</span>
 <span class='kw'>fn</span> <span class='ident'>initialize_call_frame</span>(<span class='ident'>regs</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Registers</span>, <span class='ident'>fptr</span>: <span class='ident'>InitFn</span>, <span class='ident'>arg</span>: <span class='ident'>uint</span>,
-                         <span class='ident'>procedure</span>: <span class='ident'>raw</span>::<span class='ident'>Procedure</span>, <span class='ident'>sp</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uint</span>) {<span class='comment'>
+                         <span class='ident'>procedure</span>: <span class='ident'>raw</span>::<span class='ident'>Procedure</span>, <span class='ident'>sp</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uint</span>) {
 
-    // x86 has interesting stack alignment requirements, so do some alignment
-    // plus some offsetting to figure out what the actual stack should be.
-    </span><span class='kw'>let</span> <span class='ident'>sp</span> <span class='op'>=</span> <span class='ident'>align_down</span>(<span class='ident'>sp</span>);
+    <span class='comment'>// x86 has interesting stack alignment requirements, so do some alignment</span>
+    <span class='comment'>// plus some offsetting to figure out what the actual stack should be.</span>
+    <span class='kw'>let</span> <span class='ident'>sp</span> <span class='op'>=</span> <span class='ident'>align_down</span>(<span class='ident'>sp</span>);
     <span class='kw'>let</span> <span class='ident'>sp</span> <span class='op'>=</span> <span class='ident'>mut_offset</span>(<span class='ident'>sp</span>, <span class='op'>-</span><span class='number'>4</span>);
 
     <span class='kw'>unsafe</span> { <span class='op'>*</span><span class='ident'>mut_offset</span>(<span class='ident'>sp</span>, <span class='number'>2</span>) <span class='op'>=</span> <span class='ident'>procedure</span>.<span class='ident'>env</span> <span class='kw'>as</span> <span class='ident'>uint</span> };
     <span class='kw'>unsafe</span> { <span class='op'>*</span><span class='ident'>mut_offset</span>(<span class='ident'>sp</span>, <span class='number'>1</span>) <span class='op'>=</span> <span class='ident'>procedure</span>.<span class='ident'>code</span> <span class='kw'>as</span> <span class='ident'>uint</span> };
     <span class='kw'>unsafe</span> { <span class='op'>*</span><span class='ident'>mut_offset</span>(<span class='ident'>sp</span>, <span class='number'>0</span>) <span class='op'>=</span> <span class='ident'>arg</span> <span class='kw'>as</span> <span class='ident'>uint</span> };
     <span class='kw'>let</span> <span class='ident'>sp</span> <span class='op'>=</span> <span class='ident'>mut_offset</span>(<span class='ident'>sp</span>, <span class='op'>-</span><span class='number'>1</span>);
-    <span class='kw'>unsafe</span> { <span class='op'>*</span><span class='ident'>sp</span> <span class='op'>=</span> <span class='number'>0</span> };<span class='comment'> // The final return address
+    <span class='kw'>unsafe</span> { <span class='op'>*</span><span class='ident'>sp</span> <span class='op'>=</span> <span class='number'>0</span> }; <span class='comment'>// The final return address</span>
 
-    </span><span class='ident'>regs</span>.<span class='ident'>esp</span> <span class='op'>=</span> <span class='ident'>sp</span> <span class='kw'>as</span> <span class='ident'>u32</span>;
-    <span class='ident'>regs</span>.<span class='ident'>eip</span> <span class='op'>=</span> <span class='ident'>fptr</span> <span class='kw'>as</span> <span class='ident'>u32</span>;<span class='comment'>
+    <span class='ident'>regs</span>.<span class='ident'>esp</span> <span class='op'>=</span> <span class='ident'>sp</span> <span class='kw'>as</span> <span class='ident'>u32</span>;
+    <span class='ident'>regs</span>.<span class='ident'>eip</span> <span class='op'>=</span> <span class='ident'>fptr</span> <span class='kw'>as</span> <span class='ident'>u32</span>;
 
-    // Last base pointer on the stack is 0
-    </span><span class='ident'>regs</span>.<span class='ident'>ebp</span> <span class='op'>=</span> <span class='number'>0</span>;
-}<span class='comment'>
+    <span class='comment'>// Last base pointer on the stack is 0</span>
+    <span class='ident'>regs</span>.<span class='ident'>ebp</span> <span class='op'>=</span> <span class='number'>0</span>;
+}
 
-// windows requires saving more registers (both general and XMM), so the windows
-// register context must be larger.
-</span><span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>windows</span>, <span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86_64&quot;</span>)]</span>
+<span class='comment'>// windows requires saving more registers (both general and XMM), so the windows</span>
+<span class='comment'>// register context must be larger.</span>
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>windows</span>, <span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86_64&quot;</span>)]</span>
 <span class='kw'>type</span> <span class='ident'>Registers</span> <span class='op'>=</span> [<span class='ident'>uint</span>, ..<span class='number'>34</span>];
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>windows</span>), <span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86_64&quot;</span>)]</span>
 <span class='kw'>type</span> <span class='ident'>Registers</span> <span class='op'>=</span> [<span class='ident'>uint</span>, ..<span class='number'>22</span>];
@@ -548,10 +546,10 @@
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86_64&quot;</span>)]</span>
 <span class='kw'>fn</span> <span class='ident'>initialize_call_frame</span>(<span class='ident'>regs</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Registers</span>, <span class='ident'>fptr</span>: <span class='ident'>InitFn</span>, <span class='ident'>arg</span>: <span class='ident'>uint</span>,
                          <span class='ident'>procedure</span>: <span class='ident'>raw</span>::<span class='ident'>Procedure</span>, <span class='ident'>sp</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uint</span>) {
-    <span class='kw'>extern</span> { <span class='kw'>fn</span> <span class='ident'>rust_bootstrap_green_task</span>(); }<span class='comment'>
+    <span class='kw'>extern</span> { <span class='kw'>fn</span> <span class='ident'>rust_bootstrap_green_task</span>(); }
 
-    // Redefinitions from rt/arch/x86_64/regs.h
-    </span><span class='kw'>static</span> <span class='ident'>RUSTRT_RSP</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='number'>1</span>;
+    <span class='comment'>// Redefinitions from rt/arch/x86_64/regs.h</span>
+    <span class='kw'>static</span> <span class='ident'>RUSTRT_RSP</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='number'>1</span>;
     <span class='kw'>static</span> <span class='ident'>RUSTRT_IP</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='number'>8</span>;
     <span class='kw'>static</span> <span class='ident'>RUSTRT_RBP</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='number'>2</span>;
     <span class='kw'>static</span> <span class='ident'>RUSTRT_R12</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='number'>4</span>;
@@ -560,32 +558,32 @@
     <span class='kw'>static</span> <span class='ident'>RUSTRT_R15</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='number'>7</span>;
 
     <span class='kw'>let</span> <span class='ident'>sp</span> <span class='op'>=</span> <span class='ident'>align_down</span>(<span class='ident'>sp</span>);
-    <span class='kw'>let</span> <span class='ident'>sp</span> <span class='op'>=</span> <span class='ident'>mut_offset</span>(<span class='ident'>sp</span>, <span class='op'>-</span><span class='number'>1</span>);<span class='comment'>
+    <span class='kw'>let</span> <span class='ident'>sp</span> <span class='op'>=</span> <span class='ident'>mut_offset</span>(<span class='ident'>sp</span>, <span class='op'>-</span><span class='number'>1</span>);
 
-    // The final return address. 0 indicates the bottom of the stack
-    </span><span class='kw'>unsafe</span> { <span class='op'>*</span><span class='ident'>sp</span> <span class='op'>=</span> <span class='number'>0</span>; }
+    <span class='comment'>// The final return address. 0 indicates the bottom of the stack</span>
+    <span class='kw'>unsafe</span> { <span class='op'>*</span><span class='ident'>sp</span> <span class='op'>=</span> <span class='number'>0</span>; }
 
     <span class='macro'>rtdebug</span><span class='macro'>!</span>(<span class='string'>&quot;creating call frame&quot;</span>);
     <span class='macro'>rtdebug</span><span class='macro'>!</span>(<span class='string'>&quot;fptr {:#x}&quot;</span>, <span class='ident'>fptr</span> <span class='kw'>as</span> <span class='ident'>uint</span>);
     <span class='macro'>rtdebug</span><span class='macro'>!</span>(<span class='string'>&quot;arg {:#x}&quot;</span>, <span class='ident'>arg</span>);
-    <span class='macro'>rtdebug</span><span class='macro'>!</span>(<span class='string'>&quot;sp {}&quot;</span>, <span class='ident'>sp</span>);<span class='comment'>
+    <span class='macro'>rtdebug</span><span class='macro'>!</span>(<span class='string'>&quot;sp {}&quot;</span>, <span class='ident'>sp</span>);
 
-    // These registers are frobbed by rust_bootstrap_green_task into the right
-    // location so we can invoke the &quot;real init function&quot;, `fptr`.
-    </span><span class='ident'>regs</span>[<span class='ident'>RUSTRT_R12</span>] <span class='op'>=</span> <span class='ident'>arg</span> <span class='kw'>as</span> <span class='ident'>uint</span>;
+    <span class='comment'>// These registers are frobbed by rust_bootstrap_green_task into the right</span>
+    <span class='comment'>// location so we can invoke the &quot;real init function&quot;, `fptr`.</span>
+    <span class='ident'>regs</span>[<span class='ident'>RUSTRT_R12</span>] <span class='op'>=</span> <span class='ident'>arg</span> <span class='kw'>as</span> <span class='ident'>uint</span>;
     <span class='ident'>regs</span>[<span class='ident'>RUSTRT_R13</span>] <span class='op'>=</span> <span class='ident'>procedure</span>.<span class='ident'>code</span> <span class='kw'>as</span> <span class='ident'>uint</span>;
     <span class='ident'>regs</span>[<span class='ident'>RUSTRT_R14</span>] <span class='op'>=</span> <span class='ident'>procedure</span>.<span class='ident'>env</span> <span class='kw'>as</span> <span class='ident'>uint</span>;
-    <span class='ident'>regs</span>[<span class='ident'>RUSTRT_R15</span>] <span class='op'>=</span> <span class='ident'>fptr</span> <span class='kw'>as</span> <span class='ident'>uint</span>;<span class='comment'>
+    <span class='ident'>regs</span>[<span class='ident'>RUSTRT_R15</span>] <span class='op'>=</span> <span class='ident'>fptr</span> <span class='kw'>as</span> <span class='ident'>uint</span>;
 
-    // These registers are picked up by the regular context switch paths. These
-    // will put us in &quot;mostly the right context&quot; except for frobbing all the
-    // arguments to the right place. We have the small trampoline code inside of
-    // rust_bootstrap_green_task to do that.
-    </span><span class='ident'>regs</span>[<span class='ident'>RUSTRT_RSP</span>] <span class='op'>=</span> <span class='ident'>sp</span> <span class='kw'>as</span> <span class='ident'>uint</span>;
-    <span class='ident'>regs</span>[<span class='ident'>RUSTRT_IP</span>] <span class='op'>=</span> <span class='ident'>rust_bootstrap_green_task</span> <span class='kw'>as</span> <span class='ident'>uint</span>;<span class='comment'>
+    <span class='comment'>// These registers are picked up by the regular context switch paths. These</span>
+    <span class='comment'>// will put us in &quot;mostly the right context&quot; except for frobbing all the</span>
+    <span class='comment'>// arguments to the right place. We have the small trampoline code inside of</span>
+    <span class='comment'>// rust_bootstrap_green_task to do that.</span>
+    <span class='ident'>regs</span>[<span class='ident'>RUSTRT_RSP</span>] <span class='op'>=</span> <span class='ident'>sp</span> <span class='kw'>as</span> <span class='ident'>uint</span>;
+    <span class='ident'>regs</span>[<span class='ident'>RUSTRT_IP</span>] <span class='op'>=</span> <span class='ident'>rust_bootstrap_green_task</span> <span class='kw'>as</span> <span class='ident'>uint</span>;
 
-    // Last base pointer on the stack should be 0
-    </span><span class='ident'>regs</span>[<span class='ident'>RUSTRT_RBP</span>] <span class='op'>=</span> <span class='number'>0</span>;
+    <span class='comment'>// Last base pointer on the stack should be 0</span>
+    <span class='ident'>regs</span>[<span class='ident'>RUSTRT_RBP</span>] <span class='op'>=</span> <span class='number'>0</span>;
 }
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;arm&quot;</span>)]</span>
@@ -599,23 +597,23 @@
                          <span class='ident'>procedure</span>: <span class='ident'>raw</span>::<span class='ident'>Procedure</span>, <span class='ident'>sp</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uint</span>) {
     <span class='kw'>extern</span> { <span class='kw'>fn</span> <span class='ident'>rust_bootstrap_green_task</span>(); }
 
-    <span class='kw'>let</span> <span class='ident'>sp</span> <span class='op'>=</span> <span class='ident'>align_down</span>(<span class='ident'>sp</span>);<span class='comment'>
-    // sp of arm eabi is 8-byte aligned
-    </span><span class='kw'>let</span> <span class='ident'>sp</span> <span class='op'>=</span> <span class='ident'>mut_offset</span>(<span class='ident'>sp</span>, <span class='op'>-</span><span class='number'>2</span>);<span class='comment'>
+    <span class='kw'>let</span> <span class='ident'>sp</span> <span class='op'>=</span> <span class='ident'>align_down</span>(<span class='ident'>sp</span>);
+    <span class='comment'>// sp of arm eabi is 8-byte aligned</span>
+    <span class='kw'>let</span> <span class='ident'>sp</span> <span class='op'>=</span> <span class='ident'>mut_offset</span>(<span class='ident'>sp</span>, <span class='op'>-</span><span class='number'>2</span>);
 
-    // The final return address. 0 indicates the bottom of the stack
-    </span><span class='kw'>unsafe</span> { <span class='op'>*</span><span class='ident'>sp</span> <span class='op'>=</span> <span class='number'>0</span>; }<span class='comment'>
+    <span class='comment'>// The final return address. 0 indicates the bottom of the stack</span>
+    <span class='kw'>unsafe</span> { <span class='op'>*</span><span class='ident'>sp</span> <span class='op'>=</span> <span class='number'>0</span>; }
 
-    // ARM uses the same technique as x86_64 to have a landing pad for the start
-    // of all new green tasks. Neither r1/r2 are saved on a context switch, so
-    // the shim will copy r3/r4 into r1/r2 and then execute the function in r5
-    </span><span class='ident'>regs</span>[<span class='number'>0</span>] <span class='op'>=</span> <span class='ident'>arg</span> <span class='kw'>as</span> <span class='ident'>uint</span>;<span class='comment'>              // r0
-    </span><span class='ident'>regs</span>[<span class='number'>3</span>] <span class='op'>=</span> <span class='ident'>procedure</span>.<span class='ident'>code</span> <span class='kw'>as</span> <span class='ident'>uint</span>;<span class='comment'>   // r3
-    </span><span class='ident'>regs</span>[<span class='number'>4</span>] <span class='op'>=</span> <span class='ident'>procedure</span>.<span class='ident'>env</span> <span class='kw'>as</span> <span class='ident'>uint</span>;<span class='comment'>    // r4
-    </span><span class='ident'>regs</span>[<span class='number'>5</span>] <span class='op'>=</span> <span class='ident'>fptr</span> <span class='kw'>as</span> <span class='ident'>uint</span>;<span class='comment'>             // r5
-    </span><span class='ident'>regs</span>[<span class='number'>13</span>] <span class='op'>=</span> <span class='ident'>sp</span> <span class='kw'>as</span> <span class='ident'>uint</span>;<span class='comment'>                          // #52 sp, r13
-    </span><span class='ident'>regs</span>[<span class='number'>14</span>] <span class='op'>=</span> <span class='ident'>rust_bootstrap_green_task</span> <span class='kw'>as</span> <span class='ident'>uint</span>;<span class='comment'>   // #56 pc, r14 --&gt; lr
-</span>}
+    <span class='comment'>// ARM uses the same technique as x86_64 to have a landing pad for the start</span>
+    <span class='comment'>// of all new green tasks. Neither r1/r2 are saved on a context switch, so</span>
+    <span class='comment'>// the shim will copy r3/r4 into r1/r2 and then execute the function in r5</span>
+    <span class='ident'>regs</span>[<span class='number'>0</span>] <span class='op'>=</span> <span class='ident'>arg</span> <span class='kw'>as</span> <span class='ident'>uint</span>;              <span class='comment'>// r0</span>
+    <span class='ident'>regs</span>[<span class='number'>3</span>] <span class='op'>=</span> <span class='ident'>procedure</span>.<span class='ident'>code</span> <span class='kw'>as</span> <span class='ident'>uint</span>;   <span class='comment'>// r3</span>
+    <span class='ident'>regs</span>[<span class='number'>4</span>] <span class='op'>=</span> <span class='ident'>procedure</span>.<span class='ident'>env</span> <span class='kw'>as</span> <span class='ident'>uint</span>;    <span class='comment'>// r4</span>
+    <span class='ident'>regs</span>[<span class='number'>5</span>] <span class='op'>=</span> <span class='ident'>fptr</span> <span class='kw'>as</span> <span class='ident'>uint</span>;             <span class='comment'>// r5</span>
+    <span class='ident'>regs</span>[<span class='number'>13</span>] <span class='op'>=</span> <span class='ident'>sp</span> <span class='kw'>as</span> <span class='ident'>uint</span>;                          <span class='comment'>// #52 sp, r13</span>
+    <span class='ident'>regs</span>[<span class='number'>14</span>] <span class='op'>=</span> <span class='ident'>rust_bootstrap_green_task</span> <span class='kw'>as</span> <span class='ident'>uint</span>;   <span class='comment'>// #56 pc, r14 --&gt; lr</span>
+}
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;mips&quot;</span>)]</span>
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;mipsel&quot;</span>)]</span>
@@ -629,12 +627,12 @@
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;mipsel&quot;</span>)]</span>
 <span class='kw'>fn</span> <span class='ident'>initialize_call_frame</span>(<span class='ident'>regs</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Registers</span>, <span class='ident'>fptr</span>: <span class='ident'>InitFn</span>, <span class='ident'>arg</span>: <span class='ident'>uint</span>,
                          <span class='ident'>procedure</span>: <span class='ident'>raw</span>::<span class='ident'>Procedure</span>, <span class='ident'>sp</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uint</span>) {
-    <span class='kw'>let</span> <span class='ident'>sp</span> <span class='op'>=</span> <span class='ident'>align_down</span>(<span class='ident'>sp</span>);<span class='comment'>
-    // sp of mips o32 is 8-byte aligned
-    </span><span class='kw'>let</span> <span class='ident'>sp</span> <span class='op'>=</span> <span class='ident'>mut_offset</span>(<span class='ident'>sp</span>, <span class='op'>-</span><span class='number'>2</span>);<span class='comment'>
+    <span class='kw'>let</span> <span class='ident'>sp</span> <span class='op'>=</span> <span class='ident'>align_down</span>(<span class='ident'>sp</span>);
+    <span class='comment'>// sp of mips o32 is 8-byte aligned</span>
+    <span class='kw'>let</span> <span class='ident'>sp</span> <span class='op'>=</span> <span class='ident'>mut_offset</span>(<span class='ident'>sp</span>, <span class='op'>-</span><span class='number'>2</span>);
 
-    // The final return address. 0 indicates the bottom of the stack
-    </span><span class='kw'>unsafe</span> { <span class='op'>*</span><span class='ident'>sp</span> <span class='op'>=</span> <span class='number'>0</span>; }
+    <span class='comment'>// The final return address. 0 indicates the bottom of the stack</span>
+    <span class='kw'>unsafe</span> { <span class='op'>*</span><span class='ident'>sp</span> <span class='op'>=</span> <span class='number'>0</span>; }
 
     <span class='ident'>regs</span>[<span class='number'>4</span>] <span class='op'>=</span> <span class='ident'>arg</span> <span class='kw'>as</span> <span class='ident'>uint</span>;
     <span class='ident'>regs</span>[<span class='number'>5</span>] <span class='op'>=</span> <span class='ident'>procedure</span>.<span class='ident'>code</span> <span class='kw'>as</span> <span class='ident'>uint</span>;
@@ -645,12 +643,12 @@
 }
 
 <span class='kw'>fn</span> <span class='ident'>align_down</span>(<span class='ident'>sp</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uint</span> {
-    <span class='kw'>let</span> <span class='ident'>sp</span> <span class='op'>=</span> (<span class='ident'>sp</span> <span class='kw'>as</span> <span class='ident'>uint</span>) <span class='op'>&amp;</span> <span class='op'>!</span>(<span class='number'>16</span> <span class='op'>-</span> <span class='number'>1</span>);
+    <span class='kw'>let</span> <span class='ident'>sp</span> <span class='op'>=</span> (<span class='ident'>sp</span> <span class='kw'>as</span> <span class='ident'>uint</span>) <span class='kw-2'>&amp;</span> <span class='op'>!</span>(<span class='number'>16</span> <span class='op'>-</span> <span class='number'>1</span>);
     <span class='ident'>sp</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uint</span>
-}<span class='comment'>
+}
 
-// ptr::mut_offset is positive ints only
-</span><span class='attribute'>#[<span class='ident'>inline</span>]</span>
+<span class='comment'>// ptr::mut_offset is positive ints only</span>
+<span class='attribute'>#[<span class='ident'>inline</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>mut_offset</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>ptr</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span>, <span class='ident'>count</span>: <span class='ident'>int</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span> {
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>::<span class='ident'>size_of</span>;
     (<span class='ident'>ptr</span> <span class='kw'>as</span> <span class='ident'>int</span> <span class='op'>+</span> <span class='ident'>count</span> <span class='op'>*</span> (<span class='ident'>size_of</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>() <span class='kw'>as</span> <span class='ident'>int</span>)) <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span>

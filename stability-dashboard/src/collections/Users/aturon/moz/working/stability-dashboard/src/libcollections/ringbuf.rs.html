@@ -7,8 +7,6 @@
 
     <title>ringbuf.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -901,17 +899,17 @@
 <span id='859'>859</span>
 <span id='860'>860</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! A double-ended queue implemented as a circular buffer</span>
+<span class='doccomment'>//! A double-ended queue implemented as a circular buffer</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! RingBuf implements the trait Deque. It should be imported with `use</span>
 <span class='doccomment'>//! collections::Deque`.</span>
@@ -926,8 +924,8 @@
 <span class='kw'>use</span> {<span class='ident'>Deque</span>, <span class='ident'>Collection</span>, <span class='ident'>Mutable</span>};
 <span class='kw'>use</span> <span class='ident'>vec</span>::<span class='ident'>Vec</span>;
 
-<span class='kw'>static</span> <span class='ident'>INITIAL_CAPACITY</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='number'>8u</span>;<span class='comment'> // 2^3
-</span><span class='kw'>static</span> <span class='ident'>MINIMUM_CAPACITY</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='number'>2u</span>;
+<span class='kw'>static</span> <span class='ident'>INITIAL_CAPACITY</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='number'>8u</span>; <span class='comment'>// 2^3</span>
+<span class='kw'>static</span> <span class='ident'>MINIMUM_CAPACITY</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='number'>2u</span>;
 
 <span class='doccomment'>/// RingBuf is a circular buffer that implements Deque.</span>
 <span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
@@ -1107,22 +1105,22 @@
     <span class='doccomment'>/// Front-to-back iterator which returns mutable values.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>mut_iter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>MutItems</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>start_index</span> <span class='op'>=</span> <span class='ident'>raw_index</span>(<span class='self'>self</span>.<span class='ident'>lo</span>, <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>len</span>(), <span class='number'>0</span>);
-        <span class='kw'>let</span> <span class='ident'>end_index</span> <span class='op'>=</span> <span class='ident'>raw_index</span>(<span class='self'>self</span>.<span class='ident'>lo</span>, <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>len</span>(), <span class='self'>self</span>.<span class='ident'>nelts</span>);<span class='comment'>
+        <span class='kw'>let</span> <span class='ident'>end_index</span> <span class='op'>=</span> <span class='ident'>raw_index</span>(<span class='self'>self</span>.<span class='ident'>lo</span>, <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>len</span>(), <span class='self'>self</span>.<span class='ident'>nelts</span>);
 
-        // Divide up the array
-        </span><span class='kw'>if</span> <span class='ident'>end_index</span> <span class='op'>&lt;=</span> <span class='ident'>start_index</span> {<span class='comment'>
-            // Items to iterate goes from:
-            //    start_index to self.elts.len()
-            // and then
-            //    0 to end_index
-            </span><span class='kw'>let</span> (<span class='ident'>temp</span>, <span class='ident'>remaining1</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>mut_split_at</span>(<span class='ident'>start_index</span>);
+        <span class='comment'>// Divide up the array</span>
+        <span class='kw'>if</span> <span class='ident'>end_index</span> <span class='op'>&lt;=</span> <span class='ident'>start_index</span> {
+            <span class='comment'>// Items to iterate goes from:</span>
+            <span class='comment'>//    start_index to self.elts.len()</span>
+            <span class='comment'>// and then</span>
+            <span class='comment'>//    0 to end_index</span>
+            <span class='kw'>let</span> (<span class='ident'>temp</span>, <span class='ident'>remaining1</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>mut_split_at</span>(<span class='ident'>start_index</span>);
             <span class='kw'>let</span> (<span class='ident'>remaining2</span>, _) <span class='op'>=</span> <span class='ident'>temp</span>.<span class='ident'>mut_split_at</span>(<span class='ident'>end_index</span>);
             <span class='ident'>MutItems</span> { <span class='ident'>remaining1</span>: <span class='ident'>remaining1</span>,
                                  <span class='ident'>remaining2</span>: <span class='ident'>remaining2</span>,
                                  <span class='ident'>nelts</span>: <span class='self'>self</span>.<span class='ident'>nelts</span> }
-        } <span class='kw'>else</span> {<span class='comment'>
-            // Items to iterate goes from start_index to end_index:
-            </span><span class='kw'>let</span> (<span class='ident'>empty</span>, <span class='ident'>elts</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>mut_split_at</span>(<span class='number'>0</span>);
+        } <span class='kw'>else</span> {
+            <span class='comment'>// Items to iterate goes from start_index to end_index:</span>
+            <span class='kw'>let</span> (<span class='ident'>empty</span>, <span class='ident'>elts</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>mut_split_at</span>(<span class='number'>0</span>);
             <span class='kw'>let</span> <span class='ident'>remaining1</span> <span class='op'>=</span> <span class='ident'>elts</span>.<span class='ident'>mut_slice</span>(<span class='ident'>start_index</span>, <span class='ident'>end_index</span>);
             <span class='ident'>MutItems</span> { <span class='ident'>remaining1</span>: <span class='ident'>remaining1</span>,
                                  <span class='ident'>remaining2</span>: <span class='ident'>empty</span>,
@@ -1240,29 +1238,29 @@
     <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>nelts</span>, <span class='ident'>elts</span>.<span class='ident'>len</span>());
     <span class='kw'>let</span> <span class='ident'>lo</span> <span class='op'>=</span> <span class='op'>*</span><span class='ident'>loptr</span>;
     <span class='kw'>let</span> <span class='ident'>newlen</span> <span class='op'>=</span> <span class='ident'>nelts</span> <span class='op'>*</span> <span class='number'>2</span>;
-    <span class='ident'>elts</span>.<span class='ident'>reserve</span>(<span class='ident'>newlen</span>);<span class='comment'>
+    <span class='ident'>elts</span>.<span class='ident'>reserve</span>(<span class='ident'>newlen</span>);
 
-    /* fill with None */
-    </span><span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='ident'>elts</span>.<span class='ident'>len</span>(), <span class='ident'>elts</span>.<span class='ident'>capacity</span>()) {
+    <span class='comment'>/* fill with None */</span>
+    <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='ident'>elts</span>.<span class='ident'>len</span>(), <span class='ident'>elts</span>.<span class='ident'>capacity</span>()) {
         <span class='ident'>elts</span>.<span class='ident'>push</span>(<span class='prelude-val'>None</span>);
-    }<span class='comment'>
+    }
 
-    /*
+    <span class='comment'>/*
       Move the shortest half into the newly reserved area.
       lo ----&gt;|
       nelts -----------&gt;|
         [o o o|o o o o o]
       A [. . .|o o o o o o o o|. . . . .]
       B [o o o|. . . . . . . .|o o o o o]
-     */
+     */</span>
 
-    </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>newlen</span> <span class='op'>-</span> <span class='ident'>nelts</span><span class='op'>/</span><span class='number'>2</span> <span class='op'>&gt;=</span> <span class='ident'>nelts</span>);
-    <span class='kw'>if</span> <span class='ident'>lo</span> <span class='op'>&lt;=</span> (<span class='ident'>nelts</span> <span class='op'>-</span> <span class='ident'>lo</span>) {<span class='comment'> // A
-        </span><span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='ident'>lo</span>) {
+    <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>newlen</span> <span class='op'>-</span> <span class='ident'>nelts</span><span class='op'>/</span><span class='number'>2</span> <span class='op'>&gt;=</span> <span class='ident'>nelts</span>);
+    <span class='kw'>if</span> <span class='ident'>lo</span> <span class='op'>&lt;=</span> (<span class='ident'>nelts</span> <span class='op'>-</span> <span class='ident'>lo</span>) { <span class='comment'>// A</span>
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='ident'>lo</span>) {
             <span class='ident'>elts</span>.<span class='ident'>as_mut_slice</span>().<span class='ident'>swap</span>(<span class='ident'>i</span>, <span class='ident'>nelts</span> <span class='op'>+</span> <span class='ident'>i</span>);
         }
-    } <span class='kw'>else</span> {<span class='comment'>                // B
-        </span><span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='ident'>lo</span>, <span class='ident'>nelts</span>) {
+    } <span class='kw'>else</span> {                <span class='comment'>// B</span>
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='ident'>lo</span>, <span class='ident'>nelts</span>) {
             <span class='ident'>elts</span>.<span class='ident'>as_mut_slice</span>().<span class='ident'>swap</span>(<span class='ident'>i</span>, <span class='ident'>newlen</span> <span class='op'>-</span> <span class='ident'>nelts</span> <span class='op'>+</span> <span class='ident'>i</span>);
         }
         <span class='op'>*</span><span class='ident'>loptr</span> <span class='op'>+=</span> <span class='ident'>newlen</span> <span class='op'>-</span> <span class='ident'>nelts</span>;

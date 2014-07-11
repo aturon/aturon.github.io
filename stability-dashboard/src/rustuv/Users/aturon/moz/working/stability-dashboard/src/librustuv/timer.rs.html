@@ -7,11 +7,9 @@
 
     <title>timer.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
-    
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
     
 </head>
 <body>
@@ -25,7 +23,7 @@
     
 
     <section class="sidebar">
-        
+        <a href='../../../../../../../../../rustuv/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
         
     </section>
 
@@ -214,17 +212,17 @@
 <span id='172'>172</span>
 <span id='173'>173</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rt</span>::<span class='ident'>rtio</span>::{<span class='ident'>RtioTimer</span>, <span class='ident'>Callback</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rt</span>::<span class='ident'>task</span>::<span class='ident'>BlockedTask</span>;
 
@@ -238,8 +236,8 @@
     <span class='ident'>home</span>: <span class='ident'>HomeHandle</span>,
     <span class='ident'>action</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>NextAction</span><span class='op'>&gt;</span>,
     <span class='ident'>blocker</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>BlockedTask</span><span class='op'>&gt;</span>,
-    <span class='ident'>id</span>: <span class='ident'>uint</span>,<span class='comment'> // see comments in timer_cb
-</span>}
+    <span class='ident'>id</span>: <span class='ident'>uint</span>, <span class='comment'>// see comments in timer_cb</span>
+}
 
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>NextAction</span> {
     <span class='ident'>WakeTask</span>,
@@ -290,27 +288,27 @@
 }
 
 <span class='kw'>impl</span> <span class='ident'>RtioTimer</span> <span class='kw'>for</span> <span class='ident'>TimerWatcher</span> {
-    <span class='kw'>fn</span> <span class='ident'>sleep</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>msecs</span>: <span class='ident'>u64</span>) {<span class='comment'>
-        // As with all of the below functions, we must be extra careful when
-        // destroying the previous action. If the previous action was a channel,
-        // destroying it could invoke a context switch. For these situtations,
-        // we must temporarily un-home ourselves, then destroy the action, and
-        // then re-home again.
-        </span><span class='kw'>let</span> <span class='ident'>missile</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>fire_homing_missile</span>();
+    <span class='kw'>fn</span> <span class='ident'>sleep</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>msecs</span>: <span class='ident'>u64</span>) {
+        <span class='comment'>// As with all of the below functions, we must be extra careful when</span>
+        <span class='comment'>// destroying the previous action. If the previous action was a channel,</span>
+        <span class='comment'>// destroying it could invoke a context switch. For these situations,</span>
+        <span class='comment'>// we must temporarily un-home ourselves, then destroy the action, and</span>
+        <span class='comment'>// then re-home again.</span>
+        <span class='kw'>let</span> <span class='ident'>missile</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>fire_homing_missile</span>();
         <span class='self'>self</span>.<span class='ident'>id</span> <span class='op'>+=</span> <span class='number'>1</span>;
         <span class='self'>self</span>.<span class='ident'>stop</span>();
         <span class='kw'>let</span> <span class='ident'>_missile</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>mem</span>::<span class='ident'>replace</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>action</span>, <span class='prelude-val'>None</span>) {
-            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>missile</span>,<span class='comment'> // no need to do a homing dance
-            </span><span class='prelude-val'>Some</span>(<span class='ident'>action</span>) <span class='op'>=&gt;</span> {
-                <span class='ident'>drop</span>(<span class='ident'>missile</span>);<span class='comment'>      // un-home ourself
-                </span><span class='ident'>drop</span>(<span class='ident'>action</span>);<span class='comment'>       // destroy the previous action
-                </span><span class='self'>self</span>.<span class='ident'>fire_homing_missile</span>()<span class='comment'>  // re-home ourself
-            </span>}
-        };<span class='comment'>
+            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>missile</span>, <span class='comment'>// no need to do a homing dance</span>
+            <span class='prelude-val'>Some</span>(<span class='ident'>action</span>) <span class='op'>=&gt;</span> {
+                <span class='ident'>drop</span>(<span class='ident'>missile</span>);      <span class='comment'>// un-home ourself</span>
+                <span class='ident'>drop</span>(<span class='ident'>action</span>);       <span class='comment'>// destroy the previous action</span>
+                <span class='self'>self</span>.<span class='ident'>fire_homing_missile</span>()  <span class='comment'>// re-home ourself</span>
+            }
+        };
 
-        // If the descheduling operation unwinds after the timer has been
-        // started, then we need to call stop on the timer.
-        </span><span class='kw'>let</span> <span class='ident'>_f</span> <span class='op'>=</span> <span class='ident'>ForbidUnwind</span>::<span class='ident'>new</span>(<span class='string'>&quot;timer&quot;</span>);
+        <span class='comment'>// If the descheduling operation unwinds after the timer has been</span>
+        <span class='comment'>// started, then we need to call stop on the timer.</span>
+        <span class='kw'>let</span> <span class='ident'>_f</span> <span class='op'>=</span> <span class='ident'>ForbidUnwind</span>::<span class='ident'>new</span>(<span class='string'>&quot;timer&quot;</span>);
 
         <span class='self'>self</span>.<span class='ident'>action</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>WakeTask</span>);
         <span class='ident'>wait_until_woken_after</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>blocker</span>, <span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>uv_loop</span>(), <span class='op'>||</span> {
@@ -319,10 +317,10 @@
         <span class='self'>self</span>.<span class='ident'>stop</span>();
     }
 
-    <span class='kw'>fn</span> <span class='ident'>oneshot</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>msecs</span>: <span class='ident'>u64</span>, <span class='ident'>cb</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Callback</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>) {<span class='comment'>
-        // similarly to the destructor, we must drop the previous action outside
-        // of the homing missile
-        </span><span class='kw'>let</span> <span class='ident'>_prev_action</span> <span class='op'>=</span> {
+    <span class='kw'>fn</span> <span class='ident'>oneshot</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>msecs</span>: <span class='ident'>u64</span>, <span class='ident'>cb</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Callback</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>) {
+        <span class='comment'>// similarly to the destructor, we must drop the previous action outside</span>
+        <span class='comment'>// of the homing missile</span>
+        <span class='kw'>let</span> <span class='ident'>_prev_action</span> <span class='op'>=</span> {
             <span class='kw'>let</span> <span class='ident'>_m</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>fire_homing_missile</span>();
             <span class='self'>self</span>.<span class='ident'>id</span> <span class='op'>+=</span> <span class='number'>1</span>;
             <span class='self'>self</span>.<span class='ident'>stop</span>();
@@ -331,10 +329,10 @@
         };
     }
 
-    <span class='kw'>fn</span> <span class='ident'>period</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>msecs</span>: <span class='ident'>u64</span>, <span class='ident'>cb</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Callback</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>) {<span class='comment'>
-        // similarly to the destructor, we must drop the previous action outside
-        // of the homing missile
-        </span><span class='kw'>let</span> <span class='ident'>_prev_action</span> <span class='op'>=</span> {
+    <span class='kw'>fn</span> <span class='ident'>period</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>msecs</span>: <span class='ident'>u64</span>, <span class='ident'>cb</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Callback</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>) {
+        <span class='comment'>// similarly to the destructor, we must drop the previous action outside</span>
+        <span class='comment'>// of the homing missile</span>
+        <span class='kw'>let</span> <span class='ident'>_prev_action</span> <span class='op'>=</span> {
             <span class='kw'>let</span> <span class='ident'>_m</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>fire_homing_missile</span>();
             <span class='self'>self</span>.<span class='ident'>id</span> <span class='op'>+=</span> <span class='number'>1</span>;
             <span class='self'>self</span>.<span class='ident'>stop</span>();
@@ -355,17 +353,17 @@
         }
         <span class='ident'>CallOnce</span>(<span class='kw-2'>mut</span> <span class='ident'>cb</span>) <span class='op'>=&gt;</span> { <span class='ident'>cb</span>.<span class='ident'>call</span>() }
         <span class='ident'>CallMany</span>(<span class='kw-2'>mut</span> <span class='ident'>cb</span>, <span class='ident'>id</span>) <span class='op'>=&gt;</span> {
-            <span class='ident'>cb</span>.<span class='ident'>call</span>();<span class='comment'>
+            <span class='ident'>cb</span>.<span class='ident'>call</span>();
 
-            // Note that the above operation could have performed some form of
-            // scheduling. This means that the timer may have decided to insert
-            // some other action to happen. This &#39;id&#39; keeps track of the updates
-            // to the timer, so we only reset the action back to sending on this
-            // channel if the id has remained the same. This is essentially a
-            // bug in that we have mutably aliasable memory, but that&#39;s libuv
-            // for you. We&#39;re guaranteed to all be running on the same thread,
-            // so there&#39;s no need for any synchronization here.
-            </span><span class='kw'>if</span> <span class='ident'>timer</span>.<span class='ident'>id</span> <span class='op'>==</span> <span class='ident'>id</span> {
+            <span class='comment'>// Note that the above operation could have performed some form of</span>
+            <span class='comment'>// scheduling. This means that the timer may have decided to insert</span>
+            <span class='comment'>// some other action to happen. This &#39;id&#39; keeps track of the updates</span>
+            <span class='comment'>// to the timer, so we only reset the action back to sending on this</span>
+            <span class='comment'>// channel if the id has remained the same. This is essentially a</span>
+            <span class='comment'>// bug in that we have mutably aliasable memory, but that&#39;s libuv</span>
+            <span class='comment'>// for you. We&#39;re guaranteed to all be running on the same thread,</span>
+            <span class='comment'>// so there&#39;s no need for any synchronization here.</span>
+            <span class='kw'>if</span> <span class='ident'>timer</span>.<span class='ident'>id</span> <span class='op'>==</span> <span class='ident'>id</span> {
                 <span class='ident'>timer</span>.<span class='ident'>action</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>CallMany</span>(<span class='ident'>cb</span>, <span class='ident'>id</span>));
             }
         }
@@ -373,13 +371,13 @@
 }
 
 <span class='kw'>impl</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>TimerWatcher</span> {
-    <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {<span class='comment'>
-        // note that this drop is a little subtle. Dropping a channel which is
-        // held internally may invoke some scheduling operations. We can&#39;t take
-        // the channel unless we&#39;re on the home scheduler, but once we&#39;re on the
-        // home scheduler we should never move. Hence, we take the timer&#39;s
-        // action item and then move it outside of the homing block.
-        </span><span class='kw'>let</span> <span class='ident'>_action</span> <span class='op'>=</span> {
+    <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
+        <span class='comment'>// note that this drop is a little subtle. Dropping a channel which is</span>
+        <span class='comment'>// held internally may invoke some scheduling operations. We can&#39;t take</span>
+        <span class='comment'>// the channel unless we&#39;re on the home scheduler, but once we&#39;re on the</span>
+        <span class='comment'>// home scheduler we should never move. Hence, we take the timer&#39;s</span>
+        <span class='comment'>// action item and then move it outside of the homing block.</span>
+        <span class='kw'>let</span> <span class='ident'>_action</span> <span class='op'>=</span> {
             <span class='kw'>let</span> <span class='ident'>_m</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>fire_homing_missile</span>();
             <span class='self'>self</span>.<span class='ident'>stop</span>();
             <span class='self'>self</span>.<span class='ident'>close</span>();
@@ -429,11 +427,11 @@
     <script>
         window.rootPath = "../../../../../../../../../";
         window.currentCrate = "rustuv";
-        window.playgroundUrl = "";
+        window.playgroundUrl = "http://play.rust-lang.org/";
     </script>
     <script src="../../../../../../../../../jquery.js"></script>
     <script src="../../../../../../../../../main.js"></script>
-    
+    <script src="../../../../../../../../../playpen.js"></script>
     <script async src="../../../../../../../../../search-index.js"></script>
 </body>
 </html>

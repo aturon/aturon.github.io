@@ -7,8 +7,6 @@
 
     <title>mod.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -141,17 +139,17 @@
 <span id='99'> 99</span>
 <span id='100'>100</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>/*! Runtime services, including the task scheduler and I/O dispatcher
+<span class='doccomment'>/*! Runtime services, including the task scheduler and I/O dispatcher
 
 The `rt` module provides the private runtime infrastructure necessary
 to support core language features like the exchange and local heap,
@@ -194,29 +192,29 @@ Several modules in `core` are clients of `rt`:
 
 */</span>
 
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>experimental</span>]</span><span class='comment'>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>experimental</span>]</span>
 
-// FIXME: this should not be here.
-</span><span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>missing_doc</span>)]</span>
+<span class='comment'>// FIXME: this should not be here.</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>missing_doc</span>)]</span>
 
 <span class='kw'>use</span> <span class='ident'>failure</span>;
-<span class='kw'>use</span> <span class='ident'>rustrt</span>;<span class='comment'>
+<span class='kw'>use</span> <span class='ident'>rustrt</span>;
 
-// Reexport some of our utilities which are expected by other crates.
-</span><span class='kw'>pub</span> <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>util</span>::{<span class='ident'>default_sched_threads</span>, <span class='ident'>min_stack</span>, <span class='ident'>running_on_valgrind</span>};<span class='comment'>
+<span class='comment'>// Reexport some of our utilities which are expected by other crates.</span>
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>util</span>::{<span class='ident'>default_sched_threads</span>, <span class='ident'>min_stack</span>, <span class='ident'>running_on_valgrind</span>};
 
-// Reexport functionality from librustrt and other crates underneath the
-// standard library which work together to create the entire runtime.
-</span><span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>alloc</span>::{<span class='ident'>heap</span>, <span class='ident'>libc_heap</span>};
+<span class='comment'>// Reexport functionality from librustrt and other crates underneath the</span>
+<span class='comment'>// standard library which work together to create the entire runtime.</span>
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>alloc</span>::{<span class='ident'>heap</span>, <span class='ident'>libc_heap</span>};
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>rustrt</span>::{<span class='ident'>task</span>, <span class='ident'>local</span>, <span class='ident'>mutex</span>, <span class='ident'>exclusive</span>, <span class='ident'>stack</span>, <span class='ident'>args</span>, <span class='ident'>rtio</span>, <span class='ident'>thread</span>};
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>rustrt</span>::{<span class='ident'>Stdio</span>, <span class='ident'>Stdout</span>, <span class='ident'>Stderr</span>, <span class='ident'>begin_unwind</span>, <span class='ident'>begin_unwind_fmt</span>};
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>rustrt</span>::{<span class='ident'>bookkeeping</span>, <span class='ident'>at_exit</span>, <span class='ident'>unwind</span>, <span class='ident'>DEFAULT_ERROR_CODE</span>, <span class='ident'>Runtime</span>};<span class='comment'>
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>rustrt</span>::{<span class='ident'>bookkeeping</span>, <span class='ident'>at_exit</span>, <span class='ident'>unwind</span>, <span class='ident'>DEFAULT_ERROR_CODE</span>, <span class='ident'>Runtime</span>};
 
-// Simple backtrace functionality (to print on failure)
-</span><span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>backtrace</span>;<span class='comment'>
+<span class='comment'>// Simple backtrace functionality (to print on failure)</span>
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>backtrace</span>;
 
-// Just stuff
-</span><span class='kw'>mod</span> <span class='ident'>util</span>;
+<span class='comment'>// Just stuff</span>
+<span class='kw'>mod</span> <span class='ident'>util</span>;
 
 <span class='doccomment'>/// One-time runtime initialization.</span>
 <span class='doccomment'>///</span>

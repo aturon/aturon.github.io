@@ -7,8 +7,6 @@
 
     <title>result.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -690,19 +688,19 @@
 <span id='648'>648</span>
 <span id='649'>649</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! Error handling with the `Result` type</span>
+<span class='doccomment'>//! Error handling with the `Result` type</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! `Result&lt;T&gt;` is the type used for returning and propagating</span>
+<span class='doccomment'>//! `Result&lt;T, E&gt;` is the type used for returning and propagating</span>
 <span class='doccomment'>//! errors. It is an enum with the variants, `Ok(T)`, representing</span>
 <span class='doccomment'>//! success and containing a value, and `Err(E)`, representing error</span>
 <span class='doccomment'>//! and containing an error value.</span>
@@ -983,18 +981,18 @@
 
     <span class='doccomment'>/// Contains the error value</span>
     <span class='prelude-val'>Err</span>(<span class='ident'>E</span>)
-}<span class='comment'>
+}
 
-/////////////////////////////////////////////////////////////////////////////
-// Type implementation
-/////////////////////////////////////////////////////////////////////////////
+<span class='comment'>/////////////////////////////////////////////////////////////////////////////</span>
+<span class='comment'>// Type implementation</span>
+<span class='comment'>/////////////////////////////////////////////////////////////////////////////</span>
 
-</span><span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>E</span><span class='op'>&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>E</span><span class='op'>&gt;</span> {<span class='comment'>
-    /////////////////////////////////////////////////////////////////////////
-    // Querying the contained values
-    /////////////////////////////////////////////////////////////////////////
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>E</span><span class='op'>&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>E</span><span class='op'>&gt;</span> {
+    <span class='comment'>/////////////////////////////////////////////////////////////////////////</span>
+    <span class='comment'>// Querying the contained values</span>
+    <span class='comment'>/////////////////////////////////////////////////////////////////////////</span>
 
-    </span><span class='doccomment'>/// Returns true if the result is `Ok`</span>
+    <span class='doccomment'>/// Returns true if the result is `Ok`</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// # Example</span>
     <span class='doccomment'>///</span>
@@ -1029,14 +1027,14 @@
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>is_err</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
         <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>is_ok</span>()
-    }<span class='comment'>
+    }
 
 
-    /////////////////////////////////////////////////////////////////////////
-    // Adapter for each variant
-    /////////////////////////////////////////////////////////////////////////
+    <span class='comment'>/////////////////////////////////////////////////////////////////////////</span>
+    <span class='comment'>// Adapter for each variant</span>
+    <span class='comment'>/////////////////////////////////////////////////////////////////////////</span>
 
-    </span><span class='doccomment'>/// Convert from `Result&lt;T, E&gt;` to `Option&lt;T&gt;`</span>
+    <span class='doccomment'>/// Convert from `Result&lt;T, E&gt;` to `Option&lt;T&gt;`</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// Converts `self` into an `Option&lt;T&gt;`, consuming `self`,</span>
     <span class='doccomment'>/// and discarding the error, if any.</span>
@@ -1071,13 +1069,13 @@
             <span class='prelude-val'>Ok</span>(_)  <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>,
             <span class='prelude-val'>Err</span>(<span class='ident'>x</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>(<span class='ident'>x</span>),
         }
-    }<span class='comment'>
+    }
 
-    /////////////////////////////////////////////////////////////////////////
-    // Adapter for working with references
-    /////////////////////////////////////////////////////////////////////////
+    <span class='comment'>/////////////////////////////////////////////////////////////////////////</span>
+    <span class='comment'>// Adapter for working with references</span>
+    <span class='comment'>/////////////////////////////////////////////////////////////////////////</span>
 
-    </span><span class='doccomment'>/// Convert from `Result&lt;T, E&gt;` to `Result&lt;&amp;T, &amp;E&gt;`</span>
+    <span class='doccomment'>/// Convert from `Result&lt;T, E&gt;` to `Result&lt;&amp;T, &amp;E&gt;`</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// Produces a new `Result`, containing a reference</span>
     <span class='doccomment'>/// into the original, leaving the original in place.</span>
@@ -1096,13 +1094,13 @@
             <span class='prelude-val'>Ok</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>x</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>x</span>),
             <span class='prelude-val'>Err</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>x</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>x</span>),
         }
-    }<span class='comment'>
+    }
 
-    /////////////////////////////////////////////////////////////////////////
-    // Transforming contained values
-    /////////////////////////////////////////////////////////////////////////
+    <span class='comment'>/////////////////////////////////////////////////////////////////////////</span>
+    <span class='comment'>// Transforming contained values</span>
+    <span class='comment'>/////////////////////////////////////////////////////////////////////////</span>
 
-    </span><span class='doccomment'>/// Maps a `Result&lt;T, E&gt;` to `Result&lt;U, E&gt;` by applying a function to an</span>
+    <span class='doccomment'>/// Maps a `Result&lt;T, E&gt;` to `Result&lt;U, E&gt;` by applying a function to an</span>
     <span class='doccomment'>/// contained `Ok` value, leaving an `Err` value untouched.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// This function can be used to compose the results of two functions.</span>
@@ -1151,13 +1149,13 @@
           <span class='prelude-val'>Ok</span>(<span class='ident'>t</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>t</span>),
           <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>op</span>(<span class='ident'>e</span>))
         }
-    }<span class='comment'>
+    }
 
-    ////////////////////////////////////////////////////////////////////////
-    // Boolean operations on the values, eager and lazy
-    /////////////////////////////////////////////////////////////////////////
+    <span class='comment'>////////////////////////////////////////////////////////////////////////</span>
+    <span class='comment'>// Boolean operations on the values, eager and lazy</span>
+    <span class='comment'>/////////////////////////////////////////////////////////////////////////</span>
 
-    </span><span class='doccomment'>/// Returns `res` if the result is `Ok`, otherwise returns the `Err` value of `self`.</span>
+    <span class='doccomment'>/// Returns `res` if the result is `Ok`, otherwise returns the `Err` value of `self`.</span>
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>and</span><span class='op'>&lt;</span><span class='ident'>U</span><span class='op'>&gt;</span>(<span class='self'>self</span>, <span class='ident'>res</span>: <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>U</span>, <span class='ident'>E</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>U</span>, <span class='ident'>E</span><span class='op'>&gt;</span> {
         <span class='kw'>match</span> <span class='self'>self</span> {
@@ -1251,13 +1249,13 @@
             <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='ident'>e</span>
         }
     }
-}<span class='comment'>
+}
 
-/////////////////////////////////////////////////////////////////////////////
-// Free functions
-/////////////////////////////////////////////////////////////////////////////
+<span class='comment'>/////////////////////////////////////////////////////////////////////////////</span>
+<span class='comment'>// Free functions</span>
+<span class='comment'>/////////////////////////////////////////////////////////////////////////////</span>
 
-</span><span class='doccomment'>/// Takes each element in the `Iterator`: if it is an `Err`, no further</span>
+<span class='doccomment'>/// Takes each element in the `Iterator`: if it is an `Err`, no further</span>
 <span class='doccomment'>/// elements are taken, and the `Err` is returned. Should no `Err` occur, a</span>
 <span class='doccomment'>/// vector containing the values of each `Result` is returned.</span>
 <span class='doccomment'>///</span>
@@ -1276,11 +1274,11 @@
 <span class='doccomment'>/// assert!(res == Ok(vec!(2u, 3u)));</span>
 <span class='doccomment'>/// ```</span>
 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>collect</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>E</span>, <span class='ident'>Iter</span>: <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>E</span><span class='op'>&gt;&gt;</span>, <span class='ident'>V</span>: <span class='ident'>FromIterator</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>(<span class='ident'>iter</span>: <span class='ident'>Iter</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>V</span>, <span class='ident'>E</span><span class='op'>&gt;</span> {<span class='comment'>
-    // FIXME(#11084): This could be replaced with Iterator::scan when this
-    // performance bug is closed.
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>collect</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>E</span>, <span class='ident'>Iter</span>: <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>E</span><span class='op'>&gt;&gt;</span>, <span class='ident'>V</span>: <span class='ident'>FromIterator</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>(<span class='ident'>iter</span>: <span class='ident'>Iter</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>V</span>, <span class='ident'>E</span><span class='op'>&gt;</span> {
+    <span class='comment'>// FIXME(#11084): This could be replaced with Iterator::scan when this</span>
+    <span class='comment'>// performance bug is closed.</span>
 
-    </span><span class='kw'>struct</span> <span class='ident'>Adapter</span><span class='op'>&lt;</span><span class='ident'>Iter</span>, <span class='ident'>E</span><span class='op'>&gt;</span> {
+    <span class='kw'>struct</span> <span class='ident'>Adapter</span><span class='op'>&lt;</span><span class='ident'>Iter</span>, <span class='ident'>E</span><span class='op'>&gt;</span> {
         <span class='ident'>iter</span>: <span class='ident'>Iter</span>,
         <span class='ident'>err</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>E</span><span class='op'>&gt;</span>,
     }

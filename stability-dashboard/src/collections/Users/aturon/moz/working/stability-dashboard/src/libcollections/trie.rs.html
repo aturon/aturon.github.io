@@ -7,8 +7,6 @@
 
     <title>trie.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -1126,17 +1124,17 @@
 <span id='1084'>1084</span>
 <span id='1085'>1085</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! Ordered containers with integer keys, implemented as radix tries (`TrieSet` and `TrieMap` types)</span>
+<span class='doccomment'>//! Ordered containers with integer keys, implemented as radix tries (`TrieSet` and `TrieMap` types)</span>
 
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
 
@@ -1148,10 +1146,10 @@
 
 <span class='kw'>use</span> {<span class='ident'>Collection</span>, <span class='ident'>Mutable</span>, <span class='ident'>Map</span>, <span class='ident'>MutableMap</span>, <span class='ident'>Set</span>, <span class='ident'>MutableSet</span>};
 <span class='kw'>use</span> <span class='ident'>slice</span>::{<span class='ident'>Items</span>, <span class='ident'>MutItems</span>};
-<span class='kw'>use</span> <span class='ident'>slice</span>;<span class='comment'>
+<span class='kw'>use</span> <span class='ident'>slice</span>;
 
-// FIXME: #5244: need to manually update the TrieNode constructor
-</span><span class='kw'>static</span> <span class='ident'>SHIFT</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='number'>4</span>;
+<span class='comment'>// FIXME: #5244: need to manually update the TrieNode constructor</span>
+<span class='kw'>static</span> <span class='ident'>SHIFT</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='number'>4</span>;
 <span class='kw'>static</span> <span class='ident'>SIZE</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='number'>1</span> <span class='op'>&lt;&lt;</span> <span class='ident'>SHIFT</span>;
 <span class='kw'>static</span> <span class='ident'>MASK</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='ident'>SIZE</span> <span class='op'>-</span> <span class='number'>1</span>;
 <span class='kw'>static</span> <span class='ident'>NUM_CHUNKS</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='ident'>uint</span>::<span class='ident'>BITS</span> <span class='op'>/</span> <span class='ident'>SHIFT</span>;
@@ -1274,65 +1272,65 @@
 
         <span class='ident'>iter</span>
     }
-}<span class='comment'>
+}
 
-// FIXME #5846 we want to be able to choose between &amp;x and &amp;mut x
-// (with many different `x`) below, so we need to optionally pass mut
-// as a tt, but the only thing we can do with a `tt` is pass them to
-// other macros, so this takes the `&amp; &lt;mutability&gt; &lt;operand&gt;` token
-// sequence and forces their evaluation as an expression. (see also
-// `item!` below.)
-</span><span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>addr</span> { (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span> } }
+<span class='comment'>// FIXME #5846 we want to be able to choose between &amp;x and &amp;mut x</span>
+<span class='comment'>// (with many different `x`) below, so we need to optionally pass mut</span>
+<span class='comment'>// as a tt, but the only thing we can do with a `tt` is pass them to</span>
+<span class='comment'>// other macros, so this takes the `&amp; &lt;mutability&gt; &lt;operand&gt;` token</span>
+<span class='comment'>// sequence and forces their evaluation as an expression. (see also</span>
+<span class='comment'>// `item!` below.)</span>
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>addr</span> { (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span> } }
 
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>bound</span> {
-    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>iterator_name</span>:<span class='ident'>ident</span>,<span class='comment'>
-     // the current treemap
-     </span><span class='self'>self</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span>:<span class='ident'>expr</span>,<span class='comment'>
-     // the key to look for
-     </span><span class='ident'>key</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>key</span>:<span class='ident'>expr</span>,<span class='comment'>
-     // are we looking at the upper bound?
-     </span><span class='ident'>is_upper</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>upper</span>:<span class='ident'>expr</span>,<span class='comment'>
+    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>iterator_name</span>:<span class='ident'>ident</span>,
+     <span class='comment'>// the current treemap</span>
+     <span class='self'>self</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span>:<span class='ident'>expr</span>,
+     <span class='comment'>// the key to look for</span>
+     <span class='ident'>key</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>key</span>:<span class='ident'>expr</span>,
+     <span class='comment'>// are we looking at the upper bound?</span>
+     <span class='ident'>is_upper</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>upper</span>:<span class='ident'>expr</span>,
 
-     // method names for slicing/iterating.
-     </span><span class='ident'>slice_from</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>slice_from</span>:<span class='ident'>ident</span>,
-     <span class='ident'>iter</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>iter</span>:<span class='ident'>ident</span>,<span class='comment'>
+     <span class='comment'>// method names for slicing/iterating.</span>
+     <span class='ident'>slice_from</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>slice_from</span>:<span class='ident'>ident</span>,
+     <span class='ident'>iter</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>iter</span>:<span class='ident'>ident</span>,
 
-     // see the comment on `addr!`, this is just an optional mut, but
-     // there&#39;s no 0-or-1 repeats yet.
-     </span><span class='ident'>mutability</span> <span class='op'>=</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mut_</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> {
-        {<span class='comment'>
-            // # For `mut`
-            // We need an unsafe pointer here because we are borrowing
-            // mutable references to the internals of each of these
-            // mutable nodes, while still using the outer node.
-            //
-            // However, we&#39;re allowed to flaunt rustc like this because we
-            // never actually modify the &quot;shape&quot; of the nodes. The only
-            // place that mutation is can actually occur is of the actual
-            // values of the TrieMap (as the return value of the
-            // iterator), i.e. we can never cause a deallocation of any
-            // TrieNodes so the raw pointer is always valid.
-            //
-            // # For non-`mut`
-            // We like sharing code so much that even a little unsafe won&#39;t
-            // stop us.
-            </span><span class='kw'>let</span> <span class='ident'>this</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span>;
+     <span class='comment'>// see the comment on `addr!`, this is just an optional mut, but</span>
+     <span class='comment'>// there&#39;s no 0-or-1 repeats yet.</span>
+     <span class='ident'>mutability</span> <span class='op'>=</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mut_</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> {
+        {
+            <span class='comment'>// # For `mut`</span>
+            <span class='comment'>// We need an unsafe pointer here because we are borrowing</span>
+            <span class='comment'>// mutable references to the internals of each of these</span>
+            <span class='comment'>// mutable nodes, while still using the outer node.</span>
+            <span class='comment'>//</span>
+            <span class='comment'>// However, we&#39;re allowed to flaunt rustc like this because we</span>
+            <span class='comment'>// never actually modify the &quot;shape&quot; of the nodes. The only</span>
+            <span class='comment'>// place that mutation is can actually occur is of the actual</span>
+            <span class='comment'>// values of the TrieMap (as the return value of the</span>
+            <span class='comment'>// iterator), i.e. we can never cause a deallocation of any</span>
+            <span class='comment'>// TrieNodes so the raw pointer is always valid.</span>
+            <span class='comment'>//</span>
+            <span class='comment'>// # For non-`mut`</span>
+            <span class='comment'>// We like sharing code so much that even a little unsafe won&#39;t</span>
+            <span class='comment'>// stop us.</span>
+            <span class='kw'>let</span> <span class='ident'>this</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span>;
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>node</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {
                 <span class='ident'>mem</span>::<span class='ident'>transmute</span>::<span class='op'>&lt;</span>_, <span class='ident'>uint</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='ident'>this</span>.<span class='ident'>root</span>) <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>TrieNode</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>
             };
 
             <span class='kw'>let</span> <span class='ident'>key</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>key</span>;
 
-            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>it</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>iterator_name</span>::<span class='ident'>new</span>()};<span class='comment'>
-            // everything else is zero&#39;d, as we want.
-            </span><span class='ident'>it</span>.<span class='ident'>remaining_max</span> <span class='op'>=</span> <span class='ident'>this</span>.<span class='ident'>length</span>;<span class='comment'>
+            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>it</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>iterator_name</span>::<span class='ident'>new</span>()};
+            <span class='comment'>// everything else is zero&#39;d, as we want.</span>
+            <span class='ident'>it</span>.<span class='ident'>remaining_max</span> <span class='op'>=</span> <span class='ident'>this</span>.<span class='ident'>length</span>;
 
-            // this addr is necessary for the `Internal` pattern.
-            </span><span class='macro'>addr</span><span class='macro'>!</span>(<span class='kw'>loop</span> {
-                    <span class='kw'>let</span> <span class='ident'>children</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {<span class='macro'>addr</span><span class='macro'>!</span>(<span class='op'>&amp;</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mut_</span>)<span class='op'>*</span> (<span class='op'>*</span><span class='ident'>node</span>).<span class='ident'>children</span>)};<span class='comment'>
-                    // it.length is the current depth in the iterator and the
-                    // current depth through the `uint` key we&#39;ve traversed.
-                    </span><span class='kw'>let</span> <span class='ident'>child_id</span> <span class='op'>=</span> <span class='ident'>chunk</span>(<span class='ident'>key</span>, <span class='ident'>it</span>.<span class='ident'>length</span>);
+            <span class='comment'>// this addr is necessary for the `Internal` pattern.</span>
+            <span class='macro'>addr</span><span class='macro'>!</span>(<span class='kw'>loop</span> {
+                    <span class='kw'>let</span> <span class='ident'>children</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {<span class='macro'>addr</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mut_</span>)<span class='op'>*</span> (<span class='op'>*</span><span class='ident'>node</span>).<span class='ident'>children</span>)};
+                    <span class='comment'>// it.length is the current depth in the iterator and the</span>
+                    <span class='comment'>// current depth through the `uint` key we&#39;ve traversed.</span>
+                    <span class='kw'>let</span> <span class='ident'>child_id</span> <span class='op'>=</span> <span class='ident'>chunk</span>(<span class='ident'>key</span>, <span class='ident'>it</span>.<span class='ident'>length</span>);
                     <span class='kw'>let</span> (<span class='ident'>slice_idx</span>, <span class='ident'>ret</span>) <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>children</span>[<span class='ident'>child_id</span>] {
                         <span class='ident'>Internal</span>(<span class='kw-2'>ref</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mut_</span>)<span class='op'>*</span> <span class='ident'>n</span>) <span class='op'>=&gt;</span> {
                             <span class='ident'>node</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {
@@ -1351,9 +1349,9 @@
                         <span class='ident'>Nothing</span> <span class='op'>=&gt;</span> {
                             (<span class='ident'>child_id</span> <span class='op'>+</span> <span class='number'>1</span>, <span class='boolval'>true</span>)
                         }
-                    };<span class='comment'>
-                    // push to the stack.
-                    </span><span class='ident'>it</span>.<span class='ident'>stack</span>[<span class='ident'>it</span>.<span class='ident'>length</span>] <span class='op'>=</span> <span class='ident'>children</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>slice_from</span>(<span class='ident'>slice_idx</span>).<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>iter</span>();
+                    };
+                    <span class='comment'>// push to the stack.</span>
+                    <span class='ident'>it</span>.<span class='ident'>stack</span>[<span class='ident'>it</span>.<span class='ident'>length</span>] <span class='op'>=</span> <span class='ident'>children</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>slice_from</span>(<span class='ident'>slice_idx</span>).<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>iter</span>();
                     <span class='ident'>it</span>.<span class='ident'>length</span> <span class='op'>+=</span> <span class='number'>1</span>;
                     <span class='kw'>if</span> <span class='ident'>ret</span> { <span class='kw'>return</span> <span class='ident'>it</span> }
                 })
@@ -1361,9 +1359,9 @@
     }
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>TrieMap</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {<span class='comment'>
-    // If `upper` is true then returns upper_bound else returns lower_bound.
-    </span><span class='attribute'>#[<span class='ident'>inline</span>]</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>TrieMap</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+    <span class='comment'>// If `upper` is true then returns upper_bound else returns lower_bound.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>bound</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>, <span class='ident'>key</span>: <span class='ident'>uint</span>, <span class='ident'>upper</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='ident'>Entries</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='macro'>bound</span><span class='macro'>!</span>(<span class='ident'>Entries</span>, <span class='self'>self</span> <span class='op'>=</span> <span class='self'>self</span>,
                <span class='ident'>key</span> <span class='op'>=</span> <span class='ident'>key</span>, <span class='ident'>is_upper</span> <span class='op'>=</span> <span class='ident'>upper</span>,
@@ -1381,9 +1379,9 @@
     <span class='doccomment'>/// If all keys in the map are not greater than `key` an empty iterator is returned.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>upper_bound</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>, <span class='ident'>key</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>Entries</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>bound</span>(<span class='ident'>key</span>, <span class='boolval'>true</span>)
-    }<span class='comment'>
-    // If `upper` is true then returns upper_bound else returns lower_bound.
-    </span><span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    }
+    <span class='comment'>// If `upper` is true then returns upper_bound else returns lower_bound.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>mut_bound</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>key</span>: <span class='ident'>uint</span>, <span class='ident'>upper</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='ident'>MutEntries</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='macro'>bound</span><span class='macro'>!</span>(<span class='ident'>MutEntries</span>, <span class='self'>self</span> <span class='op'>=</span> <span class='self'>self</span>,
                <span class='ident'>key</span> <span class='op'>=</span> <span class='ident'>key</span>, <span class='ident'>is_upper</span> <span class='op'>=</span> <span class='ident'>upper</span>,
@@ -1531,10 +1529,10 @@
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>TrieNode</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>new</span>() <span class='op'>-&gt;</span> <span class='ident'>TrieNode</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {<span class='comment'>
-        // FIXME: #5244: [Nothing, ..SIZE] should be possible without implicit
-        // copyability
-        </span><span class='ident'>TrieNode</span>{<span class='ident'>count</span>: <span class='number'>0</span>,
+    <span class='kw'>fn</span> <span class='ident'>new</span>() <span class='op'>-&gt;</span> <span class='ident'>TrieNode</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+        <span class='comment'>// FIXME: #5244: [Nothing, ..SIZE] should be possible without implicit</span>
+        <span class='comment'>// copyability</span>
+        <span class='ident'>TrieNode</span>{<span class='ident'>count</span>: <span class='number'>0</span>,
                  <span class='ident'>children</span>: [<span class='ident'>Nothing</span>, <span class='ident'>Nothing</span>, <span class='ident'>Nothing</span>, <span class='ident'>Nothing</span>,
                             <span class='ident'>Nothing</span>, <span class='ident'>Nothing</span>, <span class='ident'>Nothing</span>, <span class='ident'>Nothing</span>,
                             <span class='ident'>Nothing</span>, <span class='ident'>Nothing</span>, <span class='ident'>Nothing</span>, <span class='ident'>Nothing</span>,
@@ -1553,13 +1551,13 @@
         }
         <span class='boolval'>true</span>
     }
-}<span class='comment'>
+}
 
-// if this was done via a trait, the key could be generic
-</span><span class='attribute'>#[<span class='ident'>inline</span>]</span>
+<span class='comment'>// if this was done via a trait, the key could be generic</span>
+<span class='attribute'>#[<span class='ident'>inline</span>]</span>
 <span class='kw'>fn</span> <span class='ident'>chunk</span>(<span class='ident'>n</span>: <span class='ident'>uint</span>, <span class='ident'>idx</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>uint</span> {
     <span class='kw'>let</span> <span class='ident'>sh</span> <span class='op'>=</span> <span class='ident'>uint</span>::<span class='ident'>BITS</span> <span class='op'>-</span> (<span class='ident'>SHIFT</span> <span class='op'>*</span> (<span class='ident'>idx</span> <span class='op'>+</span> <span class='number'>1</span>));
-    (<span class='ident'>n</span> <span class='op'>&gt;&gt;</span> <span class='ident'>sh</span>) <span class='op'>&amp;</span> <span class='ident'>MASK</span>
+    (<span class='ident'>n</span> <span class='op'>&gt;&gt;</span> <span class='ident'>sh</span>) <span class='kw-2'>&amp;</span> <span class='ident'>MASK</span>
 }
 
 <span class='kw'>fn</span> <span class='ident'>find_mut</span><span class='op'>&lt;</span><span class='lifetime'>&#39;r</span>, <span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>child</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='kw-2'>mut</span> <span class='ident'>Child</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>key</span>: <span class='ident'>uint</span>, <span class='ident'>idx</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;r</span> <span class='kw-2'>mut</span> <span class='ident'>T</span><span class='op'>&gt;</span> {
@@ -1572,11 +1570,11 @@
 }
 
 <span class='kw'>fn</span> <span class='ident'>insert</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>count</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>uint</span>, <span class='ident'>child</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Child</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>key</span>: <span class='ident'>uint</span>, <span class='ident'>value</span>: <span class='ident'>T</span>,
-             <span class='ident'>idx</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {<span class='comment'>
-    // we branch twice to avoid having to do the `replace` when we
-    // don&#39;t need to; this is much faster, especially for keys that
-    // have long shared prefixes.
-    </span><span class='kw'>match</span> <span class='op'>*</span><span class='ident'>child</span> {
+             <span class='ident'>idx</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+    <span class='comment'>// we branch twice to avoid having to do the `replace` when we</span>
+    <span class='comment'>// don&#39;t need to; this is much faster, especially for keys that</span>
+    <span class='comment'>// have long shared prefixes.</span>
+    <span class='kw'>match</span> <span class='op'>*</span><span class='ident'>child</span> {
         <span class='ident'>Nothing</span> <span class='op'>=&gt;</span> {
             <span class='op'>*</span><span class='ident'>count</span> <span class='op'>+=</span> <span class='number'>1</span>;
             <span class='op'>*</span><span class='ident'>child</span> <span class='op'>=</span> <span class='ident'>External</span>(<span class='ident'>key</span>, <span class='ident'>value</span>);
@@ -1585,17 +1583,17 @@
         <span class='ident'>Internal</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>x</span>) <span class='op'>=&gt;</span> {
             <span class='kw'>return</span> <span class='ident'>insert</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>x</span>.<span class='ident'>count</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>x</span>.<span class='ident'>children</span>[<span class='ident'>chunk</span>(<span class='ident'>key</span>, <span class='ident'>idx</span>)], <span class='ident'>key</span>, <span class='ident'>value</span>, <span class='ident'>idx</span> <span class='op'>+</span> <span class='number'>1</span>);
         }
-        <span class='ident'>External</span>(<span class='ident'>stored_key</span>, <span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>stored_value</span>) <span class='kw'>if</span> <span class='ident'>stored_key</span> <span class='op'>==</span> <span class='ident'>key</span> <span class='op'>=&gt;</span> {<span class='comment'>
-            // swap in the new value and return the old.
-            </span><span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>mem</span>::<span class='ident'>replace</span>(<span class='ident'>stored_value</span>, <span class='ident'>value</span>));
+        <span class='ident'>External</span>(<span class='ident'>stored_key</span>, <span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>stored_value</span>) <span class='kw'>if</span> <span class='ident'>stored_key</span> <span class='op'>==</span> <span class='ident'>key</span> <span class='op'>=&gt;</span> {
+            <span class='comment'>// swap in the new value and return the old.</span>
+            <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>mem</span>::<span class='ident'>replace</span>(<span class='ident'>stored_value</span>, <span class='ident'>value</span>));
         }
         _ <span class='op'>=&gt;</span> {}
-    }<span class='comment'>
+    }
 
-    // conflict, an external node with differing keys: we have to
-    // split the node, so we need the old value by value; hence we
-    // have to move out of `child`.
-    </span><span class='kw'>match</span> <span class='ident'>mem</span>::<span class='ident'>replace</span>(<span class='ident'>child</span>, <span class='ident'>Nothing</span>) {
+    <span class='comment'>// conflict, an external node with differing keys: we have to</span>
+    <span class='comment'>// split the node, so we need the old value by value; hence we</span>
+    <span class='comment'>// have to move out of `child`.</span>
+    <span class='kw'>match</span> <span class='ident'>mem</span>::<span class='ident'>replace</span>(<span class='ident'>child</span>, <span class='ident'>Nothing</span>) {
         <span class='ident'>External</span>(<span class='ident'>stored_key</span>, <span class='ident'>stored_value</span>) <span class='op'>=&gt;</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>new</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>TrieNode</span>::<span class='ident'>new</span>();
             <span class='ident'>insert</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>new</span>.<span class='ident'>count</span>,
@@ -1650,28 +1648,28 @@
     <span class='ident'>length</span>: <span class='ident'>uint</span>,
     <span class='ident'>remaining_min</span>: <span class='ident'>uint</span>,
     <span class='ident'>remaining_max</span>: <span class='ident'>uint</span>
-}<span class='comment'>
+}
 
-// FIXME #5846: see `addr!` above.
-</span><span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>item</span> { (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span>:<span class='ident'>item</span>) <span class='op'>=&gt;</span> {<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span>}}
+<span class='comment'>// FIXME #5846: see `addr!` above.</span>
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>item</span> { (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span>:<span class='ident'>item</span>) <span class='op'>=&gt;</span> {<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span>}}
 
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>iterator_impl</span> {
     (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>name</span>:<span class='ident'>ident</span>,
      <span class='ident'>iter</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>iter</span>:<span class='ident'>ident</span>,
      <span class='ident'>mutability</span> <span class='op'>=</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mut_</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> {
-        <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>name</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {<span class='comment'>
-            // Create new zero&#39;d iterator. We have a thin gilding of safety by
-            // using init rather than uninit, so that the worst that can happen
-            // from failing to initialise correctly after calling these is a
-            // segfault.
-            </span><span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_word_size</span><span class='op'>=</span><span class='string'>&quot;32&quot;</span>)]</span>
+        <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>name</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
+            <span class='comment'>// Create new zero&#39;d iterator. We have a thin gilding of safety by</span>
+            <span class='comment'>// using init rather than uninit, so that the worst that can happen</span>
+            <span class='comment'>// from failing to initialise correctly after calling these is a</span>
+            <span class='comment'>// segfault.</span>
+            <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_word_size</span><span class='op'>=</span><span class='string'>&quot;32&quot;</span>)]</span>
             <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>new</span>() <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>name</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
                 <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>name</span> {
                     <span class='ident'>remaining_min</span>: <span class='number'>0</span>,
                     <span class='ident'>remaining_max</span>: <span class='number'>0</span>,
-                    <span class='ident'>length</span>: <span class='number'>0</span>,<span class='comment'>
-                    // ick :( ... at least the compiler will tell us if we screwed up.
-                    </span><span class='ident'>stack</span>: [<span class='ident'>zeroed</span>(), <span class='ident'>zeroed</span>(), <span class='ident'>zeroed</span>(), <span class='ident'>zeroed</span>(), <span class='ident'>zeroed</span>(),
+                    <span class='ident'>length</span>: <span class='number'>0</span>,
+                    <span class='comment'>// ick :( ... at least the compiler will tell us if we screwed up.</span>
+                    <span class='ident'>stack</span>: [<span class='ident'>zeroed</span>(), <span class='ident'>zeroed</span>(), <span class='ident'>zeroed</span>(), <span class='ident'>zeroed</span>(), <span class='ident'>zeroed</span>(),
                             <span class='ident'>zeroed</span>(), <span class='ident'>zeroed</span>(), <span class='ident'>zeroed</span>()]
                 }
             }
@@ -1690,60 +1688,60 @@
             }
         }
 
-        <span class='macro'>item</span><span class='macro'>!</span>(<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>Iterator</span><span class='op'>&lt;</span>(<span class='ident'>uint</span>, <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mut_</span>)<span class='op'>*</span> <span class='ident'>T</span>)<span class='op'>&gt;</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>name</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {<span class='comment'>
-                // you might wonder why we&#39;re not even trying to act within the
-                // rules, and are just manipulating raw pointers like there&#39;s no
-                // such thing as invalid pointers and memory unsafety. The
-                // reason is performance, without doing this we can get the
-                // bench_iter_large microbenchmark down to about 30000 ns/iter
-                // (using .unsafe_ref to index self.stack directly, 38000
-                // ns/iter with [] checked indexing), but this smashes that down
-                // to 13500 ns/iter.
-                //
-                // Fortunately, it&#39;s still safe...
-                //
-                // We have an invariant that every Internal node
-                // corresponds to one push to self.stack, and one pop,
-                // nested appropriately. self.stack has enough storage
-                // to store the maximum depth of Internal nodes in the
-                // trie (8 on 32-bit platforms, 16 on 64-bit).
-                </span><span class='kw'>fn</span> <span class='ident'>next</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span>(<span class='ident'>uint</span>, <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mut_</span>)<span class='op'>*</span> <span class='ident'>T</span>)<span class='op'>&gt;</span> {
+        <span class='macro'>item</span><span class='macro'>!</span>(<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>Iterator</span><span class='op'>&lt;</span>(<span class='ident'>uint</span>, <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mut_</span>)<span class='op'>*</span> <span class='ident'>T</span>)<span class='op'>&gt;</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>name</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
+                <span class='comment'>// you might wonder why we&#39;re not even trying to act within the</span>
+                <span class='comment'>// rules, and are just manipulating raw pointers like there&#39;s no</span>
+                <span class='comment'>// such thing as invalid pointers and memory unsafety. The</span>
+                <span class='comment'>// reason is performance, without doing this we can get the</span>
+                <span class='comment'>// bench_iter_large microbenchmark down to about 30000 ns/iter</span>
+                <span class='comment'>// (using .unsafe_ref to index self.stack directly, 38000</span>
+                <span class='comment'>// ns/iter with [] checked indexing), but this smashes that down</span>
+                <span class='comment'>// to 13500 ns/iter.</span>
+                <span class='comment'>//</span>
+                <span class='comment'>// Fortunately, it&#39;s still safe...</span>
+                <span class='comment'>//</span>
+                <span class='comment'>// We have an invariant that every Internal node</span>
+                <span class='comment'>// corresponds to one push to self.stack, and one pop,</span>
+                <span class='comment'>// nested appropriately. self.stack has enough storage</span>
+                <span class='comment'>// to store the maximum depth of Internal nodes in the</span>
+                <span class='comment'>// trie (8 on 32-bit platforms, 16 on 64-bit).</span>
+                <span class='kw'>fn</span> <span class='ident'>next</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span>(<span class='ident'>uint</span>, <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mut_</span>)<span class='op'>*</span> <span class='ident'>T</span>)<span class='op'>&gt;</span> {
                     <span class='kw'>let</span> <span class='ident'>start_ptr</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>stack</span>.<span class='ident'>as_mut_ptr</span>();
 
-                    <span class='kw'>unsafe</span> {<span class='comment'>
-                        // write_ptr is the next place to write to the stack.
-                        // invariant: start_ptr &lt;= write_ptr &lt; end of the
-                        // vector.
-                        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>write_ptr</span> <span class='op'>=</span> <span class='ident'>start_ptr</span>.<span class='ident'>offset</span>(<span class='self'>self</span>.<span class='ident'>length</span> <span class='kw'>as</span> <span class='ident'>int</span>);
-                        <span class='kw'>while</span> <span class='ident'>write_ptr</span> <span class='op'>!=</span> <span class='ident'>start_ptr</span> {<span class='comment'>
-                            // indexing back one is safe, since write_ptr &gt;
-                            // start_ptr now.
-                            </span><span class='kw'>match</span> (<span class='op'>*</span><span class='ident'>write_ptr</span>.<span class='ident'>offset</span>(<span class='op'>-</span><span class='number'>1</span>)).<span class='ident'>next</span>() {<span class='comment'>
-                                // exhausted this iterator (i.e. finished this
-                                // Internal node), so pop from the stack.
-                                //
-                                // don&#39;t bother clearing the memory, because the
-                                // next time we use it we&#39;ll&#39;ve written to it
-                                // first.
-                                </span><span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>write_ptr</span> <span class='op'>=</span> <span class='ident'>write_ptr</span>.<span class='ident'>offset</span>(<span class='op'>-</span><span class='number'>1</span>),
+                    <span class='kw'>unsafe</span> {
+                        <span class='comment'>// write_ptr is the next place to write to the stack.</span>
+                        <span class='comment'>// invariant: start_ptr &lt;= write_ptr &lt; end of the</span>
+                        <span class='comment'>// vector.</span>
+                        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>write_ptr</span> <span class='op'>=</span> <span class='ident'>start_ptr</span>.<span class='ident'>offset</span>(<span class='self'>self</span>.<span class='ident'>length</span> <span class='kw'>as</span> <span class='ident'>int</span>);
+                        <span class='kw'>while</span> <span class='ident'>write_ptr</span> <span class='op'>!=</span> <span class='ident'>start_ptr</span> {
+                            <span class='comment'>// indexing back one is safe, since write_ptr &gt;</span>
+                            <span class='comment'>// start_ptr now.</span>
+                            <span class='kw'>match</span> (<span class='op'>*</span><span class='ident'>write_ptr</span>.<span class='ident'>offset</span>(<span class='op'>-</span><span class='number'>1</span>)).<span class='ident'>next</span>() {
+                                <span class='comment'>// exhausted this iterator (i.e. finished this</span>
+                                <span class='comment'>// Internal node), so pop from the stack.</span>
+                                <span class='comment'>//</span>
+                                <span class='comment'>// don&#39;t bother clearing the memory, because the</span>
+                                <span class='comment'>// next time we use it we&#39;ll&#39;ve written to it</span>
+                                <span class='comment'>// first.</span>
+                                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>write_ptr</span> <span class='op'>=</span> <span class='ident'>write_ptr</span>.<span class='ident'>offset</span>(<span class='op'>-</span><span class='number'>1</span>),
                                 <span class='prelude-val'>Some</span>(<span class='ident'>child</span>) <span class='op'>=&gt;</span> {
                                     <span class='macro'>addr</span><span class='macro'>!</span>(<span class='kw'>match</span> <span class='op'>*</span><span class='ident'>child</span> {
-                                            <span class='ident'>Internal</span>(<span class='kw-2'>ref</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mut_</span>)<span class='op'>*</span> <span class='ident'>node</span>) <span class='op'>=&gt;</span> {<span class='comment'>
-                                                // going down a level, so push
-                                                // to the stack (this is the
-                                                // write referenced above)
-                                                </span><span class='op'>*</span><span class='ident'>write_ptr</span> <span class='op'>=</span> <span class='ident'>node</span>.<span class='ident'>children</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>iter</span>();
+                                            <span class='ident'>Internal</span>(<span class='kw-2'>ref</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mut_</span>)<span class='op'>*</span> <span class='ident'>node</span>) <span class='op'>=&gt;</span> {
+                                                <span class='comment'>// going down a level, so push</span>
+                                                <span class='comment'>// to the stack (this is the</span>
+                                                <span class='comment'>// write referenced above)</span>
+                                                <span class='op'>*</span><span class='ident'>write_ptr</span> <span class='op'>=</span> <span class='ident'>node</span>.<span class='ident'>children</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>iter</span>();
                                                 <span class='ident'>write_ptr</span> <span class='op'>=</span> <span class='ident'>write_ptr</span>.<span class='ident'>offset</span>(<span class='number'>1</span>);
                                             }
                                             <span class='ident'>External</span>(<span class='ident'>key</span>, <span class='kw-2'>ref</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mut_</span>)<span class='op'>*</span> <span class='ident'>value</span>) <span class='op'>=&gt;</span> {
                                                 <span class='self'>self</span>.<span class='ident'>remaining_max</span> <span class='op'>-=</span> <span class='number'>1</span>;
                                                 <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>remaining_min</span> <span class='op'>&gt;</span> <span class='number'>0</span> {
                                                     <span class='self'>self</span>.<span class='ident'>remaining_min</span> <span class='op'>-=</span> <span class='number'>1</span>;
-                                                }<span class='comment'>
-                                                // store the new length of the
-                                                // stack, based on our current
-                                                // position.
-                                                </span><span class='self'>self</span>.<span class='ident'>length</span> <span class='op'>=</span> (<span class='ident'>write_ptr</span> <span class='kw'>as</span> <span class='ident'>uint</span>
+                                                }
+                                                <span class='comment'>// store the new length of the</span>
+                                                <span class='comment'>// stack, based on our current</span>
+                                                <span class='comment'>// position.</span>
+                                                <span class='self'>self</span>.<span class='ident'>length</span> <span class='op'>=</span> (<span class='ident'>write_ptr</span> <span class='kw'>as</span> <span class='ident'>uint</span>
                                                                <span class='op'>-</span> <span class='ident'>start_ptr</span> <span class='kw'>as</span> <span class='ident'>uint</span>) <span class='op'>/</span>
                                                     <span class='ident'>mem</span>::<span class='ident'>size_of_val</span>(<span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>write_ptr</span>);
 
@@ -2141,9 +2139,9 @@
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>rng</span> <span class='op'>=</span> <span class='ident'>weak_rng</span>();
 
         <span class='ident'>b</span>.<span class='ident'>iter</span>(<span class='op'>||</span> {
-                <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>1000</span>) {<span class='comment'>
-                    // only have the last few bits set.
-                    </span><span class='ident'>m</span>.<span class='ident'>insert</span>(<span class='ident'>rng</span>.<span class='ident'>gen</span>::<span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>() <span class='op'>&amp;</span> <span class='number'>0xff_ff</span>, [<span class='number'>1</span>, .. <span class='number'>10</span>]);
+                <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>1000</span>) {
+                    <span class='comment'>// only have the last few bits set.</span>
+                    <span class='ident'>m</span>.<span class='ident'>insert</span>(<span class='ident'>rng</span>.<span class='ident'>gen</span>::<span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>() <span class='kw-2'>&amp;</span> <span class='number'>0xff_ff</span>, [<span class='number'>1</span>, .. <span class='number'>10</span>]);
                 }
             })
     }
@@ -2165,9 +2163,9 @@
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>rng</span> <span class='op'>=</span> <span class='ident'>weak_rng</span>();
 
         <span class='ident'>b</span>.<span class='ident'>iter</span>(<span class='op'>||</span> {
-                <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>1000</span>) {<span class='comment'>
-                    // only have the last few bits set.
-                    </span><span class='ident'>m</span>.<span class='ident'>insert</span>(<span class='ident'>rng</span>.<span class='ident'>gen</span>::<span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>() <span class='op'>&amp;</span> <span class='number'>0xff_ff</span>, ());
+                <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u</span>, <span class='number'>1000</span>) {
+                    <span class='comment'>// only have the last few bits set.</span>
+                    <span class='ident'>m</span>.<span class='ident'>insert</span>(<span class='ident'>rng</span>.<span class='ident'>gen</span>::<span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>() <span class='kw-2'>&amp;</span> <span class='number'>0xff_ff</span>, ());
                 }
             })
     }

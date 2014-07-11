@@ -7,11 +7,9 @@
 
     <title>homing.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
-    
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
     
 </head>
 <body>
@@ -25,7 +23,7 @@
     
 
     <section class="sidebar">
-        
+        <a href='../../../../../../../../../rustuv/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
         
     </section>
 
@@ -253,17 +251,17 @@
 <span id='211'>211</span>
 <span id='212'>212</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! Homing I/O implementation</span>
+<span class='doccomment'>//! Homing I/O implementation</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! In libuv, whenever a handle is created on an I/O loop it is illegal to use</span>
 <span class='doccomment'>//! that handle outside of that I/O loop. We use libuv I/O with our green</span>
@@ -348,22 +346,22 @@
         <span class='kw'>let</span> <span class='ident'>_f</span> <span class='op'>=</span> <span class='ident'>ForbidUnwind</span>::<span class='ident'>new</span>(<span class='string'>&quot;going home&quot;</span>);
 
         <span class='kw'>let</span> <span class='ident'>cur_loop_id</span> <span class='op'>=</span> <span class='ident'>local_id</span>();
-        <span class='kw'>let</span> <span class='ident'>destination</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>home</span>().<span class='ident'>id</span>;<span class='comment'>
+        <span class='kw'>let</span> <span class='ident'>destination</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>home</span>().<span class='ident'>id</span>;
 
-        // Try at all costs to avoid the homing operation because it is quite
-        // expensive. Hence, we only deschedule/send if we&#39;re not on the correct
-        // event loop. If we&#39;re already on the home event loop, then we&#39;re good
-        // to go (remember we have no preemption, so we&#39;re guaranteed to stay on
-        // this event loop as long as we avoid the scheduler).
-        </span><span class='kw'>if</span> <span class='ident'>cur_loop_id</span> <span class='op'>!=</span> <span class='ident'>destination</span> {
+        <span class='comment'>// Try at all costs to avoid the homing operation because it is quite</span>
+        <span class='comment'>// expensive. Hence, we only deschedule/send if we&#39;re not on the correct</span>
+        <span class='comment'>// event loop. If we&#39;re already on the home event loop, then we&#39;re good</span>
+        <span class='comment'>// to go (remember we have no preemption, so we&#39;re guaranteed to stay on</span>
+        <span class='comment'>// this event loop as long as we avoid the scheduler).</span>
+        <span class='kw'>if</span> <span class='ident'>cur_loop_id</span> <span class='op'>!=</span> <span class='ident'>destination</span> {
             <span class='kw'>let</span> <span class='ident'>cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Local</span>::<span class='ident'>take</span>();
             <span class='ident'>cur_task</span>.<span class='ident'>deschedule</span>(<span class='number'>1</span>, <span class='op'>|</span><span class='ident'>task</span><span class='op'>|</span> {
                 <span class='self'>self</span>.<span class='ident'>home</span>().<span class='ident'>send</span>(<span class='ident'>task</span>);
                 <span class='prelude-val'>Ok</span>(())
-            });<span class='comment'>
+            });
 
-            // Once we wake up, assert that we&#39;re in the right location
-            </span><span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>local_id</span>(), <span class='ident'>destination</span>);
+            <span class='comment'>// Once we wake up, assert that we&#39;re in the right location</span>
+            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>local_id</span>(), <span class='ident'>destination</span>);
         }
 
         <span class='kw'>return</span> <span class='ident'>destination</span>;
@@ -395,11 +393,11 @@
 
 <span class='kw'>impl</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>HomingMissile</span> {
     <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='kw'>let</span> <span class='ident'>_f</span> <span class='op'>=</span> <span class='ident'>ForbidUnwind</span>::<span class='ident'>new</span>(<span class='string'>&quot;leaving home&quot;</span>);<span class='comment'>
+        <span class='kw'>let</span> <span class='ident'>_f</span> <span class='op'>=</span> <span class='ident'>ForbidUnwind</span>::<span class='ident'>new</span>(<span class='string'>&quot;leaving home&quot;</span>);
 
-        // It would truly be a sad day if we had moved off the home I/O
-        // scheduler while we were doing I/O.
-        </span><span class='self'>self</span>.<span class='ident'>check</span>(<span class='string'>&quot;task moved away from the home scheduler&quot;</span>);
+        <span class='comment'>// It would truly be a sad day if we had moved off the home I/O</span>
+        <span class='comment'>// scheduler while we were doing I/O.</span>
+        <span class='self'>self</span>.<span class='ident'>check</span>(<span class='string'>&quot;task moved away from the home scheduler&quot;</span>);
     }
 }
 
@@ -411,13 +409,13 @@
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rt</span>::<span class='ident'>task</span>::<span class='ident'>TaskOpts</span>;
 
     <span class='kw'>use</span> <span class='ident'>net</span>::<span class='ident'>UdpWatcher</span>;
-    <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>super</span>::<span class='ident'>local_loop</span>;<span class='comment'>
+    <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>super</span>::<span class='ident'>local_loop</span>;
 
-    // On one thread, create a udp socket. Then send that socket to another
-    // thread and destroy the socket on the remote thread. This should make sure
-    // that homing kicks in for the socket to go back home to the original
-    // thread, close itself, and then come back to the last thread.
-    </span><span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='comment'>// On one thread, create a udp socket. Then send that socket to another</span>
+    <span class='comment'>// thread and destroy the socket on the remote thread. This should make sure</span>
+    <span class='comment'>// that homing kicks in for the socket to go back home to the original</span>
+    <span class='comment'>// thread, close itself, and then come back to the last thread.</span>
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_homing_closes_correctly</span>() {
         <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>pool</span> <span class='op'>=</span> <span class='ident'>SchedPool</span>::<span class='ident'>new</span>(<span class='ident'>PoolConfig</span> {
@@ -507,11 +505,11 @@
     <script>
         window.rootPath = "../../../../../../../../../";
         window.currentCrate = "rustuv";
-        window.playgroundUrl = "";
+        window.playgroundUrl = "http://play.rust-lang.org/";
     </script>
     <script src="../../../../../../../../../jquery.js"></script>
     <script src="../../../../../../../../../main.js"></script>
-    
+    <script src="../../../../../../../../../playpen.js"></script>
     <script async src="../../../../../../../../../search-index.js"></script>
 </body>
 </html>

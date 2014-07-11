@@ -7,8 +7,6 @@
 
     <title>std::slice::MutableVector - Rust</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -41,7 +39,7 @@
     </nav>
 
     <section id='main' class="content trait">
-<h1 class='fqn'>Trait <a href='../index.html'>std</a>::<a href='index.html'>slice</a>::<a class='trait' href=''>MutableVector</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-100560' href='../../core/slice/trait.MutableVector.html?gotosrc=100560'>[src]</a></span></h1>
+<h1 class='fqn'>Trait <a href='../index.html'>std</a>::<a href='index.html'>slice</a>::<a class='trait' href=''>MutableVector</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-51076' href='../../core/slice/trait.MutableVector.html?gotosrc=51076'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait MutableVector&lt;'a, T&gt; {
     fn <a href='#tymethod.get_mut' class='fnname'>get_mut</a>&lt;T&gt;(self, index: <a href='../primitive.uint.html'>uint</a>) -&gt; <a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;&amp;'a mut T&gt;;
     fn <a href='#tymethod.as_mut_slice' class='fnname'>as_mut_slice</a>&lt;T&gt;(self) -&gt; &amp;'a mut <a href='../primitive.slice.html'>[T]</a>;
@@ -179,10 +177,10 @@ indices from <code>[mid, len)</code> (excluding the index <code>len</code> itsel
         assert!(right == &amp;mut []);
     }
 }</span><pre id='rust-example-rendered-3' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> [<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>, <span class='number'>5</span>, <span class='number'>6</span>];<span class='comment'>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> [<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>, <span class='number'>5</span>, <span class='number'>6</span>];
 
-// scoped to restrict the lifetime of the borrows
-</span>{
+<span class='comment'>// scoped to restrict the lifetime of the borrows</span>
+{
    <span class='kw'>let</span> (<span class='ident'>left</span>, <span class='ident'>right</span>) <span class='op'>=</span> <span class='ident'>v</span>.<span class='ident'>mut_split_at</span>(<span class='number'>0</span>);
    <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>left</span> <span class='op'>==</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> []);
    <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>right</span> <span class='op'>==</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> [<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>, <span class='number'>5</span>, <span class='number'>6</span>]);
@@ -242,14 +240,14 @@ does run the destructor at <code>index</code>. It is equivalent to
 }</span><pre id='rust-example-rendered-5' class='rust '>
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> [<span class='string'>&quot;foo&quot;</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;bar&quot;</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;baz&quot;</span>.<span class='ident'>to_string</span>()];
 
-<span class='kw'>unsafe</span> {<span class='comment'>
-    // `&quot;baz&quot;.to_string()` is deallocated.
-    </span><span class='ident'>v</span>.<span class='ident'>unsafe_set</span>(<span class='number'>2</span>, <span class='string'>&quot;qux&quot;</span>.<span class='ident'>to_string</span>());<span class='comment'>
+<span class='kw'>unsafe</span> {
+    <span class='comment'>// `&quot;baz&quot;.to_string()` is deallocated.</span>
+    <span class='ident'>v</span>.<span class='ident'>unsafe_set</span>(<span class='number'>2</span>, <span class='string'>&quot;qux&quot;</span>.<span class='ident'>to_string</span>());
 
-    // Out of bounds: could cause a crash, or overwriting
-    // other data, or something else.
-    // v.unsafe_set(10, &quot;oops&quot;.to_string());
-</span>}
+    <span class='comment'>// Out of bounds: could cause a crash, or overwriting</span>
+    <span class='comment'>// other data, or something else.</span>
+    <span class='comment'>// v.unsafe_set(10, &quot;oops&quot;.to_string());</span>
+}
 </pre>
 </div><h3 id='tymethod.init_elem' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#tymethod.init_elem' class='fnname'>init_elem</a>&lt;T&gt;(self, i: <a href='../primitive.uint.html'>uint</a>, val: T)</code></h3><div class='docblock'><p>Unchecked vector index assignment.  Does not drop the
 old value and hence is only suitable when the vector
@@ -262,10 +260,10 @@ is newly allocated.</p>
     // memory leak! `&quot;bar&quot;.to_string()` is not deallocated.
     unsafe { v.init_elem(1, &quot;baz&quot;.to_string()); }
 }</span><pre id='rust-example-rendered-6' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> [<span class='string'>&quot;foo&quot;</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;bar&quot;</span>.<span class='ident'>to_string</span>()];<span class='comment'>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> [<span class='string'>&quot;foo&quot;</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;bar&quot;</span>.<span class='ident'>to_string</span>()];
 
-// memory leak! `&quot;bar&quot;.to_string()` is not deallocated.
-</span><span class='kw'>unsafe</span> { <span class='ident'>v</span>.<span class='ident'>init_elem</span>(<span class='number'>1</span>, <span class='string'>&quot;baz&quot;</span>.<span class='ident'>to_string</span>()); }
+<span class='comment'>// memory leak! `&quot;bar&quot;.to_string()` is not deallocated.</span>
+<span class='kw'>unsafe</span> { <span class='ident'>v</span>.<span class='ident'>init_elem</span>(<span class='number'>1</span>, <span class='string'>&quot;baz&quot;</span>.<span class='ident'>to_string</span>()); }
 </pre>
 </div><h3 id='tymethod.copy_memory' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#tymethod.copy_memory' class='fnname'>copy_memory</a>&lt;T&gt;(self, src: &amp;<a href='../primitive.slice.html'>[T]</a>)</code></h3><div class='docblock'><p>Copies raw bytes from <code>src</code> to <code>self</code>.</p>
 

@@ -7,8 +7,6 @@
 
     <title>rc.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -583,17 +581,17 @@
 <span id='541'>541</span>
 <span id='542'>542</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>/*! Task-local reference-counted boxes (`Rc` type)
+<span class='doccomment'>/*! Task-local reference-counted boxes (`Rc` type)
 
 The `Rc` type provides shared ownership of an immutable value. Destruction is
 deterministic, and will occur as soon as the last owner is gone. It is marked
@@ -756,10 +754,10 @@ fn main() {
 
 <span class='doccomment'>/// Immutable reference counted pointer type</span>
 <span class='attribute'>#[<span class='ident'>unsafe_no_drop_flag</span>]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Rc</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {<span class='comment'>
-    // FIXME #12808: strange names to try to avoid interfering with
-    // field accesses of the contained type via Deref
-    </span><span class='ident'>_ptr</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>RcBox</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>,
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Rc</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+    <span class='comment'>// FIXME #12808: strange names to try to avoid interfering with</span>
+    <span class='comment'>// field accesses of the contained type via Deref</span>
+    <span class='ident'>_ptr</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>RcBox</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>,
     <span class='ident'>_nosend</span>: <span class='ident'>marker</span>::<span class='ident'>NoSend</span>,
     <span class='ident'>_noshare</span>: <span class='ident'>marker</span>::<span class='ident'>NoShare</span>
 }
@@ -768,13 +766,13 @@ fn main() {
     <span class='doccomment'>/// Construct a new reference-counted box</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>value</span>: <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>Rc</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='kw'>unsafe</span> {
-            <span class='ident'>Rc</span> {<span class='comment'>
-                // there is an implicit weak pointer owned by all the
-                // strong pointers, which ensures that the weak
-                // destructor never frees the allocation while the
-                // strong destructor is running, even if the weak
-                // pointer is stored inside the strong one.
-                </span><span class='ident'>_ptr</span>: <span class='ident'>transmute</span>(<span class='kw'>box</span> <span class='ident'>RcBox</span> {
+            <span class='ident'>Rc</span> {
+                <span class='comment'>// there is an implicit weak pointer owned by all the</span>
+                <span class='comment'>// strong pointers, which ensures that the weak</span>
+                <span class='comment'>// destructor never frees the allocation while the</span>
+                <span class='comment'>// strong destructor is running, even if the weak</span>
+                <span class='comment'>// pointer is stored inside the strong one.</span>
+                <span class='ident'>_ptr</span>: <span class='ident'>transmute</span>(<span class='kw'>box</span> <span class='ident'>RcBox</span> {
                     <span class='ident'>value</span>: <span class='ident'>value</span>,
                     <span class='ident'>strong</span>: <span class='ident'>Cell</span>::<span class='ident'>new</span>(<span class='number'>1</span>),
                     <span class='ident'>weak</span>: <span class='ident'>Cell</span>::<span class='ident'>new</span>(<span class='number'>1</span>)
@@ -806,19 +804,19 @@ fn main() {
     <span class='doccomment'>/// data is cloned if the reference count is greater than one.</span>
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='attribute'>#[<span class='ident'>experimental</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>make_unique</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>T</span> {<span class='comment'>
-        // Note that we hold a strong reference, which also counts as
-        // a weak reference, so we only clone if there is an
-        // additional reference of either kind.
-        </span><span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>strong</span>() <span class='op'>!=</span> <span class='number'>1</span> <span class='op'>||</span> <span class='self'>self</span>.<span class='ident'>weak</span>() <span class='op'>!=</span> <span class='number'>1</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>make_unique</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>T</span> {
+        <span class='comment'>// Note that we hold a strong reference, which also counts as</span>
+        <span class='comment'>// a weak reference, so we only clone if there is an</span>
+        <span class='comment'>// additional reference of either kind.</span>
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>strong</span>() <span class='op'>!=</span> <span class='number'>1</span> <span class='op'>||</span> <span class='self'>self</span>.<span class='ident'>weak</span>() <span class='op'>!=</span> <span class='number'>1</span> {
             <span class='op'>*</span><span class='self'>self</span> <span class='op'>=</span> <span class='ident'>Rc</span>::<span class='ident'>new</span>(<span class='self'>self</span>.<span class='ident'>deref</span>().<span class='ident'>clone</span>())
-        }<span class='comment'>
-        // This unsafety is ok because we&#39;re guaranteed that the pointer
-        // returned is the *only* pointer that will ever be returned to T. Our
-        // reference count is guaranteed to be 1 at this point, and we required
-        // the Rc itself to be `mut`, so we&#39;re returning the only possible
-        // reference to the inner data.
-        </span><span class='kw'>let</span> <span class='ident'>inner</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>_ptr</span> };
+        }
+        <span class='comment'>// This unsafety is ok because we&#39;re guaranteed that the pointer</span>
+        <span class='comment'>// returned is the *only* pointer that will ever be returned to T. Our</span>
+        <span class='comment'>// reference count is guaranteed to be 1 at this point, and we required</span>
+        <span class='comment'>// the Rc itself to be `mut`, so we&#39;re returning the only possible</span>
+        <span class='comment'>// reference to the inner data.</span>
+        <span class='kw'>let</span> <span class='ident'>inner</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>_ptr</span> };
         <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>inner</span>.<span class='ident'>value</span>
     }
 }
@@ -838,11 +836,11 @@ fn main() {
             <span class='kw'>if</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>_ptr</span>.<span class='ident'>is_null</span>() {
                 <span class='self'>self</span>.<span class='ident'>dec_strong</span>();
                 <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>strong</span>() <span class='op'>==</span> <span class='number'>0</span> {
-                    <span class='ident'>ptr</span>::<span class='ident'>read</span>(<span class='self'>self</span>.<span class='ident'>deref</span>());<span class='comment'> // destroy the contained object
+                    <span class='ident'>ptr</span>::<span class='ident'>read</span>(<span class='self'>self</span>.<span class='ident'>deref</span>()); <span class='comment'>// destroy the contained object</span>
 
-                    // remove the implicit &quot;strong weak&quot; pointer now
-                    // that we&#39;ve destroyed the contents.
-                    </span><span class='self'>self</span>.<span class='ident'>dec_weak</span>();
+                    <span class='comment'>// remove the implicit &quot;strong weak&quot; pointer now</span>
+                    <span class='comment'>// that we&#39;ve destroyed the contents.</span>
+                    <span class='self'>self</span>.<span class='ident'>dec_weak</span>();
 
                     <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>weak</span>() <span class='op'>==</span> <span class='number'>0</span> {
                         <span class='ident'>deallocate</span>(<span class='self'>self</span>.<span class='ident'>_ptr</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span>, <span class='ident'>size_of</span>::<span class='op'>&lt;</span><span class='ident'>RcBox</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>(),
@@ -911,10 +909,10 @@ fn main() {
 
 <span class='doccomment'>/// Weak reference to a reference-counted box</span>
 <span class='attribute'>#[<span class='ident'>unsafe_no_drop_flag</span>]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Weak</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {<span class='comment'>
-    // FIXME #12808: strange names to try to avoid interfering with
-    // field accesses of the contained type via Deref
-    </span><span class='ident'>_ptr</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>RcBox</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>,
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Weak</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+    <span class='comment'>// FIXME #12808: strange names to try to avoid interfering with</span>
+    <span class='comment'>// field accesses of the contained type via Deref</span>
+    <span class='ident'>_ptr</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>RcBox</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>,
     <span class='ident'>_nosend</span>: <span class='ident'>marker</span>::<span class='ident'>NoSend</span>,
     <span class='ident'>_noshare</span>: <span class='ident'>marker</span>::<span class='ident'>NoShare</span>
 }
@@ -936,10 +934,10 @@ fn main() {
     <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
         <span class='kw'>unsafe</span> {
             <span class='kw'>if</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>_ptr</span>.<span class='ident'>is_null</span>() {
-                <span class='self'>self</span>.<span class='ident'>dec_weak</span>();<span class='comment'>
-                // the weak count starts at 1, and will only go to
-                // zero if all the strong pointers have disappeared.
-                </span><span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>weak</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='self'>self</span>.<span class='ident'>dec_weak</span>();
+                <span class='comment'>// the weak count starts at 1, and will only go to</span>
+                <span class='comment'>// zero if all the strong pointers have disappeared.</span>
+                <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>weak</span>() <span class='op'>==</span> <span class='number'>0</span> {
                     <span class='ident'>deallocate</span>(<span class='self'>self</span>.<span class='ident'>_ptr</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span>, <span class='ident'>size_of</span>::<span class='op'>&lt;</span><span class='ident'>RcBox</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>(),
                                <span class='ident'>min_align_of</span>::<span class='op'>&lt;</span><span class='ident'>RcBox</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>())
                 }
@@ -1043,9 +1041,9 @@ fn main() {
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>gc_inside</span>() {<span class='comment'>
-        // see issue #11532
-        </span><span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>gc</span>::<span class='ident'>GC</span>;
+    <span class='kw'>fn</span> <span class='ident'>gc_inside</span>() {
+        <span class='comment'>// see issue #11532</span>
+        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>gc</span>::<span class='ident'>GC</span>;
         <span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>Rc</span>::<span class='ident'>new</span>(<span class='ident'>RefCell</span>::<span class='ident'>new</span>(<span class='kw'>box</span>(<span class='ident'>GC</span>) <span class='number'>1i</span>));
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>a</span>.<span class='ident'>try_borrow_mut</span>().<span class='ident'>is_some</span>());
     }
@@ -1058,10 +1056,10 @@ fn main() {
 
         <span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>Rc</span>::<span class='ident'>new</span>(<span class='ident'>Cycle</span> { <span class='ident'>x</span>: <span class='ident'>RefCell</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>) });
         <span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>clone</span>().<span class='ident'>downgrade</span>();
-        <span class='op'>*</span><span class='ident'>a</span>.<span class='ident'>x</span>.<span class='ident'>borrow_mut</span>() <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>b</span>);<span class='comment'>
+        <span class='op'>*</span><span class='ident'>a</span>.<span class='ident'>x</span>.<span class='ident'>borrow_mut</span>() <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>b</span>);
 
-        // hopefully we don&#39;t double-free (or leak)...
-    </span>}
+        <span class='comment'>// hopefully we don&#39;t double-free (or leak)...</span>
+    }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_cowrc_clone_make_unique</span>() {
@@ -1079,10 +1077,10 @@ fn main() {
 
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='number'>76</span> <span class='op'>==</span> <span class='op'>*</span><span class='ident'>cow0</span>);
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='number'>77</span> <span class='op'>==</span> <span class='op'>*</span><span class='ident'>cow1</span>);
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='number'>78</span> <span class='op'>==</span> <span class='op'>*</span><span class='ident'>cow2</span>);<span class='comment'>
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='number'>78</span> <span class='op'>==</span> <span class='op'>*</span><span class='ident'>cow2</span>);
 
-        // none should point to the same backing memory
-        </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>cow0</span> <span class='op'>!=</span> <span class='op'>*</span><span class='ident'>cow1</span>);
+        <span class='comment'>// none should point to the same backing memory</span>
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>cow0</span> <span class='op'>!=</span> <span class='op'>*</span><span class='ident'>cow1</span>);
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>cow0</span> <span class='op'>!=</span> <span class='op'>*</span><span class='ident'>cow2</span>);
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>cow1</span> <span class='op'>!=</span> <span class='op'>*</span><span class='ident'>cow2</span>);
     }
@@ -1101,11 +1099,11 @@ fn main() {
 
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='number'>76</span> <span class='op'>==</span> <span class='op'>*</span><span class='ident'>cow0</span>);
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='number'>75</span> <span class='op'>==</span> <span class='op'>*</span><span class='ident'>cow1</span>);
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='number'>75</span> <span class='op'>==</span> <span class='op'>*</span><span class='ident'>cow2</span>);<span class='comment'>
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='number'>75</span> <span class='op'>==</span> <span class='op'>*</span><span class='ident'>cow2</span>);
 
-        // cow1 and cow2 should share the same contents
-        // cow0 should have a unique reference
-        </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>cow0</span> <span class='op'>!=</span> <span class='op'>*</span><span class='ident'>cow1</span>);
+        <span class='comment'>// cow1 and cow2 should share the same contents</span>
+        <span class='comment'>// cow0 should have a unique reference</span>
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>cow0</span> <span class='op'>!=</span> <span class='op'>*</span><span class='ident'>cow1</span>);
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>cow0</span> <span class='op'>!=</span> <span class='op'>*</span><span class='ident'>cow2</span>);
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>cow1</span> <span class='op'>==</span> <span class='op'>*</span><span class='ident'>cow2</span>);
     }

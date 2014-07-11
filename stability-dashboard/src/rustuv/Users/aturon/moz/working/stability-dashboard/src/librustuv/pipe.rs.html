@@ -7,11 +7,9 @@
 
     <title>pipe.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
-    
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
     
 </head>
 <body>
@@ -25,7 +23,7 @@
     
 
     <section class="sidebar">
-        
+        <a href='../../../../../../../../../rustuv/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
         
     </section>
 
@@ -442,17 +440,17 @@
 <span id='400'>400</span>
 <span id='401'>401</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='kw'>use</span> <span class='ident'>libc</span>;
+<span class='kw'>use</span> <span class='ident'>libc</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>c_str</span>::<span class='ident'>CString</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rt</span>::<span class='ident'>rtio</span>;
@@ -472,10 +470,10 @@
     <span class='ident'>stream</span>: <span class='ident'>StreamWatcher</span>,
     <span class='ident'>home</span>: <span class='ident'>HomeHandle</span>,
     <span class='ident'>defused</span>: <span class='ident'>bool</span>,
-    <span class='ident'>refcount</span>: <span class='ident'>Refcount</span>,<span class='comment'>
+    <span class='ident'>refcount</span>: <span class='ident'>Refcount</span>,
 
-    // see comments in TcpWatcher for why these exist
-    </span><span class='ident'>write_access</span>: <span class='ident'>AccessTimeout</span>,
+    <span class='comment'>// see comments in TcpWatcher for why these exist</span>
+    <span class='ident'>write_access</span>: <span class='ident'>AccessTimeout</span>,
     <span class='ident'>read_access</span>: <span class='ident'>AccessTimeout</span>,
 }
 
@@ -489,15 +487,15 @@
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>PipeAcceptor</span> {
     <span class='ident'>listener</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>PipeListener</span><span class='op'>&gt;</span>,
     <span class='ident'>timeout</span>: <span class='ident'>AcceptTimeout</span>,
-}<span class='comment'>
+}
 
-// PipeWatcher implementation and traits
+<span class='comment'>// PipeWatcher implementation and traits</span>
 
-</span><span class='kw'>impl</span> <span class='ident'>PipeWatcher</span> {<span class='comment'>
-    // Creates an uninitialized pipe watcher. The underlying uv pipe is ready to
-    // get bound to some other source (this is normally a helper method paired
-    // with another call).
-    </span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>io</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>UvIoFactory</span>, <span class='ident'>ipc</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='ident'>PipeWatcher</span> {
+<span class='kw'>impl</span> <span class='ident'>PipeWatcher</span> {
+    <span class='comment'>// Creates an uninitialized pipe watcher. The underlying uv pipe is ready to</span>
+    <span class='comment'>// get bound to some other source (this is normally a helper method paired</span>
+    <span class='comment'>// with another call).</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>io</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>UvIoFactory</span>, <span class='ident'>ipc</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='ident'>PipeWatcher</span> {
         <span class='kw'>let</span> <span class='ident'>home</span> <span class='op'>=</span> <span class='ident'>io</span>.<span class='ident'>make_handle</span>();
         <span class='ident'>PipeWatcher</span>::<span class='ident'>new_home</span>(<span class='kw-2'>&amp;</span><span class='ident'>io</span>.<span class='ident'>loop_</span>, <span class='ident'>home</span>, <span class='ident'>ipc</span>)
     }
@@ -544,11 +542,11 @@
         })
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>handle</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uvll</span>::<span class='ident'>uv_pipe_t</span> { <span class='self'>self</span>.<span class='ident'>stream</span>.<span class='ident'>handle</span> }<span class='comment'>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>handle</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uvll</span>::<span class='ident'>uv_pipe_t</span> { <span class='self'>self</span>.<span class='ident'>stream</span>.<span class='ident'>handle</span> }
 
-    // Unwraps the underlying uv pipe. This cancels destruction of the pipe and
-    // allows the pipe to get moved elsewhere
-    </span><span class='kw'>fn</span> <span class='ident'>unwrap</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uvll</span>::<span class='ident'>uv_pipe_t</span> {
+    <span class='comment'>// Unwraps the underlying uv pipe. This cancels destruction of the pipe and</span>
+    <span class='comment'>// allows the pipe to get moved elsewhere</span>
+    <span class='kw'>fn</span> <span class='ident'>unwrap</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uvll</span>::<span class='ident'>uv_pipe_t</span> {
         <span class='self'>self</span>.<span class='ident'>defused</span> <span class='op'>=</span> <span class='boolval'>true</span>;
         <span class='kw'>return</span> <span class='self'>self</span>.<span class='ident'>stream</span>.<span class='ident'>handle</span>;
     }
@@ -557,10 +555,10 @@
 <span class='kw'>impl</span> <span class='ident'>rtio</span>::<span class='ident'>RtioPipe</span> <span class='kw'>for</span> <span class='ident'>PipeWatcher</span> {
     <span class='kw'>fn</span> <span class='ident'>read</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>buf</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> [<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>fire_homing_missile</span>();
-        <span class='kw'>let</span> <span class='ident'>guard</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>read_access</span>.<span class='ident'>grant</span>(<span class='ident'>m</span>));<span class='comment'>
+        <span class='kw'>let</span> <span class='ident'>guard</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>read_access</span>.<span class='ident'>grant</span>(<span class='ident'>m</span>));
 
-        // see comments in close_read about this check
-        </span><span class='kw'>if</span> <span class='ident'>guard</span>.<span class='ident'>access</span>.<span class='ident'>is_closed</span>() {
+        <span class='comment'>// see comments in close_read about this check</span>
+        <span class='kw'>if</span> <span class='ident'>guard</span>.<span class='ident'>access</span>.<span class='ident'>is_closed</span>() {
             <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>uv_error_to_io_error</span>(<span class='ident'>UvError</span>(<span class='ident'>uvll</span>::<span class='ident'>EOF</span>)))
         }
 
@@ -584,25 +582,25 @@
         } <span class='kw'>as</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>rtio</span>::<span class='ident'>RtioPipe</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>
     }
 
-    <span class='kw'>fn</span> <span class='ident'>close_read</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {<span class='comment'>
-        // The current uv_shutdown method only shuts the writing half of the
-        // connection, and no method is provided to shut down the reading half
-        // of the connection. With a lack of method, we emulate shutting down
-        // the reading half of the connection by manually returning early from
-        // all future calls to `read`.
-        //
-        // Note that we must be careful to ensure that *all* cloned handles see
-        // the closing of the read half, so we stored the &quot;is closed&quot; bit in the
-        // Access struct, not in our own personal watcher. Additionally, the
-        // homing missile is used as a locking mechanism to ensure there is no
-        // contention over this bit.
-        //
-        // To shutdown the read half, we must first flag the access as being
-        // closed, and then afterwards we cease any pending read. Note that this
-        // ordering is crucial because we could in theory be rescheduled during
-        // the uv_read_stop which means that another read invocation could leak
-        // in before we set the flag.
-        </span><span class='kw'>let</span> <span class='ident'>task</span> <span class='op'>=</span> {
+    <span class='kw'>fn</span> <span class='ident'>close_read</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='comment'>// The current uv_shutdown method only shuts the writing half of the</span>
+        <span class='comment'>// connection, and no method is provided to shut down the reading half</span>
+        <span class='comment'>// of the connection. With a lack of method, we emulate shutting down</span>
+        <span class='comment'>// the reading half of the connection by manually returning early from</span>
+        <span class='comment'>// all future calls to `read`.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// Note that we must be careful to ensure that *all* cloned handles see</span>
+        <span class='comment'>// the closing of the read half, so we stored the &quot;is closed&quot; bit in the</span>
+        <span class='comment'>// Access struct, not in our own personal watcher. Additionally, the</span>
+        <span class='comment'>// homing missile is used as a locking mechanism to ensure there is no</span>
+        <span class='comment'>// contention over this bit.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// To shutdown the read half, we must first flag the access as being</span>
+        <span class='comment'>// closed, and then afterwards we cease any pending read. Note that this</span>
+        <span class='comment'>// ordering is crucial because we could in theory be rescheduled during</span>
+        <span class='comment'>// the uv_read_stop which means that another read invocation could leak</span>
+        <span class='comment'>// in before we set the flag.</span>
+        <span class='kw'>let</span> <span class='ident'>task</span> <span class='op'>=</span> {
             <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>fire_homing_missile</span>();
             <span class='self'>self</span>.<span class='ident'>read_access</span>.<span class='ident'>access</span>.<span class='ident'>close</span>(<span class='kw-2'>&amp;</span><span class='ident'>m</span>);
             <span class='self'>self</span>.<span class='ident'>stream</span>.<span class='ident'>cancel_read</span>(<span class='ident'>uvll</span>::<span class='ident'>EOF</span> <span class='kw'>as</span> <span class='ident'>libc</span>::<span class='ident'>ssize_t</span>)
@@ -661,11 +659,11 @@
             <span class='self'>self</span>.<span class='ident'>close</span>();
         }
     }
-}<span class='comment'>
+}
 
-// PipeListener implementation and traits
+<span class='comment'>// PipeListener implementation and traits</span>
 
-</span><span class='kw'>impl</span> <span class='ident'>PipeListener</span> {
+<span class='kw'>impl</span> <span class='ident'>PipeListener</span> {
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>bind</span>(<span class='ident'>io</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>UvIoFactory</span>, <span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='ident'>CString</span>)
         <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>PipeListener</span><span class='op'>&gt;</span>, <span class='ident'>UvError</span><span class='op'>&gt;</span>
     {
@@ -673,11 +671,11 @@
         <span class='kw'>match</span> <span class='kw'>unsafe</span> {
             <span class='ident'>uvll</span>::<span class='ident'>uv_pipe_bind</span>(<span class='ident'>pipe</span>.<span class='ident'>handle</span>(), <span class='ident'>name</span>.<span class='ident'>as_ptr</span>())
         } {
-            <span class='number'>0</span> <span class='op'>=&gt;</span> {<span class='comment'>
-                // If successful, unwrap the PipeWatcher because we control how
-                // we close the pipe differently. We can&#39;t rely on
-                // StreamWatcher&#39;s default close method.
-                </span><span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
+            <span class='number'>0</span> <span class='op'>=&gt;</span> {
+                <span class='comment'>// If successful, unwrap the PipeWatcher because we control how</span>
+                <span class='comment'>// we close the pipe differently. We can&#39;t rely on</span>
+                <span class='comment'>// StreamWatcher&#39;s default close method.</span>
+                <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
                 <span class='kw'>let</span> <span class='ident'>p</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>PipeListener</span> {
                     <span class='ident'>home</span>: <span class='ident'>io</span>.<span class='ident'>make_handle</span>(),
                     <span class='ident'>pipe</span>: <span class='ident'>pipe</span>.<span class='ident'>unwrap</span>(),
@@ -692,16 +690,16 @@
 }
 
 <span class='kw'>impl</span> <span class='ident'>rtio</span>::<span class='ident'>RtioUnixListener</span> <span class='kw'>for</span> <span class='ident'>PipeListener</span> {
-    <span class='kw'>fn</span> <span class='ident'>listen</span>(<span class='kw-2'>~</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>rtio</span>::<span class='ident'>RtioUnixAcceptor</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;&gt;</span> {<span class='comment'>
-        // create the acceptor object from ourselves
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>acceptor</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>PipeAcceptor</span> {
+    <span class='kw'>fn</span> <span class='ident'>listen</span>(<span class='kw-2'>~</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>rtio</span>::<span class='ident'>RtioUnixAcceptor</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;&gt;</span> {
+        <span class='comment'>// create the acceptor object from ourselves</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>acceptor</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>PipeAcceptor</span> {
             <span class='ident'>listener</span>: <span class='self'>self</span>,
             <span class='ident'>timeout</span>: <span class='ident'>AcceptTimeout</span>::<span class='ident'>new</span>(),
         };
 
-        <span class='kw'>let</span> <span class='ident'>_m</span> <span class='op'>=</span> <span class='ident'>acceptor</span>.<span class='ident'>fire_homing_missile</span>();<span class='comment'>
-        // FIXME: the 128 backlog should be configurable
-        </span><span class='kw'>match</span> <span class='kw'>unsafe</span> { <span class='ident'>uvll</span>::<span class='ident'>uv_listen</span>(<span class='ident'>acceptor</span>.<span class='ident'>listener</span>.<span class='ident'>pipe</span>, <span class='number'>128</span>, <span class='ident'>listen_cb</span>) } {
+        <span class='kw'>let</span> <span class='ident'>_m</span> <span class='op'>=</span> <span class='ident'>acceptor</span>.<span class='ident'>fire_homing_missile</span>();
+        <span class='comment'>// FIXME: the 128 backlog should be configurable</span>
+        <span class='kw'>match</span> <span class='kw'>unsafe</span> { <span class='ident'>uvll</span>::<span class='ident'>uv_listen</span>(<span class='ident'>acceptor</span>.<span class='ident'>listener</span>.<span class='ident'>pipe</span>, <span class='number'>128</span>, <span class='ident'>listen_cb</span>) } {
             <span class='number'>0</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>acceptor</span> <span class='kw'>as</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>rtio</span>::<span class='ident'>RtioUnixAcceptor</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>),
             <span class='ident'>n</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>uv_error_to_io_error</span>(<span class='ident'>UvError</span>(<span class='ident'>n</span>))),
         }
@@ -739,11 +737,11 @@
         <span class='kw'>let</span> <span class='ident'>_m</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>fire_homing_missile</span>();
         <span class='self'>self</span>.<span class='ident'>close</span>();
     }
-}<span class='comment'>
+}
 
-// PipeAcceptor implementation and traits
+<span class='comment'>// PipeAcceptor implementation and traits</span>
 
-</span><span class='kw'>impl</span> <span class='ident'>rtio</span>::<span class='ident'>RtioUnixAcceptor</span> <span class='kw'>for</span> <span class='ident'>PipeAcceptor</span> {
+<span class='kw'>impl</span> <span class='ident'>rtio</span>::<span class='ident'>RtioUnixAcceptor</span> <span class='kw'>for</span> <span class='ident'>PipeAcceptor</span> {
     <span class='kw'>fn</span> <span class='ident'>accept</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>rtio</span>::<span class='ident'>RtioPipe</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>timeout</span>.<span class='ident'>accept</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>listener</span>.<span class='ident'>incoming</span>)
     }
@@ -885,11 +883,11 @@
     <script>
         window.rootPath = "../../../../../../../../../";
         window.currentCrate = "rustuv";
-        window.playgroundUrl = "";
+        window.playgroundUrl = "http://play.rust-lang.org/";
     </script>
     <script src="../../../../../../../../../jquery.js"></script>
     <script src="../../../../../../../../../main.js"></script>
-    
+    <script src="../../../../../../../../../playpen.js"></script>
     <script async src="../../../../../../../../../search-index.js"></script>
 </body>
 </html>

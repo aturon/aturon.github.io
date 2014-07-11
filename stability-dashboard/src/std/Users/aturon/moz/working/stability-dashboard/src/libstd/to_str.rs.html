@@ -7,8 +7,6 @@
 
     <title>to_str.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -107,19 +105,19 @@
 <span id='65'>65</span>
 <span id='66'>66</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2012-2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2012-2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>/*!
+<span class='doccomment'>/*!
 
-The `ToStr` trait for converting to strings
+The `ToString` trait for converting to strings
 
 */</span>
 
@@ -129,19 +127,19 @@ The `ToStr` trait for converting to strings
 <span class='kw'>use</span> <span class='ident'>string</span>::<span class='ident'>String</span>;
 
 <span class='doccomment'>/// A generic trait for converting a value to a string</span>
-<span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>ToStr</span> {
+<span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>ToString</span> {
     <span class='doccomment'>/// Converts the value of `self` to an owned string</span>
-    <span class='kw'>fn</span> <span class='ident'>to_str</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span>;
+    <span class='kw'>fn</span> <span class='ident'>to_string</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span>;
 }
 
 <span class='doccomment'>/// Trait for converting a type to a string, consuming it in the process.</span>
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>IntoStr</span> {
     <span class='doccomment'>/// Consume and convert to a string.</span>
-    <span class='kw'>fn</span> <span class='ident'>into_str</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span>;
+    <span class='kw'>fn</span> <span class='ident'>into_string</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span>;
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>fmt</span>::<span class='ident'>Show</span><span class='op'>&gt;</span> <span class='ident'>ToStr</span> <span class='kw'>for</span> <span class='ident'>T</span> {
-    <span class='kw'>fn</span> <span class='ident'>to_str</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>fmt</span>::<span class='ident'>Show</span><span class='op'>&gt;</span> <span class='ident'>ToString</span> <span class='kw'>for</span> <span class='ident'>T</span> {
+    <span class='kw'>fn</span> <span class='ident'>to_string</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
         <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='op'>*</span><span class='self'>self</span>)
     }
 }
@@ -153,23 +151,23 @@ The `ToStr` trait for converting to strings
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_simple_types</span>() {
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='number'>1i</span>.<span class='ident'>to_str</span>(), <span class='string'>&quot;1&quot;</span>.<span class='ident'>to_string</span>());
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>((<span class='op'>-</span><span class='number'>1i</span>).<span class='ident'>to_str</span>(), <span class='string'>&quot;-1&quot;</span>.<span class='ident'>to_string</span>());
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='number'>200u</span>.<span class='ident'>to_str</span>(), <span class='string'>&quot;200&quot;</span>.<span class='ident'>to_string</span>());
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='number'>2u8</span>.<span class='ident'>to_str</span>(), <span class='string'>&quot;2&quot;</span>.<span class='ident'>to_string</span>());
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='boolval'>true</span>.<span class='ident'>to_str</span>(), <span class='string'>&quot;true&quot;</span>.<span class='ident'>to_string</span>());
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='boolval'>false</span>.<span class='ident'>to_str</span>(), <span class='string'>&quot;false&quot;</span>.<span class='ident'>to_string</span>());
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(().<span class='ident'>to_str</span>(), <span class='string'>&quot;()&quot;</span>.<span class='ident'>to_string</span>());
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>((<span class='string'>&quot;hi&quot;</span>.<span class='ident'>to_string</span>()).<span class='ident'>to_str</span>(), <span class='string'>&quot;hi&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='number'>1i</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;1&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>((<span class='op'>-</span><span class='number'>1i</span>).<span class='ident'>to_string</span>(), <span class='string'>&quot;-1&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='number'>200u</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;200&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='number'>2u8</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;2&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='boolval'>true</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;true&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='boolval'>false</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;false&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(().<span class='ident'>to_string</span>(), <span class='string'>&quot;()&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>((<span class='string'>&quot;hi&quot;</span>.<span class='ident'>to_string</span>()).<span class='ident'>to_string</span>(), <span class='string'>&quot;hi&quot;</span>.<span class='ident'>to_string</span>());
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_vectors</span>() {
         <span class='kw'>let</span> <span class='ident'>x</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[];
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>x</span>.<span class='ident'>to_str</span>(), <span class='string'>&quot;[]&quot;</span>.<span class='ident'>to_string</span>());
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>((<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>]).<span class='ident'>to_str</span>(), <span class='string'>&quot;[1]&quot;</span>.<span class='ident'>to_string</span>());
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>((<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>]).<span class='ident'>to_str</span>(), <span class='string'>&quot;[1, 2, 3]&quot;</span>.<span class='ident'>to_string</span>());
-        <span class='macro'>assert</span><span class='macro'>!</span>((<span class='macro'>vec</span><span class='macro'>!</span>[<span class='macro'>vec</span><span class='macro'>!</span>[], <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>], <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>1</span>]]).<span class='ident'>to_str</span>() <span class='op'>==</span>
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>x</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;[]&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>((<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>]).<span class='ident'>to_string</span>(), <span class='string'>&quot;[1]&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>((<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>]).<span class='ident'>to_string</span>(), <span class='string'>&quot;[1, 2, 3]&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert</span><span class='macro'>!</span>((<span class='macro'>vec</span><span class='macro'>!</span>[<span class='macro'>vec</span><span class='macro'>!</span>[], <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>], <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>1</span>]]).<span class='ident'>to_string</span>() <span class='op'>==</span>
                <span class='string'>&quot;[[], [1], [1, 1]]&quot;</span>.<span class='ident'>to_string</span>());
     }
 }

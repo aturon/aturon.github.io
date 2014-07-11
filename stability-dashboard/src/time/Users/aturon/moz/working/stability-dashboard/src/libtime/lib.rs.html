@@ -7,8 +7,6 @@
 
     <title>lib.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -1540,20 +1538,51 @@
 <span id='1498'>1498</span>
 <span id='1499'>1499</span>
 <span id='1500'>1500</span>
+<span id='1501'>1501</span>
+<span id='1502'>1502</span>
+<span id='1503'>1503</span>
+<span id='1504'>1504</span>
+<span id='1505'>1505</span>
+<span id='1506'>1506</span>
+<span id='1507'>1507</span>
+<span id='1508'>1508</span>
+<span id='1509'>1509</span>
+<span id='1510'>1510</span>
+<span id='1511'>1511</span>
+<span id='1512'>1512</span>
+<span id='1513'>1513</span>
+<span id='1514'>1514</span>
+<span id='1515'>1515</span>
+<span id='1516'>1516</span>
+<span id='1517'>1517</span>
+<span id='1518'>1518</span>
+<span id='1519'>1519</span>
+<span id='1520'>1520</span>
+<span id='1521'>1521</span>
+<span id='1522'>1522</span>
+<span id='1523'>1523</span>
+<span id='1524'>1524</span>
+<span id='1525'>1525</span>
+<span id='1526'>1526</span>
+<span id='1527'>1527</span>
+<span id='1528'>1528</span>
+<span id='1529'>1529</span>
+<span id='1530'>1530</span>
+<span id='1531'>1531</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2012-2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2012-2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! Simple time handling.</span>
+<span class='doccomment'>//! Simple time handling.</span>
 
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_id</span> <span class='op'>=</span> <span class='string'>&quot;time#0.11.0-pre&quot;</span>]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_name</span> <span class='op'>=</span> <span class='string'>&quot;time&quot;</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>experimental</span>]</span>
 
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_type</span> <span class='op'>=</span> <span class='string'>&quot;rlib&quot;</span>]</span>
@@ -1561,7 +1590,7 @@
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>license</span> <span class='op'>=</span> <span class='string'>&quot;MIT/ASL2&quot;</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>doc</span>(<span class='ident'>html_logo_url</span> <span class='op'>=</span> <span class='string'>&quot;http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png&quot;</span>,
        <span class='ident'>html_favicon_url</span> <span class='op'>=</span> <span class='string'>&quot;http://www.rust-lang.org/favicon.ico&quot;</span>,
-       <span class='ident'>html_root_url</span> <span class='op'>=</span> <span class='string'>&quot;http://doc.rust-lang.org/&quot;</span>,
+       <span class='ident'>html_root_url</span> <span class='op'>=</span> <span class='string'>&quot;http://doc.rust-lang.org/0.11.0/&quot;</span>,
        <span class='ident'>html_playground_url</span> <span class='op'>=</span> <span class='string'>&quot;http://play.rust-lang.org/&quot;</span>)]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>phase</span>)]</span>
 
@@ -1592,10 +1621,10 @@
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>unix</span>, <span class='ident'>not</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;macos&quot;</span>), <span class='ident'>not</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;ios&quot;</span>))]</span>
 <span class='kw'>mod</span> <span class='ident'>imp</span> {
-    <span class='kw'>use</span> <span class='ident'>libc</span>::{<span class='ident'>c_int</span>, <span class='ident'>timespec</span>};<span class='comment'>
+    <span class='kw'>use</span> <span class='ident'>libc</span>::{<span class='ident'>c_int</span>, <span class='ident'>timespec</span>};
 
-    // Apparently android provides this in some other library?
-    </span><span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;android&quot;</span>))]</span>
+    <span class='comment'>// Apparently android provides this in some other library?</span>
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;android&quot;</span>))]</span>
     <span class='attribute'>#[<span class='ident'>link</span>(<span class='ident'>name</span> <span class='op'>=</span> <span class='string'>&quot;rt&quot;</span>)]</span>
     <span class='kw'>extern</span> {}
 
@@ -1618,16 +1647,16 @@
 
 <span class='doccomment'>/// A record specifying a time value in seconds and nanoseconds.</span>
 <span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Eq</span>, <span class='ident'>PartialOrd</span>, <span class='ident'>Ord</span>, <span class='ident'>Encodable</span>, <span class='ident'>Decodable</span>, <span class='ident'>Show</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Timespec</span> { <span class='kw'>pub</span> <span class='ident'>sec</span>: <span class='ident'>i64</span>, <span class='kw'>pub</span> <span class='ident'>nsec</span>: <span class='ident'>i32</span> }<span class='comment'>
-/*
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Timespec</span> { <span class='kw'>pub</span> <span class='ident'>sec</span>: <span class='ident'>i64</span>, <span class='kw'>pub</span> <span class='ident'>nsec</span>: <span class='ident'>i32</span> }
+<span class='comment'>/*
  * Timespec assumes that pre-epoch Timespecs have negative sec and positive
  * nsec fields. Darwin&#39;s and Linux&#39;s struct timespec functions handle pre-
  * epoch timestamps using a &quot;two steps back, one step forward&quot; representation,
  * though the man pages do not actually document this. For example, the time
  * -1.2 seconds before the epoch is represented by `Timespec { sec: -2_i64,
  * nsec: 800_000_000_i32 }`.
- */
-</span><span class='kw'>impl</span> <span class='ident'>Timespec</span> {
+ */</span>
+<span class='kw'>impl</span> <span class='ident'>Timespec</span> {
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>sec</span>: <span class='ident'>i64</span>, <span class='ident'>nsec</span>: <span class='ident'>i32</span>) <span class='op'>-&gt;</span> <span class='ident'>Timespec</span> {
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>nsec</span> <span class='op'>&gt;=</span> <span class='number'>0</span> <span class='op'>&amp;&amp;</span> <span class='ident'>nsec</span> <span class='op'>&lt;</span> <span class='ident'>NSEC_PER_SEC</span>);
         <span class='ident'>Timespec</span> { <span class='ident'>sec</span>: <span class='ident'>sec</span>, <span class='ident'>nsec</span>: <span class='ident'>nsec</span> }
@@ -1652,12 +1681,12 @@
             <span class='ident'>dwLowDateTime</span>: <span class='number'>0</span>,
             <span class='ident'>dwHighDateTime</span>: <span class='number'>0</span>,
         };
-        <span class='ident'>libc</span>::<span class='ident'>GetSystemTimeAsFileTime</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>time</span>);<span class='comment'>
+        <span class='ident'>libc</span>::<span class='ident'>GetSystemTimeAsFileTime</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>time</span>);
 
-        // A FILETIME contains a 64-bit value representing the number of
-        // hectonanosecond (100-nanosecond) intervals since 1601-01-01T00:00:00Z.
-        // http://support.microsoft.com/kb/167296/en-us
-        </span><span class='kw'>let</span> <span class='ident'>ns_since_1601</span> <span class='op'>=</span> ((<span class='ident'>time</span>.<span class='ident'>dwHighDateTime</span> <span class='kw'>as</span> <span class='ident'>u64</span> <span class='op'>&lt;&lt;</span> <span class='number'>32</span>) <span class='op'>|</span>
+        <span class='comment'>// A FILETIME contains a 64-bit value representing the number of</span>
+        <span class='comment'>// hectonanosecond (100-nanosecond) intervals since 1601-01-01T00:00:00Z.</span>
+        <span class='comment'>// http://support.microsoft.com/kb/167296/en-us</span>
+        <span class='kw'>let</span> <span class='ident'>ns_since_1601</span> <span class='op'>=</span> ((<span class='ident'>time</span>.<span class='ident'>dwHighDateTime</span> <span class='kw'>as</span> <span class='ident'>u64</span> <span class='op'>&lt;&lt;</span> <span class='number'>32</span>) <span class='op'>|</span>
                              (<span class='ident'>time</span>.<span class='ident'>dwLowDateTime</span>  <span class='kw'>as</span> <span class='ident'>u64</span> <span class='op'>&lt;&lt;</span>  <span class='number'>0</span>)) <span class='op'>/</span> <span class='number'>10</span>;
         <span class='kw'>let</span> <span class='ident'>ns_since_1970</span> <span class='op'>=</span> <span class='ident'>ns_since_1601</span> <span class='op'>-</span> <span class='ident'>NANOSECONDS_FROM_1601_TO_1970</span>;
 
@@ -1859,10 +1888,24 @@
     }
 
     <span class='doccomment'>/**
-     * Return a string of the current time in the form
-     * &quot;Thu Jan  1 00:00:00 1970&quot;.
+     * Returns a time string formatted according to the `asctime` format in ISO
+     * C, in the local timezone.
+     *
+     * Example: &quot;Thu Jan  1 00:00:00 1970&quot;
      */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>ctime</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> { <span class='self'>self</span>.<span class='ident'>strftime</span>(<span class='string'>&quot;%c&quot;</span>) }
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>ctime</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
+        <span class='self'>self</span>.<span class='ident'>to_local</span>().<span class='ident'>asctime</span>()
+    }
+
+    <span class='doccomment'>/**
+     * Returns a time string formatted according to the `asctime` format in ISO
+     * C.
+     *
+     * Example: &quot;Thu Jan  1 00:00:00 1970&quot;
+     */</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>asctime</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
+        <span class='self'>self</span>.<span class='ident'>strftime</span>(<span class='string'>&quot;%c&quot;</span>)
+    }
 
     <span class='doccomment'>/// Formats the time according to the format string.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>strftime</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>format</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
@@ -1873,7 +1916,7 @@
      * Returns a time string formatted according to RFC 822.
      *
      * local: &quot;Thu, 22 Mar 2012 07:53:18 PST&quot;
-     * utc:   &quot;Thu, 22 Mar 2012 14:53:18 UTC&quot;
+     * utc:   &quot;Thu, 22 Mar 2012 14:53:18 GMT&quot;
      */</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>rfc822</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
         <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>tm_gmtoff</span> <span class='op'>==</span> <span class='number'>0_i32</span> {
@@ -1894,7 +1937,8 @@
     }
 
     <span class='doccomment'>/**
-     * Returns a time string formatted according to ISO 8601.
+     * Returns a time string formatted according to RFC 3999. RFC 3999 is
+     * compatible with ISO 8601.
      *
      * local: &quot;2012-02-22T07:53:18-07:00&quot;
      * utc:   &quot;2012-02-22T14:53:18Z&quot;
@@ -1931,8 +1975,8 @@
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='number'>0u</span>;
         <span class='kw'>let</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='ident'>strs</span>.<span class='ident'>len</span>();
         <span class='kw'>while</span> <span class='ident'>i</span> <span class='op'>&lt;</span> <span class='ident'>len</span> {
-            <span class='kw'>match</span> <span class='ident'>strs</span>[<span class='ident'>i</span>] {<span class='comment'> // can&#39;t use let due to let-pattern bugs
-                </span>(<span class='kw-2'>ref</span> <span class='ident'>needle</span>, <span class='ident'>value</span>) <span class='op'>=&gt;</span> {
+            <span class='kw'>match</span> <span class='ident'>strs</span>[<span class='ident'>i</span>] { <span class='comment'>// can&#39;t use let due to let-pattern bugs</span>
+                (<span class='kw-2'>ref</span> <span class='ident'>needle</span>, <span class='ident'>value</span>) <span class='op'>=&gt;</span> {
                     <span class='kw'>if</span> <span class='ident'>match_str</span>(<span class='ident'>ss</span>, <span class='ident'>pos</span>, <span class='ident'>needle</span>.<span class='ident'>as_slice</span>()) {
                         <span class='kw'>return</span> <span class='prelude-val'>Some</span>((<span class='ident'>value</span>, <span class='ident'>pos</span> <span class='op'>+</span> <span class='ident'>needle</span>.<span class='ident'>len</span>()));
                     }
@@ -1985,9 +2029,9 @@
 
             <span class='kw'>match</span> <span class='ident'>range</span>.<span class='ident'>ch</span> {
                 <span class='string'>&#39;0&#39;</span> .. <span class='string'>&#39;9&#39;</span> <span class='op'>=&gt;</span> {
-                    <span class='ident'>pos</span> <span class='op'>=</span> <span class='ident'>range</span>.<span class='ident'>next</span>;<span class='comment'>
-                    // This will drop digits after the nanoseconds place
-                    </span><span class='kw'>let</span> <span class='ident'>digit</span> <span class='op'>=</span> <span class='ident'>range</span>.<span class='ident'>ch</span> <span class='kw'>as</span> <span class='ident'>i32</span> <span class='op'>-</span> <span class='string'>&#39;0&#39;</span> <span class='kw'>as</span> <span class='ident'>i32</span>;
+                    <span class='ident'>pos</span> <span class='op'>=</span> <span class='ident'>range</span>.<span class='ident'>next</span>;
+                    <span class='comment'>// This will drop digits after the nanoseconds place</span>
+                    <span class='kw'>let</span> <span class='ident'>digit</span> <span class='op'>=</span> <span class='ident'>range</span>.<span class='ident'>ch</span> <span class='kw'>as</span> <span class='ident'>i32</span> <span class='op'>-</span> <span class='string'>&#39;0&#39;</span> <span class='kw'>as</span> <span class='ident'>i32</span>;
                     <span class='ident'>value</span> <span class='op'>+=</span> <span class='ident'>digit</span> <span class='op'>*</span> <span class='ident'>multiplier</span>;
                     <span class='ident'>multiplier</span> <span class='op'>/=</span> <span class='number'>10</span>;
                 }
@@ -2224,9 +2268,9 @@
               }
               <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;Invalid second&quot;</span>.<span class='ident'>to_string</span>())
             }
-          }<span class='comment'>
-          //&#39;s&#39; {}
-          </span><span class='string'>&#39;T&#39;</span> <span class='op'>|</span> <span class='string'>&#39;X&#39;</span> <span class='op'>=&gt;</span> {
+          }
+          <span class='comment'>//&#39;s&#39; {}</span>
+          <span class='string'>&#39;T&#39;</span> <span class='op'>|</span> <span class='string'>&#39;X&#39;</span> <span class='op'>=&gt;</span> {
             <span class='ident'>parse_type</span>(<span class='ident'>s</span>, <span class='ident'>pos</span>, <span class='string'>&#39;H&#39;</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='ident'>tm</span>)
                 .<span class='ident'>and_then</span>(<span class='op'>|</span><span class='ident'>pos</span><span class='op'>|</span> <span class='ident'>parse_char</span>(<span class='ident'>s</span>, <span class='ident'>pos</span>, <span class='string'>&#39;:&#39;</span>))
                 .<span class='ident'>and_then</span>(<span class='op'>|</span><span class='ident'>pos</span><span class='op'>|</span> <span class='ident'>parse_type</span>(<span class='ident'>s</span>, <span class='ident'>pos</span>, <span class='string'>&#39;M&#39;</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='ident'>tm</span>))
@@ -2250,9 +2294,9 @@
                 .<span class='ident'>and_then</span>(<span class='op'>|</span><span class='ident'>pos</span><span class='op'>|</span> <span class='ident'>parse_type</span>(<span class='ident'>s</span>, <span class='ident'>pos</span>, <span class='string'>&#39;b&#39;</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='ident'>tm</span>))
                 .<span class='ident'>and_then</span>(<span class='op'>|</span><span class='ident'>pos</span><span class='op'>|</span> <span class='ident'>parse_char</span>(<span class='ident'>s</span>, <span class='ident'>pos</span>, <span class='string'>&#39;-&#39;</span>))
                 .<span class='ident'>and_then</span>(<span class='op'>|</span><span class='ident'>pos</span><span class='op'>|</span> <span class='ident'>parse_type</span>(<span class='ident'>s</span>, <span class='ident'>pos</span>, <span class='string'>&#39;Y&#39;</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='ident'>tm</span>))
-          }<span class='comment'>
-          //&#39;W&#39; {}
-          </span><span class='string'>&#39;w&#39;</span> <span class='op'>=&gt;</span> {
+          }
+          <span class='comment'>//&#39;W&#39; {}</span>
+          <span class='string'>&#39;w&#39;</span> <span class='op'>=&gt;</span> {
             <span class='kw'>match</span> <span class='ident'>match_digits_in_range</span>(<span class='ident'>s</span>, <span class='ident'>pos</span>, <span class='number'>1u</span>, <span class='boolval'>false</span>, <span class='number'>0_i32</span>, <span class='number'>6_i32</span>) {
               <span class='prelude-val'>Some</span>(<span class='ident'>item</span>) <span class='op'>=&gt;</span> { <span class='kw'>let</span> (<span class='ident'>v</span>, <span class='ident'>pos</span>) <span class='op'>=</span> <span class='ident'>item</span>; <span class='ident'>tm</span>.<span class='ident'>tm_wday</span> <span class='op'>=</span> <span class='ident'>v</span>; <span class='prelude-val'>Ok</span>(<span class='ident'>pos</span>) }
               <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;Invalid day of week&quot;</span>.<span class='ident'>to_string</span>())
@@ -2282,10 +2326,10 @@
             <span class='kw'>if</span> <span class='ident'>match_str</span>(<span class='ident'>s</span>, <span class='ident'>pos</span>, <span class='string'>&quot;UTC&quot;</span>) <span class='op'>||</span> <span class='ident'>match_str</span>(<span class='ident'>s</span>, <span class='ident'>pos</span>, <span class='string'>&quot;GMT&quot;</span>) {
                 <span class='ident'>tm</span>.<span class='ident'>tm_gmtoff</span> <span class='op'>=</span> <span class='number'>0_i32</span>;
                 <span class='prelude-val'>Ok</span>(<span class='ident'>pos</span> <span class='op'>+</span> <span class='number'>3u</span>)
-            } <span class='kw'>else</span> {<span class='comment'>
-                // It&#39;s odd, but to maintain compatibility with c&#39;s
-                // strptime we ignore the timezone.
-                </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>pos</span> <span class='op'>=</span> <span class='ident'>pos</span>;
+            } <span class='kw'>else</span> {
+                <span class='comment'>// It&#39;s odd, but to maintain compatibility with c&#39;s</span>
+                <span class='comment'>// strptime we ignore the timezone.</span>
+                <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>pos</span> <span class='op'>=</span> <span class='ident'>pos</span>;
                 <span class='kw'>let</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>len</span>();
                 <span class='kw'>while</span> <span class='ident'>pos</span> <span class='op'>&lt;</span> <span class='ident'>len</span> {
                     <span class='kw'>let</span> <span class='ident'>range</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>char_range_at</span>(<span class='ident'>pos</span>);
@@ -2389,26 +2433,26 @@
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>strftime</span>(<span class='ident'>format</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>tm</span>: <span class='kw-2'>&amp;</span><span class='ident'>Tm</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
     <span class='kw'>fn</span> <span class='ident'>days_in_year</span>(<span class='ident'>year</span>: <span class='ident'>int</span>) <span class='op'>-&gt;</span> <span class='ident'>i32</span> {
         <span class='kw'>if</span> (<span class='ident'>year</span> <span class='op'>%</span> <span class='number'>4</span> <span class='op'>==</span> <span class='number'>0</span>) <span class='op'>&amp;&amp;</span> ((<span class='ident'>year</span> <span class='op'>%</span> <span class='number'>100</span> <span class='op'>!=</span> <span class='number'>0</span>) <span class='op'>||</span> (<span class='ident'>year</span> <span class='op'>%</span> <span class='number'>400</span> <span class='op'>==</span> <span class='number'>0</span>)) {
-            <span class='number'>366</span><span class='comment'>    /* Days in a leap year */
-        </span>} <span class='kw'>else</span> {
-            <span class='number'>365</span><span class='comment'>    /* Days in a non-leap year */
-        </span>}
+            <span class='number'>366</span>    <span class='comment'>/* Days in a leap year */</span>
+        } <span class='kw'>else</span> {
+            <span class='number'>365</span>    <span class='comment'>/* Days in a non-leap year */</span>
+        }
     }
 
-    <span class='kw'>fn</span> <span class='ident'>iso_week_days</span>(<span class='ident'>yday</span>: <span class='ident'>i32</span>, <span class='ident'>wday</span>: <span class='ident'>i32</span>) <span class='op'>-&gt;</span> <span class='ident'>int</span> {<span class='comment'>
-        /* The number of days from the first day of the first ISO week of this
+    <span class='kw'>fn</span> <span class='ident'>iso_week_days</span>(<span class='ident'>yday</span>: <span class='ident'>i32</span>, <span class='ident'>wday</span>: <span class='ident'>i32</span>) <span class='op'>-&gt;</span> <span class='ident'>int</span> {
+        <span class='comment'>/* The number of days from the first day of the first ISO week of this
         * year to the year day YDAY with week day WDAY.
         * ISO weeks start on Monday. The first ISO week has the year&#39;s first
         * Thursday.
         * YDAY may be as small as yday_minimum.
-        */
-        </span><span class='kw'>let</span> <span class='ident'>yday</span>: <span class='ident'>int</span> <span class='op'>=</span> <span class='ident'>yday</span> <span class='kw'>as</span> <span class='ident'>int</span>;
+        */</span>
+        <span class='kw'>let</span> <span class='ident'>yday</span>: <span class='ident'>int</span> <span class='op'>=</span> <span class='ident'>yday</span> <span class='kw'>as</span> <span class='ident'>int</span>;
         <span class='kw'>let</span> <span class='ident'>wday</span>: <span class='ident'>int</span> <span class='op'>=</span> <span class='ident'>wday</span> <span class='kw'>as</span> <span class='ident'>int</span>;
-        <span class='kw'>let</span> <span class='ident'>iso_week_start_wday</span>: <span class='ident'>int</span> <span class='op'>=</span> <span class='number'>1</span>;<span class='comment'>                     /* Monday */
-        </span><span class='kw'>let</span> <span class='ident'>iso_week1_wday</span>: <span class='ident'>int</span> <span class='op'>=</span> <span class='number'>4</span>;<span class='comment'>                          /* Thursday */
-        </span><span class='kw'>let</span> <span class='ident'>yday_minimum</span>: <span class='ident'>int</span> <span class='op'>=</span> <span class='number'>366</span>;<span class='comment'>
-        /* Add enough to the first operand of % to make it nonnegative. */
-        </span><span class='kw'>let</span> <span class='ident'>big_enough_multiple_of_7</span>: <span class='ident'>int</span> <span class='op'>=</span> (<span class='ident'>yday_minimum</span> <span class='op'>/</span> <span class='number'>7</span> <span class='op'>+</span> <span class='number'>2</span>) <span class='op'>*</span> <span class='number'>7</span>;
+        <span class='kw'>let</span> <span class='ident'>iso_week_start_wday</span>: <span class='ident'>int</span> <span class='op'>=</span> <span class='number'>1</span>;                     <span class='comment'>/* Monday */</span>
+        <span class='kw'>let</span> <span class='ident'>iso_week1_wday</span>: <span class='ident'>int</span> <span class='op'>=</span> <span class='number'>4</span>;                          <span class='comment'>/* Thursday */</span>
+        <span class='kw'>let</span> <span class='ident'>yday_minimum</span>: <span class='ident'>int</span> <span class='op'>=</span> <span class='number'>366</span>;
+        <span class='comment'>/* Add enough to the first operand of % to make it nonnegative. */</span>
+        <span class='kw'>let</span> <span class='ident'>big_enough_multiple_of_7</span>: <span class='ident'>int</span> <span class='op'>=</span> (<span class='ident'>yday_minimum</span> <span class='op'>/</span> <span class='number'>7</span> <span class='op'>+</span> <span class='number'>2</span>) <span class='op'>*</span> <span class='number'>7</span>;
 
         <span class='ident'>yday</span> <span class='op'>-</span> (<span class='ident'>yday</span> <span class='op'>-</span> <span class='ident'>wday</span> <span class='op'>+</span> <span class='ident'>iso_week1_wday</span> <span class='op'>+</span> <span class='ident'>big_enough_multiple_of_7</span>) <span class='op'>%</span> <span class='number'>7</span>
             <span class='op'>+</span> <span class='ident'>iso_week1_wday</span> <span class='op'>-</span> <span class='ident'>iso_week_start_wday</span>
@@ -2418,16 +2462,16 @@
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>year</span>: <span class='ident'>int</span> <span class='op'>=</span> <span class='ident'>tm</span>.<span class='ident'>tm_year</span> <span class='kw'>as</span> <span class='ident'>int</span> <span class='op'>+</span> <span class='number'>1900</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>days</span>: <span class='ident'>int</span> <span class='op'>=</span> <span class='ident'>iso_week_days</span> (<span class='ident'>tm</span>.<span class='ident'>tm_yday</span>, <span class='ident'>tm</span>.<span class='ident'>tm_wday</span>);
 
-        <span class='kw'>if</span> <span class='ident'>days</span> <span class='op'>&lt;</span> <span class='number'>0</span> {<span class='comment'>
-            /* This ISO week belongs to the previous year. */
-            </span><span class='ident'>year</span> <span class='op'>-=</span> <span class='number'>1</span>;
+        <span class='kw'>if</span> <span class='ident'>days</span> <span class='op'>&lt;</span> <span class='number'>0</span> {
+            <span class='comment'>/* This ISO week belongs to the previous year. */</span>
+            <span class='ident'>year</span> <span class='op'>-=</span> <span class='number'>1</span>;
             <span class='ident'>days</span> <span class='op'>=</span> <span class='ident'>iso_week_days</span> (<span class='ident'>tm</span>.<span class='ident'>tm_yday</span> <span class='op'>+</span> (<span class='ident'>days_in_year</span>(<span class='ident'>year</span>)), <span class='ident'>tm</span>.<span class='ident'>tm_wday</span>);
         } <span class='kw'>else</span> {
             <span class='kw'>let</span> <span class='ident'>d</span>: <span class='ident'>int</span> <span class='op'>=</span> <span class='ident'>iso_week_days</span> (<span class='ident'>tm</span>.<span class='ident'>tm_yday</span> <span class='op'>-</span> (<span class='ident'>days_in_year</span>(<span class='ident'>year</span>)),
                                         <span class='ident'>tm</span>.<span class='ident'>tm_wday</span>);
-            <span class='kw'>if</span> <span class='number'>0</span> <span class='op'>&lt;=</span> <span class='ident'>d</span> {<span class='comment'>
-                /* This ISO week belongs to the next year. */
-                </span><span class='ident'>year</span> <span class='op'>+=</span> <span class='number'>1</span>;
+            <span class='kw'>if</span> <span class='number'>0</span> <span class='op'>&lt;=</span> <span class='ident'>d</span> {
+                <span class='comment'>/* This ISO week belongs to the next year. */</span>
+                <span class='ident'>year</span> <span class='op'>+=</span> <span class='number'>1</span>;
                 <span class='ident'>days</span> <span class='op'>=</span> <span class='ident'>d</span>;
             }
         }
@@ -2565,7 +2609,7 @@
           <span class='string'>&#39;U&#39;</span> <span class='op'>=&gt;</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{:02d}&quot;</span>, (<span class='ident'>tm</span>.<span class='ident'>tm_yday</span> <span class='op'>-</span> <span class='ident'>tm</span>.<span class='ident'>tm_wday</span> <span class='op'>+</span> <span class='number'>7</span>) <span class='op'>/</span> <span class='number'>7</span>),
           <span class='string'>&#39;u&#39;</span> <span class='op'>=&gt;</span> {
             <span class='kw'>let</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='ident'>tm</span>.<span class='ident'>tm_wday</span> <span class='kw'>as</span> <span class='ident'>int</span>;
-            (<span class='kw'>if</span> <span class='ident'>i</span> <span class='op'>==</span> <span class='number'>0</span> { <span class='number'>7</span> } <span class='kw'>else</span> { <span class='ident'>i</span> }).<span class='ident'>to_str</span>()
+            (<span class='kw'>if</span> <span class='ident'>i</span> <span class='op'>==</span> <span class='number'>0</span> { <span class='number'>7</span> } <span class='kw'>else</span> { <span class='ident'>i</span> }).<span class='ident'>to_string</span>()
           }
           <span class='string'>&#39;V&#39;</span> <span class='op'>=&gt;</span> <span class='ident'>iso_week</span>(<span class='string'>&#39;V&#39;</span>, <span class='ident'>tm</span>),
           <span class='string'>&#39;v&#39;</span> <span class='op'>=&gt;</span> {
@@ -2578,11 +2622,11 @@
               <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{:02d}&quot;</span>,
                              (<span class='ident'>tm</span>.<span class='ident'>tm_yday</span> <span class='op'>-</span> (<span class='ident'>tm</span>.<span class='ident'>tm_wday</span> <span class='op'>-</span> <span class='number'>1</span> <span class='op'>+</span> <span class='number'>7</span>) <span class='op'>%</span> <span class='number'>7</span> <span class='op'>+</span> <span class='number'>7</span>) <span class='op'>/</span> <span class='number'>7</span>)
           }
-          <span class='string'>&#39;w&#39;</span> <span class='op'>=&gt;</span> (<span class='ident'>tm</span>.<span class='ident'>tm_wday</span> <span class='kw'>as</span> <span class='ident'>int</span>).<span class='ident'>to_str</span>(),
-          <span class='string'>&#39;Y&#39;</span> <span class='op'>=&gt;</span> (<span class='ident'>tm</span>.<span class='ident'>tm_year</span> <span class='kw'>as</span> <span class='ident'>int</span> <span class='op'>+</span> <span class='number'>1900</span>).<span class='ident'>to_str</span>(),
+          <span class='string'>&#39;w&#39;</span> <span class='op'>=&gt;</span> (<span class='ident'>tm</span>.<span class='ident'>tm_wday</span> <span class='kw'>as</span> <span class='ident'>int</span>).<span class='ident'>to_string</span>(),
+          <span class='string'>&#39;Y&#39;</span> <span class='op'>=&gt;</span> (<span class='ident'>tm</span>.<span class='ident'>tm_year</span> <span class='kw'>as</span> <span class='ident'>int</span> <span class='op'>+</span> <span class='number'>1900</span>).<span class='ident'>to_string</span>(),
           <span class='string'>&#39;y&#39;</span> <span class='op'>=&gt;</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{:02d}&quot;</span>, (<span class='ident'>tm</span>.<span class='ident'>tm_year</span> <span class='kw'>as</span> <span class='ident'>int</span> <span class='op'>+</span> <span class='number'>1900</span>) <span class='op'>%</span> <span class='number'>100</span>),
-          <span class='string'>&#39;Z&#39;</span> <span class='op'>=&gt;</span> <span class='string'>&quot;&quot;</span>.<span class='ident'>to_string</span>(),<span class='comment'>    // FIXME(pcwalton): Implement this.
-          </span><span class='string'>&#39;z&#39;</span> <span class='op'>=&gt;</span> {
+          <span class='string'>&#39;Z&#39;</span> <span class='op'>=&gt;</span> <span class='string'>&quot;&quot;</span>.<span class='ident'>to_string</span>(),    <span class='comment'>// FIXME(pcwalton): Implement this.</span>
+          <span class='string'>&#39;z&#39;</span> <span class='op'>=&gt;</span> {
             <span class='kw'>let</span> <span class='ident'>sign</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>tm</span>.<span class='ident'>tm_gmtoff</span> <span class='op'>&gt;</span> <span class='number'>0_i32</span> { <span class='string'>&#39;+&#39;</span> } <span class='kw'>else</span> { <span class='string'>&#39;-&#39;</span> };
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>num</span>::<span class='ident'>abs</span>(<span class='ident'>tm</span>.<span class='ident'>tm_gmtoff</span>) <span class='op'>/</span> <span class='number'>60_i32</span>;
             <span class='kw'>let</span> <span class='ident'>h</span> <span class='op'>=</span> <span class='ident'>m</span> <span class='op'>/</span> <span class='number'>60_i32</span>;
@@ -2629,19 +2673,19 @@
 
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>windows</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>set_time_zone</span>() {
-        <span class='kw'>use</span> <span class='ident'>libc</span>;<span class='comment'>
-        // Windows crt doesn&#39;t see any environment variable set by
-        // `SetEnvironmentVariable`, which `os::setenv` internally uses.
-        // It is why we use `putenv` here.
-        </span><span class='kw'>extern</span> {
+        <span class='kw'>use</span> <span class='ident'>libc</span>;
+        <span class='comment'>// Windows crt doesn&#39;t see any environment variable set by</span>
+        <span class='comment'>// `SetEnvironmentVariable`, which `os::setenv` internally uses.</span>
+        <span class='comment'>// It is why we use `putenv` here.</span>
+        <span class='kw'>extern</span> {
             <span class='kw'>fn</span> <span class='ident'>_putenv</span>(<span class='ident'>envstring</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span>) <span class='op'>-&gt;</span> <span class='ident'>libc</span>::<span class='ident'>c_int</span>;
         }
 
-        <span class='kw'>unsafe</span> {<span class='comment'>
-            // Windows does not understand &quot;America/Los_Angeles&quot;.
-            // PST+08 may look wrong, but not! &quot;PST&quot; indicates
-            // the name of timezone. &quot;+08&quot; means UTC = local + 08.
-            </span><span class='string'>&quot;TZ=PST+08&quot;</span>.<span class='ident'>with_c_str</span>(<span class='op'>|</span><span class='ident'>env</span><span class='op'>|</span> {
+        <span class='kw'>unsafe</span> {
+            <span class='comment'>// Windows does not understand &quot;America/Los_Angeles&quot;.</span>
+            <span class='comment'>// PST+08 may look wrong, but not! &quot;PST&quot; indicates</span>
+            <span class='comment'>// the name of timezone. &quot;+08&quot; means UTC = local + 08.</span>
+            <span class='string'>&quot;TZ=PST+08&quot;</span>.<span class='ident'>with_c_str</span>(<span class='op'>|</span><span class='ident'>env</span><span class='op'>|</span> {
                 <span class='ident'>_putenv</span>(<span class='ident'>env</span>);
             })
         }
@@ -2655,10 +2699,10 @@
     }
 
     <span class='kw'>fn</span> <span class='ident'>test_get_time</span>() {
-        <span class='kw'>static</span> <span class='ident'>SOME_RECENT_DATE</span>: <span class='ident'>i64</span> <span class='op'>=</span> <span class='number'>1325376000i64</span>;<span class='comment'> // 2012-01-01T00:00:00Z
-        </span><span class='kw'>static</span> <span class='ident'>SOME_FUTURE_DATE</span>: <span class='ident'>i64</span> <span class='op'>=</span> <span class='number'>1577836800i64</span>;<span class='comment'> // 2020-01-01T00:00:00Z
+        <span class='kw'>static</span> <span class='ident'>SOME_RECENT_DATE</span>: <span class='ident'>i64</span> <span class='op'>=</span> <span class='number'>1325376000i64</span>; <span class='comment'>// 2012-01-01T00:00:00Z</span>
+        <span class='kw'>static</span> <span class='ident'>SOME_FUTURE_DATE</span>: <span class='ident'>i64</span> <span class='op'>=</span> <span class='number'>1577836800i64</span>; <span class='comment'>// 2020-01-01T00:00:00Z</span>
 
-        </span><span class='kw'>let</span> <span class='ident'>tv1</span> <span class='op'>=</span> <span class='ident'>get_time</span>();
+        <span class='kw'>let</span> <span class='ident'>tv1</span> <span class='op'>=</span> <span class='ident'>get_time</span>();
         <span class='macro'>debug</span><span class='macro'>!</span>(<span class='string'>&quot;tv1={:?} sec + {:?} nsec&quot;</span>, <span class='ident'>tv1</span>.<span class='ident'>sec</span> <span class='kw'>as</span> <span class='ident'>uint</span>, <span class='ident'>tv1</span>.<span class='ident'>nsec</span> <span class='kw'>as</span> <span class='ident'>uint</span>);
 
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>tv1</span>.<span class='ident'>sec</span> <span class='op'>&gt;</span> <span class='ident'>SOME_RECENT_DATE</span>);
@@ -2876,9 +2920,9 @@
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>test</span>(<span class='string'>&quot;2009-02-13&quot;</span>, <span class='string'>&quot;%F&quot;</span>));
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>test</span>(<span class='string'>&quot;03&quot;</span>, <span class='string'>&quot;%H&quot;</span>));
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>test</span>(<span class='string'>&quot;13&quot;</span>, <span class='string'>&quot;%H&quot;</span>));
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>test</span>(<span class='string'>&quot;03&quot;</span>, <span class='string'>&quot;%I&quot;</span>));<span class='comment'> // FIXME (#2350): flesh out
-        </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>test</span>(<span class='string'>&quot;11&quot;</span>, <span class='string'>&quot;%I&quot;</span>));<span class='comment'> // FIXME (#2350): flesh out
-        </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>test</span>(<span class='string'>&quot;044&quot;</span>, <span class='string'>&quot;%j&quot;</span>));
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>test</span>(<span class='string'>&quot;03&quot;</span>, <span class='string'>&quot;%I&quot;</span>)); <span class='comment'>// FIXME (#2350): flesh out</span>
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>test</span>(<span class='string'>&quot;11&quot;</span>, <span class='string'>&quot;%I&quot;</span>)); <span class='comment'>// FIXME (#2350): flesh out</span>
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>test</span>(<span class='string'>&quot;044&quot;</span>, <span class='string'>&quot;%j&quot;</span>));
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>test</span>(<span class='string'>&quot; 3&quot;</span>, <span class='string'>&quot;%k&quot;</span>));
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>test</span>(<span class='string'>&quot;13&quot;</span>, <span class='string'>&quot;%k&quot;</span>));
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>test</span>(<span class='string'>&quot; 1&quot;</span>, <span class='string'>&quot;%l&quot;</span>));
@@ -2908,10 +2952,23 @@
             <span class='number'>0</span>);
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>strptime</span>(<span class='string'>&quot;-0800&quot;</span>, <span class='string'>&quot;%z&quot;</span>).<span class='ident'>unwrap</span>().<span class='ident'>tm_gmtoff</span> <span class='op'>==</span>
             <span class='number'>0</span>);
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>test</span>(<span class='string'>&quot;%&quot;</span>, <span class='string'>&quot;%%&quot;</span>));<span class='comment'>
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>test</span>(<span class='string'>&quot;%&quot;</span>, <span class='string'>&quot;%%&quot;</span>));
 
-        // Test for #7256
-        </span><span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>strptime</span>(<span class='string'>&quot;360&quot;</span>, <span class='string'>&quot;%Y-%m-%d&quot;</span>), <span class='prelude-val'>Err</span>(<span class='string'>&quot;Invalid year&quot;</span>.<span class='ident'>to_string</span>()))
+        <span class='comment'>// Test for #7256</span>
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>strptime</span>(<span class='string'>&quot;360&quot;</span>, <span class='string'>&quot;%Y-%m-%d&quot;</span>), <span class='prelude-val'>Err</span>(<span class='string'>&quot;Invalid year&quot;</span>.<span class='ident'>to_string</span>()))
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>test_asctime</span>() {
+        <span class='ident'>set_time_zone</span>();
+
+        <span class='kw'>let</span> <span class='ident'>time</span> <span class='op'>=</span> <span class='ident'>Timespec</span>::<span class='ident'>new</span>(<span class='number'>1234567890</span>, <span class='number'>54321</span>);
+        <span class='kw'>let</span> <span class='ident'>utc</span>   <span class='op'>=</span> <span class='ident'>at_utc</span>(<span class='ident'>time</span>);
+        <span class='kw'>let</span> <span class='ident'>local</span> <span class='op'>=</span> <span class='ident'>at</span>(<span class='ident'>time</span>);
+
+        <span class='macro'>debug</span><span class='macro'>!</span>(<span class='string'>&quot;test_ctime: {:?} {:?}&quot;</span>, <span class='ident'>utc</span>.<span class='ident'>asctime</span>(), <span class='ident'>local</span>.<span class='ident'>asctime</span>());
+
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>utc</span>.<span class='ident'>asctime</span>(), <span class='string'>&quot;Fri Feb 13 23:31:30 2009&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>local</span>.<span class='ident'>asctime</span>(), <span class='string'>&quot;Fri Feb 13 15:31:30 2009&quot;</span>.<span class='ident'>to_string</span>());
     }
 
     <span class='kw'>fn</span> <span class='ident'>test_ctime</span>() {
@@ -2923,7 +2980,7 @@
 
         <span class='macro'>debug</span><span class='macro'>!</span>(<span class='string'>&quot;test_ctime: {:?} {:?}&quot;</span>, <span class='ident'>utc</span>.<span class='ident'>ctime</span>(), <span class='ident'>local</span>.<span class='ident'>ctime</span>());
 
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>utc</span>.<span class='ident'>ctime</span>(), <span class='string'>&quot;Fri Feb 13 23:31:30 2009&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>utc</span>.<span class='ident'>ctime</span>(), <span class='string'>&quot;Fri Feb 13 15:31:30 2009&quot;</span>.<span class='ident'>to_string</span>());
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>local</span>.<span class='ident'>ctime</span>(), <span class='string'>&quot;Fri Feb 13 15:31:30 2009&quot;</span>.<span class='ident'>to_string</span>());
     }
 
@@ -2970,19 +3027,21 @@
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>local</span>.<span class='ident'>strftime</span>(<span class='string'>&quot;%v&quot;</span>), <span class='string'>&quot;13-Feb-2009&quot;</span>.<span class='ident'>to_string</span>());
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>local</span>.<span class='ident'>strftime</span>(<span class='string'>&quot;%W&quot;</span>), <span class='string'>&quot;06&quot;</span>.<span class='ident'>to_string</span>());
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>local</span>.<span class='ident'>strftime</span>(<span class='string'>&quot;%w&quot;</span>), <span class='string'>&quot;5&quot;</span>.<span class='ident'>to_string</span>());
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>local</span>.<span class='ident'>strftime</span>(<span class='string'>&quot;%X&quot;</span>), <span class='string'>&quot;15:31:30&quot;</span>.<span class='ident'>to_string</span>());<span class='comment'> // FIXME (#2350): support locale
-        </span><span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>local</span>.<span class='ident'>strftime</span>(<span class='string'>&quot;%x&quot;</span>), <span class='string'>&quot;02/13/09&quot;</span>.<span class='ident'>to_string</span>());<span class='comment'> // FIXME (#2350): support locale
-        </span><span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>local</span>.<span class='ident'>strftime</span>(<span class='string'>&quot;%Y&quot;</span>), <span class='string'>&quot;2009&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>local</span>.<span class='ident'>strftime</span>(<span class='string'>&quot;%X&quot;</span>), <span class='string'>&quot;15:31:30&quot;</span>.<span class='ident'>to_string</span>()); <span class='comment'>// FIXME (#2350): support locale</span>
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>local</span>.<span class='ident'>strftime</span>(<span class='string'>&quot;%x&quot;</span>), <span class='string'>&quot;02/13/09&quot;</span>.<span class='ident'>to_string</span>()); <span class='comment'>// FIXME (#2350): support locale</span>
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>local</span>.<span class='ident'>strftime</span>(<span class='string'>&quot;%Y&quot;</span>), <span class='string'>&quot;2009&quot;</span>.<span class='ident'>to_string</span>());
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>local</span>.<span class='ident'>strftime</span>(<span class='string'>&quot;%y&quot;</span>), <span class='string'>&quot;09&quot;</span>.<span class='ident'>to_string</span>());
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>local</span>.<span class='ident'>strftime</span>(<span class='string'>&quot;%+&quot;</span>), <span class='string'>&quot;2009-02-13T15:31:30-08:00&quot;</span>.<span class='ident'>to_string</span>());
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>local</span>.<span class='ident'>strftime</span>(<span class='string'>&quot;%z&quot;</span>), <span class='string'>&quot;-0800&quot;</span>.<span class='ident'>to_string</span>());
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>local</span>.<span class='ident'>strftime</span>(<span class='string'>&quot;%%&quot;</span>), <span class='string'>&quot;%&quot;</span>.<span class='ident'>to_string</span>());
 
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>local</span>.<span class='ident'>asctime</span>(), <span class='string'>&quot;Fri Feb 13 15:31:30 2009&quot;</span>.<span class='ident'>to_string</span>());
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>local</span>.<span class='ident'>ctime</span>(), <span class='string'>&quot;Fri Feb 13 15:31:30 2009&quot;</span>.<span class='ident'>to_string</span>());
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>local</span>.<span class='ident'>rfc822z</span>(), <span class='string'>&quot;Fri, 13 Feb 2009 15:31:30 -0800&quot;</span>.<span class='ident'>to_string</span>());
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>local</span>.<span class='ident'>rfc3339</span>(), <span class='string'>&quot;2009-02-13T15:31:30-08:00&quot;</span>.<span class='ident'>to_string</span>());
 
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>utc</span>.<span class='ident'>ctime</span>(), <span class='string'>&quot;Fri Feb 13 23:31:30 2009&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>utc</span>.<span class='ident'>asctime</span>(), <span class='string'>&quot;Fri Feb 13 23:31:30 2009&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>utc</span>.<span class='ident'>ctime</span>(), <span class='string'>&quot;Fri Feb 13 15:31:30 2009&quot;</span>.<span class='ident'>to_string</span>());
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>utc</span>.<span class='ident'>rfc822</span>(), <span class='string'>&quot;Fri, 13 Feb 2009 23:31:30 GMT&quot;</span>.<span class='ident'>to_string</span>());
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>utc</span>.<span class='ident'>rfc822z</span>(), <span class='string'>&quot;Fri, 13 Feb 2009 23:31:30 -0000&quot;</span>.<span class='ident'>to_string</span>());
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>utc</span>.<span class='ident'>rfc3339</span>(), <span class='string'>&quot;2009-02-13T23:31:30Z&quot;</span>.<span class='ident'>to_string</span>());
@@ -3020,17 +3079,18 @@
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='attribute'>#[<span class='ident'>ignore</span>(<span class='ident'>cfg</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;android&quot;</span>))]</span><span class='comment'> // FIXME #10958
-    </span><span class='kw'>fn</span> <span class='ident'>run_tests</span>() {<span class='comment'>
-        // The tests race on tzset. So instead of having many independent
-        // tests, we will just call the functions now.
-        </span><span class='ident'>test_get_time</span>();
+    <span class='attribute'>#[<span class='ident'>ignore</span>(<span class='ident'>cfg</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;android&quot;</span>))]</span> <span class='comment'>// FIXME #10958</span>
+    <span class='kw'>fn</span> <span class='ident'>run_tests</span>() {
+        <span class='comment'>// The tests race on tzset. So instead of having many independent</span>
+        <span class='comment'>// tests, we will just call the functions now.</span>
+        <span class='ident'>test_get_time</span>();
         <span class='ident'>test_precise_time</span>();
         <span class='ident'>test_at_utc</span>();
         <span class='ident'>test_at</span>();
         <span class='ident'>test_to_timespec</span>();
         <span class='ident'>test_conversions</span>();
         <span class='ident'>test_strptime</span>();
+        <span class='ident'>test_asctime</span>();
         <span class='ident'>test_ctime</span>();
         <span class='ident'>test_strftime</span>();
         <span class='ident'>test_timespec_eq_ord</span>();

@@ -7,11 +7,9 @@
 
     <title>stream.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
-    
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
     
 </head>
 <body>
@@ -25,7 +23,7 @@
     
 
     <section class="sidebar">
-        
+        <a href='../../../../../../../../../rustuv/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
         
     </section>
 
@@ -322,17 +320,17 @@
 <span id='280'>280</span>
 <span id='281'>281</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='kw'>use</span> <span class='ident'>libc</span>::{<span class='ident'>c_int</span>, <span class='ident'>size_t</span>, <span class='ident'>ssize_t</span>};
+<span class='kw'>use</span> <span class='ident'>libc</span>::{<span class='ident'>c_int</span>, <span class='ident'>size_t</span>, <span class='ident'>ssize_t</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ptr</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rt</span>::<span class='ident'>task</span>::<span class='ident'>BlockedTask</span>;
@@ -340,20 +338,20 @@
 <span class='kw'>use</span> <span class='ident'>Loop</span>;
 <span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>UvError</span>, <span class='ident'>Buf</span>, <span class='ident'>slice_to_uv_buf</span>, <span class='ident'>Request</span>, <span class='ident'>wait_until_woken_after</span>,
             <span class='ident'>ForbidUnwind</span>, <span class='ident'>wakeup</span>};
-<span class='kw'>use</span> <span class='ident'>uvll</span>;<span class='comment'>
+<span class='kw'>use</span> <span class='ident'>uvll</span>;
 
-// This is a helper structure which is intended to get embedded into other
-// Watcher structures. This structure will retain a handle to the underlying
-// uv_stream_t instance, and all I/O operations assume that it&#39;s already located
-// on the appropriate scheduler.
-</span><span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>StreamWatcher</span> {
-    <span class='kw'>pub</span> <span class='ident'>handle</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uvll</span>::<span class='ident'>uv_stream_t</span>,<span class='comment'>
+<span class='comment'>// This is a helper structure which is intended to get embedded into other</span>
+<span class='comment'>// Watcher structures. This structure will retain a handle to the underlying</span>
+<span class='comment'>// uv_stream_t instance, and all I/O operations assume that it&#39;s already located</span>
+<span class='comment'>// on the appropriate scheduler.</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>StreamWatcher</span> {
+    <span class='kw'>pub</span> <span class='ident'>handle</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uvll</span>::<span class='ident'>uv_stream_t</span>,
 
-    // Cache the last used uv_write_t so we don&#39;t have to allocate a new one on
-    // every call to uv_write(). Ideally this would be a stack-allocated
-    // structure, but currently we don&#39;t have mappings for all the structures
-    // defined in libuv, so we&#39;re foced to malloc this.
-    </span><span class='ident'>last_write_req</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Request</span><span class='op'>&gt;</span>,
+    <span class='comment'>// Cache the last used uv_write_t so we don&#39;t have to allocate a new one on</span>
+    <span class='comment'>// every call to uv_write(). Ideally this would be a stack-allocated</span>
+    <span class='comment'>// structure, but currently we don&#39;t have mappings for all the structures</span>
+    <span class='comment'>// defined in libuv, so we&#39;re foced to malloc this.</span>
+    <span class='ident'>last_write_req</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Request</span><span class='op'>&gt;</span>,
 
     <span class='ident'>blocked_writer</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>BlockedTask</span><span class='op'>&gt;</span>,
 }
@@ -370,20 +368,20 @@
     <span class='ident'>data</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span>,
 }
 
-<span class='kw'>impl</span> <span class='ident'>StreamWatcher</span> {<span class='comment'>
-    // Creates a new helper structure which should be then embedded into another
-    // watcher. This provides the generic read/write methods on streams.
-    //
-    // This structure will *not* close the stream when it is dropped. It is up
-    // to the enclosure structure to be sure to call the close method (which
-    // will block the task). Note that this is also required to prevent memory
-    // leaks.
-    //
-    // It should also be noted that the `data` field of the underlying uv handle
-    // will be manipulated on each of the methods called on this watcher.
-    // Wrappers should ensure to always reset the field to an appropriate value
-    // if they rely on the field to perform an action.
-    </span><span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>stream</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uvll</span>::<span class='ident'>uv_stream_t</span>,
+<span class='kw'>impl</span> <span class='ident'>StreamWatcher</span> {
+    <span class='comment'>// Creates a new helper structure which should be then embedded into another</span>
+    <span class='comment'>// watcher. This provides the generic read/write methods on streams.</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// This structure will *not* close the stream when it is dropped. It is up</span>
+    <span class='comment'>// to the enclosure structure to be sure to call the close method (which</span>
+    <span class='comment'>// will block the task). Note that this is also required to prevent memory</span>
+    <span class='comment'>// leaks.</span>
+    <span class='comment'>//</span>
+    <span class='comment'>// It should also be noted that the `data` field of the underlying uv handle</span>
+    <span class='comment'>// will be manipulated on each of the methods called on this watcher.</span>
+    <span class='comment'>// Wrappers should ensure to always reset the field to an appropriate value</span>
+    <span class='comment'>// if they rely on the field to perform an action.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>stream</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uvll</span>::<span class='ident'>uv_stream_t</span>,
                <span class='ident'>init</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='ident'>StreamWatcher</span> {
         <span class='kw'>if</span> <span class='ident'>init</span> {
             <span class='kw'>unsafe</span> { <span class='ident'>uvll</span>::<span class='ident'>set_data_for_uv_handle</span>(<span class='ident'>stream</span>, <span class='number'>0</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>int</span>) }
@@ -395,28 +393,28 @@
         }
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>read</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>buf</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> [<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>uint</span>, <span class='ident'>UvError</span><span class='op'>&gt;</span> {<span class='comment'>
-        // This read operation needs to get canceled on an unwind via libuv&#39;s
-        // uv_read_stop function
-        </span><span class='kw'>let</span> <span class='ident'>_f</span> <span class='op'>=</span> <span class='ident'>ForbidUnwind</span>::<span class='ident'>new</span>(<span class='string'>&quot;stream read&quot;</span>);
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>read</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>buf</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> [<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>uint</span>, <span class='ident'>UvError</span><span class='op'>&gt;</span> {
+        <span class='comment'>// This read operation needs to get canceled on an unwind via libuv&#39;s</span>
+        <span class='comment'>// uv_read_stop function</span>
+        <span class='kw'>let</span> <span class='ident'>_f</span> <span class='op'>=</span> <span class='ident'>ForbidUnwind</span>::<span class='ident'>new</span>(<span class='string'>&quot;stream read&quot;</span>);
 
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>rcx</span> <span class='op'>=</span> <span class='ident'>ReadContext</span> {
-            <span class='ident'>buf</span>: <span class='prelude-val'>Some</span>(<span class='ident'>slice_to_uv_buf</span>(<span class='ident'>buf</span>)),<span class='comment'>
-            // if the read is canceled, we&#39;ll see eof, otherwise this will get
-            // overwritten
-            </span><span class='ident'>result</span>: <span class='number'>0</span>,
+            <span class='ident'>buf</span>: <span class='prelude-val'>Some</span>(<span class='ident'>slice_to_uv_buf</span>(<span class='ident'>buf</span>)),
+            <span class='comment'>// if the read is canceled, we&#39;ll see eof, otherwise this will get</span>
+            <span class='comment'>// overwritten</span>
+            <span class='ident'>result</span>: <span class='number'>0</span>,
             <span class='ident'>task</span>: <span class='prelude-val'>None</span>,
-        };<span class='comment'>
-        // When reading a TTY stream on windows, libuv will invoke alloc_cb
-        // immediately as part of the call to alloc_cb. What this means is that
-        // we must be ready for this to happen (by setting the data in the uv
-        // handle). In theory this otherwise doesn&#39;t need to happen until after
-        // the read is succesfully started.
-        </span><span class='kw'>unsafe</span> { <span class='ident'>uvll</span>::<span class='ident'>set_data_for_uv_handle</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>rcx</span>) }<span class='comment'>
+        };
+        <span class='comment'>// When reading a TTY stream on windows, libuv will invoke alloc_cb</span>
+        <span class='comment'>// immediately as part of the call to alloc_cb. What this means is that</span>
+        <span class='comment'>// we must be ready for this to happen (by setting the data in the uv</span>
+        <span class='comment'>// handle). In theory this otherwise doesn&#39;t need to happen until after</span>
+        <span class='comment'>// the read is successfully started.</span>
+        <span class='kw'>unsafe</span> { <span class='ident'>uvll</span>::<span class='ident'>set_data_for_uv_handle</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>rcx</span>) }
 
-        // Send off the read request, but don&#39;t block until we&#39;re sure that the
-        // read request is queued.
-        </span><span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='kw'>unsafe</span> {
+        <span class='comment'>// Send off the read request, but don&#39;t block until we&#39;re sure that the</span>
+        <span class='comment'>// read request is queued.</span>
+        <span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='kw'>unsafe</span> {
             <span class='ident'>uvll</span>::<span class='ident'>uv_read_start</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>alloc_cb</span>, <span class='ident'>read_cb</span>)
         } {
             <span class='number'>0</span> <span class='op'>=&gt;</span> {
@@ -428,17 +426,17 @@
                 }
             }
             <span class='ident'>n</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>UvError</span>(<span class='ident'>n</span>))
-        };<span class='comment'>
-        // Make sure a read cancellation sees that there&#39;s no pending read
-        </span><span class='kw'>unsafe</span> { <span class='ident'>uvll</span>::<span class='ident'>set_data_for_uv_handle</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='number'>0</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>int</span>) }
+        };
+        <span class='comment'>// Make sure a read cancellation sees that there&#39;s no pending read</span>
+        <span class='kw'>unsafe</span> { <span class='ident'>uvll</span>::<span class='ident'>set_data_for_uv_handle</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='number'>0</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>int</span>) }
         <span class='kw'>return</span> <span class='ident'>ret</span>;
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>cancel_read</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>reason</span>: <span class='ident'>ssize_t</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>BlockedTask</span><span class='op'>&gt;</span> {<span class='comment'>
-        // When we invoke uv_read_stop, it cancels the read and alloc
-        // callbacks. We need to manually wake up a pending task (if one was
-        // present).
-        </span><span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw'>unsafe</span> { <span class='ident'>uvll</span>::<span class='ident'>uv_read_stop</span>(<span class='self'>self</span>.<span class='ident'>handle</span>) }, <span class='number'>0</span>);
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>cancel_read</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>reason</span>: <span class='ident'>ssize_t</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>BlockedTask</span><span class='op'>&gt;</span> {
+        <span class='comment'>// When we invoke uv_read_stop, it cancels the read and alloc</span>
+        <span class='comment'>// callbacks. We need to manually wake up a pending task (if one was</span>
+        <span class='comment'>// present).</span>
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw'>unsafe</span> { <span class='ident'>uvll</span>::<span class='ident'>uv_read_stop</span>(<span class='self'>self</span>.<span class='ident'>handle</span>) }, <span class='number'>0</span>);
         <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {
             <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>uvll</span>::<span class='ident'>get_data_for_uv_handle</span>(<span class='self'>self</span>.<span class='ident'>handle</span>);
             <span class='kw'>if</span> <span class='ident'>data</span>.<span class='ident'>is_null</span>() { <span class='kw'>return</span> <span class='prelude-val'>None</span> }
@@ -449,51 +447,51 @@
         <span class='ident'>data</span>.<span class='ident'>task</span>.<span class='ident'>take</span>()
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>write</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>buf</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>], <span class='ident'>may_timeout</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>UvError</span><span class='op'>&gt;</span> {<span class='comment'>
-        // The ownership of the write request is dubious if this function
-        // unwinds. I believe that if the write_cb fails to re-schedule the task
-        // then the write request will be leaked.
-        </span><span class='kw'>let</span> <span class='ident'>_f</span> <span class='op'>=</span> <span class='ident'>ForbidUnwind</span>::<span class='ident'>new</span>(<span class='string'>&quot;stream write&quot;</span>);<span class='comment'>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>write</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>buf</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>], <span class='ident'>may_timeout</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>UvError</span><span class='op'>&gt;</span> {
+        <span class='comment'>// The ownership of the write request is dubious if this function</span>
+        <span class='comment'>// unwinds. I believe that if the write_cb fails to re-schedule the task</span>
+        <span class='comment'>// then the write request will be leaked.</span>
+        <span class='kw'>let</span> <span class='ident'>_f</span> <span class='op'>=</span> <span class='ident'>ForbidUnwind</span>::<span class='ident'>new</span>(<span class='string'>&quot;stream write&quot;</span>);
 
-        // Prepare the write request, either using a cached one or allocating a
-        // new one
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>req</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>last_write_req</span>.<span class='ident'>take</span>() {
+        <span class='comment'>// Prepare the write request, either using a cached one or allocating a</span>
+        <span class='comment'>// new one</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>req</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>last_write_req</span>.<span class='ident'>take</span>() {
             <span class='prelude-val'>Some</span>(<span class='ident'>req</span>) <span class='op'>=&gt;</span> <span class='ident'>req</span>, <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>Request</span>::<span class='ident'>new</span>(<span class='ident'>uvll</span>::<span class='ident'>UV_WRITE</span>),
         };
-        <span class='ident'>req</span>.<span class='ident'>set_data</span>(<span class='ident'>ptr</span>::<span class='ident'>mut_null</span>::<span class='op'>&lt;</span>()<span class='op'>&gt;</span>());<span class='comment'>
+        <span class='ident'>req</span>.<span class='ident'>set_data</span>(<span class='ident'>ptr</span>::<span class='ident'>mut_null</span>::<span class='op'>&lt;</span>()<span class='op'>&gt;</span>());
 
-        // And here&#39;s where timeouts get a little interesting. Currently, libuv
-        // does not support canceling an in-flight write request. Consequently,
-        // when a write timeout expires, there&#39;s not much we can do other than
-        // detach the sleeping task from the write request itself. Semantically,
-        // this means that the write request will complete asynchronously, but
-        // the calling task will return error (because the write timed out).
-        //
-        // There is special wording in the documentation of set_write_timeout()
-        // indicating that this is a plausible failure scenario, and this
-        // function is why that wording exists.
-        //
-        // Implementation-wise, we must be careful when passing a buffer down to
-        // libuv. Most of this implementation avoids allocations because of the
-        // blocking guarantee (all stack local variables are valid for the
-        // entire read/write request). If our write request can be timed out,
-        // however, we must heap allocate the data and pass that to the libuv
-        // functions instead. The reason for this is that if we time out and
-        // return, there&#39;s no guarantee that `buf` is a valid buffer any more.
-        //
-        // To do this, the write context has an optionally owned vector of
-        // bytes.
-        </span><span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>may_timeout</span> {<span class='prelude-val'>Some</span>(<span class='ident'>Vec</span>::<span class='ident'>from_slice</span>(<span class='ident'>buf</span>))} <span class='kw'>else</span> {<span class='prelude-val'>None</span>};
+        <span class='comment'>// And here&#39;s where timeouts get a little interesting. Currently, libuv</span>
+        <span class='comment'>// does not support canceling an in-flight write request. Consequently,</span>
+        <span class='comment'>// when a write timeout expires, there&#39;s not much we can do other than</span>
+        <span class='comment'>// detach the sleeping task from the write request itself. Semantically,</span>
+        <span class='comment'>// this means that the write request will complete asynchronously, but</span>
+        <span class='comment'>// the calling task will return error (because the write timed out).</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// There is special wording in the documentation of set_write_timeout()</span>
+        <span class='comment'>// indicating that this is a plausible failure scenario, and this</span>
+        <span class='comment'>// function is why that wording exists.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// Implementation-wise, we must be careful when passing a buffer down to</span>
+        <span class='comment'>// libuv. Most of this implementation avoids allocations because of the</span>
+        <span class='comment'>// blocking guarantee (all stack local variables are valid for the</span>
+        <span class='comment'>// entire read/write request). If our write request can be timed out,</span>
+        <span class='comment'>// however, we must heap allocate the data and pass that to the libuv</span>
+        <span class='comment'>// functions instead. The reason for this is that if we time out and</span>
+        <span class='comment'>// return, there&#39;s no guarantee that `buf` is a valid buffer any more.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// To do this, the write context has an optionally owned vector of</span>
+        <span class='comment'>// bytes.</span>
+        <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>may_timeout</span> {<span class='prelude-val'>Some</span>(<span class='ident'>Vec</span>::<span class='ident'>from_slice</span>(<span class='ident'>buf</span>))} <span class='kw'>else</span> {<span class='prelude-val'>None</span>};
         <span class='kw'>let</span> <span class='ident'>uv_buf</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>may_timeout</span> {
             <span class='ident'>slice_to_uv_buf</span>(<span class='ident'>data</span>.<span class='ident'>get_ref</span>().<span class='ident'>as_slice</span>())
         } <span class='kw'>else</span> {
             <span class='ident'>slice_to_uv_buf</span>(<span class='ident'>buf</span>)
-        };<span class='comment'>
+        };
 
-        // Send off the request, but be careful to not block until we&#39;re sure
-        // that the write request is queued. If the request couldn&#39;t be queued,
-        // then we should return immediately with an error.
-        </span><span class='kw'>match</span> <span class='kw'>unsafe</span> {
+        <span class='comment'>// Send off the request, but be careful to not block until we&#39;re sure</span>
+        <span class='comment'>// that the write request is queued. If the request couldn&#39;t be queued,</span>
+        <span class='comment'>// then we should return immediately with an error.</span>
+        <span class='kw'>match</span> <span class='kw'>unsafe</span> {
             <span class='ident'>uvll</span>::<span class='ident'>uv_write</span>(<span class='ident'>req</span>.<span class='ident'>handle</span>, <span class='self'>self</span>.<span class='ident'>handle</span>, [<span class='ident'>uv_buf</span>], <span class='ident'>write_cb</span>)
         } {
             <span class='number'>0</span> <span class='op'>=&gt;</span> {
@@ -502,9 +500,9 @@
                     <span class='ident'>stream</span>: <span class='self'>self</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> _,
                     <span class='ident'>data</span>: <span class='ident'>data</span>,
                 };
-                <span class='ident'>req</span>.<span class='ident'>defuse</span>();<span class='comment'> // uv callback now owns this request
+                <span class='ident'>req</span>.<span class='ident'>defuse</span>(); <span class='comment'>// uv callback now owns this request</span>
 
-                </span><span class='kw'>let</span> <span class='ident'>loop_</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>uvll</span>::<span class='ident'>get_loop_for_uv_handle</span>(<span class='self'>self</span>.<span class='ident'>handle</span>) };
+                <span class='kw'>let</span> <span class='ident'>loop_</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>uvll</span>::<span class='ident'>get_loop_for_uv_handle</span>(<span class='self'>self</span>.<span class='ident'>handle</span>) };
                 <span class='ident'>wait_until_woken_after</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>blocked_writer</span>,
                                        <span class='kw-2'>&amp;</span><span class='ident'>Loop</span>::<span class='ident'>wrap</span>(<span class='ident'>loop_</span>), <span class='op'>||</span> {
                     <span class='ident'>req</span>.<span class='ident'>set_data</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>wcx</span>);
@@ -516,23 +514,23 @@
                         <span class='number'>0</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(()),
                         <span class='ident'>n</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>UvError</span>(<span class='ident'>n</span>)),
                     }
-                }<span class='comment'>
+                }
 
-                // This is the second case where canceling an in-flight write
-                // gets interesting. If we&#39;ve been canceled (no one reset our
-                // result), then someone still needs to free the request, and
-                // someone still needs to free the allocate buffer.
-                //
-                // To take care of this, we swap out the stack-allocated write
-                // context for a heap-allocated context, transferring ownership
-                // of everything to the write_cb. Libuv guarantees that this
-                // callback will be invoked at some point, and the callback will
-                // be responsible for deallocating these resources.
-                //
-                // Note that we don&#39;t cache this write request back in the
-                // stream watcher because we no longer have ownership of it, and
-                // we never will.
-                </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>new_wcx</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>WriteContext</span> {
+                <span class='comment'>// This is the second case where canceling an in-flight write</span>
+                <span class='comment'>// gets interesting. If we&#39;ve been canceled (no one reset our</span>
+                <span class='comment'>// result), then someone still needs to free the request, and</span>
+                <span class='comment'>// someone still needs to free the allocate buffer.</span>
+                <span class='comment'>//</span>
+                <span class='comment'>// To take care of this, we swap out the stack-allocated write</span>
+                <span class='comment'>// context for a heap-allocated context, transferring ownership</span>
+                <span class='comment'>// of everything to the write_cb. Libuv guarantees that this</span>
+                <span class='comment'>// callback will be invoked at some point, and the callback will</span>
+                <span class='comment'>// be responsible for deallocating these resources.</span>
+                <span class='comment'>//</span>
+                <span class='comment'>// Note that we don&#39;t cache this write request back in the</span>
+                <span class='comment'>// stream watcher because we no longer have ownership of it, and</span>
+                <span class='comment'>// we never will.</span>
+                <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>new_wcx</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>WriteContext</span> {
                     <span class='ident'>result</span>: <span class='number'>0</span>,
                     <span class='ident'>stream</span>: <span class='number'>0</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>StreamWatcher</span>,
                     <span class='ident'>data</span>: <span class='ident'>wcx</span>.<span class='ident'>data</span>.<span class='ident'>take</span>(),
@@ -550,52 +548,52 @@
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>cancel_write</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>BlockedTask</span><span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>blocked_writer</span>.<span class='ident'>take</span>()
     }
-}<span class='comment'>
+}
 
-// This allocation callback expects to be invoked once and only once. It will
-// unwrap the buffer in the ReadContext stored in the stream and return it. This
-// will fail if it is called more than once.
-</span><span class='kw'>extern</span> <span class='kw'>fn</span> <span class='ident'>alloc_cb</span>(<span class='ident'>stream</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uvll</span>::<span class='ident'>uv_stream_t</span>, <span class='ident'>_hint</span>: <span class='ident'>size_t</span>, <span class='ident'>buf</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Buf</span>) {
+<span class='comment'>// This allocation callback expects to be invoked once and only once. It will</span>
+<span class='comment'>// unwrap the buffer in the ReadContext stored in the stream and return it. This</span>
+<span class='comment'>// will fail if it is called more than once.</span>
+<span class='kw'>extern</span> <span class='kw'>fn</span> <span class='ident'>alloc_cb</span>(<span class='ident'>stream</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uvll</span>::<span class='ident'>uv_stream_t</span>, <span class='ident'>_hint</span>: <span class='ident'>size_t</span>, <span class='ident'>buf</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Buf</span>) {
     <span class='macro'>uvdebug</span><span class='macro'>!</span>(<span class='string'>&quot;alloc_cb&quot;</span>);
     <span class='kw'>unsafe</span> {
         <span class='kw'>let</span> <span class='ident'>rcx</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>ReadContext</span> <span class='op'>=</span>
             <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>uvll</span>::<span class='ident'>get_data_for_uv_handle</span>(<span class='ident'>stream</span>));
         <span class='op'>*</span><span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>rcx</span>.<span class='ident'>buf</span>.<span class='ident'>take</span>().<span class='ident'>expect</span>(<span class='string'>&quot;stream alloc_cb called more than once&quot;</span>);
     }
-}<span class='comment'>
+}
 
-// When a stream has read some data, we will always forcibly stop reading and
-// return all the data read (even if it didn&#39;t fill the whole buffer).
-</span><span class='kw'>extern</span> <span class='kw'>fn</span> <span class='ident'>read_cb</span>(<span class='ident'>handle</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uvll</span>::<span class='ident'>uv_stream_t</span>, <span class='ident'>nread</span>: <span class='ident'>ssize_t</span>,
+<span class='comment'>// When a stream has read some data, we will always forcibly stop reading and</span>
+<span class='comment'>// return all the data read (even if it didn&#39;t fill the whole buffer).</span>
+<span class='kw'>extern</span> <span class='kw'>fn</span> <span class='ident'>read_cb</span>(<span class='ident'>handle</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uvll</span>::<span class='ident'>uv_stream_t</span>, <span class='ident'>nread</span>: <span class='ident'>ssize_t</span>,
                   <span class='ident'>_buf</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>Buf</span>) {
     <span class='macro'>uvdebug</span><span class='macro'>!</span>(<span class='string'>&quot;read_cb {}&quot;</span>, <span class='ident'>nread</span>);
     <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>nread</span> <span class='op'>!=</span> <span class='ident'>uvll</span>::<span class='ident'>ECANCELED</span> <span class='kw'>as</span> <span class='ident'>ssize_t</span>);
     <span class='kw'>let</span> <span class='ident'>rcx</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>ReadContext</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {
         <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>uvll</span>::<span class='ident'>get_data_for_uv_handle</span>(<span class='ident'>handle</span>))
-    };<span class='comment'>
-    // Stop reading so that no read callbacks are
-    // triggered before the user calls `read` again.
-    // FIXME: Is there a performance impact to calling
-    // stop here?
-    </span><span class='kw'>unsafe</span> { <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>uvll</span>::<span class='ident'>uv_read_stop</span>(<span class='ident'>handle</span>), <span class='number'>0</span>); }
+    };
+    <span class='comment'>// Stop reading so that no read callbacks are</span>
+    <span class='comment'>// triggered before the user calls `read` again.</span>
+    <span class='comment'>// FIXME: Is there a performance impact to calling</span>
+    <span class='comment'>// stop here?</span>
+    <span class='kw'>unsafe</span> { <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>uvll</span>::<span class='ident'>uv_read_stop</span>(<span class='ident'>handle</span>), <span class='number'>0</span>); }
     <span class='ident'>rcx</span>.<span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>nread</span>;
 
     <span class='ident'>wakeup</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>rcx</span>.<span class='ident'>task</span>);
-}<span class='comment'>
+}
 
-// Unlike reading, the WriteContext is stored in the uv_write_t request. Like
-// reading, however, all this does is wake up the blocked task after squirreling
-// away the error code as a result.
-</span><span class='kw'>extern</span> <span class='kw'>fn</span> <span class='ident'>write_cb</span>(<span class='ident'>req</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uvll</span>::<span class='ident'>uv_write_t</span>, <span class='ident'>status</span>: <span class='ident'>c_int</span>) {
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>req</span> <span class='op'>=</span> <span class='ident'>Request</span>::<span class='ident'>wrap</span>(<span class='ident'>req</span>);<span class='comment'>
-    // Remember to not free the request because it is re-used between writes on
-    // the same stream.
-    </span><span class='kw'>let</span> <span class='ident'>wcx</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>WriteContext</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>req</span>.<span class='ident'>get_data</span>() };
-    <span class='ident'>wcx</span>.<span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>status</span>;<span class='comment'>
+<span class='comment'>// Unlike reading, the WriteContext is stored in the uv_write_t request. Like</span>
+<span class='comment'>// reading, however, all this does is wake up the blocked task after squirreling</span>
+<span class='comment'>// away the error code as a result.</span>
+<span class='kw'>extern</span> <span class='kw'>fn</span> <span class='ident'>write_cb</span>(<span class='ident'>req</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>uvll</span>::<span class='ident'>uv_write_t</span>, <span class='ident'>status</span>: <span class='ident'>c_int</span>) {
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>req</span> <span class='op'>=</span> <span class='ident'>Request</span>::<span class='ident'>wrap</span>(<span class='ident'>req</span>);
+    <span class='comment'>// Remember to not free the request because it is re-used between writes on</span>
+    <span class='comment'>// the same stream.</span>
+    <span class='kw'>let</span> <span class='ident'>wcx</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>WriteContext</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>req</span>.<span class='ident'>get_data</span>() };
+    <span class='ident'>wcx</span>.<span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>status</span>;
 
-    // If the stream is present, we haven&#39;t timed out, otherwise we acquire
-    // ownership of everything and then deallocate it all at once.
-    </span><span class='kw'>if</span> <span class='ident'>wcx</span>.<span class='ident'>stream</span> <span class='kw'>as</span> <span class='ident'>uint</span> <span class='op'>!=</span> <span class='number'>0</span> {
+    <span class='comment'>// If the stream is present, we haven&#39;t timed out, otherwise we acquire</span>
+    <span class='comment'>// ownership of everything and then deallocate it all at once.</span>
+    <span class='kw'>if</span> <span class='ident'>wcx</span>.<span class='ident'>stream</span> <span class='kw'>as</span> <span class='ident'>uint</span> <span class='op'>!=</span> <span class='number'>0</span> {
         <span class='ident'>req</span>.<span class='ident'>defuse</span>();
         <span class='kw'>let</span> <span class='ident'>stream</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>StreamWatcher</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='ident'>wcx</span>.<span class='ident'>stream</span> };
         <span class='ident'>wakeup</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stream</span>.<span class='ident'>blocked_writer</span>);
@@ -645,11 +643,11 @@
     <script>
         window.rootPath = "../../../../../../../../../";
         window.currentCrate = "rustuv";
-        window.playgroundUrl = "";
+        window.playgroundUrl = "http://play.rust-lang.org/";
     </script>
     <script src="../../../../../../../../../jquery.js"></script>
     <script src="../../../../../../../../../main.js"></script>
-    
+    <script src="../../../../../../../../../playpen.js"></script>
     <script async src="../../../../../../../../../search-index.js"></script>
 </body>
 </html>

@@ -8,8 +8,6 @@
     <link rel="stylesheet" type="text/css" href="rust.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
-<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400'
-        rel='stylesheet' type='text/css'>
 
 
 </head>
@@ -23,9 +21,9 @@
 
     <div id="versioninfo">
   <img src="http://www.rust-lang.org/logos/rust-logo-32x32-blk.png" width="32" height="32" alt><br>
-  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.11.0-pre</span><br>
-  <a href="http://github.com/rust-lang/rust/commit/169c988d09a9d4e46de2b7fead9489e94964c7c7"
-    class="hash white-sticker">169c988d</a>
+  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.11.0</span><br>
+  <a href="http://github.com/rust-lang/rust/commit/305cf1f1098dc87e346003e6bf7e7cca5705a135"
+    class="hash white-sticker">305cf1f1</a>
 </div>
 
 
@@ -260,8 +258,8 @@ pub fn uncompress(src: &amp;[u8]) -&gt; Option&lt;Vec&lt;u8&gt;&gt; {
             <span class='ident'>dst</span>.<span class='ident'>set_len</span>(<span class='ident'>dstlen</span> <span class='kw'>as</span> <span class='ident'>uint</span>);
             <span class='prelude-val'>Some</span>(<span class='ident'>dst</span>)
         } <span class='kw'>else</span> {
-            <span class='prelude-val'>None</span><span class='comment'> // SNAPPY_INVALID_INPUT
-        </span>}
+            <span class='prelude-val'>None</span> <span class='comment'>// SNAPPY_INVALID_INPUT</span>
+        }
     }
 }
 </pre>
@@ -341,8 +339,8 @@ fn main() {
 <span class='kw'>fn</span> <span class='ident'>main</span>() {
     <span class='kw'>unsafe</span> {
         <span class='ident'>register_callback</span>(<span class='ident'>callback</span>);
-        <span class='ident'>trigger_callback</span>();<span class='comment'> // Triggers the callback
-    </span>}
+        <span class='ident'>trigger_callback</span>(); <span class='comment'>// Triggers the callback</span>
+    }
 }
 </pre>
 
@@ -408,15 +406,15 @@ fn main() {
 }</span><pre id='rust-example-rendered-6' class='rust '>
 
 <span class='kw'>struct</span> <span class='ident'>RustObject</span> {
-    <span class='ident'>a</span>: <span class='ident'>i32</span>,<span class='comment'>
-    // other members
-</span>}
+    <span class='ident'>a</span>: <span class='ident'>i32</span>,
+    <span class='comment'>// other members</span>
+}
 
 <span class='kw'>extern</span> <span class='kw'>fn</span> <span class='ident'>callback</span>(<span class='ident'>target</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>RustObject</span>, <span class='ident'>a</span>:<span class='ident'>i32</span>) {
     <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;I&#39;m called from C with value {0}&quot;</span>, <span class='ident'>a</span>);
-    <span class='kw'>unsafe</span> {<span class='comment'>
-        // Update the value in RustObject with the value received from the callback
-        </span>(<span class='op'>*</span><span class='ident'>target</span>).<span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>a</span>;
+    <span class='kw'>unsafe</span> {
+        <span class='comment'>// Update the value in RustObject with the value received from the callback</span>
+        (<span class='op'>*</span><span class='ident'>target</span>).<span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>a</span>;
     }
 }
 
@@ -427,9 +425,9 @@ fn main() {
    <span class='kw'>fn</span> <span class='ident'>trigger_callback</span>();
 }
 
-<span class='kw'>fn</span> <span class='ident'>main</span>() {<span class='comment'>
-    // Create the object that will be referenced in the callback
-    </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>rust_object</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>RustObject</span> { <span class='ident'>a</span>: <span class='number'>5</span> };
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='comment'>// Create the object that will be referenced in the callback</span>
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>rust_object</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>RustObject</span> { <span class='ident'>a</span>: <span class='number'>5</span> };
 
     <span class='kw'>unsafe</span> {
         <span class='ident'>register_callback</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='ident'>rust_object</span>, <span class='ident'>callback</span>);
@@ -630,9 +628,9 @@ fn main() {
 
 <span class='kw'>fn</span> <span class='ident'>main</span>() {
     <span class='string'>&quot;[my-awesome-shell] $&quot;</span>.<span class='ident'>with_c_str</span>(<span class='op'>|</span><span class='ident'>buf</span><span class='op'>|</span> {
-        <span class='kw'>unsafe</span> { <span class='ident'>rl_prompt</span> <span class='op'>=</span> <span class='ident'>buf</span>; }<span class='comment'>
-        // get a line, process it
-        </span><span class='kw'>unsafe</span> { <span class='ident'>rl_prompt</span> <span class='op'>=</span> <span class='ident'>ptr</span>::<span class='ident'>null</span>(); }
+        <span class='kw'>unsafe</span> { <span class='ident'>rl_prompt</span> <span class='op'>=</span> <span class='ident'>buf</span>; }
+        <span class='comment'>// get a line, process it</span>
+        <span class='kw'>unsafe</span> { <span class='ident'>rl_prompt</span> <span class='op'>=</span> <span class='ident'>ptr</span>::<span class='ident'>null</span>(); }
     });
 }
 </pre>

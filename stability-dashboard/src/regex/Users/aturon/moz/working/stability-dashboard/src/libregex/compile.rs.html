@@ -7,8 +7,6 @@
 
     <title>compile.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -314,19 +312,19 @@
 <span id='272'>272</span>
 <span id='273'>273</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2014 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2014 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-// Enable this to squash warnings due to exporting pieces of the representation
-// for use with the regex! macro. See lib.rs for explanation.
-</span><span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>visible_private_types</span>)]</span>
+<span class='comment'>// Enable this to squash warnings due to exporting pieces of the representation</span>
+<span class='comment'>// for use with the regex! macro. See lib.rs for explanation.</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>visible_private_types</span>)]</span>
 
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cmp</span>;
 <span class='kw'>use</span> <span class='ident'>parse</span>;
@@ -340,50 +338,50 @@
 <span class='kw'>type</span> <span class='ident'>InstIdx</span> <span class='op'>=</span> <span class='ident'>uint</span>;
 
 <span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Show</span>, <span class='ident'>Clone</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>Inst</span> {<span class='comment'>
-    // When a Match instruction is executed, the current thread is successful.
-    </span><span class='ident'>Match</span>,<span class='comment'>
+<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>Inst</span> {
+    <span class='comment'>// When a Match instruction is executed, the current thread is successful.</span>
+    <span class='ident'>Match</span>,
 
-    // The OneChar instruction matches a literal character.
-    // The flags indicate whether to do a case insensitive match.
-    </span><span class='ident'>OneChar</span>(<span class='ident'>char</span>, <span class='ident'>Flags</span>),<span class='comment'>
+    <span class='comment'>// The OneChar instruction matches a literal character.</span>
+    <span class='comment'>// The flags indicate whether to do a case insensitive match.</span>
+    <span class='ident'>OneChar</span>(<span class='ident'>char</span>, <span class='ident'>Flags</span>),
 
-    // The CharClass instruction tries to match one input character against
-    // the range of characters given.
-    // The flags indicate whether to do a case insensitive match and whether
-    // the character class is negated or not.
-    </span><span class='ident'>CharClass</span>(<span class='ident'>Vec</span><span class='op'>&lt;</span>(<span class='ident'>char</span>, <span class='ident'>char</span>)<span class='op'>&gt;</span>, <span class='ident'>Flags</span>),<span class='comment'>
+    <span class='comment'>// The CharClass instruction tries to match one input character against</span>
+    <span class='comment'>// the range of characters given.</span>
+    <span class='comment'>// The flags indicate whether to do a case insensitive match and whether</span>
+    <span class='comment'>// the character class is negated or not.</span>
+    <span class='ident'>CharClass</span>(<span class='ident'>Vec</span><span class='op'>&lt;</span>(<span class='ident'>char</span>, <span class='ident'>char</span>)<span class='op'>&gt;</span>, <span class='ident'>Flags</span>),
 
-    // Matches any character except new lines.
-    // The flags indicate whether to include the &#39;\n&#39; character.
-    </span><span class='ident'>Any</span>(<span class='ident'>Flags</span>),<span class='comment'>
+    <span class='comment'>// Matches any character except new lines.</span>
+    <span class='comment'>// The flags indicate whether to include the &#39;\n&#39; character.</span>
+    <span class='ident'>Any</span>(<span class='ident'>Flags</span>),
 
-    // Matches the beginning of the string, consumes no characters.
-    // The flags indicate whether it matches if the preceding character
-    // is a new line.
-    </span><span class='ident'>EmptyBegin</span>(<span class='ident'>Flags</span>),<span class='comment'>
+    <span class='comment'>// Matches the beginning of the string, consumes no characters.</span>
+    <span class='comment'>// The flags indicate whether it matches if the preceding character</span>
+    <span class='comment'>// is a new line.</span>
+    <span class='ident'>EmptyBegin</span>(<span class='ident'>Flags</span>),
 
-    // Matches the end of the string, consumes no characters.
-    // The flags indicate whether it matches if the proceeding character
-    // is a new line.
-    </span><span class='ident'>EmptyEnd</span>(<span class='ident'>Flags</span>),<span class='comment'>
+    <span class='comment'>// Matches the end of the string, consumes no characters.</span>
+    <span class='comment'>// The flags indicate whether it matches if the proceeding character</span>
+    <span class='comment'>// is a new line.</span>
+    <span class='ident'>EmptyEnd</span>(<span class='ident'>Flags</span>),
 
-    // Matches a word boundary (\w on one side and \W \A or \z on the other),
-    // and consumes no character.
-    // The flags indicate whether this matches a word boundary or something
-    // that isn&#39;t a word boundary.
-    </span><span class='ident'>EmptyWordBoundary</span>(<span class='ident'>Flags</span>),<span class='comment'>
+    <span class='comment'>// Matches a word boundary (\w on one side and \W \A or \z on the other),</span>
+    <span class='comment'>// and consumes no character.</span>
+    <span class='comment'>// The flags indicate whether this matches a word boundary or something</span>
+    <span class='comment'>// that isn&#39;t a word boundary.</span>
+    <span class='ident'>EmptyWordBoundary</span>(<span class='ident'>Flags</span>),
 
-    // Saves the current position in the input string to the Nth save slot.
-    </span><span class='ident'>Save</span>(<span class='ident'>uint</span>),<span class='comment'>
+    <span class='comment'>// Saves the current position in the input string to the Nth save slot.</span>
+    <span class='ident'>Save</span>(<span class='ident'>uint</span>),
 
-    // Jumps to the instruction at the index given.
-    </span><span class='ident'>Jump</span>(<span class='ident'>InstIdx</span>),<span class='comment'>
+    <span class='comment'>// Jumps to the instruction at the index given.</span>
+    <span class='ident'>Jump</span>(<span class='ident'>InstIdx</span>),
 
-    // Jumps to the instruction at the first index given. If that leads to
-    // a failing state, then the instruction at the second index given is
-    // tried.
-    </span><span class='ident'>Split</span>(<span class='ident'>InstIdx</span>, <span class='ident'>InstIdx</span>),
+    <span class='comment'>// Jumps to the instruction at the first index given. If that leads to</span>
+    <span class='comment'>// a failing state, then the instruction at the second index given is</span>
+    <span class='comment'>// tried.</span>
+    <span class='ident'>Split</span>(<span class='ident'>InstIdx</span>, <span class='ident'>InstIdx</span>),
 }
 
 <span class='doccomment'>/// Program represents a compiled regular expression. Once an expression is</span>
@@ -413,12 +411,12 @@
         <span class='ident'>c</span>.<span class='ident'>insts</span>.<span class='ident'>push</span>(<span class='ident'>Save</span>(<span class='number'>0</span>));
         <span class='ident'>c</span>.<span class='ident'>compile</span>(<span class='ident'>ast</span>);
         <span class='ident'>c</span>.<span class='ident'>insts</span>.<span class='ident'>push</span>(<span class='ident'>Save</span>(<span class='number'>1</span>));
-        <span class='ident'>c</span>.<span class='ident'>insts</span>.<span class='ident'>push</span>(<span class='ident'>Match</span>);<span class='comment'>
+        <span class='ident'>c</span>.<span class='ident'>insts</span>.<span class='ident'>push</span>(<span class='ident'>Match</span>);
 
-        // Try to discover a literal string prefix.
-        // This is a bit hacky since we have to skip over the initial
-        // &#39;Save&#39; instruction.
-        </span><span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>pre</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>with_capacity</span>(<span class='number'>5</span>);
+        <span class='comment'>// Try to discover a literal string prefix.</span>
+        <span class='comment'>// This is a bit hacky since we have to skip over the initial</span>
+        <span class='comment'>// &#39;Save&#39; instruction.</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>pre</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>with_capacity</span>(<span class='number'>5</span>);
         <span class='kw'>for</span> <span class='ident'>inst</span> <span class='kw'>in</span> <span class='ident'>c</span>.<span class='ident'>insts</span>.<span class='ident'>slice_from</span>(<span class='number'>1</span>).<span class='ident'>iter</span>() {
             <span class='kw'>match</span> <span class='op'>*</span><span class='ident'>inst</span> {
                 <span class='ident'>OneChar</span>(<span class='ident'>c</span>, <span class='ident'>FLAG_EMPTY</span>) <span class='op'>=&gt;</span> <span class='ident'>pre</span>.<span class='ident'>push_char</span>(<span class='ident'>c</span>),
@@ -443,22 +441,22 @@
                 <span class='ident'>Save</span>(<span class='ident'>c</span>) <span class='op'>=&gt;</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='ident'>cmp</span>::<span class='ident'>max</span>(<span class='ident'>n</span>, <span class='ident'>c</span><span class='op'>+</span><span class='number'>1</span>),
                 _ <span class='op'>=&gt;</span> {}
             }
-        }<span class='comment'>
-        // There&#39;s exactly 2 Save slots for every capture.
-        </span><span class='ident'>n</span> <span class='op'>/</span> <span class='number'>2</span>
+        }
+        <span class='comment'>// There&#39;s exactly 2 Save slots for every capture.</span>
+        <span class='ident'>n</span> <span class='op'>/</span> <span class='number'>2</span>
     }
 }
 
 <span class='kw'>struct</span> <span class='ident'>Compiler</span><span class='op'>&lt;</span><span class='lifetime'>&#39;r</span><span class='op'>&gt;</span> {
     <span class='ident'>insts</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Inst</span><span class='op'>&gt;</span>,
     <span class='ident'>names</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;&gt;</span>,
-}<span class='comment'>
+}
 
-// The compiler implemented here is extremely simple. Most of the complexity
-// in this crate is in the parser or the VM.
-// The only tricky thing here is patching jump/split instructions to point to
-// the right instruction.
-</span><span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;r</span><span class='op'>&gt;</span> <span class='ident'>Compiler</span><span class='op'>&lt;</span><span class='lifetime'>&#39;r</span><span class='op'>&gt;</span> {
+<span class='comment'>// The compiler implemented here is extremely simple. Most of the complexity</span>
+<span class='comment'>// in this crate is in the parser or the VM.</span>
+<span class='comment'>// The only tricky thing here is patching jump/split instructions to point to</span>
+<span class='comment'>// the right instruction.</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;r</span><span class='op'>&gt;</span> <span class='ident'>Compiler</span><span class='op'>&lt;</span><span class='lifetime'>&#39;r</span><span class='op'>&gt;</span> {
     <span class='kw'>fn</span> <span class='ident'>compile</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>ast</span>: <span class='ident'>parse</span>::<span class='ident'>Ast</span>) {
         <span class='kw'>match</span> <span class='ident'>ast</span> {
             <span class='ident'>Nothing</span> <span class='op'>=&gt;</span> {},
@@ -486,17 +484,17 @@
                 }
             }
             <span class='ident'>Alt</span>(<span class='ident'>x</span>, <span class='ident'>y</span>) <span class='op'>=&gt;</span> {
-                <span class='kw'>let</span> <span class='ident'>split</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>empty_split</span>();<span class='comment'> // push: split 0, 0
-                </span><span class='kw'>let</span> <span class='ident'>j1</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>insts</span>.<span class='ident'>len</span>();
-                <span class='self'>self</span>.<span class='ident'>compile</span>(<span class='op'>*</span><span class='ident'>x</span>);<span class='comment'>                // push: insts for x
-                </span><span class='kw'>let</span> <span class='ident'>jmp</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>empty_jump</span>();<span class='comment'>    // push: jmp 0
-                </span><span class='kw'>let</span> <span class='ident'>j2</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>insts</span>.<span class='ident'>len</span>();
-                <span class='self'>self</span>.<span class='ident'>compile</span>(<span class='op'>*</span><span class='ident'>y</span>);<span class='comment'>                // push: insts for y
-                </span><span class='kw'>let</span> <span class='ident'>j3</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>insts</span>.<span class='ident'>len</span>();
+                <span class='kw'>let</span> <span class='ident'>split</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>empty_split</span>(); <span class='comment'>// push: split 0, 0</span>
+                <span class='kw'>let</span> <span class='ident'>j1</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>insts</span>.<span class='ident'>len</span>();
+                <span class='self'>self</span>.<span class='ident'>compile</span>(<span class='op'>*</span><span class='ident'>x</span>);                <span class='comment'>// push: insts for x</span>
+                <span class='kw'>let</span> <span class='ident'>jmp</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>empty_jump</span>();    <span class='comment'>// push: jmp 0</span>
+                <span class='kw'>let</span> <span class='ident'>j2</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>insts</span>.<span class='ident'>len</span>();
+                <span class='self'>self</span>.<span class='ident'>compile</span>(<span class='op'>*</span><span class='ident'>y</span>);                <span class='comment'>// push: insts for y</span>
+                <span class='kw'>let</span> <span class='ident'>j3</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>insts</span>.<span class='ident'>len</span>();
 
-                <span class='self'>self</span>.<span class='ident'>set_split</span>(<span class='ident'>split</span>, <span class='ident'>j1</span>, <span class='ident'>j2</span>);<span class='comment'>  // split 0, 0 -&gt; split j1, j2
-                </span><span class='self'>self</span>.<span class='ident'>set_jump</span>(<span class='ident'>jmp</span>, <span class='ident'>j3</span>);<span class='comment'>         // jmp 0      -&gt; jmp j3
-            </span>}
+                <span class='self'>self</span>.<span class='ident'>set_split</span>(<span class='ident'>split</span>, <span class='ident'>j1</span>, <span class='ident'>j2</span>);  <span class='comment'>// split 0, 0 -&gt; split j1, j2</span>
+                <span class='self'>self</span>.<span class='ident'>set_jump</span>(<span class='ident'>jmp</span>, <span class='ident'>j3</span>);         <span class='comment'>// jmp 0      -&gt; jmp j3</span>
+            }
             <span class='ident'>Rep</span>(<span class='ident'>x</span>, <span class='ident'>ZeroOne</span>, <span class='ident'>g</span>) <span class='op'>=&gt;</span> {
                 <span class='kw'>let</span> <span class='ident'>split</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>empty_split</span>();
                 <span class='kw'>let</span> <span class='ident'>j1</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>insts</span>.<span class='ident'>len</span>();

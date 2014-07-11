@@ -7,8 +7,6 @@
 
     <title>at_exit_imp.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -105,17 +103,17 @@
 <span id='63'>63</span>
 <span id='64'>64</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>//! Implementation of running at_exit routines</span>
+<span class='doccomment'>//! Implementation of running at_exit routines</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! Documentation can be found on the `rt::at_exit` function.</span>
 
@@ -142,12 +140,12 @@
 }
 
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>push</span>(<span class='ident'>f</span>: <span class='kw'>proc</span>():<span class='ident'>Send</span>) {
-    <span class='kw'>unsafe</span> {<span class='comment'>
-        // Note that the check against 0 for the queue pointer is not atomic at
-        // all with respect to `run`, meaning that this could theoretically be a
-        // use-after-free. There&#39;s not much we can do to protect against that,
-        // however. Let&#39;s just assume a well-behaved runtime and go from there!
-        </span><span class='macro'>rtassert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>RUNNING</span>.<span class='ident'>load</span>(<span class='ident'>atomics</span>::<span class='ident'>SeqCst</span>));
+    <span class='kw'>unsafe</span> {
+        <span class='comment'>// Note that the check against 0 for the queue pointer is not atomic at</span>
+        <span class='comment'>// all with respect to `run`, meaning that this could theoretically be a</span>
+        <span class='comment'>// use-after-free. There&#39;s not much we can do to protect against that,</span>
+        <span class='comment'>// however. Let&#39;s just assume a well-behaved runtime and go from there!</span>
+        <span class='macro'>rtassert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>RUNNING</span>.<span class='ident'>load</span>(<span class='ident'>atomics</span>::<span class='ident'>SeqCst</span>));
         <span class='kw'>let</span> <span class='ident'>queue</span> <span class='op'>=</span> <span class='ident'>QUEUE</span>.<span class='ident'>load</span>(<span class='ident'>atomics</span>::<span class='ident'>SeqCst</span>);
         <span class='macro'>rtassert</span><span class='macro'>!</span>(<span class='ident'>queue</span> <span class='op'>!=</span> <span class='number'>0</span>);
         (<span class='op'>*</span>(<span class='ident'>queue</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>Queue</span>)).<span class='ident'>lock</span>().<span class='ident'>push</span>(<span class='ident'>f</span>);

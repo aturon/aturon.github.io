@@ -7,8 +7,6 @@
 
     <title>local_data.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -474,17 +472,17 @@
 <span id='432'>432</span>
 <span id='433'>433</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2012-2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2012-2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
-</span><span class='doccomment'>/*!
+<span class='doccomment'>/*!
 
 Task local data management
 
@@ -509,12 +507,12 @@ key_vector.replace(Some(vec![4]));
 assert_eq!(*key_vector.get().unwrap(), vec![4]);
 ```
 
-*/</span><span class='comment'>
+*/</span>
 
-// Casting &#39;Arcane Sight&#39; reveals an overwhelming aura of Transmutation
-// magic.
+<span class='comment'>// Casting &#39;Arcane Sight&#39; reveals an overwhelming aura of Transmutation</span>
+<span class='comment'>// magic.</span>
 
-</span><span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
+<span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
 
 <span class='kw'>use</span> <span class='ident'>alloc</span>::<span class='ident'>owned</span>::<span class='ident'>Box</span>;
 <span class='kw'>use</span> <span class='ident'>collections</span>::<span class='ident'>vec</span>::<span class='ident'>Vec</span>;
@@ -543,46 +541,46 @@ assert_eq!(*key_vector.get().unwrap(), vec![4]);
 
 <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
 <span class='kw'>trait</span> <span class='ident'>LocalData</span> {}
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='lifetime'>&#39;static</span><span class='op'>&gt;</span> <span class='ident'>LocalData</span> <span class='kw'>for</span> <span class='ident'>T</span> {}<span class='comment'>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='lifetime'>&#39;static</span><span class='op'>&gt;</span> <span class='ident'>LocalData</span> <span class='kw'>for</span> <span class='ident'>T</span> {}
 
-// The task-local-map stores all TLS information for the currently running task.
-// It is stored as an owned pointer into the runtime, and it&#39;s only allocated
-// when TLS is used for the first time. This map must be very carefully
-// constructed because it has many mutable loans unsoundly handed out on it to
-// the various invocations of TLS requests.
-//
-// One of the most important operations is loaning a value via `get` to a
-// caller. In doing so, the slot that the TLS entry is occupying cannot be
-// invalidated because upon returning its loan state must be updated. Currently
-// the TLS map is a vector, but this is possibly dangerous because the vector
-// can be reallocated/moved when new values are pushed onto it.
-//
-// This problem currently isn&#39;t solved in a very elegant way. Inside the `get`
-// function, it internally &quot;invalidates&quot; all references after the loan is
-// finished and looks up into the vector again. In theory this will prevent
-// pointers from being moved under our feet so long as LLVM doesn&#39;t go too crazy
-// with the optimizations.
-//
-// n.b. If TLS is used heavily in future, this could be made more efficient with
-//      a proper map.
-</span><span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
+<span class='comment'>// The task-local-map stores all TLS information for the currently running task.</span>
+<span class='comment'>// It is stored as an owned pointer into the runtime, and it&#39;s only allocated</span>
+<span class='comment'>// when TLS is used for the first time. This map must be very carefully</span>
+<span class='comment'>// constructed because it has many mutable loans unsoundly handed out on it to</span>
+<span class='comment'>// the various invocations of TLS requests.</span>
+<span class='comment'>//</span>
+<span class='comment'>// One of the most important operations is loaning a value via `get` to a</span>
+<span class='comment'>// caller. In doing so, the slot that the TLS entry is occupying cannot be</span>
+<span class='comment'>// invalidated because upon returning its loan state must be updated. Currently</span>
+<span class='comment'>// the TLS map is a vector, but this is possibly dangerous because the vector</span>
+<span class='comment'>// can be reallocated/moved when new values are pushed onto it.</span>
+<span class='comment'>//</span>
+<span class='comment'>// This problem currently isn&#39;t solved in a very elegant way. Inside the `get`</span>
+<span class='comment'>// function, it internally &quot;invalidates&quot; all references after the loan is</span>
+<span class='comment'>// finished and looks up into the vector again. In theory this will prevent</span>
+<span class='comment'>// pointers from being moved under our feet so long as LLVM doesn&#39;t go too crazy</span>
+<span class='comment'>// with the optimizations.</span>
+<span class='comment'>//</span>
+<span class='comment'>// n.b. If TLS is used heavily in future, this could be made more efficient with</span>
+<span class='comment'>//      a proper map.</span>
+<span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>Map</span> <span class='op'>=</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='prelude-ty'>Option</span><span class='op'>&lt;</span>(<span class='op'>*</span><span class='kw'>const</span> <span class='ident'>u8</span>, <span class='ident'>TLSValue</span>, <span class='ident'>uint</span>)<span class='op'>&gt;&gt;</span>;
-<span class='kw'>type</span> <span class='ident'>TLSValue</span> <span class='op'>=</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>LocalData</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>;<span class='comment'>
+<span class='kw'>type</span> <span class='ident'>TLSValue</span> <span class='op'>=</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>LocalData</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>;
 
-// Gets the map from the runtime. Lazily initialises if not done so already.
-</span><span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>get_local_map</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Map</span><span class='op'>&gt;</span> {
+<span class='comment'>// Gets the map from the runtime. Lazily initialises if not done so already.</span>
+<span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>get_local_map</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Map</span><span class='op'>&gt;</span> {
     <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>Local</span>::<span class='ident'>exists</span>(<span class='prelude-val'>None</span>::<span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) { <span class='kw'>return</span> <span class='prelude-val'>None</span> }
 
     <span class='kw'>let</span> <span class='ident'>task</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Task</span> <span class='op'>=</span> <span class='ident'>Local</span>::<span class='ident'>unsafe_borrow</span>();
-    <span class='kw'>match</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> (<span class='op'>*</span><span class='ident'>task</span>).<span class='ident'>storage</span> {<span class='comment'>
-        // If the at_exit function is already set, then we just need to take
-        // a loan out on the TLS map stored inside
-        </span><span class='kw-2'>&amp;</span><span class='ident'>LocalStorage</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>map_ptr</span>)) <span class='op'>=&gt;</span> {
+    <span class='kw'>match</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> (<span class='op'>*</span><span class='ident'>task</span>).<span class='ident'>storage</span> {
+        <span class='comment'>// If the at_exit function is already set, then we just need to take</span>
+        <span class='comment'>// a loan out on the TLS map stored inside</span>
+        <span class='kw-2'>&amp;</span><span class='ident'>LocalStorage</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>map_ptr</span>)) <span class='op'>=&gt;</span> {
             <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>map_ptr</span>);
-        }<span class='comment'>
-        // If this is the first time we&#39;ve accessed TLS, perform similar
-        // actions to the oldsched way of doing things.
-        </span><span class='kw-2'>&amp;</span><span class='ident'>LocalStorage</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>slot</span>) <span class='op'>=&gt;</span> {
+        }
+        <span class='comment'>// If this is the first time we&#39;ve accessed TLS, perform similar</span>
+        <span class='comment'>// actions to the oldsched way of doing things.</span>
+        <span class='kw-2'>&amp;</span><span class='ident'>LocalStorage</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>slot</span>) <span class='op'>=&gt;</span> {
             <span class='op'>*</span><span class='ident'>slot</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>Vec</span>::<span class='ident'>new</span>());
             <span class='kw'>match</span> <span class='op'>*</span><span class='ident'>slot</span> {
                 <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>map_ptr</span>) <span class='op'>=&gt;</span> { <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>map_ptr</span>) }
@@ -600,10 +598,10 @@ assert_eq!(*key_vector.get().unwrap(), vec![4]);
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// The task-local data can be accessed through this value, and when this</span>
 <span class='doccomment'>/// structure is dropped it will return the borrow on the data.</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Ref</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {<span class='comment'>
-    // FIXME #12808: strange names to try to avoid interfering with
-    // field accesses of the contained type via Deref
-    </span><span class='ident'>_ptr</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>T</span>,
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Ref</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+    <span class='comment'>// FIXME #12808: strange names to try to avoid interfering with</span>
+    <span class='comment'>// field accesses of the contained type via Deref</span>
+    <span class='ident'>_ptr</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>T</span>,
     <span class='ident'>_key</span>: <span class='ident'>Key</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>,
     <span class='ident'>_index</span>: <span class='ident'>uint</span>,
     <span class='ident'>_nosend</span>: <span class='ident'>marker</span>::<span class='ident'>NoSend</span>,
@@ -634,22 +632,22 @@ assert_eq!(*key_vector.get().unwrap(), vec![4]);
             <span class='prelude-val'>Some</span>(<span class='ident'>map</span>) <span class='op'>=&gt;</span> <span class='ident'>map</span>,
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;must have a local task to insert into TLD&quot;</span>),
         };
-        <span class='kw'>let</span> <span class='ident'>keyval</span> <span class='op'>=</span> <span class='ident'>key_to_key_value</span>(<span class='self'>self</span>);<span class='comment'>
+        <span class='kw'>let</span> <span class='ident'>keyval</span> <span class='op'>=</span> <span class='ident'>key_to_key_value</span>(<span class='self'>self</span>);
 
-        // When the task-local map is destroyed, all the data needs to be
-        // cleaned up. For this reason we can&#39;t do some clever tricks to store
-        // &#39;~T&#39; as a &#39;*c_void&#39; or something like that. To solve the problem, we
-        // cast everything to a trait (LocalData) which is then stored inside
-        // the map.  Upon destruction of the map, all the objects will be
-        // destroyed and the traits have enough information about them to
-        // destroy themselves.
-        //
-        // Additionally, the type of the local data map must ascribe to Send, so
-        // we do the transmute here to add the Send bound back on. This doesn&#39;t
-        // actually matter because TLS will always own the data (until its moved
-        // out) and we&#39;re not actually sending it to other schedulers or
-        // anything.
-        </span><span class='kw'>let</span> <span class='ident'>newval</span> <span class='op'>=</span> <span class='ident'>data</span>.<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>d</span><span class='op'>|</span> {
+        <span class='comment'>// When the task-local map is destroyed, all the data needs to be</span>
+        <span class='comment'>// cleaned up. For this reason we can&#39;t do some clever tricks to store</span>
+        <span class='comment'>// &#39;~T&#39; as a &#39;*c_void&#39; or something like that. To solve the problem, we</span>
+        <span class='comment'>// cast everything to a trait (LocalData) which is then stored inside</span>
+        <span class='comment'>// the map.  Upon destruction of the map, all the objects will be</span>
+        <span class='comment'>// destroyed and the traits have enough information about them to</span>
+        <span class='comment'>// destroy themselves.</span>
+        <span class='comment'>//</span>
+        <span class='comment'>// Additionally, the type of the local data map must ascribe to Send, so</span>
+        <span class='comment'>// we do the transmute here to add the Send bound back on. This doesn&#39;t</span>
+        <span class='comment'>// actually matter because TLS will always own the data (until its moved</span>
+        <span class='comment'>// out) and we&#39;re not actually sending it to other schedulers or</span>
+        <span class='comment'>// anything.</span>
+        <span class='kw'>let</span> <span class='ident'>newval</span> <span class='op'>=</span> <span class='ident'>data</span>.<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>d</span><span class='op'>|</span> {
             <span class='kw'>let</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>d</span> <span class='kw'>as</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>LocalData</span><span class='op'>&gt;</span>;
             <span class='kw'>let</span> <span class='ident'>d</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>LocalData</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>d</span>) };
             (<span class='ident'>keyval</span>, <span class='ident'>d</span>, <span class='number'>0</span>)
@@ -664,15 +662,15 @@ assert_eq!(*key_vector.get().unwrap(), vec![4]);
 
         <span class='kw'>match</span> <span class='ident'>pos</span> {
             <span class='prelude-val'>Some</span>(<span class='ident'>i</span>) <span class='op'>=&gt;</span> {
-                <span class='ident'>mem</span>::<span class='ident'>replace</span>(<span class='ident'>map</span>.<span class='ident'>get_mut</span>(<span class='ident'>i</span>), <span class='ident'>newval</span>).<span class='ident'>map</span>(<span class='op'>|</span>(_, <span class='ident'>data</span>, _)<span class='op'>|</span> {<span class='comment'>
-                    // Move `data` into transmute to get out the memory that it
-                    // owns, we must free it manually later.
-                    </span><span class='kw'>let</span> <span class='ident'>t</span>: <span class='ident'>raw</span>::<span class='ident'>TraitObject</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>data</span>) };
-                    <span class='kw'>let</span> <span class='ident'>alloc</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>t</span>.<span class='ident'>data</span>) };<span class='comment'>
+                <span class='ident'>mem</span>::<span class='ident'>replace</span>(<span class='ident'>map</span>.<span class='ident'>get_mut</span>(<span class='ident'>i</span>), <span class='ident'>newval</span>).<span class='ident'>map</span>(<span class='op'>|</span>(_, <span class='ident'>data</span>, _)<span class='op'>|</span> {
+                    <span class='comment'>// Move `data` into transmute to get out the memory that it</span>
+                    <span class='comment'>// owns, we must free it manually later.</span>
+                    <span class='kw'>let</span> <span class='ident'>t</span>: <span class='ident'>raw</span>::<span class='ident'>TraitObject</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>data</span>) };
+                    <span class='kw'>let</span> <span class='ident'>alloc</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>t</span>.<span class='ident'>data</span>) };
 
-                    // Now that we own `alloc`, we can just move out of it as we
-                    // would with any other data.
-                    </span><span class='op'>*</span><span class='ident'>alloc</span>
+                    <span class='comment'>// Now that we own `alloc`, we can just move out of it as we</span>
+                    <span class='comment'>// would with any other data.</span>
+                    <span class='op'>*</span><span class='ident'>alloc</span>
                 })
             }
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
@@ -706,12 +704,12 @@ assert_eq!(*key_vector.get().unwrap(), vec![4]);
         };
 
         <span class='self'>self</span>.<span class='ident'>find</span>(<span class='ident'>map</span>).<span class='ident'>map</span>(<span class='op'>|</span>(<span class='ident'>pos</span>, <span class='ident'>data</span>, <span class='ident'>loan</span>)<span class='op'>|</span> {
-            <span class='op'>*</span><span class='ident'>loan</span> <span class='op'>+=</span> <span class='number'>1</span>;<span class='comment'>
+            <span class='op'>*</span><span class='ident'>loan</span> <span class='op'>+=</span> <span class='number'>1</span>;
 
-            // data was created with `~T as ~LocalData`, so we extract
-            // pointer part of the trait, (as ~T), and then use
-            // compiler coercions to achieve a &#39;&amp;&#39; pointer.
-            </span><span class='kw'>let</span> <span class='ident'>ptr</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {
+            <span class='comment'>// data was created with `~T as ~LocalData`, so we extract</span>
+            <span class='comment'>// pointer part of the trait, (as ~T), and then use</span>
+            <span class='comment'>// compiler coercions to achieve a &#39;&amp;&#39; pointer.</span>
+            <span class='kw'>let</span> <span class='ident'>ptr</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {
                 <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>data</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>LocalData</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>
                                 <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>raw</span>::<span class='ident'>TraitObject</span>;
                 <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span>((<span class='op'>*</span><span class='ident'>data</span>).<span class='ident'>data</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span>)
@@ -759,16 +757,16 @@ assert_eq!(*key_vector.get().unwrap(), vec![4]);
     <span class='kw'>fn</span> <span class='ident'>test_tls_multitask</span>() {
         <span class='kw'>static</span> <span class='ident'>my_key</span>: <span class='ident'>Key</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>Key</span>;
         <span class='ident'>my_key</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='string'>&quot;parent data&quot;</span>.<span class='ident'>to_string</span>()));
-        <span class='ident'>task</span>::<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {<span class='comment'>
-            // TLS shouldn&#39;t carry over.
-            </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>my_key</span>.<span class='ident'>get</span>().<span class='ident'>is_none</span>());
+        <span class='ident'>task</span>::<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
+            <span class='comment'>// TLS shouldn&#39;t carry over.</span>
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>my_key</span>.<span class='ident'>get</span>().<span class='ident'>is_none</span>());
             <span class='ident'>my_key</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='string'>&quot;child data&quot;</span>.<span class='ident'>to_string</span>()));
-            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>my_key</span>.<span class='ident'>get</span>().<span class='ident'>get_ref</span>().<span class='ident'>as_slice</span>() <span class='op'>==</span> <span class='string'>&quot;child data&quot;</span>);<span class='comment'>
-            // should be cleaned up for us
-        </span>});<span class='comment'>
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>my_key</span>.<span class='ident'>get</span>().<span class='ident'>get_ref</span>().<span class='ident'>as_slice</span>() <span class='op'>==</span> <span class='string'>&quot;child data&quot;</span>);
+            <span class='comment'>// should be cleaned up for us</span>
+        });
 
-        // Must work multiple times
-        </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>my_key</span>.<span class='ident'>get</span>().<span class='ident'>unwrap</span>().<span class='ident'>as_slice</span>() <span class='op'>==</span> <span class='string'>&quot;parent data&quot;</span>);
+        <span class='comment'>// Must work multiple times</span>
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>my_key</span>.<span class='ident'>get</span>().<span class='ident'>unwrap</span>().<span class='ident'>as_slice</span>() <span class='op'>==</span> <span class='string'>&quot;parent data&quot;</span>);
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>my_key</span>.<span class='ident'>get</span>().<span class='ident'>unwrap</span>().<span class='ident'>as_slice</span>() <span class='op'>==</span> <span class='string'>&quot;parent data&quot;</span>);
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>my_key</span>.<span class='ident'>get</span>().<span class='ident'>unwrap</span>().<span class='ident'>as_slice</span>() <span class='op'>==</span> <span class='string'>&quot;parent data&quot;</span>);
     }
@@ -777,28 +775,28 @@ assert_eq!(*key_vector.get().unwrap(), vec![4]);
     <span class='kw'>fn</span> <span class='ident'>test_tls_overwrite</span>() {
         <span class='kw'>static</span> <span class='ident'>my_key</span>: <span class='ident'>Key</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>Key</span>;
         <span class='ident'>my_key</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='string'>&quot;first data&quot;</span>.<span class='ident'>to_string</span>()));
-        <span class='ident'>my_key</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='string'>&quot;next data&quot;</span>.<span class='ident'>to_string</span>()));<span class='comment'> // Shouldn&#39;t leak.
-        </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>my_key</span>.<span class='ident'>get</span>().<span class='ident'>unwrap</span>().<span class='ident'>as_slice</span>() <span class='op'>==</span> <span class='string'>&quot;next data&quot;</span>);
+        <span class='ident'>my_key</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='string'>&quot;next data&quot;</span>.<span class='ident'>to_string</span>())); <span class='comment'>// Shouldn&#39;t leak.</span>
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>my_key</span>.<span class='ident'>get</span>().<span class='ident'>unwrap</span>().<span class='ident'>as_slice</span>() <span class='op'>==</span> <span class='string'>&quot;next data&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_tls_pop</span>() {
         <span class='kw'>static</span> <span class='ident'>my_key</span>: <span class='ident'>Key</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>Key</span>;
         <span class='ident'>my_key</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='string'>&quot;weasel&quot;</span>.<span class='ident'>to_string</span>()));
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>my_key</span>.<span class='ident'>replace</span>(<span class='prelude-val'>None</span>).<span class='ident'>unwrap</span>() <span class='op'>==</span> <span class='string'>&quot;weasel&quot;</span>.<span class='ident'>to_string</span>());<span class='comment'>
-        // Pop must remove the data from the map.
-        </span><span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>my_key</span>.<span class='ident'>replace</span>(<span class='prelude-val'>None</span>).<span class='ident'>is_none</span>());
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>my_key</span>.<span class='ident'>replace</span>(<span class='prelude-val'>None</span>).<span class='ident'>unwrap</span>() <span class='op'>==</span> <span class='string'>&quot;weasel&quot;</span>.<span class='ident'>to_string</span>());
+        <span class='comment'>// Pop must remove the data from the map.</span>
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>my_key</span>.<span class='ident'>replace</span>(<span class='prelude-val'>None</span>).<span class='ident'>is_none</span>());
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_tls_crust_automorestack_memorial_bug</span>() {<span class='comment'>
-        // This might result in a stack-canary clobber if the runtime fails to
-        // set sp_limit to 0 when calling the cleanup extern - it might
-        // automatically jump over to the rust stack, which causes next_c_sp
-        // to get recorded as something within a rust stack segment. Then a
-        // subsequent upcall (esp. for logging, think vsnprintf) would run on
-        // a stack smaller than 1 MB.
-        </span><span class='kw'>static</span> <span class='ident'>my_key</span>: <span class='ident'>Key</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>Key</span>;
+    <span class='kw'>fn</span> <span class='ident'>test_tls_crust_automorestack_memorial_bug</span>() {
+        <span class='comment'>// This might result in a stack-canary clobber if the runtime fails to</span>
+        <span class='comment'>// set sp_limit to 0 when calling the cleanup extern - it might</span>
+        <span class='comment'>// automatically jump over to the rust stack, which causes next_c_sp</span>
+        <span class='comment'>// to get recorded as something within a rust stack segment. Then a</span>
+        <span class='comment'>// subsequent upcall (esp. for logging, think vsnprintf) would run on</span>
+        <span class='comment'>// a stack smaller than 1 MB.</span>
+        <span class='kw'>static</span> <span class='ident'>my_key</span>: <span class='ident'>Key</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>Key</span>;
         <span class='ident'>task</span>::<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
             <span class='ident'>my_key</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='string'>&quot;hax&quot;</span>.<span class='ident'>to_string</span>()));
         });
@@ -826,11 +824,11 @@ assert_eq!(*key_vector.get().unwrap(), vec![4]);
             <span class='ident'>str_key</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='string'>&quot;string data 2&quot;</span>.<span class='ident'>to_string</span>()));
             <span class='ident'>box_key</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='kw'>box</span>(<span class='ident'>GC</span>) ()));
             <span class='ident'>box_key</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='kw'>box</span>(<span class='ident'>GC</span>) ()));
-            <span class='ident'>int_key</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='number'>42</span>));<span class='comment'>
-            // This could cause a segfault if overwriting-destruction is done
-            // with the crazy polymorphic transmute rather than the provided
-            // finaliser.
-            </span><span class='ident'>int_key</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='number'>31337</span>));
+            <span class='ident'>int_key</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='number'>42</span>));
+            <span class='comment'>// This could cause a segfault if overwriting-destruction is done</span>
+            <span class='comment'>// with the crazy polymorphic transmute rather than the provided</span>
+            <span class='comment'>// finaliser.</span>
+            <span class='ident'>int_key</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='number'>31337</span>));
         });
     }
 
@@ -847,9 +845,9 @@ assert_eq!(*key_vector.get().unwrap(), vec![4]);
             <span class='ident'>box_key</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='kw'>box</span>(<span class='ident'>GC</span>) ()));
             <span class='ident'>int_key</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='number'>42</span>));
             <span class='macro'>fail</span><span class='macro'>!</span>();
-        });<span class='comment'>
-        // Not quite nondeterministic.
-        </span><span class='ident'>int_key</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='number'>31337</span>));
+        });
+        <span class='comment'>// Not quite nondeterministic.</span>
+        <span class='ident'>int_key</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='number'>31337</span>));
         <span class='macro'>fail</span><span class='macro'>!</span>();
     }
 

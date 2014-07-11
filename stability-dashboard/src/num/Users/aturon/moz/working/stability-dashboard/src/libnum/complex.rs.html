@@ -7,8 +7,6 @@
 
     <title>complex.rs.html -- source</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../../../../../../../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -403,26 +401,26 @@
 <span id='361'>361</span>
 <span id='362'>362</span>
 </pre><pre class='rust '>
-<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT
-// file at the top-level directory of this distribution and at
-// http://rust-lang.org/COPYRIGHT.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+<span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
+<span class='comment'>// file at the top-level directory of this distribution and at</span>
+<span class='comment'>// http://rust-lang.org/COPYRIGHT.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
 
-</span><span class='doccomment'>//! Complex numbers.</span>
+<span class='doccomment'>//! Complex numbers.</span>
 
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fmt</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>num</span>::{<span class='ident'>Zero</span>,<span class='ident'>One</span>,<span class='ident'>ToStrRadix</span>};<span class='comment'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>num</span>::{<span class='ident'>Zero</span>,<span class='ident'>One</span>,<span class='ident'>ToStrRadix</span>};
 
-// FIXME #1284: handle complex NaN &amp; infinity etc. This
-// probably doesn&#39;t map to C&#39;s _Complex correctly.
+<span class='comment'>// FIXME #1284: handle complex NaN &amp; infinity etc. This</span>
+<span class='comment'>// probably doesn&#39;t map to C&#39;s _Complex correctly.</span>
 
-</span><span class='doccomment'>/// A complex number in Cartesian form.</span>
+<span class='doccomment'>/// A complex number in Cartesian form.</span>
 <span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>PartialEq</span>,<span class='ident'>Clone</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Real portion of the complex number</span>
@@ -504,35 +502,35 @@
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_polar</span>(<span class='ident'>r</span>: <span class='kw-2'>&amp;</span><span class='ident'>T</span>, <span class='ident'>theta</span>: <span class='kw-2'>&amp;</span><span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='ident'>Complex</span>::<span class='ident'>new</span>(<span class='op'>*</span><span class='ident'>r</span> <span class='op'>*</span> <span class='ident'>theta</span>.<span class='ident'>cos</span>(), <span class='op'>*</span><span class='ident'>r</span> <span class='op'>*</span> <span class='ident'>theta</span>.<span class='ident'>sin</span>())
     }
-}<span class='comment'>
+}
 
-/* arithmetic */
-// (a + i b) + (c + i d) == (a + c) + i (b + d)
-</span><span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Clone</span> <span class='op'>+</span> <span class='ident'>Num</span><span class='op'>&gt;</span> <span class='ident'>Add</span><span class='op'>&lt;</span><span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span> <span class='kw'>for</span> <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+<span class='comment'>/* arithmetic */</span>
+<span class='comment'>// (a + i b) + (c + i d) == (a + c) + i (b + d)</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Clone</span> <span class='op'>+</span> <span class='ident'>Num</span><span class='op'>&gt;</span> <span class='ident'>Add</span><span class='op'>&lt;</span><span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span> <span class='kw'>for</span> <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>add</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='ident'>Complex</span>::<span class='ident'>new</span>(<span class='self'>self</span>.<span class='ident'>re</span> <span class='op'>+</span> <span class='ident'>other</span>.<span class='ident'>re</span>, <span class='self'>self</span>.<span class='ident'>im</span> <span class='op'>+</span> <span class='ident'>other</span>.<span class='ident'>im</span>)
     }
-}<span class='comment'>
-// (a + i b) - (c + i d) == (a - c) + i (b - d)
-</span><span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Clone</span> <span class='op'>+</span> <span class='ident'>Num</span><span class='op'>&gt;</span> <span class='ident'>Sub</span><span class='op'>&lt;</span><span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span> <span class='kw'>for</span> <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+}
+<span class='comment'>// (a + i b) - (c + i d) == (a - c) + i (b - d)</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Clone</span> <span class='op'>+</span> <span class='ident'>Num</span><span class='op'>&gt;</span> <span class='ident'>Sub</span><span class='op'>&lt;</span><span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span> <span class='kw'>for</span> <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>sub</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='ident'>Complex</span>::<span class='ident'>new</span>(<span class='self'>self</span>.<span class='ident'>re</span> <span class='op'>-</span> <span class='ident'>other</span>.<span class='ident'>re</span>, <span class='self'>self</span>.<span class='ident'>im</span> <span class='op'>-</span> <span class='ident'>other</span>.<span class='ident'>im</span>)
     }
-}<span class='comment'>
-// (a + i b) * (c + i d) == (a*c - b*d) + i (a*d + b*c)
-</span><span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Clone</span> <span class='op'>+</span> <span class='ident'>Num</span><span class='op'>&gt;</span> <span class='ident'>Mul</span><span class='op'>&lt;</span><span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span> <span class='kw'>for</span> <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+}
+<span class='comment'>// (a + i b) * (c + i d) == (a*c - b*d) + i (a*d + b*c)</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Clone</span> <span class='op'>+</span> <span class='ident'>Num</span><span class='op'>&gt;</span> <span class='ident'>Mul</span><span class='op'>&lt;</span><span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span> <span class='kw'>for</span> <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>mul</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='ident'>Complex</span>::<span class='ident'>new</span>(<span class='self'>self</span>.<span class='ident'>re</span><span class='op'>*</span><span class='ident'>other</span>.<span class='ident'>re</span> <span class='op'>-</span> <span class='self'>self</span>.<span class='ident'>im</span><span class='op'>*</span><span class='ident'>other</span>.<span class='ident'>im</span>,
                    <span class='self'>self</span>.<span class='ident'>re</span><span class='op'>*</span><span class='ident'>other</span>.<span class='ident'>im</span> <span class='op'>+</span> <span class='self'>self</span>.<span class='ident'>im</span><span class='op'>*</span><span class='ident'>other</span>.<span class='ident'>re</span>)
     }
-}<span class='comment'>
+}
 
-// (a + i b) / (c + i d) == [(a + i b) * (c - i d)] / (c*c + d*d)
-//   == [(a*c + b*d) / (c*c + d*d)] + i [(b*c - a*d) / (c*c + d*d)]
-</span><span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Clone</span> <span class='op'>+</span> <span class='ident'>Num</span><span class='op'>&gt;</span> <span class='ident'>Div</span><span class='op'>&lt;</span><span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span> <span class='kw'>for</span> <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+<span class='comment'>// (a + i b) / (c + i d) == [(a + i b) * (c - i d)] / (c*c + d*d)</span>
+<span class='comment'>//   == [(a*c + b*d) / (c*c + d*d)] + i [(b*c - a*d) / (c*c + d*d)]</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Clone</span> <span class='op'>+</span> <span class='ident'>Num</span><span class='op'>&gt;</span> <span class='ident'>Div</span><span class='op'>&lt;</span><span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span> <span class='kw'>for</span> <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>div</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>norm_sqr</span> <span class='op'>=</span> <span class='ident'>other</span>.<span class='ident'>norm_sqr</span>();
@@ -546,10 +544,10 @@
     <span class='kw'>fn</span> <span class='ident'>neg</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='ident'>Complex</span>::<span class='ident'>new</span>(<span class='op'>-</span><span class='self'>self</span>.<span class='ident'>re</span>, <span class='op'>-</span><span class='self'>self</span>.<span class='ident'>im</span>)
     }
-}<span class='comment'>
+}
 
-/* constants */
-</span><span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Clone</span> <span class='op'>+</span> <span class='ident'>Num</span><span class='op'>&gt;</span> <span class='ident'>Zero</span> <span class='kw'>for</span> <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+<span class='comment'>/* constants */</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Clone</span> <span class='op'>+</span> <span class='ident'>Num</span><span class='op'>&gt;</span> <span class='ident'>Zero</span> <span class='kw'>for</span> <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>zero</span>() <span class='op'>-&gt;</span> <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='ident'>Complex</span>::<span class='ident'>new</span>(<span class='ident'>Zero</span>::<span class='ident'>zero</span>(), <span class='ident'>Zero</span>::<span class='ident'>zero</span>())
@@ -566,10 +564,10 @@
     <span class='kw'>fn</span> <span class='ident'>one</span>() <span class='op'>-&gt;</span> <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='ident'>Complex</span>::<span class='ident'>new</span>(<span class='ident'>One</span>::<span class='ident'>one</span>(), <span class='ident'>Zero</span>::<span class='ident'>zero</span>())
     }
-}<span class='comment'>
+}
 
-/* string conversions */
-</span><span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>fmt</span>::<span class='ident'>Show</span> <span class='op'>+</span> <span class='ident'>Num</span> <span class='op'>+</span> <span class='ident'>PartialOrd</span><span class='op'>&gt;</span> <span class='ident'>fmt</span>::<span class='ident'>Show</span> <span class='kw'>for</span> <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+<span class='comment'>/* string conversions */</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>fmt</span>::<span class='ident'>Show</span> <span class='op'>+</span> <span class='ident'>Num</span> <span class='op'>+</span> <span class='ident'>PartialOrd</span><span class='op'>&gt;</span> <span class='ident'>fmt</span>::<span class='ident'>Show</span> <span class='kw'>for</span> <span class='ident'>Complex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
         <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>im</span> <span class='op'>&lt;</span> <span class='ident'>Zero</span>::<span class='ident'>zero</span>() {
             <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;{}-{}i&quot;</span>, <span class='self'>self</span>.<span class='ident'>re</span>, <span class='op'>-</span><span class='self'>self</span>.<span class='ident'>im</span>)
@@ -609,9 +607,9 @@
     <span class='kw'>pub</span> <span class='kw'>static</span> <span class='ident'>all_consts</span> : [<span class='ident'>Complex64</span>, .. <span class='number'>5</span>] <span class='op'>=</span> [<span class='ident'>_0_0i</span>, <span class='ident'>_1_0i</span>, <span class='ident'>_1_1i</span>, <span class='ident'>_neg1_1i</span>, <span class='ident'>_05_05i</span>];
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_consts</span>() {<span class='comment'>
-        // check our constants are what Complex::new creates
-        </span><span class='kw'>fn</span> <span class='ident'>test</span>(<span class='ident'>c</span> : <span class='ident'>Complex64</span>, <span class='ident'>r</span> : <span class='ident'>f64</span>, <span class='ident'>i</span>: <span class='ident'>f64</span>) {
+    <span class='kw'>fn</span> <span class='ident'>test_consts</span>() {
+        <span class='comment'>// check our constants are what Complex::new creates</span>
+        <span class='kw'>fn</span> <span class='ident'>test</span>(<span class='ident'>c</span> : <span class='ident'>Complex64</span>, <span class='ident'>r</span> : <span class='ident'>f64</span>, <span class='ident'>i</span>: <span class='ident'>f64</span>) {
             <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>c</span>, <span class='ident'>Complex</span>::<span class='ident'>new</span>(<span class='ident'>r</span>,<span class='ident'>i</span>));
         }
         <span class='ident'>test</span>(<span class='ident'>_0_0i</span>, <span class='number'>0.0</span>, <span class='number'>0.0</span>);
@@ -625,9 +623,9 @@
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='attribute'>#[<span class='ident'>ignore</span>(<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86&quot;</span>))]</span><span class='comment'>
-    // FIXME #7158: (maybe?) currently failing on x86.
-    </span><span class='kw'>fn</span> <span class='ident'>test_norm</span>() {
+    <span class='attribute'>#[<span class='ident'>ignore</span>(<span class='ident'>cfg</span>(<span class='ident'>target_arch</span> <span class='op'>=</span> <span class='string'>&quot;x86&quot;</span>))]</span>
+    <span class='comment'>// FIXME #7158: (maybe?) currently failing on x86.</span>
+    <span class='kw'>fn</span> <span class='ident'>test_norm</span>() {
         <span class='kw'>fn</span> <span class='ident'>test</span>(<span class='ident'>c</span>: <span class='ident'>Complex64</span>, <span class='ident'>ns</span>: <span class='ident'>f64</span>) {
             <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>c</span>.<span class='ident'>norm_sqr</span>(), <span class='ident'>ns</span>);
             <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>c</span>.<span class='ident'>norm</span>(), <span class='ident'>ns</span>.<span class='ident'>sqrt</span>())
@@ -665,9 +663,9 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='attribute'>#[<span class='ident'>should_fail</span>]</span>
     <span class='attribute'>#[<span class='ident'>ignore</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_inv_zero</span>() {<span class='comment'>
-        // FIXME #5736: should this really fail, or just NaN?
-        </span><span class='ident'>_0_0i</span>.<span class='ident'>inv</span>();
+    <span class='kw'>fn</span> <span class='ident'>test_inv_zero</span>() {
+        <span class='comment'>// FIXME #5736: should this really fail, or just NaN?</span>
+        <span class='ident'>_0_0i</span>.<span class='ident'>inv</span>();
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -721,10 +719,10 @@
         <span class='attribute'>#[<span class='ident'>test</span>]</span>
         <span class='kw'>fn</span> <span class='ident'>test_mul</span>() {
             <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>_05_05i</span> <span class='op'>*</span> <span class='ident'>_05_05i</span>, <span class='ident'>_0_1i</span>.<span class='ident'>unscale</span>(<span class='number'>2.0</span>));
-            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>_1_1i</span> <span class='op'>*</span> <span class='ident'>_0_1i</span>, <span class='ident'>_neg1_1i</span>);<span class='comment'>
+            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>_1_1i</span> <span class='op'>*</span> <span class='ident'>_0_1i</span>, <span class='ident'>_neg1_1i</span>);
 
-            // i^2 &amp; i^4
-            </span><span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>_0_1i</span> <span class='op'>*</span> <span class='ident'>_0_1i</span>, <span class='op'>-</span><span class='ident'>_1_0i</span>);
+            <span class='comment'>// i^2 &amp; i^4</span>
+            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>_0_1i</span> <span class='op'>*</span> <span class='ident'>_0_1i</span>, <span class='op'>-</span><span class='ident'>_1_0i</span>);
             <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>_0_1i</span> <span class='op'>*</span> <span class='ident'>_0_1i</span> <span class='op'>*</span> <span class='ident'>_0_1i</span> <span class='op'>*</span> <span class='ident'>_0_1i</span>, <span class='ident'>_1_0i</span>);
 
             <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='ident'>c</span> <span class='kw'>in</span> <span class='ident'>all_consts</span>.<span class='ident'>iter</span>() {
@@ -752,9 +750,9 @@
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_to_str</span>() {
+    <span class='kw'>fn</span> <span class='ident'>test_to_string</span>() {
         <span class='kw'>fn</span> <span class='ident'>test</span>(<span class='ident'>c</span> : <span class='ident'>Complex64</span>, <span class='ident'>s</span>: <span class='ident'>String</span>) {
-            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>c</span>.<span class='ident'>to_str</span>(), <span class='ident'>s</span>);
+            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>c</span>.<span class='ident'>to_string</span>(), <span class='ident'>s</span>);
         }
         <span class='ident'>test</span>(<span class='ident'>_0_0i</span>, <span class='string'>&quot;0+0i&quot;</span>.<span class='ident'>to_string</span>());
         <span class='ident'>test</span>(<span class='ident'>_1_0i</span>, <span class='string'>&quot;1+0i&quot;</span>.<span class='ident'>to_string</span>());

@@ -7,8 +7,6 @@
 
     <title>std::comm::Sender - Rust</title>
 
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600'
-          rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../../main.css">
 
     <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
@@ -66,7 +64,7 @@ then the other end could immediately disconnect.</p>
 
 <p>The purpose of this functionality is to propagate failure among tasks.
 If failure is not desired, then consider using the <code>send_opt</code> method</p>
-</div><h4 id='method.send_opt' class='method'><a class='stability Unstable' title='Unstable: this function may be renamed to send() in the future'></a><code>fn <a href='#method.send_opt' class='fnname'>send_opt</a>&lt;T: <a class='trait' href='../../std/kinds/trait.Send.html' title='std::kinds::Send'>Send</a>&gt;(&amp;self, t: T) -&gt; <a class='type' href='../../std/result/type.Result.html' title='std::result::Result'>Result</a>&lt;(), T&gt;</code></h4>
+</div><h4 id='method.send_opt' class='method'><a class='stability Unstable' title='Unstable: this function may be renamed to send() in the future'></a><code>fn <a href='#method.send_opt' class='fnname'>send_opt</a>&lt;T: <a class='trait' href='../../std/kinds/trait.Send.html' title='std::kinds::Send'>Send</a>&gt;(&amp;self, t: T) -&gt; <a class='type' href='../../std/result/type.Result.html' title='std::result::Result'>Result</a>&lt;<a href='../primitive.unit.html'>()</a>, T&gt;</code></h4>
 <div class='docblock'><p>Attempts to send a value on this channel, returning it back if it could
 not be sent.</p>
 
@@ -96,13 +94,13 @@ caller if the other end is disconnected</p>
     drop(rx);
     assert_eq!(tx.send_opt(1i), Err(1));
 }</span><pre id='rust-example-rendered-0' class='rust '>
-<span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();<span class='comment'>
+<span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
 
-// This send is always successful
-</span><span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>tx</span>.<span class='ident'>send_opt</span>(<span class='number'>1i</span>), <span class='prelude-val'>Ok</span>(()));<span class='comment'>
+<span class='comment'>// This send is always successful</span>
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>tx</span>.<span class='ident'>send_opt</span>(<span class='number'>1i</span>), <span class='prelude-val'>Ok</span>(()));
 
-// This send will fail because the receiver is gone
-</span><span class='ident'>drop</span>(<span class='ident'>rx</span>);
+<span class='comment'>// This send will fail because the receiver is gone</span>
+<span class='ident'>drop</span>(<span class='ident'>rx</span>);
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>tx</span>.<span class='ident'>send_opt</span>(<span class='number'>1i</span>), <span class='prelude-val'>Err</span>(<span class='number'>1</span>));
 </pre>
 </div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T&gt; <a class='trait' href='../../sync/comm/trait.UnsafeFlavor.html' title='sync::comm::UnsafeFlavor'>UnsafeFlavor</a>&lt;T&gt; for <a class='struct' href='../../std/comm/struct.Sender.html' title='std::comm::Sender'>Sender</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.inner_unsafe' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.inner_unsafe' class='fnname'>inner_unsafe</a>&lt;T&gt;(&amp;'a self) -&gt; &amp;'a <a class='struct' href='../../std/ty/struct.Unsafe.html' title='std::ty::Unsafe'>Unsafe</a>&lt;<a class='type' href='../../sync/comm/type.Flavor.html' title='sync::comm::Flavor'>Flavor</a>&lt;T&gt;&gt;</code></h4>

@@ -47,7 +47,7 @@
 \begin{document}
 \maketitle
 
-0.11.0-pre (169c988d09a9d4e46de2b7fead9489e94964c7c7 2014-07-02 18:41:38 +0000)
+0.11.0 (305cf1f1098dc87e346003e6bf7e7cca5705a135 2014-07-10 11:19:20 -0700)
 
 Copyright © 2011-2014 The Rust Project Developers. Licensed under the
 \href{http://www.apache.org/licenses/LICENSE-2.0}{Apache License,
@@ -566,7 +566,7 @@ fn stringifier(channel: &DuplexStream<String, uint>) {
     let mut value: uint;
     loop {
         value = channel.recv();
-        channel.send(value.to_str());
+        channel.send(value.to_string());
         if value == 0 { break; }
     }
 }
@@ -579,7 +579,7 @@ receiving. The \texttt{stringifier} function takes a
 and receive \texttt{uint} messages (the second type parameter). The body
 itself simply loops, reading from the channel and then sending its
 response back. The actual response itself is simply the stringified
-version of the received value, \texttt{uint::to\_str(value)}.
+version of the received value, \texttt{uint::to\_string(value)}.
 
 Here is the code for the parent task:
 
@@ -593,7 +593,7 @@ use std::comm::duplex;
 #     let mut value: uint;
 #     loop {
 #         value = channel.recv();
-#         channel.send(value.to_str());
+#         channel.send(value.to_string());
 #         if value == 0u { break; }
 #     }
 # }
