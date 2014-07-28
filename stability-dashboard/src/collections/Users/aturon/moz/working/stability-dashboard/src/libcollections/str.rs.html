@@ -2487,64 +2487,6 @@
 <span id='2447'>2447</span>
 <span id='2448'>2448</span>
 <span id='2449'>2449</span>
-<span id='2450'>2450</span>
-<span id='2451'>2451</span>
-<span id='2452'>2452</span>
-<span id='2453'>2453</span>
-<span id='2454'>2454</span>
-<span id='2455'>2455</span>
-<span id='2456'>2456</span>
-<span id='2457'>2457</span>
-<span id='2458'>2458</span>
-<span id='2459'>2459</span>
-<span id='2460'>2460</span>
-<span id='2461'>2461</span>
-<span id='2462'>2462</span>
-<span id='2463'>2463</span>
-<span id='2464'>2464</span>
-<span id='2465'>2465</span>
-<span id='2466'>2466</span>
-<span id='2467'>2467</span>
-<span id='2468'>2468</span>
-<span id='2469'>2469</span>
-<span id='2470'>2470</span>
-<span id='2471'>2471</span>
-<span id='2472'>2472</span>
-<span id='2473'>2473</span>
-<span id='2474'>2474</span>
-<span id='2475'>2475</span>
-<span id='2476'>2476</span>
-<span id='2477'>2477</span>
-<span id='2478'>2478</span>
-<span id='2479'>2479</span>
-<span id='2480'>2480</span>
-<span id='2481'>2481</span>
-<span id='2482'>2482</span>
-<span id='2483'>2483</span>
-<span id='2484'>2484</span>
-<span id='2485'>2485</span>
-<span id='2486'>2486</span>
-<span id='2487'>2487</span>
-<span id='2488'>2488</span>
-<span id='2489'>2489</span>
-<span id='2490'>2490</span>
-<span id='2491'>2491</span>
-<span id='2492'>2492</span>
-<span id='2493'>2493</span>
-<span id='2494'>2494</span>
-<span id='2495'>2495</span>
-<span id='2496'>2496</span>
-<span id='2497'>2497</span>
-<span id='2498'>2498</span>
-<span id='2499'>2499</span>
-<span id='2500'>2500</span>
-<span id='2501'>2501</span>
-<span id='2502'>2502</span>
-<span id='2503'>2503</span>
-<span id='2504'>2504</span>
-<span id='2505'>2505</span>
-<span id='2506'>2506</span>
-<span id='2507'>2507</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -2555,6 +2497,8 @@
 <span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
 <span class='comment'>// option. This file may not be copied, modified, or distributed</span>
 <span class='comment'>// except according to those terms.</span>
+<span class='comment'>//</span>
+<span class='comment'>// ignore-lexer-test FIXME #15679</span>
 
 <span class='doccomment'>/*!
 
@@ -2603,10 +2547,10 @@ other languages.
 
 # Representation
 
-Rust&#39;s string type, `str`, is a sequence of unicode codepoints encoded as a
-stream of UTF-8 bytes. All safely-created strings are guaranteed to be validly
-encoded UTF-8 sequences. Additionally, strings are not null-terminated
-and can contain null codepoints.
+Rust&#39;s string type, `str`, is a sequence of unicode scalar values encoded as a
+stream of UTF-8 bytes. All strings are guaranteed to be validly encoded UTF-8
+sequences. Additionally, strings are not null-terminated and can contain null
+bytes.
 
 The actual representation of strings have direct mappings to vectors: `&amp;str`
 is the same as `&amp;[u8]`.
@@ -2623,7 +2567,7 @@ is the same as `&amp;[u8]`.
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>iter</span>::<span class='ident'>AdditiveIterator</span>;
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>mem</span>;
 
-<span class='kw'>use</span> <span class='ident'>Collection</span>;
+<span class='kw'>use</span> {<span class='ident'>Collection</span>, <span class='ident'>MutableSeq</span>};
 <span class='kw'>use</span> <span class='ident'>hash</span>;
 <span class='kw'>use</span> <span class='ident'>string</span>::<span class='ident'>String</span>;
 <span class='kw'>use</span> <span class='ident'>unicode</span>;
@@ -2636,72 +2580,33 @@ is the same as `&amp;[u8]`.
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>str</span>::{<span class='ident'>Utf16Item</span>, <span class='ident'>ScalarValue</span>, <span class='ident'>LoneSurrogate</span>, <span class='ident'>utf16_items</span>};
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>str</span>::{<span class='ident'>truncate_utf16_at_nul</span>, <span class='ident'>utf8_char_width</span>, <span class='ident'>CharRange</span>};
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>str</span>::{<span class='ident'>Str</span>, <span class='ident'>StrSlice</span>};
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>unicode</span>::{<span class='ident'>Words</span>, <span class='ident'>UnicodeStrSlice</span>};
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>unicode</span>::<span class='ident'>str</span>::{<span class='ident'>UnicodeStrSlice</span>, <span class='ident'>Words</span>, <span class='ident'>Graphemes</span>, <span class='ident'>GraphemeIndices</span>};
 
 <span class='comment'>/*
 Section: Creating a string
 */</span>
 
-<span class='doccomment'>/// Consumes a vector of bytes to create a new utf-8 string.</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// Returns `Err` with the original vector if the vector contains invalid</span>
-<span class='doccomment'>/// UTF-8.</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// # Example</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// ```rust</span>
-<span class='doccomment'>/// use std::str;</span>
-<span class='doccomment'>/// let hello_vec = vec![104, 101, 108, 108, 111];</span>
-<span class='doccomment'>/// let string = str::from_utf8_owned(hello_vec);</span>
-<span class='doccomment'>/// assert_eq!(string, Ok(&quot;hello&quot;.to_string()));</span>
-<span class='doccomment'>/// ```</span>
+<span class='doccomment'>/// Deprecated. Replaced by `String::from_utf8`</span>
+<span class='attribute'>#[<span class='ident'>deprecated</span> <span class='op'>=</span> <span class='string'>&quot;Replaced by `String::from_utf8`&quot;</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_utf8_owned</span>(<span class='ident'>vv</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>String</span>, <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span> {
     <span class='ident'>String</span>::<span class='ident'>from_utf8</span>(<span class='ident'>vv</span>)
 }
 
-<span class='doccomment'>/// Convert a byte to a UTF-8 string</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// # Failure</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// Fails if invalid UTF-8</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// # Example</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// ```rust</span>
-<span class='doccomment'>/// use std::str;</span>
-<span class='doccomment'>/// let string = str::from_byte(104);</span>
-<span class='doccomment'>/// assert_eq!(string.as_slice(), &quot;h&quot;);</span>
-<span class='doccomment'>/// ```</span>
+<span class='doccomment'>/// Deprecated. Replaced by `String::from_byte`</span>
+<span class='attribute'>#[<span class='ident'>deprecated</span> <span class='op'>=</span> <span class='string'>&quot;Replaced by String::from_byte&quot;</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_byte</span>(<span class='ident'>b</span>: <span class='ident'>u8</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
     <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>b</span> <span class='op'>&lt;</span> <span class='number'>128u8</span>);
     <span class='ident'>String</span>::<span class='ident'>from_char</span>(<span class='number'>1</span>, <span class='ident'>b</span> <span class='kw'>as</span> <span class='ident'>char</span>)
 }
 
-<span class='doccomment'>/// Convert a char to a string</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// # Example</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// ```rust</span>
-<span class='doccomment'>/// use std::str;</span>
-<span class='doccomment'>/// let string = str::from_char(&#39;b&#39;);</span>
-<span class='doccomment'>/// assert_eq!(string.as_slice(), &quot;b&quot;);</span>
-<span class='doccomment'>/// ```</span>
+<span class='doccomment'>/// Deprecated. Use `String::from_char` or `char::to_string()` instead</span>
+<span class='attribute'>#[<span class='ident'>deprecated</span> <span class='op'>=</span> <span class='string'>&quot;use String::from_char or char.to_string()&quot;</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_char</span>(<span class='ident'>ch</span>: <span class='ident'>char</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>new</span>();
-    <span class='ident'>buf</span>.<span class='ident'>push_char</span>(<span class='ident'>ch</span>);
-    <span class='ident'>buf</span>
+    <span class='ident'>String</span>::<span class='ident'>from_char</span>(<span class='number'>1</span>, <span class='ident'>ch</span>)
 }
 
-<span class='doccomment'>/// Convert a vector of chars to a string</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// # Example</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// ```rust</span>
-<span class='doccomment'>/// use std::str;</span>
-<span class='doccomment'>/// let chars = [&#39;h&#39;, &#39;e&#39;, &#39;l&#39;, &#39;l&#39;, &#39;o&#39;];</span>
-<span class='doccomment'>/// let string = str::from_chars(chars);</span>
-<span class='doccomment'>/// assert_eq!(string.as_slice(), &quot;hello&quot;);</span>
-<span class='doccomment'>/// ```</span>
+<span class='doccomment'>/// Deprecated. Replaced by `String::from_chars`</span>
+<span class='attribute'>#[<span class='ident'>deprecated</span> <span class='op'>=</span> <span class='string'>&quot;use String::from_chars instead&quot;</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_chars</span>(<span class='ident'>chs</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>char</span>]) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
     <span class='ident'>chs</span>.<span class='ident'>iter</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>c</span><span class='op'>|</span> <span class='op'>*</span><span class='ident'>c</span>).<span class='ident'>collect</span>()
 }
@@ -2832,8 +2737,6 @@ Section: Iterators
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>char</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>Decompositions</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>next</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>char</span><span class='op'>&gt;</span> {
-        <span class='kw'>use</span> <span class='ident'>unicode</span>::<span class='ident'>canonical_combining_class</span>;
-
         <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>buffer</span>.<span class='ident'>as_slice</span>().<span class='ident'>head</span>() {
             <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span>(<span class='ident'>c</span>, <span class='number'>0</span>)) <span class='op'>=&gt;</span> {
                 <span class='self'>self</span>.<span class='ident'>sorted</span> <span class='op'>=</span> <span class='boolval'>false</span>;
@@ -2857,7 +2760,7 @@ Section: Iterators
                 <span class='kw'>let</span> <span class='ident'>buffer</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>buffer</span>;
                 <span class='kw'>let</span> <span class='ident'>sorted</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>sorted</span>;
                 <span class='ident'>decomposer</span>(<span class='ident'>ch</span>, <span class='op'>|</span><span class='ident'>d</span><span class='op'>|</span> {
-                    <span class='kw'>let</span> <span class='ident'>class</span> <span class='op'>=</span> <span class='ident'>canonical_combining_class</span>(<span class='ident'>d</span>);
+                    <span class='kw'>let</span> <span class='ident'>class</span> <span class='op'>=</span> <span class='ident'>unicode</span>::<span class='ident'>char</span>::<span class='ident'>canonical_combining_class</span>(<span class='ident'>d</span>);
                     <span class='kw'>if</span> <span class='ident'>class</span> <span class='op'>==</span> <span class='number'>0</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='op'>*</span><span class='ident'>sorted</span> {
                         <span class='ident'>canonical_sort</span>(<span class='ident'>buffer</span>.<span class='ident'>as_mut_slice</span>());
                         <span class='op'>*</span><span class='ident'>sorted</span> <span class='op'>=</span> <span class='boolval'>true</span>;
@@ -2900,6 +2803,15 @@ Section: Iterators
 <span class='doccomment'>/// # Return value</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// The original string with all occurrences of `from` replaced with `to`</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// # Example</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// ```rust</span>
+<span class='doccomment'>/// use std::str;</span>
+<span class='doccomment'>/// let string = &quot;orange&quot;;</span>
+<span class='doccomment'>/// let new_string = str::replace(string, &quot;or&quot;, &quot;str&quot;);</span>
+<span class='doccomment'>/// assert_eq!(new_string.as_slice(), &quot;strange&quot;);</span>
+<span class='doccomment'>/// ```</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>replace</span>(<span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>from</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>to</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>new</span>();
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>last_end</span> <span class='op'>=</span> <span class='number'>0</span>;
@@ -2916,51 +2828,16 @@ Section: Iterators
 Section: Misc
 */</span>
 
-<span class='doccomment'>/// Decode a UTF-16 encoded vector `v` into a string, returning `None`</span>
-<span class='doccomment'>/// if `v` contains any invalid data.</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// # Example</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// ```rust</span>
-<span class='doccomment'>/// use std::str;</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// // 𝄞music</span>
-<span class='doccomment'>/// let mut v = [0xD834, 0xDD1E, 0x006d, 0x0075,</span>
-<span class='doccomment'>///              0x0073, 0x0069, 0x0063];</span>
-<span class='doccomment'>/// assert_eq!(str::from_utf16(v), Some(&quot;𝄞music&quot;.to_string()));</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// // 𝄞mu&lt;invalid&gt;ic</span>
-<span class='doccomment'>/// v[4] = 0xD800;</span>
-<span class='doccomment'>/// assert_eq!(str::from_utf16(v), None);</span>
-<span class='doccomment'>/// ```</span>
+<span class='doccomment'>/// Deprecated. Use `String::from_utf16`.</span>
+<span class='attribute'>#[<span class='ident'>deprecated</span> <span class='op'>=</span> <span class='string'>&quot;Replaced by String::from_utf16&quot;</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_utf16</span>(<span class='ident'>v</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u16</span>]) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>with_capacity</span>(<span class='ident'>v</span>.<span class='ident'>len</span>() <span class='op'>/</span> <span class='number'>2</span>);
-    <span class='kw'>for</span> <span class='ident'>c</span> <span class='kw'>in</span> <span class='ident'>utf16_items</span>(<span class='ident'>v</span>) {
-        <span class='kw'>match</span> <span class='ident'>c</span> {
-            <span class='ident'>ScalarValue</span>(<span class='ident'>c</span>) <span class='op'>=&gt;</span> <span class='ident'>s</span>.<span class='ident'>push_char</span>(<span class='ident'>c</span>),
-            <span class='ident'>LoneSurrogate</span>(_) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>None</span>
-        }
-    }
-    <span class='prelude-val'>Some</span>(<span class='ident'>s</span>)
+    <span class='ident'>String</span>::<span class='ident'>from_utf16</span>(<span class='ident'>v</span>)
 }
 
-<span class='doccomment'>/// Decode a UTF-16 encoded vector `v` into a string, replacing</span>
-<span class='doccomment'>/// invalid data with the replacement character (U+FFFD).</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// # Example</span>
-<span class='doccomment'>/// ```rust</span>
-<span class='doccomment'>/// use std::str;</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// // 𝄞mus&lt;invalid&gt;ic&lt;invalid&gt;</span>
-<span class='doccomment'>/// let v = [0xD834, 0xDD1E, 0x006d, 0x0075,</span>
-<span class='doccomment'>///          0x0073, 0xDD1E, 0x0069, 0x0063,</span>
-<span class='doccomment'>///          0xD834];</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// assert_eq!(str::from_utf16_lossy(v),</span>
-<span class='doccomment'>///            &quot;𝄞mus\uFFFDic\uFFFD&quot;.to_string());</span>
-<span class='doccomment'>/// ```</span>
+<span class='doccomment'>/// Deprecated. Use `String::from_utf16_lossy`.</span>
+<span class='attribute'>#[<span class='ident'>deprecated</span> <span class='op'>=</span> <span class='string'>&quot;Replaced by String::from_utf16_lossy&quot;</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_utf16_lossy</span>(<span class='ident'>v</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u16</span>]) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
-    <span class='ident'>utf16_items</span>(<span class='ident'>v</span>).<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>c</span><span class='op'>|</span> <span class='ident'>c</span>.<span class='ident'>to_char_lossy</span>()).<span class='ident'>collect</span>()
+    <span class='ident'>String</span>::<span class='ident'>from_utf16_lossy</span>(<span class='ident'>v</span>)
 }
 
 <span class='comment'>// Return the initial codepoint accumulator for the first byte.</span>
@@ -2975,131 +2852,10 @@ Section: Misc
     (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ch</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>byte</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> ((<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ch</span> <span class='op'>&lt;&lt;</span> <span class='number'>6</span>) <span class='op'>|</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>byte</span> <span class='kw-2'>&amp;</span> <span class='number'>63u8</span>) <span class='kw'>as</span> <span class='ident'>u32</span>)
 )
 
-<span class='kw'>static</span> <span class='ident'>TAG_CONT_U8</span>: <span class='ident'>u8</span> <span class='op'>=</span> <span class='number'>128u8</span>;
-
-<span class='doccomment'>/// Converts a vector of bytes to a new utf-8 string.</span>
-<span class='doccomment'>/// Any invalid utf-8 sequences are replaced with U+FFFD REPLACEMENT CHARACTER.</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// # Example</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// ```rust</span>
-<span class='doccomment'>/// let input = b&quot;Hello \xF0\x90\x80World&quot;;</span>
-<span class='doccomment'>/// let output = std::str::from_utf8_lossy(input);</span>
-<span class='doccomment'>/// assert_eq!(output.as_slice(), &quot;Hello \uFFFDWorld&quot;);</span>
-<span class='doccomment'>/// ```</span>
+<span class='doccomment'>/// Deprecated. Use `String::from_utf8_lossy`.</span>
+<span class='attribute'>#[<span class='ident'>deprecated</span> <span class='op'>=</span> <span class='string'>&quot;Replaced by String::from_utf8_lossy&quot;</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_utf8_lossy</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='ident'>v</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> [<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='ident'>MaybeOwned</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-    <span class='kw'>if</span> <span class='ident'>is_utf8</span>(<span class='ident'>v</span>) {
-        <span class='kw'>return</span> <span class='ident'>Slice</span>(<span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>v</span>) })
-    }
-
-    <span class='kw'>static</span> <span class='ident'>REPLACEMENT</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> [<span class='ident'>u8</span>] <span class='op'>=</span> <span class='string'>b&quot;\xEF\xBF\xBD&quot;</span>; <span class='comment'>// U+FFFD in UTF-8</span>
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='number'>0</span>;
-    <span class='kw'>let</span> <span class='ident'>total</span> <span class='op'>=</span> <span class='ident'>v</span>.<span class='ident'>len</span>();
-    <span class='kw'>fn</span> <span class='ident'>unsafe_get</span>(<span class='ident'>xs</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>], <span class='ident'>i</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>u8</span> {
-        <span class='kw'>unsafe</span> { <span class='op'>*</span><span class='ident'>xs</span>.<span class='ident'>unsafe_ref</span>(<span class='ident'>i</span>) }
-    }
-    <span class='kw'>fn</span> <span class='ident'>safe_get</span>(<span class='ident'>xs</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>], <span class='ident'>i</span>: <span class='ident'>uint</span>, <span class='ident'>total</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>u8</span> {
-        <span class='kw'>if</span> <span class='ident'>i</span> <span class='op'>&gt;=</span> <span class='ident'>total</span> {
-            <span class='number'>0</span>
-        } <span class='kw'>else</span> {
-            <span class='ident'>unsafe_get</span>(<span class='ident'>xs</span>, <span class='ident'>i</span>)
-        }
-    }
-
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>with_capacity</span>(<span class='ident'>total</span>);
-
-    <span class='kw'>if</span> <span class='ident'>i</span> <span class='op'>&gt;</span> <span class='number'>0</span> {
-        <span class='kw'>unsafe</span> {
-            <span class='ident'>res</span>.<span class='ident'>push_bytes</span>(<span class='ident'>v</span>.<span class='ident'>slice_to</span>(<span class='ident'>i</span>))
-        };
-    }
-
-    <span class='comment'>// subseqidx is the index of the first byte of the subsequence we&#39;re looking at.</span>
-    <span class='comment'>// It&#39;s used to copy a bunch of contiguous good codepoints at once instead of copying</span>
-    <span class='comment'>// them one by one.</span>
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>subseqidx</span> <span class='op'>=</span> <span class='number'>0</span>;
-
-    <span class='kw'>while</span> <span class='ident'>i</span> <span class='op'>&lt;</span> <span class='ident'>total</span> {
-        <span class='kw'>let</span> <span class='ident'>i_</span> <span class='op'>=</span> <span class='ident'>i</span>;
-        <span class='kw'>let</span> <span class='ident'>byte</span> <span class='op'>=</span> <span class='ident'>unsafe_get</span>(<span class='ident'>v</span>, <span class='ident'>i</span>);
-        <span class='ident'>i</span> <span class='op'>+=</span> <span class='number'>1</span>;
-
-        <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>error</span>(() <span class='op'>=&gt;</span> ({
-            <span class='kw'>unsafe</span> {
-                <span class='kw'>if</span> <span class='ident'>subseqidx</span> <span class='op'>!=</span> <span class='ident'>i_</span> {
-                    <span class='ident'>res</span>.<span class='ident'>push_bytes</span>(<span class='ident'>v</span>.<span class='ident'>slice</span>(<span class='ident'>subseqidx</span>, <span class='ident'>i_</span>));
-                }
-                <span class='ident'>subseqidx</span> <span class='op'>=</span> <span class='ident'>i</span>;
-                <span class='ident'>res</span>.<span class='ident'>push_bytes</span>(<span class='ident'>REPLACEMENT</span>);
-            }
-        }))
-
-        <span class='kw'>if</span> <span class='ident'>byte</span> <span class='op'>&lt;</span> <span class='number'>128u8</span> {
-            <span class='comment'>// subseqidx handles this</span>
-        } <span class='kw'>else</span> {
-            <span class='kw'>let</span> <span class='ident'>w</span> <span class='op'>=</span> <span class='ident'>utf8_char_width</span>(<span class='ident'>byte</span>);
-
-            <span class='kw'>match</span> <span class='ident'>w</span> {
-                <span class='number'>2</span> <span class='op'>=&gt;</span> {
-                    <span class='kw'>if</span> <span class='ident'>safe_get</span>(<span class='ident'>v</span>, <span class='ident'>i</span>, <span class='ident'>total</span>) <span class='kw-2'>&amp;</span> <span class='number'>192u8</span> <span class='op'>!=</span> <span class='ident'>TAG_CONT_U8</span> {
-                        <span class='macro'>error</span><span class='macro'>!</span>();
-                        <span class='kw'>continue</span>;
-                    }
-                    <span class='ident'>i</span> <span class='op'>+=</span> <span class='number'>1</span>;
-                }
-                <span class='number'>3</span> <span class='op'>=&gt;</span> {
-                    <span class='kw'>match</span> (<span class='ident'>byte</span>, <span class='ident'>safe_get</span>(<span class='ident'>v</span>, <span class='ident'>i</span>, <span class='ident'>total</span>)) {
-                        (<span class='number'>0xE0</span>        , <span class='number'>0xA0</span> .. <span class='number'>0xBF</span>) <span class='op'>=&gt;</span> (),
-                        (<span class='number'>0xE1</span> .. <span class='number'>0xEC</span>, <span class='number'>0x80</span> .. <span class='number'>0xBF</span>) <span class='op'>=&gt;</span> (),
-                        (<span class='number'>0xED</span>        , <span class='number'>0x80</span> .. <span class='number'>0x9F</span>) <span class='op'>=&gt;</span> (),
-                        (<span class='number'>0xEE</span> .. <span class='number'>0xEF</span>, <span class='number'>0x80</span> .. <span class='number'>0xBF</span>) <span class='op'>=&gt;</span> (),
-                        _ <span class='op'>=&gt;</span> {
-                            <span class='macro'>error</span><span class='macro'>!</span>();
-                            <span class='kw'>continue</span>;
-                        }
-                    }
-                    <span class='ident'>i</span> <span class='op'>+=</span> <span class='number'>1</span>;
-                    <span class='kw'>if</span> <span class='ident'>safe_get</span>(<span class='ident'>v</span>, <span class='ident'>i</span>, <span class='ident'>total</span>) <span class='kw-2'>&amp;</span> <span class='number'>192u8</span> <span class='op'>!=</span> <span class='ident'>TAG_CONT_U8</span> {
-                        <span class='macro'>error</span><span class='macro'>!</span>();
-                        <span class='kw'>continue</span>;
-                    }
-                    <span class='ident'>i</span> <span class='op'>+=</span> <span class='number'>1</span>;
-                }
-                <span class='number'>4</span> <span class='op'>=&gt;</span> {
-                    <span class='kw'>match</span> (<span class='ident'>byte</span>, <span class='ident'>safe_get</span>(<span class='ident'>v</span>, <span class='ident'>i</span>, <span class='ident'>total</span>)) {
-                        (<span class='number'>0xF0</span>        , <span class='number'>0x90</span> .. <span class='number'>0xBF</span>) <span class='op'>=&gt;</span> (),
-                        (<span class='number'>0xF1</span> .. <span class='number'>0xF3</span>, <span class='number'>0x80</span> .. <span class='number'>0xBF</span>) <span class='op'>=&gt;</span> (),
-                        (<span class='number'>0xF4</span>        , <span class='number'>0x80</span> .. <span class='number'>0x8F</span>) <span class='op'>=&gt;</span> (),
-                        _ <span class='op'>=&gt;</span> {
-                            <span class='macro'>error</span><span class='macro'>!</span>();
-                            <span class='kw'>continue</span>;
-                        }
-                    }
-                    <span class='ident'>i</span> <span class='op'>+=</span> <span class='number'>1</span>;
-                    <span class='kw'>if</span> <span class='ident'>safe_get</span>(<span class='ident'>v</span>, <span class='ident'>i</span>, <span class='ident'>total</span>) <span class='kw-2'>&amp;</span> <span class='number'>192u8</span> <span class='op'>!=</span> <span class='ident'>TAG_CONT_U8</span> {
-                        <span class='macro'>error</span><span class='macro'>!</span>();
-                        <span class='kw'>continue</span>;
-                    }
-                    <span class='ident'>i</span> <span class='op'>+=</span> <span class='number'>1</span>;
-                    <span class='kw'>if</span> <span class='ident'>safe_get</span>(<span class='ident'>v</span>, <span class='ident'>i</span>, <span class='ident'>total</span>) <span class='kw-2'>&amp;</span> <span class='number'>192u8</span> <span class='op'>!=</span> <span class='ident'>TAG_CONT_U8</span> {
-                        <span class='macro'>error</span><span class='macro'>!</span>();
-                        <span class='kw'>continue</span>;
-                    }
-                    <span class='ident'>i</span> <span class='op'>+=</span> <span class='number'>1</span>;
-                }
-                _ <span class='op'>=&gt;</span> {
-                    <span class='macro'>error</span><span class='macro'>!</span>();
-                    <span class='kw'>continue</span>;
-                }
-            }
-        }
-    }
-    <span class='kw'>if</span> <span class='ident'>subseqidx</span> <span class='op'>&lt;</span> <span class='ident'>total</span> {
-        <span class='kw'>unsafe</span> {
-            <span class='ident'>res</span>.<span class='ident'>push_bytes</span>(<span class='ident'>v</span>.<span class='ident'>slice</span>(<span class='ident'>subseqidx</span>, <span class='ident'>total</span>))
-        };
-    }
-    <span class='ident'>Owned</span>(<span class='ident'>res</span>.<span class='ident'>into_string</span>())
+    <span class='ident'>String</span>::<span class='ident'>from_utf8_lossy</span>(<span class='ident'>v</span>)
 }
 
 <span class='comment'>/*
@@ -3121,6 +2877,14 @@ Section: MaybeOwned
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>MaybeOwned</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Returns `true` if this `MaybeOwned` wraps an owned string</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Example</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```rust</span>
+    <span class='doccomment'>/// let string = String::from_str(&quot;orange&quot;);</span>
+    <span class='doccomment'>/// let maybe_owned_string = string.into_maybe_owned();</span>
+    <span class='doccomment'>/// assert_eq!(true, maybe_owned_string.is_owned());</span>
+    <span class='doccomment'>/// ```</span>
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>is_owned</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
         <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span> {
@@ -3130,6 +2894,14 @@ Section: MaybeOwned
     }
 
     <span class='doccomment'>/// Returns `true` if this `MaybeOwned` wraps a borrowed string</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Example</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```rust</span>
+    <span class='doccomment'>/// let string = &quot;orange&quot;;</span>
+    <span class='doccomment'>/// let maybe_owned_string = string.as_slice().into_maybe_owned();</span>
+    <span class='doccomment'>/// assert_eq!(true, maybe_owned_string.is_slice());</span>
+    <span class='doccomment'>/// ```</span>
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>is_slice</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
         <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span> {
@@ -3145,6 +2917,13 @@ Section: MaybeOwned
     <span class='kw'>fn</span> <span class='ident'>into_maybe_owned</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>MaybeOwned</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>;
 }
 
+<span class='doccomment'>/// # Example</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// ```rust</span>
+<span class='doccomment'>/// let owned_string = String::from_str(&quot;orange&quot;);</span>
+<span class='doccomment'>/// let maybe_owned_string = owned_string.into_maybe_owned();</span>
+<span class='doccomment'>/// assert_eq!(true, maybe_owned_string.is_owned());</span>
+<span class='doccomment'>/// ```</span>
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>IntoMaybeOwned</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>String</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>into_maybe_owned</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>MaybeOwned</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
@@ -3152,11 +2931,26 @@ Section: MaybeOwned
     }
 }
 
+<span class='doccomment'>/// # Example</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// ```rust</span>
+<span class='doccomment'>/// let string = &quot;orange&quot;;</span>
+<span class='doccomment'>/// let maybe_owned_str = string.as_slice().into_maybe_owned();</span>
+<span class='doccomment'>/// assert_eq!(false, maybe_owned_str.is_owned());</span>
+<span class='doccomment'>/// ```</span>
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>IntoMaybeOwned</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>into_maybe_owned</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>MaybeOwned</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> { <span class='ident'>Slice</span>(<span class='self'>self</span>) }
 }
 
+<span class='doccomment'>/// # Example</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// ```rust</span>
+<span class='doccomment'>/// let str = &quot;orange&quot;;</span>
+<span class='doccomment'>/// let maybe_owned_str = str.as_slice().into_maybe_owned();</span>
+<span class='doccomment'>/// let maybe_maybe_owned_str = maybe_owned_str.into_maybe_owned();</span>
+<span class='doccomment'>/// assert_eq!(false, maybe_maybe_owned_str.is_owned());</span>
+<span class='doccomment'>/// ```</span>
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>IntoMaybeOwned</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>MaybeOwned</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>into_maybe_owned</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>MaybeOwned</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> { <span class='self'>self</span> }
@@ -3251,68 +3045,37 @@ Section: MaybeOwned
 
 <span class='doccomment'>/// Unsafe operations</span>
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>raw</span> {
-    <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
-    <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>mem</span>;
-    <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>raw</span>::<span class='ident'>Slice</span>;
-
+    <span class='kw'>use</span> <span class='ident'>string</span>;
     <span class='kw'>use</span> <span class='ident'>string</span>::<span class='ident'>String</span>;
     <span class='kw'>use</span> <span class='ident'>vec</span>::<span class='ident'>Vec</span>;
+
+    <span class='kw'>use</span> <span class='ident'>MutableSeq</span>;
 
     <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>str</span>::<span class='ident'>raw</span>::{<span class='ident'>from_utf8</span>, <span class='ident'>c_str_to_static_slice</span>, <span class='ident'>slice_bytes</span>};
     <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>str</span>::<span class='ident'>raw</span>::{<span class='ident'>slice_unchecked</span>};
 
-    <span class='doccomment'>/// Create a Rust string from a *u8 buffer of the given length</span>
+    <span class='doccomment'>/// Deprecated. Replaced by `string::raw::from_buf_len`</span>
+    <span class='attribute'>#[<span class='ident'>deprecated</span> <span class='op'>=</span> <span class='string'>&quot;Use string::raw::from_buf_len&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>from_buf_len</span>(<span class='ident'>buf</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>u8</span>, <span class='ident'>len</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>new</span>();
-        <span class='ident'>result</span>.<span class='ident'>push_bytes</span>(<span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>Slice</span> {
-            <span class='ident'>data</span>: <span class='ident'>buf</span>,
-            <span class='ident'>len</span>: <span class='ident'>len</span>,
-        }));
-        <span class='ident'>result</span>
+        <span class='ident'>string</span>::<span class='ident'>raw</span>::<span class='ident'>from_buf_len</span>(<span class='ident'>buf</span>, <span class='ident'>len</span>)
     }
 
-    <span class='doccomment'>/// Create a Rust string from a null-terminated C string</span>
+    <span class='doccomment'>/// Deprecated. Use `string::raw::from_buf`</span>
+    <span class='attribute'>#[<span class='ident'>deprecated</span> <span class='op'>=</span> <span class='string'>&quot;Use string::raw::from_buf&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>from_c_str</span>(<span class='ident'>c_string</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>i8</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>new</span>();
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='number'>0</span>;
-        <span class='kw'>while</span> <span class='op'>*</span><span class='ident'>c_string</span>.<span class='ident'>offset</span>(<span class='ident'>len</span>) <span class='op'>!=</span> <span class='number'>0</span> {
-            <span class='ident'>len</span> <span class='op'>+=</span> <span class='number'>1</span>;
-        }
-        <span class='ident'>buf</span>.<span class='ident'>push_bytes</span>(<span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>Slice</span> {
-            <span class='ident'>data</span>: <span class='ident'>c_string</span>,
-            <span class='ident'>len</span>: <span class='ident'>len</span> <span class='kw'>as</span> <span class='ident'>uint</span>,
-        }));
-        <span class='ident'>buf</span>
+        <span class='ident'>string</span>::<span class='ident'>raw</span>::<span class='ident'>from_buf</span>(<span class='ident'>c_string</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>u8</span>)
     }
 
-    <span class='doccomment'>/// Converts an owned vector of bytes to a new owned string. This assumes</span>
-    <span class='doccomment'>/// that the utf-8-ness of the vector has already been validated</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='doccomment'>/// Deprecated. Replaced by `string::raw::from_utf8`</span>
+    <span class='attribute'>#[<span class='ident'>deprecated</span> <span class='op'>=</span> <span class='string'>&quot;Use string::raw::from_utf8&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>from_utf8_owned</span>(<span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
-        <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>v</span>)
+        <span class='ident'>string</span>::<span class='ident'>raw</span>::<span class='ident'>from_utf8</span>(<span class='ident'>v</span>)
     }
 
-    <span class='doccomment'>/// Converts a byte to a string.</span>
+    <span class='doccomment'>/// Deprecated. Use `string::raw::from_utf8`</span>
+    <span class='attribute'>#[<span class='ident'>deprecated</span> <span class='op'>=</span> <span class='string'>&quot;Use string::raw::from_utf8&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>from_byte</span>(<span class='ident'>u</span>: <span class='ident'>u8</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
-        <span class='ident'>from_utf8_owned</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>u</span>])
-    }
-
-    <span class='doccomment'>/// Sets the length of a string</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// This will explicitly set the size of the string, without actually</span>
-    <span class='doccomment'>/// modifying its buffers, so it is up to the caller to ensure that</span>
-    <span class='doccomment'>/// the string is actually the specified size.</span>
-    <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_from_buf_len</span>() {
-        <span class='kw'>use</span> <span class='ident'>slice</span>::<span class='ident'>ImmutableVector</span>;
-        <span class='kw'>use</span> <span class='ident'>str</span>::<span class='ident'>StrAllocating</span>;
-
-        <span class='kw'>unsafe</span> {
-            <span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>65u8</span>, <span class='number'>65u8</span>, <span class='number'>65u8</span>, <span class='number'>65u8</span>, <span class='number'>65u8</span>, <span class='number'>65u8</span>, <span class='number'>65u8</span>, <span class='number'>0u8</span>];
-            <span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>as_ptr</span>();
-            <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>from_buf_len</span>(<span class='ident'>b</span>, <span class='number'>3u</span>);
-            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>c</span>, <span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;AAA&quot;</span>));
-        }
+        <span class='ident'>string</span>::<span class='ident'>raw</span>::<span class='ident'>from_utf8</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>u</span>])
     }
 }
 
@@ -3480,49 +3243,25 @@ Section: Trait implementations
     }
 }
 
-<span class='doccomment'>/// Methods for owned strings</span>
-<span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>OwnedStr</span> {
-    <span class='doccomment'>/// Consumes the string, returning the underlying byte buffer.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// The buffer does not have a null terminator.</span>
-    <span class='kw'>fn</span> <span class='ident'>into_bytes</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>;
-
-    <span class='doccomment'>/// Pushes the given string onto this string, returning the concatenation of the two strings.</span>
-    <span class='kw'>fn</span> <span class='ident'>append</span>(<span class='self'>self</span>, <span class='ident'>rhs</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span>;
-}
-
-<span class='kw'>impl</span> <span class='ident'>OwnedStr</span> <span class='kw'>for</span> <span class='ident'>String</span> {
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>into_bytes</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> {
-        <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='self'>self</span>) }
-    }
-
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>append</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>rhs</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
-        <span class='self'>self</span>.<span class='ident'>push_str</span>(<span class='ident'>rhs</span>);
-        <span class='self'>self</span>
-    }
-}
-
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>tests</span> {
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>iter</span>::<span class='ident'>AdditiveIterator</span>;
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>iter</span>::<span class='ident'>range</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>default</span>::<span class='ident'>Default</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>char</span>::<span class='ident'>Char</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>clone</span>::<span class='ident'>Clone</span>;
-    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cmp</span>::{<span class='ident'>Equal</span>, <span class='ident'>Greater</span>, <span class='ident'>Less</span>, <span class='ident'>Ord</span>, <span class='ident'>Eq</span>, <span class='ident'>PartialOrd</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Equiv</span>};
-    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>result</span>::{<span class='prelude-val'>Ok</span>, <span class='prelude-val'>Err</span>};
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cmp</span>::{<span class='ident'>Equal</span>, <span class='ident'>Greater</span>, <span class='ident'>Less</span>, <span class='ident'>Ord</span>, <span class='ident'>PartialOrd</span>, <span class='ident'>Equiv</span>};
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>option</span>::{<span class='prelude-val'>Some</span>, <span class='prelude-val'>None</span>};
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ptr</span>::<span class='ident'>RawPtr</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>iter</span>::{<span class='ident'>Iterator</span>, <span class='ident'>DoubleEndedIterator</span>};
-    <span class='kw'>use</span> <span class='ident'>Collection</span>;
+    <span class='kw'>use</span> {<span class='ident'>Collection</span>, <span class='ident'>MutableSeq</span>};
 
     <span class='kw'>use</span> <span class='ident'>super</span>::<span class='op'>*</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>slice</span>::{<span class='ident'>Vector</span>, <span class='ident'>ImmutableVector</span>};
     <span class='kw'>use</span> <span class='ident'>string</span>::<span class='ident'>String</span>;
     <span class='kw'>use</span> <span class='ident'>vec</span>::<span class='ident'>Vec</span>;
 
-    <span class='kw'>use</span> <span class='ident'>unicode</span>::<span class='ident'>UnicodeChar</span>;
+    <span class='kw'>use</span> <span class='ident'>unicode</span>::<span class='ident'>char</span>::<span class='ident'>UnicodeChar</span>;
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_eq_slice</span>() {
@@ -3557,6 +3296,15 @@ Section: Trait implementations
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;\u2620&quot;</span>.<span class='ident'>char_len</span>(), <span class='number'>1u</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;\U0001d11e&quot;</span>.<span class='ident'>char_len</span>(), <span class='number'>1u</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;ประเทศไทย中华Việt Nam&quot;</span>.<span class='ident'>char_len</span>(), <span class='number'>19u</span>);
+
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;ｈｅｌｌｏ&quot;</span>.<span class='ident'>width</span>(<span class='boolval'>false</span>), <span class='number'>10u</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;ｈｅｌｌｏ&quot;</span>.<span class='ident'>width</span>(<span class='boolval'>true</span>), <span class='number'>10u</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;\0\0\0\0\0&quot;</span>.<span class='ident'>width</span>(<span class='boolval'>false</span>), <span class='number'>0u</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;\0\0\0\0\0&quot;</span>.<span class='ident'>width</span>(<span class='boolval'>true</span>), <span class='number'>0u</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;&quot;</span>.<span class='ident'>width</span>(<span class='boolval'>false</span>), <span class='number'>0u</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;&quot;</span>.<span class='ident'>width</span>(<span class='boolval'>true</span>), <span class='number'>0u</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;\u2081\u2082\u2083\u2084&quot;</span>.<span class='ident'>width</span>(<span class='boolval'>false</span>), <span class='number'>4u</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;\u2081\u2082\u2083\u2084&quot;</span>.<span class='ident'>width</span>(<span class='boolval'>true</span>), <span class='number'>8u</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -4064,16 +3812,6 @@ Section: Trait implementations
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_raw_from_c_str</span>() {
-        <span class='kw'>unsafe</span> {
-            <span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>65</span>, <span class='number'>65</span>, <span class='number'>65</span>, <span class='number'>65</span>, <span class='number'>65</span>, <span class='number'>65</span>, <span class='number'>65</span>, <span class='number'>0</span>];
-            <span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>as_ptr</span>();
-            <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>raw</span>::<span class='ident'>from_c_str</span>(<span class='ident'>b</span>);
-            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>c</span>, <span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;AAAAAAA&quot;</span>));
-        }
-    }
-
-    <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_as_bytes</span>() {
         <span class='comment'>// no null</span>
         <span class='kw'>let</span> <span class='ident'>v</span> <span class='op'>=</span> [
@@ -4178,95 +3916,6 @@ Section: Trait implementations
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_utf16</span>() {
-        <span class='kw'>let</span> <span class='ident'>pairs</span> <span class='op'>=</span>
-            [(<span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;𐍅𐌿𐌻𐍆𐌹𐌻𐌰\n&quot;</span>),
-              <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0xd800_u16</span>, <span class='number'>0xdf45_u16</span>, <span class='number'>0xd800_u16</span>, <span class='number'>0xdf3f_u16</span>,
-                <span class='number'>0xd800_u16</span>, <span class='number'>0xdf3b_u16</span>, <span class='number'>0xd800_u16</span>, <span class='number'>0xdf46_u16</span>,
-                <span class='number'>0xd800_u16</span>, <span class='number'>0xdf39_u16</span>, <span class='number'>0xd800_u16</span>, <span class='number'>0xdf3b_u16</span>,
-                <span class='number'>0xd800_u16</span>, <span class='number'>0xdf30_u16</span>, <span class='number'>0x000a_u16</span>]),
-
-             (<span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;𐐒𐑉𐐮𐑀𐐲𐑋 𐐏𐐲𐑍\n&quot;</span>),
-              <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0xd801_u16</span>, <span class='number'>0xdc12_u16</span>, <span class='number'>0xd801_u16</span>,
-                <span class='number'>0xdc49_u16</span>, <span class='number'>0xd801_u16</span>, <span class='number'>0xdc2e_u16</span>, <span class='number'>0xd801_u16</span>,
-                <span class='number'>0xdc40_u16</span>, <span class='number'>0xd801_u16</span>, <span class='number'>0xdc32_u16</span>, <span class='number'>0xd801_u16</span>,
-                <span class='number'>0xdc4b_u16</span>, <span class='number'>0x0020_u16</span>, <span class='number'>0xd801_u16</span>, <span class='number'>0xdc0f_u16</span>,
-                <span class='number'>0xd801_u16</span>, <span class='number'>0xdc32_u16</span>, <span class='number'>0xd801_u16</span>, <span class='number'>0xdc4d_u16</span>,
-                <span class='number'>0x000a_u16</span>]),
-
-             (<span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;𐌀𐌖𐌋𐌄𐌑𐌉·𐌌𐌄𐌕𐌄𐌋𐌉𐌑\n&quot;</span>),
-              <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0xd800_u16</span>, <span class='number'>0xdf00_u16</span>, <span class='number'>0xd800_u16</span>, <span class='number'>0xdf16_u16</span>,
-                <span class='number'>0xd800_u16</span>, <span class='number'>0xdf0b_u16</span>, <span class='number'>0xd800_u16</span>, <span class='number'>0xdf04_u16</span>,
-                <span class='number'>0xd800_u16</span>, <span class='number'>0xdf11_u16</span>, <span class='number'>0xd800_u16</span>, <span class='number'>0xdf09_u16</span>,
-                <span class='number'>0x00b7_u16</span>, <span class='number'>0xd800_u16</span>, <span class='number'>0xdf0c_u16</span>, <span class='number'>0xd800_u16</span>,
-                <span class='number'>0xdf04_u16</span>, <span class='number'>0xd800_u16</span>, <span class='number'>0xdf15_u16</span>, <span class='number'>0xd800_u16</span>,
-                <span class='number'>0xdf04_u16</span>, <span class='number'>0xd800_u16</span>, <span class='number'>0xdf0b_u16</span>, <span class='number'>0xd800_u16</span>,
-                <span class='number'>0xdf09_u16</span>, <span class='number'>0xd800_u16</span>, <span class='number'>0xdf11_u16</span>, <span class='number'>0x000a_u16</span> ]),
-
-             (<span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;𐒋𐒘𐒈𐒑𐒛𐒒 𐒕𐒓 𐒈𐒚𐒍 𐒏𐒜𐒒𐒖𐒆 𐒕𐒆\n&quot;</span>),
-              <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0xd801_u16</span>, <span class='number'>0xdc8b_u16</span>, <span class='number'>0xd801_u16</span>, <span class='number'>0xdc98_u16</span>,
-                <span class='number'>0xd801_u16</span>, <span class='number'>0xdc88_u16</span>, <span class='number'>0xd801_u16</span>, <span class='number'>0xdc91_u16</span>,
-                <span class='number'>0xd801_u16</span>, <span class='number'>0xdc9b_u16</span>, <span class='number'>0xd801_u16</span>, <span class='number'>0xdc92_u16</span>,
-                <span class='number'>0x0020_u16</span>, <span class='number'>0xd801_u16</span>, <span class='number'>0xdc95_u16</span>, <span class='number'>0xd801_u16</span>,
-                <span class='number'>0xdc93_u16</span>, <span class='number'>0x0020_u16</span>, <span class='number'>0xd801_u16</span>, <span class='number'>0xdc88_u16</span>,
-                <span class='number'>0xd801_u16</span>, <span class='number'>0xdc9a_u16</span>, <span class='number'>0xd801_u16</span>, <span class='number'>0xdc8d_u16</span>,
-                <span class='number'>0x0020_u16</span>, <span class='number'>0xd801_u16</span>, <span class='number'>0xdc8f_u16</span>, <span class='number'>0xd801_u16</span>,
-                <span class='number'>0xdc9c_u16</span>, <span class='number'>0xd801_u16</span>, <span class='number'>0xdc92_u16</span>, <span class='number'>0xd801_u16</span>,
-                <span class='number'>0xdc96_u16</span>, <span class='number'>0xd801_u16</span>, <span class='number'>0xdc86_u16</span>, <span class='number'>0x0020_u16</span>,
-                <span class='number'>0xd801_u16</span>, <span class='number'>0xdc95_u16</span>, <span class='number'>0xd801_u16</span>, <span class='number'>0xdc86_u16</span>,
-                <span class='number'>0x000a_u16</span> ]),
-             <span class='comment'>// Issue #12318, even-numbered non-BMP planes</span>
-             (<span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;\U00020000&quot;</span>),
-              <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0xD840</span>, <span class='number'>0xDC00</span>])];
-
-        <span class='kw'>for</span> <span class='ident'>p</span> <span class='kw'>in</span> <span class='ident'>pairs</span>.<span class='ident'>iter</span>() {
-            <span class='kw'>let</span> (<span class='ident'>s</span>, <span class='ident'>u</span>) <span class='op'>=</span> (<span class='op'>*</span><span class='ident'>p</span>).<span class='ident'>clone</span>();
-            <span class='kw'>let</span> <span class='ident'>s_as_utf16</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>as_slice</span>().<span class='ident'>utf16_units</span>().<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u16</span><span class='op'>&gt;&gt;</span>();
-            <span class='kw'>let</span> <span class='ident'>u_as_string</span> <span class='op'>=</span> <span class='ident'>from_utf16</span>(<span class='ident'>u</span>.<span class='ident'>as_slice</span>()).<span class='ident'>unwrap</span>();
-
-            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>is_utf16</span>(<span class='ident'>u</span>.<span class='ident'>as_slice</span>()));
-            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>s_as_utf16</span>, <span class='ident'>u</span>);
-
-            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>u_as_string</span>, <span class='ident'>s</span>);
-            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>from_utf16_lossy</span>(<span class='ident'>u</span>.<span class='ident'>as_slice</span>()), <span class='ident'>s</span>);
-
-            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>from_utf16</span>(<span class='ident'>s_as_utf16</span>.<span class='ident'>as_slice</span>()).<span class='ident'>unwrap</span>(), <span class='ident'>s</span>);
-            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>u_as_string</span>.<span class='ident'>as_slice</span>().<span class='ident'>utf16_units</span>().<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u16</span><span class='op'>&gt;&gt;</span>(), <span class='ident'>u</span>);
-        }
-    }
-
-    <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_utf16_invalid</span>() {
-        <span class='comment'>// completely positive cases tested above.</span>
-        <span class='comment'>// lead + eof</span>
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>from_utf16</span>([<span class='number'>0xD800</span>]), <span class='prelude-val'>None</span>);
-        <span class='comment'>// lead + lead</span>
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>from_utf16</span>([<span class='number'>0xD800</span>, <span class='number'>0xD800</span>]), <span class='prelude-val'>None</span>);
-
-        <span class='comment'>// isolated trail</span>
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>from_utf16</span>([<span class='number'>0x0061</span>, <span class='number'>0xDC00</span>]), <span class='prelude-val'>None</span>);
-
-        <span class='comment'>// general</span>
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>from_utf16</span>([<span class='number'>0xD800</span>, <span class='number'>0xd801</span>, <span class='number'>0xdc8b</span>, <span class='number'>0xD800</span>]), <span class='prelude-val'>None</span>);
-    }
-
-    <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_utf16_lossy</span>() {
-        <span class='comment'>// completely positive cases tested above.</span>
-        <span class='comment'>// lead + eof</span>
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>from_utf16_lossy</span>([<span class='number'>0xD800</span>]), <span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;\uFFFD&quot;</span>));
-        <span class='comment'>// lead + lead</span>
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>from_utf16_lossy</span>([<span class='number'>0xD800</span>, <span class='number'>0xD800</span>]), <span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;\uFFFD\uFFFD&quot;</span>));
-
-        <span class='comment'>// isolated trail</span>
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>from_utf16_lossy</span>([<span class='number'>0x0061</span>, <span class='number'>0xDC00</span>]), <span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;a\uFFFD&quot;</span>));
-
-        <span class='comment'>// general</span>
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>from_utf16_lossy</span>([<span class='number'>0xD800</span>, <span class='number'>0xd801</span>, <span class='number'>0xdc8b</span>, <span class='number'>0xD800</span>]),
-                   <span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;\uFFFD𐒋\uFFFD&quot;</span>));
-    }
-
-    <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_truncate_utf16_at_nul</span>() {
         <span class='kw'>let</span> <span class='ident'>v</span> <span class='op'>=</span> [];
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>truncate_utf16_at_nul</span>(<span class='ident'>v</span>), <span class='kw-2'>&amp;</span>[]);
@@ -4291,7 +3940,7 @@ Section: Trait implementations
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>pos</span> <span class='op'>=</span> <span class='number'>0</span>;
         <span class='kw'>for</span> <span class='ident'>ch</span> <span class='kw'>in</span> <span class='ident'>v</span>.<span class='ident'>iter</span>() {
             <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>s</span>.<span class='ident'>char_at</span>(<span class='ident'>pos</span>) <span class='op'>==</span> <span class='op'>*</span><span class='ident'>ch</span>);
-            <span class='ident'>pos</span> <span class='op'>+=</span> <span class='ident'>from_char</span>(<span class='op'>*</span><span class='ident'>ch</span>).<span class='ident'>len</span>();
+            <span class='ident'>pos</span> <span class='op'>+=</span> <span class='ident'>String</span>::<span class='ident'>from_char</span>(<span class='number'>1</span>, <span class='op'>*</span><span class='ident'>ch</span>).<span class='ident'>len</span>();
         }
     }
 
@@ -4302,7 +3951,7 @@ Section: Trait implementations
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>pos</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>len</span>();
         <span class='kw'>for</span> <span class='ident'>ch</span> <span class='kw'>in</span> <span class='ident'>v</span>.<span class='ident'>iter</span>().<span class='ident'>rev</span>() {
             <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>s</span>.<span class='ident'>char_at_reverse</span>(<span class='ident'>pos</span>) <span class='op'>==</span> <span class='op'>*</span><span class='ident'>ch</span>);
-            <span class='ident'>pos</span> <span class='op'>-=</span> <span class='ident'>from_char</span>(<span class='op'>*</span><span class='ident'>ch</span>).<span class='ident'>len</span>();
+            <span class='ident'>pos</span> <span class='op'>-=</span> <span class='ident'>String</span>::<span class='ident'>from_char</span>(<span class='number'>1</span>, <span class='op'>*</span><span class='ident'>ch</span>).<span class='ident'>len</span>();
         }
     }
 
@@ -4388,6 +4037,30 @@ Section: Trait implementations
             <span class='ident'>pos</span> <span class='op'>+=</span> <span class='number'>1</span>;
         }
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>pos</span>, <span class='ident'>v</span>.<span class='ident'>len</span>());
+    }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>test_chars_decoding</span>() {
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>bytes</span> <span class='op'>=</span> [<span class='number'>0u8</span>, ..<span class='number'>4</span>];
+        <span class='kw'>for</span> <span class='ident'>c</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u32</span>, <span class='number'>0x110000</span>).<span class='ident'>filter_map</span>(<span class='op'>|</span><span class='ident'>c</span><span class='op'>|</span> ::<span class='ident'>core</span>::<span class='ident'>char</span>::<span class='ident'>from_u32</span>(<span class='ident'>c</span>)) {
+            <span class='kw'>let</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='ident'>c</span>.<span class='ident'>encode_utf8</span>(<span class='ident'>bytes</span>);
+            <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> ::<span class='ident'>core</span>::<span class='ident'>str</span>::<span class='ident'>from_utf8</span>(<span class='ident'>bytes</span>.<span class='ident'>slice_to</span>(<span class='ident'>len</span>)).<span class='ident'>unwrap</span>();
+            <span class='kw'>if</span> <span class='prelude-val'>Some</span>(<span class='ident'>c</span>) <span class='op'>!=</span> <span class='ident'>s</span>.<span class='ident'>chars</span>().<span class='ident'>next</span>() {
+                <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;character {:x}={} does not decode correctly&quot;</span>, <span class='ident'>c</span> <span class='kw'>as</span> <span class='ident'>u32</span>, <span class='ident'>c</span>);
+            }
+        }
+    }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>test_chars_rev_decoding</span>() {
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>bytes</span> <span class='op'>=</span> [<span class='number'>0u8</span>, ..<span class='number'>4</span>];
+        <span class='kw'>for</span> <span class='ident'>c</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0u32</span>, <span class='number'>0x110000</span>).<span class='ident'>filter_map</span>(<span class='op'>|</span><span class='ident'>c</span><span class='op'>|</span> ::<span class='ident'>core</span>::<span class='ident'>char</span>::<span class='ident'>from_u32</span>(<span class='ident'>c</span>)) {
+            <span class='kw'>let</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='ident'>c</span>.<span class='ident'>encode_utf8</span>(<span class='ident'>bytes</span>);
+            <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> ::<span class='ident'>core</span>::<span class='ident'>str</span>::<span class='ident'>from_utf8</span>(<span class='ident'>bytes</span>.<span class='ident'>slice_to</span>(<span class='ident'>len</span>)).<span class='ident'>unwrap</span>();
+            <span class='kw'>if</span> <span class='prelude-val'>Some</span>(<span class='ident'>c</span>) <span class='op'>!=</span> <span class='ident'>s</span>.<span class='ident'>chars</span>().<span class='ident'>rev</span>().<span class='ident'>next</span>() {
+                <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;character {:x}={} does not decode correctly&quot;</span>, <span class='ident'>c</span> <span class='kw'>as</span> <span class='ident'>u32</span>, <span class='ident'>c</span>);
+            }
+        }
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -4602,7 +4275,7 @@ Section: Trait implementations
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;\u0301a&quot;</span>.<span class='ident'>nfkd_chars</span>().<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>(),
                    <span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;\u0301a&quot;</span>));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;\ud4db&quot;</span>.<span class='ident'>nfkd_chars</span>().<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>(),
-<span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;\u1111\u1171\u11b6&quot;</span>));
+                   <span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;\u1111\u1171\u11b6&quot;</span>));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;\uac1c&quot;</span>.<span class='ident'>nfkd_chars</span>().<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>(), <span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;\u1100\u1162&quot;</span>));
     }
 
@@ -4615,6 +4288,286 @@ Section: Trait implementations
         <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='string'>&quot;\nMäry häd ä little lämb\n\nLittle lämb&quot;</span>; <span class='comment'>// no trailing \n</span>
         <span class='kw'>let</span> <span class='ident'>lines</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>data</span>.<span class='ident'>lines</span>().<span class='ident'>collect</span>();
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>lines</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;Märy häd ä little lämb&quot;</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;Little lämb&quot;</span>]);
+    }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>test_graphemes</span>() {
+        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>iter</span>::<span class='ident'>order</span>;
+        <span class='comment'>// official Unicode test data</span>
+        <span class='comment'>// from http://www.unicode.org/Public/UCD/latest/ucd/auxiliary/GraphemeBreakTest.txt</span>
+        <span class='kw'>let</span> <span class='ident'>test_same</span> <span class='op'>=</span> [
+            (<span class='string'>&quot;\u0020\u0020&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020&quot;</span>, <span class='string'>&quot;\u0020&quot;</span>]), (<span class='string'>&quot;\u0020\u0308\u0020&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020\u0308&quot;</span>,
+            <span class='string'>&quot;\u0020&quot;</span>]), (<span class='string'>&quot;\u0020\u000D&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020&quot;</span>, <span class='string'>&quot;\u000D&quot;</span>]), (<span class='string'>&quot;\u0020\u0308\u000D&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020\u0308&quot;</span>, <span class='string'>&quot;\u000D&quot;</span>]), (<span class='string'>&quot;\u0020\u000A&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020&quot;</span>, <span class='string'>&quot;\u000A&quot;</span>]),
+            (<span class='string'>&quot;\u0020\u0308\u000A&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020\u0308&quot;</span>, <span class='string'>&quot;\u000A&quot;</span>]), (<span class='string'>&quot;\u0020\u0001&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020&quot;</span>,
+            <span class='string'>&quot;\u0001&quot;</span>]), (<span class='string'>&quot;\u0020\u0308\u0001&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020\u0308&quot;</span>, <span class='string'>&quot;\u0001&quot;</span>]), (<span class='string'>&quot;\u0020\u0300&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020\u0300&quot;</span>]), (<span class='string'>&quot;\u0020\u0308\u0300&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020\u0308\u0300&quot;</span>]), (<span class='string'>&quot;\u0020\u1100&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020&quot;</span>, <span class='string'>&quot;\u1100&quot;</span>]), (<span class='string'>&quot;\u0020\u0308\u1100&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020\u0308&quot;</span>, <span class='string'>&quot;\u1100&quot;</span>]),
+            (<span class='string'>&quot;\u0020\u1160&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020&quot;</span>, <span class='string'>&quot;\u1160&quot;</span>]), (<span class='string'>&quot;\u0020\u0308\u1160&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020\u0308&quot;</span>,
+            <span class='string'>&quot;\u1160&quot;</span>]), (<span class='string'>&quot;\u0020\u11A8&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020&quot;</span>, <span class='string'>&quot;\u11A8&quot;</span>]), (<span class='string'>&quot;\u0020\u0308\u11A8&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020\u0308&quot;</span>, <span class='string'>&quot;\u11A8&quot;</span>]), (<span class='string'>&quot;\u0020\uAC00&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020&quot;</span>, <span class='string'>&quot;\uAC00&quot;</span>]),
+            (<span class='string'>&quot;\u0020\u0308\uAC00&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020\u0308&quot;</span>, <span class='string'>&quot;\uAC00&quot;</span>]), (<span class='string'>&quot;\u0020\uAC01&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020&quot;</span>,
+            <span class='string'>&quot;\uAC01&quot;</span>]), (<span class='string'>&quot;\u0020\u0308\uAC01&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020\u0308&quot;</span>, <span class='string'>&quot;\uAC01&quot;</span>]), (<span class='string'>&quot;\u0020\U0001F1E6&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020&quot;</span>, <span class='string'>&quot;\U0001F1E6&quot;</span>]), (<span class='string'>&quot;\u0020\u0308\U0001F1E6&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020\u0308&quot;</span>,
+            <span class='string'>&quot;\U0001F1E6&quot;</span>]), (<span class='string'>&quot;\u0020\u0378&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020&quot;</span>, <span class='string'>&quot;\u0378&quot;</span>]), (<span class='string'>&quot;\u0020\u0308\u0378&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020\u0308&quot;</span>, <span class='string'>&quot;\u0378&quot;</span>]), (<span class='string'>&quot;\u000D\u0020&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>, <span class='string'>&quot;\u0020&quot;</span>]),
+            (<span class='string'>&quot;\u000D\u0308\u0020&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\u0020&quot;</span>]), (<span class='string'>&quot;\u000D\u000D&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>,
+            <span class='string'>&quot;\u000D&quot;</span>]), (<span class='string'>&quot;\u000D\u0308\u000D&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\u000D&quot;</span>]), (<span class='string'>&quot;\u000D\u000A&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D\u000A&quot;</span>]), (<span class='string'>&quot;\u000D\u0308\u000A&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\u000A&quot;</span>]),
+            (<span class='string'>&quot;\u000D\u0001&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>, <span class='string'>&quot;\u0001&quot;</span>]), (<span class='string'>&quot;\u000D\u0308\u0001&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>,
+            <span class='string'>&quot;\u0001&quot;</span>]), (<span class='string'>&quot;\u000D\u0300&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>, <span class='string'>&quot;\u0300&quot;</span>]), (<span class='string'>&quot;\u000D\u0308\u0300&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>, <span class='string'>&quot;\u0308\u0300&quot;</span>]), (<span class='string'>&quot;\u000D\u0903&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]),
+            (<span class='string'>&quot;\u000D\u1100&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>, <span class='string'>&quot;\u1100&quot;</span>]), (<span class='string'>&quot;\u000D\u0308\u1100&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>,
+            <span class='string'>&quot;\u1100&quot;</span>]), (<span class='string'>&quot;\u000D\u1160&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>, <span class='string'>&quot;\u1160&quot;</span>]), (<span class='string'>&quot;\u000D\u0308\u1160&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\u1160&quot;</span>]), (<span class='string'>&quot;\u000D\u11A8&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>, <span class='string'>&quot;\u11A8&quot;</span>]),
+            (<span class='string'>&quot;\u000D\u0308\u11A8&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\u11A8&quot;</span>]), (<span class='string'>&quot;\u000D\uAC00&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>,
+            <span class='string'>&quot;\uAC00&quot;</span>]), (<span class='string'>&quot;\u000D\u0308\uAC00&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\uAC00&quot;</span>]), (<span class='string'>&quot;\u000D\uAC01&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>, <span class='string'>&quot;\uAC01&quot;</span>]), (<span class='string'>&quot;\u000D\u0308\uAC01&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\uAC01&quot;</span>]),
+            (<span class='string'>&quot;\u000D\U0001F1E6&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>, <span class='string'>&quot;\U0001F1E6&quot;</span>]), (<span class='string'>&quot;\u000D\u0308\U0001F1E6&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\U0001F1E6&quot;</span>]), (<span class='string'>&quot;\u000D\u0378&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>, <span class='string'>&quot;\u0378&quot;</span>]),
+            (<span class='string'>&quot;\u000D\u0308\u0378&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\u0378&quot;</span>]), (<span class='string'>&quot;\u000A\u0020&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>,
+            <span class='string'>&quot;\u0020&quot;</span>]), (<span class='string'>&quot;\u000A\u0308\u0020&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\u0020&quot;</span>]), (<span class='string'>&quot;\u000A\u000D&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>, <span class='string'>&quot;\u000D&quot;</span>]), (<span class='string'>&quot;\u000A\u0308\u000D&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\u000D&quot;</span>]),
+            (<span class='string'>&quot;\u000A\u000A&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>, <span class='string'>&quot;\u000A&quot;</span>]), (<span class='string'>&quot;\u000A\u0308\u000A&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>,
+            <span class='string'>&quot;\u000A&quot;</span>]), (<span class='string'>&quot;\u000A\u0001&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>, <span class='string'>&quot;\u0001&quot;</span>]), (<span class='string'>&quot;\u000A\u0308\u0001&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\u0001&quot;</span>]), (<span class='string'>&quot;\u000A\u0300&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>, <span class='string'>&quot;\u0300&quot;</span>]),
+            (<span class='string'>&quot;\u000A\u0308\u0300&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>, <span class='string'>&quot;\u0308\u0300&quot;</span>]), (<span class='string'>&quot;\u000A\u0903&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>,
+            <span class='string'>&quot;\u0903&quot;</span>]), (<span class='string'>&quot;\u000A\u1100&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>, <span class='string'>&quot;\u1100&quot;</span>]), (<span class='string'>&quot;\u000A\u0308\u1100&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\u1100&quot;</span>]), (<span class='string'>&quot;\u000A\u1160&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>, <span class='string'>&quot;\u1160&quot;</span>]),
+            (<span class='string'>&quot;\u000A\u0308\u1160&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\u1160&quot;</span>]), (<span class='string'>&quot;\u000A\u11A8&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>,
+            <span class='string'>&quot;\u11A8&quot;</span>]), (<span class='string'>&quot;\u000A\u0308\u11A8&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\u11A8&quot;</span>]), (<span class='string'>&quot;\u000A\uAC00&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>, <span class='string'>&quot;\uAC00&quot;</span>]), (<span class='string'>&quot;\u000A\u0308\uAC00&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\uAC00&quot;</span>]),
+            (<span class='string'>&quot;\u000A\uAC01&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>, <span class='string'>&quot;\uAC01&quot;</span>]), (<span class='string'>&quot;\u000A\u0308\uAC01&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>,
+            <span class='string'>&quot;\uAC01&quot;</span>]), (<span class='string'>&quot;\u000A\U0001F1E6&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>, <span class='string'>&quot;\U0001F1E6&quot;</span>]),
+            (<span class='string'>&quot;\u000A\u0308\U0001F1E6&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\U0001F1E6&quot;</span>]), (<span class='string'>&quot;\u000A\u0378&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>, <span class='string'>&quot;\u0378&quot;</span>]), (<span class='string'>&quot;\u000A\u0308\u0378&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\u0378&quot;</span>]),
+            (<span class='string'>&quot;\u0001\u0020&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\u0020&quot;</span>]), (<span class='string'>&quot;\u0001\u0308\u0020&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>,
+            <span class='string'>&quot;\u0020&quot;</span>]), (<span class='string'>&quot;\u0001\u000D&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\u000D&quot;</span>]), (<span class='string'>&quot;\u0001\u0308\u000D&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\u000D&quot;</span>]), (<span class='string'>&quot;\u0001\u000A&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\u000A&quot;</span>]),
+            (<span class='string'>&quot;\u0001\u0308\u000A&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\u000A&quot;</span>]), (<span class='string'>&quot;\u0001\u0001&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>,
+            <span class='string'>&quot;\u0001&quot;</span>]), (<span class='string'>&quot;\u0001\u0308\u0001&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\u0001&quot;</span>]), (<span class='string'>&quot;\u0001\u0300&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\u0300&quot;</span>]), (<span class='string'>&quot;\u0001\u0308\u0300&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\u0308\u0300&quot;</span>]),
+            (<span class='string'>&quot;\u0001\u0903&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]), (<span class='string'>&quot;\u0001\u1100&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\u1100&quot;</span>]),
+            (<span class='string'>&quot;\u0001\u0308\u1100&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\u1100&quot;</span>]), (<span class='string'>&quot;\u0001\u1160&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>,
+            <span class='string'>&quot;\u1160&quot;</span>]), (<span class='string'>&quot;\u0001\u0308\u1160&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\u1160&quot;</span>]), (<span class='string'>&quot;\u0001\u11A8&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\u11A8&quot;</span>]), (<span class='string'>&quot;\u0001\u0308\u11A8&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\u11A8&quot;</span>]),
+            (<span class='string'>&quot;\u0001\uAC00&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\uAC00&quot;</span>]), (<span class='string'>&quot;\u0001\u0308\uAC00&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>,
+            <span class='string'>&quot;\uAC00&quot;</span>]), (<span class='string'>&quot;\u0001\uAC01&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\uAC01&quot;</span>]), (<span class='string'>&quot;\u0001\u0308\uAC01&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\uAC01&quot;</span>]), (<span class='string'>&quot;\u0001\U0001F1E6&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\U0001F1E6&quot;</span>]),
+            (<span class='string'>&quot;\u0001\u0308\U0001F1E6&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\U0001F1E6&quot;</span>]), (<span class='string'>&quot;\u0001\u0378&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\u0378&quot;</span>]), (<span class='string'>&quot;\u0001\u0308\u0378&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\u0378&quot;</span>]),
+            (<span class='string'>&quot;\u0300\u0020&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300&quot;</span>, <span class='string'>&quot;\u0020&quot;</span>]), (<span class='string'>&quot;\u0300\u0308\u0020&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300\u0308&quot;</span>,
+            <span class='string'>&quot;\u0020&quot;</span>]), (<span class='string'>&quot;\u0300\u000D&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300&quot;</span>, <span class='string'>&quot;\u000D&quot;</span>]), (<span class='string'>&quot;\u0300\u0308\u000D&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300\u0308&quot;</span>, <span class='string'>&quot;\u000D&quot;</span>]), (<span class='string'>&quot;\u0300\u000A&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300&quot;</span>, <span class='string'>&quot;\u000A&quot;</span>]),
+            (<span class='string'>&quot;\u0300\u0308\u000A&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300\u0308&quot;</span>, <span class='string'>&quot;\u000A&quot;</span>]), (<span class='string'>&quot;\u0300\u0001&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300&quot;</span>,
+            <span class='string'>&quot;\u0001&quot;</span>]), (<span class='string'>&quot;\u0300\u0308\u0001&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300\u0308&quot;</span>, <span class='string'>&quot;\u0001&quot;</span>]), (<span class='string'>&quot;\u0300\u0300&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300\u0300&quot;</span>]), (<span class='string'>&quot;\u0300\u0308\u0300&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300\u0308\u0300&quot;</span>]), (<span class='string'>&quot;\u0300\u1100&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300&quot;</span>, <span class='string'>&quot;\u1100&quot;</span>]), (<span class='string'>&quot;\u0300\u0308\u1100&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300\u0308&quot;</span>, <span class='string'>&quot;\u1100&quot;</span>]),
+            (<span class='string'>&quot;\u0300\u1160&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300&quot;</span>, <span class='string'>&quot;\u1160&quot;</span>]), (<span class='string'>&quot;\u0300\u0308\u1160&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300\u0308&quot;</span>,
+            <span class='string'>&quot;\u1160&quot;</span>]), (<span class='string'>&quot;\u0300\u11A8&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300&quot;</span>, <span class='string'>&quot;\u11A8&quot;</span>]), (<span class='string'>&quot;\u0300\u0308\u11A8&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300\u0308&quot;</span>, <span class='string'>&quot;\u11A8&quot;</span>]), (<span class='string'>&quot;\u0300\uAC00&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300&quot;</span>, <span class='string'>&quot;\uAC00&quot;</span>]),
+            (<span class='string'>&quot;\u0300\u0308\uAC00&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300\u0308&quot;</span>, <span class='string'>&quot;\uAC00&quot;</span>]), (<span class='string'>&quot;\u0300\uAC01&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300&quot;</span>,
+            <span class='string'>&quot;\uAC01&quot;</span>]), (<span class='string'>&quot;\u0300\u0308\uAC01&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300\u0308&quot;</span>, <span class='string'>&quot;\uAC01&quot;</span>]), (<span class='string'>&quot;\u0300\U0001F1E6&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300&quot;</span>, <span class='string'>&quot;\U0001F1E6&quot;</span>]), (<span class='string'>&quot;\u0300\u0308\U0001F1E6&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300\u0308&quot;</span>,
+            <span class='string'>&quot;\U0001F1E6&quot;</span>]), (<span class='string'>&quot;\u0300\u0378&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300&quot;</span>, <span class='string'>&quot;\u0378&quot;</span>]), (<span class='string'>&quot;\u0300\u0308\u0378&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300\u0308&quot;</span>, <span class='string'>&quot;\u0378&quot;</span>]), (<span class='string'>&quot;\u0903\u0020&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903&quot;</span>, <span class='string'>&quot;\u0020&quot;</span>]),
+            (<span class='string'>&quot;\u0903\u0308\u0020&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903\u0308&quot;</span>, <span class='string'>&quot;\u0020&quot;</span>]), (<span class='string'>&quot;\u0903\u000D&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903&quot;</span>,
+            <span class='string'>&quot;\u000D&quot;</span>]), (<span class='string'>&quot;\u0903\u0308\u000D&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903\u0308&quot;</span>, <span class='string'>&quot;\u000D&quot;</span>]), (<span class='string'>&quot;\u0903\u000A&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903&quot;</span>, <span class='string'>&quot;\u000A&quot;</span>]), (<span class='string'>&quot;\u0903\u0308\u000A&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903\u0308&quot;</span>, <span class='string'>&quot;\u000A&quot;</span>]),
+            (<span class='string'>&quot;\u0903\u0001&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903&quot;</span>, <span class='string'>&quot;\u0001&quot;</span>]), (<span class='string'>&quot;\u0903\u0308\u0001&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903\u0308&quot;</span>,
+            <span class='string'>&quot;\u0001&quot;</span>]), (<span class='string'>&quot;\u0903\u0300&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903\u0300&quot;</span>]), (<span class='string'>&quot;\u0903\u0308\u0300&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903\u0308\u0300&quot;</span>]), (<span class='string'>&quot;\u0903\u1100&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903&quot;</span>, <span class='string'>&quot;\u1100&quot;</span>]),
+            (<span class='string'>&quot;\u0903\u0308\u1100&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903\u0308&quot;</span>, <span class='string'>&quot;\u1100&quot;</span>]), (<span class='string'>&quot;\u0903\u1160&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903&quot;</span>,
+            <span class='string'>&quot;\u1160&quot;</span>]), (<span class='string'>&quot;\u0903\u0308\u1160&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903\u0308&quot;</span>, <span class='string'>&quot;\u1160&quot;</span>]), (<span class='string'>&quot;\u0903\u11A8&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903&quot;</span>, <span class='string'>&quot;\u11A8&quot;</span>]), (<span class='string'>&quot;\u0903\u0308\u11A8&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903\u0308&quot;</span>, <span class='string'>&quot;\u11A8&quot;</span>]),
+            (<span class='string'>&quot;\u0903\uAC00&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903&quot;</span>, <span class='string'>&quot;\uAC00&quot;</span>]), (<span class='string'>&quot;\u0903\u0308\uAC00&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903\u0308&quot;</span>,
+            <span class='string'>&quot;\uAC00&quot;</span>]), (<span class='string'>&quot;\u0903\uAC01&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903&quot;</span>, <span class='string'>&quot;\uAC01&quot;</span>]), (<span class='string'>&quot;\u0903\u0308\uAC01&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903\u0308&quot;</span>, <span class='string'>&quot;\uAC01&quot;</span>]), (<span class='string'>&quot;\u0903\U0001F1E6&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903&quot;</span>, <span class='string'>&quot;\U0001F1E6&quot;</span>]),
+            (<span class='string'>&quot;\u0903\u0308\U0001F1E6&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903\u0308&quot;</span>, <span class='string'>&quot;\U0001F1E6&quot;</span>]), (<span class='string'>&quot;\u0903\u0378&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903&quot;</span>, <span class='string'>&quot;\u0378&quot;</span>]), (<span class='string'>&quot;\u0903\u0308\u0378&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903\u0308&quot;</span>, <span class='string'>&quot;\u0378&quot;</span>]),
+            (<span class='string'>&quot;\u1100\u0020&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100&quot;</span>, <span class='string'>&quot;\u0020&quot;</span>]), (<span class='string'>&quot;\u1100\u0308\u0020&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100\u0308&quot;</span>,
+            <span class='string'>&quot;\u0020&quot;</span>]), (<span class='string'>&quot;\u1100\u000D&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100&quot;</span>, <span class='string'>&quot;\u000D&quot;</span>]), (<span class='string'>&quot;\u1100\u0308\u000D&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100\u0308&quot;</span>, <span class='string'>&quot;\u000D&quot;</span>]), (<span class='string'>&quot;\u1100\u000A&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100&quot;</span>, <span class='string'>&quot;\u000A&quot;</span>]),
+            (<span class='string'>&quot;\u1100\u0308\u000A&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100\u0308&quot;</span>, <span class='string'>&quot;\u000A&quot;</span>]), (<span class='string'>&quot;\u1100\u0001&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100&quot;</span>,
+            <span class='string'>&quot;\u0001&quot;</span>]), (<span class='string'>&quot;\u1100\u0308\u0001&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100\u0308&quot;</span>, <span class='string'>&quot;\u0001&quot;</span>]), (<span class='string'>&quot;\u1100\u0300&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100\u0300&quot;</span>]), (<span class='string'>&quot;\u1100\u0308\u0300&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100\u0308\u0300&quot;</span>]), (<span class='string'>&quot;\u1100\u1100&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100\u1100&quot;</span>]), (<span class='string'>&quot;\u1100\u0308\u1100&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100\u0308&quot;</span>, <span class='string'>&quot;\u1100&quot;</span>]),
+            (<span class='string'>&quot;\u1100\u1160&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100\u1160&quot;</span>]), (<span class='string'>&quot;\u1100\u0308\u1160&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100\u0308&quot;</span>,
+            <span class='string'>&quot;\u1160&quot;</span>]), (<span class='string'>&quot;\u1100\u11A8&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100&quot;</span>, <span class='string'>&quot;\u11A8&quot;</span>]), (<span class='string'>&quot;\u1100\u0308\u11A8&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100\u0308&quot;</span>, <span class='string'>&quot;\u11A8&quot;</span>]), (<span class='string'>&quot;\u1100\uAC00&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100\uAC00&quot;</span>]),
+            (<span class='string'>&quot;\u1100\u0308\uAC00&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100\u0308&quot;</span>, <span class='string'>&quot;\uAC00&quot;</span>]), (<span class='string'>&quot;\u1100\uAC01&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100\uAC01&quot;</span>]), (<span class='string'>&quot;\u1100\u0308\uAC01&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100\u0308&quot;</span>, <span class='string'>&quot;\uAC01&quot;</span>]),
+            (<span class='string'>&quot;\u1100\U0001F1E6&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100&quot;</span>, <span class='string'>&quot;\U0001F1E6&quot;</span>]), (<span class='string'>&quot;\u1100\u0308\U0001F1E6&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100\u0308&quot;</span>, <span class='string'>&quot;\U0001F1E6&quot;</span>]), (<span class='string'>&quot;\u1100\u0378&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100&quot;</span>, <span class='string'>&quot;\u0378&quot;</span>]),
+            (<span class='string'>&quot;\u1100\u0308\u0378&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100\u0308&quot;</span>, <span class='string'>&quot;\u0378&quot;</span>]), (<span class='string'>&quot;\u1160\u0020&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160&quot;</span>,
+            <span class='string'>&quot;\u0020&quot;</span>]), (<span class='string'>&quot;\u1160\u0308\u0020&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160\u0308&quot;</span>, <span class='string'>&quot;\u0020&quot;</span>]), (<span class='string'>&quot;\u1160\u000D&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160&quot;</span>, <span class='string'>&quot;\u000D&quot;</span>]), (<span class='string'>&quot;\u1160\u0308\u000D&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160\u0308&quot;</span>, <span class='string'>&quot;\u000D&quot;</span>]),
+            (<span class='string'>&quot;\u1160\u000A&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160&quot;</span>, <span class='string'>&quot;\u000A&quot;</span>]), (<span class='string'>&quot;\u1160\u0308\u000A&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160\u0308&quot;</span>,
+            <span class='string'>&quot;\u000A&quot;</span>]), (<span class='string'>&quot;\u1160\u0001&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160&quot;</span>, <span class='string'>&quot;\u0001&quot;</span>]), (<span class='string'>&quot;\u1160\u0308\u0001&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160\u0308&quot;</span>, <span class='string'>&quot;\u0001&quot;</span>]), (<span class='string'>&quot;\u1160\u0300&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160\u0300&quot;</span>]),
+            (<span class='string'>&quot;\u1160\u0308\u0300&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160\u0308\u0300&quot;</span>]), (<span class='string'>&quot;\u1160\u1100&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160&quot;</span>,
+            <span class='string'>&quot;\u1100&quot;</span>]), (<span class='string'>&quot;\u1160\u0308\u1100&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160\u0308&quot;</span>, <span class='string'>&quot;\u1100&quot;</span>]), (<span class='string'>&quot;\u1160\u1160&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160\u1160&quot;</span>]), (<span class='string'>&quot;\u1160\u0308\u1160&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160\u0308&quot;</span>, <span class='string'>&quot;\u1160&quot;</span>]),
+            (<span class='string'>&quot;\u1160\u11A8&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160\u11A8&quot;</span>]), (<span class='string'>&quot;\u1160\u0308\u11A8&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160\u0308&quot;</span>,
+            <span class='string'>&quot;\u11A8&quot;</span>]), (<span class='string'>&quot;\u1160\uAC00&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160&quot;</span>, <span class='string'>&quot;\uAC00&quot;</span>]), (<span class='string'>&quot;\u1160\u0308\uAC00&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160\u0308&quot;</span>, <span class='string'>&quot;\uAC00&quot;</span>]), (<span class='string'>&quot;\u1160\uAC01&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160&quot;</span>, <span class='string'>&quot;\uAC01&quot;</span>]),
+            (<span class='string'>&quot;\u1160\u0308\uAC01&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160\u0308&quot;</span>, <span class='string'>&quot;\uAC01&quot;</span>]), (<span class='string'>&quot;\u1160\U0001F1E6&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160&quot;</span>,
+            <span class='string'>&quot;\U0001F1E6&quot;</span>]), (<span class='string'>&quot;\u1160\u0308\U0001F1E6&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160\u0308&quot;</span>, <span class='string'>&quot;\U0001F1E6&quot;</span>]),
+            (<span class='string'>&quot;\u1160\u0378&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160&quot;</span>, <span class='string'>&quot;\u0378&quot;</span>]), (<span class='string'>&quot;\u1160\u0308\u0378&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160\u0308&quot;</span>,
+            <span class='string'>&quot;\u0378&quot;</span>]), (<span class='string'>&quot;\u11A8\u0020&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8&quot;</span>, <span class='string'>&quot;\u0020&quot;</span>]), (<span class='string'>&quot;\u11A8\u0308\u0020&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8\u0308&quot;</span>, <span class='string'>&quot;\u0020&quot;</span>]), (<span class='string'>&quot;\u11A8\u000D&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8&quot;</span>, <span class='string'>&quot;\u000D&quot;</span>]),
+            (<span class='string'>&quot;\u11A8\u0308\u000D&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8\u0308&quot;</span>, <span class='string'>&quot;\u000D&quot;</span>]), (<span class='string'>&quot;\u11A8\u000A&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8&quot;</span>,
+            <span class='string'>&quot;\u000A&quot;</span>]), (<span class='string'>&quot;\u11A8\u0308\u000A&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8\u0308&quot;</span>, <span class='string'>&quot;\u000A&quot;</span>]), (<span class='string'>&quot;\u11A8\u0001&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8&quot;</span>, <span class='string'>&quot;\u0001&quot;</span>]), (<span class='string'>&quot;\u11A8\u0308\u0001&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8\u0308&quot;</span>, <span class='string'>&quot;\u0001&quot;</span>]),
+            (<span class='string'>&quot;\u11A8\u0300&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8\u0300&quot;</span>]), (<span class='string'>&quot;\u11A8\u0308\u0300&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8\u0308\u0300&quot;</span>]),
+            (<span class='string'>&quot;\u11A8\u1100&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8&quot;</span>, <span class='string'>&quot;\u1100&quot;</span>]), (<span class='string'>&quot;\u11A8\u0308\u1100&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8\u0308&quot;</span>,
+            <span class='string'>&quot;\u1100&quot;</span>]), (<span class='string'>&quot;\u11A8\u1160&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8&quot;</span>, <span class='string'>&quot;\u1160&quot;</span>]), (<span class='string'>&quot;\u11A8\u0308\u1160&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8\u0308&quot;</span>, <span class='string'>&quot;\u1160&quot;</span>]), (<span class='string'>&quot;\u11A8\u11A8&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8\u11A8&quot;</span>]),
+            (<span class='string'>&quot;\u11A8\u0308\u11A8&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8\u0308&quot;</span>, <span class='string'>&quot;\u11A8&quot;</span>]), (<span class='string'>&quot;\u11A8\uAC00&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8&quot;</span>,
+            <span class='string'>&quot;\uAC00&quot;</span>]), (<span class='string'>&quot;\u11A8\u0308\uAC00&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8\u0308&quot;</span>, <span class='string'>&quot;\uAC00&quot;</span>]), (<span class='string'>&quot;\u11A8\uAC01&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8&quot;</span>, <span class='string'>&quot;\uAC01&quot;</span>]), (<span class='string'>&quot;\u11A8\u0308\uAC01&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8\u0308&quot;</span>, <span class='string'>&quot;\uAC01&quot;</span>]),
+            (<span class='string'>&quot;\u11A8\U0001F1E6&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8&quot;</span>, <span class='string'>&quot;\U0001F1E6&quot;</span>]), (<span class='string'>&quot;\u11A8\u0308\U0001F1E6&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8\u0308&quot;</span>, <span class='string'>&quot;\U0001F1E6&quot;</span>]), (<span class='string'>&quot;\u11A8\u0378&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8&quot;</span>, <span class='string'>&quot;\u0378&quot;</span>]),
+            (<span class='string'>&quot;\u11A8\u0308\u0378&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8\u0308&quot;</span>, <span class='string'>&quot;\u0378&quot;</span>]), (<span class='string'>&quot;\uAC00\u0020&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00&quot;</span>,
+            <span class='string'>&quot;\u0020&quot;</span>]), (<span class='string'>&quot;\uAC00\u0308\u0020&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00\u0308&quot;</span>, <span class='string'>&quot;\u0020&quot;</span>]), (<span class='string'>&quot;\uAC00\u000D&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00&quot;</span>, <span class='string'>&quot;\u000D&quot;</span>]), (<span class='string'>&quot;\uAC00\u0308\u000D&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00\u0308&quot;</span>, <span class='string'>&quot;\u000D&quot;</span>]),
+            (<span class='string'>&quot;\uAC00\u000A&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00&quot;</span>, <span class='string'>&quot;\u000A&quot;</span>]), (<span class='string'>&quot;\uAC00\u0308\u000A&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00\u0308&quot;</span>,
+            <span class='string'>&quot;\u000A&quot;</span>]), (<span class='string'>&quot;\uAC00\u0001&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00&quot;</span>, <span class='string'>&quot;\u0001&quot;</span>]), (<span class='string'>&quot;\uAC00\u0308\u0001&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00\u0308&quot;</span>, <span class='string'>&quot;\u0001&quot;</span>]), (<span class='string'>&quot;\uAC00\u0300&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00\u0300&quot;</span>]),
+            (<span class='string'>&quot;\uAC00\u0308\u0300&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00\u0308\u0300&quot;</span>]), (<span class='string'>&quot;\uAC00\u1100&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00&quot;</span>,
+            <span class='string'>&quot;\u1100&quot;</span>]), (<span class='string'>&quot;\uAC00\u0308\u1100&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00\u0308&quot;</span>, <span class='string'>&quot;\u1100&quot;</span>]), (<span class='string'>&quot;\uAC00\u1160&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00\u1160&quot;</span>]), (<span class='string'>&quot;\uAC00\u0308\u1160&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00\u0308&quot;</span>, <span class='string'>&quot;\u1160&quot;</span>]),
+            (<span class='string'>&quot;\uAC00\u11A8&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00\u11A8&quot;</span>]), (<span class='string'>&quot;\uAC00\u0308\u11A8&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00\u0308&quot;</span>,
+            <span class='string'>&quot;\u11A8&quot;</span>]), (<span class='string'>&quot;\uAC00\uAC00&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00&quot;</span>, <span class='string'>&quot;\uAC00&quot;</span>]), (<span class='string'>&quot;\uAC00\u0308\uAC00&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00\u0308&quot;</span>, <span class='string'>&quot;\uAC00&quot;</span>]), (<span class='string'>&quot;\uAC00\uAC01&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00&quot;</span>, <span class='string'>&quot;\uAC01&quot;</span>]),
+            (<span class='string'>&quot;\uAC00\u0308\uAC01&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00\u0308&quot;</span>, <span class='string'>&quot;\uAC01&quot;</span>]), (<span class='string'>&quot;\uAC00\U0001F1E6&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00&quot;</span>,
+            <span class='string'>&quot;\U0001F1E6&quot;</span>]), (<span class='string'>&quot;\uAC00\u0308\U0001F1E6&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00\u0308&quot;</span>, <span class='string'>&quot;\U0001F1E6&quot;</span>]),
+            (<span class='string'>&quot;\uAC00\u0378&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00&quot;</span>, <span class='string'>&quot;\u0378&quot;</span>]), (<span class='string'>&quot;\uAC00\u0308\u0378&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00\u0308&quot;</span>,
+            <span class='string'>&quot;\u0378&quot;</span>]), (<span class='string'>&quot;\uAC01\u0020&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01&quot;</span>, <span class='string'>&quot;\u0020&quot;</span>]), (<span class='string'>&quot;\uAC01\u0308\u0020&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01\u0308&quot;</span>, <span class='string'>&quot;\u0020&quot;</span>]), (<span class='string'>&quot;\uAC01\u000D&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01&quot;</span>, <span class='string'>&quot;\u000D&quot;</span>]),
+            (<span class='string'>&quot;\uAC01\u0308\u000D&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01\u0308&quot;</span>, <span class='string'>&quot;\u000D&quot;</span>]), (<span class='string'>&quot;\uAC01\u000A&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01&quot;</span>,
+            <span class='string'>&quot;\u000A&quot;</span>]), (<span class='string'>&quot;\uAC01\u0308\u000A&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01\u0308&quot;</span>, <span class='string'>&quot;\u000A&quot;</span>]), (<span class='string'>&quot;\uAC01\u0001&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01&quot;</span>, <span class='string'>&quot;\u0001&quot;</span>]), (<span class='string'>&quot;\uAC01\u0308\u0001&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01\u0308&quot;</span>, <span class='string'>&quot;\u0001&quot;</span>]),
+            (<span class='string'>&quot;\uAC01\u0300&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01\u0300&quot;</span>]), (<span class='string'>&quot;\uAC01\u0308\u0300&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01\u0308\u0300&quot;</span>]),
+            (<span class='string'>&quot;\uAC01\u1100&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01&quot;</span>, <span class='string'>&quot;\u1100&quot;</span>]), (<span class='string'>&quot;\uAC01\u0308\u1100&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01\u0308&quot;</span>,
+            <span class='string'>&quot;\u1100&quot;</span>]), (<span class='string'>&quot;\uAC01\u1160&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01&quot;</span>, <span class='string'>&quot;\u1160&quot;</span>]), (<span class='string'>&quot;\uAC01\u0308\u1160&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01\u0308&quot;</span>, <span class='string'>&quot;\u1160&quot;</span>]), (<span class='string'>&quot;\uAC01\u11A8&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01\u11A8&quot;</span>]),
+            (<span class='string'>&quot;\uAC01\u0308\u11A8&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01\u0308&quot;</span>, <span class='string'>&quot;\u11A8&quot;</span>]), (<span class='string'>&quot;\uAC01\uAC00&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01&quot;</span>,
+            <span class='string'>&quot;\uAC00&quot;</span>]), (<span class='string'>&quot;\uAC01\u0308\uAC00&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01\u0308&quot;</span>, <span class='string'>&quot;\uAC00&quot;</span>]), (<span class='string'>&quot;\uAC01\uAC01&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01&quot;</span>, <span class='string'>&quot;\uAC01&quot;</span>]), (<span class='string'>&quot;\uAC01\u0308\uAC01&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01\u0308&quot;</span>, <span class='string'>&quot;\uAC01&quot;</span>]),
+            (<span class='string'>&quot;\uAC01\U0001F1E6&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01&quot;</span>, <span class='string'>&quot;\U0001F1E6&quot;</span>]), (<span class='string'>&quot;\uAC01\u0308\U0001F1E6&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01\u0308&quot;</span>, <span class='string'>&quot;\U0001F1E6&quot;</span>]), (<span class='string'>&quot;\uAC01\u0378&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01&quot;</span>, <span class='string'>&quot;\u0378&quot;</span>]),
+            (<span class='string'>&quot;\uAC01\u0308\u0378&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01\u0308&quot;</span>, <span class='string'>&quot;\u0378&quot;</span>]), (<span class='string'>&quot;\U0001F1E6\u0020&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6&quot;</span>, <span class='string'>&quot;\u0020&quot;</span>]), (<span class='string'>&quot;\U0001F1E6\u0308\u0020&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6\u0308&quot;</span>,
+            <span class='string'>&quot;\u0020&quot;</span>]), (<span class='string'>&quot;\U0001F1E6\u000D&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6&quot;</span>, <span class='string'>&quot;\u000D&quot;</span>]),
+            (<span class='string'>&quot;\U0001F1E6\u0308\u000D&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6\u0308&quot;</span>, <span class='string'>&quot;\u000D&quot;</span>]), (<span class='string'>&quot;\U0001F1E6\u000A&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6&quot;</span>, <span class='string'>&quot;\u000A&quot;</span>]), (<span class='string'>&quot;\U0001F1E6\u0308\u000A&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6\u0308&quot;</span>,
+            <span class='string'>&quot;\u000A&quot;</span>]), (<span class='string'>&quot;\U0001F1E6\u0001&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6&quot;</span>, <span class='string'>&quot;\u0001&quot;</span>]),
+            (<span class='string'>&quot;\U0001F1E6\u0308\u0001&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6\u0308&quot;</span>, <span class='string'>&quot;\u0001&quot;</span>]), (<span class='string'>&quot;\U0001F1E6\u0300&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6\u0300&quot;</span>]), (<span class='string'>&quot;\U0001F1E6\u0308\u0300&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6\u0308\u0300&quot;</span>]),
+            (<span class='string'>&quot;\U0001F1E6\u1100&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6&quot;</span>, <span class='string'>&quot;\u1100&quot;</span>]), (<span class='string'>&quot;\U0001F1E6\u0308\u1100&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6\u0308&quot;</span>, <span class='string'>&quot;\u1100&quot;</span>]), (<span class='string'>&quot;\U0001F1E6\u1160&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6&quot;</span>, <span class='string'>&quot;\u1160&quot;</span>]),
+            (<span class='string'>&quot;\U0001F1E6\u0308\u1160&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6\u0308&quot;</span>, <span class='string'>&quot;\u1160&quot;</span>]), (<span class='string'>&quot;\U0001F1E6\u11A8&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6&quot;</span>, <span class='string'>&quot;\u11A8&quot;</span>]), (<span class='string'>&quot;\U0001F1E6\u0308\u11A8&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6\u0308&quot;</span>,
+            <span class='string'>&quot;\u11A8&quot;</span>]), (<span class='string'>&quot;\U0001F1E6\uAC00&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6&quot;</span>, <span class='string'>&quot;\uAC00&quot;</span>]),
+            (<span class='string'>&quot;\U0001F1E6\u0308\uAC00&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6\u0308&quot;</span>, <span class='string'>&quot;\uAC00&quot;</span>]), (<span class='string'>&quot;\U0001F1E6\uAC01&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6&quot;</span>, <span class='string'>&quot;\uAC01&quot;</span>]), (<span class='string'>&quot;\U0001F1E6\u0308\uAC01&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6\u0308&quot;</span>,
+            <span class='string'>&quot;\uAC01&quot;</span>]), (<span class='string'>&quot;\U0001F1E6\U0001F1E6&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6\U0001F1E6&quot;</span>]),
+            (<span class='string'>&quot;\U0001F1E6\u0308\U0001F1E6&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6\u0308&quot;</span>, <span class='string'>&quot;\U0001F1E6&quot;</span>]),
+            (<span class='string'>&quot;\U0001F1E6\u0378&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6&quot;</span>, <span class='string'>&quot;\u0378&quot;</span>]), (<span class='string'>&quot;\U0001F1E6\u0308\u0378&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6\u0308&quot;</span>, <span class='string'>&quot;\u0378&quot;</span>]), (<span class='string'>&quot;\u0378\u0020&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378&quot;</span>, <span class='string'>&quot;\u0020&quot;</span>]),
+            (<span class='string'>&quot;\u0378\u0308\u0020&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378\u0308&quot;</span>, <span class='string'>&quot;\u0020&quot;</span>]), (<span class='string'>&quot;\u0378\u000D&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378&quot;</span>,
+            <span class='string'>&quot;\u000D&quot;</span>]), (<span class='string'>&quot;\u0378\u0308\u000D&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378\u0308&quot;</span>, <span class='string'>&quot;\u000D&quot;</span>]), (<span class='string'>&quot;\u0378\u000A&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378&quot;</span>, <span class='string'>&quot;\u000A&quot;</span>]), (<span class='string'>&quot;\u0378\u0308\u000A&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378\u0308&quot;</span>, <span class='string'>&quot;\u000A&quot;</span>]),
+            (<span class='string'>&quot;\u0378\u0001&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378&quot;</span>, <span class='string'>&quot;\u0001&quot;</span>]), (<span class='string'>&quot;\u0378\u0308\u0001&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378\u0308&quot;</span>,
+            <span class='string'>&quot;\u0001&quot;</span>]), (<span class='string'>&quot;\u0378\u0300&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378\u0300&quot;</span>]), (<span class='string'>&quot;\u0378\u0308\u0300&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378\u0308\u0300&quot;</span>]), (<span class='string'>&quot;\u0378\u1100&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378&quot;</span>, <span class='string'>&quot;\u1100&quot;</span>]),
+            (<span class='string'>&quot;\u0378\u0308\u1100&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378\u0308&quot;</span>, <span class='string'>&quot;\u1100&quot;</span>]), (<span class='string'>&quot;\u0378\u1160&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378&quot;</span>,
+            <span class='string'>&quot;\u1160&quot;</span>]), (<span class='string'>&quot;\u0378\u0308\u1160&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378\u0308&quot;</span>, <span class='string'>&quot;\u1160&quot;</span>]), (<span class='string'>&quot;\u0378\u11A8&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378&quot;</span>, <span class='string'>&quot;\u11A8&quot;</span>]), (<span class='string'>&quot;\u0378\u0308\u11A8&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378\u0308&quot;</span>, <span class='string'>&quot;\u11A8&quot;</span>]),
+            (<span class='string'>&quot;\u0378\uAC00&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378&quot;</span>, <span class='string'>&quot;\uAC00&quot;</span>]), (<span class='string'>&quot;\u0378\u0308\uAC00&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378\u0308&quot;</span>,
+            <span class='string'>&quot;\uAC00&quot;</span>]), (<span class='string'>&quot;\u0378\uAC01&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378&quot;</span>, <span class='string'>&quot;\uAC01&quot;</span>]), (<span class='string'>&quot;\u0378\u0308\uAC01&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378\u0308&quot;</span>, <span class='string'>&quot;\uAC01&quot;</span>]), (<span class='string'>&quot;\u0378\U0001F1E6&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378&quot;</span>, <span class='string'>&quot;\U0001F1E6&quot;</span>]),
+            (<span class='string'>&quot;\u0378\u0308\U0001F1E6&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378\u0308&quot;</span>, <span class='string'>&quot;\U0001F1E6&quot;</span>]), (<span class='string'>&quot;\u0378\u0378&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378&quot;</span>, <span class='string'>&quot;\u0378&quot;</span>]), (<span class='string'>&quot;\u0378\u0308\u0378&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378\u0308&quot;</span>, <span class='string'>&quot;\u0378&quot;</span>]),
+            (<span class='string'>&quot;\u0061\U0001F1E6\u0062&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0061&quot;</span>, <span class='string'>&quot;\U0001F1E6&quot;</span>, <span class='string'>&quot;\u0062&quot;</span>]),
+            (<span class='string'>&quot;\U0001F1F7\U0001F1FA&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1F7\U0001F1FA&quot;</span>]),
+            (<span class='string'>&quot;\U0001F1F7\U0001F1FA\U0001F1F8&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1F7\U0001F1FA\U0001F1F8&quot;</span>]),
+            (<span class='string'>&quot;\U0001F1F7\U0001F1FA\U0001F1F8\U0001F1EA&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1F7\U0001F1FA\U0001F1F8\U0001F1EA&quot;</span>]),
+            (<span class='string'>&quot;\U0001F1F7\U0001F1FA\u200B\U0001F1F8\U0001F1EA&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1F7\U0001F1FA&quot;</span>, <span class='string'>&quot;\u200B&quot;</span>,
+            <span class='string'>&quot;\U0001F1F8\U0001F1EA&quot;</span>]), (<span class='string'>&quot;\U0001F1E6\U0001F1E7\U0001F1E8&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6\U0001F1E7\U0001F1E8&quot;</span>]), (<span class='string'>&quot;\U0001F1E6\u200D\U0001F1E7\U0001F1E8&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6\u200D&quot;</span>, <span class='string'>&quot;\U0001F1E7\U0001F1E8&quot;</span>]),
+            (<span class='string'>&quot;\U0001F1E6\U0001F1E7\u200D\U0001F1E8&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6\U0001F1E7\u200D&quot;</span>,
+            <span class='string'>&quot;\U0001F1E8&quot;</span>]), (<span class='string'>&quot;\u0020\u200D\u0646&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020\u200D&quot;</span>, <span class='string'>&quot;\u0646&quot;</span>]),
+            (<span class='string'>&quot;\u0646\u200D\u0020&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0646\u200D&quot;</span>, <span class='string'>&quot;\u0020&quot;</span>]),
+        ];
+
+        <span class='kw'>let</span> <span class='ident'>test_diff</span> <span class='op'>=</span> [
+            (<span class='string'>&quot;\u0020\u0903&quot;</span>, <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020\u0903&quot;</span>], <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]), (<span class='string'>&quot;\u0020\u0308\u0903&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020\u0308\u0903&quot;</span>], <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0020\u0308&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]), (<span class='string'>&quot;\u000D\u0308\u0903&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>, <span class='string'>&quot;\u0308\u0903&quot;</span>], <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000D&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]), (<span class='string'>&quot;\u000A\u0308\u0903&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>, <span class='string'>&quot;\u0308\u0903&quot;</span>], <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u000A&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]), (<span class='string'>&quot;\u0001\u0308\u0903&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\u0308\u0903&quot;</span>], <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0001&quot;</span>, <span class='string'>&quot;\u0308&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]), (<span class='string'>&quot;\u0300\u0903&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300\u0903&quot;</span>], <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]), (<span class='string'>&quot;\u0300\u0308\u0903&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300\u0308\u0903&quot;</span>], <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0300\u0308&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]), (<span class='string'>&quot;\u0903\u0903&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903\u0903&quot;</span>], <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]), (<span class='string'>&quot;\u0903\u0308\u0903&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903\u0308\u0903&quot;</span>], <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0903\u0308&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]), (<span class='string'>&quot;\u1100\u0903&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100\u0903&quot;</span>], <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]), (<span class='string'>&quot;\u1100\u0308\u0903&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100\u0308\u0903&quot;</span>], <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1100\u0308&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]), (<span class='string'>&quot;\u1160\u0903&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160\u0903&quot;</span>], <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]), (<span class='string'>&quot;\u1160\u0308\u0903&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160\u0308\u0903&quot;</span>], <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u1160\u0308&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]), (<span class='string'>&quot;\u11A8\u0903&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8\u0903&quot;</span>], <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]), (<span class='string'>&quot;\u11A8\u0308\u0903&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8\u0308\u0903&quot;</span>], <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u11A8\u0308&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]), (<span class='string'>&quot;\uAC00\u0903&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00\u0903&quot;</span>], <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]), (<span class='string'>&quot;\uAC00\u0308\u0903&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00\u0308\u0903&quot;</span>], <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC00\u0308&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]), (<span class='string'>&quot;\uAC01\u0903&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01\u0903&quot;</span>], <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]), (<span class='string'>&quot;\uAC01\u0308\u0903&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01\u0308\u0903&quot;</span>], <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\uAC01\u0308&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]), (<span class='string'>&quot;\U0001F1E6\u0903&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6\u0903&quot;</span>], <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]), (<span class='string'>&quot;\U0001F1E6\u0308\u0903&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6\u0308\u0903&quot;</span>], <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\U0001F1E6\u0308&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]), (<span class='string'>&quot;\u0378\u0903&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378\u0903&quot;</span>], <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]), (<span class='string'>&quot;\u0378\u0308\u0903&quot;</span>,
+            <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378\u0308\u0903&quot;</span>], <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\u0378\u0308&quot;</span>, <span class='string'>&quot;\u0903&quot;</span>]),
+        ];
+
+        <span class='kw'>for</span> <span class='kw-2'>&amp;</span>(<span class='ident'>s</span>, <span class='ident'>g</span>) <span class='kw'>in</span> <span class='ident'>test_same</span>.<span class='ident'>iter</span>() {
+            <span class='comment'>// test forward iterator</span>
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>order</span>::<span class='ident'>equals</span>(<span class='ident'>s</span>.<span class='ident'>graphemes</span>(<span class='boolval'>true</span>), <span class='ident'>g</span>.<span class='ident'>iter</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span>)));
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>order</span>::<span class='ident'>equals</span>(<span class='ident'>s</span>.<span class='ident'>graphemes</span>(<span class='boolval'>false</span>), <span class='ident'>g</span>.<span class='ident'>iter</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span>)));
+
+            <span class='comment'>// test reverse iterator</span>
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>order</span>::<span class='ident'>equals</span>(<span class='ident'>s</span>.<span class='ident'>graphemes</span>(<span class='boolval'>true</span>).<span class='ident'>rev</span>(), <span class='ident'>g</span>.<span class='ident'>iter</span>().<span class='ident'>rev</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span>)));
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>order</span>::<span class='ident'>equals</span>(<span class='ident'>s</span>.<span class='ident'>graphemes</span>(<span class='boolval'>false</span>).<span class='ident'>rev</span>(), <span class='ident'>g</span>.<span class='ident'>iter</span>().<span class='ident'>rev</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span>)));
+        }
+
+        <span class='kw'>for</span> <span class='kw-2'>&amp;</span>(<span class='ident'>s</span>, <span class='ident'>gt</span>, <span class='ident'>gf</span>) <span class='kw'>in</span> <span class='ident'>test_diff</span>.<span class='ident'>iter</span>() {
+            <span class='comment'>// test forward iterator</span>
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>order</span>::<span class='ident'>equals</span>(<span class='ident'>s</span>.<span class='ident'>graphemes</span>(<span class='boolval'>true</span>), <span class='ident'>gt</span>.<span class='ident'>iter</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span>)));
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>order</span>::<span class='ident'>equals</span>(<span class='ident'>s</span>.<span class='ident'>graphemes</span>(<span class='boolval'>false</span>), <span class='ident'>gf</span>.<span class='ident'>iter</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span>)));
+
+            <span class='comment'>// test reverse iterator</span>
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>order</span>::<span class='ident'>equals</span>(<span class='ident'>s</span>.<span class='ident'>graphemes</span>(<span class='boolval'>true</span>).<span class='ident'>rev</span>(), <span class='ident'>gt</span>.<span class='ident'>iter</span>().<span class='ident'>rev</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span>)));
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>order</span>::<span class='ident'>equals</span>(<span class='ident'>s</span>.<span class='ident'>graphemes</span>(<span class='boolval'>false</span>).<span class='ident'>rev</span>(), <span class='ident'>gf</span>.<span class='ident'>iter</span>().<span class='ident'>rev</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span>)));
+        }
+
+        <span class='comment'>// test the indices iterators</span>
+        <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='string'>&quot;a̐éö̲\r\n&quot;</span>;
+        <span class='kw'>let</span> <span class='ident'>gr_inds</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>grapheme_indices</span>(<span class='boolval'>true</span>).<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span>(<span class='ident'>uint</span>, <span class='kw-2'>&amp;</span><span class='ident'>str</span>)<span class='op'>&gt;&gt;</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>gr_inds</span>.<span class='ident'>as_slice</span>(), <span class='kw-2'>&amp;</span>[(<span class='number'>0u</span>, <span class='string'>&quot;a̐&quot;</span>), (<span class='number'>3</span>, <span class='string'>&quot;é&quot;</span>), (<span class='number'>6</span>, <span class='string'>&quot;ö̲&quot;</span>), (<span class='number'>11</span>, <span class='string'>&quot;\r\n&quot;</span>)]);
+        <span class='kw'>let</span> <span class='ident'>gr_inds</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>grapheme_indices</span>(<span class='boolval'>true</span>).<span class='ident'>rev</span>().<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span>(<span class='ident'>uint</span>, <span class='kw-2'>&amp;</span><span class='ident'>str</span>)<span class='op'>&gt;&gt;</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>gr_inds</span>.<span class='ident'>as_slice</span>(), <span class='kw-2'>&amp;</span>[(<span class='number'>11</span>, <span class='string'>&quot;\r\n&quot;</span>), (<span class='number'>6</span>, <span class='string'>&quot;ö̲&quot;</span>), (<span class='number'>3</span>, <span class='string'>&quot;é&quot;</span>), (<span class='number'>0u</span>, <span class='string'>&quot;a̐&quot;</span>)]);
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>gr_inds</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>grapheme_indices</span>(<span class='boolval'>true</span>);
+        <span class='kw'>let</span> <span class='ident'>e1</span> <span class='op'>=</span> <span class='ident'>gr_inds</span>.<span class='ident'>size_hint</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>e1</span>, (<span class='number'>1</span>, <span class='prelude-val'>Some</span>(<span class='number'>13</span>)));
+        <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>gr_inds</span>.<span class='ident'>count</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>c</span>, <span class='number'>4</span>);
+        <span class='kw'>let</span> <span class='ident'>e2</span> <span class='op'>=</span> <span class='ident'>gr_inds</span>.<span class='ident'>size_hint</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>e2</span>, (<span class='number'>0</span>, <span class='prelude-val'>Some</span>(<span class='number'>0</span>)));
+
+        <span class='comment'>// make sure the reverse iterator does the right thing with &quot;\n&quot; at beginning of string</span>
+        <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='string'>&quot;\n\r\n\r&quot;</span>;
+        <span class='kw'>let</span> <span class='ident'>gr</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>graphemes</span>(<span class='boolval'>true</span>).<span class='ident'>rev</span>().<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;&gt;</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>gr</span>.<span class='ident'>as_slice</span>(), <span class='kw-2'>&amp;</span>[<span class='string'>&quot;\r&quot;</span>, <span class='string'>&quot;\r\n&quot;</span>, <span class='string'>&quot;\n&quot;</span>]);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -4674,54 +4627,6 @@ Section: Trait implementations
 
         <span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> <span class='string'>b&quot;hello\xFF&quot;</span>;
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>from_utf8</span>(<span class='ident'>xs</span>), <span class='prelude-val'>None</span>);
-    }
-
-    <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_str_from_utf8_owned</span>() {
-        <span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>from_slice</span>(<span class='string'>b&quot;hello&quot;</span>);
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>from_utf8_owned</span>(<span class='ident'>xs</span>), <span class='prelude-val'>Ok</span>(<span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;hello&quot;</span>)));
-
-        <span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>from_slice</span>(<span class='string'>&quot;ศไทย中华Việt Nam&quot;</span>.<span class='ident'>as_bytes</span>());
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>from_utf8_owned</span>(<span class='ident'>xs</span>), <span class='prelude-val'>Ok</span>(<span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;ศไทย中华Việt Nam&quot;</span>)));
-
-        <span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>from_slice</span>(<span class='string'>b&quot;hello\xFF&quot;</span>);
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>from_utf8_owned</span>(<span class='ident'>xs</span>),
-                   <span class='prelude-val'>Err</span>(<span class='ident'>Vec</span>::<span class='ident'>from_slice</span>(<span class='string'>b&quot;hello\xFF&quot;</span>)));
-    }
-
-    <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_str_from_utf8_lossy</span>() {
-        <span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> <span class='string'>b&quot;hello&quot;</span>;
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>from_utf8_lossy</span>(<span class='ident'>xs</span>), <span class='ident'>Slice</span>(<span class='string'>&quot;hello&quot;</span>));
-
-        <span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> <span class='string'>&quot;ศไทย中华Việt Nam&quot;</span>.<span class='ident'>as_bytes</span>();
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>from_utf8_lossy</span>(<span class='ident'>xs</span>), <span class='ident'>Slice</span>(<span class='string'>&quot;ศไทย中华Việt Nam&quot;</span>));
-
-        <span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> <span class='string'>b&quot;Hello\xC2 There\xFF Goodbye&quot;</span>;
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>from_utf8_lossy</span>(<span class='ident'>xs</span>), <span class='ident'>Owned</span>(<span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;Hello\uFFFD There\uFFFD Goodbye&quot;</span>)));
-
-        <span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> <span class='string'>b&quot;Hello\xC0\x80 There\xE6\x83 Goodbye&quot;</span>;
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>from_utf8_lossy</span>(<span class='ident'>xs</span>),
-                   <span class='ident'>Owned</span>(<span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;Hello\uFFFD\uFFFD There\uFFFD Goodbye&quot;</span>)));
-
-        <span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> <span class='string'>b&quot;\xF5foo\xF5\x80bar&quot;</span>;
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>from_utf8_lossy</span>(<span class='ident'>xs</span>), <span class='ident'>Owned</span>(<span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;\uFFFDfoo\uFFFD\uFFFDbar&quot;</span>)));
-
-        <span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> <span class='string'>b&quot;\xF1foo\xF1\x80bar\xF1\x80\x80baz&quot;</span>;
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>from_utf8_lossy</span>(<span class='ident'>xs</span>), <span class='ident'>Owned</span>(<span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;\uFFFDfoo\uFFFDbar\uFFFDbaz&quot;</span>)));
-
-        <span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> <span class='string'>b&quot;\xF4foo\xF4\x80bar\xF4\xBFbaz&quot;</span>;
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>from_utf8_lossy</span>(<span class='ident'>xs</span>),
-                   <span class='ident'>Owned</span>(<span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;\uFFFDfoo\uFFFDbar\uFFFD\uFFFDbaz&quot;</span>)));
-
-        <span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> <span class='string'>b&quot;\xF0\x80\x80\x80foo\xF0\x90\x80\x80bar&quot;</span>;
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>from_utf8_lossy</span>(<span class='ident'>xs</span>), <span class='ident'>Owned</span>(<span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;\uFFFD\uFFFD\uFFFD\uFFFD\
-                                               foo\U00010000bar&quot;</span>)));
-
-        <span class='comment'>// surrogates</span>
-        <span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> <span class='string'>b&quot;\xED\xA0\x80foo\xED\xBF\xBFbar&quot;</span>;
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>from_utf8_lossy</span>(<span class='ident'>xs</span>), <span class='ident'>Owned</span>(<span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;\uFFFD\uFFFD\uFFFDfoo\
-                                               \uFFFD\uFFFD\uFFFDbar&quot;</span>)));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -4788,18 +4693,26 @@ Section: Trait implementations
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>bench</span> {
     <span class='kw'>use</span> <span class='ident'>test</span>::<span class='ident'>Bencher</span>;
+    <span class='kw'>use</span> <span class='ident'>test</span>::<span class='ident'>black_box</span>;
     <span class='kw'>use</span> <span class='ident'>super</span>::<span class='op'>*</span>;
-    <span class='kw'>use</span> <span class='ident'>vec</span>::<span class='ident'>Vec</span>;
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>option</span>::{<span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>};
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>iter</span>::{<span class='ident'>Iterator</span>, <span class='ident'>DoubleEndedIterator</span>};
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>Collection</span>;
-    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>slice</span>::<span class='ident'>Vector</span>;
 
     <span class='attribute'>#[<span class='ident'>bench</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>char_iterator</span>(<span class='ident'>b</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Bencher</span>) {
         <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='string'>&quot;ศไทย中华Việt Nam; Mary had a little lamb, Little lamb&quot;</span>;
-        <span class='kw'>let</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>char_len</span>();
 
-        <span class='ident'>b</span>.<span class='ident'>iter</span>(<span class='op'>||</span> <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>s</span>.<span class='ident'>chars</span>().<span class='ident'>count</span>(), <span class='ident'>len</span>));
+        <span class='ident'>b</span>.<span class='ident'>iter</span>(<span class='op'>||</span> <span class='ident'>s</span>.<span class='ident'>chars</span>().<span class='ident'>count</span>());
+    }
+
+    <span class='attribute'>#[<span class='ident'>bench</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>char_iterator_for</span>(<span class='ident'>b</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Bencher</span>) {
+        <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='string'>&quot;ศไทย中华Việt Nam; Mary had a little lamb, Little lamb&quot;</span>;
+
+        <span class='ident'>b</span>.<span class='ident'>iter</span>(<span class='op'>||</span> {
+            <span class='kw'>for</span> <span class='ident'>ch</span> <span class='kw'>in</span> <span class='ident'>s</span>.<span class='ident'>chars</span>() { <span class='ident'>black_box</span>(<span class='ident'>ch</span>) }
+        });
     }
 
     <span class='attribute'>#[<span class='ident'>bench</span>]</span>
@@ -4810,17 +4723,24 @@ Section: Trait implementations
         Mary had a little lamb, Little lamb
         Mary had a little lamb, Little lamb
         Mary had a little lamb, Little lamb&quot;</span>;
-        <span class='kw'>let</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>char_len</span>();
 
-        <span class='ident'>b</span>.<span class='ident'>iter</span>(<span class='op'>||</span> <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>s</span>.<span class='ident'>chars</span>().<span class='ident'>count</span>(), <span class='ident'>len</span>));
+        <span class='ident'>b</span>.<span class='ident'>iter</span>(<span class='op'>||</span> <span class='ident'>s</span>.<span class='ident'>chars</span>().<span class='ident'>count</span>());
     }
 
     <span class='attribute'>#[<span class='ident'>bench</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>char_iterator_rev</span>(<span class='ident'>b</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Bencher</span>) {
         <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='string'>&quot;ศไทย中华Việt Nam; Mary had a little lamb, Little lamb&quot;</span>;
-        <span class='kw'>let</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>char_len</span>();
 
-        <span class='ident'>b</span>.<span class='ident'>iter</span>(<span class='op'>||</span> <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>s</span>.<span class='ident'>chars</span>().<span class='ident'>rev</span>().<span class='ident'>count</span>(), <span class='ident'>len</span>));
+        <span class='ident'>b</span>.<span class='ident'>iter</span>(<span class='op'>||</span> <span class='ident'>s</span>.<span class='ident'>chars</span>().<span class='ident'>rev</span>().<span class='ident'>count</span>());
+    }
+
+    <span class='attribute'>#[<span class='ident'>bench</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>char_iterator_rev_for</span>(<span class='ident'>b</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Bencher</span>) {
+        <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='string'>&quot;ศไทย中华Việt Nam; Mary had a little lamb, Little lamb&quot;</span>;
+
+        <span class='ident'>b</span>.<span class='ident'>iter</span>(<span class='op'>||</span> {
+            <span class='kw'>for</span> <span class='ident'>ch</span> <span class='kw'>in</span> <span class='ident'>s</span>.<span class='ident'>chars</span>().<span class='ident'>rev</span>() { <span class='ident'>black_box</span>(<span class='ident'>ch</span>) }
+        });
     }
 
     <span class='attribute'>#[<span class='ident'>bench</span>]</span>
@@ -4930,42 +4850,6 @@ Section: Trait implementations
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='number'>100</span>, <span class='ident'>s</span>.<span class='ident'>len</span>());
         <span class='ident'>b</span>.<span class='ident'>iter</span>(<span class='op'>||</span> {
             <span class='ident'>is_utf8</span>(<span class='ident'>s</span>)
-        });
-    }
-
-    <span class='attribute'>#[<span class='ident'>bench</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>from_utf8_lossy_100_ascii</span>(<span class='ident'>b</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Bencher</span>) {
-        <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='string'>b&quot;Hello there, the quick brown fox jumped over the lazy dog! \
-                  Lorem ipsum dolor sit amet, consectetur. &quot;</span>;
-
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='number'>100</span>, <span class='ident'>s</span>.<span class='ident'>len</span>());
-        <span class='ident'>b</span>.<span class='ident'>iter</span>(<span class='op'>||</span> {
-            <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>from_utf8_lossy</span>(<span class='ident'>s</span>);
-        });
-    }
-
-    <span class='attribute'>#[<span class='ident'>bench</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>from_utf8_lossy_100_multibyte</span>(<span class='ident'>b</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Bencher</span>) {
-        <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='string'>&quot;𐌀𐌖𐌋𐌄𐌑𐌉ปรدولة الكويتทศไทย中华𐍅𐌿𐌻𐍆𐌹𐌻𐌰&quot;</span>.<span class='ident'>as_bytes</span>();
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='number'>100</span>, <span class='ident'>s</span>.<span class='ident'>len</span>());
-        <span class='ident'>b</span>.<span class='ident'>iter</span>(<span class='op'>||</span> {
-            <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>from_utf8_lossy</span>(<span class='ident'>s</span>);
-        });
-    }
-
-    <span class='attribute'>#[<span class='ident'>bench</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>from_utf8_lossy_invalid</span>(<span class='ident'>b</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Bencher</span>) {
-        <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='string'>b&quot;Hello\xC0\x80 There\xE6\x83 Goodbye&quot;</span>;
-        <span class='ident'>b</span>.<span class='ident'>iter</span>(<span class='op'>||</span> {
-            <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>from_utf8_lossy</span>(<span class='ident'>s</span>);
-        });
-    }
-
-    <span class='attribute'>#[<span class='ident'>bench</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>from_utf8_lossy_100_invalid</span>(<span class='ident'>b</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Bencher</span>) {
-        <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>from_elem</span>(<span class='number'>100</span>, <span class='number'>0xF5u8</span>);
-        <span class='ident'>b</span>.<span class='ident'>iter</span>(<span class='op'>||</span> {
-            <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>from_utf8_lossy</span>(<span class='ident'>s</span>.<span class='ident'>as_slice</span>());
         });
     }
 

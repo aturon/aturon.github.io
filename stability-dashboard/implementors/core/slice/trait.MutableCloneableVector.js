@@ -2,6 +2,7 @@
 implementors['rand'] = [];
 implementors['sync'] = [];
 implementors['rustrt'] = [];
+implementors['unicode'] = [];
 implementors['core'] = [];
 
             if (window.register_implementors) {

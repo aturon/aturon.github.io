@@ -414,6 +414,37 @@
 <span id='374'>374</span>
 <span id='375'>375</span>
 <span id='376'>376</span>
+<span id='377'>377</span>
+<span id='378'>378</span>
+<span id='379'>379</span>
+<span id='380'>380</span>
+<span id='381'>381</span>
+<span id='382'>382</span>
+<span id='383'>383</span>
+<span id='384'>384</span>
+<span id='385'>385</span>
+<span id='386'>386</span>
+<span id='387'>387</span>
+<span id='388'>388</span>
+<span id='389'>389</span>
+<span id='390'>390</span>
+<span id='391'>391</span>
+<span id='392'>392</span>
+<span id='393'>393</span>
+<span id='394'>394</span>
+<span id='395'>395</span>
+<span id='396'>396</span>
+<span id='397'>397</span>
+<span id='398'>398</span>
+<span id='399'>399</span>
+<span id='400'>400</span>
+<span id='401'>401</span>
+<span id='402'>402</span>
+<span id='403'>403</span>
+<span id='404'>404</span>
+<span id='405'>405</span>
+<span id='406'>406</span>
+<span id='407'>407</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -454,6 +485,8 @@
 <span class='doccomment'>//! assert!(SketchyNum {num: 25} != SketchyNum {num: 57});</span>
 <span class='doccomment'>//! ```</span>
 
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>stable</span>]</span>
+
 <span class='kw'>use</span> <span class='ident'>option</span>::{<span class='prelude-ty'>Option</span>, <span class='prelude-val'>Some</span>};
 
 <span class='doccomment'>/// Trait for values that can be compared for equality and inequality.</span>
@@ -470,6 +503,7 @@
 <span class='doccomment'>/// Eventually, this will be implemented by default for types that implement</span>
 <span class='doccomment'>/// `Eq`.</span>
 <span class='attribute'>#[<span class='ident'>lang</span><span class='op'>=</span><span class='string'>&quot;eq&quot;</span>]</span>
+<span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Definition may change slightly after trait reform&quot;</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>PartialEq</span> {
     <span class='doccomment'>/// This method tests for `self` and `other` values to be equal, and is used by `==`.</span>
     <span class='kw'>fn</span> <span class='ident'>eq</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='ident'>Self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span>;
@@ -488,6 +522,7 @@
 <span class='doccomment'>/// - reflexive: `a == a`;</span>
 <span class='doccomment'>/// - symmetric: `a == b` implies `b == a`; and</span>
 <span class='doccomment'>/// - transitive: `a == b` and `b == c` implies `a == c`.</span>
+<span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Definition may change slightly after trait reform&quot;</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>Eq</span>: <span class='ident'>PartialEq</span> {
     <span class='comment'>// FIXME #13101: this method is used solely by #[deriving] to</span>
     <span class='comment'>// assert that every component of a type implements #[deriving]</span>
@@ -503,6 +538,7 @@
 
 <span class='doccomment'>/// An ordering is, e.g, a result of a comparison between two values.</span>
 <span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Show</span>)]</span>
+<span class='attribute'>#[<span class='ident'>stable</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>Ordering</span> {
    <span class='doccomment'>/// An ordering where a compared value is less [than another].</span>
    <span class='ident'>Less</span> <span class='op'>=</span> <span class='op'>-</span><span class='number'>1i</span>,
@@ -521,6 +557,7 @@
 <span class='doccomment'>///   true; and</span>
 <span class='doccomment'>/// - transitive, `a &lt; b` and `b &lt; c` implies `a &lt; c`. The same must hold for</span>
 <span class='doccomment'>///   both `==` and `&gt;`.</span>
+<span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Definition may change slightly after trait reform&quot;</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>Ord</span>: <span class='ident'>Eq</span> <span class='op'>+</span> <span class='ident'>PartialOrd</span> {
     <span class='doccomment'>/// This method returns an ordering between `self` and `other` values.</span>
     <span class='doccomment'>///</span>
@@ -535,8 +572,10 @@
     <span class='kw'>fn</span> <span class='ident'>cmp</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='ident'>Self</span>) <span class='op'>-&gt;</span> <span class='ident'>Ordering</span>;
 }
 
+<span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Trait is unstable.&quot;</span>]</span>
 <span class='kw'>impl</span> <span class='ident'>Eq</span> <span class='kw'>for</span> <span class='ident'>Ordering</span> {}
 
+<span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Trait is unstable.&quot;</span>]</span>
 <span class='kw'>impl</span> <span class='ident'>Ord</span> <span class='kw'>for</span> <span class='ident'>Ordering</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>cmp</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='ident'>Ordering</span>) <span class='op'>-&gt;</span> <span class='ident'>Ordering</span> {
@@ -544,6 +583,7 @@
     }
 }
 
+<span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Trait is unstable.&quot;</span>]</span>
 <span class='kw'>impl</span> <span class='ident'>PartialOrd</span> <span class='kw'>for</span> <span class='ident'>Ordering</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>partial_cmp</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='ident'>Ordering</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Ordering</span><span class='op'>&gt;</span> {
@@ -557,6 +597,7 @@
 <span class='doccomment'>/// If the first ordering is different, the first ordering is all that must be returned.</span>
 <span class='doccomment'>/// If the first ordering is equal, then second ordering is returned.</span>
 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+<span class='attribute'>#[<span class='ident'>deprecated</span> <span class='op'>=</span> <span class='string'>&quot;Just call .cmp() on an Ordering&quot;</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>lexical_ordering</span>(<span class='ident'>o1</span>: <span class='ident'>Ordering</span>, <span class='ident'>o2</span>: <span class='ident'>Ordering</span>) <span class='op'>-&gt;</span> <span class='ident'>Ordering</span> {
     <span class='kw'>match</span> <span class='ident'>o1</span> {
         <span class='ident'>Equal</span> <span class='op'>=&gt;</span> <span class='ident'>o2</span>,
@@ -574,6 +615,7 @@
 <span class='doccomment'>/// `NaN &lt; 0 == false` and `NaN &gt;= 0 == false` (cf. IEEE 754-2008 section</span>
 <span class='doccomment'>/// 5.11).</span>
 <span class='attribute'>#[<span class='ident'>lang</span><span class='op'>=</span><span class='string'>&quot;ord&quot;</span>]</span>
+<span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Definition may change slightly after trait reform&quot;</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>PartialOrd</span>: <span class='ident'>PartialEq</span> {
     <span class='doccomment'>/// This method returns an ordering between `self` and `other` values</span>
     <span class='doccomment'>/// if one exists.</span>
@@ -619,6 +661,7 @@
 <span class='doccomment'>/// of different types. The most common use case for this relation is</span>
 <span class='doccomment'>/// container types; e.g. it is often desirable to be able to use `&amp;str`</span>
 <span class='doccomment'>/// values to look up entries in a container with `String` keys.</span>
+<span class='attribute'>#[<span class='ident'>experimental</span> <span class='op'>=</span> <span class='string'>&quot;Better solutions may be discovered.&quot;</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>Equiv</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Implement this function to decide equivalent values.</span>
     <span class='kw'>fn</span> <span class='ident'>equiv</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span>;
@@ -626,12 +669,14 @@
 
 <span class='doccomment'>/// Compare and return the minimum of two values.</span>
 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+<span class='attribute'>#[<span class='ident'>stable</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>min</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Ord</span><span class='op'>&gt;</span>(<span class='ident'>v1</span>: <span class='ident'>T</span>, <span class='ident'>v2</span>: <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span> {
     <span class='kw'>if</span> <span class='ident'>v1</span> <span class='op'>&lt;</span> <span class='ident'>v2</span> { <span class='ident'>v1</span> } <span class='kw'>else</span> { <span class='ident'>v2</span> }
 }
 
 <span class='doccomment'>/// Compare and return the maximum of two values.</span>
 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+<span class='attribute'>#[<span class='ident'>stable</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>max</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Ord</span><span class='op'>&gt;</span>(<span class='ident'>v1</span>: <span class='ident'>T</span>, <span class='ident'>v2</span>: <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span> {
     <span class='kw'>if</span> <span class='ident'>v1</span> <span class='op'>&gt;</span> <span class='ident'>v2</span> { <span class='ident'>v1</span> } <span class='kw'>else</span> { <span class='ident'>v2</span> }
 }
@@ -644,6 +689,7 @@
 
     <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>eq_impl</span>(
         ($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> ($(
+            <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Trait is unstable.&quot;</span>]</span>
             <span class='kw'>impl</span> <span class='ident'>PartialEq</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span> {
                 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
                 <span class='kw'>fn</span> <span class='ident'>eq</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { (<span class='op'>*</span><span class='self'>self</span>) <span class='op'>==</span> (<span class='op'>*</span><span class='ident'>other</span>) }
@@ -653,6 +699,7 @@
         )<span class='op'>*</span>)
     )
 
+    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Trait is unstable.&quot;</span>]</span>
     <span class='kw'>impl</span> <span class='ident'>PartialEq</span> <span class='kw'>for</span> () {
         <span class='attribute'>#[<span class='ident'>inline</span>]</span>
         <span class='kw'>fn</span> <span class='ident'>eq</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>_other</span>: <span class='kw-2'>&amp;</span>()) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='boolval'>true</span> }
@@ -664,6 +711,7 @@
 
     <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>totaleq_impl</span>(
         ($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> ($(
+            <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Trait is unstable.&quot;</span>]</span>
             <span class='kw'>impl</span> <span class='ident'>Eq</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span> {}
         )<span class='op'>*</span>)
     )
@@ -672,6 +720,7 @@
 
     <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ord_impl</span>(
         ($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> ($(
+            <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Trait is unstable.&quot;</span>]</span>
             <span class='kw'>impl</span> <span class='ident'>PartialOrd</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span> {
                 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
                 <span class='kw'>fn</span> <span class='ident'>partial_cmp</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Ordering</span><span class='op'>&gt;</span> {
@@ -694,6 +743,7 @@
         )<span class='op'>*</span>)
     )
 
+    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Trait is unstable.&quot;</span>]</span>
     <span class='kw'>impl</span> <span class='ident'>PartialOrd</span> <span class='kw'>for</span> () {
         <span class='attribute'>#[<span class='ident'>inline</span>]</span>
         <span class='kw'>fn</span> <span class='ident'>partial_cmp</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, _: <span class='kw-2'>&amp;</span>()) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Ordering</span><span class='op'>&gt;</span> {
@@ -701,6 +751,7 @@
         }
     }
 
+    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Trait is unstable.&quot;</span>]</span>
     <span class='kw'>impl</span> <span class='ident'>PartialOrd</span> <span class='kw'>for</span> <span class='ident'>bool</span> {
         <span class='attribute'>#[<span class='ident'>inline</span>]</span>
         <span class='kw'>fn</span> <span class='ident'>partial_cmp</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Ordering</span><span class='op'>&gt;</span> {
@@ -712,6 +763,7 @@
 
     <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>totalord_impl</span>(
         ($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> ($(
+            <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Trait is unstable.&quot;</span>]</span>
             <span class='kw'>impl</span> <span class='ident'>Ord</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span> {
                 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
                 <span class='kw'>fn</span> <span class='ident'>cmp</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>) <span class='op'>-&gt;</span> <span class='ident'>Ordering</span> {
@@ -723,11 +775,13 @@
         )<span class='op'>*</span>)
     )
 
+    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Trait is unstable.&quot;</span>]</span>
     <span class='kw'>impl</span> <span class='ident'>Ord</span> <span class='kw'>for</span> () {
         <span class='attribute'>#[<span class='ident'>inline</span>]</span>
         <span class='kw'>fn</span> <span class='ident'>cmp</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>_other</span>: <span class='kw-2'>&amp;</span>()) <span class='op'>-&gt;</span> <span class='ident'>Ordering</span> { <span class='ident'>Equal</span> }
     }
 
+    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Trait is unstable.&quot;</span>]</span>
     <span class='kw'>impl</span> <span class='ident'>Ord</span> <span class='kw'>for</span> <span class='ident'>bool</span> {
         <span class='attribute'>#[<span class='ident'>inline</span>]</span>
         <span class='kw'>fn</span> <span class='ident'>cmp</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='ident'>Ordering</span> {
@@ -738,12 +792,14 @@
     <span class='macro'>totalord_impl</span><span class='macro'>!</span>(<span class='ident'>char</span> <span class='ident'>uint</span> <span class='ident'>u8</span> <span class='ident'>u16</span> <span class='ident'>u32</span> <span class='ident'>u64</span> <span class='ident'>int</span> <span class='ident'>i8</span> <span class='ident'>i16</span> <span class='ident'>i32</span> <span class='ident'>i64</span>)
 
     <span class='comment'>// &amp; pointers</span>
+    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Trait is unstable.&quot;</span>]</span>
     <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>: <span class='ident'>PartialEq</span><span class='op'>&gt;</span> <span class='ident'>PartialEq</span> <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>T</span> {
         <span class='attribute'>#[<span class='ident'>inline</span>]</span>
         <span class='kw'>fn</span> <span class='ident'>eq</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='op'>*</span>(<span class='op'>*</span><span class='self'>self</span>) <span class='op'>==</span> <span class='op'>*</span>(<span class='op'>*</span><span class='ident'>other</span>) }
         <span class='attribute'>#[<span class='ident'>inline</span>]</span>
         <span class='kw'>fn</span> <span class='ident'>ne</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='op'>*</span>(<span class='op'>*</span><span class='self'>self</span>) <span class='op'>!=</span> <span class='op'>*</span>(<span class='op'>*</span><span class='ident'>other</span>) }
     }
+    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Trait is unstable.&quot;</span>]</span>
     <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>: <span class='ident'>PartialOrd</span><span class='op'>&gt;</span> <span class='ident'>PartialOrd</span> <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>T</span> {
         <span class='attribute'>#[<span class='ident'>inline</span>]</span>
         <span class='kw'>fn</span> <span class='ident'>partial_cmp</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='op'>&amp;&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Ordering</span><span class='op'>&gt;</span> {
@@ -758,19 +814,23 @@
         <span class='attribute'>#[<span class='ident'>inline</span>]</span>
         <span class='kw'>fn</span> <span class='ident'>gt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='op'>*</span>(<span class='op'>*</span><span class='self'>self</span>) <span class='op'>&gt;</span> <span class='op'>*</span>(<span class='op'>*</span><span class='ident'>other</span>) }
     }
+    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Trait is unstable.&quot;</span>]</span>
     <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>: <span class='ident'>Ord</span><span class='op'>&gt;</span> <span class='ident'>Ord</span> <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>T</span> {
         <span class='attribute'>#[<span class='ident'>inline</span>]</span>
         <span class='kw'>fn</span> <span class='ident'>cmp</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>Ordering</span> { (<span class='op'>*</span><span class='op'>*</span><span class='self'>self</span>).<span class='ident'>cmp</span>(<span class='op'>*</span><span class='ident'>other</span>) }
     }
+    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Trait is unstable.&quot;</span>]</span>
     <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>: <span class='ident'>Eq</span><span class='op'>&gt;</span> <span class='ident'>Eq</span> <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>T</span> {}
 
     <span class='comment'>// &amp;mut pointers</span>
+    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Trait is unstable.&quot;</span>]</span>
     <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>: <span class='ident'>PartialEq</span><span class='op'>&gt;</span> <span class='ident'>PartialEq</span> <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>T</span> {
         <span class='attribute'>#[<span class='ident'>inline</span>]</span>
         <span class='kw'>fn</span> <span class='ident'>eq</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='op'>&amp;&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='op'>*</span><span class='op'>*</span><span class='self'>self</span> <span class='op'>==</span> <span class='op'>*</span>(<span class='op'>*</span><span class='ident'>other</span>) }
         <span class='attribute'>#[<span class='ident'>inline</span>]</span>
         <span class='kw'>fn</span> <span class='ident'>ne</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='op'>&amp;&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='op'>*</span><span class='op'>*</span><span class='self'>self</span> <span class='op'>!=</span> <span class='op'>*</span>(<span class='op'>*</span><span class='ident'>other</span>) }
     }
+    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Trait is unstable.&quot;</span>]</span>
     <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>: <span class='ident'>PartialOrd</span><span class='op'>&gt;</span> <span class='ident'>PartialOrd</span> <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>T</span> {
         <span class='attribute'>#[<span class='ident'>inline</span>]</span>
         <span class='kw'>fn</span> <span class='ident'>partial_cmp</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='op'>&amp;&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Ordering</span><span class='op'>&gt;</span> {
@@ -785,10 +845,12 @@
         <span class='attribute'>#[<span class='ident'>inline</span>]</span>
         <span class='kw'>fn</span> <span class='ident'>gt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='op'>&amp;&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='op'>*</span><span class='op'>*</span><span class='self'>self</span> <span class='op'>&gt;</span> <span class='op'>*</span><span class='op'>*</span><span class='ident'>other</span> }
     }
+    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Trait is unstable.&quot;</span>]</span>
     <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>: <span class='ident'>Ord</span><span class='op'>&gt;</span> <span class='ident'>Ord</span> <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>T</span> {
         <span class='attribute'>#[<span class='ident'>inline</span>]</span>
         <span class='kw'>fn</span> <span class='ident'>cmp</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='op'>&amp;&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>Ordering</span> { (<span class='op'>*</span><span class='op'>*</span><span class='self'>self</span>).<span class='ident'>cmp</span>(<span class='op'>*</span><span class='ident'>other</span>) }
     }
+    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Trait is unstable.&quot;</span>]</span>
     <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>: <span class='ident'>Eq</span><span class='op'>&gt;</span> <span class='ident'>Eq</span> <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>T</span> {}
 }
 </pre>

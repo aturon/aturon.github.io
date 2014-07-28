@@ -1627,6 +1627,51 @@
 <span id='1587'>1587</span>
 <span id='1588'>1588</span>
 <span id='1589'>1589</span>
+<span id='1590'>1590</span>
+<span id='1591'>1591</span>
+<span id='1592'>1592</span>
+<span id='1593'>1593</span>
+<span id='1594'>1594</span>
+<span id='1595'>1595</span>
+<span id='1596'>1596</span>
+<span id='1597'>1597</span>
+<span id='1598'>1598</span>
+<span id='1599'>1599</span>
+<span id='1600'>1600</span>
+<span id='1601'>1601</span>
+<span id='1602'>1602</span>
+<span id='1603'>1603</span>
+<span id='1604'>1604</span>
+<span id='1605'>1605</span>
+<span id='1606'>1606</span>
+<span id='1607'>1607</span>
+<span id='1608'>1608</span>
+<span id='1609'>1609</span>
+<span id='1610'>1610</span>
+<span id='1611'>1611</span>
+<span id='1612'>1612</span>
+<span id='1613'>1613</span>
+<span id='1614'>1614</span>
+<span id='1615'>1615</span>
+<span id='1616'>1616</span>
+<span id='1617'>1617</span>
+<span id='1618'>1618</span>
+<span id='1619'>1619</span>
+<span id='1620'>1620</span>
+<span id='1621'>1621</span>
+<span id='1622'>1622</span>
+<span id='1623'>1623</span>
+<span id='1624'>1624</span>
+<span id='1625'>1625</span>
+<span id='1626'>1626</span>
+<span id='1627'>1627</span>
+<span id='1628'>1628</span>
+<span id='1629'>1629</span>
+<span id='1630'>1630</span>
+<span id='1631'>1631</span>
+<span id='1632'>1632</span>
+<span id='1633'>1633</span>
+<span id='1634'>1634</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -1637,6 +1682,8 @@
 <span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
 <span class='comment'>// option. This file may not be copied, modified, or distributed</span>
 <span class='comment'>// except according to those terms.</span>
+<span class='comment'>//</span>
+<span class='comment'>// ignore-lexer-test FIXME #15679</span>
 
 <span class='doccomment'>/*! Synchronous File I/O
 
@@ -1681,7 +1728,7 @@ fs::unlink(&amp;path);
 
 <span class='kw'>use</span> <span class='ident'>c_str</span>::<span class='ident'>ToCStr</span>;
 <span class='kw'>use</span> <span class='ident'>clone</span>::<span class='ident'>Clone</span>;
-<span class='kw'>use</span> <span class='ident'>collections</span>::<span class='ident'>Collection</span>;
+<span class='kw'>use</span> <span class='ident'>collections</span>::{<span class='ident'>Collection</span>, <span class='ident'>MutableSeq</span>};
 <span class='kw'>use</span> <span class='ident'>io</span>::<span class='ident'>standard_error</span>;
 <span class='kw'>use</span> <span class='ident'>io</span>::{<span class='ident'>FilePermission</span>, <span class='ident'>Write</span>, <span class='ident'>UnstableFileStat</span>, <span class='ident'>Open</span>, <span class='ident'>FileAccess</span>, <span class='ident'>FileMode</span>};
 <span class='kw'>use</span> <span class='ident'>io</span>::{<span class='ident'>IoResult</span>, <span class='ident'>IoError</span>, <span class='ident'>FileStat</span>, <span class='ident'>SeekStyle</span>, <span class='ident'>Seek</span>, <span class='ident'>Writer</span>, <span class='ident'>Reader</span>};
@@ -1692,7 +1739,7 @@ fs::unlink(&amp;path);
 <span class='kw'>use</span> <span class='ident'>kinds</span>::<span class='ident'>Send</span>;
 <span class='kw'>use</span> <span class='ident'>libc</span>;
 <span class='kw'>use</span> <span class='ident'>option</span>::{<span class='prelude-val'>Some</span>, <span class='prelude-val'>None</span>, <span class='prelude-ty'>Option</span>};
-<span class='kw'>use</span> <span class='ident'>owned</span>::<span class='ident'>Box</span>;
+<span class='kw'>use</span> <span class='ident'>boxed</span>::<span class='ident'>Box</span>;
 <span class='kw'>use</span> <span class='ident'>path</span>::{<span class='ident'>Path</span>, <span class='ident'>GenericPath</span>};
 <span class='kw'>use</span> <span class='ident'>path</span>;
 <span class='kw'>use</span> <span class='ident'>result</span>::{<span class='prelude-val'>Err</span>, <span class='prelude-val'>Ok</span>};
@@ -1905,11 +1952,41 @@ fs::unlink(&amp;path);
 <span class='doccomment'>/// user lacks permissions to remove the file, or if some other filesystem-level</span>
 <span class='doccomment'>/// error occurs.</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>unlink</span>(<span class='ident'>path</span>: <span class='kw-2'>&amp;</span><span class='ident'>Path</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-    <span class='kw'>let</span> <span class='ident'>err</span> <span class='op'>=</span> <span class='ident'>LocalIo</span>::<span class='ident'>maybe_raise</span>(<span class='op'>|</span><span class='ident'>io</span><span class='op'>|</span> {
-        <span class='ident'>io</span>.<span class='ident'>fs_unlink</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>.<span class='ident'>to_c_str</span>())
-    }).<span class='ident'>map_err</span>(<span class='ident'>IoError</span>::<span class='ident'>from_rtio_error</span>);
-    <span class='ident'>err</span>.<span class='ident'>update_err</span>(<span class='string'>&quot;couldn&#39;t unlink path&quot;</span>,
-                   <span class='op'>|</span><span class='ident'>e</span><span class='op'>|</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}; path={}&quot;</span>, <span class='ident'>e</span>, <span class='ident'>path</span>.<span class='ident'>display</span>()))
+    <span class='kw'>return</span> <span class='kw'>match</span> <span class='ident'>do_unlink</span>(<span class='ident'>path</span>) {
+        <span class='prelude-val'>Ok</span>(()) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(()),
+        <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
+            <span class='comment'>// On unix, a readonly file can be successfully removed. On windows,</span>
+            <span class='comment'>// however, it cannot. To keep the two platforms in line with</span>
+            <span class='comment'>// respect to their behavior, catch this case on windows, attempt to</span>
+            <span class='comment'>// change it to read-write, and then remove the file.</span>
+            <span class='kw'>if</span> <span class='macro'>cfg</span><span class='macro'>!</span>(<span class='ident'>windows</span>) <span class='op'>&amp;&amp;</span> <span class='ident'>e</span>.<span class='ident'>kind</span> <span class='op'>==</span> <span class='ident'>io</span>::<span class='ident'>PermissionDenied</span> {
+                <span class='kw'>let</span> <span class='ident'>stat</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>stat</span>(<span class='ident'>path</span>) {
+                    <span class='prelude-val'>Ok</span>(<span class='ident'>stat</span>) <span class='op'>=&gt;</span> <span class='ident'>stat</span>,
+                    <span class='prelude-val'>Err</span>(..) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>),
+                };
+                <span class='kw'>if</span> <span class='ident'>stat</span>.<span class='ident'>perm</span>.<span class='ident'>intersects</span>(<span class='ident'>io</span>::<span class='ident'>UserWrite</span>) { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) }
+
+                <span class='kw'>match</span> <span class='ident'>chmod</span>(<span class='ident'>path</span>, <span class='ident'>stat</span>.<span class='ident'>perm</span> <span class='op'>|</span> <span class='ident'>io</span>::<span class='ident'>UserWrite</span>) {
+                    <span class='prelude-val'>Ok</span>(()) <span class='op'>=&gt;</span> <span class='ident'>do_unlink</span>(<span class='ident'>path</span>),
+                    <span class='prelude-val'>Err</span>(..) <span class='op'>=&gt;</span> {
+                        <span class='comment'>// Try to put it back as we found it</span>
+                        <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>chmod</span>(<span class='ident'>path</span>, <span class='ident'>stat</span>.<span class='ident'>perm</span>);
+                        <span class='prelude-val'>Err</span>(<span class='ident'>e</span>)
+                    }
+                }
+            } <span class='kw'>else</span> {
+                <span class='prelude-val'>Err</span>(<span class='ident'>e</span>)
+            }
+        }
+    };
+
+    <span class='kw'>fn</span> <span class='ident'>do_unlink</span>(<span class='ident'>path</span>: <span class='kw-2'>&amp;</span><span class='ident'>Path</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='kw'>let</span> <span class='ident'>err</span> <span class='op'>=</span> <span class='ident'>LocalIo</span>::<span class='ident'>maybe_raise</span>(<span class='op'>|</span><span class='ident'>io</span><span class='op'>|</span> {
+            <span class='ident'>io</span>.<span class='ident'>fs_unlink</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>.<span class='ident'>to_c_str</span>())
+        }).<span class='ident'>map_err</span>(<span class='ident'>IoError</span>::<span class='ident'>from_rtio_error</span>);
+        <span class='ident'>err</span>.<span class='ident'>update_err</span>(<span class='string'>&quot;couldn&#39;t unlink path&quot;</span>,
+                       <span class='op'>|</span><span class='ident'>e</span><span class='op'>|</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}; path={}&quot;</span>, <span class='ident'>e</span>, <span class='ident'>path</span>.<span class='ident'>display</span>()))
+    }
 }
 
 <span class='doccomment'>/// Given a path, query the file system to get information about a file,</span>
@@ -1960,6 +2037,11 @@ fs::unlink(&amp;path);
 }
 
 <span class='kw'>fn</span> <span class='ident'>from_rtio</span>(<span class='ident'>s</span>: <span class='ident'>rtio</span>::<span class='ident'>FileStat</span>) <span class='op'>-&gt;</span> <span class='ident'>FileStat</span> {
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>windows</span>)]</span>
+    <span class='kw'>type</span> <span class='ident'>Mode</span> <span class='op'>=</span> <span class='ident'>libc</span>::<span class='ident'>c_int</span>;
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>unix</span>)]</span>
+    <span class='kw'>type</span> <span class='ident'>Mode</span> <span class='op'>=</span> <span class='ident'>libc</span>::<span class='ident'>mode_t</span>;
+
     <span class='kw'>let</span> <span class='ident'>rtio</span>::<span class='ident'>FileStat</span> {
         <span class='ident'>size</span>, <span class='ident'>kind</span>, <span class='ident'>perm</span>, <span class='ident'>created</span>, <span class='ident'>modified</span>,
         <span class='ident'>accessed</span>, <span class='ident'>device</span>, <span class='ident'>inode</span>, <span class='ident'>rdev</span>,
@@ -1968,7 +2050,7 @@ fs::unlink(&amp;path);
 
     <span class='ident'>FileStat</span> {
         <span class='ident'>size</span>: <span class='ident'>size</span>,
-        <span class='ident'>kind</span>: <span class='kw'>match</span> (<span class='ident'>kind</span> <span class='kw'>as</span> <span class='ident'>libc</span>::<span class='ident'>c_int</span>) <span class='kw-2'>&amp;</span> <span class='ident'>libc</span>::<span class='ident'>S_IFMT</span> {
+        <span class='ident'>kind</span>: <span class='kw'>match</span> (<span class='ident'>kind</span> <span class='kw'>as</span> <span class='ident'>Mode</span>) <span class='kw-2'>&amp;</span> <span class='ident'>libc</span>::<span class='ident'>S_IFMT</span> {
             <span class='ident'>libc</span>::<span class='ident'>S_IFREG</span> <span class='op'>=&gt;</span> <span class='ident'>io</span>::<span class='ident'>TypeFile</span>,
             <span class='ident'>libc</span>::<span class='ident'>S_IFDIR</span> <span class='op'>=&gt;</span> <span class='ident'>io</span>::<span class='ident'>TypeDirectory</span>,
             <span class='ident'>libc</span>::<span class='ident'>S_IFIFO</span> <span class='op'>=&gt;</span> <span class='ident'>io</span>::<span class='ident'>TypeNamedPipe</span>,
@@ -2594,9 +2676,9 @@ fs::unlink(&amp;path);
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>read_buf</span> <span class='op'>=</span> [<span class='number'>0</span>, .. <span class='number'>1028</span>];
             <span class='kw'>let</span> <span class='ident'>read_str</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='macro'>check</span><span class='macro'>!</span>(<span class='ident'>read_stream</span>.<span class='ident'>read</span>(<span class='ident'>read_buf</span>)) {
                 <span class='op'>-</span><span class='number'>1</span><span class='op'>|</span><span class='number'>0</span> <span class='op'>=&gt;</span> <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;shouldn&#39;t happen&quot;</span>),
-                <span class='ident'>n</span> <span class='op'>=&gt;</span> <span class='ident'>str</span>::<span class='ident'>from_utf8</span>(<span class='ident'>read_buf</span>.<span class='ident'>slice_to</span>(<span class='ident'>n</span>)).<span class='ident'>unwrap</span>().<span class='ident'>to_owned</span>()
+                <span class='ident'>n</span> <span class='op'>=&gt;</span> <span class='ident'>str</span>::<span class='ident'>from_utf8</span>(<span class='ident'>read_buf</span>.<span class='ident'>slice_to</span>(<span class='ident'>n</span>)).<span class='ident'>unwrap</span>().<span class='ident'>to_string</span>()
             };
-            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>read_str</span>, <span class='ident'>message</span>.<span class='ident'>to_owned</span>());
+            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>read_str</span>.<span class='ident'>as_slice</span>(), <span class='ident'>message</span>);
         }
         <span class='macro'>check</span><span class='macro'>!</span>(<span class='ident'>unlink</span>(<span class='ident'>filename</span>));
     })
@@ -3215,6 +3297,14 @@ fs::unlink(&amp;path);
         <span class='macro'>check</span><span class='macro'>!</span>(<span class='ident'>File</span>::<span class='ident'>create</span>(<span class='kw-2'>&amp;</span><span class='ident'>tmpdir</span>.<span class='ident'>join</span>(<span class='string'>&quot;test&quot;</span>)).<span class='ident'>write</span>(<span class='ident'>bytes</span>));
         <span class='kw'>let</span> <span class='ident'>actual</span> <span class='op'>=</span> <span class='macro'>check</span><span class='macro'>!</span>(<span class='ident'>File</span>::<span class='ident'>open</span>(<span class='kw-2'>&amp;</span><span class='ident'>tmpdir</span>.<span class='ident'>join</span>(<span class='string'>&quot;test&quot;</span>)).<span class='ident'>read_to_end</span>());
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>actual</span>.<span class='ident'>as_slice</span>() <span class='op'>==</span> <span class='ident'>bytes</span>);
+    })
+
+    <span class='macro'>iotest</span><span class='macro'>!</span>(<span class='kw'>fn</span> <span class='ident'>unlink_readonly</span>() {
+        <span class='kw'>let</span> <span class='ident'>tmpdir</span> <span class='op'>=</span> <span class='ident'>tmpdir</span>();
+        <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='ident'>tmpdir</span>.<span class='ident'>join</span>(<span class='string'>&quot;file&quot;</span>);
+        <span class='macro'>check</span><span class='macro'>!</span>(<span class='ident'>File</span>::<span class='ident'>create</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>));
+        <span class='macro'>check</span><span class='macro'>!</span>(<span class='ident'>chmod</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>, <span class='ident'>io</span>::<span class='ident'>UserRead</span>));
+        <span class='macro'>check</span><span class='macro'>!</span>(<span class='ident'>unlink</span>(<span class='kw-2'>&amp;</span><span class='ident'>path</span>));
     })
 }
 </pre>

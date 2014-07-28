@@ -166,7 +166,7 @@
 
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
 
-<span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>ty</span>::<span class='ident'>Unsafe</span>;
+<span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>cell</span>::<span class='ident'>UnsafeCell</span>;
 <span class='kw'>use</span> <span class='ident'>mutex</span>;
 
 <span class='doccomment'>/// An OS mutex over some data.</span>
@@ -179,7 +179,7 @@
 <span class='doccomment'>/// &gt;           as part of `libsync` should almost always be favored.</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Exclusive</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='ident'>lock</span>: <span class='ident'>mutex</span>::<span class='ident'>NativeMutex</span>,
-    <span class='ident'>data</span>: <span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>,
+    <span class='ident'>data</span>: <span class='ident'>UnsafeCell</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>,
 }
 
 <span class='doccomment'>/// An RAII guard returned via `lock`</span>
@@ -195,7 +195,7 @@
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>user_data</span>: <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>Exclusive</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='ident'>Exclusive</span> {
             <span class='ident'>lock</span>: <span class='kw'>unsafe</span> { <span class='ident'>mutex</span>::<span class='ident'>NativeMutex</span>::<span class='ident'>new</span>() },
-            <span class='ident'>data</span>: <span class='ident'>Unsafe</span>::<span class='ident'>new</span>(<span class='ident'>user_data</span>),
+            <span class='ident'>data</span>: <span class='ident'>UnsafeCell</span>::<span class='ident'>new</span>(<span class='ident'>user_data</span>),
         }
     }
 

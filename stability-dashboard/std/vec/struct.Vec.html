@@ -39,86 +39,180 @@
     </nav>
 
     <section id='main' class="content struct">
-<h1 class='fqn'>Struct <a href='../index.html'>std</a>::<a href='index.html'>vec</a>::<a class='struct' href=''>Vec</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-28787' href='../../collections/vec/struct.Vec.html?gotosrc=28787'>[src]</a></span></h1>
+<h1 class='fqn'>Struct <a href='../index.html'>std</a>::<a href='index.html'>vec</a>::<a class='struct' href=''>Vec</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-29466' href='../../collections/vec/struct.Vec.html?gotosrc=29466'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Vec&lt;T&gt; {
     // some fields omitted
 }</pre><div class='docblock'><p>An owned, growable vector.</p>
 
 <h1 id="examples" class='section-header'><a
                            href="#examples">Examples</a></h1><span id='rust-example-raw-0' class='rusttest'>fn main() {
-    use std::vec::Vec;
     let mut vec = Vec::new();
     vec.push(1i);
     vec.push(2i);
     
     assert_eq!(vec.len(), 2);
-    assert_eq!(vec.get(0), &amp;1);
+    assert_eq!(vec[0], 1);
     
     assert_eq!(vec.pop(), Some(2));
     assert_eq!(vec.len(), 1);
+    
+    *vec.get_mut(0) = 7i;
+    assert_eq!(vec[0], 7);
+    
+    vec.push_all([1, 2, 3]);
+    
+    for x in vec.iter() {
+        println!(&quot;{}&quot;, x);
+    }
+    assert_eq!(vec, vec![7i, 1, 2, 3]);
 }</span><pre id='rust-example-rendered-0' class='rust '>
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
 <span class='ident'>vec</span>.<span class='ident'>push</span>(<span class='number'>1i</span>);
 <span class='ident'>vec</span>.<span class='ident'>push</span>(<span class='number'>2i</span>);
 
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>.<span class='ident'>len</span>(), <span class='number'>2</span>);
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>.<span class='ident'>get</span>(<span class='number'>0</span>), <span class='kw-2'>&amp;</span><span class='number'>1</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>[<span class='number'>0</span>], <span class='number'>1</span>);
 
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>.<span class='ident'>pop</span>(), <span class='prelude-val'>Some</span>(<span class='number'>2</span>));
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>.<span class='ident'>len</span>(), <span class='number'>1</span>);
+
+<span class='op'>*</span><span class='ident'>vec</span>.<span class='ident'>get_mut</span>(<span class='number'>0</span>) <span class='op'>=</span> <span class='number'>7i</span>;
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>[<span class='number'>0</span>], <span class='number'>7</span>);
+
+<span class='ident'>vec</span>.<span class='ident'>push_all</span>([<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>]);
+
+<span class='kw'>for</span> <span class='ident'>x</span> <span class='kw'>in</span> <span class='ident'>vec</span>.<span class='ident'>iter</span>() {
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>x</span>);
+}
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>7i</span>, <span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>]);
 </pre>
 
 <p>The <code>vec!</code> macro is provided to make initialization more convenient:</p>
 <span id='rust-example-raw-1' class='rusttest'>fn main() {
-    let mut vec = vec!(1i, 2i, 3i);
+    let mut vec = vec![1i, 2i, 3i];
     vec.push(4);
-    assert_eq!(vec, vec!(1, 2, 3, 4));
+    assert_eq!(vec, vec![1, 2, 3, 4]);
 }</span><pre id='rust-example-rendered-1' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2i</span>, <span class='number'>3i</span>);
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2i</span>, <span class='number'>3i</span>];
 <span class='ident'>vec</span>.<span class='ident'>push</span>(<span class='number'>4</span>);
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>]);
 </pre>
-</div><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.new' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.new' class='fnname'>new</a>&lt;T&gt;() -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
+
+<p>Use a <code>Vec</code> as an efficient stack:</p>
+<span id='rust-example-raw-2' class='rusttest'>fn main() {
+    let mut stack = Vec::new();
+    
+    stack.push(1i);
+    stack.push(2i);
+    stack.push(3i);
+    
+    loop {
+        let top = match stack.pop() {
+            None =&gt; break, // empty
+            Some(x) =&gt; x,
+        };
+        // Prints 3, 2, 1
+        println!(&quot;{}&quot;, top);
+    }
+}</span><pre id='rust-example-rendered-2' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>stack</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
+
+<span class='ident'>stack</span>.<span class='ident'>push</span>(<span class='number'>1i</span>);
+<span class='ident'>stack</span>.<span class='ident'>push</span>(<span class='number'>2i</span>);
+<span class='ident'>stack</span>.<span class='ident'>push</span>(<span class='number'>3i</span>);
+
+<span class='kw'>loop</span> {
+    <span class='kw'>let</span> <span class='ident'>top</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>stack</span>.<span class='ident'>pop</span>() {
+        <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>break</span>, <span class='comment'>// empty</span>
+        <span class='prelude-val'>Some</span>(<span class='ident'>x</span>) <span class='op'>=&gt;</span> <span class='ident'>x</span>,
+    };
+    <span class='comment'>// Prints 3, 2, 1</span>
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>top</span>);
+}
+</pre>
+
+<h1 id="capacity-and-reallocation" class='section-header'><a
+                           href="#capacity-and-reallocation">Capacity and reallocation</a></h1>
+<p>The capacity of a vector is the amount of space allocated for any future
+elements that will be added onto the vector. This is not to be confused
+with the <em>length</em> of a vector, which specifies the number of actual
+elements within the vector. If a vector&#39;s length exceeds its capacity,
+its capacity will automatically be increased, but its elements will
+have to be reallocated.</p>
+
+<p>For example, a vector with capacity 10 and length 0 would be an empty
+vector with space for 10 more elements. Pushing 10 or fewer elements onto
+the vector will not change its capacity or cause reallocation to occur.
+However, if the vector&#39;s length is increased to 11, it will have to
+reallocate, which can be slow. For this reason, it is recommended
+to use <code>Vec::with_capacity</code> whenever possible to specify how big the vector
+is expected to get.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.new' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
 <div class='docblock'><p>Constructs a new, empty <code>Vec</code>.</p>
 
 <p>The vector will not allocate until elements are pushed onto it.</p>
 
 <h1 id="example" class='section-header'><a
-                           href="#example">Example</a></h1><span id='rust-example-raw-2' class='rusttest'>fn main() {
-    use std::vec::Vec;
+                           href="#example">Example</a></h1><span id='rust-example-raw-3' class='rusttest'>fn main() {
     let mut vec: Vec&lt;int&gt; = Vec::new();
-}</span><pre id='rust-example-rendered-2' class='rust '>
+}</span><pre id='rust-example-rendered-3' class='rust '>
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
 </pre>
-</div><h4 id='method.with_capacity' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.with_capacity' class='fnname'>with_capacity</a>&lt;T&gt;(capacity: <a href='../primitive.uint.html'>uint</a>) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
+</div><h4 id='method.with_capacity' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.with_capacity' class='fnname'>with_capacity</a>(capacity: <a href='../primitive.uint.html'>uint</a>) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
 <div class='docblock'><p>Constructs a new, empty <code>Vec</code> with the specified capacity.</p>
 
 <p>The vector will be able to hold exactly <code>capacity</code> elements without
 reallocating. If <code>capacity</code> is 0, the vector will not allocate.</p>
 
+<p>It is important to note that this function does not specify the
+<em>length</em> of the returned vector, but only the <em>capacity</em>. (For an
+explanation of the difference between length and capacity, see
+the main <code>Vec</code> docs above, &#39;Capacity and reallocation&#39;.) To create
+a vector of a given length, use <code>Vec::from_elem</code> or <code>Vec::from_fn</code>.</p>
+
 <h1 id="example-1" class='section-header'><a
-                           href="#example-1">Example</a></h1><span id='rust-example-raw-3' class='rusttest'>fn main() {
-    use std::vec::Vec;
-    let vec: Vec&lt;int&gt; = Vec::with_capacity(10);
-}</span><pre id='rust-example-rendered-3' class='rust '>
-<span class='kw'>let</span> <span class='ident'>vec</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='number'>10</span>);
+                           href="#example-1">Example</a></h1><span id='rust-example-raw-4' class='rusttest'>fn main() {
+    let mut vec: Vec&lt;int&gt; = Vec::with_capacity(10);
+    
+    // The vector contains no items, even though it has capacity for more
+    assert_eq!(vec.len(), 0);
+    
+    // These are all done without reallocating...
+    for i in range(0i, 10) {
+        vec.push(i);
+    }
+    
+    // ...but this may make the vector reallocate
+    vec.push(11);
+}</span><pre id='rust-example-rendered-4' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='number'>10</span>);
+
+<span class='comment'>// The vector contains no items, even though it has capacity for more</span>
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>.<span class='ident'>len</span>(), <span class='number'>0</span>);
+
+<span class='comment'>// These are all done without reallocating...</span>
+<span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0i</span>, <span class='number'>10</span>) {
+    <span class='ident'>vec</span>.<span class='ident'>push</span>(<span class='ident'>i</span>);
+}
+
+<span class='comment'>// ...but this may make the vector reallocate</span>
+<span class='ident'>vec</span>.<span class='ident'>push</span>(<span class='number'>11</span>);
 </pre>
-</div><h4 id='method.from_fn' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.from_fn' class='fnname'>from_fn</a>&lt;T&gt;(length: <a href='../primitive.uint.html'>uint</a>, op: |<a href='../primitive.uint.html'>uint</a>| -&gt; T) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
+</div><h4 id='method.from_fn' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.from_fn' class='fnname'>from_fn</a>(length: <a href='../primitive.uint.html'>uint</a>, op: |<a href='../primitive.uint.html'>uint</a>| -&gt; T) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
 <div class='docblock'><p>Creates and initializes a <code>Vec</code>.</p>
 
 <p>Creates a <code>Vec</code> of size <code>length</code> and initializes the elements to the
 value returned by the closure <code>op</code>.</p>
 
 <h1 id="example-2" class='section-header'><a
-                           href="#example-2">Example</a></h1><span id='rust-example-raw-4' class='rusttest'>fn main() {
-    use std::vec::Vec;
+                           href="#example-2">Example</a></h1><span id='rust-example-raw-5' class='rusttest'>fn main() {
     let vec = Vec::from_fn(3, |idx| idx * 2);
-    assert_eq!(vec, vec!(0, 2, 4));
-}</span><pre id='rust-example-rendered-4' class='rust '>
+    assert_eq!(vec, vec![0, 2, 4]);
+}</span><pre id='rust-example-rendered-5' class='rust '>
 <span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>from_fn</span>(<span class='number'>3</span>, <span class='op'>|</span><span class='ident'>idx</span><span class='op'>|</span> <span class='ident'>idx</span> <span class='op'>*</span> <span class='number'>2</span>);
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>0</span>, <span class='number'>2</span>, <span class='number'>4</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0</span>, <span class='number'>2</span>, <span class='number'>4</span>]);
 </pre>
-</div><h4 id='method.from_raw_parts' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#method.from_raw_parts' class='fnname'>from_raw_parts</a>&lt;T&gt;(length: <a href='../primitive.uint.html'>uint</a>, capacity: <a href='../primitive.uint.html'>uint</a>, ptr: *mut T) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
+</div><h4 id='method.from_raw_parts' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#method.from_raw_parts' class='fnname'>from_raw_parts</a>(length: <a href='../primitive.uint.html'>uint</a>, capacity: <a href='../primitive.uint.html'>uint</a>, ptr: *mut T) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
 <div class='docblock'><p>Create a <code>Vec&lt;T&gt;</code> directly from the raw constituents.</p>
 
 <p>This is highly unsafe:</p>
@@ -130,97 +224,150 @@ value returned by the closure <code>op</code>.</p>
 beginning of that allocation</li>
 <li><code>ptr</code> must be allocated by the default <code>Vec</code> allocator</li>
 </ul>
-</div><h4 id='method.partition' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.partition' class='fnname'>partition</a>&lt;T&gt;(self, f: |&amp;T| -&gt; <a href='../primitive.bool.html'>bool</a>) -&gt; <a href='../primitive.tuple.html'>(<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;, <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;)</a></code></h4>
+
+<h1 id="example-3" class='section-header'><a
+                           href="#example-3">Example</a></h1><span id='rust-example-raw-6' class='rusttest'>use std::ptr;
+use std::mem;
+
+fn main() {
+    let mut v = vec![1i, 2, 3];
+
+    // Pull out the various important pieces of information about `v`
+    let p = v.as_mut_ptr();
+    let len = v.len();
+    let cap = v.capacity();
+
+    unsafe {
+        // Cast `v` into the void: no destructor run, so we are in
+        // complete control of the allocation to which `p` points.
+        mem::forget(v);
+
+        // Overwrite memory with 4, 5, 6
+        for i in range(0, len as int) {
+            ptr::write(p.offset(i), 4 + i);
+        }
+
+        // Put everything back together into a Vec
+        let rebuilt = Vec::from_raw_parts(len, cap, p);
+        assert_eq!(rebuilt, vec![4i, 5i, 6i]);
+    }
+}</span><pre id='rust-example-rendered-6' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ptr</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
+
+    <span class='comment'>// Pull out the various important pieces of information about `v`</span>
+    <span class='kw'>let</span> <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>v</span>.<span class='ident'>as_mut_ptr</span>();
+    <span class='kw'>let</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='ident'>v</span>.<span class='ident'>len</span>();
+    <span class='kw'>let</span> <span class='ident'>cap</span> <span class='op'>=</span> <span class='ident'>v</span>.<span class='ident'>capacity</span>();
+
+    <span class='kw'>unsafe</span> {
+        <span class='comment'>// Cast `v` into the void: no destructor run, so we are in</span>
+        <span class='comment'>// complete control of the allocation to which `p` points.</span>
+        <span class='ident'>mem</span>::<span class='ident'>forget</span>(<span class='ident'>v</span>);
+
+        <span class='comment'>// Overwrite memory with 4, 5, 6</span>
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0</span>, <span class='ident'>len</span> <span class='kw'>as</span> <span class='ident'>int</span>) {
+            <span class='ident'>ptr</span>::<span class='ident'>write</span>(<span class='ident'>p</span>.<span class='ident'>offset</span>(<span class='ident'>i</span>), <span class='number'>4</span> <span class='op'>+</span> <span class='ident'>i</span>);
+        }
+
+        <span class='comment'>// Put everything back together into a Vec</span>
+        <span class='kw'>let</span> <span class='ident'>rebuilt</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>from_raw_parts</span>(<span class='ident'>len</span>, <span class='ident'>cap</span>, <span class='ident'>p</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>rebuilt</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>4i</span>, <span class='number'>5i</span>, <span class='number'>6i</span>]);
+    }
+}
+</pre>
+</div><h4 id='method.partition' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.partition' class='fnname'>partition</a>(self, f: |&amp;T| -&gt; <a href='../primitive.bool.html'>bool</a>) -&gt; <a href='../primitive.tuple.html'>(<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;, <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;)</a></code></h4>
 <div class='docblock'><p>Consumes the <code>Vec</code>, partitioning it based on a predicate.</p>
 
 <p>Partitions the <code>Vec</code> into two <code>Vec</code>s <code>(A,B)</code>, where all elements of <code>A</code>
 satisfy <code>f</code> and all elements of <code>B</code> do not. The order of elements is
 preserved.</p>
 
-<h1 id="example-3" class='section-header'><a
-                           href="#example-3">Example</a></h1><span id='rust-example-raw-5' class='rusttest'>fn main() {
-    let vec = vec!(1i, 2i, 3i, 4i);
+<h1 id="example-4" class='section-header'><a
+                           href="#example-4">Example</a></h1><span id='rust-example-raw-7' class='rusttest'>fn main() {
+    let vec = vec![1i, 2i, 3i, 4i];
     let (even, odd) = vec.partition(|&amp;n| n % 2 == 0);
-    assert_eq!(even, vec!(2, 4));
-    assert_eq!(odd, vec!(1, 3));
-}</span><pre id='rust-example-rendered-5' class='rust '>
-<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2i</span>, <span class='number'>3i</span>, <span class='number'>4i</span>);
+    assert_eq!(even, vec![2, 4]);
+    assert_eq!(odd, vec![1, 3]);
+}</span><pre id='rust-example-rendered-7' class='rust '>
+<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2i</span>, <span class='number'>3i</span>, <span class='number'>4i</span>];
 <span class='kw'>let</span> (<span class='ident'>even</span>, <span class='ident'>odd</span>) <span class='op'>=</span> <span class='ident'>vec</span>.<span class='ident'>partition</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>n</span><span class='op'>|</span> <span class='ident'>n</span> <span class='op'>%</span> <span class='number'>2</span> <span class='op'>==</span> <span class='number'>0</span>);
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>even</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>2</span>, <span class='number'>4</span>));
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>odd</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1</span>, <span class='number'>3</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>even</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>2</span>, <span class='number'>4</span>]);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>odd</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1</span>, <span class='number'>3</span>]);
 </pre>
-</div></div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.append' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.append' class='fnname'>append</a>&lt;T: <a class='trait' href='../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>&gt;(self, second: &amp;<a href='../primitive.slice.html'>[T]</a>) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
+</div></div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.append' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.append' class='fnname'>append</a>(self, second: &amp;<a href='../primitive.slice.html'>[T]</a>) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
 <div class='docblock'><p>Iterates over the <code>second</code> vector, copying each element and appending it to
 the <code>first</code>. Afterwards, the <code>first</code> is then returned for use again.</p>
 
-<h1 id="example-4" class='section-header'><a
-                           href="#example-4">Example</a></h1><span id='rust-example-raw-6' class='rusttest'>fn main() {
-    let vec = vec!(1i, 2i);
+<h1 id="example-5" class='section-header'><a
+                           href="#example-5">Example</a></h1><span id='rust-example-raw-8' class='rusttest'>fn main() {
+    let vec = vec![1i, 2i];
     let vec = vec.append([3i, 4i]);
-    assert_eq!(vec, vec!(1, 2, 3, 4));
-}</span><pre id='rust-example-rendered-6' class='rust '>
-<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2i</span>);
+    assert_eq!(vec, vec![1, 2, 3, 4]);
+}</span><pre id='rust-example-rendered-8' class='rust '>
+<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2i</span>];
 <span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='ident'>vec</span>.<span class='ident'>append</span>([<span class='number'>3i</span>, <span class='number'>4i</span>]);
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>]);
 </pre>
-</div><h4 id='method.from_slice' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.from_slice' class='fnname'>from_slice</a>&lt;T: <a class='trait' href='../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>&gt;(values: &amp;<a href='../primitive.slice.html'>[T]</a>) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
+</div><h4 id='method.from_slice' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.from_slice' class='fnname'>from_slice</a>(values: &amp;<a href='../primitive.slice.html'>[T]</a>) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
 <div class='docblock'><p>Constructs a <code>Vec</code> by cloning elements of a slice.</p>
 
-<h1 id="example-5" class='section-header'><a
-                           href="#example-5">Example</a></h1><span id='rust-example-raw-7' class='rusttest'>fn main() {
-    use std::vec::Vec;
+<h1 id="example-6" class='section-header'><a
+                           href="#example-6">Example</a></h1><span id='rust-example-raw-9' class='rusttest'>fn main() {
     let slice = [1i, 2, 3];
     let vec = Vec::from_slice(slice);
-}</span><pre id='rust-example-rendered-7' class='rust '>
+}</span><pre id='rust-example-rendered-9' class='rust '>
 <span class='kw'>let</span> <span class='ident'>slice</span> <span class='op'>=</span> [<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
 <span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>from_slice</span>(<span class='ident'>slice</span>);
 </pre>
-</div><h4 id='method.from_elem' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.from_elem' class='fnname'>from_elem</a>&lt;T: <a class='trait' href='../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>&gt;(length: <a href='../primitive.uint.html'>uint</a>, value: T) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
+</div><h4 id='method.from_elem' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.from_elem' class='fnname'>from_elem</a>(length: <a href='../primitive.uint.html'>uint</a>, value: T) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
 <div class='docblock'><p>Constructs a <code>Vec</code> with copies of a value.</p>
 
 <p>Creates a <code>Vec</code> with <code>length</code> copies of <code>value</code>.</p>
 
-<h1 id="example-6" class='section-header'><a
-                           href="#example-6">Example</a></h1><span id='rust-example-raw-8' class='rusttest'>fn main() {
-    use std::vec::Vec;
+<h1 id="example-7" class='section-header'><a
+                           href="#example-7">Example</a></h1><span id='rust-example-raw-10' class='rusttest'>fn main() {
     let vec = Vec::from_elem(3, &quot;hi&quot;);
     println!(&quot;{}&quot;, vec); // prints [hi, hi, hi]
-}</span><pre id='rust-example-rendered-8' class='rust '>
+}</span><pre id='rust-example-rendered-10' class='rust '>
 <span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>from_elem</span>(<span class='number'>3</span>, <span class='string'>&quot;hi&quot;</span>);
 <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>vec</span>); <span class='comment'>// prints [hi, hi, hi]</span>
 </pre>
-</div><h4 id='method.push_all' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.push_all' class='fnname'>push_all</a>&lt;T: <a class='trait' href='../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>&gt;(&amp;mut self, other: &amp;<a href='../primitive.slice.html'>[T]</a>)</code></h4>
+</div><h4 id='method.push_all' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.push_all' class='fnname'>push_all</a>(&amp;mut self, other: &amp;<a href='../primitive.slice.html'>[T]</a>)</code></h4>
 <div class='docblock'><p>Appends all elements in a slice to the <code>Vec</code>.</p>
 
 <p>Iterates over the slice <code>other</code>, clones each element, and then appends
 it to this <code>Vec</code>. The <code>other</code> vector is traversed in-order.</p>
 
-<h1 id="example-7" class='section-header'><a
-                           href="#example-7">Example</a></h1><span id='rust-example-raw-9' class='rusttest'>fn main() {
-    let mut vec = vec!(1i);
+<h1 id="example-8" class='section-header'><a
+                           href="#example-8">Example</a></h1><span id='rust-example-raw-11' class='rusttest'>fn main() {
+    let mut vec = vec![1i];
     vec.push_all([2i, 3, 4]);
-    assert_eq!(vec, vec!(1, 2, 3, 4));
-}</span><pre id='rust-example-rendered-9' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>);
+    assert_eq!(vec, vec![1, 2, 3, 4]);
+}</span><pre id='rust-example-rendered-11' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>];
 <span class='ident'>vec</span>.<span class='ident'>push_all</span>([<span class='number'>2i</span>, <span class='number'>3</span>, <span class='number'>4</span>]);
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>]);
 </pre>
-</div><h4 id='method.grow' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.grow' class='fnname'>grow</a>&lt;T: <a class='trait' href='../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>&gt;(&amp;mut self, n: <a href='../primitive.uint.html'>uint</a>, value: &amp;T)</code></h4>
+</div><h4 id='method.grow' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.grow' class='fnname'>grow</a>(&amp;mut self, n: <a href='../primitive.uint.html'>uint</a>, value: &amp;T)</code></h4>
 <div class='docblock'><p>Grows the <code>Vec</code> in-place.</p>
 
 <p>Adds <code>n</code> copies of <code>value</code> to the <code>Vec</code>.</p>
 
-<h1 id="example-8" class='section-header'><a
-                           href="#example-8">Example</a></h1><span id='rust-example-raw-10' class='rusttest'>fn main() {
-    let mut vec = vec!(&quot;hello&quot;);
+<h1 id="example-9" class='section-header'><a
+                           href="#example-9">Example</a></h1><span id='rust-example-raw-12' class='rusttest'>fn main() {
+    let mut vec = vec![&quot;hello&quot;];
     vec.grow(2, &amp;(&quot;world&quot;));
-    assert_eq!(vec, vec!(&quot;hello&quot;, &quot;world&quot;, &quot;world&quot;));
-}</span><pre id='rust-example-rendered-10' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='string'>&quot;hello&quot;</span>);
+    assert_eq!(vec, vec![&quot;hello&quot;, &quot;world&quot;, &quot;world&quot;]);
+}</span><pre id='rust-example-rendered-12' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;hello&quot;</span>];
 <span class='ident'>vec</span>.<span class='ident'>grow</span>(<span class='number'>2</span>, <span class='kw-2'>&amp;</span>(<span class='string'>&quot;world&quot;</span>));
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='string'>&quot;hello&quot;</span>, <span class='string'>&quot;world&quot;</span>, <span class='string'>&quot;world&quot;</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;hello&quot;</span>, <span class='string'>&quot;world&quot;</span>, <span class='string'>&quot;world&quot;</span>]);
 </pre>
-</div><h4 id='method.grow_set' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.grow_set' class='fnname'>grow_set</a>&lt;T: <a class='trait' href='../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>&gt;(&amp;mut self, index: <a href='../primitive.uint.html'>uint</a>, initval: &amp;T, value: T)</code></h4>
+</div><h4 id='method.grow_set' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.grow_set' class='fnname'>grow_set</a>(&amp;mut self, index: <a href='../primitive.uint.html'>uint</a>, initval: &amp;T, value: T)</code></h4>
 <div class='docblock'><p>Sets the value of a vector element at a given index, growing the vector
 as needed.</p>
 
@@ -228,51 +375,50 @@ as needed.</p>
 end of the vector, expands the vector by replicating <code>initval</code> to fill
 the intervening space.</p>
 
-<h1 id="example-9" class='section-header'><a
-                           href="#example-9">Example</a></h1><span id='rust-example-raw-11' class='rusttest'>fn main() {
-    let mut vec = vec!(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;);
+<h1 id="example-10" class='section-header'><a
+                           href="#example-10">Example</a></h1><span id='rust-example-raw-13' class='rusttest'>fn main() {
+    let mut vec = vec![&quot;a&quot;, &quot;b&quot;, &quot;c&quot;];
     vec.grow_set(1, &amp;(&quot;fill&quot;), &quot;d&quot;);
     vec.grow_set(4, &amp;(&quot;fill&quot;), &quot;e&quot;);
-    assert_eq!(vec, vec!(&quot;a&quot;, &quot;d&quot;, &quot;c&quot;, &quot;fill&quot;, &quot;e&quot;));
-}</span><pre id='rust-example-rendered-11' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='string'>&quot;a&quot;</span>, <span class='string'>&quot;b&quot;</span>, <span class='string'>&quot;c&quot;</span>);
+    assert_eq!(vec, vec![&quot;a&quot;, &quot;d&quot;, &quot;c&quot;, &quot;fill&quot;, &quot;e&quot;]);
+}</span><pre id='rust-example-rendered-13' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;a&quot;</span>, <span class='string'>&quot;b&quot;</span>, <span class='string'>&quot;c&quot;</span>];
 <span class='ident'>vec</span>.<span class='ident'>grow_set</span>(<span class='number'>1</span>, <span class='kw-2'>&amp;</span>(<span class='string'>&quot;fill&quot;</span>), <span class='string'>&quot;d&quot;</span>);
 <span class='ident'>vec</span>.<span class='ident'>grow_set</span>(<span class='number'>4</span>, <span class='kw-2'>&amp;</span>(<span class='string'>&quot;fill&quot;</span>), <span class='string'>&quot;e&quot;</span>);
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='string'>&quot;a&quot;</span>, <span class='string'>&quot;d&quot;</span>, <span class='string'>&quot;c&quot;</span>, <span class='string'>&quot;fill&quot;</span>, <span class='string'>&quot;e&quot;</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;a&quot;</span>, <span class='string'>&quot;d&quot;</span>, <span class='string'>&quot;c&quot;</span>, <span class='string'>&quot;fill&quot;</span>, <span class='string'>&quot;e&quot;</span>]);
 </pre>
-</div><h4 id='method.partitioned' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.partitioned' class='fnname'>partitioned</a>&lt;T: <a class='trait' href='../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>&gt;(&amp;self, f: |&amp;T| -&gt; <a href='../primitive.bool.html'>bool</a>) -&gt; <a href='../primitive.tuple.html'>(<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;, <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;)</a></code></h4>
+</div><h4 id='method.partitioned' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.partitioned' class='fnname'>partitioned</a>(&amp;self, f: |&amp;T| -&gt; <a href='../primitive.bool.html'>bool</a>) -&gt; <a href='../primitive.tuple.html'>(<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;, <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;)</a></code></h4>
 <div class='docblock'><p>Partitions a vector based on a predicate.</p>
 
 <p>Clones the elements of the vector, partitioning them into two <code>Vec</code>s
 <code>(A,B)</code>, where all elements of <code>A</code> satisfy <code>f</code> and all elements of <code>B</code>
 do not. The order of elements is preserved.</p>
 
-<h1 id="example-10" class='section-header'><a
-                           href="#example-10">Example</a></h1><span id='rust-example-raw-12' class='rusttest'>fn main() {
-    let vec = vec!(1i, 2, 3, 4);
+<h1 id="example-11" class='section-header'><a
+                           href="#example-11">Example</a></h1><span id='rust-example-raw-14' class='rusttest'>fn main() {
+    let vec = vec![1i, 2, 3, 4];
     let (even, odd) = vec.partitioned(|&amp;n| n % 2 == 0);
-    assert_eq!(even, vec!(2i, 4));
-    assert_eq!(odd, vec!(1i, 3));
-}</span><pre id='rust-example-rendered-12' class='rust '>
-<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>);
+    assert_eq!(even, vec![2i, 4]);
+    assert_eq!(odd, vec![1i, 3]);
+}</span><pre id='rust-example-rendered-14' class='rust '>
+<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>];
 <span class='kw'>let</span> (<span class='ident'>even</span>, <span class='ident'>odd</span>) <span class='op'>=</span> <span class='ident'>vec</span>.<span class='ident'>partitioned</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>n</span><span class='op'>|</span> <span class='ident'>n</span> <span class='op'>%</span> <span class='number'>2</span> <span class='op'>==</span> <span class='number'>0</span>);
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>even</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>2i</span>, <span class='number'>4</span>));
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>odd</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>3</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>even</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>2i</span>, <span class='number'>4</span>]);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>odd</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>3</span>]);
 </pre>
-</div></div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.capacity' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.capacity' class='fnname'>capacity</a>&lt;T&gt;(&amp;self) -&gt; <a href='../primitive.uint.html'>uint</a></code></h4>
+</div></div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.capacity' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.capacity' class='fnname'>capacity</a>(&amp;self) -&gt; <a href='../primitive.uint.html'>uint</a></code></h4>
 <div class='docblock'><p>Returns the number of elements the vector can hold without
 reallocating.</p>
 
-<h1 id="example-11" class='section-header'><a
-                           href="#example-11">Example</a></h1><span id='rust-example-raw-13' class='rusttest'>fn main() {
-    use std::vec::Vec;
+<h1 id="example-12" class='section-header'><a
+                           href="#example-12">Example</a></h1><span id='rust-example-raw-15' class='rusttest'>fn main() {
     let vec: Vec&lt;int&gt; = Vec::with_capacity(10);
     assert_eq!(vec.capacity(), 10);
-}</span><pre id='rust-example-rendered-13' class='rust '>
+}</span><pre id='rust-example-rendered-15' class='rust '>
 <span class='kw'>let</span> <span class='ident'>vec</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='number'>10</span>);
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>.<span class='ident'>capacity</span>(), <span class='number'>10</span>);
 </pre>
-</div><h4 id='method.reserve_additional' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.reserve_additional' class='fnname'>reserve_additional</a>&lt;T&gt;(&amp;mut self, extra: <a href='../primitive.uint.html'>uint</a>)</code></h4>
+</div><h4 id='method.reserve_additional' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.reserve_additional' class='fnname'>reserve_additional</a>(&amp;mut self, extra: <a href='../primitive.uint.html'>uint</a>)</code></h4>
 <div class='docblock'><p>Reserves capacity for at least <code>n</code> additional elements in the given
 vector.</p>
 
@@ -280,18 +426,17 @@ vector.</p>
                            href="#failure">Failure</a></h1>
 <p>Fails if the new capacity overflows <code>uint</code>.</p>
 
-<h1 id="example-12" class='section-header'><a
-                           href="#example-12">Example</a></h1><span id='rust-example-raw-14' class='rusttest'>fn main() {
-    use std::vec::Vec;
-    let mut vec: Vec&lt;int&gt; = vec!(1i);
+<h1 id="example-13" class='section-header'><a
+                           href="#example-13">Example</a></h1><span id='rust-example-raw-16' class='rusttest'>fn main() {
+    let mut vec: Vec&lt;int&gt; = vec![1i];
     vec.reserve_additional(10);
     assert!(vec.capacity() &gt;= 11);
-}</span><pre id='rust-example-rendered-14' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>);
+}</span><pre id='rust-example-rendered-16' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>];
 <span class='ident'>vec</span>.<span class='ident'>reserve_additional</span>(<span class='number'>10</span>);
 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>vec</span>.<span class='ident'>capacity</span>() <span class='op'>&gt;=</span> <span class='number'>11</span>);
 </pre>
-</div><h4 id='method.reserve' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.reserve' class='fnname'>reserve</a>&lt;T&gt;(&amp;mut self, capacity: <a href='../primitive.uint.html'>uint</a>)</code></h4>
+</div><h4 id='method.reserve' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.reserve' class='fnname'>reserve</a>(&amp;mut self, capacity: <a href='../primitive.uint.html'>uint</a>)</code></h4>
 <div class='docblock'><p>Reserves capacity for at least <code>n</code> elements in the given vector.</p>
 
 <p>This function will over-allocate in order to amortize the allocation
@@ -301,336 +446,321 @@ additional space.</p>
 <p>If the capacity for <code>self</code> is already equal to or greater than the
 requested capacity, then no action is taken.</p>
 
-<h1 id="example-13" class='section-header'><a
-                           href="#example-13">Example</a></h1><span id='rust-example-raw-15' class='rusttest'>fn main() {
-    let mut vec = vec!(1i, 2, 3);
+<h1 id="example-14" class='section-header'><a
+                           href="#example-14">Example</a></h1><span id='rust-example-raw-17' class='rusttest'>fn main() {
+    let mut vec = vec![1i, 2, 3];
     vec.reserve(10);
     assert!(vec.capacity() &gt;= 10);
-}</span><pre id='rust-example-rendered-15' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>);
+}</span><pre id='rust-example-rendered-17' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
 <span class='ident'>vec</span>.<span class='ident'>reserve</span>(<span class='number'>10</span>);
 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>vec</span>.<span class='ident'>capacity</span>() <span class='op'>&gt;=</span> <span class='number'>10</span>);
 </pre>
-</div><h4 id='method.reserve_exact' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.reserve_exact' class='fnname'>reserve_exact</a>&lt;T&gt;(&amp;mut self, capacity: <a href='../primitive.uint.html'>uint</a>)</code></h4>
+</div><h4 id='method.reserve_exact' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.reserve_exact' class='fnname'>reserve_exact</a>(&amp;mut self, capacity: <a href='../primitive.uint.html'>uint</a>)</code></h4>
 <div class='docblock'><p>Reserves capacity for exactly <code>capacity</code> elements in the given vector.</p>
 
 <p>If the capacity for <code>self</code> is already equal to or greater than the
 requested capacity, then no action is taken.</p>
 
-<h1 id="example-14" class='section-header'><a
-                           href="#example-14">Example</a></h1><span id='rust-example-raw-16' class='rusttest'>fn main() {
-    use std::vec::Vec;
+<h1 id="example-15" class='section-header'><a
+                           href="#example-15">Example</a></h1><span id='rust-example-raw-18' class='rusttest'>fn main() {
     let mut vec: Vec&lt;int&gt; = Vec::with_capacity(10);
     vec.reserve_exact(11);
     assert_eq!(vec.capacity(), 11);
-}</span><pre id='rust-example-rendered-16' class='rust '>
+}</span><pre id='rust-example-rendered-18' class='rust '>
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='number'>10</span>);
 <span class='ident'>vec</span>.<span class='ident'>reserve_exact</span>(<span class='number'>11</span>);
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>.<span class='ident'>capacity</span>(), <span class='number'>11</span>);
 </pre>
-</div><h4 id='method.shrink_to_fit' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.shrink_to_fit' class='fnname'>shrink_to_fit</a>&lt;T&gt;(&amp;mut self)</code></h4>
+</div><h4 id='method.shrink_to_fit' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.shrink_to_fit' class='fnname'>shrink_to_fit</a>(&amp;mut self)</code></h4>
 <div class='docblock'><p>Shrink the capacity of the vector as much as possible</p>
 
-<h1 id="example-15" class='section-header'><a
-                           href="#example-15">Example</a></h1><span id='rust-example-raw-17' class='rusttest'>fn main() {
-    let mut vec = vec!(1i, 2, 3);
+<h1 id="example-16" class='section-header'><a
+                           href="#example-16">Example</a></h1><span id='rust-example-raw-19' class='rusttest'>fn main() {
+    let mut vec = vec![1i, 2, 3];
     vec.shrink_to_fit();
-}</span><pre id='rust-example-rendered-17' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>);
+}</span><pre id='rust-example-rendered-19' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
 <span class='ident'>vec</span>.<span class='ident'>shrink_to_fit</span>();
 </pre>
-</div><h4 id='method.pop' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.pop' class='fnname'>pop</a>&lt;T&gt;(&amp;mut self) -&gt; <a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;T&gt;</code></h4>
-<div class='docblock'><p>Remove the last element from a vector and return it, or <code>None</code> if it is
-empty.</p>
-
-<h1 id="example-16" class='section-header'><a
-                           href="#example-16">Example</a></h1><span id='rust-example-raw-18' class='rusttest'>fn main() {
-    let mut vec = vec!(1i, 2, 3);
-    assert_eq!(vec.pop(), Some(3));
-    assert_eq!(vec, vec!(1, 2));
-}</span><pre id='rust-example-rendered-18' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>);
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>.<span class='ident'>pop</span>(), <span class='prelude-val'>Some</span>(<span class='number'>3</span>));
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1</span>, <span class='number'>2</span>));
-</pre>
-</div><h4 id='method.push' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.push' class='fnname'>push</a>&lt;T&gt;(&amp;mut self, value: T)</code></h4>
-<div class='docblock'><p>Append an element to a vector.</p>
-
-<h1 id="failure-1" class='section-header'><a
-                           href="#failure-1">Failure</a></h1>
-<p>Fails if the number of elements in the vector overflows a <code>uint</code>.</p>
-
-<h1 id="example-17" class='section-header'><a
-                           href="#example-17">Example</a></h1><span id='rust-example-raw-19' class='rusttest'>fn main() {
-    let mut vec = vec!(1i, 2);
-    vec.push(3);
-    assert_eq!(vec, vec!(1, 2, 3));
-}</span><pre id='rust-example-rendered-19' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>);
-<span class='ident'>vec</span>.<span class='ident'>push</span>(<span class='number'>3</span>);
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>));
-</pre>
-</div><h4 id='method.append_one' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.append_one' class='fnname'>append_one</a>&lt;T&gt;(self, x: T) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
+</div><h4 id='method.append_one' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.append_one' class='fnname'>append_one</a>(self, x: T) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
 <div class='docblock'><p>Appends one element to the vector provided. The vector itself is then
 returned for use again.</p>
 
-<h1 id="example-18" class='section-header'><a
-                           href="#example-18">Example</a></h1><span id='rust-example-raw-20' class='rusttest'>fn main() {
-    let vec = vec!(1i, 2);
+<h1 id="example-17" class='section-header'><a
+                           href="#example-17">Example</a></h1><span id='rust-example-raw-20' class='rusttest'>fn main() {
+    let vec = vec![1i, 2];
     let vec = vec.append_one(3);
-    assert_eq!(vec, vec!(1, 2, 3));
+    assert_eq!(vec, vec![1, 2, 3]);
 }</span><pre id='rust-example-rendered-20' class='rust '>
-<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>);
+<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>];
 <span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='ident'>vec</span>.<span class='ident'>append_one</span>(<span class='number'>3</span>);
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>]);
 </pre>
-</div><h4 id='method.truncate' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.truncate' class='fnname'>truncate</a>&lt;T&gt;(&amp;mut self, len: <a href='../primitive.uint.html'>uint</a>)</code></h4>
+</div><h4 id='method.truncate' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.truncate' class='fnname'>truncate</a>(&amp;mut self, len: <a href='../primitive.uint.html'>uint</a>)</code></h4>
 <div class='docblock'><p>Shorten a vector, dropping excess elements.</p>
 
 <p>If <code>len</code> is greater than the vector&#39;s current length, this has no
 effect.</p>
 
-<h1 id="example-19" class='section-header'><a
-                           href="#example-19">Example</a></h1><span id='rust-example-raw-21' class='rusttest'>fn main() {
-    let mut vec = vec!(1i, 2, 3, 4);
+<h1 id="example-18" class='section-header'><a
+                           href="#example-18">Example</a></h1><span id='rust-example-raw-21' class='rusttest'>fn main() {
+    let mut vec = vec![1i, 2, 3, 4];
     vec.truncate(2);
-    assert_eq!(vec, vec!(1, 2));
+    assert_eq!(vec, vec![1, 2]);
 }</span><pre id='rust-example-rendered-21' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>);
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>];
 <span class='ident'>vec</span>.<span class='ident'>truncate</span>(<span class='number'>2</span>);
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1</span>, <span class='number'>2</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1</span>, <span class='number'>2</span>]);
 </pre>
-</div><h4 id='method.as_mut_slice' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.as_mut_slice' class='fnname'>as_mut_slice</a>&lt;T&gt;(&amp;'a mut self) -&gt; &amp;'a mut <a href='../primitive.slice.html'>[T]</a></code></h4>
+</div><h4 id='method.as_mut_slice' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.as_mut_slice' class='fnname'>as_mut_slice</a>(&amp;'a mut self) -&gt; &amp;'a mut <a href='../primitive.slice.html'>[T]</a></code></h4>
 <div class='docblock'><p>Work with <code>self</code> as a mutable slice.</p>
 
-<h1 id="example-20" class='section-header'><a
-                           href="#example-20">Example</a></h1><span id='rust-example-raw-22' class='rusttest'>fn main() {
+<h1 id="example-19" class='section-header'><a
+                           href="#example-19">Example</a></h1><span id='rust-example-raw-22' class='rusttest'>fn main() {
     fn foo(slice: &amp;mut [int]) {}
     
-    let mut vec = vec!(1i, 2);
+    let mut vec = vec![1i, 2];
     foo(vec.as_mut_slice());
 }</span><pre id='rust-example-rendered-22' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>foo</span>(<span class='ident'>slice</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> [<span class='ident'>int</span>]) {}
 
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>);
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>];
 <span class='ident'>foo</span>(<span class='ident'>vec</span>.<span class='ident'>as_mut_slice</span>());
 </pre>
-</div><h4 id='method.move_iter' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.move_iter' class='fnname'>move_iter</a>&lt;T&gt;(self) -&gt; <a class='struct' href='../../std/vec/struct.MoveItems.html' title='std::vec::MoveItems'>MoveItems</a>&lt;T&gt;</code></h4>
+</div><h4 id='method.move_iter' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.move_iter' class='fnname'>move_iter</a>(self) -&gt; <a class='struct' href='../../std/vec/struct.MoveItems.html' title='std::vec::MoveItems'>MoveItems</a>&lt;T&gt;</code></h4>
 <div class='docblock'><p>Creates a consuming iterator, that is, one that moves each
 value out of the vector (from start to end). The vector cannot
 be used after calling this.</p>
 
-<h1 id="example-21" class='section-header'><a
-                           href="#example-21">Example</a></h1><span id='rust-example-raw-23' class='rusttest'>fn main() {
-    let v = vec!(&quot;a&quot;.to_string(), &quot;b&quot;.to_string());
+<h1 id="example-20" class='section-header'><a
+                           href="#example-20">Example</a></h1><span id='rust-example-raw-23' class='rusttest'>fn main() {
+    let v = vec![&quot;a&quot;.to_string(), &quot;b&quot;.to_string()];
     for s in v.move_iter() {
         // s has type String, not &amp;String
         println!(&quot;{}&quot;, s);
     }
 }</span><pre id='rust-example-rendered-23' class='rust '>
-<span class='kw'>let</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='string'>&quot;a&quot;</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;b&quot;</span>.<span class='ident'>to_string</span>());
+<span class='kw'>let</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;a&quot;</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;b&quot;</span>.<span class='ident'>to_string</span>()];
 <span class='kw'>for</span> <span class='ident'>s</span> <span class='kw'>in</span> <span class='ident'>v</span>.<span class='ident'>move_iter</span>() {
     <span class='comment'>// s has type String, not &amp;String</span>
     <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>s</span>);
 }
 </pre>
-</div><h4 id='method.set_len' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#method.set_len' class='fnname'>set_len</a>&lt;T&gt;(&amp;mut self, len: <a href='../primitive.uint.html'>uint</a>)</code></h4>
+</div><h4 id='method.set_len' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#method.set_len' class='fnname'>set_len</a>(&amp;mut self, len: <a href='../primitive.uint.html'>uint</a>)</code></h4>
 <div class='docblock'><p>Sets the length of a vector.</p>
 
 <p>This will explicitly set the size of the vector, without actually
 modifying its buffers, so it is up to the caller to ensure that the
 vector is actually the specified size.</p>
-</div><h4 id='method.get' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.get' class='fnname'>get</a>&lt;T&gt;(&amp;'a self, index: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a T</code></h4>
+
+<h1 id="example-21" class='section-header'><a
+                           href="#example-21">Example</a></h1><span id='rust-example-raw-24' class='rusttest'>fn main() {
+    let mut v = vec![1u, 2, 3, 4];
+    unsafe {
+        v.set_len(1);
+    }
+}</span><pre id='rust-example-rendered-24' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1u</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>];
+<span class='kw'>unsafe</span> {
+    <span class='ident'>v</span>.<span class='ident'>set_len</span>(<span class='number'>1</span>);
+}
+</pre>
+</div><h4 id='method.get' class='method'><a class='stability Deprecated' title='Deprecated: prefer using indexing, e.g., vec[0]'></a><code>fn <a href='#method.get' class='fnname'>get</a>(&amp;'a self, index: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a T</code></h4>
 <div class='docblock'><p>Returns a reference to the value at index <code>index</code>.</p>
+
+<h1 id="failure-1" class='section-header'><a
+                           href="#failure-1">Failure</a></h1>
+<p>Fails if <code>index</code> is out of bounds</p>
+
+<h1 id="example-22" class='section-header'><a
+                           href="#example-22">Example</a></h1><span id='rust-example-raw-25' class='rusttest'>fn main() {
+    #![allow(deprecated)]
+    
+    let vec = vec![1i, 2, 3];
+    assert!(vec.get(1) == &amp;2);
+}</span><pre id='rust-example-rendered-25' class='rust '>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>deprecated</span>)]</span>
+
+<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>vec</span>.<span class='ident'>get</span>(<span class='number'>1</span>) <span class='op'>==</span> <span class='kw-2'>&amp;</span><span class='number'>2</span>);
+</pre>
+</div><h4 id='method.get_mut' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.get_mut' class='fnname'>get_mut</a>(&amp;'a mut self, index: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a mut T</code></h4>
+<div class='docblock'><p>Returns a mutable reference to the value at index <code>index</code>.</p>
 
 <h1 id="failure-2" class='section-header'><a
                            href="#failure-2">Failure</a></h1>
 <p>Fails if <code>index</code> is out of bounds</p>
 
-<h1 id="example-22" class='section-header'><a
-                           href="#example-22">Example</a></h1><span id='rust-example-raw-24' class='rusttest'>fn main() {
-    let vec = vec!(1i, 2, 3);
-    assert!(vec.get(1) == &amp;2);
-}</span><pre id='rust-example-rendered-24' class='rust '>
-<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>);
-<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>vec</span>.<span class='ident'>get</span>(<span class='number'>1</span>) <span class='op'>==</span> <span class='kw-2'>&amp;</span><span class='number'>2</span>);
-</pre>
-</div><h4 id='method.get_mut' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.get_mut' class='fnname'>get_mut</a>&lt;T&gt;(&amp;'a mut self, index: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a mut T</code></h4>
-<div class='docblock'><p>Returns a mutable reference to the value at index <code>index</code>.</p>
-
-<h1 id="failure-3" class='section-header'><a
-                           href="#failure-3">Failure</a></h1>
-<p>Fails if <code>index</code> is out of bounds</p>
-
 <h1 id="example-23" class='section-header'><a
-                           href="#example-23">Example</a></h1><span id='rust-example-raw-25' class='rusttest'>fn main() {
-    let mut vec = vec!(1i, 2, 3);
+                           href="#example-23">Example</a></h1><span id='rust-example-raw-26' class='rusttest'>fn main() {
+    let mut vec = vec![1i, 2, 3];
     *vec.get_mut(1) = 4;
-    assert_eq!(vec, vec!(1i, 4, 3));
-}</span><pre id='rust-example-rendered-25' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>);
+    assert_eq!(vec, vec![1i, 4, 3]);
+}</span><pre id='rust-example-rendered-26' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
 <span class='op'>*</span><span class='ident'>vec</span>.<span class='ident'>get_mut</span>(<span class='number'>1</span>) <span class='op'>=</span> <span class='number'>4</span>;
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>4</span>, <span class='number'>3</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>4</span>, <span class='number'>3</span>]);
 </pre>
-</div><h4 id='method.iter' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.iter' class='fnname'>iter</a>&lt;T&gt;(&amp;'a self) -&gt; <a class='struct' href='../../std/slice/struct.Items.html' title='std::slice::Items'>Items</a>&lt;'a, T&gt;</code></h4>
+</div><h4 id='method.iter' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.iter' class='fnname'>iter</a>(&amp;'a self) -&gt; <a class='struct' href='../../std/slice/struct.Items.html' title='std::slice::Items'>Items</a>&lt;'a, T&gt;</code></h4>
 <div class='docblock'><p>Returns an iterator over references to the elements of the vector in
 order.</p>
 
 <h1 id="example-24" class='section-header'><a
-                           href="#example-24">Example</a></h1><span id='rust-example-raw-26' class='rusttest'>fn main() {
-    let vec = vec!(1i, 2, 3);
+                           href="#example-24">Example</a></h1><span id='rust-example-raw-27' class='rusttest'>fn main() {
+    let vec = vec![1i, 2, 3];
     for num in vec.iter() {
         println!(&quot;{}&quot;, *num);
     }
-}</span><pre id='rust-example-rendered-26' class='rust '>
-<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>);
+}</span><pre id='rust-example-rendered-27' class='rust '>
+<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
 <span class='kw'>for</span> <span class='ident'>num</span> <span class='kw'>in</span> <span class='ident'>vec</span>.<span class='ident'>iter</span>() {
     <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='op'>*</span><span class='ident'>num</span>);
 }
 </pre>
-</div><h4 id='method.mut_iter' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.mut_iter' class='fnname'>mut_iter</a>&lt;T&gt;(&amp;'a mut self) -&gt; <a class='struct' href='../../std/slice/struct.MutItems.html' title='std::slice::MutItems'>MutItems</a>&lt;'a, T&gt;</code></h4>
+</div><h4 id='method.mut_iter' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.mut_iter' class='fnname'>mut_iter</a>(&amp;'a mut self) -&gt; <a class='struct' href='../../std/slice/struct.MutItems.html' title='std::slice::MutItems'>MutItems</a>&lt;'a, T&gt;</code></h4>
 <div class='docblock'><p>Returns an iterator over mutable references to the elements of the
 vector in order.</p>
 
 <h1 id="example-25" class='section-header'><a
-                           href="#example-25">Example</a></h1><span id='rust-example-raw-27' class='rusttest'>fn main() {
-    let mut vec = vec!(1i, 2, 3);
+                           href="#example-25">Example</a></h1><span id='rust-example-raw-28' class='rusttest'>fn main() {
+    let mut vec = vec![1i, 2, 3];
     for num in vec.mut_iter() {
         *num = 0;
     }
-}</span><pre id='rust-example-rendered-27' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>);
+}</span><pre id='rust-example-rendered-28' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
 <span class='kw'>for</span> <span class='ident'>num</span> <span class='kw'>in</span> <span class='ident'>vec</span>.<span class='ident'>mut_iter</span>() {
     <span class='op'>*</span><span class='ident'>num</span> <span class='op'>=</span> <span class='number'>0</span>;
 }
 </pre>
-</div><h4 id='method.sort_by' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.sort_by' class='fnname'>sort_by</a>&lt;T&gt;(&amp;mut self, compare: |&amp;T, &amp;T| -&gt; <a class='type' href='../../std/cmp/type.Ordering.html' title='std::cmp::Ordering'>Ordering</a>)</code></h4>
+</div><h4 id='method.sort_by' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.sort_by' class='fnname'>sort_by</a>(&amp;mut self, compare: |&amp;T, &amp;T| -&gt; <a class='type' href='../../std/cmp/type.Ordering.html' title='std::cmp::Ordering'>Ordering</a>)</code></h4>
 <div class='docblock'><p>Sort the vector, in place, using <code>compare</code> to compare elements.</p>
 
 <p>This sort is <code>O(n log n)</code> worst-case and stable, but allocates
 approximately <code>2 * n</code>, where <code>n</code> is the length of <code>self</code>.</p>
 
 <h1 id="example-26" class='section-header'><a
-                           href="#example-26">Example</a></h1><span id='rust-example-raw-28' class='rusttest'>fn main() {
-    let mut v = vec!(5i, 4, 1, 3, 2);
+                           href="#example-26">Example</a></h1><span id='rust-example-raw-29' class='rusttest'>fn main() {
+    let mut v = vec![5i, 4, 1, 3, 2];
     v.sort_by(|a, b| a.cmp(b));
-    assert_eq!(v, vec!(1i, 2, 3, 4, 5));
+    assert_eq!(v, vec![1i, 2, 3, 4, 5]);
     
     // reverse sorting
     v.sort_by(|a, b| b.cmp(a));
-    assert_eq!(v, vec!(5i, 4, 3, 2, 1));
-}</span><pre id='rust-example-rendered-28' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>5i</span>, <span class='number'>4</span>, <span class='number'>1</span>, <span class='number'>3</span>, <span class='number'>2</span>);
+    assert_eq!(v, vec![5i, 4, 3, 2, 1]);
+}</span><pre id='rust-example-rendered-29' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>5i</span>, <span class='number'>4</span>, <span class='number'>1</span>, <span class='number'>3</span>, <span class='number'>2</span>];
 <span class='ident'>v</span>.<span class='ident'>sort_by</span>(<span class='op'>|</span><span class='ident'>a</span>, <span class='ident'>b</span><span class='op'>|</span> <span class='ident'>a</span>.<span class='ident'>cmp</span>(<span class='ident'>b</span>));
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>, <span class='number'>5</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>, <span class='number'>5</span>]);
 
 <span class='comment'>// reverse sorting</span>
 <span class='ident'>v</span>.<span class='ident'>sort_by</span>(<span class='op'>|</span><span class='ident'>a</span>, <span class='ident'>b</span><span class='op'>|</span> <span class='ident'>b</span>.<span class='ident'>cmp</span>(<span class='ident'>a</span>));
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>5i</span>, <span class='number'>4</span>, <span class='number'>3</span>, <span class='number'>2</span>, <span class='number'>1</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>5i</span>, <span class='number'>4</span>, <span class='number'>3</span>, <span class='number'>2</span>, <span class='number'>1</span>]);
 </pre>
-</div><h4 id='method.slice' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.slice' class='fnname'>slice</a>&lt;T&gt;(&amp;'a self, start: <a href='../primitive.uint.html'>uint</a>, end: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h4>
+</div><h4 id='method.slice' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.slice' class='fnname'>slice</a>(&amp;'a self, start: <a href='../primitive.uint.html'>uint</a>, end: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h4>
 <div class='docblock'><p>Returns a slice of self spanning the interval [<code>start</code>, <code>end</code>).</p>
 
-<h1 id="failure-4" class='section-header'><a
-                           href="#failure-4">Failure</a></h1>
+<h1 id="failure-3" class='section-header'><a
+                           href="#failure-3">Failure</a></h1>
 <p>Fails when the slice (or part of it) is outside the bounds of self, or when
 <code>start</code> &gt; <code>end</code>.</p>
 
 <h1 id="example-27" class='section-header'><a
-                           href="#example-27">Example</a></h1><span id='rust-example-raw-29' class='rusttest'>fn main() {
-    let vec = vec!(1i, 2, 3, 4);
+                           href="#example-27">Example</a></h1><span id='rust-example-raw-30' class='rusttest'>fn main() {
+    let vec = vec![1i, 2, 3, 4];
     assert!(vec.slice(0, 2) == [1, 2]);
-}</span><pre id='rust-example-rendered-29' class='rust '>
-<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>);
+}</span><pre id='rust-example-rendered-30' class='rust '>
+<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>];
 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>vec</span>.<span class='ident'>slice</span>(<span class='number'>0</span>, <span class='number'>2</span>) <span class='op'>==</span> [<span class='number'>1</span>, <span class='number'>2</span>]);
 </pre>
-</div><h4 id='method.tail' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.tail' class='fnname'>tail</a>&lt;T&gt;(&amp;'a self) -&gt; &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h4>
+</div><h4 id='method.tail' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.tail' class='fnname'>tail</a>(&amp;'a self) -&gt; &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h4>
 <div class='docblock'><p>Returns a slice containing all but the first element of the vector.</p>
 
-<h1 id="failure-5" class='section-header'><a
-                           href="#failure-5">Failure</a></h1>
+<h1 id="failure-4" class='section-header'><a
+                           href="#failure-4">Failure</a></h1>
 <p>Fails when the vector is empty.</p>
 
 <h1 id="example-28" class='section-header'><a
-                           href="#example-28">Example</a></h1><span id='rust-example-raw-30' class='rusttest'>fn main() {
-    let vec = vec!(1i, 2, 3);
+                           href="#example-28">Example</a></h1><span id='rust-example-raw-31' class='rusttest'>fn main() {
+    let vec = vec![1i, 2, 3];
     assert!(vec.tail() == [2, 3]);
-}</span><pre id='rust-example-rendered-30' class='rust '>
-<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>);
+}</span><pre id='rust-example-rendered-31' class='rust '>
+<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>vec</span>.<span class='ident'>tail</span>() <span class='op'>==</span> [<span class='number'>2</span>, <span class='number'>3</span>]);
 </pre>
-</div><h4 id='method.tailn' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.tailn' class='fnname'>tailn</a>&lt;T&gt;(&amp;'a self, n: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h4>
+</div><h4 id='method.tailn' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.tailn' class='fnname'>tailn</a>(&amp;'a self, n: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h4>
 <div class='docblock'><p>Returns all but the first `n&#39; elements of a vector.</p>
 
-<h1 id="failure-6" class='section-header'><a
-                           href="#failure-6">Failure</a></h1>
+<h1 id="failure-5" class='section-header'><a
+                           href="#failure-5">Failure</a></h1>
 <p>Fails when there are fewer than <code>n</code> elements in the vector.</p>
 
 <h1 id="example-29" class='section-header'><a
-                           href="#example-29">Example</a></h1><span id='rust-example-raw-31' class='rusttest'>fn main() {
-    let vec = vec!(1i, 2, 3, 4);
+                           href="#example-29">Example</a></h1><span id='rust-example-raw-32' class='rusttest'>fn main() {
+    let vec = vec![1i, 2, 3, 4];
     assert!(vec.tailn(2) == [3, 4]);
-}</span><pre id='rust-example-rendered-31' class='rust '>
-<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>);
+}</span><pre id='rust-example-rendered-32' class='rust '>
+<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>];
 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>vec</span>.<span class='ident'>tailn</span>(<span class='number'>2</span>) <span class='op'>==</span> [<span class='number'>3</span>, <span class='number'>4</span>]);
 </pre>
-</div><h4 id='method.last' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.last' class='fnname'>last</a>&lt;T&gt;(&amp;'a self) -&gt; <a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;&amp;'a T&gt;</code></h4>
+</div><h4 id='method.last' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.last' class='fnname'>last</a>(&amp;'a self) -&gt; <a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;&amp;'a T&gt;</code></h4>
 <div class='docblock'><p>Returns a reference to the last element of a vector, or <code>None</code> if it is
 empty.</p>
 
 <h1 id="example-30" class='section-header'><a
-                           href="#example-30">Example</a></h1><span id='rust-example-raw-32' class='rusttest'>fn main() {
-    let vec = vec!(1i, 2, 3);
+                           href="#example-30">Example</a></h1><span id='rust-example-raw-33' class='rusttest'>fn main() {
+    let vec = vec![1i, 2, 3];
     assert!(vec.last() == Some(&amp;3));
-}</span><pre id='rust-example-rendered-32' class='rust '>
-<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>);
+}</span><pre id='rust-example-rendered-33' class='rust '>
+<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>vec</span>.<span class='ident'>last</span>() <span class='op'>==</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='number'>3</span>));
 </pre>
-</div><h4 id='method.mut_last' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.mut_last' class='fnname'>mut_last</a>&lt;T&gt;(&amp;'a mut self) -&gt; <a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;&amp;'a mut T&gt;</code></h4>
+</div><h4 id='method.mut_last' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.mut_last' class='fnname'>mut_last</a>(&amp;'a mut self) -&gt; <a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;&amp;'a mut T&gt;</code></h4>
 <div class='docblock'><p>Returns a mutable reference to the last element of a vector, or <code>None</code>
 if it is empty.</p>
 
 <h1 id="example-31" class='section-header'><a
-                           href="#example-31">Example</a></h1><span id='rust-example-raw-33' class='rusttest'>fn main() {
-    let mut vec = vec!(1i, 2, 3);
+                           href="#example-31">Example</a></h1><span id='rust-example-raw-34' class='rusttest'>fn main() {
+    let mut vec = vec![1i, 2, 3];
     *vec.mut_last().unwrap() = 4;
-    assert_eq!(vec, vec!(1i, 2, 4));
-}</span><pre id='rust-example-rendered-33' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>);
+    assert_eq!(vec, vec![1i, 2, 4]);
+}</span><pre id='rust-example-rendered-34' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
 <span class='op'>*</span><span class='ident'>vec</span>.<span class='ident'>mut_last</span>().<span class='ident'>unwrap</span>() <span class='op'>=</span> <span class='number'>4</span>;
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>4</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>4</span>]);
 </pre>
-</div><h4 id='method.swap_remove' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.swap_remove' class='fnname'>swap_remove</a>&lt;T&gt;(&amp;mut self, index: <a href='../primitive.uint.html'>uint</a>) -&gt; <a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;T&gt;</code></h4>
+</div><h4 id='method.swap_remove' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.swap_remove' class='fnname'>swap_remove</a>(&amp;mut self, index: <a href='../primitive.uint.html'>uint</a>) -&gt; <a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;T&gt;</code></h4>
 <div class='docblock'><p>Remove an element from anywhere in the vector and return it, replacing
 it with the last element. This does not preserve ordering, but is O(1).</p>
 
 <p>Returns <code>None</code> if <code>index</code> is out of bounds.</p>
 
 <h1 id="example-32" class='section-header'><a
-                           href="#example-32">Example</a></h1><span id='rust-example-raw-34' class='rusttest'>fn main() {
-    let mut v = vec!(&quot;foo&quot;.to_string(), &quot;bar&quot;.to_string(),
-                     &quot;baz&quot;.to_string(), &quot;qux&quot;.to_string());
+                           href="#example-32">Example</a></h1><span id='rust-example-raw-35' class='rusttest'>fn main() {
+    let mut v = vec![&quot;foo&quot;.to_string(), &quot;bar&quot;.to_string(),
+                     &quot;baz&quot;.to_string(), &quot;qux&quot;.to_string()];
     
     assert_eq!(v.swap_remove(1), Some(&quot;bar&quot;.to_string()));
-    assert_eq!(v, vec!(&quot;foo&quot;.to_string(), &quot;qux&quot;.to_string(), &quot;baz&quot;.to_string()));
+    assert_eq!(v, vec![&quot;foo&quot;.to_string(), &quot;qux&quot;.to_string(), &quot;baz&quot;.to_string()]);
     
     assert_eq!(v.swap_remove(0), Some(&quot;foo&quot;.to_string()));
-    assert_eq!(v, vec!(&quot;baz&quot;.to_string(), &quot;qux&quot;.to_string()));
+    assert_eq!(v, vec![&quot;baz&quot;.to_string(), &quot;qux&quot;.to_string()]);
     
     assert_eq!(v.swap_remove(2), None);
-}</span><pre id='rust-example-rendered-34' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='string'>&quot;foo&quot;</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;bar&quot;</span>.<span class='ident'>to_string</span>(),
-                 <span class='string'>&quot;baz&quot;</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;qux&quot;</span>.<span class='ident'>to_string</span>());
+}</span><pre id='rust-example-rendered-35' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;foo&quot;</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;bar&quot;</span>.<span class='ident'>to_string</span>(),
+                 <span class='string'>&quot;baz&quot;</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;qux&quot;</span>.<span class='ident'>to_string</span>()];
 
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>.<span class='ident'>swap_remove</span>(<span class='number'>1</span>), <span class='prelude-val'>Some</span>(<span class='string'>&quot;bar&quot;</span>.<span class='ident'>to_string</span>()));
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='string'>&quot;foo&quot;</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;qux&quot;</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;baz&quot;</span>.<span class='ident'>to_string</span>()));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;foo&quot;</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;qux&quot;</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;baz&quot;</span>.<span class='ident'>to_string</span>()]);
 
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>.<span class='ident'>swap_remove</span>(<span class='number'>0</span>), <span class='prelude-val'>Some</span>(<span class='string'>&quot;foo&quot;</span>.<span class='ident'>to_string</span>()));
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='string'>&quot;baz&quot;</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;qux&quot;</span>.<span class='ident'>to_string</span>()));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;baz&quot;</span>.<span class='ident'>to_string</span>(), <span class='string'>&quot;qux&quot;</span>.<span class='ident'>to_string</span>()]);
 
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>.<span class='ident'>swap_remove</span>(<span class='number'>2</span>), <span class='prelude-val'>None</span>);
 </pre>
-</div><h4 id='method.unshift' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.unshift' class='fnname'>unshift</a>&lt;T&gt;(&amp;mut self, element: T)</code></h4>
+</div><h4 id='method.unshift' class='method'><a class='stability Deprecated' title='Deprecated: use insert(0, ...)'></a><code>fn <a href='#method.unshift' class='fnname'>unshift</a>(&amp;mut self, element: T)</code></h4>
 <div class='docblock'><p>Prepend an element to the vector.</p>
 
 <h1 id="warning" class='section-header'><a
@@ -639,16 +769,16 @@ it with the last element. This does not preserve ordering, but is O(1).</p>
 vector.</p>
 
 <h1 id="example-33" class='section-header'><a
-                           href="#example-33">Example</a></h1><span id='rust-example-raw-35' class='rusttest'>fn main() {
-    let mut vec = vec!(1i, 2, 3);
+                           href="#example-33">Example</a></h1><span id='rust-example-raw-36' class='rusttest'>fn main() {
+    let mut vec = vec![1i, 2, 3];
     vec.unshift(4);
-    assert_eq!(vec, vec!(4, 1, 2, 3));
-}</span><pre id='rust-example-rendered-35' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>);
+    assert_eq!(vec, vec![4, 1, 2, 3]);
+}</span><pre id='rust-example-rendered-36' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
 <span class='ident'>vec</span>.<span class='ident'>unshift</span>(<span class='number'>4</span>);
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>4</span>, <span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>4</span>, <span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>]);
 </pre>
-</div><h4 id='method.shift' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.shift' class='fnname'>shift</a>&lt;T&gt;(&amp;mut self) -&gt; <a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;T&gt;</code></h4>
+</div><h4 id='method.shift' class='method'><a class='stability Deprecated' title='Deprecated: use remove(0)'></a><code>fn <a href='#method.shift' class='fnname'>shift</a>(&amp;mut self) -&gt; <a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;T&gt;</code></h4>
 <div class='docblock'><p>Removes the first element from a vector and returns it, or <code>None</code> if
 the vector is empty.</p>
 
@@ -658,137 +788,137 @@ the vector is empty.</p>
 vector.</p>
 
 <h1 id="example-34" class='section-header'><a
-                           href="#example-34">Example</a></h1><span id='rust-example-raw-36' class='rusttest'>fn main() {
-    let mut vec = vec!(1i, 2, 3);
+                           href="#example-34">Example</a></h1><span id='rust-example-raw-37' class='rusttest'>fn main() {
+    let mut vec = vec![1i, 2, 3];
     assert!(vec.shift() == Some(1));
-    assert_eq!(vec, vec!(2, 3));
-}</span><pre id='rust-example-rendered-36' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>);
+    assert_eq!(vec, vec![2, 3]);
+}</span><pre id='rust-example-rendered-37' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>vec</span>.<span class='ident'>shift</span>() <span class='op'>==</span> <span class='prelude-val'>Some</span>(<span class='number'>1</span>));
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>2</span>, <span class='number'>3</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>2</span>, <span class='number'>3</span>]);
 </pre>
-</div><h4 id='method.insert' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.insert' class='fnname'>insert</a>&lt;T&gt;(&amp;mut self, index: <a href='../primitive.uint.html'>uint</a>, element: T)</code></h4>
+</div><h4 id='method.insert' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.insert' class='fnname'>insert</a>(&amp;mut self, index: <a href='../primitive.uint.html'>uint</a>, element: T)</code></h4>
 <div class='docblock'><p>Insert an element at position <code>index</code> within the vector, shifting all
 elements after position i one position to the right.</p>
 
-<h1 id="failure-7" class='section-header'><a
-                           href="#failure-7">Failure</a></h1>
+<h1 id="failure-6" class='section-header'><a
+                           href="#failure-6">Failure</a></h1>
 <p>Fails if <code>index</code> is not between <code>0</code> and the vector&#39;s length (both
 bounds inclusive).</p>
 
 <h1 id="example-35" class='section-header'><a
-                           href="#example-35">Example</a></h1><span id='rust-example-raw-37' class='rusttest'>fn main() {
-    let mut vec = vec!(1i, 2, 3);
+                           href="#example-35">Example</a></h1><span id='rust-example-raw-38' class='rusttest'>fn main() {
+    let mut vec = vec![1i, 2, 3];
     vec.insert(1, 4);
-    assert_eq!(vec, vec!(1, 4, 2, 3));
+    assert_eq!(vec, vec![1, 4, 2, 3]);
     vec.insert(4, 5);
-    assert_eq!(vec, vec!(1, 4, 2, 3, 5));
-}</span><pre id='rust-example-rendered-37' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>);
+    assert_eq!(vec, vec![1, 4, 2, 3, 5]);
+}</span><pre id='rust-example-rendered-38' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
 <span class='ident'>vec</span>.<span class='ident'>insert</span>(<span class='number'>1</span>, <span class='number'>4</span>);
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1</span>, <span class='number'>4</span>, <span class='number'>2</span>, <span class='number'>3</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1</span>, <span class='number'>4</span>, <span class='number'>2</span>, <span class='number'>3</span>]);
 <span class='ident'>vec</span>.<span class='ident'>insert</span>(<span class='number'>4</span>, <span class='number'>5</span>);
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1</span>, <span class='number'>4</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>5</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1</span>, <span class='number'>4</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>5</span>]);
 </pre>
-</div><h4 id='method.remove' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.remove' class='fnname'>remove</a>&lt;T&gt;(&amp;mut self, index: <a href='../primitive.uint.html'>uint</a>) -&gt; <a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;T&gt;</code></h4>
+</div><h4 id='method.remove' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.remove' class='fnname'>remove</a>(&amp;mut self, index: <a href='../primitive.uint.html'>uint</a>) -&gt; <a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;T&gt;</code></h4>
 <div class='docblock'><p>Remove and return the element at position <code>index</code> within the vector,
 shifting all elements after position <code>index</code> one position to the left.
 Returns <code>None</code> if <code>i</code> is out of bounds.</p>
 
 <h1 id="example-36" class='section-header'><a
-                           href="#example-36">Example</a></h1><span id='rust-example-raw-38' class='rusttest'>fn main() {
-    let mut v = vec!(1i, 2, 3);
+                           href="#example-36">Example</a></h1><span id='rust-example-raw-39' class='rusttest'>fn main() {
+    let mut v = vec![1i, 2, 3];
     assert_eq!(v.remove(1), Some(2));
-    assert_eq!(v, vec!(1, 3));
+    assert_eq!(v, vec![1, 3]);
     
     assert_eq!(v.remove(4), None);
     // v is unchanged:
-    assert_eq!(v, vec!(1, 3));
-}</span><pre id='rust-example-rendered-38' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>);
+    assert_eq!(v, vec![1, 3]);
+}</span><pre id='rust-example-rendered-39' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>.<span class='ident'>remove</span>(<span class='number'>1</span>), <span class='prelude-val'>Some</span>(<span class='number'>2</span>));
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1</span>, <span class='number'>3</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1</span>, <span class='number'>3</span>]);
 
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>.<span class='ident'>remove</span>(<span class='number'>4</span>), <span class='prelude-val'>None</span>);
 <span class='comment'>// v is unchanged:</span>
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1</span>, <span class='number'>3</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1</span>, <span class='number'>3</span>]);
 </pre>
-</div><h4 id='method.push_all_move' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.push_all_move' class='fnname'>push_all_move</a>&lt;T&gt;(&amp;mut self, other: <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;)</code></h4>
+</div><h4 id='method.push_all_move' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.push_all_move' class='fnname'>push_all_move</a>(&amp;mut self, other: <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;)</code></h4>
 <div class='docblock'><p>Takes ownership of the vector <code>other</code>, moving all elements into
 the current vector. This does not copy any elements, and it is
 illegal to use the <code>other</code> vector after calling this method
 (because it is moved here).</p>
 
 <h1 id="example-37" class='section-header'><a
-                           href="#example-37">Example</a></h1><span id='rust-example-raw-39' class='rusttest'>fn main() {
-    let mut vec = vec!(box 1i);
-    vec.push_all_move(vec!(box 2, box 3, box 4));
-    assert_eq!(vec, vec!(box 1, box 2, box 3, box 4));
-}</span><pre id='rust-example-rendered-39' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='kw'>box</span> <span class='number'>1i</span>);
-<span class='ident'>vec</span>.<span class='ident'>push_all_move</span>(<span class='macro'>vec</span><span class='macro'>!</span>(<span class='kw'>box</span> <span class='number'>2</span>, <span class='kw'>box</span> <span class='number'>3</span>, <span class='kw'>box</span> <span class='number'>4</span>));
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='kw'>box</span> <span class='number'>1</span>, <span class='kw'>box</span> <span class='number'>2</span>, <span class='kw'>box</span> <span class='number'>3</span>, <span class='kw'>box</span> <span class='number'>4</span>));
+                           href="#example-37">Example</a></h1><span id='rust-example-raw-40' class='rusttest'>fn main() {
+    let mut vec = vec![box 1i];
+    vec.push_all_move(vec![box 2, box 3, box 4]);
+    assert_eq!(vec, vec![box 1, box 2, box 3, box 4]);
+}</span><pre id='rust-example-rendered-40' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw'>box</span> <span class='number'>1i</span>];
+<span class='ident'>vec</span>.<span class='ident'>push_all_move</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw'>box</span> <span class='number'>2</span>, <span class='kw'>box</span> <span class='number'>3</span>, <span class='kw'>box</span> <span class='number'>4</span>]);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw'>box</span> <span class='number'>1</span>, <span class='kw'>box</span> <span class='number'>2</span>, <span class='kw'>box</span> <span class='number'>3</span>, <span class='kw'>box</span> <span class='number'>4</span>]);
 </pre>
-</div><h4 id='method.mut_slice' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.mut_slice' class='fnname'>mut_slice</a>&lt;T&gt;(&amp;'a mut self, start: <a href='../primitive.uint.html'>uint</a>, end: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a mut <a href='../primitive.slice.html'>[T]</a></code></h4>
+</div><h4 id='method.mut_slice' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.mut_slice' class='fnname'>mut_slice</a>(&amp;'a mut self, start: <a href='../primitive.uint.html'>uint</a>, end: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a mut <a href='../primitive.slice.html'>[T]</a></code></h4>
 <div class='docblock'><p>Returns a mutable slice of <code>self</code> between <code>start</code> and <code>end</code>.</p>
 
-<h1 id="failure-8" class='section-header'><a
-                           href="#failure-8">Failure</a></h1>
+<h1 id="failure-7" class='section-header'><a
+                           href="#failure-7">Failure</a></h1>
 <p>Fails when <code>start</code> or <code>end</code> point outside the bounds of <code>self</code>, or when
 <code>start</code> &gt; <code>end</code>.</p>
 
 <h1 id="example-38" class='section-header'><a
-                           href="#example-38">Example</a></h1><span id='rust-example-raw-40' class='rusttest'>fn main() {
-    let mut vec = vec!(1i, 2, 3, 4);
+                           href="#example-38">Example</a></h1><span id='rust-example-raw-41' class='rusttest'>fn main() {
+    let mut vec = vec![1i, 2, 3, 4];
     assert!(vec.mut_slice(0, 2) == [1, 2]);
-}</span><pre id='rust-example-rendered-40' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>);
+}</span><pre id='rust-example-rendered-41' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>];
 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>vec</span>.<span class='ident'>mut_slice</span>(<span class='number'>0</span>, <span class='number'>2</span>) <span class='op'>==</span> [<span class='number'>1</span>, <span class='number'>2</span>]);
 </pre>
-</div><h4 id='method.mut_slice_from' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.mut_slice_from' class='fnname'>mut_slice_from</a>&lt;T&gt;(&amp;'a mut self, start: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a mut <a href='../primitive.slice.html'>[T]</a></code></h4>
+</div><h4 id='method.mut_slice_from' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.mut_slice_from' class='fnname'>mut_slice_from</a>(&amp;'a mut self, start: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a mut <a href='../primitive.slice.html'>[T]</a></code></h4>
 <div class='docblock'><p>Returns a mutable slice of self from <code>start</code> to the end of the vec.</p>
 
-<h1 id="failure-9" class='section-header'><a
-                           href="#failure-9">Failure</a></h1>
+<h1 id="failure-8" class='section-header'><a
+                           href="#failure-8">Failure</a></h1>
 <p>Fails when <code>start</code> points outside the bounds of self.</p>
 
 <h1 id="example-39" class='section-header'><a
-                           href="#example-39">Example</a></h1><span id='rust-example-raw-41' class='rusttest'>fn main() {
-    let mut vec = vec!(1i, 2, 3, 4);
+                           href="#example-39">Example</a></h1><span id='rust-example-raw-42' class='rusttest'>fn main() {
+    let mut vec = vec![1i, 2, 3, 4];
     assert!(vec.mut_slice_from(2) == [3, 4]);
-}</span><pre id='rust-example-rendered-41' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>);
+}</span><pre id='rust-example-rendered-42' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>];
 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>vec</span>.<span class='ident'>mut_slice_from</span>(<span class='number'>2</span>) <span class='op'>==</span> [<span class='number'>3</span>, <span class='number'>4</span>]);
 </pre>
-</div><h4 id='method.mut_slice_to' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.mut_slice_to' class='fnname'>mut_slice_to</a>&lt;T&gt;(&amp;'a mut self, end: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a mut <a href='../primitive.slice.html'>[T]</a></code></h4>
+</div><h4 id='method.mut_slice_to' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.mut_slice_to' class='fnname'>mut_slice_to</a>(&amp;'a mut self, end: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a mut <a href='../primitive.slice.html'>[T]</a></code></h4>
 <div class='docblock'><p>Returns a mutable slice of self from the start of the vec to <code>end</code>.</p>
 
-<h1 id="failure-10" class='section-header'><a
-                           href="#failure-10">Failure</a></h1>
+<h1 id="failure-9" class='section-header'><a
+                           href="#failure-9">Failure</a></h1>
 <p>Fails when <code>end</code> points outside the bounds of self.</p>
 
 <h1 id="example-40" class='section-header'><a
-                           href="#example-40">Example</a></h1><span id='rust-example-raw-42' class='rusttest'>fn main() {
-    let mut vec = vec!(1i, 2, 3, 4);
+                           href="#example-40">Example</a></h1><span id='rust-example-raw-43' class='rusttest'>fn main() {
+    let mut vec = vec![1i, 2, 3, 4];
     assert!(vec.mut_slice_to(2) == [1, 2]);
-}</span><pre id='rust-example-rendered-42' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>);
+}</span><pre id='rust-example-rendered-43' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>];
 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>vec</span>.<span class='ident'>mut_slice_to</span>(<span class='number'>2</span>) <span class='op'>==</span> [<span class='number'>1</span>, <span class='number'>2</span>]);
 </pre>
-</div><h4 id='method.mut_split_at' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.mut_split_at' class='fnname'>mut_split_at</a>&lt;T&gt;(&amp;'a mut self, mid: <a href='../primitive.uint.html'>uint</a>) -&gt; <a href='../primitive.tuple.html'>(&amp;'a mut <a href='../primitive.slice.html'>[T]</a>, &amp;'a mut <a href='../primitive.slice.html'>[T]</a>)</a></code></h4>
+</div><h4 id='method.mut_split_at' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.mut_split_at' class='fnname'>mut_split_at</a>(&amp;'a mut self, mid: <a href='../primitive.uint.html'>uint</a>) -&gt; <a href='../primitive.tuple.html'>(&amp;'a mut <a href='../primitive.slice.html'>[T]</a>, &amp;'a mut <a href='../primitive.slice.html'>[T]</a>)</a></code></h4>
 <div class='docblock'><p>Returns a pair of mutable slices that divides the vec at an index.</p>
 
 <p>The first will contain all indices from <code>[0, mid)</code> (excluding
 the index <code>mid</code> itself) and the second will contain all
 indices from <code>[mid, len)</code> (excluding the index <code>len</code> itself).</p>
 
-<h1 id="failure-11" class='section-header'><a
-                           href="#failure-11">Failure</a></h1>
+<h1 id="failure-10" class='section-header'><a
+                           href="#failure-10">Failure</a></h1>
 <p>Fails if <code>mid &gt; len</code>.</p>
 
 <h1 id="example-41" class='section-header'><a
-                           href="#example-41">Example</a></h1><span id='rust-example-raw-43' class='rusttest'>fn main() {
-    let mut vec = vec!(1i, 2, 3, 4, 5, 6);
+                           href="#example-41">Example</a></h1><span id='rust-example-raw-44' class='rusttest'>fn main() {
+    let mut vec = vec![1i, 2, 3, 4, 5, 6];
     
     // scoped to restrict the lifetime of the borrows
     {
@@ -808,8 +938,8 @@ indices from <code>[mid, len)</code> (excluding the index <code>len</code> itsel
         assert!(left == &amp;mut [1, 2, 3, 4, 5, 6]);
         assert!(right == &amp;mut []);
     }
-}</span><pre id='rust-example-rendered-43' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>, <span class='number'>5</span>, <span class='number'>6</span>);
+}</span><pre id='rust-example-rendered-44' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>, <span class='number'>5</span>, <span class='number'>6</span>];
 
 <span class='comment'>// scoped to restrict the lifetime of the borrows</span>
 {
@@ -830,56 +960,65 @@ indices from <code>[mid, len)</code> (excluding the index <code>len</code> itsel
     <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>right</span> <span class='op'>==</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> []);
 }
 </pre>
-</div><h4 id='method.reverse' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.reverse' class='fnname'>reverse</a>&lt;T&gt;(&amp;mut self)</code></h4>
+</div><h4 id='method.reverse' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.reverse' class='fnname'>reverse</a>(&amp;mut self)</code></h4>
 <div class='docblock'><p>Reverse the order of elements in a vector, in place.</p>
 
 <h1 id="example-42" class='section-header'><a
-                           href="#example-42">Example</a></h1><span id='rust-example-raw-44' class='rusttest'>fn main() {
-    let mut v = vec!(1i, 2, 3);
+                           href="#example-42">Example</a></h1><span id='rust-example-raw-45' class='rusttest'>fn main() {
+    let mut v = vec![1i, 2, 3];
     v.reverse();
-    assert_eq!(v, vec!(3i, 2, 1));
-}</span><pre id='rust-example-rendered-44' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>);
+    assert_eq!(v, vec![3i, 2, 1]);
+}</span><pre id='rust-example-rendered-45' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
 <span class='ident'>v</span>.<span class='ident'>reverse</span>();
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>3i</span>, <span class='number'>2</span>, <span class='number'>1</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>3i</span>, <span class='number'>2</span>, <span class='number'>1</span>]);
 </pre>
-</div><h4 id='method.slice_from' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.slice_from' class='fnname'>slice_from</a>&lt;T&gt;(&amp;'a self, start: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h4>
+</div><h4 id='method.slice_from' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.slice_from' class='fnname'>slice_from</a>(&amp;'a self, start: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h4>
 <div class='docblock'><p>Returns a slice of <code>self</code> from <code>start</code> to the end of the vec.</p>
 
-<h1 id="failure-12" class='section-header'><a
-                           href="#failure-12">Failure</a></h1>
+<h1 id="failure-11" class='section-header'><a
+                           href="#failure-11">Failure</a></h1>
 <p>Fails when <code>start</code> points outside the bounds of self.</p>
 
 <h1 id="example-43" class='section-header'><a
-                           href="#example-43">Example</a></h1><span id='rust-example-raw-45' class='rusttest'>fn main() {
-    let vec = vec!(1i, 2, 3);
+                           href="#example-43">Example</a></h1><span id='rust-example-raw-46' class='rusttest'>fn main() {
+    let vec = vec![1i, 2, 3];
     assert!(vec.slice_from(1) == [2, 3]);
-}</span><pre id='rust-example-rendered-45' class='rust '>
-<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>);
+}</span><pre id='rust-example-rendered-46' class='rust '>
+<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>vec</span>.<span class='ident'>slice_from</span>(<span class='number'>1</span>) <span class='op'>==</span> [<span class='number'>2</span>, <span class='number'>3</span>]);
 </pre>
-</div><h4 id='method.slice_to' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.slice_to' class='fnname'>slice_to</a>&lt;T&gt;(&amp;'a self, end: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h4>
+</div><h4 id='method.slice_to' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.slice_to' class='fnname'>slice_to</a>(&amp;'a self, end: <a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h4>
 <div class='docblock'><p>Returns a slice of self from the start of the vec to <code>end</code>.</p>
 
-<h1 id="failure-13" class='section-header'><a
-                           href="#failure-13">Failure</a></h1>
+<h1 id="failure-12" class='section-header'><a
+                           href="#failure-12">Failure</a></h1>
 <p>Fails when <code>end</code> points outside the bounds of self.</p>
 
 <h1 id="example-44" class='section-header'><a
-                           href="#example-44">Example</a></h1><span id='rust-example-raw-46' class='rusttest'>fn main() {
-    let vec = vec!(1i, 2, 3);
+                           href="#example-44">Example</a></h1><span id='rust-example-raw-47' class='rusttest'>fn main() {
+    let vec = vec![1i, 2, 3, 4];
     assert!(vec.slice_to(2) == [1, 2]);
-}</span><pre id='rust-example-rendered-46' class='rust '>
-<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>);
+}</span><pre id='rust-example-rendered-47' class='rust '>
+<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>];
 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>vec</span>.<span class='ident'>slice_to</span>(<span class='number'>2</span>) <span class='op'>==</span> [<span class='number'>1</span>, <span class='number'>2</span>]);
 </pre>
-</div><h4 id='method.init' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.init' class='fnname'>init</a>&lt;T&gt;(&amp;'a self) -&gt; &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h4>
+</div><h4 id='method.init' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.init' class='fnname'>init</a>(&amp;'a self) -&gt; &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h4>
 <div class='docblock'><p>Returns a slice containing all but the last element of the vector.</p>
 
-<h1 id="failure-14" class='section-header'><a
-                           href="#failure-14">Failure</a></h1>
+<h1 id="failure-13" class='section-header'><a
+                           href="#failure-13">Failure</a></h1>
 <p>Fails if the vector is empty</p>
-</div><h4 id='method.as_ptr' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.as_ptr' class='fnname'>as_ptr</a>&lt;T&gt;(&amp;self) -&gt; *T</code></h4>
+
+<h1 id="example-45" class='section-header'><a
+                           href="#example-45">Example</a></h1><span id='rust-example-raw-48' class='rusttest'>fn main() {
+    let vec = vec![1i, 2, 3];
+    assert!(vec.init() == [1, 2]);
+}</span><pre id='rust-example-rendered-48' class='rust '>
+<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>vec</span>.<span class='ident'>init</span>() <span class='op'>==</span> [<span class='number'>1</span>, <span class='number'>2</span>]);
+</pre>
+</div><h4 id='method.as_ptr' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.as_ptr' class='fnname'>as_ptr</a>(&amp;self) -&gt; *const T</code></h4>
 <div class='docblock'><p>Returns an unsafe pointer to the vector&#39;s buffer.</p>
 
 <p>The caller must ensure that the vector outlives the pointer this
@@ -887,7 +1026,28 @@ function returns, or else it will end up pointing to garbage.</p>
 
 <p>Modifying the vector may cause its buffer to be reallocated, which
 would also make any pointers to it invalid.</p>
-</div><h4 id='method.as_mut_ptr' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.as_mut_ptr' class='fnname'>as_mut_ptr</a>&lt;T&gt;(&amp;mut self) -&gt; *mut T</code></h4>
+
+<h1 id="example-46" class='section-header'><a
+                           href="#example-46">Example</a></h1><span id='rust-example-raw-49' class='rusttest'>fn main() {
+    let v = vec![1i, 2, 3];
+    let p = v.as_ptr();
+    unsafe {
+        // Examine each element manually
+        assert_eq!(*p, 1i);
+        assert_eq!(*p.offset(1), 2i);
+        assert_eq!(*p.offset(2), 3i);
+    }
+}</span><pre id='rust-example-rendered-49' class='rust '>
+<span class='kw'>let</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
+<span class='kw'>let</span> <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>v</span>.<span class='ident'>as_ptr</span>();
+<span class='kw'>unsafe</span> {
+    <span class='comment'>// Examine each element manually</span>
+    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>p</span>, <span class='number'>1i</span>);
+    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>p</span>.<span class='ident'>offset</span>(<span class='number'>1</span>), <span class='number'>2i</span>);
+    <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>p</span>.<span class='ident'>offset</span>(<span class='number'>2</span>), <span class='number'>3i</span>);
+}
+</pre>
+</div><h4 id='method.as_mut_ptr' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.as_mut_ptr' class='fnname'>as_mut_ptr</a>(&amp;mut self) -&gt; *mut T</code></h4>
 <div class='docblock'><p>Returns a mutable unsafe pointer to the vector&#39;s buffer.</p>
 
 <p>The caller must ensure that the vector outlives the pointer this
@@ -895,128 +1055,172 @@ function returns, or else it will end up pointing to garbage.</p>
 
 <p>Modifying the vector may cause its buffer to be reallocated, which
 would also make any pointers to it invalid.</p>
-</div><h4 id='method.retain' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.retain' class='fnname'>retain</a>&lt;T&gt;(&amp;mut self, f: |&amp;T| -&gt; <a href='../primitive.bool.html'>bool</a>)</code></h4>
+
+<h1 id="example-47" class='section-header'><a
+                           href="#example-47">Example</a></h1><span id='rust-example-raw-50' class='rusttest'>fn main() {
+    use std::ptr;
+    
+    let mut v = vec![1i, 2, 3];
+    let p = v.as_mut_ptr();
+    unsafe {
+        ptr::write(p, 9i);
+        ptr::write(p.offset(2), 5i);
+    }
+    assert_eq!(v, vec![9i, 2, 5]);
+}</span><pre id='rust-example-rendered-50' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ptr</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
+<span class='kw'>let</span> <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>v</span>.<span class='ident'>as_mut_ptr</span>();
+<span class='kw'>unsafe</span> {
+    <span class='ident'>ptr</span>::<span class='ident'>write</span>(<span class='ident'>p</span>, <span class='number'>9i</span>);
+    <span class='ident'>ptr</span>::<span class='ident'>write</span>(<span class='ident'>p</span>.<span class='ident'>offset</span>(<span class='number'>2</span>), <span class='number'>5i</span>);
+}
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>9i</span>, <span class='number'>2</span>, <span class='number'>5</span>]);
+</pre>
+</div><h4 id='method.retain' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.retain' class='fnname'>retain</a>(&amp;mut self, f: |&amp;T| -&gt; <a href='../primitive.bool.html'>bool</a>)</code></h4>
 <div class='docblock'><p>Retains only the elements specified by the predicate.</p>
 
 <p>In other words, remove all elements <code>e</code> such that <code>f(&amp;e)</code> returns false.
 This method operates in place and preserves the order the retained elements.</p>
 
-<h1 id="example-45" class='section-header'><a
-                           href="#example-45">Example</a></h1><span id='rust-example-raw-47' class='rusttest'>fn main() {
-    let mut vec = vec!(1i, 2, 3, 4);
+<h1 id="example-48" class='section-header'><a
+                           href="#example-48">Example</a></h1><span id='rust-example-raw-51' class='rusttest'>fn main() {
+    let mut vec = vec![1i, 2, 3, 4];
     vec.retain(|x| x%2 == 0);
-    assert_eq!(vec, vec!(2, 4));
-}</span><pre id='rust-example-rendered-47' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>);
+    assert_eq!(vec, vec![2, 4]);
+}</span><pre id='rust-example-rendered-51' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>];
 <span class='ident'>vec</span>.<span class='ident'>retain</span>(<span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span><span class='op'>%</span><span class='number'>2</span> <span class='op'>==</span> <span class='number'>0</span>);
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>2</span>, <span class='number'>4</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>2</span>, <span class='number'>4</span>]);
 </pre>
-</div><h4 id='method.grow_fn' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.grow_fn' class='fnname'>grow_fn</a>&lt;T&gt;(&amp;mut self, n: <a href='../primitive.uint.html'>uint</a>, f: |<a href='../primitive.uint.html'>uint</a>| -&gt; T)</code></h4>
+</div><h4 id='method.grow_fn' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.grow_fn' class='fnname'>grow_fn</a>(&amp;mut self, n: <a href='../primitive.uint.html'>uint</a>, f: |<a href='../primitive.uint.html'>uint</a>| -&gt; T)</code></h4>
 <div class='docblock'><p>Expands a vector in place, initializing the new elements to the result of a function.</p>
 
 <p>The vector is grown by <code>n</code> elements. The i-th new element are initialized to the value
 returned by <code>f(i)</code> where <code>i</code> is in the range [0, n).</p>
 
-<h1 id="example-46" class='section-header'><a
-                           href="#example-46">Example</a></h1><span id='rust-example-raw-48' class='rusttest'>fn main() {
-    let mut vec = vec!(0u, 1);
+<h1 id="example-49" class='section-header'><a
+                           href="#example-49">Example</a></h1><span id='rust-example-raw-52' class='rusttest'>fn main() {
+    let mut vec = vec![0u, 1];
     vec.grow_fn(3, |i| i);
-    assert_eq!(vec, vec!(0, 1, 0, 1, 2));
-}</span><pre id='rust-example-rendered-48' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>0u</span>, <span class='number'>1</span>);
+    assert_eq!(vec, vec![0, 1, 0, 1, 2]);
+}</span><pre id='rust-example-rendered-52' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0u</span>, <span class='number'>1</span>];
 <span class='ident'>vec</span>.<span class='ident'>grow_fn</span>(<span class='number'>3</span>, <span class='op'>|</span><span class='ident'>i</span><span class='op'>|</span> <span class='ident'>i</span>);
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>0</span>, <span class='number'>1</span>, <span class='number'>0</span>, <span class='number'>1</span>, <span class='number'>2</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>0</span>, <span class='number'>1</span>, <span class='number'>0</span>, <span class='number'>1</span>, <span class='number'>2</span>]);
 </pre>
-</div></div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../std/cmp/trait.Ord.html' title='std::cmp::Ord'>Ord</a>&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.sort' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.sort' class='fnname'>sort</a>&lt;T: <a class='trait' href='../../std/cmp/trait.Ord.html' title='std::cmp::Ord'>Ord</a>&gt;(&amp;mut self)</code></h4>
+</div></div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../std/cmp/trait.Ord.html' title='std::cmp::Ord'>Ord</a>&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.sort' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.sort' class='fnname'>sort</a>(&amp;mut self)</code></h4>
 <div class='docblock'><p>Sorts the vector in place.</p>
 
 <p>This sort is <code>O(n log n)</code> worst-case and stable, but allocates
 approximately <code>2 * n</code>, where <code>n</code> is the length of <code>self</code>.</p>
 
-<h1 id="example-47" class='section-header'><a
-                           href="#example-47">Example</a></h1><span id='rust-example-raw-49' class='rusttest'>fn main() {
-    let mut vec = vec!(3i, 1, 2);
+<h1 id="example-50" class='section-header'><a
+                           href="#example-50">Example</a></h1><span id='rust-example-raw-53' class='rusttest'>fn main() {
+    let mut vec = vec![3i, 1, 2];
     vec.sort();
-    assert_eq!(vec, vec!(1, 2, 3));
-}</span><pre id='rust-example-rendered-49' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>3i</span>, <span class='number'>1</span>, <span class='number'>2</span>);
+    assert_eq!(vec, vec![1, 2, 3]);
+}</span><pre id='rust-example-rendered-53' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>3i</span>, <span class='number'>1</span>, <span class='number'>2</span>];
 <span class='ident'>vec</span>.<span class='ident'>sort</span>();
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>]);
 </pre>
-</div></div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../std/cmp/trait.PartialEq.html' title='std::cmp::PartialEq'>PartialEq</a>&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.contains' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.contains' class='fnname'>contains</a>&lt;T: <a class='trait' href='../../std/cmp/trait.PartialEq.html' title='std::cmp::PartialEq'>PartialEq</a>&gt;(&amp;self, x: &amp;T) -&gt; <a href='../primitive.bool.html'>bool</a></code></h4>
+</div></div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../std/cmp/trait.PartialEq.html' title='std::cmp::PartialEq'>PartialEq</a>&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.contains' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.contains' class='fnname'>contains</a>(&amp;self, x: &amp;T) -&gt; <a href='../primitive.bool.html'>bool</a></code></h4>
 <div class='docblock'><p>Return true if a vector contains an element with the given value</p>
 
-<h1 id="example-48" class='section-header'><a
-                           href="#example-48">Example</a></h1><span id='rust-example-raw-50' class='rusttest'>fn main() {
-    let vec = vec!(1i, 2, 3);
+<h1 id="example-51" class='section-header'><a
+                           href="#example-51">Example</a></h1><span id='rust-example-raw-54' class='rusttest'>fn main() {
+    let vec = vec![1i, 2, 3];
     assert!(vec.contains(&amp;1));
-}</span><pre id='rust-example-rendered-50' class='rust '>
-<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>);
+}</span><pre id='rust-example-rendered-54' class='rust '>
+<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>vec</span>.<span class='ident'>contains</span>(<span class='kw-2'>&amp;</span><span class='number'>1</span>));
 </pre>
-</div><h4 id='method.dedup' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.dedup' class='fnname'>dedup</a>&lt;T: <a class='trait' href='../../std/cmp/trait.PartialEq.html' title='std::cmp::PartialEq'>PartialEq</a>&gt;(&amp;mut self)</code></h4>
+</div><h4 id='method.dedup' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.dedup' class='fnname'>dedup</a>(&amp;mut self)</code></h4>
 <div class='docblock'><p>Remove consecutive repeated elements in the vector.</p>
 
 <p>If the vector is sorted, this removes all duplicates.</p>
 
-<h1 id="example-49" class='section-header'><a
-                           href="#example-49">Example</a></h1><span id='rust-example-raw-51' class='rusttest'>fn main() {
-    let mut vec = vec!(1i, 2, 2, 3, 2);
+<h1 id="example-52" class='section-header'><a
+                           href="#example-52">Example</a></h1><span id='rust-example-raw-55' class='rusttest'>fn main() {
+    let mut vec = vec![1i, 2, 2, 3, 2];
     vec.dedup();
-    assert_eq!(vec, vec!(1i, 2, 3, 2));
-}</span><pre id='rust-example-rendered-51' class='rust '>
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>2</span>);
+    assert_eq!(vec, vec![1i, 2, 3, 2]);
+}</span><pre id='rust-example-rendered-55' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>2</span>];
 <span class='ident'>vec</span>.<span class='ident'>dedup</span>();
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>2</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>2</span>]);
 </pre>
 </div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../std/ascii/trait.OwnedAsciiCast.html' title='std::ascii::OwnedAsciiCast'>OwnedAsciiCast</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;<a href='../primitive.u8.html'>u8</a>&gt;</code></h3><div class='impl-methods'><h4 id='method.is_ascii' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.is_ascii' class='fnname'>is_ascii</a>(&amp;self) -&gt; <a href='../primitive.bool.html'>bool</a></code></h4>
 <h4 id='method.into_ascii_nocheck' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#method.into_ascii_nocheck' class='fnname'>into_ascii_nocheck</a>(self) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../std/ascii/struct.Ascii.html' title='std::ascii::Ascii'>Ascii</a>&gt;</code></h4>
 <h4 id='method.into_ascii' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.into_ascii' class='fnname'>into_ascii</a>(self) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../std/ascii/struct.Ascii.html' title='std::ascii::Ascii'>Ascii</a>&gt;</code></h4>
 <h4 id='method.into_ascii_opt' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.into_ascii_opt' class='fnname'>into_ascii_opt</a>(self) -&gt; <a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../std/ascii/struct.Ascii.html' title='std::ascii::Ascii'>Ascii</a>&gt;&gt;</code></h4>
-</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../std/to_str/trait.IntoStr.html' title='std::to_str::IntoStr'>IntoStr</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../std/ascii/struct.Ascii.html' title='std::ascii::Ascii'>Ascii</a>&gt;</code></h3><div class='impl-methods'><h4 id='method.into_string' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.into_string' class='fnname'>into_string</a>(self) -&gt; <a class='struct' href='../../std/string/struct.String.html' title='std::string::String'>String</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../std/to_string/trait.IntoStr.html' title='std::to_string::IntoStr'>IntoStr</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../std/ascii/struct.Ascii.html' title='std::ascii::Ascii'>Ascii</a>&gt;</code></h3><div class='impl-methods'><h4 id='method.into_string' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.into_string' class='fnname'>into_string</a>(self) -&gt; <a class='struct' href='../../std/string/struct.String.html' title='std::string::String'>String</a></code></h4>
 </div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../std/ascii/trait.IntoBytes.html' title='std::ascii::IntoBytes'>IntoBytes</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../std/ascii/struct.Ascii.html' title='std::ascii::Ascii'>Ascii</a>&gt;</code></h3><div class='impl-methods'><h4 id='method.into_bytes' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.into_bytes' class='fnname'>into_bytes</a>(self) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;<a href='../primitive.u8.html'>u8</a>&gt;</code></h4>
-</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, S: <a class='trait' href='../../std/str/trait.Str.html' title='std::str::Str'>Str</a>&gt; <a class='trait' href='../../std/str/trait.StrVector.html' title='std::str::StrVector'>StrVector</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;S&gt;</code></h3><div class='impl-methods'><h4 id='method.concat' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.concat' class='fnname'>concat</a>&lt;'a, S: <a class='trait' href='../../std/str/trait.Str.html' title='std::str::Str'>Str</a>&gt;(&amp;self) -&gt; <a class='struct' href='../../std/string/struct.String.html' title='std::string::String'>String</a></code></h4>
-<h4 id='method.connect' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.connect' class='fnname'>connect</a>&lt;'a, S: <a class='trait' href='../../std/str/trait.Str.html' title='std::str::Str'>Str</a>&gt;(&amp;self, sep: &amp;<a href='../primitive.str.html'>str</a>) -&gt; <a class='struct' href='../../std/string/struct.String.html' title='std::string::String'>String</a></code></h4>
-</div><h3 class='impl'><a class='stability Unstable' title='Unstable'></a><code>impl&lt;T: <a class='trait' href='../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>&gt; <a class='trait' href='../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.clone' class='method'><a class='stability Unstable' title='Unstable'></a><code>fn <a href='#method.clone' class='fnname'>clone</a>&lt;T: <a class='trait' href='../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>&gt;(&amp;self) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
-<h4 id='method.clone_from' class='method'><a class='stability Experimental' title='Experimental: this function is mostly unused'></a><code>fn <a href='#method.clone_from' class='fnname'>clone_from</a>&lt;T: <a class='trait' href='../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>&gt;(&amp;mut self, other: &amp;<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;)</code></h4>
-<h4 id='method.clone_from' class='method'><a class='stability Experimental' title='Experimental: this function is mostly unused'></a><code>fn <a href='#method.clone_from' class='fnname'>clone_from</a>&lt;T: <a class='trait' href='../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>&gt;(&amp;mut self, &amp;<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;)</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, S: <a class='trait' href='../../std/str/trait.Str.html' title='std::str::Str'>Str</a>&gt; <a class='trait' href='../../std/str/trait.StrVector.html' title='std::str::StrVector'>StrVector</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;S&gt;</code></h3><div class='impl-methods'><h4 id='method.concat' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.concat' class='fnname'>concat</a>(&amp;self) -&gt; <a class='struct' href='../../std/string/struct.String.html' title='std::string::String'>String</a></code></h4>
+<h4 id='method.connect' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.connect' class='fnname'>connect</a>(&amp;self, sep: &amp;<a href='../primitive.str.html'>str</a>) -&gt; <a class='struct' href='../../std/string/struct.String.html' title='std::string::String'>String</a></code></h4>
+</div><h3 class='impl'><a class='stability Unstable' title='Unstable'></a><code>impl&lt;T: <a class='trait' href='../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>&gt; <a class='trait' href='../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.clone' class='method'><a class='stability Unstable' title='Unstable'></a><code>fn <a href='#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
+<h4 id='method.clone_from' class='method'><a class='stability Experimental' title='Experimental: this function is mostly unused'></a><code>fn <a href='#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, other: &amp;<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;)</code></h4>
+<h4 id='method.clone_from' class='method'><a class='stability Experimental' title='Experimental: this function is mostly unused'></a><code>fn <a href='#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, &amp;<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;)</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T&gt; <a class='trait' href='../../std/ops/trait.Index.html' title='std::ops::Index'>Index</a>&lt;<a href='../primitive.uint.html'>uint</a>, T&gt; for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.index' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.index' class='fnname'>index</a>(&amp;'a self, index: &amp;<a href='../primitive.uint.html'>uint</a>) -&gt; &amp;'a T</code></h4>
 </div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T&gt; <a class='trait' href='../../std/iter/trait.FromIterator.html' title='std::iter::FromIterator'>FromIterator</a>&lt;T&gt; for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.from_iter' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.from_iter' class='fnname'>from_iter</a>&lt;I: <a class='trait' href='../../std/iter/trait.Iterator.html' title='std::iter::Iterator'>Iterator</a>&lt;T&gt;&gt;(iterator: I) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
 </div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T&gt; <a class='trait' href='../../std/iter/trait.Extendable.html' title='std::iter::Extendable'>Extendable</a>&lt;T&gt; for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.extend' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.extend' class='fnname'>extend</a>&lt;I: <a class='trait' href='../../std/iter/trait.Iterator.html' title='std::iter::Iterator'>Iterator</a>&lt;T&gt;&gt;(&amp;mut self, iterator: I)</code></h4>
-</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../std/cmp/trait.PartialEq.html' title='std::cmp::PartialEq'>PartialEq</a>&gt; <a class='trait' href='../../std/cmp/trait.PartialEq.html' title='std::cmp::PartialEq'>PartialEq</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.eq' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.eq' class='fnname'>eq</a>&lt;T: <a class='trait' href='../../std/cmp/trait.PartialEq.html' title='std::cmp::PartialEq'>PartialEq</a>&gt;(&amp;self, other: &amp;<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;) -&gt; <a href='../primitive.bool.html'>bool</a></code></h4>
-<h4 id='method.ne' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.ne' class='fnname'>ne</a>&lt;T: <a class='trait' href='../../std/cmp/trait.PartialEq.html' title='std::cmp::PartialEq'>PartialEq</a>&gt;(&amp;self, &amp;<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;) -&gt; <a href='../primitive.bool.html'>bool</a></code></h4>
-</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../std/cmp/trait.PartialOrd.html' title='std::cmp::PartialOrd'>PartialOrd</a>&gt; <a class='trait' href='../../std/cmp/trait.PartialOrd.html' title='std::cmp::PartialOrd'>PartialOrd</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.partial_cmp' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.partial_cmp' class='fnname'>partial_cmp</a>&lt;T: <a class='trait' href='../../std/cmp/trait.PartialOrd.html' title='std::cmp::PartialOrd'>PartialOrd</a>&gt;(&amp;self, other: &amp;<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;) -&gt; <a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;<a class='type' href='../../std/cmp/type.Ordering.html' title='std::cmp::Ordering'>Ordering</a>&gt;</code></h4>
-<h4 id='method.lt' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.lt' class='fnname'>lt</a>&lt;T: <a class='trait' href='../../std/cmp/trait.PartialOrd.html' title='std::cmp::PartialOrd'>PartialOrd</a>&gt;(&amp;self, &amp;<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;) -&gt; <a href='../primitive.bool.html'>bool</a></code></h4>
-<h4 id='method.le' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.le' class='fnname'>le</a>&lt;T: <a class='trait' href='../../std/cmp/trait.PartialOrd.html' title='std::cmp::PartialOrd'>PartialOrd</a>&gt;(&amp;self, &amp;<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;) -&gt; <a href='../primitive.bool.html'>bool</a></code></h4>
-<h4 id='method.gt' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.gt' class='fnname'>gt</a>&lt;T: <a class='trait' href='../../std/cmp/trait.PartialOrd.html' title='std::cmp::PartialOrd'>PartialOrd</a>&gt;(&amp;self, &amp;<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;) -&gt; <a href='../primitive.bool.html'>bool</a></code></h4>
-<h4 id='method.ge' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.ge' class='fnname'>ge</a>&lt;T: <a class='trait' href='../../std/cmp/trait.PartialOrd.html' title='std::cmp::PartialOrd'>PartialOrd</a>&gt;(&amp;self, &amp;<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;) -&gt; <a href='../primitive.bool.html'>bool</a></code></h4>
-</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a>&gt; <a class='trait' href='../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.assert_receiver_is_total_eq' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.assert_receiver_is_total_eq' class='fnname'>assert_receiver_is_total_eq</a>&lt;T: <a class='trait' href='../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a>&gt;(&amp;self)</code></h4>
-</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../std/cmp/trait.PartialEq.html' title='std::cmp::PartialEq'>PartialEq</a>, V: <a class='trait' href='../../std/slice/trait.Vector.html' title='std::slice::Vector'>Vector</a>&lt;T&gt;&gt; <a class='trait' href='../../std/cmp/trait.Equiv.html' title='std::cmp::Equiv'>Equiv</a>&lt;V&gt; for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.equiv' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.equiv' class='fnname'>equiv</a>&lt;T: <a class='trait' href='../../std/cmp/trait.PartialEq.html' title='std::cmp::PartialEq'>PartialEq</a>, V: <a class='trait' href='../../std/slice/trait.Vector.html' title='std::slice::Vector'>Vector</a>&lt;T&gt;&gt;(&amp;self, other: &amp;V) -&gt; <a href='../primitive.bool.html'>bool</a></code></h4>
-</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../std/cmp/trait.Ord.html' title='std::cmp::Ord'>Ord</a>&gt; <a class='trait' href='../../std/cmp/trait.Ord.html' title='std::cmp::Ord'>Ord</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.cmp' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.cmp' class='fnname'>cmp</a>&lt;T: <a class='trait' href='../../std/cmp/trait.Ord.html' title='std::cmp::Ord'>Ord</a>&gt;(&amp;self, other: &amp;<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;) -&gt; <a class='type' href='../../std/cmp/type.Ordering.html' title='std::cmp::Ordering'>Ordering</a></code></h4>
-</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T&gt; <a class='trait' href='../../std/collections/trait.Collection.html' title='std::collections::Collection'>Collection</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.len' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.len' class='fnname'>len</a>&lt;T&gt;(&amp;self) -&gt; <a href='../primitive.uint.html'>uint</a></code></h4>
-<h4 id='method.is_empty' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.is_empty' class='fnname'>is_empty</a>&lt;T&gt;(&amp;self) -&gt; <a href='../primitive.bool.html'>bool</a></code></h4>
-</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>&gt; <a class='trait' href='../../std/slice/trait.CloneableVector.html' title='std::slice::CloneableVector'>CloneableVector</a>&lt;T&gt; for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.to_owned' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.to_owned' class='fnname'>to_owned</a>&lt;T: <a class='trait' href='../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>&gt;(&amp;self) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
-<h4 id='method.into_owned' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.into_owned' class='fnname'>into_owned</a>&lt;T: <a class='trait' href='../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>&gt;(self) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
-</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T&gt; <a class='trait' href='../../std/collections/trait.Mutable.html' title='std::collections::Mutable'>Mutable</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.clear' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.clear' class='fnname'>clear</a>&lt;T&gt;(&amp;mut self)</code></h4>
-</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T&gt; <a class='trait' href='../../std/slice/trait.Vector.html' title='std::slice::Vector'>Vector</a>&lt;T&gt; for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.as_slice' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.as_slice' class='fnname'>as_slice</a>&lt;T&gt;(&amp;'a self) -&gt; &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../std/cmp/trait.PartialEq.html' title='std::cmp::PartialEq'>PartialEq</a>&gt; <a class='trait' href='../../std/cmp/trait.PartialEq.html' title='std::cmp::PartialEq'>PartialEq</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.eq' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#method.eq' class='fnname'>eq</a>(&amp;self, other: &amp;<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;) -&gt; <a href='../primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#method.ne' class='fnname'>ne</a>(&amp;self, &amp;<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;) -&gt; <a href='../primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../std/cmp/trait.PartialOrd.html' title='std::cmp::PartialOrd'>PartialOrd</a>&gt; <a class='trait' href='../../std/cmp/trait.PartialOrd.html' title='std::cmp::PartialOrd'>PartialOrd</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.partial_cmp' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#method.partial_cmp' class='fnname'>partial_cmp</a>(&amp;self, other: &amp;<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;) -&gt; <a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;<a class='type' href='../../std/cmp/type.Ordering.html' title='std::cmp::Ordering'>Ordering</a>&gt;</code></h4>
+<h4 id='method.lt' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#method.lt' class='fnname'>lt</a>(&amp;self, &amp;<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;) -&gt; <a href='../primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.le' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#method.le' class='fnname'>le</a>(&amp;self, &amp;<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;) -&gt; <a href='../primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.gt' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#method.gt' class='fnname'>gt</a>(&amp;self, &amp;<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;) -&gt; <a href='../primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ge' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#method.ge' class='fnname'>ge</a>(&amp;self, &amp;<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;) -&gt; <a href='../primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a>&gt; <a class='trait' href='../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.assert_receiver_is_total_eq' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#method.assert_receiver_is_total_eq' class='fnname'>assert_receiver_is_total_eq</a>(&amp;self)</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../std/cmp/trait.PartialEq.html' title='std::cmp::PartialEq'>PartialEq</a>, V: <a class='trait' href='../../std/slice/trait.Vector.html' title='std::slice::Vector'>Vector</a>&lt;T&gt;&gt; <a class='trait' href='../../std/cmp/trait.Equiv.html' title='std::cmp::Equiv'>Equiv</a>&lt;V&gt; for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.equiv' class='method'><a class='stability Experimental' title='Experimental: Better solutions may be discovered.'></a><code>fn <a href='#method.equiv' class='fnname'>equiv</a>(&amp;self, other: &amp;V) -&gt; <a href='../primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../std/cmp/trait.Ord.html' title='std::cmp::Ord'>Ord</a>&gt; <a class='trait' href='../../std/cmp/trait.Ord.html' title='std::cmp::Ord'>Ord</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.cmp' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#method.cmp' class='fnname'>cmp</a>(&amp;self, other: &amp;<a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;) -&gt; <a class='type' href='../../std/cmp/type.Ordering.html' title='std::cmp::Ordering'>Ordering</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T&gt; <a class='trait' href='../../std/collections/trait.Collection.html' title='std::collections::Collection'>Collection</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.len' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.len' class='fnname'>len</a>(&amp;self) -&gt; <a href='../primitive.uint.html'>uint</a></code></h4>
+<h4 id='method.is_empty' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.is_empty' class='fnname'>is_empty</a>(&amp;self) -&gt; <a href='../primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>&gt; <a class='trait' href='../../std/slice/trait.CloneableVector.html' title='std::slice::CloneableVector'>CloneableVector</a>&lt;T&gt; for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.to_vec' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.to_vec' class='fnname'>to_vec</a>(&amp;self) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
+<h4 id='method.into_vec' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.into_vec' class='fnname'>into_vec</a>(self) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
+<h4 id='method.to_owned' class='method'><a class='stability Deprecated' title='Deprecated: Replaced by `to_vec`'></a><code>fn <a href='#method.to_owned' class='fnname'>to_owned</a>(&amp;self) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
+<h4 id='method.into_owned' class='method'><a class='stability Deprecated' title='Deprecated: Replaced by `into_vec`'></a><code>fn <a href='#method.into_owned' class='fnname'>into_owned</a>(self) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T&gt; <a class='trait' href='../../std/collections/trait.Mutable.html' title='std::collections::Mutable'>Mutable</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.clear' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.clear' class='fnname'>clear</a>(&amp;mut self)</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T&gt; <a class='trait' href='../../std/slice/trait.Vector.html' title='std::slice::Vector'>Vector</a>&lt;T&gt; for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.as_slice' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.as_slice' class='fnname'>as_slice</a>(&amp;'a self) -&gt; &amp;'a <a href='../primitive.slice.html'>[T]</a></code></h4>
 <div class='docblock'><p>Work with <code>self</code> as a slice.</p>
 
-<h1 id="example-50" class='section-header'><a
-                           href="#example-50">Example</a></h1><span id='rust-example-raw-52' class='rusttest'>fn main() {
+<h1 id="example-53" class='section-header'><a
+                           href="#example-53">Example</a></h1><span id='rust-example-raw-56' class='rusttest'>fn main() {
     fn foo(slice: &amp;[int]) {}
     
-    let vec = vec!(1i, 2);
+    let vec = vec![1i, 2];
     foo(vec.as_slice());
-}</span><pre id='rust-example-rendered-52' class='rust '>
+}</span><pre id='rust-example-rendered-56' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>foo</span>(<span class='ident'>slice</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>int</span>]) {}
 
-<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>);
+<span class='kw'>let</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>];
 <span class='ident'>foo</span>(<span class='ident'>vec</span>.<span class='ident'>as_slice</span>());
 </pre>
-</div></div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>, V: <a class='trait' href='../../std/slice/trait.Vector.html' title='std::slice::Vector'>Vector</a>&lt;T&gt;&gt; <a class='trait' href='../../std/ops/trait.Add.html' title='std::ops::Add'>Add</a>&lt;V, <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;&gt; for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.add' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.add' class='fnname'>add</a>&lt;T: <a class='trait' href='../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>, V: <a class='trait' href='../../std/slice/trait.Vector.html' title='std::slice::Vector'>Vector</a>&lt;T&gt;&gt;(&amp;self, rhs: &amp;V) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
-</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T&gt; <a class='trait' href='../../std/ops/trait.Drop.html' title='std::ops::Drop'>Drop</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.drop' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.drop' class='fnname'>drop</a>&lt;T&gt;(&amp;mut self)</code></h4>
-</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T&gt; <a class='trait' href='../../std/default/trait.Default.html' title='std::default::Default'>Default</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.default' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.default' class='fnname'>default</a>&lt;T&gt;() -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
-</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../std/fmt/trait.Show.html' title='std::fmt::Show'>Show</a>&gt; <a class='trait' href='../../std/fmt/trait.Show.html' title='std::fmt::Show'>Show</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.fmt' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.fmt' class='fnname'>fmt</a>&lt;T: <a class='trait' href='../../std/fmt/trait.Show.html' title='std::fmt::Show'>Show</a>&gt;(&amp;self, f: &amp;mut <a class='struct' href='../../std/fmt/struct.Formatter.html' title='std::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='../../std/result/type.Result.html' title='std::result::Result'>Result</a>&lt;<a href='../primitive.unit.html'>()</a>, <a class='type' href='../../std/fmt/type.FormatError.html' title='std::fmt::FormatError'>FormatError</a>&gt;</code></h4>
-</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;S: <a class='trait' href='../../std/hash/trait.Writer.html' title='std::hash::Writer'>Writer</a>, T: <a class='trait' href='../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a>&lt;S&gt;&gt; <a class='trait' href='../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a>&lt;S&gt; for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.hash' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.hash' class='fnname'>hash</a>&lt;S: <a class='trait' href='../../std/hash/trait.Writer.html' title='std::hash::Writer'>Writer</a>, T: <a class='trait' href='../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a>&lt;S&gt;&gt;(&amp;self, state: &amp;mut S)</code></h4>
+</div></div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>, V: <a class='trait' href='../../std/slice/trait.Vector.html' title='std::slice::Vector'>Vector</a>&lt;T&gt;&gt; <a class='trait' href='../../std/ops/trait.Add.html' title='std::ops::Add'>Add</a>&lt;V, <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;&gt; for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.add' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.add' class='fnname'>add</a>(&amp;self, rhs: &amp;V) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T&gt; <a class='trait' href='../../std/ops/trait.Drop.html' title='std::ops::Drop'>Drop</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.drop' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.drop' class='fnname'>drop</a>(&amp;mut self)</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T&gt; <a class='trait' href='../../std/default/trait.Default.html' title='std::default::Default'>Default</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.default' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.default' class='fnname'>default</a>() -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T: <a class='trait' href='../../std/fmt/trait.Show.html' title='std::fmt::Show'>Show</a>&gt; <a class='trait' href='../../std/fmt/trait.Show.html' title='std::fmt::Show'>Show</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.fmt' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='../../std/fmt/struct.Formatter.html' title='std::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='../../std/result/type.Result.html' title='std::result::Result'>Result</a>&lt;<a href='../primitive.unit.html'>()</a>, <a class='type' href='../../std/fmt/type.FormatError.html' title='std::fmt::FormatError'>FormatError</a>&gt;</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;T&gt; <a class='trait' href='../../std/collections/trait.MutableSeq.html' title='std::collections::MutableSeq'>MutableSeq</a>&lt;T&gt; for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.push' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.push' class='fnname'>push</a>(&amp;mut self, value: T)</code></h4>
+<div class='docblock'><p>Append an element to the back of a collection.</p>
+
+<h1 id="failure-14" class='section-header'><a
+                           href="#failure-14">Failure</a></h1>
+<p>Fails if the number of elements in the vector overflows a <code>uint</code>.</p>
+
+<h1 id="example-54" class='section-header'><a
+                           href="#example-54">Example</a></h1><span id='rust-example-raw-57' class='rusttest'>fn main() {
+    let mut vec = vec!(1i, 2);
+    vec.push(3);
+    assert_eq!(vec, vec!(1, 2, 3));
+}</span><pre id='rust-example-rendered-57' class='rust '>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1i</span>, <span class='number'>2</span>);
+<span class='ident'>vec</span>.<span class='ident'>push</span>(<span class='number'>3</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>vec</span>, <span class='macro'>vec</span><span class='macro'>!</span>(<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>));
+</pre>
+</div><h4 id='method.pop' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.pop' class='fnname'>pop</a>(&amp;mut self) -&gt; <a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;T&gt;</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;S: <a class='trait' href='../../std/hash/trait.Writer.html' title='std::hash::Writer'>Writer</a>, T: <a class='trait' href='../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a>&lt;S&gt;&gt; <a class='trait' href='../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a>&lt;S&gt; for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;T&gt;</code></h3><div class='impl-methods'><h4 id='method.hash' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.hash' class='fnname'>hash</a>(&amp;self, state: &amp;mut S)</code></h4>
 </div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../std/path/trait.BytesContainer.html' title='std::path::BytesContainer'>BytesContainer</a> for <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;<a href='../primitive.u8.html'>u8</a>&gt;</code></h3><div class='impl-methods'><h4 id='method.container_as_bytes' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.container_as_bytes' class='fnname'>container_as_bytes</a>&lt;'a&gt;(&amp;'a self) -&gt; &amp;'a <a href='../primitive.slice.html'>[<a href='../primitive.u8.html'>u8</a>]</a></code></h4>
 <h4 id='method.container_into_owned_bytes' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.container_into_owned_bytes' class='fnname'>container_into_owned_bytes</a>(self) -&gt; <a class='struct' href='../../std/vec/struct.Vec.html' title='std::vec::Vec'>Vec</a>&lt;<a href='../primitive.u8.html'>u8</a>&gt;</code></h4>
 <h4 id='method.container_as_str' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.container_as_str' class='fnname'>container_as_str</a>&lt;'a&gt;(&amp;'a self) -&gt; <a class='type' href='../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;&amp;'a <a href='../primitive.str.html'>str</a>&gt;</code></h4>

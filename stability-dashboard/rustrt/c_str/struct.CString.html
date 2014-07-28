@@ -39,16 +39,20 @@
     </nav>
 
     <section id='main' class="content struct">
-<h1 class='fqn'>Struct <a href='../index.html'>rustrt</a>::<a href='index.html'>c_str</a>::<a class='struct' href=''>CString</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-2944' href='../../src/rustrt/Users/aturon/moz/working/stability-dashboard/src/librustrt/c_str.rs.html#84-87'>[src]</a></span></h1>
+<h1 class='fqn'>Struct <a href='../index.html'>rustrt</a>::<a href='index.html'>c_str</a>::<a class='struct' href=''>CString</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-2930' href='../../src/rustrt/Users/aturon/moz/working/stability-dashboard/src/librustrt/c_str.rs.html#86-89'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct CString {
     // some fields omitted
 }</pre><div class='docblock'><p>The representation of a C String.</p>
 
 <p>This structure wraps a <code>*libc::c_char</code>, and will automatically free the
 memory it is pointing to when it goes out of scope.</p>
-</div><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='struct' href='../../rustrt/c_str/struct.CString.html' title='rustrt::c_str::CString'>CString</a></code></h3><div class='impl-methods'><h4 id='method.new' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#method.new' class='fnname'>new</a>(buf: *<a class='type' href='../../libc/types/os/arch/c95/type.c_char.html' title='libc::types::os::arch::c95::c_char'>c_char</a>, owns_buffer: <a href='../../core/primitive.bool.html'>bool</a>) -&gt; <a class='struct' href='../../rustrt/c_str/struct.CString.html' title='rustrt::c_str::CString'>CString</a></code></h4>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='struct' href='../../rustrt/c_str/struct.CString.html' title='rustrt::c_str::CString'>CString</a></code></h3><div class='impl-methods'><h4 id='method.new' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#method.new' class='fnname'>new</a>(buf: *const <a class='type' href='../../libc/types/os/arch/c95/type.c_char.html' title='libc::types::os::arch::c95::c_char'>c_char</a>, owns_buffer: <a href='../../core/primitive.bool.html'>bool</a>) -&gt; <a class='struct' href='../../rustrt/c_str/struct.CString.html' title='rustrt::c_str::CString'>CString</a></code></h4>
 <div class='docblock'><p>Create a C String from a pointer.</p>
-</div><h4 id='method.as_ptr' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.as_ptr' class='fnname'>as_ptr</a>(&amp;self) -&gt; *<a class='type' href='../../libc/types/os/arch/c95/type.c_char.html' title='libc::types::os::arch::c95::c_char'>c_char</a></code></h4>
+
+<h1 id="failure" class='section-header'><a
+                           href="#failure">Failure</a></h1>
+<p>Fails if <code>buf</code> is null</p>
+</div><h4 id='method.as_ptr' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.as_ptr' class='fnname'>as_ptr</a>(&amp;self) -&gt; *const <a class='type' href='../../libc/types/os/arch/c95/type.c_char.html' title='libc::types::os::arch::c95::c_char'>c_char</a></code></h4>
 <div class='docblock'><p>Return a pointer to the NUL-terminated string data.</p>
 
 <p><code>.as_ptr</code> returns an internal pointer into the <code>CString</code>, and
@@ -65,10 +69,6 @@ one).</p>
 <span class='comment'>// wrong (the CString will be freed, invalidating `p`)</span>
 <span class='kw'>let</span> <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>foo</span>.<span class='ident'>to_c_str</span>().<span class='ident'>as_ptr</span>();
 </pre>
-
-<h1 id="failure" class='section-header'><a
-                           href="#failure">Failure</a></h1>
-<p>Fails if the CString is null.</p>
 
 <h1 id="example" class='section-header'><a
                            href="#example">Example</a></h1><pre class='rust '>
@@ -98,56 +98,28 @@ one).</p>
 <span class='comment'>// wrong (the CString will be freed, invalidating `p`)</span>
 <span class='kw'>let</span> <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>foo</span>.<span class='ident'>to_c_str</span>().<span class='ident'>as_mut_ptr</span>();
 </pre>
-
-<h1 id="failure-1" class='section-header'><a
-                           href="#failure-1">Failure</a></h1>
-<p>Fails if the CString is null.</p>
-</div><h4 id='method.with_ref' class='method'><a class='stability Deprecated' title='Deprecated: use `.as_ptr()`'></a><code>fn <a href='#method.with_ref' class='fnname'>with_ref</a>&lt;T&gt;(&amp;self, f: |*<a class='type' href='../../libc/types/os/arch/c95/type.c_char.html' title='libc::types::os::arch::c95::c_char'>c_char</a>| -&gt; T) -&gt; T</code></h4>
+</div><h4 id='method.with_ref' class='method'><a class='stability Deprecated' title='Deprecated: use `.as_ptr()`'></a><code>fn <a href='#method.with_ref' class='fnname'>with_ref</a>&lt;T&gt;(&amp;self, f: |*const <a class='type' href='../../libc/types/os/arch/c95/type.c_char.html' title='libc::types::os::arch::c95::c_char'>c_char</a>| -&gt; T) -&gt; T</code></h4>
 <div class='docblock'><p>Calls a closure with a reference to the underlying <code>*libc::c_char</code>.</p>
-
-<h1 id="failure-2" class='section-header'><a
-                           href="#failure-2">Failure</a></h1>
-<p>Fails if the CString is null.</p>
 </div><h4 id='method.with_mut_ref' class='method'><a class='stability Deprecated' title='Deprecated: use `.as_mut_ptr()`'></a><code>fn <a href='#method.with_mut_ref' class='fnname'>with_mut_ref</a>&lt;T&gt;(&amp;mut self, f: |*mut <a class='type' href='../../libc/types/os/arch/c95/type.c_char.html' title='libc::types::os::arch::c95::c_char'>c_char</a>| -&gt; T) -&gt; T</code></h4>
 <div class='docblock'><p>Calls a closure with a mutable reference to the underlying <code>*libc::c_char</code>.</p>
-
-<h1 id="failure-3" class='section-header'><a
-                           href="#failure-3">Failure</a></h1>
-<p>Fails if the CString is null.</p>
-</div><h4 id='method.is_null' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.is_null' class='fnname'>is_null</a>(&amp;self) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+</div><h4 id='method.is_null' class='method'><a class='stability Deprecated' title='Deprecated: a CString cannot be null'></a><code>fn <a href='#method.is_null' class='fnname'>is_null</a>(&amp;self) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
 <div class='docblock'><p>Returns true if the CString is a null.</p>
-</div><h4 id='method.is_not_null' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.is_not_null' class='fnname'>is_not_null</a>(&amp;self) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+</div><h4 id='method.is_not_null' class='method'><a class='stability Deprecated' title='Deprecated: a CString cannot be null'></a><code>fn <a href='#method.is_not_null' class='fnname'>is_not_null</a>(&amp;self) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
 <div class='docblock'><p>Returns true if the CString is not null.</p>
 </div><h4 id='method.owns_buffer' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.owns_buffer' class='fnname'>owns_buffer</a>(&amp;self) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
 <div class='docblock'><p>Returns whether or not the <code>CString</code> owns the buffer.</p>
 </div><h4 id='method.as_bytes' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.as_bytes' class='fnname'>as_bytes</a>&lt;'a&gt;(&amp;'a self) -&gt; &amp;'a <a href='../../core/primitive.slice.html'>[<a href='../../core/primitive.u8.html'>u8</a>]</a></code></h4>
 <div class='docblock'><p>Converts the CString into a <code>&amp;[u8]</code> without copying.
 Includes the terminating NUL byte.</p>
-
-<h1 id="failure-4" class='section-header'><a
-                           href="#failure-4">Failure</a></h1>
-<p>Fails if the CString is null.</p>
 </div><h4 id='method.as_bytes_no_nul' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.as_bytes_no_nul' class='fnname'>as_bytes_no_nul</a>&lt;'a&gt;(&amp;'a self) -&gt; &amp;'a <a href='../../core/primitive.slice.html'>[<a href='../../core/primitive.u8.html'>u8</a>]</a></code></h4>
 <div class='docblock'><p>Converts the CString into a <code>&amp;[u8]</code> without copying.
 Does not include the terminating NUL byte.</p>
-
-<h1 id="failure-5" class='section-header'><a
-                           href="#failure-5">Failure</a></h1>
-<p>Fails if the CString is null.</p>
 </div><h4 id='method.as_str' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.as_str' class='fnname'>as_str</a>&lt;'a&gt;(&amp;'a self) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;&amp;'a <a href='../../core/primitive.str.html'>str</a>&gt;</code></h4>
 <div class='docblock'><p>Converts the CString into a <code>&amp;str</code> without copying.
 Returns None if the CString is not UTF-8.</p>
-
-<h1 id="failure-6" class='section-header'><a
-                           href="#failure-6">Failure</a></h1>
-<p>Fails if the CString is null.</p>
 </div><h4 id='method.iter' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.iter' class='fnname'>iter</a>&lt;'a&gt;(&amp;'a self) -&gt; <a class='struct' href='../../rustrt/c_str/struct.CChars.html' title='rustrt::c_str::CChars'>CChars</a>&lt;'a&gt;</code></h4>
 <div class='docblock'><p>Return a CString iterator.</p>
-
-<h1 id="failure-7" class='section-header'><a
-                           href="#failure-7">Failure</a></h1>
-<p>Fails if the CString is null.</p>
-</div><h4 id='method.unwrap' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#method.unwrap' class='fnname'>unwrap</a>(self) -&gt; *<a class='type' href='../../libc/types/os/arch/c95/type.c_char.html' title='libc::types::os::arch::c95::c_char'>c_char</a></code></h4>
+</div><h4 id='method.unwrap' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#method.unwrap' class='fnname'>unwrap</a>(self) -&gt; *const <a class='type' href='../../libc/types/os/arch/c95/type.c_char.html' title='libc::types::os::arch::c95::c_char'>c_char</a></code></h4>
 <div class='docblock'><p>Unwraps the wrapped <code>*libc::c_char</code> from the <code>CString</code> wrapper.</p>
 
 <p>Any ownership of the buffer by the <code>CString</code> wrapper is
@@ -163,16 +135,19 @@ string data, as that does not relinquish ownership.</p>
 reasons, this is always a deep clone, rather than the usual shallow
 clone.</p>
 </div><h4 id='method.clone_from' class='method'><a class='stability Experimental' title='Experimental: this function is mostly unused'></a><code>fn <a href='#tymethod.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
-</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for <a class='struct' href='../../rustrt/c_str/struct.CString.html' title='rustrt::c_str::CString'>CString</a></code></h3><div class='impl-methods'><h4 id='method.eq' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.eq' class='fnname'>eq</a>(&amp;self, other: &amp;<a class='struct' href='../../rustrt/c_str/struct.CString.html' title='rustrt::c_str::CString'>CString</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
-<h4 id='method.ne' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.ne' class='fnname'>ne</a>(&amp;self, other: &amp;Self) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for <a class='struct' href='../../rustrt/c_str/struct.CString.html' title='rustrt::c_str::CString'>CString</a></code></h3><div class='impl-methods'><h4 id='method.eq' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#method.eq' class='fnname'>eq</a>(&amp;self, other: &amp;<a class='struct' href='../../rustrt/c_str/struct.CString.html' title='rustrt::c_str::CString'>CString</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#tymethod.ne' class='fnname'>ne</a>(&amp;self, other: &amp;Self) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a> for <a class='struct' href='../../rustrt/c_str/struct.CString.html' title='rustrt::c_str::CString'>CString</a></code></h3><div class='impl-methods'><h4 id='method.partial_cmp' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#method.partial_cmp' class='fnname'>partial_cmp</a>(&amp;self, other: &amp;<a class='struct' href='../../rustrt/c_str/struct.CString.html' title='rustrt::c_str::CString'>CString</a>) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='type' href='../../core/cmp/type.Ordering.html' title='core::cmp::Ordering'>Ordering</a>&gt;</code></h4>
+<h4 id='method.lt' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#tymethod.lt' class='fnname'>lt</a>(&amp;self, other: &amp;Self) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.le' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#tymethod.le' class='fnname'>le</a>(&amp;self, other: &amp;Self) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.gt' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#tymethod.gt' class='fnname'>gt</a>(&amp;self, other: &amp;Self) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ge' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#tymethod.ge' class='fnname'>ge</a>(&amp;self, other: &amp;Self) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../core/cmp/trait.Eq.html' title='core::cmp::Eq'>Eq</a> for <a class='struct' href='../../rustrt/c_str/struct.CString.html' title='rustrt::c_str::CString'>CString</a></code></h3><div class='impl-methods'></div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;S: <a class='trait' href='../../collections/hash/trait.Writer.html' title='collections::hash::Writer'>Writer</a>&gt; <a class='trait' href='../../collections/hash/trait.Hash.html' title='collections::hash::Hash'>Hash</a>&lt;S&gt; for <a class='struct' href='../../rustrt/c_str/struct.CString.html' title='rustrt::c_str::CString'>CString</a></code></h3><div class='impl-methods'><h4 id='method.hash' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.hash' class='fnname'>hash</a>(&amp;self, state: &amp;mut S)</code></h4>
 </div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../core/ops/trait.Drop.html' title='core::ops::Drop'>Drop</a> for <a class='struct' href='../../rustrt/c_str/struct.CString.html' title='rustrt::c_str::CString'>CString</a></code></h3><div class='impl-methods'><h4 id='method.drop' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.drop' class='fnname'>drop</a>(&amp;mut self)</code></h4>
 </div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../core/collections/trait.Collection.html' title='core::collections::Collection'>Collection</a> for <a class='struct' href='../../rustrt/c_str/struct.CString.html' title='rustrt::c_str::CString'>CString</a></code></h3><div class='impl-methods'><h4 id='method.len' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.len' class='fnname'>len</a>(&amp;self) -&gt; <a href='../../core/primitive.uint.html'>uint</a></code></h4>
 <div class='docblock'><p>Return the number of bytes in the CString (not including the NUL terminator).</p>
-
-<h1 id="failure-8" class='section-header'><a
-                           href="#failure-8">Failure</a></h1>
-<p>Fails if the CString is null.</p>
 </div><h4 id='method.is_empty' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.is_empty' class='fnname'>is_empty</a>(&amp;self) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../core/fmt/trait.Show.html' title='core::fmt::Show'>Show</a> for <a class='struct' href='../../rustrt/c_str/struct.CString.html' title='rustrt::c_str::CString'>CString</a></code></h3><div class='impl-methods'><h4 id='method.fmt' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='../../core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='../../core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>
 

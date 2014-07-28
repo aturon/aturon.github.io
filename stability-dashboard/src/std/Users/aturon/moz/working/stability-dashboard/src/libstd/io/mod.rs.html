@@ -1970,6 +1970,8 @@
 <span id='1930'>1930</span>
 <span id='1931'>1931</span>
 <span id='1932'>1932</span>
+<span id='1933'>1933</span>
+<span id='1934'>1934</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -1980,6 +1982,8 @@
 <span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
 <span class='comment'>// option. This file may not be copied, modified, or distributed</span>
 <span class='comment'>// except according to those terms.</span>
+<span class='comment'>//</span>
+<span class='comment'>// ignore-lexer-test FIXME #15883</span>
 
 <span class='comment'>// FIXME: cover these topics:</span>
 <span class='comment'>//        path, reader, writer, stream, raii (close not needed),</span>
@@ -2202,7 +2206,7 @@ responding to errors that may occur while attempting to read the numbers.
 <span class='kw'>use</span> <span class='ident'>ops</span>::{<span class='ident'>BitOr</span>, <span class='ident'>BitAnd</span>, <span class='ident'>Sub</span>, <span class='ident'>Not</span>};
 <span class='kw'>use</span> <span class='ident'>option</span>::{<span class='prelude-ty'>Option</span>, <span class='prelude-val'>Some</span>, <span class='prelude-val'>None</span>};
 <span class='kw'>use</span> <span class='ident'>os</span>;
-<span class='kw'>use</span> <span class='ident'>owned</span>::<span class='ident'>Box</span>;
+<span class='kw'>use</span> <span class='ident'>boxed</span>::<span class='ident'>Box</span>;
 <span class='kw'>use</span> <span class='ident'>result</span>::{<span class='prelude-val'>Ok</span>, <span class='prelude-val'>Err</span>, <span class='prelude-ty'>Result</span>};
 <span class='kw'>use</span> <span class='ident'>rt</span>::<span class='ident'>rtio</span>;
 <span class='kw'>use</span> <span class='ident'>slice</span>::{<span class='ident'>Vector</span>, <span class='ident'>MutableVector</span>, <span class='ident'>ImmutableVector</span>};
@@ -2210,7 +2214,7 @@ responding to errors that may occur while attempting to read the numbers.
 <span class='kw'>use</span> <span class='ident'>str</span>;
 <span class='kw'>use</span> <span class='ident'>string</span>::<span class='ident'>String</span>;
 <span class='kw'>use</span> <span class='ident'>uint</span>;
-<span class='kw'>use</span> <span class='ident'>unicode</span>::<span class='ident'>UnicodeChar</span>;
+<span class='kw'>use</span> <span class='ident'>unicode</span>::<span class='ident'>char</span>::<span class='ident'>UnicodeChar</span>;
 <span class='kw'>use</span> <span class='ident'>vec</span>::<span class='ident'>Vec</span>;
 
 <span class='comment'>// Reexports</span>
@@ -2266,7 +2270,7 @@ responding to errors that may occur while attempting to read the numbers.
 <span class='doccomment'>/// # FIXME</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// Is something like this sufficient? It&#39;s kind of archaic</span>
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>PartialEq</span>, <span class='ident'>Clone</span>)]</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>PartialEq</span>, <span class='ident'>Eq</span>, <span class='ident'>Clone</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>IoError</span> {
     <span class='doccomment'>/// An enumeration which can be matched against for determining the flavor</span>
     <span class='doccomment'>/// of error.</span>
@@ -2408,7 +2412,7 @@ responding to errors that may occur while attempting to read the numbers.
 }
 
 <span class='doccomment'>/// A list specifying general categories of I/O error.</span>
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>PartialEq</span>, <span class='ident'>Clone</span>, <span class='ident'>Show</span>)]</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>PartialEq</span>, <span class='ident'>Eq</span>, <span class='ident'>Clone</span>, <span class='ident'>Show</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>IoErrorKind</span> {
     <span class='doccomment'>/// Any I/O error not part of this list.</span>
     <span class='ident'>OtherIoError</span>,
@@ -2678,9 +2682,9 @@ responding to errors that may occur while attempting to read the numbers.
     <span class='doccomment'>/// UTF-8 bytes.</span>
     <span class='kw'>fn</span> <span class='ident'>read_to_string</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>read_to_end</span>().<span class='ident'>and_then</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> {
-            <span class='kw'>match</span> <span class='ident'>str</span>::<span class='ident'>from_utf8</span>(<span class='ident'>s</span>.<span class='ident'>as_slice</span>()) {
-                <span class='prelude-val'>Some</span>(<span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='ident'>s</span>)),
-                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>standard_error</span>(<span class='ident'>InvalidInput</span>)),
+            <span class='kw'>match</span> <span class='ident'>String</span>::<span class='ident'>from_utf8</span>(<span class='ident'>s</span>) {
+                <span class='prelude-val'>Ok</span>(<span class='ident'>s</span>)  <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>s</span>),
+                <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>standard_error</span>(<span class='ident'>InvalidInput</span>)),
             }
         })
     }
@@ -3413,9 +3417,9 @@ responding to errors that may occur while attempting to read the numbers.
     <span class='doccomment'>/// valid UTF-8 sequence of bytes.</span>
     <span class='kw'>fn</span> <span class='ident'>read_line</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>read_until</span>(<span class='string'>&#39;\n&#39;</span> <span class='kw'>as</span> <span class='ident'>u8</span>).<span class='ident'>and_then</span>(<span class='op'>|</span><span class='ident'>line</span><span class='op'>|</span>
-            <span class='kw'>match</span> <span class='ident'>str</span>::<span class='ident'>from_utf8</span>(<span class='ident'>line</span>.<span class='ident'>as_slice</span>()) {
-                <span class='prelude-val'>Some</span>(<span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='ident'>s</span>)),
-                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>standard_error</span>(<span class='ident'>InvalidInput</span>)),
+            <span class='kw'>match</span> <span class='ident'>String</span>::<span class='ident'>from_utf8</span>(<span class='ident'>line</span>) {
+                <span class='prelude-val'>Ok</span>(<span class='ident'>s</span>)  <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>s</span>),
+                <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>standard_error</span>(<span class='ident'>InvalidInput</span>)),
             }
         )
     }

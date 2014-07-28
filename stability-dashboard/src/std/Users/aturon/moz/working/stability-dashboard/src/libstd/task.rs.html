@@ -696,6 +696,21 @@
 <span id='656'>656</span>
 <span id='657'>657</span>
 <span id='658'>658</span>
+<span id='659'>659</span>
+<span id='660'>660</span>
+<span id='661'>661</span>
+<span id='662'>662</span>
+<span id='663'>663</span>
+<span id='664'>664</span>
+<span id='665'>665</span>
+<span id='666'>666</span>
+<span id='667'>667</span>
+<span id='668'>668</span>
+<span id='669'>669</span>
+<span id='670'>670</span>
+<span id='671'>671</span>
+<span id='672'>672</span>
+<span id='673'>673</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2012-2013 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -790,20 +805,22 @@
 <span class='doccomment'>//! # }</span>
 <span class='doccomment'>//! ```</span>
 
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>experimental</span>]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>stable</span>]</span>
 
 <span class='kw'>use</span> <span class='ident'>any</span>::<span class='ident'>Any</span>;
 <span class='kw'>use</span> <span class='ident'>comm</span>::<span class='ident'>channel</span>;
 <span class='kw'>use</span> <span class='ident'>io</span>::{<span class='ident'>Writer</span>, <span class='ident'>stdio</span>};
 <span class='kw'>use</span> <span class='ident'>kinds</span>::{<span class='ident'>Send</span>, <span class='ident'>marker</span>};
 <span class='kw'>use</span> <span class='ident'>option</span>::{<span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>, <span class='prelude-ty'>Option</span>};
-<span class='kw'>use</span> <span class='ident'>owned</span>::<span class='ident'>Box</span>;
+<span class='kw'>use</span> <span class='ident'>boxed</span>::<span class='ident'>Box</span>;
 <span class='kw'>use</span> <span class='ident'>result</span>::<span class='prelude-ty'>Result</span>;
 <span class='kw'>use</span> <span class='ident'>rt</span>::<span class='ident'>local</span>::<span class='ident'>Local</span>;
 <span class='kw'>use</span> <span class='ident'>rt</span>::<span class='ident'>task</span>;
 <span class='kw'>use</span> <span class='ident'>rt</span>::<span class='ident'>task</span>::<span class='ident'>Task</span>;
 <span class='kw'>use</span> <span class='ident'>str</span>::{<span class='ident'>Str</span>, <span class='ident'>SendStr</span>, <span class='ident'>IntoMaybeOwned</span>};
+<span class='kw'>use</span> <span class='ident'>string</span>::<span class='ident'>String</span>;
 <span class='kw'>use</span> <span class='ident'>sync</span>::<span class='ident'>Future</span>;
+<span class='kw'>use</span> <span class='ident'>to_string</span>::<span class='ident'>ToString</span>;
 
 <span class='doccomment'>/// A means of spawning a task</span>
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>Spawner</span> {
@@ -871,6 +888,7 @@
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>Spawner</span><span class='op'>&gt;</span> <span class='ident'>TaskBuilder</span><span class='op'>&lt;</span><span class='ident'>S</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Name the task-to-be. Currently the name is used for identification</span>
     <span class='doccomment'>/// only in failure messages.</span>
+    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;IntoMaybeOwned will probably change.&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>named</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>IntoMaybeOwned</span><span class='op'>&lt;</span><span class='lifetime'>&#39;static</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>name</span>: <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>TaskBuilder</span><span class='op'>&lt;</span><span class='ident'>S</span><span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>name</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>name</span>.<span class='ident'>into_maybe_owned</span>());
         <span class='self'>self</span>
@@ -883,12 +901,14 @@
     }
 
     <span class='doccomment'>/// Redirect task-local stdout.</span>
+    <span class='attribute'>#[<span class='ident'>experimental</span> <span class='op'>=</span> <span class='string'>&quot;May not want to make stdio overridable here.&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>stdout</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>stdout</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Writer</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>TaskBuilder</span><span class='op'>&lt;</span><span class='ident'>S</span><span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>stdout</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>stdout</span>);
         <span class='self'>self</span>
     }
 
     <span class='doccomment'>/// Redirect task-local stderr.</span>
+    <span class='attribute'>#[<span class='ident'>experimental</span> <span class='op'>=</span> <span class='string'>&quot;May not want to make stdio overridable here.&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>stderr</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>stderr</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Writer</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>TaskBuilder</span><span class='op'>&lt;</span><span class='ident'>S</span><span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>stderr</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>stderr</span>);
         <span class='self'>self</span>
@@ -987,6 +1007,7 @@
     <span class='doccomment'>/// future returns `result::Ok` containing the value returned by the</span>
     <span class='doccomment'>/// function. If the child task fails then the future returns `result::Err`</span>
     <span class='doccomment'>/// containing the argument to `fail!(...)` as an `Any` trait object.</span>
+    <span class='attribute'>#[<span class='ident'>experimental</span> <span class='op'>=</span> <span class='string'>&quot;Futures are experimental.&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>try_future</span><span class='op'>&lt;</span><span class='ident'>T</span>:<span class='ident'>Send</span><span class='op'>&gt;</span>(<span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw'>proc</span>():<span class='ident'>Send</span> <span class='op'>-&gt;</span> <span class='ident'>T</span>)
                               <span class='op'>-&gt;</span> <span class='ident'>Future</span><span class='op'>&lt;</span><span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span> {
         <span class='comment'>// currently, the on_exit proc provided by librustrt only works for unit</span>
@@ -1007,6 +1028,7 @@
 
     <span class='doccomment'>/// Execute a function in a newly-spawnedtask and block until the task</span>
     <span class='doccomment'>/// completes or fails. Equivalent to `.try_future(f).unwrap()`.</span>
+    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Error type may change.&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>try</span><span class='op'>&lt;</span><span class='ident'>T</span>:<span class='ident'>Send</span><span class='op'>&gt;</span>(<span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw'>proc</span>():<span class='ident'>Send</span> <span class='op'>-&gt;</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>try_future</span>(<span class='ident'>f</span>).<span class='ident'>unwrap</span>()
     }
@@ -1028,6 +1050,7 @@
 <span class='doccomment'>/// value of the function or an error if the task failed.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// This is equivalent to `TaskBuilder::new().try`.</span>
+<span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Error type may change.&quot;</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>try</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Send</span><span class='op'>&gt;</span>(<span class='ident'>f</span>: <span class='kw'>proc</span>(): <span class='ident'>Send</span> <span class='op'>-&gt;</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;&gt;</span> {
     <span class='ident'>TaskBuilder</span>::<span class='ident'>new</span>().<span class='ident'>try</span>(<span class='ident'>f</span>)
 }
@@ -1036,6 +1059,7 @@
 <span class='doccomment'>/// task&#39;s result.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// This is equivalent to `TaskBuilder::new().try_future`.</span>
+<span class='attribute'>#[<span class='ident'>experimental</span> <span class='op'>=</span> <span class='string'>&quot;Futures are experimental.&quot;</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>try_future</span><span class='op'>&lt;</span><span class='ident'>T</span>:<span class='ident'>Send</span><span class='op'>&gt;</span>(<span class='ident'>f</span>: <span class='kw'>proc</span>():<span class='ident'>Send</span> <span class='op'>-&gt;</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>Future</span><span class='op'>&lt;</span><span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span> {
     <span class='ident'>TaskBuilder</span>::<span class='ident'>new</span>().<span class='ident'>try_future</span>(<span class='ident'>f</span>)
 }
@@ -1044,6 +1068,7 @@
 <span class='comment'>/* Lifecycle functions */</span>
 
 <span class='doccomment'>/// Read the name of the current task.</span>
+<span class='attribute'>#[<span class='ident'>deprecated</span> <span class='op'>=</span> <span class='string'>&quot;Use `task::name()`.&quot;</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>with_task_name</span><span class='op'>&lt;</span><span class='ident'>U</span><span class='op'>&gt;</span>(<span class='ident'>blk</span>: <span class='op'>|</span><span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span><span class='op'>|</span> <span class='op'>-&gt;</span> <span class='ident'>U</span>) <span class='op'>-&gt;</span> <span class='ident'>U</span> {
     <span class='kw'>use</span> <span class='ident'>rt</span>::<span class='ident'>task</span>::<span class='ident'>Task</span>;
 
@@ -1054,7 +1079,20 @@
     }
 }
 
+<span class='doccomment'>/// Read the name of the current task.</span>
+<span class='attribute'>#[<span class='ident'>stable</span>]</span>
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>name</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
+    <span class='kw'>use</span> <span class='ident'>rt</span>::<span class='ident'>task</span>::<span class='ident'>Task</span>;
+
+    <span class='kw'>let</span> <span class='ident'>task</span> <span class='op'>=</span> <span class='ident'>Local</span>::<span class='ident'>borrow</span>(<span class='prelude-val'>None</span>::<span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>);
+    <span class='kw'>match</span> <span class='ident'>task</span>.<span class='ident'>name</span> {
+        <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>name</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>(<span class='ident'>name</span>.<span class='ident'>as_slice</span>().<span class='ident'>to_string</span>()),
+        <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>
+    }
+}
+
 <span class='doccomment'>/// Yield control to the task scheduler.</span>
+<span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Name will change.&quot;</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>deschedule</span>() {
     <span class='kw'>use</span> <span class='ident'>rt</span>::<span class='ident'>local</span>::<span class='ident'>Local</span>;
 
@@ -1065,6 +1103,7 @@
 
 <span class='doccomment'>/// True if the running task is currently failing (e.g. will return `true` inside a</span>
 <span class='doccomment'>/// destructor that is run while unwinding the stack after a call to `fail!()`).</span>
+<span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;May move to a different module.&quot;</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>failing</span>() <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>use</span> <span class='ident'>rt</span>::<span class='ident'>task</span>::<span class='ident'>Task</span>;
     <span class='ident'>Local</span>::<span class='ident'>borrow</span>(<span class='prelude-val'>None</span>::<span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>).<span class='ident'>unwinder</span>.<span class='ident'>unwinding</span>()
@@ -1073,10 +1112,9 @@
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>test</span> {
     <span class='kw'>use</span> <span class='ident'>any</span>::{<span class='ident'>Any</span>, <span class='ident'>AnyRefExt</span>};
-    <span class='kw'>use</span> <span class='ident'>owned</span>::<span class='ident'>AnyOwnExt</span>;
+    <span class='kw'>use</span> <span class='ident'>boxed</span>::<span class='ident'>BoxAny</span>;
     <span class='kw'>use</span> <span class='ident'>result</span>;
     <span class='kw'>use</span> <span class='ident'>result</span>::{<span class='prelude-val'>Ok</span>, <span class='prelude-val'>Err</span>};
-    <span class='kw'>use</span> <span class='ident'>str</span>::<span class='ident'>StrAllocating</span>;
     <span class='kw'>use</span> <span class='ident'>string</span>::<span class='ident'>String</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>ChanReader</span>, <span class='ident'>ChanWriter</span>};
     <span class='kw'>use</span> <span class='ident'>prelude</span>::<span class='op'>*</span>;
@@ -1087,38 +1125,30 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_unnamed_task</span>() {
-        <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
-            <span class='ident'>with_task_name</span>(<span class='op'>|</span><span class='ident'>name</span><span class='op'>|</span> {
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>name</span>.<span class='ident'>is_none</span>());
-            })
-        })
+        <span class='ident'>try</span>(<span class='kw'>proc</span>() {
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>name</span>().<span class='ident'>is_none</span>());
+        }).<span class='ident'>map_err</span>(<span class='op'>|</span>_<span class='op'>|</span> ()).<span class='ident'>unwrap</span>();
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_owned_named_task</span>() {
-        <span class='ident'>TaskBuilder</span>::<span class='ident'>new</span>().<span class='ident'>named</span>(<span class='string'>&quot;ada lovelace&quot;</span>.<span class='ident'>to_string</span>()).<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
-            <span class='ident'>with_task_name</span>(<span class='op'>|</span><span class='ident'>name</span><span class='op'>|</span> {
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>name</span>.<span class='ident'>unwrap</span>() <span class='op'>==</span> <span class='string'>&quot;ada lovelace&quot;</span>);
-            })
-        })
+        <span class='ident'>TaskBuilder</span>::<span class='ident'>new</span>().<span class='ident'>named</span>(<span class='string'>&quot;ada lovelace&quot;</span>.<span class='ident'>to_string</span>()).<span class='ident'>try</span>(<span class='kw'>proc</span>() {
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>name</span>().<span class='ident'>unwrap</span>() <span class='op'>==</span> <span class='string'>&quot;ada lovelace&quot;</span>.<span class='ident'>to_string</span>());
+        }).<span class='ident'>map_err</span>(<span class='op'>|</span>_<span class='op'>|</span> ()).<span class='ident'>unwrap</span>();
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_static_named_task</span>() {
-        <span class='ident'>TaskBuilder</span>::<span class='ident'>new</span>().<span class='ident'>named</span>(<span class='string'>&quot;ada lovelace&quot;</span>).<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
-            <span class='ident'>with_task_name</span>(<span class='op'>|</span><span class='ident'>name</span><span class='op'>|</span> {
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>name</span>.<span class='ident'>unwrap</span>() <span class='op'>==</span> <span class='string'>&quot;ada lovelace&quot;</span>);
-            })
-        })
+        <span class='ident'>TaskBuilder</span>::<span class='ident'>new</span>().<span class='ident'>named</span>(<span class='string'>&quot;ada lovelace&quot;</span>).<span class='ident'>try</span>(<span class='kw'>proc</span>() {
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>name</span>().<span class='ident'>unwrap</span>() <span class='op'>==</span> <span class='string'>&quot;ada lovelace&quot;</span>.<span class='ident'>to_string</span>());
+        }).<span class='ident'>map_err</span>(<span class='op'>|</span>_<span class='op'>|</span> ()).<span class='ident'>unwrap</span>();
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_send_named_task</span>() {
-        <span class='ident'>TaskBuilder</span>::<span class='ident'>new</span>().<span class='ident'>named</span>(<span class='string'>&quot;ada lovelace&quot;</span>.<span class='ident'>into_maybe_owned</span>()).<span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
-            <span class='ident'>with_task_name</span>(<span class='op'>|</span><span class='ident'>name</span><span class='op'>|</span> {
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>name</span>.<span class='ident'>unwrap</span>() <span class='op'>==</span> <span class='string'>&quot;ada lovelace&quot;</span>);
-            })
-        })
+        <span class='ident'>TaskBuilder</span>::<span class='ident'>new</span>().<span class='ident'>named</span>(<span class='string'>&quot;ada lovelace&quot;</span>.<span class='ident'>into_maybe_owned</span>()).<span class='ident'>try</span>(<span class='kw'>proc</span>() {
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>name</span>().<span class='ident'>unwrap</span>() <span class='op'>==</span> <span class='string'>&quot;ada lovelace&quot;</span>.<span class='ident'>to_string</span>());
+        }).<span class='ident'>map_err</span>(<span class='op'>|</span>_<span class='op'>|</span> ()).<span class='ident'>unwrap</span>();
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -1277,7 +1307,7 @@
             <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
                 <span class='kw'>type</span> <span class='ident'>T</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>;
                 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>e</span>.<span class='ident'>is</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>());
-                <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>e</span>.<span class='ident'>move</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>().<span class='ident'>unwrap</span>(), <span class='string'>&quot;static string&quot;</span>);
+                <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>e</span>.<span class='ident'>downcast</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>().<span class='ident'>unwrap</span>(), <span class='string'>&quot;static string&quot;</span>);
             }
             <span class='prelude-val'>Ok</span>(()) <span class='op'>=&gt;</span> <span class='macro'>fail</span><span class='macro'>!</span>()
         }
@@ -1291,7 +1321,7 @@
             <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
                 <span class='kw'>type</span> <span class='ident'>T</span> <span class='op'>=</span> <span class='ident'>String</span>;
                 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>e</span>.<span class='ident'>is</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>());
-                <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>e</span>.<span class='ident'>move</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>().<span class='ident'>unwrap</span>(), <span class='string'>&quot;owned string&quot;</span>.<span class='ident'>to_string</span>());
+                <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>e</span>.<span class='ident'>downcast</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>().<span class='ident'>unwrap</span>(), <span class='string'>&quot;owned string&quot;</span>.<span class='ident'>to_string</span>());
             }
             <span class='prelude-val'>Ok</span>(()) <span class='op'>=&gt;</span> <span class='macro'>fail</span><span class='macro'>!</span>()
         }
@@ -1305,9 +1335,9 @@
             <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
                 <span class='kw'>type</span> <span class='ident'>T</span> <span class='op'>=</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>;
                 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>e</span>.<span class='ident'>is</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>());
-                <span class='kw'>let</span> <span class='ident'>any</span> <span class='op'>=</span> <span class='ident'>e</span>.<span class='ident'>move</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>().<span class='ident'>unwrap</span>();
+                <span class='kw'>let</span> <span class='ident'>any</span> <span class='op'>=</span> <span class='ident'>e</span>.<span class='ident'>downcast</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>().<span class='ident'>unwrap</span>();
                 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>any</span>.<span class='ident'>is</span>::<span class='op'>&lt;</span><span class='ident'>u16</span><span class='op'>&gt;</span>());
-                <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>any</span>.<span class='ident'>move</span>::<span class='op'>&lt;</span><span class='ident'>u16</span><span class='op'>&gt;</span>().<span class='ident'>unwrap</span>(), <span class='number'>413u16</span>);
+                <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>any</span>.<span class='ident'>downcast</span>::<span class='op'>&lt;</span><span class='ident'>u16</span><span class='op'>&gt;</span>().<span class='ident'>unwrap</span>(), <span class='number'>413u16</span>);
             }
             <span class='prelude-val'>Ok</span>(()) <span class='op'>=&gt;</span> <span class='macro'>fail</span><span class='macro'>!</span>()
         }

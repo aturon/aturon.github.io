@@ -1099,7 +1099,6 @@
 <span id='1059'>1059</span>
 <span id='1060'>1060</span>
 <span id='1061'>1061</span>
-<span id='1062'>1062</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2014 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -1116,7 +1115,6 @@
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fmt</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>iter</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>num</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>str</span>;
 
 <span class='doccomment'>/// Static data containing Unicode ranges for general categories and scripts.</span>
 <span class='kw'>use</span> <span class='ident'>unicode</span>::<span class='ident'>regex</span>::{<span class='ident'>UNICODE_CLASSES</span>, <span class='ident'>PERLD</span>, <span class='ident'>PERLS</span>, <span class='ident'>PERLW</span>};
@@ -1339,7 +1337,7 @@
                     <span class='comment'>// left paren, let&#39;s grab the old flags and see if we</span>
                     <span class='comment'>// need a capture.</span>
                     <span class='kw'>let</span> (<span class='ident'>cap</span>, <span class='ident'>cap_name</span>, <span class='ident'>oldflags</span>) <span class='op'>=</span> {
-                        <span class='kw'>let</span> <span class='ident'>paren</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>stack</span>.<span class='ident'>get</span>(<span class='ident'>altfrom</span><span class='op'>-</span><span class='number'>1</span>);
+                        <span class='kw'>let</span> <span class='ident'>paren</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>stack</span>[<span class='ident'>altfrom</span><span class='op'>-</span><span class='number'>1</span>];
                         (<span class='ident'>paren</span>.<span class='ident'>capture</span>(), <span class='ident'>paren</span>.<span class='ident'>capture_name</span>(), <span class='ident'>paren</span>.<span class='ident'>flags</span>())
                     };
                     <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>alternate</span>(<span class='ident'>altfrom</span>));
@@ -1568,7 +1566,7 @@
                 <span class='prelude-val'>Some</span>(<span class='ident'>i</span>) <span class='op'>=&gt;</span> <span class='ident'>i</span>,
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>None</span>,
             };
-        <span class='kw'>if</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>chars</span>.<span class='ident'>get</span>(<span class='ident'>closer</span><span class='op'>-</span><span class='number'>1</span>) <span class='op'>!=</span> <span class='string'>&#39;:&#39;</span> {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>chars</span>[<span class='ident'>closer</span><span class='op'>-</span><span class='number'>1</span>] <span class='op'>!=</span> <span class='string'>&#39;:&#39;</span> {
             <span class='kw'>return</span> <span class='prelude-val'>None</span>
         }
         <span class='kw'>if</span> <span class='ident'>closer</span> <span class='op'>-</span> <span class='self'>self</span>.<span class='ident'>chari</span> <span class='op'>&lt;=</span> <span class='number'>3</span> {
@@ -1613,7 +1611,7 @@
             };
         <span class='self'>self</span>.<span class='ident'>chari</span> <span class='op'>=</span> <span class='ident'>closer</span>;
         <span class='kw'>let</span> <span class='ident'>greed</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>get_next_greedy</span>());
-        <span class='kw'>let</span> <span class='ident'>inner</span> <span class='op'>=</span> <span class='ident'>str</span>::<span class='ident'>from_chars</span>(
+        <span class='kw'>let</span> <span class='ident'>inner</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_chars</span>(
             <span class='self'>self</span>.<span class='ident'>chars</span>.<span class='ident'>as_slice</span>().<span class='ident'>slice</span>(<span class='ident'>start</span> <span class='op'>+</span> <span class='number'>1</span>, <span class='ident'>closer</span>));
 
         <span class='comment'>// Parse the min and max values from the regex.</span>
@@ -1623,7 +1621,7 @@
             <span class='ident'>max</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>min</span>);
         } <span class='kw'>else</span> {
             <span class='kw'>let</span> <span class='ident'>pieces</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>inner</span>.<span class='ident'>as_slice</span>().<span class='ident'>splitn</span>(<span class='string'>&#39;,&#39;</span>, <span class='number'>1</span>).<span class='ident'>collect</span>();
-            <span class='kw'>let</span> (<span class='ident'>smin</span>, <span class='ident'>smax</span>) <span class='op'>=</span> (<span class='op'>*</span><span class='ident'>pieces</span>.<span class='ident'>get</span>(<span class='number'>0</span>), <span class='op'>*</span><span class='ident'>pieces</span>.<span class='ident'>get</span>(<span class='number'>1</span>));
+            <span class='kw'>let</span> (<span class='ident'>smin</span>, <span class='ident'>smax</span>) <span class='op'>=</span> (<span class='ident'>pieces</span>[<span class='number'>0</span>], <span class='ident'>pieces</span>[<span class='number'>1</span>]);
             <span class='kw'>if</span> <span class='ident'>smin</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
                 <span class='kw'>return</span> <span class='self'>self</span>.<span class='ident'>err</span>(<span class='string'>&quot;Max repetitions cannot be specified \
                                     without min repetitions.&quot;</span>)
@@ -2035,7 +2033,7 @@
         <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>chari</span> <span class='op'>+</span> <span class='ident'>offset</span> <span class='op'>&gt;=</span> <span class='self'>self</span>.<span class='ident'>chars</span>.<span class='ident'>len</span>() {
             <span class='kw'>return</span> <span class='prelude-val'>None</span>
         }
-        <span class='prelude-val'>Some</span>(<span class='op'>*</span><span class='self'>self</span>.<span class='ident'>chars</span>.<span class='ident'>get</span>(<span class='self'>self</span>.<span class='ident'>chari</span> <span class='op'>+</span> <span class='ident'>offset</span>))
+        <span class='prelude-val'>Some</span>(<span class='self'>self</span>.<span class='ident'>chars</span>[<span class='self'>self</span>.<span class='ident'>chari</span> <span class='op'>+</span> <span class='ident'>offset</span>])
     }
 
     <span class='kw'>fn</span> <span class='ident'>peek_is</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>offset</span>: <span class='ident'>uint</span>, <span class='ident'>is</span>: <span class='ident'>char</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
@@ -2043,11 +2041,11 @@
     }
 
     <span class='kw'>fn</span> <span class='ident'>cur</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>char</span> {
-        <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>chars</span>.<span class='ident'>get</span>(<span class='self'>self</span>.<span class='ident'>chari</span>)
+        <span class='self'>self</span>.<span class='ident'>chars</span>[<span class='self'>self</span>.<span class='ident'>chari</span>]
     }
 
     <span class='kw'>fn</span> <span class='ident'>slice</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>start</span>: <span class='ident'>uint</span>, <span class='ident'>end</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
-        <span class='ident'>str</span>::<span class='ident'>from_chars</span>(<span class='self'>self</span>.<span class='ident'>chars</span>.<span class='ident'>as_slice</span>().<span class='ident'>slice</span>(<span class='ident'>start</span>, <span class='ident'>end</span>)).<span class='ident'>to_string</span>()
+        <span class='ident'>String</span>::<span class='ident'>from_chars</span>(<span class='self'>self</span>.<span class='ident'>chars</span>.<span class='ident'>as_slice</span>().<span class='ident'>slice</span>(<span class='ident'>start</span>, <span class='ident'>end</span>))
     }
 }
 
@@ -2102,7 +2100,7 @@
     <span class='kw'>match</span> (<span class='ident'>x</span>, <span class='ident'>y</span>) {
         (<span class='ident'>Cat</span>(<span class='kw-2'>mut</span> <span class='ident'>xs</span>), <span class='ident'>Cat</span>(<span class='ident'>ys</span>)) <span class='op'>=&gt;</span> { <span class='ident'>xs</span>.<span class='ident'>push_all_move</span>(<span class='ident'>ys</span>); <span class='ident'>Cat</span>(<span class='ident'>xs</span>) }
         (<span class='ident'>Cat</span>(<span class='kw-2'>mut</span> <span class='ident'>xs</span>), <span class='ident'>ast</span>) <span class='op'>=&gt;</span> { <span class='ident'>xs</span>.<span class='ident'>push</span>(<span class='ident'>ast</span>); <span class='ident'>Cat</span>(<span class='ident'>xs</span>) }
-        (<span class='ident'>ast</span>, <span class='ident'>Cat</span>(<span class='kw-2'>mut</span> <span class='ident'>xs</span>)) <span class='op'>=&gt;</span> { <span class='ident'>xs</span>.<span class='ident'>unshift</span>(<span class='ident'>ast</span>); <span class='ident'>Cat</span>(<span class='ident'>xs</span>) }
+        (<span class='ident'>ast</span>, <span class='ident'>Cat</span>(<span class='kw-2'>mut</span> <span class='ident'>xs</span>)) <span class='op'>=&gt;</span> { <span class='ident'>xs</span>.<span class='ident'>insert</span>(<span class='number'>0</span>, <span class='ident'>ast</span>); <span class='ident'>Cat</span>(<span class='ident'>xs</span>) }
         (<span class='ident'>ast1</span>, <span class='ident'>ast2</span>) <span class='op'>=&gt;</span> <span class='ident'>Cat</span>(<span class='macro'>vec</span><span class='macro'>!</span>(<span class='ident'>ast1</span>, <span class='ident'>ast2</span>)),
     }
 }

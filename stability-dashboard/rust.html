@@ -37,9 +37,9 @@
 
     <div id="versioninfo">
   <img src="http://www.rust-lang.org/logos/rust-logo-32x32-blk.png" width="32" height="32" alt><br>
-  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.11.0</span><br>
-  <a href="http://github.com/rust-lang/rust/commit/305cf1f1098dc87e346003e6bf7e7cca5705a135"
-    class="hash white-sticker">305cf1f1</a>
+  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.12.0-pre</span><br>
+  <a href="http://github.com/rust-lang/rust/commit/2c50add48273cf1ef44b47eceb5d9446fc81ce41"
+    class="hash white-sticker"></a>
 </div>
 
 
@@ -3965,7 +3965,7 @@ For example:</p>
 fn is_sorted(list: &amp;List) -&gt; bool {
     match *list {
         Nil | Cons(_, box Nil) =&gt; true,
-        Cons(x, ref r @ box Cons(y, _)) =&gt; (x &lt;= y) &amp;&amp; is_sorted(*r)
+        Cons(x, ref r @ box Cons(y, _)) =&gt; (x &lt;= y) &amp;&amp; is_sorted(&amp;**r)
     }
 }
 
@@ -3979,7 +3979,7 @@ fn main() {
 <span class='kw'>fn</span> <span class='ident'>is_sorted</span>(<span class='ident'>list</span>: <span class='kw-2'>&amp;</span><span class='ident'>List</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>match</span> <span class='op'>*</span><span class='ident'>list</span> {
         <span class='ident'>Nil</span> <span class='op'>|</span> <span class='ident'>Cons</span>(_, <span class='kw'>box</span> <span class='ident'>Nil</span>) <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
-        <span class='ident'>Cons</span>(<span class='ident'>x</span>, <span class='kw-2'>ref</span> <span class='ident'>r</span> <span class='kw-2'>@</span> <span class='kw'>box</span> <span class='ident'>Cons</span>(<span class='ident'>y</span>, _)) <span class='op'>=&gt;</span> (<span class='ident'>x</span> <span class='op'>&lt;=</span> <span class='ident'>y</span>) <span class='op'>&amp;&amp;</span> <span class='ident'>is_sorted</span>(<span class='op'>*</span><span class='ident'>r</span>)
+        <span class='ident'>Cons</span>(<span class='ident'>x</span>, <span class='kw-2'>ref</span> <span class='ident'>r</span> <span class='kw-2'>@</span> <span class='kw'>box</span> <span class='ident'>Cons</span>(<span class='ident'>y</span>, _)) <span class='op'>=&gt;</span> (<span class='ident'>x</span> <span class='op'>&lt;=</span> <span class='ident'>y</span>) <span class='op'>&amp;&amp;</span> <span class='ident'>is_sorted</span>(<span class='kw-2'>&amp;</span><span class='op'>*</span><span class='op'>*</span><span class='ident'>r</span>)
     }
 }
 
@@ -4688,17 +4688,17 @@ allocated within the stack&#39;s memory. The value is a part of the stack frame.
 and <code>fn f(mut x: Box&lt;int&gt;, y: Box&lt;int&gt;)</code> declare one mutable variable <code>x</code> and
 one immutable variable <code>y</code>).</p>
 
-<p>Methods that take either <code>self</code> or <code>~self</code> can optionally place them in a
+<p>Methods that take either <code>self</code> or <code>Box&lt;Self&gt;</code> can optionally place them in a
 mutable slot by prefixing them with <code>mut</code> (similar to regular arguments):</p>
 <span id='rust-example-raw-90' class='rusttest'>fn main() {
     trait Changer {
         fn change(mut self) -&gt; Self;
-        fn modify(mut ~self) -&gt; Box&lt;Self&gt;;
+        fn modify(mut self: Box&lt;Self&gt;) -&gt; Box&lt;Self&gt;;
     }
 }</span><pre id='rust-example-rendered-90' class='rust '>
 <span class='kw'>trait</span> <span class='ident'>Changer</span> {
     <span class='kw'>fn</span> <span class='ident'>change</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Self</span>;
-    <span class='kw'>fn</span> <span class='ident'>modify</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Self</span><span class='op'>&gt;</span>;
+    <span class='kw'>fn</span> <span class='ident'>modify</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Self</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Self</span><span class='op'>&gt;</span>;
 }
 </pre>
 

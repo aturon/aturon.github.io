@@ -39,7 +39,7 @@
     </nav>
 
     <section id='main' class="content struct">
-<h1 class='fqn'>Struct <a href='../index.html'>core</a>::<a href='index.html'>atomics</a>::<a class='struct' href=''>AtomicBool</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-31486' href='../../src/core/Users/aturon/moz/working/stability-dashboard/src/libcore/atomics.rs.html#18-21'>[src]</a></span></h1>
+<h1 class='fqn'>Struct <a href='../index.html'>core</a>::<a href='index.html'>atomics</a>::<a class='struct' href=''>AtomicBool</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-33475' href='../../src/core/Users/aturon/moz/working/stability-dashboard/src/libcore/atomics.rs.html#18-21'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct AtomicBool {
     // some fields omitted
 }</pre><div class='docblock'><p>An atomic boolean type.</p>
@@ -78,7 +78,7 @@ fn main() {
 
 fn with_lock(spinlock: &amp;Arc&lt;AtomicBool&gt;, f: || -&gt; ()) {
     // CAS loop until we are able to replace `false` with `true`
-    while spinlock.compare_and_swap(false, true, SeqCst) == false {
+    while spinlock.compare_and_swap(false, true, SeqCst) != false {
         // Since tasks may not be preemptive (if they are green threads)
         // yield to the scheduler to let the other task run. Low level
         // concurrent code needs to take into account Rust&#39;s two threading
@@ -111,7 +111,7 @@ fn with_lock(spinlock: &amp;Arc&lt;AtomicBool&gt;, f: || -&gt; ()) {
 
 <span class='kw'>fn</span> <span class='ident'>with_lock</span>(<span class='ident'>spinlock</span>: <span class='kw-2'>&amp;</span><span class='ident'>Arc</span><span class='op'>&lt;</span><span class='ident'>AtomicBool</span><span class='op'>&gt;</span>, <span class='ident'>f</span>: <span class='op'>||</span> <span class='op'>-&gt;</span> ()) {
     <span class='comment'>// CAS loop until we are able to replace `false` with `true`</span>
-    <span class='kw'>while</span> <span class='ident'>spinlock</span>.<span class='ident'>compare_and_swap</span>(<span class='boolval'>false</span>, <span class='boolval'>true</span>, <span class='ident'>SeqCst</span>) <span class='op'>==</span> <span class='boolval'>false</span> {
+    <span class='kw'>while</span> <span class='ident'>spinlock</span>.<span class='ident'>compare_and_swap</span>(<span class='boolval'>false</span>, <span class='boolval'>true</span>, <span class='ident'>SeqCst</span>) <span class='op'>!=</span> <span class='boolval'>false</span> {
         <span class='comment'>// Since tasks may not be preemptive (if they are green threads)</span>
         <span class='comment'>// yield to the scheduler to let the other task run. Low level</span>
         <span class='comment'>// concurrent code needs to take into account Rust&#39;s two threading</span>

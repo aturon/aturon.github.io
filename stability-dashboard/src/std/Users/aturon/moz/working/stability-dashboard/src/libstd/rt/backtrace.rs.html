@@ -1061,7 +1061,6 @@
 <span id='1021'>1021</span>
 <span id='1022'>1022</span>
 <span id='1023'>1023</span>
-<span id='1024'>1024</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2014 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -1086,7 +1085,7 @@
 <span class='kw'>use</span> <span class='ident'>result</span>::{<span class='prelude-val'>Ok</span>, <span class='prelude-val'>Err</span>};
 <span class='kw'>use</span> <span class='ident'>str</span>::<span class='ident'>StrSlice</span>;
 <span class='kw'>use</span> <span class='ident'>sync</span>::<span class='ident'>atomics</span>;
-<span class='kw'>use</span> <span class='ident'>unicode</span>::<span class='ident'>UnicodeChar</span>;
+<span class='kw'>use</span> <span class='ident'>unicode</span>::<span class='ident'>char</span>::<span class='ident'>UnicodeChar</span>;
 
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>imp</span>::<span class='ident'>write</span>;
 
@@ -2057,12 +2056,11 @@
 <span class='kw'>mod</span> <span class='ident'>test</span> {
     <span class='kw'>use</span> <span class='ident'>prelude</span>::<span class='op'>*</span>;
     <span class='kw'>use</span> <span class='ident'>io</span>::<span class='ident'>MemWriter</span>;
-    <span class='kw'>use</span> <span class='ident'>str</span>;
 
     <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>t</span>( (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>a</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>b</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> ({
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='ident'>MemWriter</span>::<span class='ident'>new</span>();
         <span class='ident'>super</span>::<span class='ident'>demangle</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>m</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>a</span>).<span class='ident'>unwrap</span>();
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>str</span>::<span class='ident'>from_utf8</span>(<span class='ident'>m</span>.<span class='ident'>unwrap</span>().<span class='ident'>as_slice</span>()).<span class='ident'>unwrap</span>().<span class='ident'>to_owned</span>(), <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>b</span>.<span class='ident'>to_owned</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>String</span>::<span class='ident'>from_utf8</span>(<span class='ident'>m</span>.<span class='ident'>unwrap</span>()).<span class='ident'>unwrap</span>(), <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>b</span>.<span class='ident'>to_string</span>());
     }) )
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>

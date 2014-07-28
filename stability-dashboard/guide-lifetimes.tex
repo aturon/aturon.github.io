@@ -47,7 +47,7 @@
 \begin{document}
 \maketitle
 
-0.11.0 (305cf1f1098dc87e346003e6bf7e7cca5705a135 2014-07-10 11:19:20 -0700)
+0.12.0-pre (2c50add48 2014-07-27 23:03:52 -0700)
 
 Copyright © 2011-2014 The Rust Project Developers. Licensed under the
 \href{http://www.apache.org/licenses/LICENSE-2.0}{Apache License,
@@ -132,7 +132,7 @@ Now we can call \texttt{compute\_distance()}:
 # let on_the_stack :     Point  =     Point{x: 3.0, y: 4.0};
 # let on_the_heap  : Box<Point> = box Point{x: 7.0, y: 9.0};
 # fn compute_distance(p1: &Point, p2: &Point) -> f64 { 0.0 }
-compute_distance(&on_the_stack, on_the_heap);
+compute_distance(&on_the_stack, &*on_the_heap);
 \end{verbatim}
 
 Here, the \texttt{\&} operator takes the address of the variable
@@ -142,10 +142,9 @@ address to get a value. We also call this \emph{borrowing} the local
 variable \texttt{on\_the\_stack}, because we have created an alias: that
 is, another name for the same data.
 
-In the case of \texttt{on\_the\_heap}, however, no explicit action is
-necessary. The compiler will automatically convert a box point to a
-reference like \&point. This is another form of borrowing; in this case,
-the contents of the owned box are being lent out.
+Likewise, in the case of \texttt{on\_the\_heap}, the \texttt{\&}
+operator is used in conjunction with the \texttt{*} operator to take a
+reference to the contents of the box.
 
 Whenever a caller lends data to a callee, there are some limitations on
 what the caller can do with the original. For example, if the contents

@@ -21,9 +21,9 @@
 
     <div id="versioninfo">
   <img src="http://www.rust-lang.org/logos/rust-logo-32x32-blk.png" width="32" height="32" alt><br>
-  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.11.0</span><br>
-  <a href="http://github.com/rust-lang/rust/commit/305cf1f1098dc87e346003e6bf7e7cca5705a135"
-    class="hash white-sticker">305cf1f1</a>
+  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.12.0-pre</span><br>
+  <a href="http://github.com/rust-lang/rust/commit/2c50add48273cf1ef44b47eceb5d9446fc81ce41"
+    class="hash white-sticker"></a>
 </div>
 
 
@@ -34,7 +34,7 @@
 <li><a href="#stack-management">3 Stack management</a><ul></ul></li>
 <li><a href="#destructors">4 Destructors</a><ul></ul></li>
 <li><a href="#callbacks-from-c-code-to-rust-functions">5 Callbacks from C code to Rust functions</a><ul>
-<li><a href="#targetting-callbacks-to-rust-objects">5.1 Targetting callbacks to Rust objects</a><ul></ul></li>
+<li><a href="#targeting-callbacks-to-rust-objects">5.1 Targeting callbacks to Rust objects</a><ul></ul></li>
 <li><a href="#asynchronous-callbacks">5.2 Asynchronous callbacks</a><ul></ul></li></ul></li>
 <li><a href="#linking">6 Linking</a><ul>
 <li><a href="#the-link_args-attribute">6.1 The <code>link_args</code> attribute</a><ul></ul></li></ul></li>
@@ -276,7 +276,7 @@ the same stack as the rust stack. This means that there is no extra
 stack-switching mechanism in place because it is assumed that the large stack
 for the rust task is plenty for the C function to have.</p>
 
-<p>A planned future improvement (net yet implemented at the time of this writing)
+<p>A planned future improvement (not yet implemented at the time of this writing)
 is to have a guard page at the end of every rust stack. No rust function will
 hit this guard page (due to Rust&#39;s usage of LLVM&#39;s <code>__morestack</code>). The intention
 for this unmapped page is to prevent infinite recursion in C from overflowing
@@ -304,7 +304,7 @@ It is possible to pass functions defined in Rust to an external library.
 The requirement for this is that the callback function is marked as <code>extern</code>
 with the correct calling convention to make it callable from C code.</p>
 
-<p>The callback function that can then be sent to through a registration call
+<p>The callback function can then be sent through a registration call
 to the C library and afterwards be invoked from there.</p>
 
 <p>A basic example is:</p>
@@ -358,13 +358,13 @@ void trigger_callback() {
   cb(7); // Will call callback(7) in Rust
 }</code></pre>
 
-<p>In this example will Rust&#39;s <code>main()</code> will call <code>do_callback()</code> in C,
-which would call back to <code>callback()</code> in Rust.</p>
+<p>In this example Rust&#39;s <code>main()</code> will call <code>do_callback()</code> in C,
+which would, in turn, call back to <code>callback()</code> in Rust.</p>
 
-<h2 id="targetting-callbacks-to-rust-objects" class='section-header'><a
-                           href="#targetting-callbacks-to-rust-objects">5.1 Targetting callbacks to Rust objects</a></h2>
+<h2 id="targeting-callbacks-to-rust-objects" class='section-header'><a
+                           href="#targeting-callbacks-to-rust-objects">5.1 Targeting callbacks to Rust objects</a></h2>
 <p>The former example showed how a global function can be called from C code.
-However it is often desired that the callback is targetted to a special
+However it is often desired that the callback is targeted to a special
 Rust object. This could be the object that represents the wrapper for the
 respective C object.</p>
 
@@ -474,7 +474,7 @@ it is also absolutely necessary that no more callbacks are performed by the
 C library after the respective Rust object gets destroyed.
 This can be achieved by unregistering the callback in the object&#39;s
 destructor and designing the library in a way that guarantees that no
-callback will be performed after unregistration.</p>
+callback will be performed after deregistration.</p>
 
 <h1 id="linking" class='section-header'><a
                            href="#linking">6 Linking</a></h1>

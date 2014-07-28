@@ -888,7 +888,7 @@
 
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
 
-<span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>ty</span>::<span class='ident'>Unsafe</span>;
+<span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>cell</span>::<span class='ident'>UnsafeCell</span>;
 <span class='kw'>use</span> <span class='ident'>rustrt</span>::<span class='ident'>local</span>::<span class='ident'>Local</span>;
 <span class='kw'>use</span> <span class='ident'>rustrt</span>::<span class='ident'>task</span>::<span class='ident'>Task</span>;
 
@@ -1041,8 +1041,8 @@
 <span class='doccomment'>/// ```</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Mutex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='ident'>lock</span>: <span class='ident'>raw</span>::<span class='ident'>Mutex</span>,
-    <span class='ident'>failed</span>: <span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='ident'>bool</span><span class='op'>&gt;</span>,
-    <span class='ident'>data</span>: <span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>,
+    <span class='ident'>failed</span>: <span class='ident'>UnsafeCell</span><span class='op'>&lt;</span><span class='ident'>bool</span><span class='op'>&gt;</span>,
+    <span class='ident'>data</span>: <span class='ident'>UnsafeCell</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>,
 }
 
 <span class='doccomment'>/// An guard which is created by locking a mutex. Through this guard the</span>
@@ -1070,8 +1070,8 @@
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new_with_condvars</span>(<span class='ident'>user_data</span>: <span class='ident'>T</span>, <span class='ident'>num_condvars</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>Mutex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='ident'>Mutex</span> {
             <span class='ident'>lock</span>: <span class='ident'>raw</span>::<span class='ident'>Mutex</span>::<span class='ident'>new_with_condvars</span>(<span class='ident'>num_condvars</span>),
-            <span class='ident'>failed</span>: <span class='ident'>Unsafe</span>::<span class='ident'>new</span>(<span class='boolval'>false</span>),
-            <span class='ident'>data</span>: <span class='ident'>Unsafe</span>::<span class='ident'>new</span>(<span class='ident'>user_data</span>),
+            <span class='ident'>failed</span>: <span class='ident'>UnsafeCell</span>::<span class='ident'>new</span>(<span class='boolval'>false</span>),
+            <span class='ident'>data</span>: <span class='ident'>UnsafeCell</span>::<span class='ident'>new</span>(<span class='ident'>user_data</span>),
         }
     }
 
@@ -1141,8 +1141,8 @@
 <span class='doccomment'>/// ```</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>RWLock</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='ident'>lock</span>: <span class='ident'>raw</span>::<span class='ident'>RWLock</span>,
-    <span class='ident'>failed</span>: <span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='ident'>bool</span><span class='op'>&gt;</span>,
-    <span class='ident'>data</span>: <span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>,
+    <span class='ident'>failed</span>: <span class='ident'>UnsafeCell</span><span class='op'>&lt;</span><span class='ident'>bool</span><span class='op'>&gt;</span>,
+    <span class='ident'>data</span>: <span class='ident'>UnsafeCell</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>,
 }
 
 <span class='doccomment'>/// A guard which is created by locking an rwlock in write mode. Through this</span>
@@ -1176,8 +1176,8 @@
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new_with_condvars</span>(<span class='ident'>user_data</span>: <span class='ident'>T</span>, <span class='ident'>num_condvars</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>RWLock</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='ident'>RWLock</span> {
             <span class='ident'>lock</span>: <span class='ident'>raw</span>::<span class='ident'>RWLock</span>::<span class='ident'>new_with_condvars</span>(<span class='ident'>num_condvars</span>),
-            <span class='ident'>failed</span>: <span class='ident'>Unsafe</span>::<span class='ident'>new</span>(<span class='boolval'>false</span>),
-            <span class='ident'>data</span>: <span class='ident'>Unsafe</span>::<span class='ident'>new</span>(<span class='ident'>user_data</span>),
+            <span class='ident'>failed</span>: <span class='ident'>UnsafeCell</span>::<span class='ident'>new</span>(<span class='boolval'>false</span>),
+            <span class='ident'>data</span>: <span class='ident'>UnsafeCell</span>::<span class='ident'>new</span>(<span class='ident'>user_data</span>),
         }
     }
 

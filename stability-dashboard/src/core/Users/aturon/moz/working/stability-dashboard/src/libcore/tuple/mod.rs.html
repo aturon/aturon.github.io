@@ -344,6 +344,23 @@
 <span id='304'>304</span>
 <span id='305'>305</span>
 <span id='306'>306</span>
+<span id='307'>307</span>
+<span id='308'>308</span>
+<span id='309'>309</span>
+<span id='310'>310</span>
+<span id='311'>311</span>
+<span id='312'>312</span>
+<span id='313'>313</span>
+<span id='314'>314</span>
+<span id='315'>315</span>
+<span id='316'>316</span>
+<span id='317'>317</span>
+<span id='318'>318</span>
+<span id='319'>319</span>
+<span id='320'>320</span>
+<span id='321'>321</span>
+<span id='322'>322</span>
+<span id='323'>323</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2012 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -407,7 +424,10 @@
 <span class='doccomment'>//! ```</span>
 
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>doc</span>(<span class='ident'>primitive</span> <span class='op'>=</span> <span class='string'>&quot;tuple&quot;</span>)]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>stable</span>]</span>
 
+<span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;this is just a documentation module and should not be part \
+              of the public api&quot;</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>unit</span>;
 
 <span class='kw'>use</span> <span class='ident'>clone</span>::<span class='ident'>Clone</span>;
@@ -426,41 +446,51 @@
     )<span class='op'>+</span>) <span class='op'>=&gt;</span> {
         $(
             <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>missing_doc</span>)]</span>
+            <span class='attribute'>#[<span class='ident'>stable</span>]</span>
             <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>Tuple</span><span class='op'>&lt;</span>$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>),<span class='op'>+</span><span class='op'>&gt;</span> {
-                $(<span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>valN</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>;)<span class='op'>+</span>
-                $(<span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>refN</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>;)<span class='op'>+</span>
-                $(<span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mutN</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>;)<span class='op'>+</span>
+                $(
+                    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;may rename pending accessor naming conventions&quot;</span>]</span>
+                    <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>valN</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>;
+                    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;may rename pending accessor naming conventions&quot;</span>]</span>
+                    <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>refN</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>;
+                    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;may rename pending accessor naming conventions&quot;</span>]</span>
+                    <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mutN</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>;
+                 )<span class='op'>+</span>
             }
 
             <span class='kw'>impl</span><span class='op'>&lt;</span>$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>),<span class='op'>+</span><span class='op'>&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>Tuple</span><span class='op'>&lt;</span>$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>),<span class='op'>+</span><span class='op'>&gt;</span> <span class='kw'>for</span> ($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>,)<span class='op'>+</span>) {
                 $(
                     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
                     <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>unused_variable</span>)]</span>
+                    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;may rename pending accessor naming conventions&quot;</span>]</span>
                     <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>valN</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span> {
                         <span class='kw'>let</span> ($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>x</span>,)<span class='op'>+</span>) <span class='op'>=</span> <span class='self'>self</span>; <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ret</span>
                     }
 
                     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
                     <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>unused_variable</span>)]</span>
+                    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;may rename pending accessor naming conventions&quot;</span>]</span>
                     <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>refN</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span> {
                         <span class='kw'>let</span> ($(<span class='kw-2'>ref</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>x</span>,)<span class='op'>+</span>) <span class='op'>=</span> <span class='op'>*</span><span class='self'>self</span>; <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ret</span>
                     }
 
                     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
                     <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>unused_variable</span>)]</span>
+                    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;may rename pending accessor naming conventions&quot;</span>]</span>
                     <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mutN</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span> {
                         <span class='kw'>let</span> ($(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>x</span>,)<span class='op'>+</span>) <span class='op'>=</span> <span class='op'>*</span><span class='self'>self</span>; <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ret</span>
                     }
                 )<span class='op'>+</span>
             }
 
-            <span class='attribute'>#[<span class='ident'>unstable</span>]</span>
+            <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;waiting for Clone to stabilize&quot;</span>]</span>
             <span class='kw'>impl</span><span class='op'>&lt;</span>$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>:<span class='ident'>Clone</span>),<span class='op'>+</span><span class='op'>&gt;</span> <span class='ident'>Clone</span> <span class='kw'>for</span> ($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>,)<span class='op'>+</span>) {
                 <span class='kw'>fn</span> <span class='ident'>clone</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> ($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>,)<span class='op'>+</span>) {
                     ($(<span class='self'>self</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>refN</span>().<span class='ident'>clone</span>(),)<span class='op'>+</span>)
                 }
             }
 
+            <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;waiting for PartialEq to stabilize&quot;</span>]</span>
             <span class='kw'>impl</span><span class='op'>&lt;</span>$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>:<span class='ident'>PartialEq</span>),<span class='op'>+</span><span class='op'>&gt;</span> <span class='ident'>PartialEq</span> <span class='kw'>for</span> ($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>,)<span class='op'>+</span>) {
                 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
                 <span class='kw'>fn</span> <span class='ident'>eq</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span>($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>,)<span class='op'>+</span>)) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
@@ -472,8 +502,10 @@
                 }
             }
 
+            <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;waiting for Eq to stabilize&quot;</span>]</span>
             <span class='kw'>impl</span><span class='op'>&lt;</span>$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>:<span class='ident'>Eq</span>),<span class='op'>+</span><span class='op'>&gt;</span> <span class='ident'>Eq</span> <span class='kw'>for</span> ($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>,)<span class='op'>+</span>) {}
 
+            <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;waiting for PartialOrd to stabilize&quot;</span>]</span>
             <span class='kw'>impl</span><span class='op'>&lt;</span>$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>:<span class='ident'>PartialOrd</span> <span class='op'>+</span> <span class='ident'>PartialEq</span>),<span class='op'>+</span><span class='op'>&gt;</span> <span class='ident'>PartialOrd</span> <span class='kw'>for</span> ($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>,)<span class='op'>+</span>) {
                 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
                 <span class='kw'>fn</span> <span class='ident'>partial_cmp</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span>($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>,)<span class='op'>+</span>)) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Ordering</span><span class='op'>&gt;</span> {
@@ -497,6 +529,7 @@
                 }
             }
 
+            <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;waiting for Ord to stabilize&quot;</span>]</span>
             <span class='kw'>impl</span><span class='op'>&lt;</span>$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>:<span class='ident'>Ord</span>),<span class='op'>+</span><span class='op'>&gt;</span> <span class='ident'>Ord</span> <span class='kw'>for</span> ($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>,)<span class='op'>+</span>) {
                 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
                 <span class='kw'>fn</span> <span class='ident'>cmp</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span>($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>,)<span class='op'>+</span>)) <span class='op'>-&gt;</span> <span class='ident'>Ordering</span> {
@@ -504,6 +537,7 @@
                 }
             }
 
+            <span class='attribute'>#[<span class='ident'>stable</span>]</span>
             <span class='kw'>impl</span><span class='op'>&lt;</span>$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>:<span class='ident'>Default</span>),<span class='op'>+</span><span class='op'>&gt;</span> <span class='ident'>Default</span> <span class='kw'>for</span> ($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>,)<span class='op'>+</span>) {
                 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
                 <span class='kw'>fn</span> <span class='ident'>default</span>() <span class='op'>-&gt;</span> ($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>T</span>,)<span class='op'>+</span>) {

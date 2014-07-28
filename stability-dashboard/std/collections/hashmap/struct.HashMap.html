@@ -39,7 +39,7 @@
     </nav>
 
     <section id='main' class="content struct">
-<h1 class='fqn'>Struct <a href='../../index.html'>std</a>::<a href='../index.html'>collections</a>::<a href='index.html'>hashmap</a>::<a class='struct' href=''>HashMap</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-15022' href='../../../src/std/Users/aturon/moz/working/stability-dashboard/src/libstd/collections/hashmap.rs.html#731-739'>[src]</a></span></h1>
+<h1 class='fqn'>Struct <a href='../../index.html'>std</a>::<a href='../index.html'>collections</a>::<a href='index.html'>hashmap</a>::<a class='struct' href=''>HashMap</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-14881' href='../../../src/std/Users/aturon/moz/working/stability-dashboard/src/libstd/collections/hashmap.rs.html#757-765'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct HashMap&lt;K, V, H = <a class='struct' href='../../../std/hash/struct.RandomSipHasher.html' title='std::hash::RandomSipHasher'>RandomSipHasher</a>&gt; {
     // some fields omitted
 }</pre><div class='docblock'><p>A hash map implementation which uses linear probing with Robin
@@ -136,16 +136,91 @@ deletion&quot;</a></li>
     <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}: \&quot;{}\&quot;&quot;</span>, <span class='op'>*</span><span class='ident'>book</span>, <span class='op'>*</span><span class='ident'>review</span>);
 }
 </pre>
-</div><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;K: <a class='trait' href='../../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a> + <a class='trait' href='../../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a>&lt;S&gt;, V, S, H: <a class='trait' href='../../../std/hash/trait.Hasher.html' title='std::hash::Hasher'>Hasher</a>&lt;S&gt;&gt; <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, H&gt;</code></h3><div class='impl-methods'><h4 id='method.pop_equiv' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.pop_equiv' class='fnname'>pop_equiv</a>&lt;Q: <a class='trait' href='../../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a>&lt;S&gt; + <a class='trait' href='../../../std/cmp/trait.Equiv.html' title='std::cmp::Equiv'>Equiv</a>&lt;K&gt;&gt;(&amp;mut self, k: &amp;Q) -&gt; <a class='type' href='../../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;V&gt;</code></h4>
-<div class='docblock'><p>Like <code>pop</code>, but can operate on any type that is equivalent to a key.</p>
-</div></div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;K: <a class='trait' href='../../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a> + <a class='trait' href='../../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a>, V&gt; <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, <a class='struct' href='../../../std/hash/struct.RandomSipHasher.html' title='std::hash::RandomSipHasher'>RandomSipHasher</a>&gt;</code></h3><div class='impl-methods'><h4 id='method.new' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, <a class='struct' href='../../../std/hash/struct.RandomSipHasher.html' title='std::hash::RandomSipHasher'>RandomSipHasher</a>&gt;</code></h4>
+
+<p>The easiest way to use <code>HashMap</code> with a custom type is to derive <code>Eq</code> and <code>Hash</code>.
+We must also derive <code>PartialEq</code>.</p>
+<span id='rust-example-raw-1' class='rusttest'>fn main() {
+    use std::collections::HashMap;
+    
+    #[deriving(Hash, Eq, PartialEq, Show)]
+    struct Viking&lt;&#39;a&gt; {
+        name: &amp;&#39;a str,
+        power: uint,
+    }
+    
+    let mut vikings = HashMap::new();
+    
+    vikings.insert(&quot;Norway&quot;, Viking { name: &quot;Einar&quot;, power: 9u });
+    vikings.insert(&quot;Denmark&quot;, Viking { name: &quot;Olaf&quot;, power: 4u });
+    vikings.insert(&quot;Iceland&quot;, Viking { name: &quot;Harald&quot;, power: 8u });
+    
+    // Use derived implementation to print the vikings.
+    for (land, viking) in vikings.iter() {
+        println!(&quot;{} at {}&quot;, viking, land);
+    }
+}</span><pre id='rust-example-rendered-1' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
+
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Hash</span>, <span class='ident'>Eq</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Show</span>)]</span>
+<span class='kw'>struct</span> <span class='ident'>Viking</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+    <span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>,
+    <span class='ident'>power</span>: <span class='ident'>uint</span>,
+}
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vikings</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
+
+<span class='ident'>vikings</span>.<span class='ident'>insert</span>(<span class='string'>&quot;Norway&quot;</span>, <span class='ident'>Viking</span> { <span class='ident'>name</span>: <span class='string'>&quot;Einar&quot;</span>, <span class='ident'>power</span>: <span class='number'>9u</span> });
+<span class='ident'>vikings</span>.<span class='ident'>insert</span>(<span class='string'>&quot;Denmark&quot;</span>, <span class='ident'>Viking</span> { <span class='ident'>name</span>: <span class='string'>&quot;Olaf&quot;</span>, <span class='ident'>power</span>: <span class='number'>4u</span> });
+<span class='ident'>vikings</span>.<span class='ident'>insert</span>(<span class='string'>&quot;Iceland&quot;</span>, <span class='ident'>Viking</span> { <span class='ident'>name</span>: <span class='string'>&quot;Harald&quot;</span>, <span class='ident'>power</span>: <span class='number'>8u</span> });
+
+<span class='comment'>// Use derived implementation to print the vikings.</span>
+<span class='kw'>for</span> (<span class='ident'>land</span>, <span class='ident'>viking</span>) <span class='kw'>in</span> <span class='ident'>vikings</span>.<span class='ident'>iter</span>() {
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{} at {}&quot;</span>, <span class='ident'>viking</span>, <span class='ident'>land</span>);
+}
+</pre>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;K: <a class='trait' href='../../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a> + <a class='trait' href='../../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a>, V&gt; <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, <a class='struct' href='../../../std/hash/struct.RandomSipHasher.html' title='std::hash::RandomSipHasher'>RandomSipHasher</a>&gt;</code></h3><div class='impl-methods'><h4 id='method.new' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, <a class='struct' href='../../../std/hash/struct.RandomSipHasher.html' title='std::hash::RandomSipHasher'>RandomSipHasher</a>&gt;</code></h4>
 <div class='docblock'><p>Create an empty HashMap.</p>
+
+<h1 id="example-1" class='section-header'><a
+                           href="#example-1">Example</a></h1><span id='rust-example-raw-2' class='rusttest'>fn main() {
+    use std::collections::HashMap;
+    let mut map: HashMap&lt;&amp;str, int&gt; = HashMap::new();
+}</span><pre id='rust-example-rendered-2' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>map</span>: <span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>int</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
+</pre>
 </div><h4 id='method.with_capacity' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.with_capacity' class='fnname'>with_capacity</a>(capacity: <a href='../../primitive.uint.html'>uint</a>) -&gt; <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, <a class='struct' href='../../../std/hash/struct.RandomSipHasher.html' title='std::hash::RandomSipHasher'>RandomSipHasher</a>&gt;</code></h4>
 <div class='docblock'><p>Creates an empty hash map with the given initial capacity.</p>
+
+<h1 id="example-2" class='section-header'><a
+                           href="#example-2">Example</a></h1><span id='rust-example-raw-3' class='rusttest'>fn main() {
+    use std::collections::HashMap;
+    let mut map: HashMap&lt;&amp;str, int&gt; = HashMap::with_capacity(10);
+}</span><pre id='rust-example-rendered-3' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>map</span>: <span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>int</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>with_capacity</span>(<span class='number'>10</span>);
+</pre>
 </div></div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;K: <a class='trait' href='../../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a> + <a class='trait' href='../../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a>&lt;S&gt;, V, S, H: <a class='trait' href='../../../std/hash/trait.Hasher.html' title='std::hash::Hasher'>Hasher</a>&lt;S&gt;&gt; <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, H&gt;</code></h3><div class='impl-methods'><h4 id='method.with_hasher' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.with_hasher' class='fnname'>with_hasher</a>(hasher: H) -&gt; <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, H&gt;</code></h4>
 <div class='docblock'><p>Creates an empty hashmap which will use the given hasher to hash keys.</p>
 
 <p>The creates map has the default initial capacity.</p>
+
+<h1 id="example-3" class='section-header'><a
+                           href="#example-3">Example</a></h1><span id='rust-example-raw-4' class='rusttest'>fn main() {
+    use std::collections::HashMap;
+    use std::hash::sip::SipHasher;
+    
+    let h = SipHasher::new();
+    let mut map = HashMap::with_hasher(h);
+    map.insert(1i, 2u);
+}</span><pre id='rust-example-rendered-4' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>hash</span>::<span class='ident'>sip</span>::<span class='ident'>SipHasher</span>;
+
+<span class='kw'>let</span> <span class='ident'>h</span> <span class='op'>=</span> <span class='ident'>SipHasher</span>::<span class='ident'>new</span>();
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>map</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>with_hasher</span>(<span class='ident'>h</span>);
+<span class='ident'>map</span>.<span class='ident'>insert</span>(<span class='number'>1i</span>, <span class='number'>2u</span>);
+</pre>
 </div><h4 id='method.with_capacity_and_hasher' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.with_capacity_and_hasher' class='fnname'>with_capacity_and_hasher</a>(capacity: <a href='../../primitive.uint.html'>uint</a>, hasher: H) -&gt; <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, H&gt;</code></h4>
 <div class='docblock'><p>Create an empty HashMap with space for at least <code>capacity</code>
 elements, using <code>hasher</code> to hash the keys.</p>
@@ -154,6 +229,23 @@ elements, using <code>hasher</code> to hash the keys.</p>
 is designed to allow HashMaps to be resistant to attacks that
 cause many collisions and very poor performance. Setting it
 manually using this function can expose a DoS attack vector.</p>
+
+<h1 id="example-4" class='section-header'><a
+                           href="#example-4">Example</a></h1><span id='rust-example-raw-5' class='rusttest'>fn main() {
+    use std::collections::HashMap;
+    use std::hash::sip::SipHasher;
+    
+    let h = SipHasher::new();
+    let mut map = HashMap::with_capacity_and_hasher(10, h);
+    map.insert(1i, 2u);
+}</span><pre id='rust-example-rendered-5' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>hash</span>::<span class='ident'>sip</span>::<span class='ident'>SipHasher</span>;
+
+<span class='kw'>let</span> <span class='ident'>h</span> <span class='op'>=</span> <span class='ident'>SipHasher</span>::<span class='ident'>new</span>();
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>map</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>with_capacity_and_hasher</span>(<span class='number'>10</span>, <span class='ident'>h</span>);
+<span class='ident'>map</span>.<span class='ident'>insert</span>(<span class='number'>1i</span>, <span class='number'>2u</span>);
+</pre>
 </div><h4 id='method.reserve' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.reserve' class='fnname'>reserve</a>(&amp;mut self, new_minimum_capacity: <a href='../../primitive.uint.html'>uint</a>)</code></h4>
 <div class='docblock'><p>The hashtable will never try to shrink below this size. You can use
 this function to reduce reallocations if your hashtable frequently
@@ -161,27 +253,103 @@ grows and shrinks by large amounts.</p>
 
 <p>This function has no effect on the operational semantics of the
 hashtable, only on performance.</p>
+<span id='rust-example-raw-6' class='rusttest'>fn main() {
+    use std::collections::HashMap;
+    let mut map: HashMap&lt;&amp;str, int&gt; = HashMap::new();
+    map.reserve(10);
+}</span><pre id='rust-example-rendered-6' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>map</span>: <span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>int</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
+<span class='ident'>map</span>.<span class='ident'>reserve</span>(<span class='number'>10</span>);
+</pre>
 </div><h4 id='method.find_or_insert' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.find_or_insert' class='fnname'>find_or_insert</a>&lt;'a&gt;(&amp;'a mut self, k: K, v: V) -&gt; &amp;'a mut V</code></h4>
 <div class='docblock'><p>Return the value corresponding to the key in the map, or insert
 and return the value if it doesn&#39;t exist.</p>
+
+<h1 id="example-5" class='section-header'><a
+                           href="#example-5">Example</a></h1><span id='rust-example-raw-7' class='rusttest'>fn main() {
+    use std::collections::HashMap;
+    let mut map = HashMap::new();
+    
+    // Insert 1i with key &quot;a&quot;
+    assert_eq!(*map.find_or_insert(&quot;a&quot;, 1i), 1);
+    
+    // Find the existing key
+    assert_eq!(*map.find_or_insert(&quot;a&quot;, -2), 1);
+}</span><pre id='rust-example-rendered-7' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>map</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
+
+<span class='comment'>// Insert 1i with key &quot;a&quot;</span>
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>map</span>.<span class='ident'>find_or_insert</span>(<span class='string'>&quot;a&quot;</span>, <span class='number'>1i</span>), <span class='number'>1</span>);
+
+<span class='comment'>// Find the existing key</span>
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>map</span>.<span class='ident'>find_or_insert</span>(<span class='string'>&quot;a&quot;</span>, <span class='op'>-</span><span class='number'>2</span>), <span class='number'>1</span>);
+</pre>
 </div><h4 id='method.find_or_insert_with' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.find_or_insert_with' class='fnname'>find_or_insert_with</a>&lt;'a&gt;(&amp;'a mut self, k: K, f: |&amp;K| -&gt; V) -&gt; &amp;'a mut V</code></h4>
 <div class='docblock'><p>Return the value corresponding to the key in the map, or create,
 insert, and return a new value if it doesn&#39;t exist.</p>
+
+<h1 id="example-6" class='section-header'><a
+                           href="#example-6">Example</a></h1><span id='rust-example-raw-8' class='rusttest'>fn main() {
+    use std::collections::HashMap;
+    let mut map = HashMap::new();
+    
+    // Insert 10 with key 2
+    assert_eq!(*map.find_or_insert_with(2i, |&amp;key| 5 * key as uint), 10u);
+    
+    // Find the existing key
+    assert_eq!(*map.find_or_insert_with(2, |&amp;key| key as uint), 10);
+}</span><pre id='rust-example-rendered-8' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>map</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
+
+<span class='comment'>// Insert 10 with key 2</span>
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>map</span>.<span class='ident'>find_or_insert_with</span>(<span class='number'>2i</span>, <span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>key</span><span class='op'>|</span> <span class='number'>5</span> <span class='op'>*</span> <span class='ident'>key</span> <span class='kw'>as</span> <span class='ident'>uint</span>), <span class='number'>10u</span>);
+
+<span class='comment'>// Find the existing key</span>
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>map</span>.<span class='ident'>find_or_insert_with</span>(<span class='number'>2</span>, <span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>key</span><span class='op'>|</span> <span class='ident'>key</span> <span class='kw'>as</span> <span class='ident'>uint</span>), <span class='number'>10</span>);
+</pre>
 </div><h4 id='method.insert_or_update_with' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.insert_or_update_with' class='fnname'>insert_or_update_with</a>&lt;'a&gt;(&amp;'a mut self, k: K, v: V, f: |&amp;K, &amp;mut V|) -&gt; &amp;'a mut V</code></h4>
 <div class='docblock'><p>Insert a key-value pair into the map if the key is not already present.
 Otherwise, modify the existing value for the key.
 Returns the new or modified value for the key.</p>
+
+<h1 id="example-7" class='section-header'><a
+                           href="#example-7">Example</a></h1><span id='rust-example-raw-9' class='rusttest'>fn main() {
+    use std::collections::HashMap;
+    let mut map = HashMap::new();
+    
+    // Insert 2 with key &quot;a&quot;
+    assert_eq!(*map.insert_or_update_with(&quot;a&quot;, 2u, |_key, val| *val = 3), 2);
+    
+    // Update and return the existing value
+    assert_eq!(*map.insert_or_update_with(&quot;a&quot;, 9, |_key, val| *val = 7), 7);
+    assert_eq!(map.get(&amp;&quot;a&quot;), &amp;7);
+}</span><pre id='rust-example-rendered-9' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>map</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
+
+<span class='comment'>// Insert 2 with key &quot;a&quot;</span>
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>map</span>.<span class='ident'>insert_or_update_with</span>(<span class='string'>&quot;a&quot;</span>, <span class='number'>2u</span>, <span class='op'>|</span><span class='ident'>_key</span>, <span class='ident'>val</span><span class='op'>|</span> <span class='op'>*</span><span class='ident'>val</span> <span class='op'>=</span> <span class='number'>3</span>), <span class='number'>2</span>);
+
+<span class='comment'>// Update and return the existing value</span>
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='op'>*</span><span class='ident'>map</span>.<span class='ident'>insert_or_update_with</span>(<span class='string'>&quot;a&quot;</span>, <span class='number'>9</span>, <span class='op'>|</span><span class='ident'>_key</span>, <span class='ident'>val</span><span class='op'>|</span> <span class='op'>*</span><span class='ident'>val</span> <span class='op'>=</span> <span class='number'>7</span>), <span class='number'>7</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>map</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;a&quot;</span>), <span class='kw-2'>&amp;</span><span class='number'>7</span>);
+</pre>
 </div><h4 id='method.find_with_or_insert_with' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.find_with_or_insert_with' class='fnname'>find_with_or_insert_with</a>&lt;'a, A&gt;(&amp;'a mut self, k: K, a: A, found: |&amp;K, &amp;mut V, A|, not_found: |&amp;K, A| -&gt; V) -&gt; &amp;'a mut V</code></h4>
 <div class='docblock'><p>Modify and return the value corresponding to the key in the map, or
 insert and return a new value if it doesn&#39;t exist.</p>
 
 <p>This method allows for all insertion behaviours of a hashmap;
-see methods like <code>insert</code>, <code>find_or_insert</code> and
-<code>insert_or_update_with</code> for less general and more friendly
-variations of this.</p>
+see methods like
+<a href="../trait.MutableMap.html#tymethod.insert"><code>insert</code></a>,
+<a href="#method.find_or_insert"><code>find_or_insert</code></a> and
+<a href="#method.insert_or_update_with"><code>insert_or_update_with</code></a>
+for less general and more friendly variations of this.</p>
 
-<h1 id="example-1" class='section-header'><a
-                           href="#example-1">Example</a></h1><span id='rust-example-raw-1' class='rusttest'>fn main() {
+<h1 id="example-8" class='section-header'><a
+                           href="#example-8">Example</a></h1><span id='rust-example-raw-10' class='rusttest'>fn main() {
     use std::collections::HashMap;
     
     // map some strings to vectors of strings
@@ -198,7 +366,7 @@ variations of this.</p>
             // new value based on the first letter of the key.
             |key, already, new| {
                 if key.as_slice().starts_with(&quot;z&quot;) {
-                    already.unshift(new);
+                    already.insert(0, new);
                 } else {
                     already.push(new);
                 }
@@ -212,7 +380,7 @@ variations of this.</p>
     assert_eq!(map.get(&amp;&quot;a key&quot;), &amp;vec![&quot;value&quot;, &quot;new value&quot;]);
     assert_eq!(map.get(&amp;&quot;b key&quot;), &amp;vec![&quot;new value&quot;]);
     assert_eq!(map.get(&amp;&quot;z key&quot;), &amp;vec![&quot;new value&quot;, &quot;value&quot;]);
-}</span><pre id='rust-example-rendered-1' class='rust '>
+}</span><pre id='rust-example-rendered-10' class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
 
 <span class='comment'>// map some strings to vectors of strings</span>
@@ -229,7 +397,7 @@ variations of this.</p>
         <span class='comment'>// new value based on the first letter of the key.</span>
         <span class='op'>|</span><span class='ident'>key</span>, <span class='ident'>already</span>, <span class='ident'>new</span><span class='op'>|</span> {
             <span class='kw'>if</span> <span class='ident'>key</span>.<span class='ident'>as_slice</span>().<span class='ident'>starts_with</span>(<span class='string'>&quot;z&quot;</span>) {
-                <span class='ident'>already</span>.<span class='ident'>unshift</span>(<span class='ident'>new</span>);
+                <span class='ident'>already</span>.<span class='ident'>insert</span>(<span class='number'>0</span>, <span class='ident'>new</span>);
             } <span class='kw'>else</span> {
                 <span class='ident'>already</span>.<span class='ident'>push</span>(<span class='ident'>new</span>);
             }
@@ -245,38 +413,346 @@ variations of this.</p>
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>map</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;z key&quot;</span>), <span class='kw-2'>&amp;</span><span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;new value&quot;</span>, <span class='string'>&quot;value&quot;</span>]);
 </pre>
 </div><h4 id='method.get' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.get' class='fnname'>get</a>&lt;'a&gt;(&amp;'a self, k: &amp;K) -&gt; &amp;'a V</code></h4>
-<div class='docblock'><p>Retrieves a value for the given key, failing if the key is not present.</p>
+<div class='docblock'><p>Retrieves a value for the given key.
+See <a href="../trait.Map.html#tymethod.find"><code>find</code></a> for a non-failing alternative.</p>
+
+<h1 id="failure" class='section-header'><a
+                           href="#failure">Failure</a></h1>
+<p>Fails if the key is not present.</p>
+
+<h1 id="example-9" class='section-header'><a
+                           href="#example-9">Example</a></h1><span id='rust-example-raw-11' class='rusttest'>fn main() {
+    use std::collections::HashMap;
+    
+    let mut map = HashMap::new();
+    map.insert(&quot;a&quot;, 1i);
+    assert_eq!(map.get(&amp;&quot;a&quot;), &amp;1);
+}</span><pre id='rust-example-rendered-11' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>map</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
+<span class='ident'>map</span>.<span class='ident'>insert</span>(<span class='string'>&quot;a&quot;</span>, <span class='number'>1i</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>map</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;a&quot;</span>), <span class='kw-2'>&amp;</span><span class='number'>1</span>);
+</pre>
 </div><h4 id='method.get_mut' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.get_mut' class='fnname'>get_mut</a>&lt;'a&gt;(&amp;'a mut self, k: &amp;K) -&gt; &amp;'a mut V</code></h4>
-<div class='docblock'><p>Retrieves a (mutable) value for the given key, failing if the key is not present.</p>
+<div class='docblock'><p>Retrieves a mutable value for the given key.
+See <a href="../trait.MutableMap.html#tymethod.find_mut"><code>find_mut</code></a> for a non-failing alternative.</p>
+
+<h1 id="failure-1" class='section-header'><a
+                           href="#failure-1">Failure</a></h1>
+<p>Fails if the key is not present.</p>
+
+<h1 id="example-10" class='section-header'><a
+                           href="#example-10">Example</a></h1><span id='rust-example-raw-12' class='rusttest'>fn main() {
+    use std::collections::HashMap;
+    
+    let mut map = HashMap::new();
+    map.insert(&quot;a&quot;, 1i);
+    {
+        // val will freeze map to prevent usage during its lifetime
+        let val = map.get_mut(&amp;&quot;a&quot;);
+        *val = 40;
+    }
+    assert_eq!(map.get(&amp;&quot;a&quot;), &amp;40);
+    
+    // A more direct way could be:
+    *map.get_mut(&amp;&quot;a&quot;) = -2;
+    assert_eq!(map.get(&amp;&quot;a&quot;), &amp;-2);
+}</span><pre id='rust-example-rendered-12' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>map</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
+<span class='ident'>map</span>.<span class='ident'>insert</span>(<span class='string'>&quot;a&quot;</span>, <span class='number'>1i</span>);
+{
+    <span class='comment'>// val will freeze map to prevent usage during its lifetime</span>
+    <span class='kw'>let</span> <span class='ident'>val</span> <span class='op'>=</span> <span class='ident'>map</span>.<span class='ident'>get_mut</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;a&quot;</span>);
+    <span class='op'>*</span><span class='ident'>val</span> <span class='op'>=</span> <span class='number'>40</span>;
+}
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>map</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;a&quot;</span>), <span class='kw-2'>&amp;</span><span class='number'>40</span>);
+
+<span class='comment'>// A more direct way could be:</span>
+<span class='op'>*</span><span class='ident'>map</span>.<span class='ident'>get_mut</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;a&quot;</span>) <span class='op'>=</span> <span class='op'>-</span><span class='number'>2</span>;
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>map</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;a&quot;</span>), <span class='kw-2'>&amp;</span><span class='op'>-</span><span class='number'>2</span>);
+</pre>
 </div><h4 id='method.contains_key_equiv' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.contains_key_equiv' class='fnname'>contains_key_equiv</a>&lt;Q: <a class='trait' href='../../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a>&lt;S&gt; + <a class='trait' href='../../../std/cmp/trait.Equiv.html' title='std::cmp::Equiv'>Equiv</a>&lt;K&gt;&gt;(&amp;self, key: &amp;Q) -&gt; <a href='../../primitive.bool.html'>bool</a></code></h4>
 <div class='docblock'><p>Return true if the map contains a value for the specified key,
 using equivalence.</p>
+
+<p>See <a href="#method.pop_equiv">pop_equiv</a> for an extended example.</p>
 </div><h4 id='method.find_equiv' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.find_equiv' class='fnname'>find_equiv</a>&lt;'a, Q: <a class='trait' href='../../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a>&lt;S&gt; + <a class='trait' href='../../../std/cmp/trait.Equiv.html' title='std::cmp::Equiv'>Equiv</a>&lt;K&gt;&gt;(&amp;'a self, k: &amp;Q) -&gt; <a class='type' href='../../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;&amp;'a V&gt;</code></h4>
 <div class='docblock'><p>Return the value corresponding to the key in the map, using
 equivalence.</p>
+
+<p>See <a href="#method.pop_equiv">pop_equiv</a> for an extended example.</p>
+</div><h4 id='method.pop_equiv' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.pop_equiv' class='fnname'>pop_equiv</a>&lt;Q: <a class='trait' href='../../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a>&lt;S&gt; + <a class='trait' href='../../../std/cmp/trait.Equiv.html' title='std::cmp::Equiv'>Equiv</a>&lt;K&gt;&gt;(&amp;mut self, k: &amp;Q) -&gt; <a class='type' href='../../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;V&gt;</code></h4>
+<div class='docblock'><p>Remove an equivalent key from the map, returning the value at the
+key if the key was previously in the map.</p>
+
+<h1 id="example-11" class='section-header'><a
+                           href="#example-11">Example</a></h1>
+<p>This is a slightly silly example where we define the number&#39;s parity as
+the equivalence class. It is important that the values hash the same,
+which is why we override <code>Hash</code>.</p>
+<span id='rust-example-raw-13' class='rusttest'>fn main() {
+    use std::collections::HashMap;
+    use std::hash::Hash;
+    use std::hash::sip::SipState;
+    
+    #[deriving(Eq, PartialEq)]
+    struct EvenOrOdd {
+        num: uint
+    };
+    
+    impl Hash for EvenOrOdd {
+        fn hash(&amp;self, state: &amp;mut SipState) {
+            let parity = self.num % 2;
+            parity.hash(state);
+        }
+    }
+    
+    impl Equiv&lt;EvenOrOdd&gt; for EvenOrOdd {
+        fn equiv(&amp;self, other: &amp;EvenOrOdd) -&gt; bool {
+            self.num % 2 == other.num % 2
+        }
+    }
+    
+    let mut map = HashMap::new();
+    map.insert(EvenOrOdd { num: 3 }, &quot;foo&quot;);
+    
+    assert!(map.contains_key_equiv(&amp;EvenOrOdd { num: 1 }));
+    assert!(!map.contains_key_equiv(&amp;EvenOrOdd { num: 4 }));
+    
+    assert_eq!(map.find_equiv(&amp;EvenOrOdd { num: 5 }), Some(&amp;&quot;foo&quot;));
+    assert_eq!(map.find_equiv(&amp;EvenOrOdd { num: 2 }), None);
+    
+    assert_eq!(map.pop_equiv(&amp;EvenOrOdd { num: 1 }), Some(&quot;foo&quot;));
+    assert_eq!(map.pop_equiv(&amp;EvenOrOdd { num: 2 }), None);
+    
+}</span><pre id='rust-example-rendered-13' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>hash</span>::<span class='ident'>Hash</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>hash</span>::<span class='ident'>sip</span>::<span class='ident'>SipState</span>;
+
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Eq</span>, <span class='ident'>PartialEq</span>)]</span>
+<span class='kw'>struct</span> <span class='ident'>EvenOrOdd</span> {
+    <span class='ident'>num</span>: <span class='ident'>uint</span>
+};
+
+<span class='kw'>impl</span> <span class='ident'>Hash</span> <span class='kw'>for</span> <span class='ident'>EvenOrOdd</span> {
+    <span class='kw'>fn</span> <span class='ident'>hash</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>state</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>SipState</span>) {
+        <span class='kw'>let</span> <span class='ident'>parity</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>num</span> <span class='op'>%</span> <span class='number'>2</span>;
+        <span class='ident'>parity</span>.<span class='ident'>hash</span>(<span class='ident'>state</span>);
+    }
+}
+
+<span class='kw'>impl</span> <span class='ident'>Equiv</span><span class='op'>&lt;</span><span class='ident'>EvenOrOdd</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>EvenOrOdd</span> {
+    <span class='kw'>fn</span> <span class='ident'>equiv</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='ident'>EvenOrOdd</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+        <span class='self'>self</span>.<span class='ident'>num</span> <span class='op'>%</span> <span class='number'>2</span> <span class='op'>==</span> <span class='ident'>other</span>.<span class='ident'>num</span> <span class='op'>%</span> <span class='number'>2</span>
+    }
+}
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>map</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
+<span class='ident'>map</span>.<span class='ident'>insert</span>(<span class='ident'>EvenOrOdd</span> { <span class='ident'>num</span>: <span class='number'>3</span> }, <span class='string'>&quot;foo&quot;</span>);
+
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>map</span>.<span class='ident'>contains_key_equiv</span>(<span class='kw-2'>&amp;</span><span class='ident'>EvenOrOdd</span> { <span class='ident'>num</span>: <span class='number'>1</span> }));
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>map</span>.<span class='ident'>contains_key_equiv</span>(<span class='kw-2'>&amp;</span><span class='ident'>EvenOrOdd</span> { <span class='ident'>num</span>: <span class='number'>4</span> }));
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>map</span>.<span class='ident'>find_equiv</span>(<span class='kw-2'>&amp;</span><span class='ident'>EvenOrOdd</span> { <span class='ident'>num</span>: <span class='number'>5</span> }), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;foo&quot;</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>map</span>.<span class='ident'>find_equiv</span>(<span class='kw-2'>&amp;</span><span class='ident'>EvenOrOdd</span> { <span class='ident'>num</span>: <span class='number'>2</span> }), <span class='prelude-val'>None</span>);
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>map</span>.<span class='ident'>pop_equiv</span>(<span class='kw-2'>&amp;</span><span class='ident'>EvenOrOdd</span> { <span class='ident'>num</span>: <span class='number'>1</span> }), <span class='prelude-val'>Some</span>(<span class='string'>&quot;foo&quot;</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>map</span>.<span class='ident'>pop_equiv</span>(<span class='kw-2'>&amp;</span><span class='ident'>EvenOrOdd</span> { <span class='ident'>num</span>: <span class='number'>2</span> }), <span class='prelude-val'>None</span>);
+</pre>
 </div><h4 id='method.keys' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.keys' class='fnname'>keys</a>&lt;'a&gt;(&amp;'a self) -&gt; <a class='type' href='../../../std/collections/hashmap/type.Keys.html' title='std::collections::hashmap::Keys'>Keys</a>&lt;'a, K, V&gt;</code></h4>
 <div class='docblock'><p>An iterator visiting all keys in arbitrary order.
-Iterator element type is &amp;&#39;a K.</p>
+Iterator element type is <code>&amp;&#39;a K</code>.</p>
+
+<h1 id="example-12" class='section-header'><a
+                           href="#example-12">Example</a></h1><span id='rust-example-raw-14' class='rusttest'>fn main() {
+    use std::collections::HashMap;
+    
+    let mut map = HashMap::new();
+    map.insert(&quot;a&quot;, 1i);
+    map.insert(&quot;b&quot;, 2);
+    map.insert(&quot;c&quot;, 3);
+    
+    for key in map.keys() {
+        println!(&quot;{}&quot;, key);
+    }
+}</span><pre id='rust-example-rendered-14' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>map</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
+<span class='ident'>map</span>.<span class='ident'>insert</span>(<span class='string'>&quot;a&quot;</span>, <span class='number'>1i</span>);
+<span class='ident'>map</span>.<span class='ident'>insert</span>(<span class='string'>&quot;b&quot;</span>, <span class='number'>2</span>);
+<span class='ident'>map</span>.<span class='ident'>insert</span>(<span class='string'>&quot;c&quot;</span>, <span class='number'>3</span>);
+
+<span class='kw'>for</span> <span class='ident'>key</span> <span class='kw'>in</span> <span class='ident'>map</span>.<span class='ident'>keys</span>() {
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>key</span>);
+}
+</pre>
 </div><h4 id='method.values' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.values' class='fnname'>values</a>&lt;'a&gt;(&amp;'a self) -&gt; <a class='type' href='../../../std/collections/hashmap/type.Values.html' title='std::collections::hashmap::Values'>Values</a>&lt;'a, K, V&gt;</code></h4>
 <div class='docblock'><p>An iterator visiting all values in arbitrary order.
-Iterator element type is &amp;&#39;a V.</p>
+Iterator element type is <code>&amp;&#39;a V</code>.</p>
+
+<h1 id="example-13" class='section-header'><a
+                           href="#example-13">Example</a></h1><span id='rust-example-raw-15' class='rusttest'>fn main() {
+    use std::collections::HashMap;
+    
+    let mut map = HashMap::new();
+    map.insert(&quot;a&quot;, 1i);
+    map.insert(&quot;b&quot;, 2);
+    map.insert(&quot;c&quot;, 3);
+    
+    for key in map.values() {
+        println!(&quot;{}&quot;, key);
+    }
+}</span><pre id='rust-example-rendered-15' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>map</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
+<span class='ident'>map</span>.<span class='ident'>insert</span>(<span class='string'>&quot;a&quot;</span>, <span class='number'>1i</span>);
+<span class='ident'>map</span>.<span class='ident'>insert</span>(<span class='string'>&quot;b&quot;</span>, <span class='number'>2</span>);
+<span class='ident'>map</span>.<span class='ident'>insert</span>(<span class='string'>&quot;c&quot;</span>, <span class='number'>3</span>);
+
+<span class='kw'>for</span> <span class='ident'>key</span> <span class='kw'>in</span> <span class='ident'>map</span>.<span class='ident'>values</span>() {
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>key</span>);
+}
+</pre>
 </div><h4 id='method.iter' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.iter' class='fnname'>iter</a>&lt;'a&gt;(&amp;'a self) -&gt; <a class='type' href='../../../std/collections/hashmap/type.Entries.html' title='std::collections::hashmap::Entries'>Entries</a>&lt;'a, K, V&gt;</code></h4>
 <div class='docblock'><p>An iterator visiting all key-value pairs in arbitrary order.
-Iterator element type is (&amp;&#39;a K, &amp;&#39;a V).</p>
+Iterator element type is <code>(&amp;&#39;a K, &amp;&#39;a V)</code>.</p>
+
+<h1 id="example-14" class='section-header'><a
+                           href="#example-14">Example</a></h1><span id='rust-example-raw-16' class='rusttest'>fn main() {
+    use std::collections::HashMap;
+    
+    let mut map = HashMap::new();
+    map.insert(&quot;a&quot;, 1i);
+    map.insert(&quot;b&quot;, 2);
+    map.insert(&quot;c&quot;, 3);
+    
+    for (key, val) in map.iter() {
+        println!(&quot;key: {} val: {}&quot;, key, val);
+    }
+}</span><pre id='rust-example-rendered-16' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>map</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
+<span class='ident'>map</span>.<span class='ident'>insert</span>(<span class='string'>&quot;a&quot;</span>, <span class='number'>1i</span>);
+<span class='ident'>map</span>.<span class='ident'>insert</span>(<span class='string'>&quot;b&quot;</span>, <span class='number'>2</span>);
+<span class='ident'>map</span>.<span class='ident'>insert</span>(<span class='string'>&quot;c&quot;</span>, <span class='number'>3</span>);
+
+<span class='kw'>for</span> (<span class='ident'>key</span>, <span class='ident'>val</span>) <span class='kw'>in</span> <span class='ident'>map</span>.<span class='ident'>iter</span>() {
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;key: {} val: {}&quot;</span>, <span class='ident'>key</span>, <span class='ident'>val</span>);
+}
+</pre>
 </div><h4 id='method.mut_iter' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.mut_iter' class='fnname'>mut_iter</a>&lt;'a&gt;(&amp;'a mut self) -&gt; <a class='type' href='../../../std/collections/hashmap/type.MutEntries.html' title='std::collections::hashmap::MutEntries'>MutEntries</a>&lt;'a, K, V&gt;</code></h4>
 <div class='docblock'><p>An iterator visiting all key-value pairs in arbitrary order,
 with mutable references to the values.
-Iterator element type is (&amp;&#39;a K, &amp;&#39;a mut V).</p>
+Iterator element type is <code>(&amp;&#39;a K, &amp;&#39;a mut V)</code>.</p>
+
+<h1 id="example-15" class='section-header'><a
+                           href="#example-15">Example</a></h1><span id='rust-example-raw-17' class='rusttest'>fn main() {
+    use std::collections::HashMap;
+    
+    let mut map = HashMap::new();
+    map.insert(&quot;a&quot;, 1i);
+    map.insert(&quot;b&quot;, 2);
+    map.insert(&quot;c&quot;, 3);
+    
+    // Update all values
+    for (_, val) in map.mut_iter() {
+        *val *= 2;
+    }
+    
+    for (key, val) in map.iter() {
+        println!(&quot;key: {} val: {}&quot;, key, val);
+    }
+}</span><pre id='rust-example-rendered-17' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>map</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
+<span class='ident'>map</span>.<span class='ident'>insert</span>(<span class='string'>&quot;a&quot;</span>, <span class='number'>1i</span>);
+<span class='ident'>map</span>.<span class='ident'>insert</span>(<span class='string'>&quot;b&quot;</span>, <span class='number'>2</span>);
+<span class='ident'>map</span>.<span class='ident'>insert</span>(<span class='string'>&quot;c&quot;</span>, <span class='number'>3</span>);
+
+<span class='comment'>// Update all values</span>
+<span class='kw'>for</span> (_, <span class='ident'>val</span>) <span class='kw'>in</span> <span class='ident'>map</span>.<span class='ident'>mut_iter</span>() {
+    <span class='op'>*</span><span class='ident'>val</span> <span class='op'>*=</span> <span class='number'>2</span>;
+}
+
+<span class='kw'>for</span> (<span class='ident'>key</span>, <span class='ident'>val</span>) <span class='kw'>in</span> <span class='ident'>map</span>.<span class='ident'>iter</span>() {
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;key: {} val: {}&quot;</span>, <span class='ident'>key</span>, <span class='ident'>val</span>);
+}
+</pre>
 </div><h4 id='method.move_iter' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.move_iter' class='fnname'>move_iter</a>(self) -&gt; <a class='type' href='../../../std/collections/hashmap/type.MoveEntries.html' title='std::collections::hashmap::MoveEntries'>MoveEntries</a>&lt;K, V&gt;</code></h4>
 <div class='docblock'><p>Creates a consuming iterator, that is, one that moves each key-value
 pair out of the map in arbitrary order. The map cannot be used after
 calling this.</p>
+
+<h1 id="example-16" class='section-header'><a
+                           href="#example-16">Example</a></h1><span id='rust-example-raw-18' class='rusttest'>fn main() {
+    use std::collections::HashMap;
+    
+    let mut map = HashMap::new();
+    map.insert(&quot;a&quot;, 1i);
+    map.insert(&quot;b&quot;, 2);
+    map.insert(&quot;c&quot;, 3);
+    
+    // Not possible with .iter()
+    let vec: Vec&lt;(&amp;str, int)&gt; = map.move_iter().collect();
+}</span><pre id='rust-example-rendered-18' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>map</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
+<span class='ident'>map</span>.<span class='ident'>insert</span>(<span class='string'>&quot;a&quot;</span>, <span class='number'>1i</span>);
+<span class='ident'>map</span>.<span class='ident'>insert</span>(<span class='string'>&quot;b&quot;</span>, <span class='number'>2</span>);
+<span class='ident'>map</span>.<span class='ident'>insert</span>(<span class='string'>&quot;c&quot;</span>, <span class='number'>3</span>);
+
+<span class='comment'>// Not possible with .iter()</span>
+<span class='kw'>let</span> <span class='ident'>vec</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span>(<span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>int</span>)<span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>map</span>.<span class='ident'>move_iter</span>().<span class='ident'>collect</span>();
+</pre>
 </div></div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;K: <a class='trait' href='../../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a> + <a class='trait' href='../../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a>&lt;S&gt;, V: <a class='trait' href='../../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>, S, H: <a class='trait' href='../../../std/hash/trait.Hasher.html' title='std::hash::Hasher'>Hasher</a>&lt;S&gt;&gt; <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, H&gt;</code></h3><div class='impl-methods'><h4 id='method.find_copy' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.find_copy' class='fnname'>find_copy</a>(&amp;self, k: &amp;K) -&gt; <a class='type' href='../../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;V&gt;</code></h4>
-<div class='docblock'><p>Like <code>find</code>, but returns a copy of the value.</p>
+<div class='docblock'><p>Return a copy of the value corresponding to the key.</p>
+
+<h1 id="example-17" class='section-header'><a
+                           href="#example-17">Example</a></h1><span id='rust-example-raw-19' class='rusttest'>fn main() {
+    use std::collections::HashMap;
+    
+    let mut map: HashMap&lt;uint, String&gt; = HashMap::new();
+    map.insert(1u, &quot;foo&quot;.to_string());
+    let s: String = map.find_copy(&amp;1).unwrap();
+}</span><pre id='rust-example-rendered-19' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>map</span>: <span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='ident'>uint</span>, <span class='ident'>String</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
+<span class='ident'>map</span>.<span class='ident'>insert</span>(<span class='number'>1u</span>, <span class='string'>&quot;foo&quot;</span>.<span class='ident'>to_string</span>());
+<span class='kw'>let</span> <span class='ident'>s</span>: <span class='ident'>String</span> <span class='op'>=</span> <span class='ident'>map</span>.<span class='ident'>find_copy</span>(<span class='kw-2'>&amp;</span><span class='number'>1</span>).<span class='ident'>unwrap</span>();
+</pre>
 </div><h4 id='method.get_copy' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.get_copy' class='fnname'>get_copy</a>(&amp;self, k: &amp;K) -&gt; V</code></h4>
-<div class='docblock'><p>Like <code>get</code>, but returns a copy of the value.</p>
+<div class='docblock'><p>Return a copy of the value corresponding to the key.</p>
+
+<h1 id="failure-2" class='section-header'><a
+                           href="#failure-2">Failure</a></h1>
+<p>Fails if the key is not present.</p>
+
+<h1 id="example-18" class='section-header'><a
+                           href="#example-18">Example</a></h1><span id='rust-example-raw-20' class='rusttest'>fn main() {
+    use std::collections::HashMap;
+    
+    let mut map: HashMap&lt;uint, String&gt; = HashMap::new();
+    map.insert(1u, &quot;foo&quot;.to_string());
+    let s: String = map.get_copy(&amp;1);
+}</span><pre id='rust-example-rendered-20' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>map</span>: <span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='ident'>uint</span>, <span class='ident'>String</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
+<span class='ident'>map</span>.<span class='ident'>insert</span>(<span class='number'>1u</span>, <span class='string'>&quot;foo&quot;</span>.<span class='ident'>to_string</span>());
+<span class='kw'>let</span> <span class='ident'>s</span>: <span class='ident'>String</span> <span class='op'>=</span> <span class='ident'>map</span>.<span class='ident'>get_copy</span>(<span class='kw-2'>&amp;</span><span class='number'>1</span>);
+</pre>
 </div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;K: <a class='trait' href='../../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a> + <a class='trait' href='../../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a>&lt;S&gt;, V, S, H: <a class='trait' href='../../../std/hash/trait.Hasher.html' title='std::hash::Hasher'>Hasher</a>&lt;S&gt;&gt; <a class='trait' href='../../../std/collections/trait.Collection.html' title='std::collections::Collection'>Collection</a> for <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, H&gt;</code></h3><div class='impl-methods'><h4 id='method.len' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.len' class='fnname'>len</a>(&amp;self) -&gt; <a href='../../primitive.uint.html'>uint</a></code></h4>
-<div class='docblock'><p>Return the number of elements in the map</p>
+<div class='docblock'><p>Return the number of elements in the map.</p>
 </div><h4 id='method.is_empty' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.is_empty' class='fnname'>is_empty</a>(&amp;self) -&gt; <a href='../../primitive.bool.html'>bool</a></code></h4>
 </div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;K: <a class='trait' href='../../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a> + <a class='trait' href='../../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a>&lt;S&gt;, V, S, H: <a class='trait' href='../../../std/hash/trait.Hasher.html' title='std::hash::Hasher'>Hasher</a>&lt;S&gt;&gt; <a class='trait' href='../../../std/collections/trait.Mutable.html' title='std::collections::Mutable'>Mutable</a> for <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, H&gt;</code></h3><div class='impl-methods'><h4 id='method.clear' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.clear' class='fnname'>clear</a>(&amp;mut self)</code></h4>
 <div class='docblock'><p>Clear the map, removing all key-value pairs. Keeps the allocated memory
@@ -286,12 +762,12 @@ for reuse.</p>
 </div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;K: <a class='trait' href='../../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a> + <a class='trait' href='../../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a>&lt;S&gt;, V, S, H: <a class='trait' href='../../../std/hash/trait.Hasher.html' title='std::hash::Hasher'>Hasher</a>&lt;S&gt;&gt; <a class='trait' href='../../../std/collections/trait.MutableMap.html' title='std::collections::MutableMap'>MutableMap</a>&lt;K, V&gt; for <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, H&gt;</code></h3><div class='impl-methods'><h4 id='method.find_mut' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.find_mut' class='fnname'>find_mut</a>&lt;'a&gt;(&amp;'a mut self, k: &amp;K) -&gt; <a class='type' href='../../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;&amp;'a mut V&gt;</code></h4>
 <h4 id='method.swap' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.swap' class='fnname'>swap</a>(&amp;mut self, k: K, v: V) -&gt; <a class='type' href='../../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;V&gt;</code></h4>
 <h4 id='method.pop' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.pop' class='fnname'>pop</a>(&amp;mut self, k: &amp;K) -&gt; <a class='type' href='../../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;V&gt;</code></h4>
-<h4 id='method.insert' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.insert' class='fnname'>insert</a>&lt;K, V&gt;(&amp;mut self, key: K, value: V) -&gt; <a href='../../primitive.bool.html'>bool</a></code></h4>
-<h4 id='method.remove' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.remove' class='fnname'>remove</a>&lt;K, V&gt;(&amp;mut self, key: &amp;K) -&gt; <a href='../../primitive.bool.html'>bool</a></code></h4>
-</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;K: <a class='trait' href='../../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a> + <a class='trait' href='../../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a>&lt;S&gt;, V: <a class='trait' href='../../../std/cmp/trait.PartialEq.html' title='std::cmp::PartialEq'>PartialEq</a>, S, H: <a class='trait' href='../../../std/hash/trait.Hasher.html' title='std::hash::Hasher'>Hasher</a>&lt;S&gt;&gt; <a class='trait' href='../../../std/cmp/trait.PartialEq.html' title='std::cmp::PartialEq'>PartialEq</a> for <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, H&gt;</code></h3><div class='impl-methods'><h4 id='method.eq' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.eq' class='fnname'>eq</a>(&amp;self, other: &amp;<a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, H&gt;) -&gt; <a href='../../primitive.bool.html'>bool</a></code></h4>
-<h4 id='method.ne' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.ne' class='fnname'>ne</a>(&amp;self, other: &amp;Self) -&gt; <a href='../../primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.insert' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.insert' class='fnname'>insert</a>(&amp;mut self, key: K, value: V) -&gt; <a href='../../primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.remove' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.remove' class='fnname'>remove</a>(&amp;mut self, key: &amp;K) -&gt; <a href='../../primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;K: <a class='trait' href='../../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a> + <a class='trait' href='../../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a>&lt;S&gt;, V: <a class='trait' href='../../../std/cmp/trait.PartialEq.html' title='std::cmp::PartialEq'>PartialEq</a>, S, H: <a class='trait' href='../../../std/hash/trait.Hasher.html' title='std::hash::Hasher'>Hasher</a>&lt;S&gt;&gt; <a class='trait' href='../../../std/cmp/trait.PartialEq.html' title='std::cmp::PartialEq'>PartialEq</a> for <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, H&gt;</code></h3><div class='impl-methods'><h4 id='method.eq' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#method.eq' class='fnname'>eq</a>(&amp;self, other: &amp;<a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, H&gt;) -&gt; <a href='../../primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#tymethod.ne' class='fnname'>ne</a>(&amp;self, other: &amp;Self) -&gt; <a href='../../primitive.bool.html'>bool</a></code></h4>
 </div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;K: <a class='trait' href='../../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a> + <a class='trait' href='../../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a>&lt;S&gt;, V: <a class='trait' href='../../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a>, S, H: <a class='trait' href='../../../std/hash/trait.Hasher.html' title='std::hash::Hasher'>Hasher</a>&lt;S&gt;&gt; <a class='trait' href='../../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a> for <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, H&gt;</code></h3><div class='impl-methods'></div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;K: <a class='trait' href='../../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a> + <a class='trait' href='../../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a>&lt;S&gt; + <a class='trait' href='../../../std/fmt/trait.Show.html' title='std::fmt::Show'>Show</a>, V: <a class='trait' href='../../../std/fmt/trait.Show.html' title='std::fmt::Show'>Show</a>, S, H: <a class='trait' href='../../../std/hash/trait.Hasher.html' title='std::hash::Hasher'>Hasher</a>&lt;S&gt;&gt; <a class='trait' href='../../../std/fmt/trait.Show.html' title='std::fmt::Show'>Show</a> for <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, H&gt;</code></h3><div class='impl-methods'><h4 id='method.fmt' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='../../../std/fmt/struct.Formatter.html' title='std::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='../../../std/fmt/type.Result.html' title='std::fmt::Result'>Result</a></code></h4>
-</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;K: <a class='trait' href='../../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a> + <a class='trait' href='../../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a>&lt;S&gt;, V, S, H: <a class='trait' href='../../../std/hash/trait.Hasher.html' title='std::hash::Hasher'>Hasher</a>&lt;S&gt; + <a class='trait' href='../../../std/default/trait.Default.html' title='std::default::Default'>Default</a>&gt; <a class='trait' href='../../../std/default/trait.Default.html' title='std::default::Default'>Default</a> for <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, H&gt;</code></h3><div class='impl-methods'><h4 id='method.default' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.default' class='fnname'>default</a>() -&gt; <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, H&gt;</code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;K: <a class='trait' href='../../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a> + <a class='trait' href='../../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a>&lt;S&gt;, V, S, H: <a class='trait' href='../../../std/hash/trait.Hasher.html' title='std::hash::Hasher'>Hasher</a>&lt;S&gt; + <a class='trait' href='../../../std/default/trait.Default.html' title='std::default::Default'>Default</a>&gt; <a class='trait' href='../../../std/default/trait.Default.html' title='std::default::Default'>Default</a> for <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, H&gt;</code></h3><div class='impl-methods'><h4 id='method.default' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.default' class='fnname'>default</a>() -&gt; <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, H&gt;</code></h4>
 </div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;K: <a class='trait' href='../../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a> + <a class='trait' href='../../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a>&lt;S&gt;, V, S, H: <a class='trait' href='../../../std/hash/trait.Hasher.html' title='std::hash::Hasher'>Hasher</a>&lt;S&gt; + <a class='trait' href='../../../std/default/trait.Default.html' title='std::default::Default'>Default</a>&gt; <a class='trait' href='../../../std/iter/trait.FromIterator.html' title='std::iter::FromIterator'>FromIterator</a>&lt;<a href='../../primitive.tuple.html'>(K, V)</a>&gt; for <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, H&gt;</code></h3><div class='impl-methods'><h4 id='method.from_iter' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.from_iter' class='fnname'>from_iter</a>&lt;T: <a class='trait' href='../../../std/iter/trait.Iterator.html' title='std::iter::Iterator'>Iterator</a>&lt;<a href='../../primitive.tuple.html'>(K, V)</a>&gt;&gt;(iter: T) -&gt; <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, H&gt;</code></h4>
 </div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;K: <a class='trait' href='../../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a> + <a class='trait' href='../../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a>&lt;S&gt;, V, S, H: <a class='trait' href='../../../std/hash/trait.Hasher.html' title='std::hash::Hasher'>Hasher</a>&lt;S&gt; + <a class='trait' href='../../../std/default/trait.Default.html' title='std::default::Default'>Default</a>&gt; <a class='trait' href='../../../std/iter/trait.Extendable.html' title='std::iter::Extendable'>Extendable</a>&lt;<a href='../../primitive.tuple.html'>(K, V)</a>&gt; for <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, H&gt;</code></h3><div class='impl-methods'><h4 id='method.extend' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.extend' class='fnname'>extend</a>&lt;T: <a class='trait' href='../../../std/iter/trait.Iterator.html' title='std::iter::Iterator'>Iterator</a>&lt;<a href='../../primitive.tuple.html'>(K, V)</a>&gt;&gt;(&amp;mut self, iter: T)</code></h4>
 </div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;K: <a class='trait' href='../../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>, V: <a class='trait' href='../../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>, H: <a class='trait' href='../../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a>&gt; <a class='trait' href='../../../std/clone/trait.Clone.html' title='std::clone::Clone'>Clone</a> for <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, H&gt;</code></h3><div class='impl-methods'><h4 id='method.clone' class='method'><a class='stability Unstable' title='Unstable'></a><code>fn <a href='#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../../std/collections/hashmap/struct.HashMap.html' title='std::collections::hashmap::HashMap'>HashMap</a>&lt;K, V, H&gt;</code></h4>

@@ -21,9 +21,9 @@
 
     <div id="versioninfo">
   <img src="http://www.rust-lang.org/logos/rust-logo-32x32-blk.png" width="32" height="32" alt><br>
-  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.11.0</span><br>
-  <a href="http://github.com/rust-lang/rust/commit/305cf1f1098dc87e346003e6bf7e7cca5705a135"
-    class="hash white-sticker">305cf1f1</a>
+  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.12.0-pre</span><br>
+  <a href="http://github.com/rust-lang/rust/commit/2c50add48273cf1ef44b47eceb5d9446fc81ce41"
+    class="hash white-sticker"></a>
 </div>
 
 
@@ -252,7 +252,7 @@ Typically, tasks do not share memory but instead communicate amongst each other 
 
     spawn(proc() {
         let numbers = rx.recv();
-        println!(&quot;{}&quot;, *numbers.get(0));
+        println!(&quot;{}&quot;, numbers[0]);
     })
 }</span><pre id='rust-example-rendered-3' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>main</span>() {
@@ -263,7 +263,7 @@ Typically, tasks do not share memory but instead communicate amongst each other 
 
     <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
         <span class='kw'>let</span> <span class='ident'>numbers</span> <span class='op'>=</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>();
-        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='op'>*</span><span class='ident'>numbers</span>.<span class='ident'>get</span>(<span class='number'>0</span>));
+        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>numbers</span>[<span class='number'>0</span>]);
     })
 }
 </pre>
@@ -300,11 +300,11 @@ try to modify the previous example to continue using the variable <code>numbers<
 
     spawn(proc() {
         let numbers = rx.recv();
-        println!(&quot;{}&quot;, numbers.get(0));
+        println!(&quot;{}&quot;, numbers[0]);
     });
 
     // Try to print a number from the original task
-    println!(&quot;{}&quot;, *numbers.get(0));
+    println!(&quot;{}&quot;, numbers[0]);
 }</span><pre id='rust-example-rendered-4' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>main</span>() {
     <span class='kw'>let</span> <span class='ident'>numbers</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2i</span>, <span class='number'>3i</span>];
@@ -314,18 +314,18 @@ try to modify the previous example to continue using the variable <code>numbers<
 
     <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
         <span class='kw'>let</span> <span class='ident'>numbers</span> <span class='op'>=</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>();
-        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>numbers</span>.<span class='ident'>get</span>(<span class='number'>0</span>));
+        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>numbers</span>[<span class='number'>0</span>]);
     });
 
     <span class='comment'>// Try to print a number from the original task</span>
-    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='op'>*</span><span class='ident'>numbers</span>.<span class='ident'>get</span>(<span class='number'>0</span>));
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>numbers</span>[<span class='number'>0</span>]);
 }
 </pre>
 
 <p>The compiler will produce an error indicating that the value is no longer in scope:</p>
 
 <pre><code class="language-text">concurrency.rs:12:20: 12:27 error: use of moved value: &#39;numbers&#39;
-concurrency.rs:12     println!(&quot;{}&quot;, numbers.get(0));
+concurrency.rs:12     println!(&quot;{}&quot;, numbers[0]);
                                      ^~~~~~~</code></pre>
 
 <p>Since only one task can own a boxed array at a time,
@@ -342,7 +342,7 @@ Let&#39;s see an example that uses the <code>clone</code> method to create copie
 
         spawn(proc() {
             let numbers = rx.recv();
-            println!(&quot;{:d}&quot;, *numbers.get(num as uint));
+            println!(&quot;{:d}&quot;, numbers[num]);
         })
     }
 }</span><pre id='rust-example-rendered-5' class='rust '>
@@ -356,7 +356,7 @@ Let&#39;s see an example that uses the <code>clone</code> method to create copie
 
         <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
             <span class='kw'>let</span> <span class='ident'>numbers</span> <span class='op'>=</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>();
-            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{:d}&quot;</span>, <span class='op'>*</span><span class='ident'>numbers</span>.<span class='ident'>get</span>(<span class='ident'>num</span> <span class='kw'>as</span> <span class='ident'>uint</span>));
+            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{:d}&quot;</span>, <span class='ident'>numbers</span>[<span class='ident'>num</span>]);
         })
     }
 }
@@ -387,7 +387,7 @@ fn main() {
 
         spawn(proc() {
             let numbers = rx.recv();
-            println!(&quot;{:d}&quot;, *numbers.get(num as uint));
+            println!(&quot;{:d}&quot;, (*numbers)[num as uint]);
         })
     }
 }</span><pre id='rust-example-rendered-6' class='rust '>
@@ -403,7 +403,7 @@ fn main() {
 
         <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
             <span class='kw'>let</span> <span class='ident'>numbers</span> <span class='op'>=</span> <span class='ident'>rx</span>.<span class='ident'>recv</span>();
-            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{:d}&quot;</span>, <span class='op'>*</span><span class='ident'>numbers</span>.<span class='ident'>get</span>(<span class='ident'>num</span> <span class='kw'>as</span> <span class='ident'>uint</span>));
+            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{:d}&quot;</span>, (<span class='op'>*</span><span class='ident'>numbers</span>)[<span class='ident'>num</span> <span class='kw'>as</span> <span class='ident'>uint</span>]);
         })
     }
 }
@@ -456,7 +456,7 @@ fn main() {
             // See: https://github.com/rust-lang/rust/issues/6515
             *numbers.get_mut(num as uint) = *numbers.get_mut(num as uint) + 1;
 
-            println!(&quot;{}&quot;, *numbers.get(num as uint));
+            println!(&quot;{}&quot;, (*numbers)[num as uint]);
 
             // When `numbers` goes out of scope the lock is dropped
         })
@@ -483,7 +483,7 @@ fn main() {
             <span class='comment'>// See: https://github.com/rust-lang/rust/issues/6515</span>
             <span class='op'>*</span><span class='ident'>numbers</span>.<span class='ident'>get_mut</span>(<span class='ident'>num</span> <span class='kw'>as</span> <span class='ident'>uint</span>) <span class='op'>=</span> <span class='op'>*</span><span class='ident'>numbers</span>.<span class='ident'>get_mut</span>(<span class='ident'>num</span> <span class='kw'>as</span> <span class='ident'>uint</span>) <span class='op'>+</span> <span class='number'>1</span>;
 
-            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='op'>*</span><span class='ident'>numbers</span>.<span class='ident'>get</span>(<span class='ident'>num</span> <span class='kw'>as</span> <span class='ident'>uint</span>));
+            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, (<span class='op'>*</span><span class='ident'>numbers</span>)[<span class='ident'>num</span> <span class='kw'>as</span> <span class='ident'>uint</span>]);
 
             <span class='comment'>// When `numbers` goes out of scope the lock is dropped</span>
         })

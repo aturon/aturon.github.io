@@ -172,7 +172,7 @@
 
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>File</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>os</span>::<span class='ident'>getenv</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::{<span class='ident'>os</span>, <span class='ident'>str</span>};
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>os</span>;
 
 <span class='doccomment'>/// Return path to database entry for `term`</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_dbpath_for_term</span>(<span class='ident'>term</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Path</span><span class='op'>&gt;&gt;</span> {
@@ -217,7 +217,7 @@
     <span class='comment'>// Look for the terminal in all of the search directories</span>
     <span class='kw'>for</span> <span class='ident'>p</span> <span class='kw'>in</span> <span class='ident'>dirs_to_search</span>.<span class='ident'>iter</span>() {
         <span class='kw'>if</span> <span class='ident'>p</span>.<span class='ident'>exists</span>() {
-            <span class='kw'>let</span> <span class='ident'>f</span> <span class='op'>=</span> <span class='ident'>str</span>::<span class='ident'>from_char</span>(<span class='ident'>first_char</span>);
+            <span class='kw'>let</span> <span class='ident'>f</span> <span class='op'>=</span> <span class='ident'>first_char</span>.<span class='ident'>to_string</span>();
             <span class='kw'>let</span> <span class='ident'>newp</span> <span class='op'>=</span> <span class='ident'>p</span>.<span class='ident'>join_many</span>([<span class='ident'>f</span>.<span class='ident'>as_slice</span>(), <span class='ident'>term</span>]);
             <span class='kw'>if</span> <span class='ident'>newp</span>.<span class='ident'>exists</span>() {
                 <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='kw'>box</span> <span class='ident'>newp</span>);
@@ -237,7 +237,7 @@
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>open</span>(<span class='ident'>term</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>File</span>, <span class='ident'>String</span><span class='op'>&gt;</span> {
     <span class='kw'>match</span> <span class='ident'>get_dbpath_for_term</span>(<span class='ident'>term</span>) {
         <span class='prelude-val'>Some</span>(<span class='ident'>x</span>) <span class='op'>=&gt;</span> {
-            <span class='kw'>match</span> <span class='ident'>File</span>::<span class='ident'>open</span>(<span class='ident'>x</span>) {
+            <span class='kw'>match</span> <span class='ident'>File</span>::<span class='ident'>open</span>(<span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>x</span>) {
                 <span class='prelude-val'>Ok</span>(<span class='ident'>file</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>file</span>),
                 <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;error opening file: {}&quot;</span>, <span class='ident'>e</span>)),
             }

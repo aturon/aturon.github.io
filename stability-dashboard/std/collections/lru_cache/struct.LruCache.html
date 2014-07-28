@@ -39,23 +39,163 @@
     </nav>
 
     <section id='main' class="content struct">
-<h1 class='fqn'>Struct <a href='../../index.html'>std</a>::<a href='../index.html'>collections</a>::<a href='index.html'>lru_cache</a>::<a class='struct' href=''>LruCache</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-19774' href='../../../src/std/Users/aturon/moz/working/stability-dashboard/src/libstd/collections/lru_cache.rs.html#62-66'>[src]</a></span></h1>
+<h1 class='fqn'>Struct <a href='../../index.html'>std</a>::<a href='../index.html'>collections</a>::<a href='index.html'>lru_cache</a>::<a class='struct' href=''>LruCache</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-19435' href='../../../src/std/Users/aturon/moz/working/stability-dashboard/src/libstd/collections/lru_cache.rs.html#62-66'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct LruCache&lt;K, V&gt; {
     // some fields omitted
 }</pre><div class='docblock'><p>An LRU Cache.</p>
 </div><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;K: <a class='trait' href='../../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a> + <a class='trait' href='../../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a>, V&gt; <a class='struct' href='../../../std/collections/lru_cache/struct.LruCache.html' title='std::collections::lru_cache::LruCache'>LruCache</a>&lt;K, V&gt;</code></h3><div class='impl-methods'><h4 id='method.new' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.new' class='fnname'>new</a>(capacity: <a href='../../primitive.uint.html'>uint</a>) -&gt; <a class='struct' href='../../../std/collections/lru_cache/struct.LruCache.html' title='std::collections::lru_cache::LruCache'>LruCache</a>&lt;K, V&gt;</code></h4>
 <div class='docblock'><p>Create an LRU Cache that holds at most <code>capacity</code> items.</p>
+
+<h1 id="example" class='section-header'><a
+                           href="#example">Example</a></h1><span id='rust-example-raw-0' class='rusttest'>fn main() {
+    use std::collections::LruCache;
+    let mut cache: LruCache&lt;int, &amp;str&gt; = LruCache::new(10);
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>LruCache</span>;
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>cache</span>: <span class='ident'>LruCache</span><span class='op'>&lt;</span><span class='ident'>int</span>, <span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>LruCache</span>::<span class='ident'>new</span>(<span class='number'>10</span>);
+</pre>
 </div><h4 id='method.put' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.put' class='fnname'>put</a>(&amp;mut self, k: K, v: V)</code></h4>
 <div class='docblock'><p>Put a key-value pair into cache.</p>
+
+<h1 id="example-1" class='section-header'><a
+                           href="#example-1">Example</a></h1><span id='rust-example-raw-1' class='rusttest'>fn main() {
+    use std::collections::LruCache;
+    let mut cache = LruCache::new(2);
+    
+    cache.put(1i, &quot;a&quot;);
+    cache.put(2, &quot;b&quot;);
+    assert_eq!(cache.get(&amp;1), Some(&amp;&quot;a&quot;));
+    assert_eq!(cache.get(&amp;2), Some(&amp;&quot;b&quot;));
+}</span><pre id='rust-example-rendered-1' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>LruCache</span>;
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>cache</span> <span class='op'>=</span> <span class='ident'>LruCache</span>::<span class='ident'>new</span>(<span class='number'>2</span>);
+
+<span class='ident'>cache</span>.<span class='ident'>put</span>(<span class='number'>1i</span>, <span class='string'>&quot;a&quot;</span>);
+<span class='ident'>cache</span>.<span class='ident'>put</span>(<span class='number'>2</span>, <span class='string'>&quot;b&quot;</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='number'>1</span>), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;a&quot;</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='number'>2</span>), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;b&quot;</span>));
+</pre>
 </div><h4 id='method.get' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.get' class='fnname'>get</a>&lt;'a&gt;(&amp;'a mut self, k: &amp;K) -&gt; <a class='type' href='../../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;&amp;'a V&gt;</code></h4>
 <div class='docblock'><p>Return a value corresponding to the key in the cache.</p>
+
+<h1 id="example-2" class='section-header'><a
+                           href="#example-2">Example</a></h1><span id='rust-example-raw-2' class='rusttest'>fn main() {
+    use std::collections::LruCache;
+    let mut cache = LruCache::new(2);
+    
+    cache.put(1i, &quot;a&quot;);
+    cache.put(2, &quot;b&quot;);
+    cache.put(2, &quot;c&quot;);
+    cache.put(3, &quot;d&quot;);
+    
+    assert_eq!(cache.get(&amp;1), None);
+    assert_eq!(cache.get(&amp;2), Some(&amp;&quot;c&quot;));
+}</span><pre id='rust-example-rendered-2' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>LruCache</span>;
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>cache</span> <span class='op'>=</span> <span class='ident'>LruCache</span>::<span class='ident'>new</span>(<span class='number'>2</span>);
+
+<span class='ident'>cache</span>.<span class='ident'>put</span>(<span class='number'>1i</span>, <span class='string'>&quot;a&quot;</span>);
+<span class='ident'>cache</span>.<span class='ident'>put</span>(<span class='number'>2</span>, <span class='string'>&quot;b&quot;</span>);
+<span class='ident'>cache</span>.<span class='ident'>put</span>(<span class='number'>2</span>, <span class='string'>&quot;c&quot;</span>);
+<span class='ident'>cache</span>.<span class='ident'>put</span>(<span class='number'>3</span>, <span class='string'>&quot;d&quot;</span>);
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='number'>1</span>), <span class='prelude-val'>None</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='number'>2</span>), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;c&quot;</span>));
+</pre>
 </div><h4 id='method.pop' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.pop' class='fnname'>pop</a>(&amp;mut self, k: &amp;K) -&gt; <a class='type' href='../../../std/option/type.Option.html' title='std::option::Option'>Option</a>&lt;V&gt;</code></h4>
 <div class='docblock'><p>Remove and return a value corresponding to the key from the cache.</p>
+
+<h1 id="example-3" class='section-header'><a
+                           href="#example-3">Example</a></h1><span id='rust-example-raw-3' class='rusttest'>fn main() {
+    use std::collections::LruCache;
+    let mut cache = LruCache::new(2);
+    
+    cache.put(2i, &quot;a&quot;);
+    
+    assert_eq!(cache.pop(&amp;1), None);
+    assert_eq!(cache.pop(&amp;2), Some(&quot;a&quot;));
+    assert_eq!(cache.pop(&amp;2), None);
+    assert_eq!(cache.len(), 0);
+}</span><pre id='rust-example-rendered-3' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>LruCache</span>;
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>cache</span> <span class='op'>=</span> <span class='ident'>LruCache</span>::<span class='ident'>new</span>(<span class='number'>2</span>);
+
+<span class='ident'>cache</span>.<span class='ident'>put</span>(<span class='number'>2i</span>, <span class='string'>&quot;a&quot;</span>);
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>pop</span>(<span class='kw-2'>&amp;</span><span class='number'>1</span>), <span class='prelude-val'>None</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>pop</span>(<span class='kw-2'>&amp;</span><span class='number'>2</span>), <span class='prelude-val'>Some</span>(<span class='string'>&quot;a&quot;</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>pop</span>(<span class='kw-2'>&amp;</span><span class='number'>2</span>), <span class='prelude-val'>None</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>len</span>(), <span class='number'>0</span>);
+</pre>
 </div><h4 id='method.capacity' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.capacity' class='fnname'>capacity</a>(&amp;self) -&gt; <a href='../../primitive.uint.html'>uint</a></code></h4>
 <div class='docblock'><p>Return the maximum number of key-value pairs the cache can hold.</p>
+
+<h1 id="example-4" class='section-header'><a
+                           href="#example-4">Example</a></h1><span id='rust-example-raw-4' class='rusttest'>fn main() {
+    use std::collections::LruCache;
+    let mut cache: LruCache&lt;int, &amp;str&gt; = LruCache::new(2);
+    assert_eq!(cache.capacity(), 2);
+}</span><pre id='rust-example-rendered-4' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>LruCache</span>;
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>cache</span>: <span class='ident'>LruCache</span><span class='op'>&lt;</span><span class='ident'>int</span>, <span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>LruCache</span>::<span class='ident'>new</span>(<span class='number'>2</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>capacity</span>(), <span class='number'>2</span>);
+</pre>
 </div><h4 id='method.change_capacity' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.change_capacity' class='fnname'>change_capacity</a>(&amp;mut self, capacity: <a href='../../primitive.uint.html'>uint</a>)</code></h4>
 <div class='docblock'><p>Change the number of key-value pairs the cache can hold. Remove
 least-recently-used key-value pairs if necessary.</p>
+
+<h1 id="example-5" class='section-header'><a
+                           href="#example-5">Example</a></h1><span id='rust-example-raw-5' class='rusttest'>fn main() {
+    use std::collections::LruCache;
+    let mut cache = LruCache::new(2);
+    
+    cache.put(1i, &quot;a&quot;);
+    cache.put(2, &quot;b&quot;);
+    cache.put(3, &quot;c&quot;);
+    
+    assert_eq!(cache.get(&amp;1), None);
+    assert_eq!(cache.get(&amp;2), Some(&amp;&quot;b&quot;));
+    assert_eq!(cache.get(&amp;3), Some(&amp;&quot;c&quot;));
+    
+    cache.change_capacity(3);
+    cache.put(1i, &quot;a&quot;);
+    cache.put(2, &quot;b&quot;);
+    
+    assert_eq!(cache.get(&amp;1), Some(&amp;&quot;a&quot;));
+    assert_eq!(cache.get(&amp;2), Some(&amp;&quot;b&quot;));
+    assert_eq!(cache.get(&amp;3), Some(&amp;&quot;c&quot;));
+    
+    cache.change_capacity(1);
+    
+    assert_eq!(cache.get(&amp;1), None);
+    assert_eq!(cache.get(&amp;2), None);
+    assert_eq!(cache.get(&amp;3), Some(&amp;&quot;c&quot;));
+}</span><pre id='rust-example-rendered-5' class='rust '>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>LruCache</span>;
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>cache</span> <span class='op'>=</span> <span class='ident'>LruCache</span>::<span class='ident'>new</span>(<span class='number'>2</span>);
+
+<span class='ident'>cache</span>.<span class='ident'>put</span>(<span class='number'>1i</span>, <span class='string'>&quot;a&quot;</span>);
+<span class='ident'>cache</span>.<span class='ident'>put</span>(<span class='number'>2</span>, <span class='string'>&quot;b&quot;</span>);
+<span class='ident'>cache</span>.<span class='ident'>put</span>(<span class='number'>3</span>, <span class='string'>&quot;c&quot;</span>);
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='number'>1</span>), <span class='prelude-val'>None</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='number'>2</span>), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;b&quot;</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='number'>3</span>), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;c&quot;</span>));
+
+<span class='ident'>cache</span>.<span class='ident'>change_capacity</span>(<span class='number'>3</span>);
+<span class='ident'>cache</span>.<span class='ident'>put</span>(<span class='number'>1i</span>, <span class='string'>&quot;a&quot;</span>);
+<span class='ident'>cache</span>.<span class='ident'>put</span>(<span class='number'>2</span>, <span class='string'>&quot;b&quot;</span>);
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='number'>1</span>), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;a&quot;</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='number'>2</span>), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;b&quot;</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='number'>3</span>), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;c&quot;</span>));
+
+<span class='ident'>cache</span>.<span class='ident'>change_capacity</span>(<span class='number'>1</span>);
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='number'>1</span>), <span class='prelude-val'>None</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='number'>2</span>), <span class='prelude-val'>None</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cache</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='number'>3</span>), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='string'>&quot;c&quot;</span>));
+</pre>
 </div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;A: <a class='trait' href='../../../std/fmt/trait.Show.html' title='std::fmt::Show'>Show</a> + <a class='trait' href='../../../std/hash/trait.Hash.html' title='std::hash::Hash'>Hash</a> + <a class='trait' href='../../../std/cmp/trait.Eq.html' title='std::cmp::Eq'>Eq</a>, B: <a class='trait' href='../../../std/fmt/trait.Show.html' title='std::fmt::Show'>Show</a>&gt; <a class='trait' href='../../../std/fmt/trait.Show.html' title='std::fmt::Show'>Show</a> for <a class='struct' href='../../../std/collections/lru_cache/struct.LruCache.html' title='std::collections::lru_cache::LruCache'>LruCache</a>&lt;A, B&gt;</code></h3><div class='impl-methods'><h4 id='method.fmt' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='../../../std/fmt/struct.Formatter.html' title='std::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='../../../std/fmt/type.Result.html' title='std::fmt::Result'>Result</a></code></h4>
 <div class='docblock'><p>Return a string that lists the key-value pairs from most-recently
 used to least-recently used.</p>

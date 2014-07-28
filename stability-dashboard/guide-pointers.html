@@ -21,403 +21,448 @@
 
     <div id="versioninfo">
   <img src="http://www.rust-lang.org/logos/rust-logo-32x32-blk.png" width="32" height="32" alt><br>
-  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.11.0</span><br>
-  <a href="http://github.com/rust-lang/rust/commit/305cf1f1098dc87e346003e6bf7e7cca5705a135"
-    class="hash white-sticker">305cf1f1</a>
+  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.12.0-pre</span><br>
+  <a href="http://github.com/rust-lang/rust/commit/2c50add48273cf1ef44b47eceb5d9446fc81ce41"
+    class="hash white-sticker"></a>
 </div>
 
 
     <h1 class="title">The Rust Pointer Guide</h1>
     <nav id="TOC"><ul>
-<li><a href="#you-don&#39;t-actually-need-pointers,-use-references">1 You don&#39;t actually need pointers, use references</a><ul>
-<li><a href="#a-note-for-those-proficient-in-pointers">1.1 A note for those proficient in pointers</a><ul></ul></li></ul></li>
-<li><a href="#owned-pointers">2 Owned Pointers</a><ul>
-<li><a href="#references-to-traits">2.1 References to Traits</a><ul></ul></li>
-<li><a href="#recursive-data-structures">2.2 Recursive Data Structures</a><ul></ul></li>
-<li><a href="#efficiency">2.3 Efficiency</a><ul></ul></li></ul></li>
-<li><a href="#references">3 References</a><ul></ul></li>
-<li><a href="#returning-pointers">4 Returning Pointers</a><ul></ul></li>
-<li><a href="#related-resources">5 Related Resources</a><ul></ul></li></ul></nav><p>Rust&#39;s pointers are one of its more unique and compelling features. Pointers
+<li><a href="#an-introduction">1 An introduction</a><ul>
+<li><a href="#pointer-basics">1.1 Pointer Basics</a><ul></ul></li>
+<li><a href="#pointer-uses">1.2 Pointer uses</a><ul></ul></li>
+<li><a href="#common-pointer-problems">1.3 Common pointer problems</a><ul></ul></li>
+<li><a href="#conclusion">1.4 Conclusion</a><ul></ul></li></ul></li>
+<li><a href="#references">2 References</a><ul>
+<li><a href="#best-practices">2.1 Best practices</a><ul></ul></li></ul></li>
+<li><a href="#boxes">3 Boxes</a><ul></ul></li>
+<li><a href="#best-practices-1">4 Best practices</a><ul>
+<li><a href="#recursive-data-structures">4.1 Recursive data structures</a><ul></ul></li>
+<li><a href="#returning-data">4.2 Returning data</a><ul></ul></li></ul></li>
+<li><a href="#rc-and-arc">5 Rc and Arc</a><ul>
+<li><a href="#best-practices-2">5.1 Best practices</a><ul></ul></li></ul></li>
+<li><a href="#gc">6 Gc</a><ul>
+<li><a href="#best-practices-3">6.1 Best practices</a><ul></ul></li></ul></li>
+<li><a href="#raw-pointers">7 Raw Pointers</a><ul>
+<li><a href="#best-practices-4">7.1 Best practices</a><ul></ul></li></ul></li>
+<li><a href="#returning-pointers">8 Returning Pointers</a><ul></ul></li>
+<li><a href="#creating-your-own-pointers">9 Creating your own Pointers</a><ul>
+<li><a href="#best-practices-5">9.1 Best practices</a><ul></ul></li></ul></li>
+<li><a href="#cheat-sheet">10 Cheat Sheet</a><ul></ul></li>
+<li><a href="#related-resources">11 Related resources</a><ul></ul></li></ul></nav><p>Rust&#39;s pointers are one of its more unique and compelling features. Pointers
 are also one of the more confusing topics for newcomers to Rust. They can also
 be confusing for people coming from other languages that support pointers, such
 as C++. This guide will help you understand this important topic.</p>
 
-<h1 id="you-don&#39;t-actually-need-pointers,-use-references" class='section-header'><a
-                           href="#you-don&#39;t-actually-need-pointers,-use-references">1 You don&#39;t actually need pointers, use references</a></h1>
-<p>I have good news for you: you probably don&#39;t need to care about pointers,
-especially as you&#39;re getting started. Think of it this way: Rust is a language
-that emphasizes safety. Pointers, as the joke goes, are very pointy: it&#39;s easy
-to accidentally stab yourself. Therefore, Rust is made in a way such that you
-don&#39;t need them very often.</p>
+<p>Be sceptical of non-reference pointers in Rust: use them for a deliberate
+purpose, not just to make the compiler happy. Each pointer type comes with an
+explanation about when they are appropriate to use. Default to references
+unless you&#39;re in one of those specific situations.</p>
 
-<p>&quot;But guide!&quot; you may cry. &quot;My co-worker wrote a function that looks like this:</p>
+<p>You may be interested in the <a href="#cheat-sheet">cheat sheet</a>, which gives a quick
+overview of the types, names, and purpose of the various pointers.</p>
+
+<h1 id="an-introduction" class='section-header'><a
+                           href="#an-introduction">1 An introduction</a></h1>
+<p>If you aren&#39;t familiar with the concept of pointers, here&#39;s a short
+introduction.  Pointers are a very fundamental concept in systems programming
+languages, so it&#39;s important to understand them.</p>
+
+<h2 id="pointer-basics" class='section-header'><a
+                           href="#pointer-basics">1.1 Pointer Basics</a></h2>
+<p>When you create a new variable binding, you&#39;re giving a name to a value that&#39;s
+stored at a particular location on the stack. (If you&#39;re not familiar with the
+&quot;heap&quot; vs. &quot;stack&quot;, please check out <a href="http://stackoverflow.com/questions/79923/what-and-where-are-the-stack-and-heap">this Stack Overflow
+question</a>,
+as the rest of this guide assumes you know the difference.) Like this:</p>
 <span id='rust-example-raw-0' class='rusttest'>fn main() {
-    fn succ(x: &amp;int) -&gt; int { *x + 1 }
+    let x = 5i;
+    let y = 8i;
 }</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='number'>5i</span>;
+<span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='number'>8i</span>;
+</pre>
+
+<table><thead>
+<tr>
+<th>location</th>
+<th>value</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>0xd3e030</td>
+<td>5</td>
+</tr>
+<tr>
+<td>0xd3e028</td>
+<td>8</td>
+</tr>
+</tbody></table>
+
+<p>We&#39;re making up memory locations here, they&#39;re just sample values. Anyway, the
+point is that <code>x</code>, the name we&#39;re using for our variable, corresponds to the
+memory location <code>0xd3e030</code>, and the value at that location is <code>5</code>. When we
+refer to <code>x</code>, we get the corresponding value. Hence, <code>x</code> is <code>5</code>.</p>
+
+<p>Let&#39;s introduce a pointer. In some languages, there is just one type of
+&#39;pointer,&#39; but in Rust, we have many types. In this case, we&#39;ll use a Rust
+<strong>reference</strong>, which is the simplest kind of pointer.</p>
+<span id='rust-example-raw-1' class='rusttest'>fn main() {
+    let x = 5i;
+    let y = 8i;
+    let z = &amp;y;
+}</span><pre id='rust-example-rendered-1' class='rust '>
+<span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='number'>5i</span>;
+<span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='number'>8i</span>;
+<span class='kw'>let</span> <span class='ident'>z</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>y</span>;
+</pre>
+
+<table><thead>
+<tr>
+<th>location</th>
+<th>value</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>0xd3e030</td>
+<td>5</td>
+</tr>
+<tr>
+<td>0xd3e028</td>
+<td>8</td>
+</tr>
+<tr>
+<td>0xd3e020</td>
+<td>0xd3e028</td>
+</tr>
+</tbody></table>
+
+<p>See the difference? Rather than contain a value, the value of a pointer is a
+location in memory. In this case, the location of <code>y</code>. <code>x</code> and <code>y</code> have the
+type <code>int</code>, but <code>z</code> has the type <code>&amp;int</code>. We can print this location using the
+<code>{:p}</code> format string:</p>
+<span id='rust-example-raw-2' class='rusttest'>fn main() {
+    let x = 5i;
+    let y = 8i;
+    let z = &amp;y;
+    
+    println!(&quot;{:p}&quot;, z);
+}</span><pre id='rust-example-rendered-2' class='rust '>
+<span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='number'>5i</span>;
+<span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='number'>8i</span>;
+<span class='kw'>let</span> <span class='ident'>z</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>y</span>;
+
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{:p}&quot;</span>, <span class='ident'>z</span>);
+</pre>
+
+<p>This would print <code>0xd3e028</code>, with our fictional memory addresses.</p>
+
+<p>Because <code>int</code> and <code>&amp;int</code> are different types, we can&#39;t, for example, add them
+together:</p>
+<span id='rust-example-raw-3' class='rusttest'>fn main() {
+    let x = 5i;
+    let y = 8i;
+    let z = &amp;y;
+    
+    println!(&quot;{}&quot;, x + z);
+}</span><pre id='rust-example-rendered-3' class='rust '>
+<span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='number'>5i</span>;
+<span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='number'>8i</span>;
+<span class='kw'>let</span> <span class='ident'>z</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>y</span>;
+
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>x</span> <span class='op'>+</span> <span class='ident'>z</span>);
+</pre>
+
+<p>This gives us an error:</p>
+
+<pre><code class="language-{notrust,ignore}">hello.rs:6:24: 6:25 error: mismatched types: expected `int` but found `&amp;int` (expected int but found &amp;-ptr)
+hello.rs:6     println!(&quot;{}&quot;, x + z);
+                                  ^</code></pre>
+
+<p>We can <strong>dereference</strong> the pointer by using the <code>*</code> operator. Dereferencing a
+pointer means accessing the value at the location stored in the pointer. This
+will work:</p>
+<span id='rust-example-raw-4' class='rusttest'>fn main() {
+    let x = 5i;
+    let y = 8i;
+    let z = &amp;y;
+    
+    println!(&quot;{}&quot;, x + *z);
+}</span><pre id='rust-example-rendered-4' class='rust '>
+<span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='number'>5i</span>;
+<span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='number'>8i</span>;
+<span class='kw'>let</span> <span class='ident'>z</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>y</span>;
+
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>x</span> <span class='op'>+</span> <span class='op'>*</span><span class='ident'>z</span>);
+</pre>
+
+<p>It prints <code>13</code>.</p>
+
+<p>That&#39;s it! That&#39;s all pointers are: they point to some memory location. Not
+much else to them. Now that we&#39;ve discussed the &#39;what&#39; of pointers, let&#39;s
+talk about the &#39;why.&#39;</p>
+
+<h2 id="pointer-uses" class='section-header'><a
+                           href="#pointer-uses">1.2 Pointer uses</a></h2>
+<p>Rust&#39;s pointers are quite useful, but in different ways than in other systems
+languages. We&#39;ll talk about best practices for Rust pointers later in
+the guide, but here are some ways that pointers are useful in other languages:</p>
+
+<p>In C, strings are a pointer to a list of <code>char</code>s, ending with a null byte.
+The only way to use strings is to get quite familiar with pointers.</p>
+
+<p>Pointers are useful to point to memory locations that are not on the stack. For
+example, our example used two stack variables, so we were able to give them
+names. But if we allocated some heap memory, we wouldn&#39;t have that name
+available.  In C, <code>malloc</code> is used to allocate heap memory, and it returns a
+pointer.</p>
+
+<p>As a more general variant of the previous two points, any time you have a
+structure that can change in size, you need a pointer. You can&#39;t tell at
+compile time how much memory to allocate, so you&#39;ve gotta use a pointer to
+point at the memory where it will be allocated, and deal with it at run time.</p>
+
+<p>Pointers are useful in languages that are pass-by-value, rather than
+pass-by-reference. Basically, languages can make two choices (this is made
+up syntax, it&#39;s not Rust):</p>
+
+<pre><code class="language-{notrust,ignore}">fn foo(x) {
+    x = 5
+}
+
+fn main() {
+    i = 1
+    foo(i)
+    // what is the value of i here?
+}</code></pre>
+
+<p>In languages that are pass-by-value, <code>foo</code> will get a copy of <code>i</code>, and so
+the original version of <code>i</code> is not modified. At the comment, <code>i</code> will still be
+<code>1</code>. In a language that is pass-by-reference, <code>foo</code> will get a reference to <code>i</code>,
+and therefore, can change its value. At the comment, <code>i</code> will be <code>5</code>.</p>
+
+<p>So what do pointers have to do with this? Well, since pointers point to a
+location in memory...</p>
+
+<pre><code class="language-{notrust,ignore}">fn foo(&amp;int x) {
+    *x = 5
+}
+
+fn main() {
+    i = 1
+    foo(&amp;i)
+    // what is the value of i here?
+}</code></pre>
+
+<p>Even in a language which is pass by value, <code>i</code> will be <code>5</code> at the comment. You
+see, because the argument <code>x</code> is a pointer, we do send a copy over to <code>foo</code>,
+but because it points at a memory location, which we then assign to, the
+original value is still changed. This pattern is called
+&#39;pass-reference-by-value.&#39; Tricky!</p>
+
+<h2 id="common-pointer-problems" class='section-header'><a
+                           href="#common-pointer-problems">1.3 Common pointer problems</a></h2>
+<p>We&#39;ve talked about pointers, and we&#39;ve sung their praises. So what&#39;s the
+downside? Well, Rust attempts to mitigate each of these kinds of problems,
+but here are problems with pointers in other languages:</p>
+
+<p>Uninitialized pointers can cause a problem. For example, what does this program
+do?</p>
+
+<pre><code class="language-{notrust,ignore}">&amp;int x;
+*x = 5; // whoops!</code></pre>
+
+<p>Who knows? We just declare a pointer, but don&#39;t point it at anything, and then
+set the memory location that it points at to be <code>5</code>. But which location? Nobody
+knows. This might be harmless, and it might be catastrophic.</p>
+
+<p>When you combine pointers and functions, it&#39;s easy to accidentally invalidate
+the memory the pointer is pointing to. For example:</p>
+
+<pre><code class="language-{notrust,ignore}">fn make_pointer(): &amp;int {
+    x = 5;
+
+    return &amp;x;
+}
+
+fn main() {
+    &amp;int i = make_pointer();
+    *i = 5; // uh oh!
+}</code></pre>
+
+<p><code>x</code> is local to the <code>make_pointer</code> function, and therefore, is invalid as soon
+as <code>make_pointer</code> returns. But we return a pointer to its memory location, and
+so back in <code>main</code>, we try to use that pointer, and it&#39;s a very similar
+situation to our first one. Setting invalid memory locations is bad.</p>
+
+<p>As one last example of a big problem with pointers, <strong>aliasing</strong> can be an
+issue. Two pointers are said to alias when they point at the same location
+in memory. Like this:</p>
+
+<pre><code class="language-{notrust,ignore}">fn mutate(&amp;int i, int j) {
+    *i = j;
+}
+
+fn main() {
+  x = 5;
+  y = &amp;x;
+  z = &amp;x; //y and z are aliased
+
+
+  run_in_new_thread(mutate, y, 1);
+  run_in_new_thread(mutate, z, 100);
+
+  // what is the value of x here?
+}</code></pre>
+
+<p>In this made-up example, <code>run_in_new_thread</code> spins up a new thread, and calls
+the given function name with its arguments. Since we have two threads, and
+they&#39;re both operating on aliases to <code>x</code>, we can&#39;t tell which one finishes
+first, and therefore, the value of <code>x</code> is actually non-deterministic. Worse,
+what if one of them had invalidated the memory location they pointed to? We&#39;d
+have the same problem as before, where we&#39;d be setting an invalid location.</p>
+
+<h2 id="conclusion" class='section-header'><a
+                           href="#conclusion">1.4 Conclusion</a></h2>
+<p>That&#39;s a basic overview of pointers as a general concept. As we alluded to
+before, Rust has different kinds of pointers, rather than just one, and
+mitigates all of the problems that we talked about, too. This does mean that
+Rust pointers are slightly more complicated than in other languages, but
+it&#39;s worth it to not have the problems that simple pointers have.</p>
+
+<h1 id="references" class='section-header'><a
+                           href="#references">2 References</a></h1>
+<p>The most basic type of pointer that Rust has is called a &#39;reference.&#39; Rust
+references look like this:</p>
+<span id='rust-example-raw-5' class='rusttest'>fn main() {
+    let x = 5i;
+    let y = &amp;x;
+    
+    println!(&quot;{}&quot;, *y);
+    println!(&quot;{:p}&quot;, y);
+    println!(&quot;{}&quot;, y);
+}</span><pre id='rust-example-rendered-5' class='rust '>
+<span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='number'>5i</span>;
+<span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>x</span>;
+
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='op'>*</span><span class='ident'>y</span>);
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{:p}&quot;</span>, <span class='ident'>y</span>);
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>y</span>);
+</pre>
+
+<p>We&#39;d say &quot;<code>y</code> is a reference to <code>x</code>.&quot; The first <code>println!</code> prints out the
+value of <code>y</code>&#39;s referent by using the dereference operator, <code>*</code>. The second
+one prints out the memory location that <code>y</code> points to, by using the pointer
+format string. The third <code>println!</code> <em>also</em> prints out the value of <code>y</code>&#39;s
+referent, because <code>println!</code> will automatically dereference it for us.</p>
+
+<p>Here&#39;s a function that takes a reference:</p>
+<span id='rust-example-raw-6' class='rusttest'>fn main() {
+    fn succ(x: &amp;int) -&gt; int { *x + 1 }
+}</span><pre id='rust-example-rendered-6' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>succ</span>(<span class='ident'>x</span>: <span class='kw-2'>&amp;</span><span class='ident'>int</span>) <span class='op'>-&gt;</span> <span class='ident'>int</span> { <span class='op'>*</span><span class='ident'>x</span> <span class='op'>+</span> <span class='number'>1</span> }
 </pre>
 
-<p>So I wrote this code to try it out:</p>
-<span id='rust-example-raw-1' class='rusttest'>fn main() {
-    let number = 5;
-    let succ_number = succ(number);
-    println!(&quot;{}&quot;, succ_number);
-}</span><pre id='rust-example-rendered-1' class='rust '>
-<span class='kw'>fn</span> <span class='ident'>main</span>() {
-    <span class='kw'>let</span> <span class='ident'>number</span> <span class='op'>=</span> <span class='number'>5</span>;
-    <span class='kw'>let</span> <span class='ident'>succ_number</span> <span class='op'>=</span> <span class='ident'>succ</span>(<span class='ident'>number</span>);
-    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>succ_number</span>);
-}
-</pre>
-
-<p>And now I get an error:</p>
-
-<pre><code class="language-text">error: mismatched types: expected `&amp;int` but found `&lt;generic integer #0&gt;` (expected &amp;-ptr but found integral variable)</code></pre>
-
-<p>What gives? It needs a pointer! Therefore I have to use pointers!&quot;</p>
-
-<p>Turns out, you don&#39;t. All you need is a reference. Try this on for size:</p>
-<span id='rust-example-raw-2' class='rusttest'>fn succ(x: &amp;int) -&gt; int { *x + 1 }
-fn main() {
-    let number = 5;
-    let succ_number = succ(&amp;number);
-    println!(&quot;{}&quot;, succ_number);
-}</span><pre id='rust-example-rendered-2' class='rust '>
-<span class='kw'>fn</span> <span class='ident'>main</span>() {
-    <span class='kw'>let</span> <span class='ident'>number</span> <span class='op'>=</span> <span class='number'>5</span>;
-    <span class='kw'>let</span> <span class='ident'>succ_number</span> <span class='op'>=</span> <span class='ident'>succ</span>(<span class='kw-2'>&amp;</span><span class='ident'>number</span>);
-    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>succ_number</span>);
-}
-</pre>
-
-<p>It&#39;s that easy! One extra little <code>&amp;</code> there. This code will run, and print <code>6</code>.</p>
-
-<p>That&#39;s all you need to know. Your co-worker could have written the function
-like this:</p>
-<span id='rust-example-raw-3' class='rusttest'>fn succ(x: int) -&gt; int { x + 1 }
+<p>You can also use <code>&amp;</code> as an operator to create a reference, so we can
+call this function in two different ways:</p>
+<span id='rust-example-raw-7' class='rusttest'>fn succ(x: &amp;int) -&gt; int { *x + 1 }
 
 fn main() {
-    let number = 5;
-    let succ_number = succ(number);
-    println!(&quot;{}&quot;, succ_number);
-}</span><pre id='rust-example-rendered-3' class='rust '>
-<span class='kw'>fn</span> <span class='ident'>succ</span>(<span class='ident'>x</span>: <span class='ident'>int</span>) <span class='op'>-&gt;</span> <span class='ident'>int</span> { <span class='ident'>x</span> <span class='op'>+</span> <span class='number'>1</span> }
 
-<span class='kw'>fn</span> <span class='ident'>main</span>() {
-    <span class='kw'>let</span> <span class='ident'>number</span> <span class='op'>=</span> <span class='number'>5</span>;
-    <span class='kw'>let</span> <span class='ident'>succ_number</span> <span class='op'>=</span> <span class='ident'>succ</span>(<span class='ident'>number</span>);
-    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>succ_number</span>);
-}
-</pre>
+    let x = 5i;
+    let y = &amp;x;
 
-<p>No pointers even needed. Then again, this is a simple example. I assume that
-your real-world <code>succ</code> function is more complicated, and maybe your co-worker
-had a good reason for <code>x</code> to be a pointer of some kind. In that case, references
-are your best friend. Don&#39;t worry about it, life is too short.</p>
-
-<p>However.</p>
-
-<p>Here are the use-cases for pointers. I&#39;ve prefixed them with the name of the
-pointer that satisfies that use-case:</p>
-
-<ol>
-<li><p>Owned: <code>Box&lt;Trait&gt;</code> must be a pointer, because you don&#39;t know the size of the
-object, so indirection is mandatory.</p></li>
-<li><p>Owned: You need a recursive data structure. These can be infinite sized, so
-indirection is mandatory.</p></li>
-<li><p>Owned: A very, very, very rare situation in which you have a <em>huge</em> chunk of
-data that you wish to pass to many methods. Passing a pointer will make this
-more efficient. If you&#39;re coming from another language where this technique is
-common, such as C++, please read &quot;A note...&quot; below.</p></li>
-<li><p>Reference: You&#39;re writing a function, and you need a pointer, but you don&#39;t
-care about its ownership. If you make the argument a reference, callers
-can send in whatever kind they want.</p></li>
-<li><p>Shared: You need to share data among tasks. You can achieve that via the
-<code>Rc</code> and <code>Arc</code> types.</p></li>
-</ol>
-
-<p>Five exceptions. That&#39;s it. Otherwise, you shouldn&#39;t need them. Be sceptical
-of pointers in Rust: use them for a deliberate purpose, not just to make the
-compiler happy.</p>
-
-<h2 id="a-note-for-those-proficient-in-pointers" class='section-header'><a
-                           href="#a-note-for-those-proficient-in-pointers">1.1 A note for those proficient in pointers</a></h2>
-<p>If you&#39;re coming to Rust from a language like C or C++, you may be used to
-passing things by reference, or passing things by pointer. In some languages,
-like Java, you can&#39;t even have objects without a pointer to them. Therefore, if
-you were writing this Rust code:</p>
-<span id='rust-example-raw-4' class='rusttest'>fn transform(p: Point) -&gt; Point { p }
-#[deriving(Show)]
-struct Point {
-    x: int,
-    y: int,
-}
-
-fn main() {
-    let p0 = Point { x: 5, y: 10};
-    let p1 = transform(p0);
-    println!(&quot;{}&quot;, p1);
-}
-</span><pre id='rust-example-rendered-4' class='rust '>
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Show</span>)]</span>
-<span class='kw'>struct</span> <span class='ident'>Point</span> {
-    <span class='ident'>x</span>: <span class='ident'>int</span>,
-    <span class='ident'>y</span>: <span class='ident'>int</span>,
-}
-
-<span class='kw'>fn</span> <span class='ident'>main</span>() {
-    <span class='kw'>let</span> <span class='ident'>p0</span> <span class='op'>=</span> <span class='ident'>Point</span> { <span class='ident'>x</span>: <span class='number'>5</span>, <span class='ident'>y</span>: <span class='number'>10</span>};
-    <span class='kw'>let</span> <span class='ident'>p1</span> <span class='op'>=</span> <span class='ident'>transform</span>(<span class='ident'>p0</span>);
-    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>p1</span>);
-}
-</pre>
-
-<p>I think you&#39;d implement <code>transform</code> like this:</p>
-<span id='rust-example-raw-5' class='rusttest'>fn main() {
-    struct Point {
-        x: int,
-        y: int,
-    }
-    let p0 = Point { x: 5, y: 10};
-    fn transform(p: &amp;Point) -&gt; Point {
-        Point { x: p.x + 1, y: p.y + 1}
-    }
-    
-    // and change this:
-    let p1 = transform(&amp;p0);
-}</span><pre id='rust-example-rendered-5' class='rust '>
-<span class='kw'>fn</span> <span class='ident'>transform</span>(<span class='ident'>p</span>: <span class='kw-2'>&amp;</span><span class='ident'>Point</span>) <span class='op'>-&gt;</span> <span class='ident'>Point</span> {
-    <span class='ident'>Point</span> { <span class='ident'>x</span>: <span class='ident'>p</span>.<span class='ident'>x</span> <span class='op'>+</span> <span class='number'>1</span>, <span class='ident'>y</span>: <span class='ident'>p</span>.<span class='ident'>y</span> <span class='op'>+</span> <span class='number'>1</span>}
-}
-
-<span class='comment'>// and change this:</span>
-<span class='kw'>let</span> <span class='ident'>p1</span> <span class='op'>=</span> <span class='ident'>transform</span>(<span class='kw-2'>&amp;</span><span class='ident'>p0</span>);
-</pre>
-
-<p>This does work, but you don&#39;t need to create those references! The better way to write this is simply:</p>
-<span id='rust-example-raw-6' class='rusttest'>#[deriving(Show)]
-struct Point {
-    x: int,
-    y: int,
-}
-
-fn transform(p: Point) -&gt; Point {
-    Point { x: p.x + 1, y: p.y + 1}
-}
-
-fn main() {
-    let p0 = Point { x: 5, y: 10};
-    let p1 = transform(p0);
-    println!(&quot;{}&quot;, p1);
-}</span><pre id='rust-example-rendered-6' class='rust '>
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Show</span>)]</span>
-<span class='kw'>struct</span> <span class='ident'>Point</span> {
-    <span class='ident'>x</span>: <span class='ident'>int</span>,
-    <span class='ident'>y</span>: <span class='ident'>int</span>,
-}
-
-<span class='kw'>fn</span> <span class='ident'>transform</span>(<span class='ident'>p</span>: <span class='ident'>Point</span>) <span class='op'>-&gt;</span> <span class='ident'>Point</span> {
-    <span class='ident'>Point</span> { <span class='ident'>x</span>: <span class='ident'>p</span>.<span class='ident'>x</span> <span class='op'>+</span> <span class='number'>1</span>, <span class='ident'>y</span>: <span class='ident'>p</span>.<span class='ident'>y</span> <span class='op'>+</span> <span class='number'>1</span>}
-}
-
-<span class='kw'>fn</span> <span class='ident'>main</span>() {
-    <span class='kw'>let</span> <span class='ident'>p0</span> <span class='op'>=</span> <span class='ident'>Point</span> { <span class='ident'>x</span>: <span class='number'>5</span>, <span class='ident'>y</span>: <span class='number'>10</span>};
-    <span class='kw'>let</span> <span class='ident'>p1</span> <span class='op'>=</span> <span class='ident'>transform</span>(<span class='ident'>p0</span>);
-    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>p1</span>);
-}
-</pre>
-
-<p>But won&#39;t this be inefficient? Well, that&#39;s a complicated question, but it&#39;s
-important to know that Rust, like C and C++, store aggregate data types
-&#39;unboxed,&#39; whereas languages like Java and Ruby store these types as &#39;boxed.&#39;
-For smaller structs, this way will be more efficient. For larger ones, it may
-be less so. But don&#39;t reach for that pointer until you must! Make sure that the
-struct is large enough by performing some tests before you add in the
-complexity of pointers.</p>
-
-<h1 id="owned-pointers" class='section-header'><a
-                           href="#owned-pointers">2 Owned Pointers</a></h1>
-<p>Owned pointers are the conceptually simplest kind of pointer in Rust. A rough
-approximation of owned pointers follows:</p>
-
-<ol>
-<li><p>Only one owned pointer may exist to a particular place in memory. It may be
-borrowed from that owner, however.</p></li>
-<li><p>The Rust compiler uses static analysis to determine where the pointer is in
-scope, and handles allocating and de-allocating that memory. Owned pointers are
-not garbage collected.</p></li>
-</ol>
-
-<p>These two properties make for three use cases.</p>
-
-<h2 id="references-to-traits" class='section-header'><a
-                           href="#references-to-traits">2.1 References to Traits</a></h2>
-<p>Traits must be referenced through a pointer, because the struct that implements
-the trait may be a different size than a different struct that implements the
-trait. Therefore, unboxed traits don&#39;t make any sense, and aren&#39;t allowed.</p>
-
-<h2 id="recursive-data-structures" class='section-header'><a
-                           href="#recursive-data-structures">2.2 Recursive Data Structures</a></h2>
-<p>Sometimes, you need a recursive data structure. The simplest is known as a &#39;cons list&#39;:</p>
-<span id='rust-example-raw-7' class='rusttest'>#[deriving(Show)]
-enum List&lt;T&gt; {
-    Nil,
-    Cons(T, Box&lt;List&lt;T&gt;&gt;),
-}
-
-fn main() {
-    let list: List&lt;int&gt; = Cons(1, box Cons(2, box Cons(3, box Nil)));
-    println!(&quot;{}&quot;, list);
+    println!(&quot;{}&quot;, succ(y));
+    println!(&quot;{}&quot;, succ(&amp;x));
 }</span><pre id='rust-example-rendered-7' class='rust '>
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Show</span>)]</span>
-<span class='kw'>enum</span> <span class='ident'>List</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
-    <span class='ident'>Nil</span>,
-    <span class='ident'>Cons</span>(<span class='ident'>T</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>List</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>),
-}
+<span class='kw'>fn</span> <span class='ident'>succ</span>(<span class='ident'>x</span>: <span class='kw-2'>&amp;</span><span class='ident'>int</span>) <span class='op'>-&gt;</span> <span class='ident'>int</span> { <span class='op'>*</span><span class='ident'>x</span> <span class='op'>+</span> <span class='number'>1</span> }
 
 <span class='kw'>fn</span> <span class='ident'>main</span>() {
-    <span class='kw'>let</span> <span class='ident'>list</span>: <span class='ident'>List</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Cons</span>(<span class='number'>1</span>, <span class='kw'>box</span> <span class='ident'>Cons</span>(<span class='number'>2</span>, <span class='kw'>box</span> <span class='ident'>Cons</span>(<span class='number'>3</span>, <span class='kw'>box</span> <span class='ident'>Nil</span>)));
-    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>list</span>);
+
+    <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='number'>5i</span>;
+    <span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>x</span>;
+
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>succ</span>(<span class='ident'>y</span>));
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>succ</span>(<span class='kw-2'>&amp;</span><span class='ident'>x</span>));
 }
 </pre>
 
-<p>This prints:</p>
+<p>Both of these <code>println!</code>s will print out <code>6</code>.</p>
 
-<pre><code class="language-text">Cons(1, box Cons(2, box Cons(3, box Nil)))</code></pre>
-
-<p>The inner lists <em>must</em> be an owned pointer, because we can&#39;t know how many
-elements are in the list. Without knowing the length, we don&#39;t know the size,
-and therefore require the indirection that pointers offer.</p>
-
-<h2 id="efficiency" class='section-header'><a
-                           href="#efficiency">2.3 Efficiency</a></h2>
-<p>This should almost never be a concern, but because creating an owned pointer
-boxes its value, it therefore makes referring to the value the size of the box.
-This may make passing an owned pointer to a function less expensive than
-passing the value itself. Don&#39;t worry yourself with this case until you&#39;ve
-proved that it&#39;s an issue through benchmarks.</p>
-
-<p>For example, this will work:</p>
-<span id='rust-example-raw-8' class='rusttest'>struct Point {
-    x: int,
-    y: int,
-}
-
-fn main() {
-    let a = Point { x: 10, y: 20 };
-    spawn(proc() {
-        println!(&quot;{}&quot;, a.x);
-    });
+<p>Of course, if this were real code, we wouldn&#39;t bother with the reference, and
+just write:</p>
+<span id='rust-example-raw-8' class='rusttest'>fn main() {
+    fn succ(x: int) -&gt; int { x + 1 }
 }</span><pre id='rust-example-rendered-8' class='rust '>
-<span class='kw'>struct</span> <span class='ident'>Point</span> {
-    <span class='ident'>x</span>: <span class='ident'>int</span>,
-    <span class='ident'>y</span>: <span class='ident'>int</span>,
-}
-
-<span class='kw'>fn</span> <span class='ident'>main</span>() {
-    <span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>Point</span> { <span class='ident'>x</span>: <span class='number'>10</span>, <span class='ident'>y</span>: <span class='number'>20</span> };
-    <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
-        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>a</span>.<span class='ident'>x</span>);
-    });
-}
+<span class='kw'>fn</span> <span class='ident'>succ</span>(<span class='ident'>x</span>: <span class='ident'>int</span>) <span class='op'>-&gt;</span> <span class='ident'>int</span> { <span class='ident'>x</span> <span class='op'>+</span> <span class='number'>1</span> }
 </pre>
 
-<p>This struct is tiny, so it&#39;s fine. If <code>Point</code> were large, this would be more
-efficient:</p>
-<span id='rust-example-raw-9' class='rusttest'>struct Point {
-    x: int,
-    y: int,
-}
-
-fn main() {
-    let a = box Point { x: 10, y: 20 };
-    spawn(proc() {
-        println!(&quot;{}&quot;, a.x);
-    });
+<p>References are immutable by default:</p>
+<span id='rust-example-raw-9' class='rusttest'>fn main() {
+    let x = 5i;
+    let y = &amp;x;
+    
+    *y = 5; // error: cannot assign to immutable dereference of `&amp;`-pointer `*y`
 }</span><pre id='rust-example-rendered-9' class='rust '>
-<span class='kw'>struct</span> <span class='ident'>Point</span> {
-    <span class='ident'>x</span>: <span class='ident'>int</span>,
-    <span class='ident'>y</span>: <span class='ident'>int</span>,
-}
+<span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='number'>5i</span>;
+<span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>x</span>;
 
-<span class='kw'>fn</span> <span class='ident'>main</span>() {
-    <span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>Point</span> { <span class='ident'>x</span>: <span class='number'>10</span>, <span class='ident'>y</span>: <span class='number'>20</span> };
-    <span class='ident'>spawn</span>(<span class='kw'>proc</span>() {
-        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>a</span>.<span class='ident'>x</span>);
-    });
-}
+<span class='op'>*</span><span class='ident'>y</span> <span class='op'>=</span> <span class='number'>5</span>; <span class='comment'>// error: cannot assign to immutable dereference of `&amp;`-pointer `*y`</span>
 </pre>
 
-<p>Now it&#39;ll be copying a pointer-sized chunk of memory rather than the whole
-struct.</p>
-
-<h1 id="references" class='section-header'><a
-                           href="#references">3 References</a></h1>
-<p>References are the third major kind of pointer Rust supports. They are
-simultaneously the simplest and the most complicated kind. Let me explain:
-references are considered &#39;borrowed&#39; because they claim no ownership over the
-data they&#39;re pointing to. They&#39;re just borrowing it for a while. So in that
-sense, they&#39;re simple: just keep whatever ownership the data already has. For
-example:</p>
-<span id='rust-example-raw-10' class='rusttest'>struct Point {
-    x: f32,
-    y: f32,
-}
-
-fn compute_distance(p1: &amp;Point, p2: &amp;Point) -&gt; f32 {
-    let x_d = p1.x - p2.x;
-    let y_d = p1.y - p2.y;
-
-    (x_d * x_d + y_d * y_d).sqrt()
-}
-
-fn main() {
-    let origin =    &amp;Point { x: 0.0, y: 0.0 };
-    let p1     = box Point { x: 5.0, y: 3.0 };
-
-    println!(&quot;{}&quot;, compute_distance(origin, p1));
+<p>They can be made mutable with <code>mut</code>, but only if its referent is also mutable.
+This works:</p>
+<span id='rust-example-raw-10' class='rusttest'>fn main() {
+    let mut x = 5i;
+    let y = &amp;mut x;
 }</span><pre id='rust-example-rendered-10' class='rust '>
-<span class='kw'>struct</span> <span class='ident'>Point</span> {
-    <span class='ident'>x</span>: <span class='ident'>f32</span>,
-    <span class='ident'>y</span>: <span class='ident'>f32</span>,
-}
-
-<span class='kw'>fn</span> <span class='ident'>compute_distance</span>(<span class='ident'>p1</span>: <span class='kw-2'>&amp;</span><span class='ident'>Point</span>, <span class='ident'>p2</span>: <span class='kw-2'>&amp;</span><span class='ident'>Point</span>) <span class='op'>-&gt;</span> <span class='ident'>f32</span> {
-    <span class='kw'>let</span> <span class='ident'>x_d</span> <span class='op'>=</span> <span class='ident'>p1</span>.<span class='ident'>x</span> <span class='op'>-</span> <span class='ident'>p2</span>.<span class='ident'>x</span>;
-    <span class='kw'>let</span> <span class='ident'>y_d</span> <span class='op'>=</span> <span class='ident'>p1</span>.<span class='ident'>y</span> <span class='op'>-</span> <span class='ident'>p2</span>.<span class='ident'>y</span>;
-
-    (<span class='ident'>x_d</span> <span class='op'>*</span> <span class='ident'>x_d</span> <span class='op'>+</span> <span class='ident'>y_d</span> <span class='op'>*</span> <span class='ident'>y_d</span>).<span class='ident'>sqrt</span>()
-}
-
-<span class='kw'>fn</span> <span class='ident'>main</span>() {
-    <span class='kw'>let</span> <span class='ident'>origin</span> <span class='op'>=</span>    <span class='kw-2'>&amp;</span><span class='ident'>Point</span> { <span class='ident'>x</span>: <span class='number'>0.0</span>, <span class='ident'>y</span>: <span class='number'>0.0</span> };
-    <span class='kw'>let</span> <span class='ident'>p1</span>     <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>Point</span> { <span class='ident'>x</span>: <span class='number'>5.0</span>, <span class='ident'>y</span>: <span class='number'>3.0</span> };
-
-    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>compute_distance</span>(<span class='ident'>origin</span>, <span class='ident'>p1</span>));
-}
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='number'>5i</span>;
+<span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>x</span>;
 </pre>
 
-<p>This prints <code>5.83095189</code>. You can see that the <code>compute_distance</code> function
-takes in two references, a reference to a value on the stack, and a reference
-to a value in a box.
-Of course, if this were a real program, we wouldn&#39;t have any of these pointers,
-they&#39;re just there to demonstrate the concepts.</p>
+<p>This does not:</p>
+<span id='rust-example-raw-11' class='rusttest'>fn main() {
+    let x = 5i;
+    let y = &amp;mut x; // error: cannot borrow immutable local variable `x` as mutable
+}</span><pre id='rust-example-rendered-11' class='rust '>
+<span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='number'>5i</span>;
+<span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>x</span>; <span class='comment'>// error: cannot borrow immutable local variable `x` as mutable</span>
+</pre>
 
-<p>So how is this hard? Well, because we&#39;re ignoring ownership, the compiler needs
-to take great care to make sure that everything is safe. Despite their complete
-safety, a reference&#39;s representation at runtime is the same as that of
-an ordinary pointer in a C program. They introduce zero overhead. The compiler
-does all safety checks at compile time.</p>
+<p>Immutable pointers are allowed to alias:</p>
+<span id='rust-example-raw-12' class='rusttest'>fn main() {
+    let x = 5i;
+    let y = &amp;x;
+    let z = &amp;x;
+}</span><pre id='rust-example-rendered-12' class='rust '>
+<span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='number'>5i</span>;
+<span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>x</span>;
+<span class='kw'>let</span> <span class='ident'>z</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>x</span>;
+</pre>
 
-<p>This theory is called &#39;region pointers&#39; and you can read more about it
-<a href="http://www.cs.umd.edu/projects/cyclone/papers/cyclone-regions.pdf">here</a>.
-Region pointers evolved into what we know today as &#39;lifetimes&#39;.</p>
+<p>Mutable ones, however, are not:</p>
+<span id='rust-example-raw-13' class='rusttest'>fn main() {
+    let x = 5i;
+    let y = &amp;mut x;
+    let z = &amp;mut x; // error: cannot borrow `x` as mutable more than once at a time
+}</span><pre id='rust-example-rendered-13' class='rust '>
+<span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='number'>5i</span>;
+<span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>x</span>;
+<span class='kw'>let</span> <span class='ident'>z</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>x</span>; <span class='comment'>// error: cannot borrow `x` as mutable more than once at a time</span>
+</pre>
+
+<p>Despite their complete safety, a reference&#39;s representation at runtime is the
+same as that of an ordinary pointer in a C program. They introduce zero
+overhead. The compiler does all safety checks at compile time. The theory that
+allows for this was originally called <strong>region pointers</strong>. Region pointers
+evolved into what we know today as <strong>lifetimes</strong>.</p>
 
 <p>Here&#39;s the simple explanation: would you expect this code to compile?</p>
-<span id='rust-example-raw-11' class='rusttest'>fn main() {
+<span id='rust-example-raw-14' class='rusttest'>fn main() {
     println!(&quot;{}&quot;, x);
     let x = 5;
-}</span><pre id='rust-example-rendered-11' class='rust '>
+}</span><pre id='rust-example-rendered-14' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>main</span>() {
     <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>x</span>);
     <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='number'>5</span>;
@@ -428,24 +473,32 @@ Region pointers evolved into what we know today as &#39;lifetimes&#39;.</p>
 it&#39;s declared to when it goes out of scope. In this case, that&#39;s the end of
 the <code>main</code> function. So you know this code will cause an error. We call this
 duration a &#39;lifetime&#39;. Let&#39;s try a more complex example:</p>
-<span id='rust-example-raw-12' class='rusttest'>fn main() {
-    let mut x = box 5i;
+<span id='rust-example-raw-15' class='rusttest'>fn main() {
+    let x = &amp;mut 5i;
+
     if *x &lt; 10 {
         let y = &amp;x;
+
         println!(&quot;Oh no: {}&quot;, y);
         return;
     }
+
     *x -= 1;
+
     println!(&quot;Oh no: {}&quot;, x);
-}</span><pre id='rust-example-rendered-12' class='rust '>
+}</span><pre id='rust-example-rendered-15' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>main</span>() {
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='number'>5i</span>;
+    <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='number'>5i</span>;
+
     <span class='kw'>if</span> <span class='op'>*</span><span class='ident'>x</span> <span class='op'>&lt;</span> <span class='number'>10</span> {
         <span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>x</span>;
+
         <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Oh no: {}&quot;</span>, <span class='ident'>y</span>);
         <span class='kw'>return</span>;
     }
+
     <span class='op'>*</span><span class='ident'>x</span> <span class='op'>-=</span> <span class='number'>1</span>;
+
     <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Oh no: {}&quot;</span>, <span class='ident'>x</span>);
 }
 </pre>
@@ -453,8 +506,9 @@ duration a &#39;lifetime&#39;. Let&#39;s try a more complex example:</p>
 <p>Here, we&#39;re borrowing a pointer to <code>x</code> inside of the <code>if</code>. The compiler, however,
 is able to determine that that pointer will go out of scope without <code>x</code> being
 mutated, and therefore, lets us pass. This wouldn&#39;t work:</p>
-<span id='rust-example-raw-13' class='rusttest'>fn main() {
-    let mut x = box 5i;
+<span id='rust-example-raw-16' class='rusttest'>fn main() {
+    let x = &amp;mut 5i;
+
     if *x &lt; 10 {
         let y = &amp;x;
         *x -= 1;
@@ -462,11 +516,14 @@ mutated, and therefore, lets us pass. This wouldn&#39;t work:</p>
         println!(&quot;Oh no: {}&quot;, y);
         return;
     }
+
     *x -= 1;
+
     println!(&quot;Oh no: {}&quot;, x);
-}</span><pre id='rust-example-rendered-13' class='rust '>
+}</span><pre id='rust-example-rendered-16' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>main</span>() {
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='number'>5i</span>;
+    <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='number'>5i</span>;
+
     <span class='kw'>if</span> <span class='op'>*</span><span class='ident'>x</span> <span class='op'>&lt;</span> <span class='number'>10</span> {
         <span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>x</span>;
         <span class='op'>*</span><span class='ident'>x</span> <span class='op'>-=</span> <span class='number'>1</span>;
@@ -474,14 +531,16 @@ mutated, and therefore, lets us pass. This wouldn&#39;t work:</p>
         <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Oh no: {}&quot;</span>, <span class='ident'>y</span>);
         <span class='kw'>return</span>;
     }
+
     <span class='op'>*</span><span class='ident'>x</span> <span class='op'>-=</span> <span class='number'>1</span>;
+
     <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Oh no: {}&quot;</span>, <span class='ident'>x</span>);
 }
 </pre>
 
 <p>It gives this error:</p>
 
-<pre><code class="language-text">test.rs:5:8: 5:10 error: cannot assign to `*x` because it is borrowed
+<pre><code class="language-{notrust,ignore}">test.rs:5:8: 5:10 error: cannot assign to `*x` because it is borrowed
 test.rs:5         *x -= 1;
                   ^~
 test.rs:4:16: 4:18 note: borrow of `*x` occurs here
@@ -493,68 +552,476 @@ hard for a computer, too! There is an entire <a href="guide-lifetimes.html">guid
 and lifetimes</a> that goes into lifetimes in
 great detail, so if you want the full details, check that out.</p>
 
-<h1 id="returning-pointers" class='section-header'><a
-                           href="#returning-pointers">4 Returning Pointers</a></h1>
-<p>We&#39;ve talked a lot about functions that accept various kinds of pointers, but
-what about returning them? In general, it is better to let the caller decide
-how to use a function&#39;s output, instead of assuming a certain type of pointer
-is best.</p>
+<h2 id="best-practices" class='section-header'><a
+                           href="#best-practices">2.1 Best practices</a></h2>
+<p>In general, prefer stack allocation over heap allocation. Using references to
+stack allocated information is preferred whenever possible. Therefore,
+references are the default pointer type you should use, unless you have
+specific reason to use a different type. The other types of pointers cover when
+they&#39;re appropriate to use in their own best practices sections.</p>
 
-<p>What does that mean? Don&#39;t do this:</p>
-<span id='rust-example-raw-14' class='rusttest'>fn foo(x: Box&lt;int&gt;) -&gt; Box&lt;int&gt; {
+<p>Use references when you want to use a pointer, but do not want to take ownership.
+References just borrow ownership, which is more polite if you don&#39;t need the
+ownership. In other words, prefer:</p>
+<span id='rust-example-raw-17' class='rusttest'>fn main() {
+    fn succ(x: &amp;int) -&gt; int { *x + 1 }
+}</span><pre id='rust-example-rendered-17' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>succ</span>(<span class='ident'>x</span>: <span class='kw-2'>&amp;</span><span class='ident'>int</span>) <span class='op'>-&gt;</span> <span class='ident'>int</span> { <span class='op'>*</span><span class='ident'>x</span> <span class='op'>+</span> <span class='number'>1</span> }
+</pre>
+
+<p>to</p>
+<span id='rust-example-raw-18' class='rusttest'>fn main() {
+    fn succ(x: Box&lt;int&gt;) -&gt; int { *x + 1 }
+}</span><pre id='rust-example-rendered-18' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>succ</span>(<span class='ident'>x</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>int</span> { <span class='op'>*</span><span class='ident'>x</span> <span class='op'>+</span> <span class='number'>1</span> }
+</pre>
+
+<p>As a corollary to that rule, references allow you to accept a wide variety of
+other pointers, and so are useful so that you don&#39;t have to write a number
+of variants per pointer. In other words, prefer:</p>
+<span id='rust-example-raw-19' class='rusttest'>fn main() {
+    fn succ(x: &amp;int) -&gt; int { *x + 1 }
+}</span><pre id='rust-example-rendered-19' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>succ</span>(<span class='ident'>x</span>: <span class='kw-2'>&amp;</span><span class='ident'>int</span>) <span class='op'>-&gt;</span> <span class='ident'>int</span> { <span class='op'>*</span><span class='ident'>x</span> <span class='op'>+</span> <span class='number'>1</span> }
+</pre>
+
+<p>to</p>
+<span id='rust-example-raw-20' class='rusttest'>fn main() {
+    fn box_succ(x: Box&lt;int&gt;) -&gt; int { *x + 1 }
+    
+    fn rc_succ(x: std::rc::Rc&lt;int&gt;) -&gt; int { *x + 1 }
+}</span><pre id='rust-example-rendered-20' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>box_succ</span>(<span class='ident'>x</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>int</span> { <span class='op'>*</span><span class='ident'>x</span> <span class='op'>+</span> <span class='number'>1</span> }
+
+<span class='kw'>fn</span> <span class='ident'>rc_succ</span>(<span class='ident'>x</span>: <span class='ident'>std</span>::<span class='ident'>rc</span>::<span class='ident'>Rc</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>int</span> { <span class='op'>*</span><span class='ident'>x</span> <span class='op'>+</span> <span class='number'>1</span> }
+</pre>
+
+<h1 id="boxes" class='section-header'><a
+                           href="#boxes">3 Boxes</a></h1>
+<p><code>Box&lt;T&gt;</code> is Rust&#39;s &#39;boxed pointer&#39; type. Boxes provide the simplest form of
+heap allocation in Rust. Creating a box looks like this:</p>
+<span id='rust-example-raw-21' class='rusttest'>fn main() {
+    let x = box(std::boxed::HEAP) 5i;
+}</span><pre id='rust-example-rendered-21' class='rust '>
+<span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>box</span>(<span class='ident'>std</span>::<span class='ident'>boxed</span>::<span class='ident'>HEAP</span>) <span class='number'>5i</span>;
+</pre>
+
+<p><code>box</code> is a keyword that does &#39;placement new,&#39; which we&#39;ll talk about in a bit.
+<code>box</code> will be useful for creating a number of heap-allocated types, but is not
+quite finished yet. In the meantime, <code>box</code>&#39;s type defaults to
+<code>std::boxed::HEAP</code>, and so you can leave it off:</p>
+<span id='rust-example-raw-22' class='rusttest'>fn main() {
+    let x = box 5i;
+}</span><pre id='rust-example-rendered-22' class='rust '>
+<span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='number'>5i</span>;
+</pre>
+
+<p>As you might assume from the <code>HEAP</code>, boxes are heap allocated. They are
+deallocated automatically by Rust when they go out of scope:</p>
+<span id='rust-example-raw-23' class='rusttest'>fn main() {
+    {
+        let x = box 5i;
+    
+        // stuff happens
+    
+    } // x is destructed and its memory is free&#39;d here
+}</span><pre id='rust-example-rendered-23' class='rust '>
+{
+    <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='number'>5i</span>;
+
+    <span class='comment'>// stuff happens</span>
+
+} <span class='comment'>// x is destructed and its memory is free&#39;d here</span>
+</pre>
+
+<p>However, boxes do <em>not</em> use reference counting or garbage collection. Boxes are
+what&#39;s called an <strong>affine type</strong>. This means that the Rust compiler, at compile
+time, determines when the box comes into and goes out of scope, and inserts the
+appropriate calls there. Furthermore, boxes are a specific kind of affine type,
+known as a <strong>region</strong>. You can read more about regions <a href="http://www.cs.umd.edu/projects/cyclone/papers/cyclone-regions.pdf">in this paper on the
+Cyclone programming
+language</a>.</p>
+
+<p>You don&#39;t need to fully grok the theory of affine types or regions to grok
+boxes, though. As a rough approximation, you can treat this Rust code:</p>
+<span id='rust-example-raw-24' class='rusttest'>fn main() {
+    {
+        let x = box 5i;
+    
+        // stuff happens
+    }
+}</span><pre id='rust-example-rendered-24' class='rust '>
+{
+    <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='number'>5i</span>;
+
+    <span class='comment'>// stuff happens</span>
+}
+</pre>
+
+<p>As being similar to this C code:</p>
+
+<pre><code class="language-{notrust,ignore}">{
+    int *x;
+    x = (int *)malloc(sizeof(int));
+
+    // stuff happens
+
+    free(x);
+}</code></pre>
+
+<p>Of course, this is a 10,000 foot view. It leaves out destructors, for example.
+But the general idea is correct: you get the semantics of <code>malloc</code>/<code>free</code>, but
+with some improvements:</p>
+
+<ol>
+<li>It&#39;s impossible to allocate the incorrect amount of memory, because Rust
+figures it out from the types.</li>
+<li>You cannot forget to <code>free</code> memory you&#39;ve allocated, because Rust does it
+for you.</li>
+<li>Rust ensures that this <code>free</code> happens at the right time, when it is truly
+not used. Use-after-free is not possible.</li>
+<li>Rust enforces that no other writeable pointers alias to this heap memory,
+which means writing to an invalid pointer is not possible.</li>
+</ol>
+
+<p>See the section on references or the <a href="guide-lifetimes.html">lifetimes guide</a>
+for more detail on how lifetimes work.</p>
+
+<p>Using boxes and references together is very common. For example:</p>
+<span id='rust-example-raw-25' class='rusttest'>fn add_one(x: &amp;int) -&gt; int {
+    *x + 1
+}
+
+fn main() {
+    let x = box 5i;
+
+    println!(&quot;{}&quot;, add_one(&amp;*x));
+}</span><pre id='rust-example-rendered-25' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>add_one</span>(<span class='ident'>x</span>: <span class='kw-2'>&amp;</span><span class='ident'>int</span>) <span class='op'>-&gt;</span> <span class='ident'>int</span> {
+    <span class='op'>*</span><span class='ident'>x</span> <span class='op'>+</span> <span class='number'>1</span>
+}
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='number'>5i</span>;
+
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>add_one</span>(<span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>x</span>));
+}
+</pre>
+
+<p>In this case, Rust knows that <code>x</code> is being &#39;borrowed&#39; by the <code>add_one()</code>
+function, and since it&#39;s only reading the value, allows it.</p>
+
+<p>We can borrow <code>x</code> multiple times, as long as it&#39;s not simultaneous:</p>
+<span id='rust-example-raw-26' class='rusttest'>fn add_one(x: &amp;int) -&gt; int {
+    *x + 1
+}
+
+fn main() {
+    let x = box 5i;
+
+    println!(&quot;{}&quot;, add_one(&amp;*x));
+    println!(&quot;{}&quot;, add_one(&amp;*x));
+    println!(&quot;{}&quot;, add_one(&amp;*x));
+}</span><pre id='rust-example-rendered-26' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>add_one</span>(<span class='ident'>x</span>: <span class='kw-2'>&amp;</span><span class='ident'>int</span>) <span class='op'>-&gt;</span> <span class='ident'>int</span> {
+    <span class='op'>*</span><span class='ident'>x</span> <span class='op'>+</span> <span class='number'>1</span>
+}
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='number'>5i</span>;
+
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>add_one</span>(<span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>x</span>));
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>add_one</span>(<span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>x</span>));
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>add_one</span>(<span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>x</span>));
+}
+</pre>
+
+<p>Or as long as it&#39;s not a mutable borrow. This will error:</p>
+<span id='rust-example-raw-27' class='rusttest'>fn add_one(x: &amp;mut int) -&gt; int {
+    *x + 1
+}
+
+fn main() {
+    let x = box 5i;
+
+    println!(&quot;{}&quot;, add_one(&amp;*x)); // error: cannot borrow immutable dereference 
+                                  // of `&amp;`-pointer as mutable
+}</span><pre id='rust-example-rendered-27' class='rust '>
+<span class='kw'>fn</span> <span class='ident'>add_one</span>(<span class='ident'>x</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>int</span>) <span class='op'>-&gt;</span> <span class='ident'>int</span> {
+    <span class='op'>*</span><span class='ident'>x</span> <span class='op'>+</span> <span class='number'>1</span>
+}
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='number'>5i</span>;
+
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>add_one</span>(<span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>x</span>)); <span class='comment'>// error: cannot borrow immutable dereference </span>
+                                  <span class='comment'>// of `&amp;`-pointer as mutable</span>
+}
+</pre>
+
+<p>Notice we changed the signature of <code>add_one()</code> to request a mutable reference.</p>
+
+<h1 id="best-practices-1" class='section-header'><a
+                           href="#best-practices-1">4 Best practices</a></h1>
+<p>Boxes are appropriate to use in two situations: Recursive data structures,
+and occasionally, when returning data.</p>
+
+<h2 id="recursive-data-structures" class='section-header'><a
+                           href="#recursive-data-structures">4.1 Recursive data structures</a></h2>
+<p>Sometimes, you need a recursive data structure. The simplest is known as a
+&#39;cons list&#39;:</p>
+<span id='rust-example-raw-28' class='rusttest'>#[deriving(Show)]
+enum List&lt;T&gt; {
+    Cons(T, Box&lt;List&lt;T&gt;&gt;),
+    Nil,
+}
+
+fn main() {
+    let list: List&lt;int&gt; = Cons(1, box Cons(2, box Cons(3, box Nil)));
+    println!(&quot;{}&quot;, list);
+}</span><pre id='rust-example-rendered-28' class='rust '>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Show</span>)]</span>
+<span class='kw'>enum</span> <span class='ident'>List</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+    <span class='ident'>Cons</span>(<span class='ident'>T</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>List</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>),
+    <span class='ident'>Nil</span>,
+}
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='ident'>list</span>: <span class='ident'>List</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Cons</span>(<span class='number'>1</span>, <span class='kw'>box</span> <span class='ident'>Cons</span>(<span class='number'>2</span>, <span class='kw'>box</span> <span class='ident'>Cons</span>(<span class='number'>3</span>, <span class='kw'>box</span> <span class='ident'>Nil</span>)));
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>list</span>);
+}
+</pre>
+
+<p>This prints:</p>
+
+<pre><code class="language-{notrust,ignore}">Cons(1, box Cons(2, box Cons(3, box Nil)))</code></pre>
+
+<p>The reference to another <code>List</code> inside of the <code>Cons</code> enum variant must be a box,
+because we don&#39;t know the length of the list. Because we don&#39;t know the length,
+we don&#39;t know the size, and therefore, we need to heap allocate our list.</p>
+
+<p>Working with recursive or other unknown-sized data structures is the primary
+use-case for boxes.</p>
+
+<h2 id="returning-data" class='section-header'><a
+                           href="#returning-data">4.2 Returning data</a></h2>
+<p>This is important enough to have its own section entirely. The TL;DR is this:
+you don&#39;t generally want to return pointers, even when you might in a language
+like C or C++.</p>
+
+<p>See <a href="#returning-pointers">Returning Pointers</a> below for more.</p>
+
+<h1 id="rc-and-arc" class='section-header'><a
+                           href="#rc-and-arc">5 Rc and Arc</a></h1>
+<p>This part is coming soon.</p>
+
+<h2 id="best-practices-2" class='section-header'><a
+                           href="#best-practices-2">5.1 Best practices</a></h2>
+<p>This part is coming soon.</p>
+
+<h1 id="gc" class='section-header'><a
+                           href="#gc">6 Gc</a></h1>
+<p>The <code>Gc&lt;T&gt;</code> type exists for historical reasons, and is <a href="https://github.com/rust-lang/rust/issues/7929">still used
+internally</a> by the compiler.
+It is not even a &#39;real&#39; garbage collected type at the moment.</p>
+
+<p>In the future, Rust may have a real garbage collected type, and so it
+has not yet been removed for that reason.</p>
+
+<h2 id="best-practices-3" class='section-header'><a
+                           href="#best-practices-3">6.1 Best practices</a></h2>
+<p>There is currently no legitimate use case for the <code>Gc&lt;T&gt;</code> type.</p>
+
+<h1 id="raw-pointers" class='section-header'><a
+                           href="#raw-pointers">7 Raw Pointers</a></h1>
+<p>This part is coming soon.</p>
+
+<h2 id="best-practices-4" class='section-header'><a
+                           href="#best-practices-4">7.1 Best practices</a></h2>
+<p>This part is coming soon.</p>
+
+<h1 id="returning-pointers" class='section-header'><a
+                           href="#returning-pointers">8 Returning Pointers</a></h1>
+<p>In many languages with pointers, you&#39;d return a pointer from a function
+so as to avoid a copying a large data structure. For example:</p>
+<span id='rust-example-raw-29' class='rusttest'>struct BigStruct {
+    one: int,
+    two: int,
+    // etc
+    one_hundred: int,
+}
+
+fn foo(x: Box&lt;BigStruct&gt;) -&gt; Box&lt;BigStruct&gt; {
     return box *x;
 }
 
 fn main() {
-    let x = box 5;
+    let x = box BigStruct {
+        one: 1,
+        two: 2,
+        one_hundred: 100,
+    };
+
     let y = foo(x);
-}</span><pre id='rust-example-rendered-14' class='rust '>
-<span class='kw'>fn</span> <span class='ident'>foo</span>(<span class='ident'>x</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span> {
+}</span><pre id='rust-example-rendered-29' class='rust '>
+<span class='kw'>struct</span> <span class='ident'>BigStruct</span> {
+    <span class='ident'>one</span>: <span class='ident'>int</span>,
+    <span class='ident'>two</span>: <span class='ident'>int</span>,
+    <span class='comment'>// etc</span>
+    <span class='ident'>one_hundred</span>: <span class='ident'>int</span>,
+}
+
+<span class='kw'>fn</span> <span class='ident'>foo</span>(<span class='ident'>x</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>BigStruct</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>BigStruct</span><span class='op'>&gt;</span> {
     <span class='kw'>return</span> <span class='kw'>box</span> <span class='op'>*</span><span class='ident'>x</span>;
 }
 
 <span class='kw'>fn</span> <span class='ident'>main</span>() {
-    <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='number'>5</span>;
+    <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>BigStruct</span> {
+        <span class='ident'>one</span>: <span class='number'>1</span>,
+        <span class='ident'>two</span>: <span class='number'>2</span>,
+        <span class='ident'>one_hundred</span>: <span class='number'>100</span>,
+    };
+
     <span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='ident'>foo</span>(<span class='ident'>x</span>);
 }
 </pre>
 
-<p>Do this:</p>
-<span id='rust-example-raw-15' class='rusttest'>fn foo(x: Box&lt;int&gt;) -&gt; int {
+<p>The idea is that by passing around a box, you&#39;re only copying a pointer, rather
+than the hundred <code>int</code>s that make up the <code>BigStruct</code>.</p>
+
+<p>This is an antipattern in Rust. Instead, write this:</p>
+<span id='rust-example-raw-30' class='rusttest'>struct BigStruct {
+    one: int,
+    two: int,
+    // etc
+    one_hundred: int,
+}
+
+fn foo(x: Box&lt;BigStruct&gt;) -&gt; BigStruct {
     return *x;
 }
 
 fn main() {
-    let x = box 5;
+    let x = box BigStruct {
+        one: 1,
+        two: 2,
+        one_hundred: 100,
+    };
+
     let y = box foo(x);
-}</span><pre id='rust-example-rendered-15' class='rust '>
-<span class='kw'>fn</span> <span class='ident'>foo</span>(<span class='ident'>x</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>int</span> {
+}</span><pre id='rust-example-rendered-30' class='rust '>
+<span class='kw'>struct</span> <span class='ident'>BigStruct</span> {
+    <span class='ident'>one</span>: <span class='ident'>int</span>,
+    <span class='ident'>two</span>: <span class='ident'>int</span>,
+    <span class='comment'>// etc</span>
+    <span class='ident'>one_hundred</span>: <span class='ident'>int</span>,
+}
+
+<span class='kw'>fn</span> <span class='ident'>foo</span>(<span class='ident'>x</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>BigStruct</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>BigStruct</span> {
     <span class='kw'>return</span> <span class='op'>*</span><span class='ident'>x</span>;
 }
 
 <span class='kw'>fn</span> <span class='ident'>main</span>() {
-    <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='number'>5</span>;
+    <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>BigStruct</span> {
+        <span class='ident'>one</span>: <span class='number'>1</span>,
+        <span class='ident'>two</span>: <span class='number'>2</span>,
+        <span class='ident'>one_hundred</span>: <span class='number'>100</span>,
+    };
+
     <span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>foo</span>(<span class='ident'>x</span>);
 }
 </pre>
 
-<p>This gives you flexibility, without sacrificing performance.</p>
+<p>This gives you flexibility without sacrificing performance.</p>
 
 <p>You may think that this gives us terrible performance: return a value and then
 immediately box it up ?! Isn&#39;t that the worst of both worlds? Rust is smarter
-than that. There is no copy in this code. <code>main</code> allocates enough room for the
-<code>box int</code>, passes a pointer to that memory into <code>foo</code> as <code>x</code>, and then <code>foo</code> writes
-the value straight into that pointer. This writes the return value directly into
+than that. There is no copy in this code. main allocates enough room for the
+`box , passes a pointer to that memory into foo as x, and then foo writes the
+value straight into that pointer. This writes the return value directly into
 the allocated box.</p>
 
-<p>This is important enough that it bears repeating: pointers are not for optimizing
-returning values from your code. Allow the caller to choose how they want to
-use your output.</p>
+<p>This is important enough that it bears repeating: pointers are not for
+optimizing returning values from your code. Allow the caller to choose how they
+want to use your output.</p>
+
+<h1 id="creating-your-own-pointers" class='section-header'><a
+                           href="#creating-your-own-pointers">9 Creating your own Pointers</a></h1>
+<p>This part is coming soon.</p>
+
+<h2 id="best-practices-5" class='section-header'><a
+                           href="#best-practices-5">9.1 Best practices</a></h2>
+<p>This part is coming soon.</p>
+
+<h1 id="cheat-sheet" class='section-header'><a
+                           href="#cheat-sheet">10 Cheat Sheet</a></h1>
+<p>Here&#39;s a quick rundown of Rust&#39;s pointer types:</p>
+
+<table><thead>
+<tr>
+<th>Type</th>
+<th>Name</th>
+<th>Summary</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code>&amp;T</code></td>
+<td>Reference</td>
+<td>Allows one or more references to read <code>T</code></td>
+</tr>
+<tr>
+<td><code>&amp;mut T</code></td>
+<td>Mutable Reference</td>
+<td>Allows a single reference to</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>read and write <code>T</code></td>
+</tr>
+<tr>
+<td><code>Box&lt;T&gt;</code></td>
+<td>Box</td>
+<td>Heap allocated <code>T</code> with a single owner</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>that may read and write <code>T</code>.</td>
+</tr>
+<tr>
+<td><code>Rc&lt;T&gt;</code></td>
+<td>&quot;arr cee&quot; pointer</td>
+<td>Heap allocated <code>T</code> with many readers</td>
+</tr>
+<tr>
+<td><code>Arc&lt;T&gt;</code></td>
+<td>Arc pointer</td>
+<td>Same as above, but safe sharing across</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>threads</td>
+</tr>
+<tr>
+<td><code>*const T</code></td>
+<td>Raw pointer</td>
+<td>Unsafe read access to <code>T</code></td>
+</tr>
+<tr>
+<td><code>*mut T</code></td>
+<td>Mutable raw pointer</td>
+<td>Unsafe read and write access to <code>T</code></td>
+</tr>
+</tbody></table>
 
 <h1 id="related-resources" class='section-header'><a
-                           href="#related-resources">5 Related Resources</a></h1>
+                           href="#related-resources">11 Related resources</a></h1>
 <ul>
+<li><a href="std/boxed/index.html">API documentation for Box</a></li>
 <li><a href="guide-lifetimes.html">Lifetimes guide</a></li>
+<li><a href="http://www.cs.umd.edu/projects/cyclone/papers/cyclone-regions.pdf">Cyclone paper on regions</a>, which inspired Rust&#39;s lifetime system</li>
 </ul>
 
     <script type="text/javascript">

@@ -2357,6 +2357,47 @@
 <span id='2317'>2317</span>
 <span id='2318'>2318</span>
 <span id='2319'>2319</span>
+<span id='2320'>2320</span>
+<span id='2321'>2321</span>
+<span id='2322'>2322</span>
+<span id='2323'>2323</span>
+<span id='2324'>2324</span>
+<span id='2325'>2325</span>
+<span id='2326'>2326</span>
+<span id='2327'>2327</span>
+<span id='2328'>2328</span>
+<span id='2329'>2329</span>
+<span id='2330'>2330</span>
+<span id='2331'>2331</span>
+<span id='2332'>2332</span>
+<span id='2333'>2333</span>
+<span id='2334'>2334</span>
+<span id='2335'>2335</span>
+<span id='2336'>2336</span>
+<span id='2337'>2337</span>
+<span id='2338'>2338</span>
+<span id='2339'>2339</span>
+<span id='2340'>2340</span>
+<span id='2341'>2341</span>
+<span id='2342'>2342</span>
+<span id='2343'>2343</span>
+<span id='2344'>2344</span>
+<span id='2345'>2345</span>
+<span id='2346'>2346</span>
+<span id='2347'>2347</span>
+<span id='2348'>2348</span>
+<span id='2349'>2349</span>
+<span id='2350'>2350</span>
+<span id='2351'>2351</span>
+<span id='2352'>2352</span>
+<span id='2353'>2353</span>
+<span id='2354'>2354</span>
+<span id='2355'>2355</span>
+<span id='2356'>2356</span>
+<span id='2357'>2357</span>
+<span id='2358'>2358</span>
+<span id='2359'>2359</span>
+<span id='2360'>2360</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -2424,14 +2465,14 @@ the rest of the rust manuals.
 
 */</span>
 
-<span class='kw'>use</span> <span class='ident'>cmp</span>;
-<span class='kw'>use</span> <span class='ident'>num</span>::{<span class='ident'>Zero</span>, <span class='ident'>One</span>, <span class='ident'>CheckedAdd</span>, <span class='ident'>CheckedSub</span>, <span class='ident'>Saturating</span>, <span class='ident'>ToPrimitive</span>, <span class='ident'>Int</span>};
-<span class='kw'>use</span> <span class='ident'>option</span>::{<span class='prelude-ty'>Option</span>, <span class='prelude-val'>Some</span>, <span class='prelude-val'>None</span>};
-<span class='kw'>use</span> <span class='ident'>ops</span>::{<span class='ident'>Add</span>, <span class='ident'>Mul</span>, <span class='ident'>Sub</span>};
-<span class='kw'>use</span> <span class='ident'>cmp</span>::{<span class='ident'>PartialEq</span>, <span class='ident'>PartialOrd</span>, <span class='ident'>Ord</span>};
 <span class='kw'>use</span> <span class='ident'>clone</span>::<span class='ident'>Clone</span>;
-<span class='kw'>use</span> <span class='ident'>uint</span>;
+<span class='kw'>use</span> <span class='ident'>cmp</span>;
+<span class='kw'>use</span> <span class='ident'>cmp</span>::{<span class='ident'>PartialEq</span>, <span class='ident'>PartialOrd</span>, <span class='ident'>Ord</span>};
 <span class='kw'>use</span> <span class='ident'>mem</span>;
+<span class='kw'>use</span> <span class='ident'>num</span>::{<span class='ident'>Zero</span>, <span class='ident'>One</span>, <span class='ident'>CheckedAdd</span>, <span class='ident'>CheckedSub</span>, <span class='ident'>Saturating</span>, <span class='ident'>ToPrimitive</span>, <span class='ident'>Int</span>};
+<span class='kw'>use</span> <span class='ident'>ops</span>::{<span class='ident'>Add</span>, <span class='ident'>Mul</span>, <span class='ident'>Sub</span>};
+<span class='kw'>use</span> <span class='ident'>option</span>::{<span class='prelude-ty'>Option</span>, <span class='prelude-val'>Some</span>, <span class='prelude-val'>None</span>};
+<span class='kw'>use</span> <span class='ident'>uint</span>;
 
 <span class='doccomment'>/// Conversion from an `Iterator`</span>
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>FromIterator</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span> {
@@ -2455,13 +2496,15 @@ the rest of the rust manuals.
 <span class='doccomment'>/// is returned. A concrete Iterator implementation may choose to behave however</span>
 <span class='doccomment'>/// it wishes, either by returning `None` infinitely, or by doing something</span>
 <span class='doccomment'>/// else.</span>
+<span class='attribute'>#[<span class='ident'>lang</span><span class='op'>=</span><span class='string'>&quot;iterator&quot;</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Advance the iterator and return the next value. Return `None` when the end is reached.</span>
     <span class='kw'>fn</span> <span class='ident'>next</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span>;
 
-    <span class='doccomment'>/// Return a lower bound and upper bound on the remaining length of the iterator.</span>
+    <span class='doccomment'>/// Returns a lower and upper bound on the remaining length of the iterator.</span>
     <span class='doccomment'>///</span>
-    <span class='doccomment'>/// The common use case for the estimate is pre-allocating space to store the results.</span>
+    <span class='doccomment'>/// An upper bound of `None` means either there is no known upper bound, or the upper bound</span>
+    <span class='doccomment'>/// does not fit within a `uint`.</span>
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>size_hint</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='ident'>uint</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>) { (<span class='number'>0</span>, <span class='prelude-val'>None</span>) }
 
@@ -3004,6 +3047,9 @@ the rest of the rust manuals.
 }
 
 <span class='doccomment'>/// A range iterator able to yield elements from both ends</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// A `DoubleEndedIterator` can be thought of as a deque in that `next()` and `next_back()` exhaust</span>
+<span class='doccomment'>/// elements from the *same* range, and do not work independently of each other.</span>
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>DoubleEndedIterator</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span>: <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Yield an element from the end of the range, returning `None` if the range is empty.</span>
     <span class='kw'>fn</span> <span class='ident'>next_back</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span>;
@@ -3050,12 +3096,15 @@ the rest of the rust manuals.
 <span class='doccomment'>/// An object implementing random access indexing by `uint`</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// A `RandomAccessIterator` should be either infinite or a `DoubleEndedIterator`.</span>
+<span class='doccomment'>/// Calling `next()` or `next_back()` on a `RandomAccessIterator`</span>
+<span class='doccomment'>/// reduces the indexable range accordingly. That is, `it.idx(1)` will become `it.idx(0)`</span>
+<span class='doccomment'>/// after `it.next()` is called.</span>
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>RandomAccessIterator</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span>: <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Return the number of indexable elements. At most `std::uint::MAX`</span>
     <span class='doccomment'>/// elements are indexable, even if the iterator represents a longer range.</span>
     <span class='kw'>fn</span> <span class='ident'>indexable</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>uint</span>;
 
-    <span class='doccomment'>/// Return an element at an index</span>
+    <span class='doccomment'>/// Return an element at an index, or `None` if the index is out of bounds</span>
     <span class='kw'>fn</span> <span class='ident'>idx</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>index</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span>;
 }
 
@@ -4322,7 +4371,19 @@ the rest of the rust manuals.
     <span class='ident'>one</span>: <span class='ident'>A</span>
 }
 
-<span class='doccomment'>/// Return an iterator over the range [start, stop)</span>
+<span class='doccomment'>/// Returns an iterator over the given range [start, stop) (that is, starting</span>
+<span class='doccomment'>/// at start (inclusive), and ending at stop (exclusive)).</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// # Example</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// ```rust</span>
+<span class='doccomment'>/// let array = [0, 1, 2, 3, 4];</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// for i in range(0, 5u) {</span>
+<span class='doccomment'>///     println!(&quot;{}&quot;, i);</span>
+<span class='doccomment'>///     assert_eq!(i,  array[i]);</span>
+<span class='doccomment'>/// }</span>
+<span class='doccomment'>/// ```</span>
 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>range</span><span class='op'>&lt;</span><span class='ident'>A</span>: <span class='ident'>Add</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>A</span><span class='op'>&gt;</span> <span class='op'>+</span> <span class='ident'>PartialOrd</span> <span class='op'>+</span> <span class='ident'>Clone</span> <span class='op'>+</span> <span class='ident'>One</span><span class='op'>&gt;</span>(<span class='ident'>start</span>: <span class='ident'>A</span>, <span class='ident'>stop</span>: <span class='ident'>A</span>) <span class='op'>-&gt;</span> <span class='ident'>Range</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span> {
     <span class='ident'>Range</span>{<span class='ident'>state</span>: <span class='ident'>start</span>, <span class='ident'>stop</span>: <span class='ident'>stop</span>, <span class='ident'>one</span>: <span class='ident'>One</span>::<span class='ident'>one</span>()}
@@ -4550,6 +4611,27 @@ the rest of the rust manuals.
     <span class='kw'>fn</span> <span class='ident'>indexable</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>uint</span> { <span class='ident'>uint</span>::<span class='ident'>MAX</span> }
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>idx</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, _: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span> { <span class='prelude-val'>Some</span>(<span class='self'>self</span>.<span class='ident'>element</span>.<span class='ident'>clone</span>()) }
+}
+
+<span class='kw'>type</span> <span class='ident'>IterateState</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> <span class='op'>=</span> (<span class='op'>|</span><span class='ident'>T</span><span class='op'>|</span>: <span class='lifetime'>&#39;a</span> <span class='op'>-&gt;</span> <span class='ident'>T</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>bool</span>);
+
+<span class='doccomment'>/// An iterator that repeatedly applies a given function, starting</span>
+<span class='doccomment'>/// from a given seed value.</span>
+<span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>Iterate</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Unfold</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>, <span class='ident'>IterateState</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;&gt;</span>;
+
+<span class='doccomment'>/// Creates a new iterator that produces an infinite sequence of</span>
+<span class='doccomment'>/// repeated applications of the given function `f`.</span>
+<span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>visible_private_types</span>)]</span>
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>iterate</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>: <span class='ident'>Clone</span><span class='op'>&gt;</span>(<span class='ident'>f</span>: <span class='op'>|</span><span class='ident'>T</span><span class='op'>|</span>: <span class='lifetime'>&#39;a</span> <span class='op'>-&gt;</span> <span class='ident'>T</span>, <span class='ident'>seed</span>: <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>Iterate</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
+    <span class='ident'>Unfold</span>::<span class='ident'>new</span>((<span class='ident'>f</span>, <span class='prelude-val'>Some</span>(<span class='ident'>seed</span>), <span class='boolval'>true</span>), <span class='op'>|</span><span class='ident'>st</span><span class='op'>|</span> {
+        <span class='kw'>let</span> <span class='kw-2'>&amp;</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>f</span>, <span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>val</span>, <span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>first</span>) <span class='op'>=</span> <span class='ident'>st</span>;
+        <span class='kw'>if</span> <span class='op'>*</span><span class='ident'>first</span> {
+            <span class='op'>*</span><span class='ident'>first</span> <span class='op'>=</span> <span class='boolval'>false</span>;
+        } <span class='kw'>else</span> {
+            <span class='ident'>val</span>.<span class='ident'>mutate</span>(<span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> (<span class='op'>*</span><span class='ident'>f</span>)(<span class='ident'>x</span>));
+        }
+        <span class='ident'>val</span>.<span class='ident'>clone</span>()
+    })
 }
 
 <span class='doccomment'>/// Functions for lexicographical ordering of sequences.</span>

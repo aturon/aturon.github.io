@@ -224,7 +224,7 @@
 
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>atomics</span>;
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>mem</span>;
-<span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>ty</span>::<span class='ident'>Unsafe</span>;
+<span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>cell</span>::<span class='ident'>UnsafeCell</span>;
 
 <span class='comment'>// NB: all links are done as AtomicUint instead of AtomicPtr to allow for static</span>
 <span class='comment'>// initialization.</span>
@@ -240,7 +240,7 @@
 
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Queue</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='kw'>pub</span> <span class='ident'>head</span>: <span class='ident'>atomics</span>::<span class='ident'>AtomicUint</span>,
-    <span class='kw'>pub</span> <span class='ident'>tail</span>: <span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>,
+    <span class='kw'>pub</span> <span class='ident'>tail</span>: <span class='ident'>UnsafeCell</span><span class='op'>&lt;</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>,
     <span class='kw'>pub</span> <span class='ident'>stub</span>: <span class='ident'>DummyNode</span>,
 }
 
@@ -248,7 +248,7 @@
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>() <span class='op'>-&gt;</span> <span class='ident'>Queue</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='ident'>Queue</span> {
             <span class='ident'>head</span>: <span class='ident'>atomics</span>::<span class='ident'>AtomicUint</span>::<span class='ident'>new</span>(<span class='number'>0</span>),
-            <span class='ident'>tail</span>: <span class='ident'>Unsafe</span>::<span class='ident'>new</span>(<span class='number'>0</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>),
+            <span class='ident'>tail</span>: <span class='ident'>UnsafeCell</span>::<span class='ident'>new</span>(<span class='number'>0</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>),
             <span class='ident'>stub</span>: <span class='ident'>DummyNode</span> {
                 <span class='ident'>next</span>: <span class='ident'>atomics</span>::<span class='ident'>AtomicUint</span>::<span class='ident'>new</span>(<span class='number'>0</span>),
             },

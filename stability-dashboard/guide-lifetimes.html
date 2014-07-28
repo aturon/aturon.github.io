@@ -21,9 +21,9 @@
 
     <div id="versioninfo">
   <img src="http://www.rust-lang.org/logos/rust-logo-32x32-blk.png" width="32" height="32" alt><br>
-  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.11.0</span><br>
-  <a href="http://github.com/rust-lang/rust/commit/305cf1f1098dc87e346003e6bf7e7cca5705a135"
-    class="hash white-sticker">305cf1f1</a>
+  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.12.0-pre</span><br>
+  <a href="http://github.com/rust-lang/rust/commit/2c50add48273cf1ef44b47eceb5d9446fc81ce41"
+    class="hash white-sticker"></a>
 </div>
 
 
@@ -114,9 +114,9 @@ a reference.</p>
     let on_the_stack :     Point  =     Point{x: 3.0, y: 4.0};
     let on_the_heap  : Box&lt;Point&gt; = box Point{x: 7.0, y: 9.0};
     fn compute_distance(p1: &amp;Point, p2: &amp;Point) -&gt; f64 { 0.0 }
-    compute_distance(&amp;on_the_stack, on_the_heap);
+    compute_distance(&amp;on_the_stack, &amp;*on_the_heap);
 }</span><pre id='rust-example-rendered-3' class='rust '>
-<span class='ident'>compute_distance</span>(<span class='kw-2'>&amp;</span><span class='ident'>on_the_stack</span>, <span class='ident'>on_the_heap</span>);
+<span class='ident'>compute_distance</span>(<span class='kw-2'>&amp;</span><span class='ident'>on_the_stack</span>, <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>on_the_heap</span>);
 </pre>
 
 <p>Here, the <code>&amp;</code> operator takes the address of the variable
@@ -126,10 +126,9 @@ value. We also call this <em>borrowing</em> the local variable
 <code>on_the_stack</code>, because we have created an alias: that is, another
 name for the same data.</p>
 
-<p>In the case of <code>on_the_heap</code>, however, no explicit action is necessary. 
-The compiler will automatically convert a box point to a reference like &amp;point. 
-This is another form of borrowing; in this case, the contents of the owned box 
-are being lent out.</p>
+<p>Likewise, in the case of <code>on_the_heap</code>,
+the <code>&amp;</code> operator is used in conjunction with the <code>*</code> operator
+to take a reference to the contents of the box.</p>
 
 <p>Whenever a caller lends data to a callee, there are some limitations on what
 the caller can do with the original. For example, if the contents of a

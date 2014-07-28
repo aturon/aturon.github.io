@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The rustc_back library documentation.">
+
+    <title>rustc_back::sha2::FixedBuffer - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body>
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../rustc_back/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../index.html'>rustc_back</a>&#8203;::<a href='index.html'>sha2</a></p><div class='block struct'><h2>Structs</h2><a class='struct ' href='struct.Sha256.html'>Sha256</a></div><div class='block trait'><h2>Traits</h2><a class='trait ' href='trait.Digest.html'>Digest</a><a class='trait current' href='trait.FixedBuffer.html'>FixedBuffer</a><a class='trait ' href='trait.StandardPadding.html'>StandardPadding</a><a class='trait ' href='trait.ToBits.html'>ToBits</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content trait">
+<h1 class='fqn'>Trait <a href='../index.html'>rustc_back</a>::<a href='index.html'>sha2</a>::<a class='trait' href=''>FixedBuffer</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-3968' href='../../src/rustc_back/Users/aturon/moz/working/stability-dashboard/src/librustc_back/sha2.rs.html#80-107'>[src]</a></span></h1>
+<pre class='rust trait'>trait FixedBuffer {
+    fn <a href='#tymethod.input' class='fnname'>input</a>(&amp;mut self, input: &amp;<a href='../../std/primitive.slice.html'>[<a href='../../std/primitive.u8.html'>u8</a>]</a>, func: |&amp;<a href='../../std/primitive.slice.html'>[<a href='../../std/primitive.u8.html'>u8</a>]</a>|);
+    fn <a href='#tymethod.reset' class='fnname'>reset</a>(&amp;mut self);
+    fn <a href='#tymethod.zero_until' class='fnname'>zero_until</a>(&amp;mut self, idx: <a href='../../std/primitive.uint.html'>uint</a>);
+    fn <a href='#tymethod.next' class='fnname'>next</a>&lt;'s&gt;(&amp;'s mut self, len: <a href='../../std/primitive.uint.html'>uint</a>) -&gt; &amp;'s mut <a href='../../std/primitive.slice.html'>[<a href='../../std/primitive.u8.html'>u8</a>]</a>;
+    fn <a href='#tymethod.full_buffer' class='fnname'>full_buffer</a>&lt;'s&gt;(&amp;'s mut self) -&gt; &amp;'s <a href='../../std/primitive.slice.html'>[<a href='../../std/primitive.u8.html'>u8</a>]</a>;
+    fn <a href='#tymethod.position' class='fnname'>position</a>(&amp;self) -&gt; <a href='../../std/primitive.uint.html'>uint</a>;
+    fn <a href='#tymethod.remaining' class='fnname'>remaining</a>(&amp;self) -&gt; <a href='../../std/primitive.uint.html'>uint</a>;
+    fn <a href='#tymethod.size' class='fnname'>size</a>(&amp;self) -&gt; <a href='../../std/primitive.uint.html'>uint</a>;
+}</pre><div class='docblock'><p>A FixedBuffer, likes its name implies, is a fixed size buffer. When the buffer becomes full, it
+must be processed. The input() method takes care of processing and then clearing the buffer
+automatically. However, other methods do not and require the caller to process the buffer. Any
+method that modifies the buffer directory or provides the caller with bytes that can be modified
+results in those bytes being marked as used by the buffer.</p>
+</div>
+            <h2 id='required-methods'>Required Methods</h2>
+            <div class='methods'>
+        <h3 id='tymethod.input' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.input' class='fnname'>input</a>(&amp;mut self, input: &amp;<a href='../../std/primitive.slice.html'>[<a href='../../std/primitive.u8.html'>u8</a>]</a>, func: |&amp;<a href='../../std/primitive.slice.html'>[<a href='../../std/primitive.u8.html'>u8</a>]</a>|)</code></h3><div class='docblock'><p>Input a vector of bytes. If the buffer becomes full, process it with the provided
+function and then clear the buffer.</p>
+</div><h3 id='tymethod.reset' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.reset' class='fnname'>reset</a>(&amp;mut self)</code></h3><div class='docblock'><p>Reset the buffer.</p>
+</div><h3 id='tymethod.zero_until' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.zero_until' class='fnname'>zero_until</a>(&amp;mut self, idx: <a href='../../std/primitive.uint.html'>uint</a>)</code></h3><div class='docblock'><p>Zero the buffer up until the specified index. The buffer position currently must not be
+greater than that index.</p>
+</div><h3 id='tymethod.next' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.next' class='fnname'>next</a>&lt;'s&gt;(&amp;'s mut self, len: <a href='../../std/primitive.uint.html'>uint</a>) -&gt; &amp;'s mut <a href='../../std/primitive.slice.html'>[<a href='../../std/primitive.u8.html'>u8</a>]</a></code></h3><div class='docblock'><p>Get a slice of the buffer of the specified size. There must be at least that many bytes
+remaining in the buffer.</p>
+</div><h3 id='tymethod.full_buffer' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.full_buffer' class='fnname'>full_buffer</a>&lt;'s&gt;(&amp;'s mut self) -&gt; &amp;'s <a href='../../std/primitive.slice.html'>[<a href='../../std/primitive.u8.html'>u8</a>]</a></code></h3><div class='docblock'><p>Get the current buffer. The buffer must already be full. This clears the buffer as well.</p>
+</div><h3 id='tymethod.position' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.position' class='fnname'>position</a>(&amp;self) -&gt; <a href='../../std/primitive.uint.html'>uint</a></code></h3><div class='docblock'><p>Get the current position of the buffer.</p>
+</div><h3 id='tymethod.remaining' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.remaining' class='fnname'>remaining</a>(&amp;self) -&gt; <a href='../../std/primitive.uint.html'>uint</a></code></h3><div class='docblock'><p>Get the number of bytes remaining in the buffer until it is full.</p>
+</div><h3 id='tymethod.size' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.size' class='fnname'>size</a>(&amp;self) -&gt; <a href='../../std/primitive.uint.html'>uint</a></code></h3><div class='docblock'><p>Get the size of the buffer</p>
+</div></div>
+        <h2 id='implementors'>Implementors</h2>
+        <ul class='item-list' id='implementors-list'>
+    </ul><script type="text/javascript" async
+                              src="../../implementors/rustc_back/sha2/trait.FixedBuffer.js">
+                      </script></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code> (or <code>str</code>), <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "rustc_back";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

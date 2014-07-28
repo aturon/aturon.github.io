@@ -822,6 +822,30 @@
 <span id='782'>782</span>
 <span id='783'>783</span>
 <span id='784'>784</span>
+<span id='785'>785</span>
+<span id='786'>786</span>
+<span id='787'>787</span>
+<span id='788'>788</span>
+<span id='789'>789</span>
+<span id='790'>790</span>
+<span id='791'>791</span>
+<span id='792'>792</span>
+<span id='793'>793</span>
+<span id='794'>794</span>
+<span id='795'>795</span>
+<span id='796'>796</span>
+<span id='797'>797</span>
+<span id='798'>798</span>
+<span id='799'>799</span>
+<span id='800'>800</span>
+<span id='801'>801</span>
+<span id='802'>802</span>
+<span id='803'>803</span>
+<span id='804'>804</span>
+<span id='805'>805</span>
+<span id='806'>806</span>
+<span id='807'>807</span>
+<span id='808'>808</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2014 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -993,7 +1017,7 @@ impl&lt;&#39;a&gt; dot::Labeller&lt;&#39;a, Nd, Ed&lt;&#39;a&gt;&gt; for Graph {
         dot::Id::new(format!(&quot;N{}&quot;, n))
     }
     fn node_label&lt;&#39;a&gt;(&amp;&#39;a self, n: &amp;Nd) -&gt; dot::LabelText&lt;&#39;a&gt; {
-        dot::LabelStr(str::Slice(self.nodes.get(*n).as_slice()))
+        dot::LabelStr(str::Slice(self.nodes[*n].as_slice()))
     }
     fn edge_label&lt;&#39;a&gt;(&amp;&#39;a self, _: &amp;Ed) -&gt; dot::LabelText&lt;&#39;a&gt; {
         dot::LabelStr(str::Slice(&quot;&amp;sube;&quot;))
@@ -1050,7 +1074,7 @@ impl&lt;&#39;a&gt; dot::Labeller&lt;&#39;a, Nd&lt;&#39;a&gt;, Ed&lt;&#39;a&gt;&g
     }
     fn node_label&lt;&#39;a&gt;(&amp;&#39;a self, n: &amp;Nd&lt;&#39;a&gt;) -&gt; dot::LabelText&lt;&#39;a&gt; {
         let &amp;(i, _) = n;
-        dot::LabelStr(str::Slice(self.nodes.get(i).as_slice()))
+        dot::LabelStr(str::Slice(self.nodes[i].as_slice()))
     }
     fn edge_label&lt;&#39;a&gt;(&amp;&#39;a self, _: &amp;Ed&lt;&#39;a&gt;) -&gt; dot::LabelText&lt;&#39;a&gt; {
         dot::LabelStr(str::Slice(&quot;&amp;sube;&quot;))
@@ -1063,8 +1087,8 @@ impl&lt;&#39;a&gt; dot::GraphWalk&lt;&#39;a, Nd&lt;&#39;a&gt;, Ed&lt;&#39;a&gt;&
     }
     fn edges(&amp;&#39;a self) -&gt; dot::Edges&lt;&#39;a,Ed&lt;&#39;a&gt;&gt; {
         self.edges.iter()
-            .map(|&amp;(i,j)|((i, self.nodes.get(i).as_slice()),
-                          (j, self.nodes.get(j).as_slice())))
+            .map(|&amp;(i,j)|((i, self.nodes[i].as_slice()),
+                          (j, self.nodes[j].as_slice())))
             .collect()
     }
     fn source(&amp;self, e: &amp;Ed&lt;&#39;a&gt;) -&gt; Nd&lt;&#39;a&gt; { let &amp;(s,_) = e; s }
@@ -1098,7 +1122,7 @@ pub fn main() {
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>license</span> <span class='op'>=</span> <span class='string'>&quot;MIT/ASL2&quot;</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>doc</span>(<span class='ident'>html_logo_url</span> <span class='op'>=</span> <span class='string'>&quot;http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png&quot;</span>,
        <span class='ident'>html_favicon_url</span> <span class='op'>=</span> <span class='string'>&quot;http://www.rust-lang.org/favicon.ico&quot;</span>,
-       <span class='ident'>html_root_url</span> <span class='op'>=</span> <span class='string'>&quot;http://doc.rust-lang.org/0.11.0/&quot;</span>)]</span>
+       <span class='ident'>html_root_url</span> <span class='op'>=</span> <span class='string'>&quot;http://doc.rust-lang.org/master/&quot;</span>)]</span>
 
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>str</span>;
@@ -1259,9 +1283,36 @@ pub fn main() {
     <span class='doccomment'>/// Renders text as string suitable for a label in a .dot file.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>escape</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
         <span class='kw'>match</span> <span class='self'>self</span> {
-            <span class='kw-2'>&amp;</span><span class='ident'>LabelStr</span>(<span class='kw-2'>ref</span> <span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='ident'>s</span>.<span class='ident'>as_slice</span>().<span class='ident'>escape_default</span>().<span class='ident'>to_string</span>(),
-            <span class='kw-2'>&amp;</span><span class='ident'>EscStr</span>(<span class='kw-2'>ref</span> <span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='ident'>LabelText</span>::<span class='ident'>escape_str</span>(<span class='ident'>s</span>.<span class='ident'>as_slice</span>()).<span class='ident'>to_string</span>(),
+            <span class='kw-2'>&amp;</span><span class='ident'>LabelStr</span>(<span class='kw-2'>ref</span> <span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='ident'>s</span>.<span class='ident'>as_slice</span>().<span class='ident'>escape_default</span>(),
+            <span class='kw-2'>&amp;</span><span class='ident'>EscStr</span>(<span class='kw-2'>ref</span> <span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='ident'>LabelText</span>::<span class='ident'>escape_str</span>(<span class='ident'>s</span>.<span class='ident'>as_slice</span>()),
         }
+    }
+
+    <span class='doccomment'>/// Decomposes content into string suitable for making EscStr that</span>
+    <span class='doccomment'>/// yields same content as self.  The result obeys the law</span>
+    <span class='doccomment'>/// render(`lt`) == render(`EscStr(lt.pre_escaped_content())`) for</span>
+    <span class='doccomment'>/// all `lt: LabelText`.</span>
+    <span class='kw'>fn</span> <span class='ident'>pre_escaped_content</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>str</span>::<span class='ident'>MaybeOwned</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+        <span class='kw'>match</span> <span class='self'>self</span> {
+            <span class='ident'>EscStr</span>(<span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='ident'>s</span>,
+            <span class='ident'>LabelStr</span>(<span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>s</span>.<span class='ident'>as_slice</span>().<span class='ident'>contains_char</span>(<span class='string'>&#39;\\&#39;</span>) {
+                <span class='ident'>str</span>::<span class='ident'>Owned</span>(<span class='ident'>s</span>.<span class='ident'>as_slice</span>().<span class='ident'>escape_default</span>())
+            } <span class='kw'>else</span> {
+                <span class='ident'>s</span>
+            },
+        }
+    }
+
+    <span class='doccomment'>/// Puts `prefix` on a line above this label, with a blank line separator.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>prefix_line</span>(<span class='self'>self</span>, <span class='ident'>prefix</span>: <span class='ident'>LabelText</span>) <span class='op'>-&gt;</span> <span class='ident'>LabelText</span><span class='op'>&lt;</span><span class='lifetime'>&#39;static</span><span class='op'>&gt;</span> {
+        <span class='ident'>prefix</span>.<span class='ident'>suffix_line</span>(<span class='self'>self</span>)
+    }
+
+    <span class='doccomment'>/// Puts `suffix` on a line below this label, with a blank line separator.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>suffix_line</span>(<span class='self'>self</span>, <span class='ident'>suffix</span>: <span class='ident'>LabelText</span>) <span class='op'>-&gt;</span> <span class='ident'>LabelText</span><span class='op'>&lt;</span><span class='lifetime'>&#39;static</span><span class='op'>&gt;</span> {
+        <span class='kw'>let</span> <span class='ident'>prefix</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>pre_escaped_content</span>().<span class='ident'>into_string</span>();
+        <span class='kw'>let</span> <span class='ident'>suffix</span> <span class='op'>=</span> <span class='ident'>suffix</span>.<span class='ident'>pre_escaped_content</span>();
+        <span class='ident'>EscStr</span>(<span class='ident'>str</span>::<span class='ident'>Owned</span>(<span class='ident'>prefix</span>.<span class='ident'>append</span>(<span class='string'>r&quot;\n\n&quot;</span>).<span class='ident'>append</span>(<span class='ident'>suffix</span>.<span class='ident'>as_slice</span>())))
     }
 }
 
@@ -1346,7 +1397,7 @@ pub fn main() {
         <span class='ident'>from</span>: <span class='ident'>uint</span>, <span class='ident'>to</span>: <span class='ident'>uint</span>, <span class='ident'>label</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>
     }
 
-    <span class='kw'>fn</span> <span class='ident'>Edge</span>(<span class='ident'>from</span>: <span class='ident'>uint</span>, <span class='ident'>to</span>: <span class='ident'>uint</span>, <span class='ident'>label</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>Edge</span> {
+    <span class='kw'>fn</span> <span class='ident'>edge</span>(<span class='ident'>from</span>: <span class='ident'>uint</span>, <span class='ident'>to</span>: <span class='ident'>uint</span>, <span class='ident'>label</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>Edge</span> {
         <span class='ident'>Edge</span> { <span class='ident'>from</span>: <span class='ident'>from</span>, <span class='ident'>to</span>: <span class='ident'>to</span>, <span class='ident'>label</span>: <span class='ident'>label</span> }
     }
 
@@ -1489,10 +1540,7 @@ pub fn main() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>writer</span> <span class='op'>=</span> <span class='ident'>MemWriter</span>::<span class='ident'>new</span>();
         <span class='ident'>render</span>(<span class='kw-2'>&amp;</span><span class='ident'>g</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>writer</span>).<span class='ident'>unwrap</span>();
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>r</span> <span class='op'>=</span> <span class='ident'>BufReader</span>::<span class='ident'>new</span>(<span class='ident'>writer</span>.<span class='ident'>get_ref</span>());
-        <span class='kw'>match</span> <span class='ident'>r</span>.<span class='ident'>read_to_string</span>() {
-            <span class='prelude-val'>Ok</span>(<span class='ident'>string</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>string</span>.<span class='ident'>to_string</span>()),
-            <span class='prelude-val'>Err</span>(<span class='ident'>err</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>err</span>),
-        }
+        <span class='ident'>r</span>.<span class='ident'>read_to_string</span>()
     }
 
     <span class='comment'>// All of the tests use raw-strings as the format for the expected outputs,</span>
@@ -1524,7 +1572,7 @@ pub fn main() {
     <span class='kw'>fn</span> <span class='ident'>single_edge</span>() {
         <span class='kw'>let</span> <span class='ident'>labels</span> : <span class='ident'>Trivial</span> <span class='op'>=</span> <span class='ident'>UnlabelledNodes</span>(<span class='number'>2</span>);
         <span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>test_input</span>(<span class='ident'>LabelledGraph</span>::<span class='ident'>new</span>(<span class='string'>&quot;single_edge&quot;</span>, <span class='ident'>labels</span>,
-                                                   <span class='macro'>vec</span><span class='macro'>!</span>(<span class='ident'>Edge</span>(<span class='number'>0</span>, <span class='number'>1</span>, <span class='string'>&quot;E&quot;</span>))));
+                                                   <span class='macro'>vec</span><span class='macro'>!</span>(<span class='ident'>edge</span>(<span class='number'>0</span>, <span class='number'>1</span>, <span class='string'>&quot;E&quot;</span>))));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>result</span>.<span class='ident'>unwrap</span>().<span class='ident'>as_slice</span>(),
 <span class='string'>r#&quot;digraph single_edge {
     N0[label=&quot;N0&quot;];
@@ -1538,7 +1586,7 @@ pub fn main() {
     <span class='kw'>fn</span> <span class='ident'>single_cyclic_node</span>() {
         <span class='kw'>let</span> <span class='ident'>labels</span> : <span class='ident'>Trivial</span> <span class='op'>=</span> <span class='ident'>UnlabelledNodes</span>(<span class='number'>1</span>);
         <span class='kw'>let</span> <span class='ident'>r</span> <span class='op'>=</span> <span class='ident'>test_input</span>(<span class='ident'>LabelledGraph</span>::<span class='ident'>new</span>(<span class='string'>&quot;single_cyclic_node&quot;</span>, <span class='ident'>labels</span>,
-                                              <span class='macro'>vec</span><span class='macro'>!</span>(<span class='ident'>Edge</span>(<span class='number'>0</span>, <span class='number'>0</span>, <span class='string'>&quot;E&quot;</span>))));
+                                              <span class='macro'>vec</span><span class='macro'>!</span>(<span class='ident'>edge</span>(<span class='number'>0</span>, <span class='number'>0</span>, <span class='string'>&quot;E&quot;</span>))));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>r</span>.<span class='ident'>unwrap</span>().<span class='ident'>as_slice</span>(),
 <span class='string'>r#&quot;digraph single_cyclic_node {
     N0[label=&quot;N0&quot;];
@@ -1552,8 +1600,8 @@ pub fn main() {
         <span class='kw'>let</span> <span class='ident'>labels</span> <span class='op'>=</span> <span class='ident'>AllNodesLabelled</span>(<span class='macro'>vec</span><span class='macro'>!</span>(<span class='string'>&quot;{x,y}&quot;</span>, <span class='string'>&quot;{x}&quot;</span>, <span class='string'>&quot;{y}&quot;</span>, <span class='string'>&quot;{}&quot;</span>));
         <span class='kw'>let</span> <span class='ident'>r</span> <span class='op'>=</span> <span class='ident'>test_input</span>(<span class='ident'>LabelledGraph</span>::<span class='ident'>new</span>(
             <span class='string'>&quot;hasse_diagram&quot;</span>, <span class='ident'>labels</span>,
-            <span class='macro'>vec</span><span class='macro'>!</span>(<span class='ident'>Edge</span>(<span class='number'>0</span>, <span class='number'>1</span>, <span class='string'>&quot;&quot;</span>), <span class='ident'>Edge</span>(<span class='number'>0</span>, <span class='number'>2</span>, <span class='string'>&quot;&quot;</span>),
-                 <span class='ident'>Edge</span>(<span class='number'>1</span>, <span class='number'>3</span>, <span class='string'>&quot;&quot;</span>), <span class='ident'>Edge</span>(<span class='number'>2</span>, <span class='number'>3</span>, <span class='string'>&quot;&quot;</span>))));
+            <span class='macro'>vec</span><span class='macro'>!</span>(<span class='ident'>edge</span>(<span class='number'>0</span>, <span class='number'>1</span>, <span class='string'>&quot;&quot;</span>), <span class='ident'>edge</span>(<span class='number'>0</span>, <span class='number'>2</span>, <span class='string'>&quot;&quot;</span>),
+                 <span class='ident'>edge</span>(<span class='number'>1</span>, <span class='number'>3</span>, <span class='string'>&quot;&quot;</span>), <span class='ident'>edge</span>(<span class='number'>2</span>, <span class='number'>3</span>, <span class='string'>&quot;&quot;</span>))));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>r</span>.<span class='ident'>unwrap</span>().<span class='ident'>as_slice</span>(),
 <span class='string'>r#&quot;digraph hasse_diagram {
     N0[label=&quot;{x,y}&quot;];
@@ -1586,8 +1634,8 @@ pub fn main() {
 
         <span class='kw'>let</span> <span class='ident'>g</span> <span class='op'>=</span> <span class='ident'>LabelledGraphWithEscStrs</span>::<span class='ident'>new</span>(
             <span class='string'>&quot;syntax_tree&quot;</span>, <span class='ident'>labels</span>,
-            <span class='macro'>vec</span><span class='macro'>!</span>(<span class='ident'>Edge</span>(<span class='number'>0</span>, <span class='number'>1</span>, <span class='string'>&quot;then&quot;</span>), <span class='ident'>Edge</span>(<span class='number'>0</span>, <span class='number'>2</span>, <span class='string'>&quot;else&quot;</span>),
-                 <span class='ident'>Edge</span>(<span class='number'>1</span>, <span class='number'>3</span>, <span class='string'>&quot;;&quot;</span>),    <span class='ident'>Edge</span>(<span class='number'>2</span>, <span class='number'>3</span>, <span class='string'>&quot;;&quot;</span>   )));
+            <span class='macro'>vec</span><span class='macro'>!</span>(<span class='ident'>edge</span>(<span class='number'>0</span>, <span class='number'>1</span>, <span class='string'>&quot;then&quot;</span>), <span class='ident'>edge</span>(<span class='number'>0</span>, <span class='number'>2</span>, <span class='string'>&quot;else&quot;</span>),
+                 <span class='ident'>edge</span>(<span class='number'>1</span>, <span class='number'>3</span>, <span class='string'>&quot;;&quot;</span>),    <span class='ident'>edge</span>(<span class='number'>2</span>, <span class='number'>3</span>, <span class='string'>&quot;;&quot;</span>   )));
 
         <span class='ident'>render</span>(<span class='kw-2'>&amp;</span><span class='ident'>g</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>writer</span>).<span class='ident'>unwrap</span>();
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>r</span> <span class='op'>=</span> <span class='ident'>BufReader</span>::<span class='ident'>new</span>(<span class='ident'>writer</span>.<span class='ident'>get_ref</span>());

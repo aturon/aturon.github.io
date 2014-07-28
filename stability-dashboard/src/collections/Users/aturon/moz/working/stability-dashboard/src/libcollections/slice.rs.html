@@ -2432,6 +2432,19 @@
 <span id='2392'>2392</span>
 <span id='2393'>2393</span>
 <span id='2394'>2394</span>
+<span id='2395'>2395</span>
+<span id='2396'>2396</span>
+<span id='2397'>2397</span>
+<span id='2398'>2398</span>
+<span id='2399'>2399</span>
+<span id='2400'>2400</span>
+<span id='2401'>2401</span>
+<span id='2402'>2402</span>
+<span id='2403'>2403</span>
+<span id='2404'>2404</span>
+<span id='2405'>2405</span>
+<span id='2406'>2406</span>
+<span id='2407'>2407</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -2542,7 +2555,7 @@ There are a number of free functions that create or take vectors, for example:
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>ptr</span>;
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>iter</span>::{<span class='ident'>range_step</span>, <span class='ident'>MultiplicativeIterator</span>};
 
-<span class='kw'>use</span> <span class='ident'>Collection</span>;
+<span class='kw'>use</span> {<span class='ident'>Collection</span>, <span class='ident'>MutableSeq</span>};
 <span class='kw'>use</span> <span class='ident'>vec</span>::<span class='ident'>Vec</span>;
 
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>slice</span>::{<span class='ident'>ref_slice</span>, <span class='ident'>mut_ref_slice</span>, <span class='ident'>Splits</span>, <span class='ident'>Windows</span>};
@@ -2590,7 +2603,7 @@ There are a number of free functions that create or take vectors, for example:
 <span class='doccomment'>/// a sequence of all possible permutations for an indexed sequence of</span>
 <span class='doccomment'>/// elements. Each permutation is only a single swap apart.</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>/// The Steinhaus–Johnson–Trotter algorithm is used.</span>
+<span class='doccomment'>/// The Steinhaus-Johnson-Trotter algorithm is used.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// Generates even and odd permutations alternately.</span>
 <span class='doccomment'>///</span>
@@ -2712,21 +2725,33 @@ There are a number of free functions that create or take vectors, for example:
 
 <span class='doccomment'>/// Extension methods for vector slices with cloneable elements</span>
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>CloneableVector</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
-    <span class='doccomment'>/// Copy `self` into a new owned vector</span>
-    <span class='kw'>fn</span> <span class='ident'>to_owned</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>;
+    <span class='doccomment'>/// Copy `self` into a new vector</span>
+    <span class='kw'>fn</span> <span class='ident'>to_vec</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>;
+
+    <span class='doccomment'>/// Deprecated. Use `to_vec`</span>
+    <span class='attribute'>#[<span class='ident'>deprecated</span> <span class='op'>=</span> <span class='string'>&quot;Replaced by `to_vec`&quot;</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>to_owned</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>to_vec</span>()
+    }
 
     <span class='doccomment'>/// Convert `self` into an owned vector, not making a copy if possible.</span>
-    <span class='kw'>fn</span> <span class='ident'>into_owned</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>;
+    <span class='kw'>fn</span> <span class='ident'>into_vec</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>;
+
+    <span class='doccomment'>/// Deprecated. Use `into_vec`</span>
+    <span class='attribute'>#[<span class='ident'>deprecated</span> <span class='op'>=</span> <span class='string'>&quot;Replaced by `into_vec`&quot;</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>into_owned</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>into_vec</span>()
+    }
 }
 
 <span class='doccomment'>/// Extension methods for vector slices</span>
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>: <span class='ident'>Clone</span><span class='op'>&gt;</span> <span class='ident'>CloneableVector</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> [<span class='ident'>T</span>] {
     <span class='doccomment'>/// Returns a copy of `v`.</span>
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>to_owned</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> { <span class='ident'>Vec</span>::<span class='ident'>from_slice</span>(<span class='op'>*</span><span class='self'>self</span>) }
+    <span class='kw'>fn</span> <span class='ident'>to_vec</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> { <span class='ident'>Vec</span>::<span class='ident'>from_slice</span>(<span class='op'>*</span><span class='self'>self</span>) }
 
     <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-    <span class='kw'>fn</span> <span class='ident'>into_owned</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> { <span class='self'>self</span>.<span class='ident'>to_owned</span>() }
+    <span class='kw'>fn</span> <span class='ident'>into_vec</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> { <span class='self'>self</span>.<span class='ident'>to_vec</span>() }
 }
 
 <span class='doccomment'>/// Extension methods for vectors containing `Clone` elements.</span>
@@ -2760,7 +2785,7 @@ There are a number of free functions that create or take vectors, for example:
     <span class='kw'>fn</span> <span class='ident'>permutations</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Permutations</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='ident'>Permutations</span>{
             <span class='ident'>swaps</span>: <span class='ident'>ElementSwaps</span>::<span class='ident'>new</span>(<span class='self'>self</span>.<span class='ident'>len</span>()),
-            <span class='ident'>v</span>: <span class='self'>self</span>.<span class='ident'>to_owned</span>(),
+            <span class='ident'>v</span>: <span class='self'>self</span>.<span class='ident'>to_vec</span>(),
         }
     }
 
@@ -3154,7 +3179,7 @@ There are a number of free functions that create or take vectors, for example:
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rt</span>;
     <span class='kw'>use</span> <span class='ident'>slice</span>::<span class='op'>*</span>;
 
-    <span class='kw'>use</span> <span class='ident'>Mutable</span>;
+    <span class='kw'>use</span> {<span class='ident'>Mutable</span>, <span class='ident'>MutableSeq</span>};
     <span class='kw'>use</span> <span class='ident'>vec</span>::<span class='ident'>Vec</span>;
 
     <span class='kw'>fn</span> <span class='ident'>square</span>(<span class='ident'>n</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>uint</span> { <span class='ident'>n</span> <span class='op'>*</span> <span class='ident'>n</span> }
@@ -3323,7 +3348,7 @@ There are a number of free functions that create or take vectors, for example:
     <span class='kw'>fn</span> <span class='ident'>test_slice</span>() {
         <span class='comment'>// Test fixed length vector.</span>
         <span class='kw'>let</span> <span class='ident'>vec_fixed</span> <span class='op'>=</span> [<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>];
-        <span class='kw'>let</span> <span class='ident'>v_a</span> <span class='op'>=</span> <span class='ident'>vec_fixed</span>.<span class='ident'>slice</span>(<span class='number'>1u</span>, <span class='ident'>vec_fixed</span>.<span class='ident'>len</span>()).<span class='ident'>to_owned</span>();
+        <span class='kw'>let</span> <span class='ident'>v_a</span> <span class='op'>=</span> <span class='ident'>vec_fixed</span>.<span class='ident'>slice</span>(<span class='number'>1u</span>, <span class='ident'>vec_fixed</span>.<span class='ident'>len</span>()).<span class='ident'>to_vec</span>();
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v_a</span>.<span class='ident'>len</span>(), <span class='number'>3u</span>);
         <span class='kw'>let</span> <span class='ident'>v_a</span> <span class='op'>=</span> <span class='ident'>v_a</span>.<span class='ident'>as_slice</span>();
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v_a</span>[<span class='number'>0</span>], <span class='number'>2</span>);
@@ -3332,7 +3357,7 @@ There are a number of free functions that create or take vectors, for example:
 
         <span class='comment'>// Test on stack.</span>
         <span class='kw'>let</span> <span class='ident'>vec_stack</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
-        <span class='kw'>let</span> <span class='ident'>v_b</span> <span class='op'>=</span> <span class='ident'>vec_stack</span>.<span class='ident'>slice</span>(<span class='number'>1u</span>, <span class='number'>3u</span>).<span class='ident'>to_owned</span>();
+        <span class='kw'>let</span> <span class='ident'>v_b</span> <span class='op'>=</span> <span class='ident'>vec_stack</span>.<span class='ident'>slice</span>(<span class='number'>1u</span>, <span class='number'>3u</span>).<span class='ident'>to_vec</span>();
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v_b</span>.<span class='ident'>len</span>(), <span class='number'>2u</span>);
         <span class='kw'>let</span> <span class='ident'>v_b</span> <span class='op'>=</span> <span class='ident'>v_b</span>.<span class='ident'>as_slice</span>();
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v_b</span>[<span class='number'>0</span>], <span class='number'>2</span>);
@@ -3340,7 +3365,7 @@ There are a number of free functions that create or take vectors, for example:
 
         <span class='comment'>// Test `Box&lt;[T]&gt;`</span>
         <span class='kw'>let</span> <span class='ident'>vec_unique</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>, <span class='number'>5</span>, <span class='number'>6</span>];
-        <span class='kw'>let</span> <span class='ident'>v_d</span> <span class='op'>=</span> <span class='ident'>vec_unique</span>.<span class='ident'>slice</span>(<span class='number'>1u</span>, <span class='number'>6u</span>).<span class='ident'>to_owned</span>();
+        <span class='kw'>let</span> <span class='ident'>v_d</span> <span class='op'>=</span> <span class='ident'>vec_unique</span>.<span class='ident'>slice</span>(<span class='number'>1u</span>, <span class='number'>6u</span>).<span class='ident'>to_vec</span>();
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v_d</span>.<span class='ident'>len</span>(), <span class='number'>5u</span>);
         <span class='kw'>let</span> <span class='ident'>v_d</span> <span class='op'>=</span> <span class='ident'>v_d</span>.<span class='ident'>as_slice</span>();
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>v_d</span>[<span class='number'>0</span>], <span class='number'>2</span>);
@@ -3567,7 +3592,7 @@ There are a number of free functions that create or take vectors, for example:
             <span class='kw'>let</span> (<span class='ident'>min_size</span>, <span class='ident'>max_opt</span>) <span class='op'>=</span> <span class='ident'>it</span>.<span class='ident'>size_hint</span>();
             <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>min_size</span>, <span class='number'>1</span>);
             <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>max_opt</span>.<span class='ident'>unwrap</span>(), <span class='number'>1</span>);
-            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>it</span>.<span class='ident'>next</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>v</span>.<span class='ident'>as_slice</span>().<span class='ident'>to_owned</span>()));
+            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>it</span>.<span class='ident'>next</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>v</span>.<span class='ident'>as_slice</span>().<span class='ident'>to_vec</span>()));
             <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>it</span>.<span class='ident'>next</span>(), <span class='prelude-val'>None</span>);
         }
         {
@@ -3576,7 +3601,7 @@ There are a number of free functions that create or take vectors, for example:
             <span class='kw'>let</span> (<span class='ident'>min_size</span>, <span class='ident'>max_opt</span>) <span class='op'>=</span> <span class='ident'>it</span>.<span class='ident'>size_hint</span>();
             <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>min_size</span>, <span class='number'>1</span>);
             <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>max_opt</span>.<span class='ident'>unwrap</span>(), <span class='number'>1</span>);
-            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>it</span>.<span class='ident'>next</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>v</span>.<span class='ident'>as_slice</span>().<span class='ident'>to_owned</span>()));
+            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>it</span>.<span class='ident'>next</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>v</span>.<span class='ident'>as_slice</span>().<span class='ident'>to_vec</span>()));
             <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>it</span>.<span class='ident'>next</span>(), <span class='prelude-val'>None</span>);
         }
         {
@@ -4556,6 +4581,7 @@ There are a number of free functions that create or take vectors, for example:
     <span class='kw'>use</span> <span class='ident'>test</span>::<span class='ident'>Bencher</span>;
 
     <span class='kw'>use</span> <span class='ident'>vec</span>::<span class='ident'>Vec</span>;
+    <span class='kw'>use</span> <span class='ident'>MutableSeq</span>;
 
     <span class='attribute'>#[<span class='ident'>bench</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>iterator</span>(<span class='ident'>b</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Bencher</span>) {

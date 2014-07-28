@@ -1091,7 +1091,7 @@
     <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>super</span>::<span class='ident'>Loop</span>;
     <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>super</span>::<span class='ident'>local_loop</span>;
 
-    <span class='kw'>fn</span> <span class='ident'>l</span>() <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Loop</span> { <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>local_loop</span>().<span class='ident'>loop_</span> }
+    <span class='kw'>fn</span> <span class='ident'>l</span>() <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='kw-2'>mut</span> <span class='ident'>Loop</span> { <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>local_loop</span>().<span class='ident'>loop_</span> }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>file_test_full_simple_sync</span>() {
@@ -1169,7 +1169,7 @@
         <span class='kw'>let</span> <span class='ident'>path</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='string'>&quot;./tmp/mk_rm_dir&quot;</span>.<span class='ident'>to_c_str</span>();
         <span class='kw'>let</span> <span class='ident'>mode</span> <span class='op'>=</span> <span class='ident'>S_IWUSR</span> <span class='op'>|</span> <span class='ident'>S_IRUSR</span>;
 
-        <span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>FsRequest</span>::<span class='ident'>mkdir</span>(<span class='ident'>l</span>(), <span class='ident'>path</span>, <span class='ident'>mode</span>);
+        <span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>FsRequest</span>::<span class='ident'>mkdir</span>(<span class='ident'>l</span>(), <span class='ident'>path</span>, <span class='ident'>mode</span> <span class='kw'>as</span> <span class='ident'>c_int</span>);
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>result</span>.<span class='ident'>is_ok</span>());
 
         <span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>FsRequest</span>::<span class='ident'>rmdir</span>(<span class='ident'>l</span>(), <span class='ident'>path</span>);

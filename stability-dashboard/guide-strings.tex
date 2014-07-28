@@ -1,0 +1,170 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+    \usepackage{xltxtra,xunicode}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
+  \newcommand{\euro}{€}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{\usepackage{microtype}}{}
+\ifxetex
+  \usepackage[setpagesize=false, % page size defined by xetex
+              unicode=false, % unicode breaks when used with xetex
+              xetex]{hyperref}
+\else
+  \usepackage[unicode=true]{hyperref}
+\fi
+\hypersetup{breaklinks=true,
+            bookmarks=true,
+            pdfauthor={},
+            pdftitle={The Strings Guide},
+            colorlinks=true,
+            citecolor=blue,
+            urlcolor=blue,
+            linkcolor=magenta,
+            pdfborder={0 0 0}}
+\urlstyle{same}  % don't use monospace font for urls
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\setcounter{secnumdepth}{5}
+
+\title{The Strings Guide}
+
+\begin{document}
+\maketitle
+
+0.12.0-pre (2c50add48 2014-07-27 23:03:52 -0700)
+
+Copyright © 2011-2014 The Rust Project Developers. Licensed under the
+\href{http://www.apache.org/licenses/LICENSE-2.0}{Apache License,
+Version 2.0} or the \href{http://opensource.org/licenses/MIT}{MIT
+license}, at your option.
+
+This file may not be copied, modified, or distributed except according
+to those terms.
+
+{
+\hypersetup{linkcolor=black}
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+Strings are an important concept to master in any programming language.
+If you come from a managed language background, you may be surprised at
+the complexity of string handling in a systems programming language.
+Efficient access and allocation of memory for a dynamically sized
+structure involves a lot of details. Luckily, Rust has lots of tools to
+help us here.
+
+A \textbf{string} is a sequence of unicode scalar values encoded as a
+stream of UTF-8 bytes. All strings are guaranteed to be validly-encoded
+UTF-8 sequences. Additionally, strings are not null-terminated and can
+contain null bytes.
+
+Rust has two main types of strings: \texttt{\&str} and \texttt{String}.
+
+\section{\&str}\label{str}
+
+The first kind is a \texttt{\&str}. This is pronounced a `string slice.'
+String literals are of the type \texttt{\&str}:
+
+\texttt{\{rust\} let string = "Hello there.";}
+
+Like any Rust type, string slices have an associated lifetime. A string
+literal is a \texttt{\&'static str}. A string slice can be written
+without an explicit lifetime in many cases, such as in function
+arguments. In these cases the lifetime will be inferred:
+
+\texttt{\{rust\} fn takes\_slice(slice: \&str) \{     println!("Got: \{\}", slice); \}}
+
+Like vector slices, string slices are simply a pointer plus a length.
+This means that they're a `view' into an already-allocated string, such
+as a \texttt{\&'static str} or a \texttt{String}.
+
+\section{String}\label{string}
+
+A \texttt{String} is a heap-allocated string. This string is growable,
+and is also guaranteed to be UTF-8.
+
+```\{rust\} let mut s = ``Hello''.to\_string(); println!(``\{\}'', s);
+
+s.push\_str(``, world.''); println!(``\{\}'', s); ```
+
+You can coerce a \texttt{String} into a \texttt{\&str} with the
+\texttt{as\_slice()} method:
+
+```\{rust\} fn takes\_slice(slice: \&str) \{ println!(``Got: \{\}'',
+slice); \}
+
+fn main() \{ let s = ``Hello''.to\_string();
+takes\_slice(s.as\_slice()); \} ```
+
+You can also get a \texttt{\&str} from a stack-allocated array of bytes:
+
+```\{rust\} use std::str;
+
+let x: \&{[}u8{]} = \&{[}b'a', b'b'{]}; let stack\_str: \&str =
+str::from\_utf8(x).unwrap(); ```
+
+\section{Best Practices}\label{best-practices}
+
+\subsection{\texttt{String} vs. \texttt{\&str}}\label{string-vs.-str}
+
+In general, you should prefer \texttt{String} when you need ownership,
+and \texttt{\&str} when you just need to borrow a string. This is very
+similar to using \texttt{Vec\textless{}T\textgreater{}} vs.
+\texttt{\&{[}T{]}}, and \texttt{T} vs \texttt{\&T} in general.
+
+This means starting off with this:
+
+\texttt{\{rust,ignore\} fn foo(s: \&str) \{}
+
+and only moving to this:
+
+\texttt{\{rust,ignore\} fn foo(s: String) \{}
+
+If you have good reason. It's not polite to hold on to ownership you
+don't need, and it can make your lifetimes more complex. Furthermore,
+you can pass either kind of string into \texttt{foo} by using
+\texttt{.as\_slice()} on any \texttt{String} you need to pass in, so the
+\texttt{\&str} version is more flexible.
+
+\subsection{Comparisons}\label{comparisons}
+
+To compare a String to a constant string, prefer
+\texttt{as\_slice()}\ldots{}
+
+\texttt{\{rust\} fn compare(string: String) \{     if string.as\_slice() == "Hello" \{         println!("yes");     \} \}}
+
+\ldots{} over \texttt{to\_string()}:
+
+\texttt{\{rust\} fn compare(string: String) \{     if string == "Hello".to\_string() \{         println!("yes");     \} \}}
+
+Converting a \texttt{String} to a \texttt{\&str} is cheap, but
+converting the \texttt{\&str} to a \texttt{String} involves an
+allocation.
+
+\section{Other Documentation}\label{other-documentation}
+
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  \href{/std/str/index.html}{the \texttt{\&str} API documentation}
+\item
+  \href{std/string/index.html}{the \texttt{String} API documentation}
+\end{itemize}
+
+\end{document}

@@ -1174,7 +1174,7 @@
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>find</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>text</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span>(<span class='ident'>uint</span>, <span class='ident'>uint</span>)<span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>caps</span> <span class='op'>=</span> <span class='ident'>exec</span>(<span class='self'>self</span>, <span class='ident'>Location</span>, <span class='ident'>text</span>);
         <span class='kw'>if</span> <span class='ident'>has_match</span>(<span class='kw-2'>&amp;</span><span class='ident'>caps</span>) {
-            <span class='prelude-val'>Some</span>((<span class='ident'>caps</span>.<span class='ident'>get</span>(<span class='number'>0</span>).<span class='ident'>unwrap</span>(), <span class='ident'>caps</span>.<span class='ident'>get</span>(<span class='number'>1</span>).<span class='ident'>unwrap</span>()))
+            <span class='prelude-val'>Some</span>((<span class='ident'>caps</span>[<span class='number'>0</span>].<span class='ident'>unwrap</span>(), <span class='ident'>caps</span>[<span class='number'>1</span>].<span class='ident'>unwrap</span>()))
         } <span class='kw'>else</span> {
             <span class='prelude-val'>None</span>
         }
@@ -1666,11 +1666,11 @@
     <span class='doccomment'>/// original string matched.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>pos</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>i</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span>(<span class='ident'>uint</span>, <span class='ident'>uint</span>)<span class='op'>&gt;</span> {
         <span class='kw'>let</span> (<span class='ident'>s</span>, <span class='ident'>e</span>) <span class='op'>=</span> (<span class='ident'>i</span> <span class='op'>*</span> <span class='number'>2</span>, <span class='ident'>i</span> <span class='op'>*</span> <span class='number'>2</span> <span class='op'>+</span> <span class='number'>1</span>);
-        <span class='kw'>if</span> <span class='ident'>e</span> <span class='op'>&gt;=</span> <span class='self'>self</span>.<span class='ident'>locs</span>.<span class='ident'>len</span>() <span class='op'>||</span> <span class='self'>self</span>.<span class='ident'>locs</span>.<span class='ident'>get</span>(<span class='ident'>s</span>).<span class='ident'>is_none</span>() {
+        <span class='kw'>if</span> <span class='ident'>e</span> <span class='op'>&gt;=</span> <span class='self'>self</span>.<span class='ident'>locs</span>.<span class='ident'>len</span>() <span class='op'>||</span> <span class='self'>self</span>.<span class='ident'>locs</span>[<span class='ident'>s</span>].<span class='ident'>is_none</span>() {
             <span class='comment'>// VM guarantees that each pair of locations are both Some or None.</span>
             <span class='kw'>return</span> <span class='prelude-val'>None</span>
         }
-        <span class='prelude-val'>Some</span>((<span class='self'>self</span>.<span class='ident'>locs</span>.<span class='ident'>get</span>(<span class='ident'>s</span>).<span class='ident'>unwrap</span>(), <span class='self'>self</span>.<span class='ident'>locs</span>.<span class='ident'>get</span>(<span class='ident'>e</span>).<span class='ident'>unwrap</span>()))
+        <span class='prelude-val'>Some</span>((<span class='self'>self</span>.<span class='ident'>locs</span>[<span class='ident'>s</span>].<span class='ident'>unwrap</span>(), <span class='self'>self</span>.<span class='ident'>locs</span>[<span class='ident'>e</span>].<span class='ident'>unwrap</span>()))
     }
 
     <span class='doccomment'>/// Returns the matched string for the capture group `i`.</span>
@@ -1818,7 +1818,7 @@
             <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>has_match</span>(<span class='kw-2'>&amp;</span><span class='ident'>caps</span>) {
                 <span class='kw'>return</span> <span class='prelude-val'>None</span>
             } <span class='kw'>else</span> {
-                (<span class='ident'>caps</span>.<span class='ident'>get</span>(<span class='number'>0</span>).<span class='ident'>unwrap</span>(), <span class='ident'>caps</span>.<span class='ident'>get</span>(<span class='number'>1</span>).<span class='ident'>unwrap</span>())
+                (<span class='ident'>caps</span>[<span class='number'>0</span>].<span class='ident'>unwrap</span>(), <span class='ident'>caps</span>[<span class='number'>1</span>].<span class='ident'>unwrap</span>())
             };
 
         <span class='comment'>// Don&#39;t accept empty matches immediately following a match.</span>
@@ -1860,7 +1860,7 @@
             <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>has_match</span>(<span class='kw-2'>&amp;</span><span class='ident'>caps</span>) {
                 <span class='kw'>return</span> <span class='prelude-val'>None</span>
             } <span class='kw'>else</span> {
-                (<span class='ident'>caps</span>.<span class='ident'>get</span>(<span class='number'>0</span>).<span class='ident'>unwrap</span>(), <span class='ident'>caps</span>.<span class='ident'>get</span>(<span class='number'>1</span>).<span class='ident'>unwrap</span>())
+                (<span class='ident'>caps</span>[<span class='number'>0</span>].<span class='ident'>unwrap</span>(), <span class='ident'>caps</span>[<span class='number'>1</span>].<span class='ident'>unwrap</span>())
             };
 
         <span class='comment'>// Don&#39;t accept empty matches immediately following a match.</span>
@@ -1889,7 +1889,7 @@
 
 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
 <span class='kw'>fn</span> <span class='ident'>has_match</span>(<span class='ident'>caps</span>: <span class='kw-2'>&amp;</span><span class='ident'>CaptureLocs</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
-    <span class='ident'>caps</span>.<span class='ident'>len</span>() <span class='op'>&gt;=</span> <span class='number'>2</span> <span class='op'>&amp;&amp;</span> <span class='ident'>caps</span>.<span class='ident'>get</span>(<span class='number'>0</span>).<span class='ident'>is_some</span>() <span class='op'>&amp;&amp;</span> <span class='ident'>caps</span>.<span class='ident'>get</span>(<span class='number'>1</span>).<span class='ident'>is_some</span>()
+    <span class='ident'>caps</span>.<span class='ident'>len</span>() <span class='op'>&gt;=</span> <span class='number'>2</span> <span class='op'>&amp;&amp;</span> <span class='ident'>caps</span>[<span class='number'>0</span>].<span class='ident'>is_some</span>() <span class='op'>&amp;&amp;</span> <span class='ident'>caps</span>[<span class='number'>1</span>].<span class='ident'>is_some</span>()
 }
 </pre>
 </section>

@@ -1577,6 +1577,10 @@
 <span id='1537'>1537</span>
 <span id='1538'>1538</span>
 <span id='1539'>1539</span>
+<span id='1540'>1540</span>
+<span id='1541'>1541</span>
+<span id='1542'>1542</span>
+<span id='1543'>1543</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -1760,7 +1764,7 @@
 
     <span class='comment'>// Take a main task to run, and a scheduler to run it in. Create a</span>
     <span class='comment'>// scheduler task and bootstrap into it.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>bootstrap</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>) {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>bootstrap</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>) {
 
         <span class='comment'>// Build an Idle callback.</span>
         <span class='kw'>let</span> <span class='ident'>cb</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>SchedRunner</span> <span class='kw'>as</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Callback</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>;
@@ -1804,7 +1808,8 @@
 
     <span class='comment'>// This does not return a scheduler, as the scheduler is placed</span>
     <span class='comment'>// inside the task.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>run</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>stask</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>run</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>, <span class='ident'>stask</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>)
+               <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span> {
 
         <span class='comment'>// This is unsafe because we need to place the scheduler, with</span>
         <span class='comment'>// the event_loop inside, inside our task. But we still need a</span>
@@ -1851,7 +1856,7 @@
     <span class='comment'>// If we try really hard to do some work, but no work is available to be</span>
     <span class='comment'>// done, then we fall back to epoll() to block this thread waiting for more</span>
     <span class='comment'>// work (instead of busy waiting).</span>
-    <span class='kw'>fn</span> <span class='ident'>run_sched_once</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>stask</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) {
+    <span class='kw'>fn</span> <span class='ident'>run_sched_once</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>, <span class='ident'>stask</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) {
         <span class='comment'>// Make sure that we&#39;re not lying in that the `stask` argument is indeed</span>
         <span class='comment'>// the scheduler task for this scheduler.</span>
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>sched_task</span>.<span class='ident'>is_none</span>());
@@ -1929,11 +1934,10 @@
     <span class='comment'>// returns the still-available scheduler. At this point all</span>
     <span class='comment'>// message-handling will count as a turn of work, and as a result</span>
     <span class='comment'>// return None.</span>
-    <span class='kw'>fn</span> <span class='ident'>interpret_message_queue</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>stask</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>,
+    <span class='kw'>fn</span> <span class='ident'>interpret_message_queue</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>,
+                               <span class='ident'>stask</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>,
                                <span class='ident'>effort</span>: <span class='ident'>EffortLevel</span>)
-            <span class='op'>-&gt;</span> (<span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>, <span class='ident'>bool</span>)
-    {
-
+                               <span class='op'>-&gt;</span> (<span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>, <span class='ident'>bool</span>) {
         <span class='kw'>let</span> <span class='ident'>msg</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>effort</span> <span class='op'>==</span> <span class='ident'>DontTryTooHard</span> {
             <span class='self'>self</span>.<span class='ident'>message_queue</span>.<span class='ident'>casual_pop</span>()
         } <span class='kw'>else</span> {
@@ -2012,7 +2016,7 @@
         }
     }
 
-    <span class='kw'>fn</span> <span class='ident'>do_work</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>stask</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>)
+    <span class='kw'>fn</span> <span class='ident'>do_work</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>, <span class='ident'>stask</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>)
                <span class='op'>-&gt;</span> (<span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>, <span class='ident'>bool</span>) {
         <span class='macro'>rtdebug</span><span class='macro'>!</span>(<span class='string'>&quot;scheduler calling do work&quot;</span>);
         <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>find_work</span>() {
@@ -2097,7 +2101,7 @@
     <span class='comment'>// * Task Routing Functions - Make sure tasks send up in the right</span>
     <span class='comment'>// place.</span>
 
-    <span class='kw'>fn</span> <span class='ident'>process_task</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>,
+    <span class='kw'>fn</span> <span class='ident'>process_task</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>,
                     <span class='ident'>cur</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>,
                     <span class='kw-2'>mut</span> <span class='ident'>next</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>,
                     <span class='ident'>schedule_fn</span>: <span class='ident'>SchedulingFn</span>)
@@ -2190,7 +2194,7 @@
     <span class='comment'>// cleanup function f, which takes the scheduler and the</span>
     <span class='comment'>// old task as inputs.</span>
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>change_task_context</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>,
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>change_task_context</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>,
                                <span class='kw-2'>mut</span> <span class='ident'>current_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>,
                                <span class='kw-2'>mut</span> <span class='ident'>next_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>,
                                <span class='ident'>f</span>: <span class='op'>|</span><span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Scheduler</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span><span class='op'>|</span>)
@@ -2273,7 +2277,7 @@
 
     <span class='comment'>// * Context Swapping Helpers - Here be ugliness!</span>
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>resume_task_immediately</span>(<span class='kw-2'>~</span><span class='self'>self</span>,
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>resume_task_immediately</span>(<span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>,
                                    <span class='ident'>cur</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>,
                                    <span class='ident'>next</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>)
                                    <span class='op'>-&gt;</span> (<span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) {
@@ -2313,7 +2317,7 @@
     <span class='doccomment'>/// This situation is currently prevented, or in other words it is</span>
     <span class='doccomment'>/// guaranteed that this function will not return before the given closure</span>
     <span class='doccomment'>/// has returned.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>deschedule_running_task_and_then</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>,
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>deschedule_running_task_and_then</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>,
                                             <span class='ident'>cur</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>,
                                             <span class='ident'>f</span>: <span class='op'>|</span><span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Scheduler</span>, <span class='ident'>BlockedTask</span><span class='op'>|</span>) {
         <span class='comment'>// Trickier - we need to get the scheduler task out of self</span>
@@ -2323,7 +2327,7 @@
         <span class='self'>self</span>.<span class='ident'>switch_running_tasks_and_then</span>(<span class='ident'>cur</span>, <span class='ident'>stask</span>, <span class='ident'>f</span>)
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>switch_running_tasks_and_then</span>(<span class='kw-2'>~</span><span class='self'>self</span>,
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>switch_running_tasks_and_then</span>(<span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>,
                                          <span class='ident'>cur</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>,
                                          <span class='ident'>next</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>,
                                          <span class='ident'>f</span>: <span class='op'>|</span><span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Scheduler</span>, <span class='ident'>BlockedTask</span><span class='op'>|</span>) {
@@ -2375,7 +2379,9 @@
 
     <span class='doccomment'>/// Called by a running task to end execution, after which it will</span>
     <span class='doccomment'>/// be recycled by the scheduler for reuse in a new task.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>terminate_current_task</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>cur</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='op'>!</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>terminate_current_task</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>,
+                                  <span class='ident'>cur</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>)
+                                  <span class='op'>-&gt;</span> <span class='op'>!</span> {
         <span class='comment'>// Similar to deschedule running task and then, but cannot go through</span>
         <span class='comment'>// the task-blocking path. The task is already dying.</span>
         <span class='kw'>let</span> <span class='ident'>stask</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>sched_task</span>.<span class='ident'>take_unwrap</span>();
@@ -2387,7 +2393,9 @@
         <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;should never return!&quot;</span>);
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>run_task</span>(<span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>cur</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>, <span class='ident'>next</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>run_task</span>(<span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>,
+                    <span class='ident'>cur</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>,
+                    <span class='ident'>next</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) {
         <span class='kw'>let</span> (<span class='ident'>sched</span>, <span class='ident'>task</span>) <span class='op'>=</span>
             <span class='self'>self</span>.<span class='ident'>process_task</span>(<span class='ident'>cur</span>, <span class='ident'>next</span>, <span class='ident'>Scheduler</span>::<span class='ident'>switch_task</span>);
         <span class='ident'>task</span>.<span class='ident'>put_with_sched</span>(<span class='ident'>sched</span>);
@@ -2403,7 +2411,7 @@
     <span class='doccomment'>/// to introduce some amount of randomness to the scheduler. Currently the</span>
     <span class='doccomment'>/// randomness is a result of performing a round of work stealing (which</span>
     <span class='doccomment'>/// may end up stealing from the current scheduler).</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>yield_now</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>cur</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>yield_now</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>, <span class='ident'>cur</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) {
         <span class='comment'>// Async handles trigger the scheduler by calling yield_now on the local</span>
         <span class='comment'>// task, which eventually gets us to here. See comments in SchedRunner</span>
         <span class='comment'>// for more info on this.</span>
@@ -2422,7 +2430,7 @@
         }
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>maybe_yield</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>cur</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>maybe_yield</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>, <span class='ident'>cur</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) {
         <span class='comment'>// It&#39;s possible for sched tasks to possibly call this function, and it</span>
         <span class='comment'>// just means that they&#39;re likely sending on channels (which</span>
         <span class='comment'>// occasionally call this function). Sched tasks follow different paths</span>
@@ -2539,13 +2547,13 @@
 <span class='kw'>type</span> <span class='ident'>UnsafeTaskReceiver</span> <span class='op'>=</span> <span class='ident'>raw</span>::<span class='ident'>Closure</span>;
 <span class='kw'>trait</span> <span class='ident'>ClosureConverter</span> {
     <span class='kw'>fn</span> <span class='ident'>from_fn</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Scheduler</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span><span class='op'>|</span>) <span class='op'>-&gt;</span> <span class='ident'>Self</span>;
-    <span class='kw'>fn</span> <span class='ident'>to_fn</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>|</span><span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Scheduler</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span><span class='op'>|</span>;
+    <span class='kw'>fn</span> <span class='ident'>to_fn</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>|</span><span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Scheduler</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span><span class='op'>|</span>:<span class='lifetime'>&#39;static</span> ;
 }
 <span class='kw'>impl</span> <span class='ident'>ClosureConverter</span> <span class='kw'>for</span> <span class='ident'>UnsafeTaskReceiver</span> {
     <span class='kw'>fn</span> <span class='ident'>from_fn</span>(<span class='ident'>f</span>: <span class='op'>|</span><span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Scheduler</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span><span class='op'>|</span>) <span class='op'>-&gt;</span> <span class='ident'>UnsafeTaskReceiver</span> {
         <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>f</span>) }
     }
-    <span class='kw'>fn</span> <span class='ident'>to_fn</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>|</span><span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Scheduler</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span><span class='op'>|</span> {
+    <span class='kw'>fn</span> <span class='ident'>to_fn</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>|</span><span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Scheduler</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span><span class='op'>|</span>:<span class='lifetime'>&#39;static</span> {
         <span class='kw'>unsafe</span> { <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='self'>self</span>) }
     }
 }

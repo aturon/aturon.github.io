@@ -379,9 +379,9 @@
 
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
 
-<span class='kw'>use</span> <span class='ident'>alloc</span>::<span class='ident'>owned</span>::<span class='ident'>Box</span>;
+<span class='kw'>use</span> <span class='ident'>alloc</span>::<span class='ident'>boxed</span>::<span class='ident'>Box</span>;
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>mem</span>;
-<span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>ty</span>::<span class='ident'>Unsafe</span>;
+<span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>cell</span>::<span class='ident'>UnsafeCell</span>;
 
 <span class='kw'>use</span> <span class='ident'>atomics</span>::{<span class='ident'>AtomicPtr</span>, <span class='ident'>Relaxed</span>, <span class='ident'>AtomicUint</span>, <span class='ident'>Acquire</span>, <span class='ident'>Release</span>};
 
@@ -400,13 +400,13 @@
 <span class='doccomment'>/// time.</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Queue</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='comment'>// consumer fields</span>
-    <span class='ident'>tail</span>: <span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>, <span class='comment'>// where to pop from</span>
+    <span class='ident'>tail</span>: <span class='ident'>UnsafeCell</span><span class='op'>&lt;</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>, <span class='comment'>// where to pop from</span>
     <span class='ident'>tail_prev</span>: <span class='ident'>AtomicPtr</span><span class='op'>&lt;</span><span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>, <span class='comment'>// where to pop from</span>
 
     <span class='comment'>// producer fields</span>
-    <span class='ident'>head</span>: <span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>,      <span class='comment'>// where to push to</span>
-    <span class='ident'>first</span>: <span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>,     <span class='comment'>// where to get new nodes from</span>
-    <span class='ident'>tail_copy</span>: <span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>, <span class='comment'>// between first/tail</span>
+    <span class='ident'>head</span>: <span class='ident'>UnsafeCell</span><span class='op'>&lt;</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>,      <span class='comment'>// where to push to</span>
+    <span class='ident'>first</span>: <span class='ident'>UnsafeCell</span><span class='op'>&lt;</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>,     <span class='comment'>// where to get new nodes from</span>
+    <span class='ident'>tail_copy</span>: <span class='ident'>UnsafeCell</span><span class='op'>&lt;</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>, <span class='comment'>// between first/tail</span>
 
     <span class='comment'>// Cache maintenance fields. Additions and subtractions are stored</span>
     <span class='comment'>// separately in order to allow them to use nonatomic addition/subtraction.</span>
@@ -445,11 +445,11 @@
         <span class='kw'>let</span> <span class='ident'>n2</span> <span class='op'>=</span> <span class='ident'>Node</span>::<span class='ident'>new</span>();
         <span class='kw'>unsafe</span> { (<span class='op'>*</span><span class='ident'>n1</span>).<span class='ident'>next</span>.<span class='ident'>store</span>(<span class='ident'>n2</span>, <span class='ident'>Relaxed</span>) }
         <span class='ident'>Queue</span> {
-            <span class='ident'>tail</span>: <span class='ident'>Unsafe</span>::<span class='ident'>new</span>(<span class='ident'>n2</span>),
+            <span class='ident'>tail</span>: <span class='ident'>UnsafeCell</span>::<span class='ident'>new</span>(<span class='ident'>n2</span>),
             <span class='ident'>tail_prev</span>: <span class='ident'>AtomicPtr</span>::<span class='ident'>new</span>(<span class='ident'>n1</span>),
-            <span class='ident'>head</span>: <span class='ident'>Unsafe</span>::<span class='ident'>new</span>(<span class='ident'>n2</span>),
-            <span class='ident'>first</span>: <span class='ident'>Unsafe</span>::<span class='ident'>new</span>(<span class='ident'>n1</span>),
-            <span class='ident'>tail_copy</span>: <span class='ident'>Unsafe</span>::<span class='ident'>new</span>(<span class='ident'>n1</span>),
+            <span class='ident'>head</span>: <span class='ident'>UnsafeCell</span>::<span class='ident'>new</span>(<span class='ident'>n2</span>),
+            <span class='ident'>first</span>: <span class='ident'>UnsafeCell</span>::<span class='ident'>new</span>(<span class='ident'>n1</span>),
+            <span class='ident'>tail_copy</span>: <span class='ident'>UnsafeCell</span>::<span class='ident'>new</span>(<span class='ident'>n1</span>),
             <span class='ident'>cache_bound</span>: <span class='ident'>bound</span>,
             <span class='ident'>cache_additions</span>: <span class='ident'>AtomicUint</span>::<span class='ident'>new</span>(<span class='number'>0</span>),
             <span class='ident'>cache_subtractions</span>: <span class='ident'>AtomicUint</span>::<span class='ident'>new</span>(<span class='number'>0</span>),

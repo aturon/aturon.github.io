@@ -861,77 +861,6 @@
 <span id='821'>821</span>
 <span id='822'>822</span>
 <span id='823'>823</span>
-<span id='824'>824</span>
-<span id='825'>825</span>
-<span id='826'>826</span>
-<span id='827'>827</span>
-<span id='828'>828</span>
-<span id='829'>829</span>
-<span id='830'>830</span>
-<span id='831'>831</span>
-<span id='832'>832</span>
-<span id='833'>833</span>
-<span id='834'>834</span>
-<span id='835'>835</span>
-<span id='836'>836</span>
-<span id='837'>837</span>
-<span id='838'>838</span>
-<span id='839'>839</span>
-<span id='840'>840</span>
-<span id='841'>841</span>
-<span id='842'>842</span>
-<span id='843'>843</span>
-<span id='844'>844</span>
-<span id='845'>845</span>
-<span id='846'>846</span>
-<span id='847'>847</span>
-<span id='848'>848</span>
-<span id='849'>849</span>
-<span id='850'>850</span>
-<span id='851'>851</span>
-<span id='852'>852</span>
-<span id='853'>853</span>
-<span id='854'>854</span>
-<span id='855'>855</span>
-<span id='856'>856</span>
-<span id='857'>857</span>
-<span id='858'>858</span>
-<span id='859'>859</span>
-<span id='860'>860</span>
-<span id='861'>861</span>
-<span id='862'>862</span>
-<span id='863'>863</span>
-<span id='864'>864</span>
-<span id='865'>865</span>
-<span id='866'>866</span>
-<span id='867'>867</span>
-<span id='868'>868</span>
-<span id='869'>869</span>
-<span id='870'>870</span>
-<span id='871'>871</span>
-<span id='872'>872</span>
-<span id='873'>873</span>
-<span id='874'>874</span>
-<span id='875'>875</span>
-<span id='876'>876</span>
-<span id='877'>877</span>
-<span id='878'>878</span>
-<span id='879'>879</span>
-<span id='880'>880</span>
-<span id='881'>881</span>
-<span id='882'>882</span>
-<span id='883'>883</span>
-<span id='884'>884</span>
-<span id='885'>885</span>
-<span id='886'>886</span>
-<span id='887'>887</span>
-<span id='888'>888</span>
-<span id='889'>889</span>
-<span id='890'>890</span>
-<span id='891'>891</span>
-<span id='892'>892</span>
-<span id='893'>893</span>
-<span id='894'>894</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2012 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -1004,6 +933,8 @@ fn main() {
 
 <span class='kw'>use</span> <span class='ident'>alloc</span>::<span class='ident'>libc_heap</span>::<span class='ident'>malloc_raw</span>;
 <span class='kw'>use</span> <span class='ident'>collections</span>::<span class='ident'>string</span>::<span class='ident'>String</span>;
+<span class='kw'>use</span> <span class='ident'>collections</span>::<span class='ident'>hash</span>;
+<span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>fmt</span>;
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>kinds</span>::<span class='ident'>marker</span>;
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>mem</span>;
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>ptr</span>;
@@ -1026,23 +957,18 @@ fn main() {
     <span class='doccomment'>/// reasons, this is always a deep clone, rather than the usual shallow</span>
     <span class='doccomment'>/// clone.</span>
     <span class='kw'>fn</span> <span class='ident'>clone</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>CString</span> {
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>buf</span>.<span class='ident'>is_null</span>() {
-            <span class='ident'>CString</span> { <span class='ident'>buf</span>: <span class='self'>self</span>.<span class='ident'>buf</span>, <span class='ident'>owns_buffer_</span>: <span class='self'>self</span>.<span class='ident'>owns_buffer_</span> }
-        } <span class='kw'>else</span> {
-            <span class='kw'>let</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>len</span>() <span class='op'>+</span> <span class='number'>1</span>;
-            <span class='kw'>let</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>malloc_raw</span>(<span class='ident'>len</span>) } <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span>;
-            <span class='kw'>unsafe</span> { <span class='ident'>ptr</span>::<span class='ident'>copy_nonoverlapping_memory</span>(<span class='ident'>buf</span>, <span class='self'>self</span>.<span class='ident'>buf</span>, <span class='ident'>len</span>); }
-            <span class='ident'>CString</span> { <span class='ident'>buf</span>: <span class='ident'>buf</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span>, <span class='ident'>owns_buffer_</span>: <span class='boolval'>true</span> }
-        }
+        <span class='kw'>let</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>len</span>() <span class='op'>+</span> <span class='number'>1</span>;
+        <span class='kw'>let</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>malloc_raw</span>(<span class='ident'>len</span>) } <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span>;
+        <span class='kw'>unsafe</span> { <span class='ident'>ptr</span>::<span class='ident'>copy_nonoverlapping_memory</span>(<span class='ident'>buf</span>, <span class='self'>self</span>.<span class='ident'>buf</span>, <span class='ident'>len</span>); }
+        <span class='ident'>CString</span> { <span class='ident'>buf</span>: <span class='ident'>buf</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span>, <span class='ident'>owns_buffer_</span>: <span class='boolval'>true</span> }
     }
 }
 
 <span class='kw'>impl</span> <span class='ident'>PartialEq</span> <span class='kw'>for</span> <span class='ident'>CString</span> {
     <span class='kw'>fn</span> <span class='ident'>eq</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='ident'>CString</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+        <span class='comment'>// Check if the two strings share the same buffer</span>
         <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>buf</span> <span class='kw'>as</span> <span class='ident'>uint</span> <span class='op'>==</span> <span class='ident'>other</span>.<span class='ident'>buf</span> <span class='kw'>as</span> <span class='ident'>uint</span> {
             <span class='boolval'>true</span>
-        } <span class='kw'>else</span> <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>buf</span>.<span class='ident'>is_null</span>() <span class='op'>||</span> <span class='ident'>other</span>.<span class='ident'>buf</span>.<span class='ident'>is_null</span>() {
-            <span class='boolval'>false</span>
         } <span class='kw'>else</span> {
             <span class='kw'>unsafe</span> {
                 <span class='ident'>libc</span>::<span class='ident'>strcmp</span>(<span class='self'>self</span>.<span class='ident'>buf</span>, <span class='ident'>other</span>.<span class='ident'>buf</span>) <span class='op'>==</span> <span class='number'>0</span>
@@ -1051,9 +977,30 @@ fn main() {
     }
 }
 
+<span class='kw'>impl</span> <span class='ident'>PartialOrd</span> <span class='kw'>for</span> <span class='ident'>CString</span> {
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>partial_cmp</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='ident'>CString</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Ordering</span><span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>as_bytes</span>().<span class='ident'>partial_cmp</span>(<span class='kw-2'>&amp;</span><span class='ident'>other</span>.<span class='ident'>as_bytes</span>())
+    }
+}
+
+<span class='kw'>impl</span> <span class='ident'>Eq</span> <span class='kw'>for</span> <span class='ident'>CString</span> {}
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>hash</span>::<span class='ident'>Writer</span><span class='op'>&gt;</span> <span class='ident'>hash</span>::<span class='ident'>Hash</span><span class='op'>&lt;</span><span class='ident'>S</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>CString</span> {
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>hash</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>state</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>S</span>) {
+        <span class='self'>self</span>.<span class='ident'>as_bytes</span>().<span class='ident'>hash</span>(<span class='ident'>state</span>)
+    }
+}
+
 <span class='kw'>impl</span> <span class='ident'>CString</span> {
     <span class='doccomment'>/// Create a C String from a pointer.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>///# Failure</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// Fails if `buf` is null</span>
     <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>buf</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span>, <span class='ident'>owns_buffer</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='ident'>CString</span> {
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>buf</span>.<span class='ident'>is_null</span>());
         <span class='ident'>CString</span> { <span class='ident'>buf</span>: <span class='ident'>buf</span>, <span class='ident'>owns_buffer_</span>: <span class='ident'>owns_buffer</span> }
     }
 
@@ -1075,10 +1022,6 @@ fn main() {
     <span class='doccomment'>/// let p = foo.to_c_str().as_ptr();</span>
     <span class='doccomment'>/// ```</span>
     <span class='doccomment'>///</span>
-    <span class='doccomment'>/// # Failure</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// Fails if the CString is null.</span>
-    <span class='doccomment'>///</span>
     <span class='doccomment'>/// # Example</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// ```rust</span>
@@ -1092,8 +1035,6 @@ fn main() {
     <span class='doccomment'>/// }</span>
     <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>as_ptr</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span> {
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>buf</span>.<span class='ident'>is_null</span>() { <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;CString is null!&quot;</span>); }
-
         <span class='self'>self</span>.<span class='ident'>buf</span>
     }
 
@@ -1114,44 +1055,30 @@ fn main() {
     <span class='doccomment'>/// // wrong (the CString will be freed, invalidating `p`)</span>
     <span class='doccomment'>/// let p = foo.to_c_str().as_mut_ptr();</span>
     <span class='doccomment'>/// ```</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// # Failure</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// Fails if the CString is null.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>as_mut_ptr</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span> {
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>buf</span>.<span class='ident'>is_null</span>() { <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;CString is null!&quot;</span>) }
-
         <span class='self'>self</span>.<span class='ident'>buf</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> _
     }
 
     <span class='doccomment'>/// Calls a closure with a reference to the underlying `*libc::c_char`.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// # Failure</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// Fails if the CString is null.</span>
     <span class='attribute'>#[<span class='ident'>deprecated</span><span class='op'>=</span><span class='string'>&quot;use `.as_ptr()`&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>with_ref</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='op'>|</span><span class='op'>*</span><span class='kw'>const</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span><span class='op'>|</span> <span class='op'>-&gt;</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span> {
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>buf</span>.<span class='ident'>is_null</span>() { <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;CString is null!&quot;</span>); }
         <span class='ident'>f</span>(<span class='self'>self</span>.<span class='ident'>buf</span>)
     }
 
     <span class='doccomment'>/// Calls a closure with a mutable reference to the underlying `*libc::c_char`.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// # Failure</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// Fails if the CString is null.</span>
     <span class='attribute'>#[<span class='ident'>deprecated</span><span class='op'>=</span><span class='string'>&quot;use `.as_mut_ptr()`&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>with_mut_ref</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>f</span>: <span class='op'>|</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span><span class='op'>|</span> <span class='op'>-&gt;</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span> {
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>buf</span>.<span class='ident'>is_null</span>() { <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;CString is null!&quot;</span>); }
         <span class='ident'>f</span>(<span class='self'>self</span>.<span class='ident'>buf</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span>)
     }
 
     <span class='doccomment'>/// Returns true if the CString is a null.</span>
+    <span class='attribute'>#[<span class='ident'>deprecated</span><span class='op'>=</span><span class='string'>&quot;a CString cannot be null&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>is_null</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
         <span class='self'>self</span>.<span class='ident'>buf</span>.<span class='ident'>is_null</span>()
     }
 
     <span class='doccomment'>/// Returns true if the CString is not null.</span>
+    <span class='attribute'>#[<span class='ident'>deprecated</span><span class='op'>=</span><span class='string'>&quot;a CString cannot be null&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>is_not_null</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
         <span class='self'>self</span>.<span class='ident'>buf</span>.<span class='ident'>is_not_null</span>()
     }
@@ -1163,13 +1090,8 @@ fn main() {
 
     <span class='doccomment'>/// Converts the CString into a `&amp;[u8]` without copying.</span>
     <span class='doccomment'>/// Includes the terminating NUL byte.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// # Failure</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// Fails if the CString is null.</span>
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>as_bytes</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> [<span class='ident'>u8</span>] {
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>buf</span>.<span class='ident'>is_null</span>() { <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;CString is null!&quot;</span>); }
         <span class='kw'>unsafe</span> {
             <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>Slice</span> { <span class='ident'>data</span>: <span class='self'>self</span>.<span class='ident'>buf</span>, <span class='ident'>len</span>: <span class='self'>self</span>.<span class='ident'>len</span>() <span class='op'>+</span> <span class='number'>1</span> })
         }
@@ -1177,13 +1099,8 @@ fn main() {
 
     <span class='doccomment'>/// Converts the CString into a `&amp;[u8]` without copying.</span>
     <span class='doccomment'>/// Does not include the terminating NUL byte.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// # Failure</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// Fails if the CString is null.</span>
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>as_bytes_no_nul</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> [<span class='ident'>u8</span>] {
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>buf</span>.<span class='ident'>is_null</span>() { <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;CString is null!&quot;</span>); }
         <span class='kw'>unsafe</span> {
             <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>Slice</span> { <span class='ident'>data</span>: <span class='self'>self</span>.<span class='ident'>buf</span>, <span class='ident'>len</span>: <span class='self'>self</span>.<span class='ident'>len</span>() })
         }
@@ -1191,10 +1108,6 @@ fn main() {
 
     <span class='doccomment'>/// Converts the CString into a `&amp;str` without copying.</span>
     <span class='doccomment'>/// Returns None if the CString is not UTF-8.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// # Failure</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// Fails if the CString is null.</span>
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>as_str</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>as_bytes_no_nul</span>();
@@ -1202,12 +1115,7 @@ fn main() {
     }
 
     <span class='doccomment'>/// Return a CString iterator.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// # Failure</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// Fails if the CString is null.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>iter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>CChars</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>buf</span>.<span class='ident'>is_null</span>() { <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;CString is null!&quot;</span>); }
         <span class='ident'>CChars</span> {
             <span class='ident'>ptr</span>: <span class='self'>self</span>.<span class='ident'>buf</span>,
             <span class='ident'>marker</span>: <span class='ident'>marker</span>::<span class='ident'>ContravariantLifetime</span>,
@@ -1243,13 +1151,8 @@ fn main() {
 
 <span class='kw'>impl</span> <span class='ident'>Collection</span> <span class='kw'>for</span> <span class='ident'>CString</span> {
     <span class='doccomment'>/// Return the number of bytes in the CString (not including the NUL terminator).</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// # Failure</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// Fails if the CString is null.</span>
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>len</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>uint</span> {
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>buf</span>.<span class='ident'>is_null</span>() { <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;CString is null!&quot;</span>); }
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>cur</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>buf</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='number'>0</span>;
         <span class='kw'>unsafe</span> {
@@ -1259,6 +1162,12 @@ fn main() {
             }
         }
         <span class='kw'>return</span> <span class='ident'>len</span>;
+    }
+}
+
+<span class='kw'>impl</span> <span class='ident'>fmt</span>::<span class='ident'>Show</span> <span class='kw'>for</span> <span class='ident'>CString</span> {
+    <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
+        <span class='ident'>String</span>::<span class='ident'>from_utf8_lossy</span>(<span class='self'>self</span>.<span class='ident'>as_bytes_no_nul</span>()).<span class='ident'>fmt</span>(<span class='ident'>f</span>)
     }
 }
 
@@ -1543,13 +1452,6 @@ fn main() {
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_is_null</span>() {
-        <span class='kw'>let</span> <span class='ident'>c_str</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>CString</span>::<span class='ident'>new</span>(<span class='ident'>ptr</span>::<span class='ident'>null</span>(), <span class='boolval'>false</span>) };
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>c_str</span>.<span class='ident'>is_null</span>());
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>c_str</span>.<span class='ident'>is_not_null</span>());
-    }
-
-    <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_unwrap</span>() {
         <span class='kw'>let</span> <span class='ident'>c_str</span> <span class='op'>=</span> <span class='string'>&quot;hello&quot;</span>.<span class='ident'>to_c_str</span>();
         <span class='kw'>unsafe</span> { <span class='ident'>libc</span>::<span class='ident'>free</span>(<span class='ident'>c_str</span>.<span class='ident'>unwrap</span>() <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>libc</span>::<span class='ident'>c_void</span>) }
@@ -1559,15 +1461,7 @@ fn main() {
     <span class='kw'>fn</span> <span class='ident'>test_as_ptr</span>() {
         <span class='kw'>let</span> <span class='ident'>c_str</span> <span class='op'>=</span> <span class='string'>&quot;hello&quot;</span>.<span class='ident'>to_c_str</span>();
         <span class='kw'>let</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>libc</span>::<span class='ident'>strlen</span>(<span class='ident'>c_str</span>.<span class='ident'>as_ptr</span>()) };
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>c_str</span>.<span class='ident'>is_null</span>());
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>c_str</span>.<span class='ident'>is_not_null</span>());
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>len</span>, <span class='number'>5</span>);
-    }
-    <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='attribute'>#[<span class='ident'>should_fail</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_as_ptr_empty_fail</span>() {
-        <span class='kw'>let</span> <span class='ident'>c_str</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>CString</span>::<span class='ident'>new</span>(<span class='ident'>ptr</span>::<span class='ident'>null</span>(), <span class='boolval'>false</span>) };
-        <span class='ident'>c_str</span>.<span class='ident'>as_ptr</span>();
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -1628,20 +1522,6 @@ fn main() {
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='attribute'>#[<span class='ident'>should_fail</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_as_bytes_fail</span>() {
-        <span class='kw'>let</span> <span class='ident'>c_str</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>CString</span>::<span class='ident'>new</span>(<span class='ident'>ptr</span>::<span class='ident'>null</span>(), <span class='boolval'>false</span>) };
-        <span class='ident'>c_str</span>.<span class='ident'>as_bytes</span>();
-    }
-
-    <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='attribute'>#[<span class='ident'>should_fail</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_as_bytes_no_nul_fail</span>() {
-        <span class='kw'>let</span> <span class='ident'>c_str</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>CString</span>::<span class='ident'>new</span>(<span class='ident'>ptr</span>::<span class='ident'>null</span>(), <span class='boolval'>false</span>) };
-        <span class='ident'>c_str</span>.<span class='ident'>as_bytes_no_nul</span>();
-    }
-
-    <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_as_str</span>() {
         <span class='kw'>let</span> <span class='ident'>c_str</span> <span class='op'>=</span> <span class='string'>&quot;hello&quot;</span>.<span class='ident'>to_c_str</span>();
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>c_str</span>.<span class='ident'>as_str</span>(), <span class='prelude-val'>Some</span>(<span class='string'>&quot;hello&quot;</span>));
@@ -1653,23 +1533,8 @@ fn main() {
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='attribute'>#[<span class='ident'>should_fail</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_as_str_fail</span>() {
+    <span class='kw'>fn</span> <span class='ident'>test_new_fail</span>() {
         <span class='kw'>let</span> <span class='ident'>c_str</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>CString</span>::<span class='ident'>new</span>(<span class='ident'>ptr</span>::<span class='ident'>null</span>(), <span class='boolval'>false</span>) };
-        <span class='ident'>c_str</span>.<span class='ident'>as_str</span>();
-    }
-
-    <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='attribute'>#[<span class='ident'>should_fail</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_len_fail</span>() {
-        <span class='kw'>let</span> <span class='ident'>c_str</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>CString</span>::<span class='ident'>new</span>(<span class='ident'>ptr</span>::<span class='ident'>null</span>(), <span class='boolval'>false</span>) };
-        <span class='ident'>c_str</span>.<span class='ident'>len</span>();
-    }
-
-    <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='attribute'>#[<span class='ident'>should_fail</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_iter_fail</span>() {
-        <span class='kw'>let</span> <span class='ident'>c_str</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>CString</span>::<span class='ident'>new</span>(<span class='ident'>ptr</span>::<span class='ident'>null</span>(), <span class='boolval'>false</span>) };
-        <span class='ident'>c_str</span>.<span class='ident'>iter</span>();
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -1696,18 +1561,11 @@ fn main() {
             <span class='ident'>c_</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>c</span>.<span class='ident'>clone</span>());
             <span class='ident'>c</span>.<span class='ident'>clone</span>();
             <span class='comment'>// force a copy, reading the memory</span>
-            <span class='ident'>c</span>.<span class='ident'>as_bytes</span>().<span class='ident'>to_owned</span>();
+            <span class='ident'>c</span>.<span class='ident'>as_bytes</span>().<span class='ident'>to_vec</span>();
         });
         <span class='kw'>let</span> <span class='ident'>c_</span> <span class='op'>=</span> <span class='ident'>c_</span>.<span class='ident'>unwrap</span>();
         <span class='comment'>// force a copy, reading the memory</span>
-        <span class='ident'>c_</span>.<span class='ident'>as_bytes</span>().<span class='ident'>to_owned</span>();
-    }
-
-    <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_clone_eq_null</span>() {
-        <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>CString</span>::<span class='ident'>new</span>(<span class='ident'>ptr</span>::<span class='ident'>null</span>(), <span class='boolval'>false</span>) };
-        <span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>clone</span>();
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>x</span> <span class='op'>==</span> <span class='ident'>y</span>);
+        <span class='ident'>c_</span>.<span class='ident'>as_bytes</span>().<span class='ident'>to_vec</span>();
     }
 }
 

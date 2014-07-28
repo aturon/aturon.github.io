@@ -296,7 +296,7 @@
 <span class='kw'>use</span> <span class='ident'>alloc</span>::<span class='ident'>arc</span>::<span class='ident'>Arc</span>;
 <span class='kw'>use</span> <span class='ident'>collections</span>::<span class='ident'>Vec</span>;
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>num</span>::<span class='ident'>next_power_of_two</span>;
-<span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>ty</span>::<span class='ident'>Unsafe</span>;
+<span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>cell</span>::<span class='ident'>UnsafeCell</span>;
 
 <span class='kw'>use</span> <span class='ident'>atomics</span>::{<span class='ident'>AtomicUint</span>,<span class='ident'>Relaxed</span>,<span class='ident'>Release</span>,<span class='ident'>Acquire</span>};
 
@@ -307,7 +307,7 @@
 
 <span class='kw'>struct</span> <span class='ident'>State</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='ident'>pad0</span>: [<span class='ident'>u8</span>, ..<span class='number'>64</span>],
-    <span class='ident'>buffer</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>,
+    <span class='ident'>buffer</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>UnsafeCell</span><span class='op'>&lt;</span><span class='ident'>Node</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>,
     <span class='ident'>mask</span>: <span class='ident'>uint</span>,
     <span class='ident'>pad1</span>: [<span class='ident'>u8</span>, ..<span class='number'>64</span>],
     <span class='ident'>enqueue_pos</span>: <span class='ident'>AtomicUint</span>,
@@ -333,7 +333,7 @@
             <span class='ident'>capacity</span>
         };
         <span class='kw'>let</span> <span class='ident'>buffer</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>from_fn</span>(<span class='ident'>capacity</span>, <span class='op'>|</span><span class='ident'>i</span><span class='op'>|</span> {
-            <span class='ident'>Unsafe</span>::<span class='ident'>new</span>(<span class='ident'>Node</span> { <span class='ident'>sequence</span>:<span class='ident'>AtomicUint</span>::<span class='ident'>new</span>(<span class='ident'>i</span>), <span class='ident'>value</span>: <span class='prelude-val'>None</span> })
+            <span class='ident'>UnsafeCell</span>::<span class='ident'>new</span>(<span class='ident'>Node</span> { <span class='ident'>sequence</span>:<span class='ident'>AtomicUint</span>::<span class='ident'>new</span>(<span class='ident'>i</span>), <span class='ident'>value</span>: <span class='prelude-val'>None</span> })
         });
         <span class='ident'>State</span>{
             <span class='ident'>pad0</span>: [<span class='number'>0</span>, ..<span class='number'>64</span>],
@@ -351,7 +351,7 @@
         <span class='kw'>let</span> <span class='ident'>mask</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>mask</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>pos</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>enqueue_pos</span>.<span class='ident'>load</span>(<span class='ident'>Relaxed</span>);
         <span class='kw'>loop</span> {
-            <span class='kw'>let</span> <span class='ident'>node</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>buffer</span>.<span class='ident'>get</span>(<span class='ident'>pos</span> <span class='kw-2'>&amp;</span> <span class='ident'>mask</span>);
+            <span class='kw'>let</span> <span class='ident'>node</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>buffer</span>[<span class='ident'>pos</span> <span class='kw-2'>&amp;</span> <span class='ident'>mask</span>];
             <span class='kw'>let</span> <span class='ident'>seq</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { (<span class='op'>*</span><span class='ident'>node</span>.<span class='ident'>get</span>()).<span class='ident'>sequence</span>.<span class='ident'>load</span>(<span class='ident'>Acquire</span>) };
             <span class='kw'>let</span> <span class='ident'>diff</span>: <span class='ident'>int</span> <span class='op'>=</span> <span class='ident'>seq</span> <span class='kw'>as</span> <span class='ident'>int</span> <span class='op'>-</span> <span class='ident'>pos</span> <span class='kw'>as</span> <span class='ident'>int</span>;
 
@@ -379,7 +379,7 @@
         <span class='kw'>let</span> <span class='ident'>mask</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>mask</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>pos</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>dequeue_pos</span>.<span class='ident'>load</span>(<span class='ident'>Relaxed</span>);
         <span class='kw'>loop</span> {
-            <span class='kw'>let</span> <span class='ident'>node</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>buffer</span>.<span class='ident'>get</span>(<span class='ident'>pos</span> <span class='kw-2'>&amp;</span> <span class='ident'>mask</span>);
+            <span class='kw'>let</span> <span class='ident'>node</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>buffer</span>[<span class='ident'>pos</span> <span class='kw-2'>&amp;</span> <span class='ident'>mask</span>];
             <span class='kw'>let</span> <span class='ident'>seq</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { (<span class='op'>*</span><span class='ident'>node</span>.<span class='ident'>get</span>()).<span class='ident'>sequence</span>.<span class='ident'>load</span>(<span class='ident'>Acquire</span>) };
             <span class='kw'>let</span> <span class='ident'>diff</span>: <span class='ident'>int</span> <span class='op'>=</span> <span class='ident'>seq</span> <span class='kw'>as</span> <span class='ident'>int</span> <span class='op'>-</span> (<span class='ident'>pos</span> <span class='op'>+</span> <span class='number'>1</span>) <span class='kw'>as</span> <span class='ident'>int</span>;
             <span class='kw'>if</span> <span class='ident'>diff</span> <span class='op'>==</span> <span class='number'>0</span> {

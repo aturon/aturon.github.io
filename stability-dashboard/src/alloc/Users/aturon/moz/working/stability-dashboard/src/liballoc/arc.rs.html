@@ -461,6 +461,15 @@
 <span id='421'>421</span>
 <span id='422'>422</span>
 <span id='423'>423</span>
+<span id='424'>424</span>
+<span id='425'>425</span>
+<span id='426'>426</span>
+<span id='427'>427</span>
+<span id='428'>428</span>
+<span id='429'>429</span>
+<span id='430'>430</span>
+<span id='431'>431</span>
+<span id='432'>432</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -472,10 +481,10 @@
 <span class='comment'>// option. This file may not be copied, modified, or distributed</span>
 <span class='comment'>// except according to those terms.</span>
 
-<span class='doccomment'>/*!
- * Concurrency-enabled mechanisms for sharing mutable and/or immutable state
- * between tasks.
- */</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>stable</span>]</span>
+
+<span class='doccomment'>//! Concurrency-enabled mechanisms for sharing mutable and/or immutable state</span>
+<span class='doccomment'>//! between tasks.</span>
 
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>atomics</span>;
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>clone</span>::<span class='ident'>Clone</span>;
@@ -515,6 +524,7 @@
 <span class='doccomment'>/// }</span>
 <span class='doccomment'>/// ```</span>
 <span class='attribute'>#[<span class='ident'>unsafe_no_drop_flag</span>]</span>
+<span class='attribute'>#[<span class='ident'>stable</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Arc</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='comment'>// FIXME #12808: strange name to try to avoid interfering with</span>
     <span class='comment'>// field accesses of the contained type via Deref</span>
@@ -526,6 +536,7 @@
 <span class='doccomment'>/// Weak pointers will not keep the data inside of the `Arc` alive, and can be</span>
 <span class='doccomment'>/// used to break cycles between `Arc` pointers.</span>
 <span class='attribute'>#[<span class='ident'>unsafe_no_drop_flag</span>]</span>
+<span class='attribute'>#[<span class='ident'>experimental</span> <span class='op'>=</span> <span class='string'>&quot;Weak pointers may not belong in this module.&quot;</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Weak</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='comment'>// FIXME #12808: strange name to try to avoid interfering with</span>
     <span class='comment'>// field accesses of the contained type via Deref</span>
@@ -541,6 +552,7 @@
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Share</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span> <span class='ident'>Arc</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Create an atomically reference counted wrapper.</span>
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>data</span>: <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>Arc</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='comment'>// Start the weak pointer count as 1 which is the weak pointer that&#39;s</span>
         <span class='comment'>// held by all the strong pointers (kinda), see std/rc.rs for more info</span>
@@ -567,6 +579,7 @@
     <span class='doccomment'>/// Weak pointers will not keep the data alive. Once all strong references</span>
     <span class='doccomment'>/// to the underlying data have been dropped, the data itself will be</span>
     <span class='doccomment'>/// destroyed.</span>
+    <span class='attribute'>#[<span class='ident'>experimental</span> <span class='op'>=</span> <span class='string'>&quot;Weak pointers may not belong in this module.&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>downgrade</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Weak</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
         <span class='comment'>// See the clone() impl for why this is relaxed</span>
         <span class='self'>self</span>.<span class='ident'>inner</span>().<span class='ident'>weak</span>.<span class='ident'>fetch_add</span>(<span class='number'>1</span>, <span class='ident'>atomics</span>::<span class='ident'>Relaxed</span>);
@@ -574,7 +587,7 @@
     }
 }
 
-<span class='attribute'>#[<span class='ident'>unstable</span>]</span>
+<span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;waiting on stability of Clone&quot;</span>]</span>
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Share</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span> <span class='ident'>Clone</span> <span class='kw'>for</span> <span class='ident'>Arc</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Duplicate an atomically reference counted wrapper.</span>
     <span class='doccomment'>///</span>
@@ -599,6 +612,7 @@
     }
 }
 
+<span class='attribute'>#[<span class='ident'>experimental</span> <span class='op'>=</span> <span class='string'>&quot;Deref is experimental.&quot;</span>]</span>
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Send</span> <span class='op'>+</span> <span class='ident'>Share</span><span class='op'>&gt;</span> <span class='ident'>Deref</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>Arc</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>deref</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>T</span> {
@@ -633,6 +647,7 @@
 }
 
 <span class='attribute'>#[<span class='ident'>unsafe_destructor</span>]</span>
+<span class='attribute'>#[<span class='ident'>experimental</span> <span class='op'>=</span> <span class='string'>&quot;waiting on stability of Drop&quot;</span>]</span>
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Share</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>Arc</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
         <span class='comment'>// This structure has #[unsafe_no_drop_flag], so this drop glue may run</span>
@@ -676,6 +691,7 @@
     }
 }
 
+<span class='attribute'>#[<span class='ident'>experimental</span> <span class='op'>=</span> <span class='string'>&quot;Weak pointers may not belong in this module.&quot;</span>]</span>
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Share</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span> <span class='ident'>Weak</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Attempts to upgrade this weak reference to a strong reference.</span>
     <span class='doccomment'>///</span>
@@ -701,7 +717,7 @@
     }
 }
 
-<span class='attribute'>#[<span class='ident'>unstable</span>]</span>
+<span class='attribute'>#[<span class='ident'>experimental</span> <span class='op'>=</span> <span class='string'>&quot;Weak pointers may not belong in this module.&quot;</span>]</span>
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Share</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span> <span class='ident'>Clone</span> <span class='kw'>for</span> <span class='ident'>Weak</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>clone</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Weak</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
@@ -712,6 +728,7 @@
 }
 
 <span class='attribute'>#[<span class='ident'>unsafe_destructor</span>]</span>
+<span class='attribute'>#[<span class='ident'>experimental</span> <span class='op'>=</span> <span class='string'>&quot;Weak pointers may not belong in this module.&quot;</span>]</span>
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Share</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>Weak</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
         <span class='comment'>// see comments above for why this check is here</span>
@@ -732,6 +749,7 @@
 <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>experimental</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>tests</span> {
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>clone</span>::<span class='ident'>Clone</span>;
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>MutableSeq</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>comm</span>::<span class='ident'>channel</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>::<span class='ident'>drop</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ops</span>::<span class='ident'>Drop</span>;

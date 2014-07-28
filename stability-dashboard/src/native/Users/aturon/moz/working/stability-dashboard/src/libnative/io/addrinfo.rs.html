@@ -167,7 +167,6 @@
 
 <span class='kw'>use</span> <span class='ident'>libc</span>::{<span class='ident'>c_char</span>, <span class='ident'>c_int</span>};
 <span class='kw'>use</span> <span class='ident'>libc</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>c_str</span>::<span class='ident'>CString</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ptr</span>::{<span class='ident'>null</span>, <span class='ident'>mut_null</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rt</span>::<span class='ident'>rtio</span>;
@@ -184,8 +183,10 @@
     {
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>host</span>.<span class='ident'>is_some</span>() <span class='op'>||</span> <span class='ident'>servname</span>.<span class='ident'>is_some</span>());
 
-        <span class='kw'>let</span> <span class='ident'>c_host</span> <span class='op'>=</span> <span class='ident'>host</span>.<span class='ident'>map_or</span>(<span class='kw'>unsafe</span> { <span class='ident'>CString</span>::<span class='ident'>new</span>(<span class='ident'>null</span>(), <span class='boolval'>true</span>) }, <span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span>.<span class='ident'>to_c_str</span>());
-        <span class='kw'>let</span> <span class='ident'>c_serv</span> <span class='op'>=</span> <span class='ident'>servname</span>.<span class='ident'>map_or</span>(<span class='kw'>unsafe</span> { <span class='ident'>CString</span>::<span class='ident'>new</span>(<span class='ident'>null</span>(), <span class='boolval'>true</span>) }, <span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span>.<span class='ident'>to_c_str</span>());
+        <span class='kw'>let</span> <span class='ident'>c_host</span> <span class='op'>=</span> <span class='ident'>host</span>.<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span>.<span class='ident'>to_c_str</span>());
+        <span class='kw'>let</span> <span class='ident'>c_host</span> <span class='op'>=</span> <span class='ident'>c_host</span>.<span class='ident'>as_ref</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span>.<span class='ident'>as_ptr</span>()).<span class='ident'>unwrap_or</span>(<span class='ident'>null</span>());
+        <span class='kw'>let</span> <span class='ident'>c_serv</span> <span class='op'>=</span> <span class='ident'>servname</span>.<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span>.<span class='ident'>to_c_str</span>());
+        <span class='kw'>let</span> <span class='ident'>c_serv</span> <span class='op'>=</span> <span class='ident'>c_serv</span>.<span class='ident'>as_ref</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span>.<span class='ident'>as_ptr</span>()).<span class='ident'>unwrap_or</span>(<span class='ident'>null</span>());
 
         <span class='kw'>let</span> <span class='ident'>hint</span> <span class='op'>=</span> <span class='ident'>hint</span>.<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>hint</span><span class='op'>|</span> {
             <span class='ident'>libc</span>::<span class='ident'>addrinfo</span> {
@@ -207,9 +208,7 @@
 
         <span class='comment'>// Make the call</span>
         <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {
-            <span class='kw'>let</span> <span class='ident'>ch</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>c_host</span>.<span class='ident'>is_null</span>() { <span class='ident'>null</span>() } <span class='kw'>else</span> { <span class='ident'>c_host</span>.<span class='ident'>as_ptr</span>() };
-            <span class='kw'>let</span> <span class='ident'>cs</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>c_serv</span>.<span class='ident'>is_null</span>() { <span class='ident'>null</span>() } <span class='kw'>else</span> { <span class='ident'>c_serv</span>.<span class='ident'>as_ptr</span>() };
-            <span class='ident'>getaddrinfo</span>(<span class='ident'>ch</span>, <span class='ident'>cs</span>, <span class='ident'>hint_ptr</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>res</span>)
+            <span class='ident'>getaddrinfo</span>(<span class='ident'>c_host</span>, <span class='ident'>c_serv</span>, <span class='ident'>hint_ptr</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>res</span>)
         };
 
         <span class='comment'>// Error?</span>
@@ -261,6 +260,7 @@
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>windows</span>))]</span>
 <span class='kw'>fn</span> <span class='ident'>get_error</span>(<span class='ident'>s</span>: <span class='ident'>c_int</span>) <span class='op'>-&gt;</span> <span class='ident'>IoError</span> {
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>c_str</span>::<span class='ident'>CString</span>;
 
     <span class='kw'>let</span> <span class='ident'>err_str</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {
         <span class='ident'>CString</span>::<span class='ident'>new</span>(<span class='ident'>gai_strerror</span>(<span class='ident'>s</span>), <span class='boolval'>false</span>).<span class='ident'>as_str</span>().<span class='ident'>unwrap</span>().<span class='ident'>to_string</span>()

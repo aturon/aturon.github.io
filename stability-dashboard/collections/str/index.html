@@ -24,7 +24,7 @@
 
     <section class="sidebar">
         <a href='../../collections/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
-        <p class='location'><a href='../index.html'>collections</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='../bitv/index.html'>bitv</a><a class='mod ' href='../btree/index.html'>btree</a><a class='mod ' href='../dlist/index.html'>dlist</a><a class='mod ' href='../enum_set/index.html'>enum_set</a><a class='mod ' href='../hash/index.html'>hash</a><a class='mod ' href='../priority_queue/index.html'>priority_queue</a><a class='mod ' href='../ringbuf/index.html'>ringbuf</a><a class='mod ' href='../slice/index.html'>slice</a><a class='mod ' href='../smallintmap/index.html'>smallintmap</a><a class='mod current' href='../str/index.html'>str</a><a class='mod ' href='../string/index.html'>string</a><a class='mod ' href='../treemap/index.html'>treemap</a><a class='mod ' href='../trie/index.html'>trie</a><a class='mod ' href='../vec/index.html'>vec</a></div><div class='block trait'><h2>Traits</h2><a class='trait ' href='../trait.Collection.html'>Collection</a><a class='trait ' href='../trait.Deque.html'>Deque</a><a class='trait ' href='../trait.Map.html'>Map</a><a class='trait ' href='../trait.Mutable.html'>Mutable</a><a class='trait ' href='../trait.MutableMap.html'>MutableMap</a><a class='trait ' href='../trait.MutableSet.html'>MutableSet</a><a class='trait ' href='../trait.Set.html'>Set</a></div>
+        <p class='location'><a href='../index.html'>collections</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='../bitv/index.html'>bitv</a><a class='mod ' href='../btree/index.html'>btree</a><a class='mod ' href='../dlist/index.html'>dlist</a><a class='mod ' href='../enum_set/index.html'>enum_set</a><a class='mod ' href='../hash/index.html'>hash</a><a class='mod ' href='../priority_queue/index.html'>priority_queue</a><a class='mod ' href='../ringbuf/index.html'>ringbuf</a><a class='mod ' href='../slice/index.html'>slice</a><a class='mod ' href='../smallintmap/index.html'>smallintmap</a><a class='mod current' href='../str/index.html'>str</a><a class='mod ' href='../string/index.html'>string</a><a class='mod ' href='../treemap/index.html'>treemap</a><a class='mod ' href='../trie/index.html'>trie</a><a class='mod ' href='../vec/index.html'>vec</a></div><div class='block trait'><h2>Traits</h2><a class='trait ' href='../trait.Collection.html'>Collection</a><a class='trait ' href='../trait.Deque.html'>Deque</a><a class='trait ' href='../trait.Map.html'>Map</a><a class='trait ' href='../trait.Mutable.html'>Mutable</a><a class='trait ' href='../trait.MutableMap.html'>MutableMap</a><a class='trait ' href='../trait.MutableSeq.html'>MutableSeq</a><a class='trait ' href='../trait.MutableSet.html'>MutableSet</a><a class='trait ' href='../trait.Set.html'>Set</a></div>
     </section>
 
     <nav class="sub">
@@ -39,7 +39,7 @@
     </nav>
 
     <section id='main' class="content mod">
-<h1 class='fqn'>Module <a href='../index.html'>collections</a>::<a class='mod' href=''>str</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-24674' href='../../src/collections/Users/aturon/moz/working/stability-dashboard/src/libcollections/str.rs.html#11-2507'>[src]</a></span></h1>
+<h1 class='fqn'>Module <a href='../index.html'>collections</a>::<a class='mod' href=''>str</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-25471' href='../../src/collections/Users/aturon/moz/working/stability-dashboard/src/libcollections/str.rs.html#13-2449'>[src]</a></span></h1>
 <div class='docblock'><p>Unicode string manipulation (<code>str</code> type)</p>
 
 <h1 id="basic-usage" class='section-header'><a
@@ -86,10 +86,10 @@ other languages.</p>
 
 <h1 id="representation" class='section-header'><a
                            href="#representation">Representation</a></h1>
-<p>Rust&#39;s string type, <code>str</code>, is a sequence of unicode codepoints encoded as a
-stream of UTF-8 bytes. All safely-created strings are guaranteed to be validly
-encoded UTF-8 sequences. Additionally, strings are not null-terminated
-and can contain null codepoints.</p>
+<p>Rust&#39;s string type, <code>str</code>, is a sequence of unicode scalar values encoded as a
+stream of UTF-8 bytes. All strings are guaranteed to be validly encoded UTF-8
+sequences. Additionally, strings are not null-terminated and can contain null
+bytes.</p>
 
 <p>The actual representation of strings have direct mappings to vectors: <code>&amp;str</code>
 is the same as <code>&amp;[u8]</code>.</p>
@@ -146,8 +146,7 @@ splitting at most <code>count</code> times.</p>
                     <tr>
                         <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.Chars.html'
                                title='collections::str::Chars'>Chars</a></td>
-                        <td class='docblock short'><p>External iterator for a string&#39;s characters.
-Use with the <code>std::iter</code> module.</p>
+                        <td class='docblock short'><p>Iterator for the char (representing <em>Unicode Scalar Values</em>) of a string</p>
 </td>
                     </tr>
                 
@@ -156,6 +155,21 @@ Use with the <code>std::iter</code> module.</p>
                                title='collections::str::Decompositions'>Decompositions</a></td>
                         <td class='docblock short'><p>External iterator for a string&#39;s decomposition&#39;s characters.
 Use with the <code>std::iter</code> module.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.GraphemeIndices.html'
+                               title='collections::str::GraphemeIndices'>GraphemeIndices</a></td>
+                        <td class='docblock short'><p>External iterator for grapheme clusters and byte offsets.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='struct' href='struct.Graphemes.html'
+                               title='collections::str::Graphemes'>Graphemes</a></td>
+                        <td class='docblock short'><p>External iterator for a string&#39;s
+<a href="http://www.unicode.org/reports/tr29/#Grapheme_Cluster_Boundaries">grapheme clusters</a>.</p>
 </td>
                     </tr>
                 
@@ -216,13 +230,6 @@ needed but not always.</p>
                     </tr>
                 
                     <tr>
-                        <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.OwnedStr.html'
-                               title='collections::str::OwnedStr'>OwnedStr</a></td>
-                        <td class='docblock short'><p>Methods for owned strings</p>
-</td>
-                    </tr>
-                
-                    <tr>
                         <td><a class='stability Experimental' title='Experimental'></a><a class='trait' href='trait.Str.html'
                                title='collections::str::Str'>Str</a></td>
                         <td class='docblock short'><p>Any string that can be represented as a slice</p>
@@ -268,39 +275,37 @@ to compare &amp;[u8] byte slices that are not necessarily valid UTF-8.</p>
                     </tr>
                 
                     <tr>
-                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.from_byte.html'
+                        <td><a class='stability Deprecated' title='Deprecated: Replaced by String::from_byte'></a><a class='fn' href='fn.from_byte.html'
                                title='collections::str::from_byte'>from_byte</a></td>
-                        <td class='docblock short'><p>Convert a byte to a UTF-8 string</p>
+                        <td class='docblock short'><p>Deprecated. Replaced by <code>String::from_byte</code></p>
 </td>
                     </tr>
                 
                     <tr>
-                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.from_char.html'
+                        <td><a class='stability Deprecated' title='Deprecated: use String::from_char or char.to_string()'></a><a class='fn' href='fn.from_char.html'
                                title='collections::str::from_char'>from_char</a></td>
-                        <td class='docblock short'><p>Convert a char to a string</p>
+                        <td class='docblock short'><p>Deprecated. Use <code>String::from_char</code> or <code>char::to_string()</code> instead</p>
 </td>
                     </tr>
                 
                     <tr>
-                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.from_chars.html'
+                        <td><a class='stability Deprecated' title='Deprecated: use String::from_chars instead'></a><a class='fn' href='fn.from_chars.html'
                                title='collections::str::from_chars'>from_chars</a></td>
-                        <td class='docblock short'><p>Convert a vector of chars to a string</p>
+                        <td class='docblock short'><p>Deprecated. Replaced by <code>String::from_chars</code></p>
 </td>
                     </tr>
                 
                     <tr>
-                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.from_utf16.html'
+                        <td><a class='stability Deprecated' title='Deprecated: Replaced by String::from_utf16'></a><a class='fn' href='fn.from_utf16.html'
                                title='collections::str::from_utf16'>from_utf16</a></td>
-                        <td class='docblock short'><p>Decode a UTF-16 encoded vector <code>v</code> into a string, returning <code>None</code>
-if <code>v</code> contains any invalid data.</p>
+                        <td class='docblock short'><p>Deprecated. Use <code>String::from_utf16</code>.</p>
 </td>
                     </tr>
                 
                     <tr>
-                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.from_utf16_lossy.html'
+                        <td><a class='stability Deprecated' title='Deprecated: Replaced by String::from_utf16_lossy'></a><a class='fn' href='fn.from_utf16_lossy.html'
                                title='collections::str::from_utf16_lossy'>from_utf16_lossy</a></td>
-                        <td class='docblock short'><p>Decode a UTF-16 encoded vector <code>v</code> into a string, replacing
-invalid data with the replacement character (U+FFFD).</p>
+                        <td class='docblock short'><p>Deprecated. Use <code>String::from_utf16_lossy</code>.</p>
 </td>
                     </tr>
                 
@@ -312,17 +317,16 @@ invalid data with the replacement character (U+FFFD).</p>
                     </tr>
                 
                     <tr>
-                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.from_utf8_lossy.html'
+                        <td><a class='stability Deprecated' title='Deprecated: Replaced by String::from_utf8_lossy'></a><a class='fn' href='fn.from_utf8_lossy.html'
                                title='collections::str::from_utf8_lossy'>from_utf8_lossy</a></td>
-                        <td class='docblock short'><p>Converts a vector of bytes to a new utf-8 string.
-Any invalid utf-8 sequences are replaced with U+FFFD REPLACEMENT CHARACTER.</p>
+                        <td class='docblock short'><p>Deprecated. Use <code>String::from_utf8_lossy</code>.</p>
 </td>
                     </tr>
                 
                     <tr>
-                        <td><a class='stability Experimental' title='Experimental'></a><a class='fn' href='fn.from_utf8_owned.html'
+                        <td><a class='stability Deprecated' title='Deprecated: Replaced by `String::from_utf8`'></a><a class='fn' href='fn.from_utf8_owned.html'
                                title='collections::str::from_utf8_owned'>from_utf8_owned</a></td>
-                        <td class='docblock short'><p>Consumes a vector of bytes to create a new utf-8 string.</p>
+                        <td class='docblock short'><p>Deprecated. Replaced by <code>String::from_utf8</code></p>
 </td>
                     </tr>
                 

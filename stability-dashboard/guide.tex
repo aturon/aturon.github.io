@@ -68,7 +68,7 @@
 \begin{document}
 \maketitle
 
-0.11.0 (305cf1f1098dc87e346003e6bf7e7cca5705a135 2014-07-10 11:19:20 -0700)
+0.12.0-pre (2c50add48 2014-07-27 23:03:52 -0700)
 
 Copyright © 2011-2014 The Rust Project Developers. Licensed under the
 \href{http://www.apache.org/licenses/LICENSE-2.0}{Apache License,
@@ -88,7 +88,7 @@ that you read the Tutorial instead. This work-in-progress Guide is being
 displayed here in line with Rust's open development policy. Please open
 any issues you find as usual.
 
-\subsection{Welcome!}\label{welcome}
+\section{Welcome!}\label{welcome}
 
 Hey there! Welcome to the Rust guide. This is the place to be if you'd
 like to learn how to program in Rust. Rust is a systems programming
@@ -100,12 +100,12 @@ We really think Rust is something special, and we hope you do too.
 To show you how to get going with Rust, we're going to write the
 traditional ``Hello, World!'' program. Next, we'll introduce you to a
 tool that's useful for writing real-world Rust programs and libraries:
-``Cargo.'' Then, we'll show off Rust's features by writing a little
-program together.
+``Cargo.'' After that, we'll talk about the basics of Rust, write a
+little program to try them out, and then learn more advanced things.
 
 Sound good? Let's go!
 
-\subsection{Installing Rust}\label{installing-rust}
+\section{Installing Rust}\label{installing-rust}
 
 The first step to using Rust is to install it! There are a number of
 ways to install Rust, but the easiest is to use the the \texttt{rustup}
@@ -176,7 +176,7 @@ If you've got Rust installed, you can open up a shell, and type this:
 
 You should see some output that looks something like this:
 
-\texttt{\{ignore\} rustc 0.11.0-pre (443a1cd 2014-06-08 14:56:52 -0700)}
+\texttt{\{ignore\} rustc 0.12.0-pre (443a1cd 2014-06-08 14:56:52 -0700)}
 
 If you did, Rust has been installed successfully! Congrats!
 
@@ -191,7 +191,7 @@ mailing list}, \href{http://www.reddit.com/r/rust}{the /r/rust
 subreddit}, and
 \href{http://stackoverflow.com/questions/tagged/rust}{Stack Overflow}.
 
-\subsection{Hello, world!}\label{hello-world}
+\section{Hello, world!}\label{hello-world}
 
 Now that you have Rust installed, let's write your first Rust program.
 It's traditional to make your first program in any new language one that
@@ -342,7 +342,7 @@ simple things, but as your project grows, you'll want something to help
 you manage all of the options that it has, and to make it easy to share
 your code with other people and projects.
 
-\subsection{Hello, Cargo!}\label{hello-cargo}
+\section{Hello, Cargo!}\label{hello-cargo}
 
 \href{http://crates.io}{Cargo} is a tool that Rustaceans use to help
 manage their Rust projects. Cargo is currently in an alpha state, just
@@ -357,45 +357,11 @@ only be using the first part of its functionality. Eventually, we'll add
 more. Since we started off by using Cargo, it'll be easy to add later.
 
 Let's convert Hello World to Cargo. The first thing we need to do to
-begin using Cargo is to install Cargo. To do this, we need to build it
-from source. There are no binaries yet.
-
-First, let's go back to our projects directory. We don't want Cargo to
-live in our project!
-
-\texttt{\{bash\} \$ cd ..}
-
-Next, we need these commands:
-
-\texttt{\{bash\} \$ git clone -\/-recursive https://github.com/rust-lang/cargo \$ cd cargo \$ make \$ make install \# may need sudo or admin permissions}
-
-The \texttt{-\/-recursive} downloads Cargo's own dependencies. You can't
-use Cargo to fetch dependencies until you have Cargo installed! Also,
-you will need to have \texttt{git} installed. Much of the Rust world
-assumes \texttt{git} usage, so it's a good thing to have around. Please
-check out
-\href{http://git-scm.com/book/en/Getting-Started-Installing-Git}{the git
-documentation} for more on installing \texttt{git}.
-
-We hope to give Cargo a binary installer, similar to Rust's own, so that
-this will not be necessary in the future.
-
-Let's see if that worked. Try this:
-
-```\{bash\} \$ cargo Commands: build \# compile the current project
-
-Options (for all commands):
-
--v, {[}--verbose{]} -h, {[}--help{]} ```
-
-If you see this output when you run \texttt{cargo}, congrats! Cargo is
-working. If not, please
-\href{https://github.com/rust-lang/cargo/issues/new}{open an issue} or
-drop by the Rust IRC, and we can help you out.
-
-Let's move back into our \texttt{hello\_world} directory now:
-
-\texttt{\{bash\} \$ cd ..              \# move back up into projects \$ cd hello\_world     \# move into hello\_world}
+begin using Cargo is to install Cargo. Luckily for us, the script we ran
+to install Rust includes Cargo by default. If you installed Rust some
+other way, you may want to
+\href{https://github.com/rust-lang/cargo\#installing-cargo-from-nightlies}{check
+the Cargo README} for specific instructions about installing it.
 
 To Cargo-ify our project, we need to do two things: Make a
 \texttt{Cargo.toml} configuration file, and put our source file in the
@@ -459,60 +425,11 @@ That's it! We've successfully built \texttt{hello\_world} with Cargo.
 Even though our program is simple, it's using much of the real tooling
 that you'll use for the rest of your Rust career.
 
-Next, we'll learn more about Rust itself, by starting to write a more
-complicated program. We hope you want to do more with Rust than just
-print ``Hello, world!''
+Now that you've got the tools down, let's actually learn more about the
+Rust language itself. These are the basics that will serve you well
+through the rest of your time with Rust.
 
-\subsection{Guessing Game}\label{guessing-game}
-
-Let's write a bigger program in Rust. We could just go through a laundry
-list of Rust features, but that's boring. Instead, we'll learn more
-about how to code in Rust by writing a few example projects.
-
-For our first project, we'll implement a classic beginner programming
-problem: the guessing game. Here's how it works: Our program will
-generate a random integer between one and a hundred. It will then prompt
-us to enter a guess. Upon entering our guess, it will tell us if we're
-too low or too high. Once we guess correctly, it will congratulate us,
-and print the number of guesses we've taken to the screen. Sound good?
-It sounds easy, but it'll end up showing off a number of basic features
-of Rust.
-
-\subsubsection{Set up}\label{set-up}
-
-Let's set up a new project. Go to your projects directory, and make a
-new directory for the project, as well as a \texttt{src} directory for
-our code:
-
-\texttt{\{bash\} \$ cd \textasciitilde{}/projects \$ mkdir guessing\_game \$ cd guessing\_game \$ mkdir src}
-
-Great. Next, let's make a \texttt{Cargo.toml} file so Cargo knows how to
-build our project:
-
-```\{ignore\} {[}package{]}
-
-name = ``guessing\_game'' version = ``0.1.0'' authors = {[}
-``someone@example.com'' {]}
-
-{[}{[}bin{]}{]}
-
-name = ``guessing\_game'' ```
-
-Finally, we need our source file. Let's just make it hello world for
-now, so we can check that our setup works. In
-\texttt{src/guessing\_game.rs}:
-
-\texttt{\{rust\} fn main() \{     println!("Hello world!"); \}}
-
-Let's make sure that worked:
-
-\texttt{\{bash\} \$ cargo build    Compiling guessing\_game v0.1.0 (file:/home/you/projects/guessing\_game) \$}
-
-Excellent! Open up your \texttt{src/guessing\_game.rs} again. We'll be
-writing all of our code in this file. The next section of the tutorial
-will show you how to build multiple-file projects.
-
-\subsection{Variable bindings}\label{variable-bindings}
+\section{Variable bindings}\label{variable-bindings}
 
 The first thing we'll learn about are `variable bindings.' They look
 like this:
@@ -645,7 +562,7 @@ passing more than one.
 When you just use the double curly braces, Rust will attempt to display
 the value in a meaningful way by checking out its type. If you want to
 specify the format in a more detailed manner, there are a
-\href{/std/fmt/index.html}{wide number of options available}. Fow now,
+\href{/std/fmt/index.html}{wide number of options available}. For now,
 we'll just stick to the default: integers aren't very complicated to
 print.
 
@@ -655,7 +572,7 @@ initial value if we must initialize the binding before we use it? And
 how does it know that we have or have not initialized the binding? For
 that, we need to learn our next concept: \texttt{if}.
 
-\subsection{If}\label{if}
+\section{If}\label{if}
 
 Rust's take on \texttt{if} is not particularly complex, but it's much
 more like the \texttt{if} you'll find in a dynamically typed language
@@ -722,8 +639,7 @@ expression-based language, and semicolons are different than in other
 `curly brace and semicolon'-based languages. These two things are
 related.
 
-\subsubsection{Expressions
-vs.~Statements}\label{expressions-vs.statements}
+\subsection{Expressions vs.~Statements}\label{expressions-vs.statements}
 
 Rust is primarily an expression based language. There are only two kinds
 of statements, and everything else is an expression.
@@ -754,13 +670,11 @@ The compiler is telling us here that it was expecting to see the
 beginning of an expression, and a \texttt{let} can only begin a
 statement, not an expression.
 
-However, assigning to a variable binding is an expression:
-
-\texttt{\{rust\} let x; let y = x = 5i;}
-
-In this case, we have an assignment expression (\texttt{x = 5}) whose
-value is being used as part of a \texttt{let} declaration statement
-(\texttt{let y = ...}).
+Note that assigning to an already-bound variable (e.g. \texttt{y = 5i})
+is still an expression, although its value is not particularly useful.
+Unlike C, where an assignment evaluates to the assigned value (e.g.
+\texttt{5i} in the previous example), in Rust the value of an assignment
+is the unit type \texttt{()} (which we'll cover later).
 
 The second kind of statement in Rust is the \textbf{expression
 statement}. Its purpose is to turn any expression into a statement. In
@@ -809,7 +723,7 @@ value and returning unit instead.
 There's one more time in which you won't see a semicolon at the end of a
 line of Rust code. For that, we'll need our next concept: functions.
 
-\subsection{Functions}\label{functions}
+\section{Functions}\label{functions}
 
 You've already seen one function so far, the \texttt{main} function:
 
@@ -924,7 +838,7 @@ There are some additional ways to define functions, but they involve
 features that we haven't learned about yet, so let's just leave it at
 that for now.
 
-\subsection{Comments}\label{comments}
+\section{Comments}\label{comments}
 
 Now that we have some functions, it's a good idea to learn about
 comments. Comments are notes that you leave to other programmers to help
@@ -959,14 +873,14 @@ from these doc comments. We will talk more about \texttt{rustdoc} when
 we get to modules, as generally, you want to export documentation for a
 full module.
 
-\subsection{Compound Data Types}\label{compound-data-types}
+\section{Compound Data Types}\label{compound-data-types}
 
 Rust, like many programming languages, has a number of different data
 types that are built-in. You've already done some simple work with
 integers and strings, but next, let's talk about some more complicated
 ways of storing data.
 
-\subsubsection{Tuples}\label{tuples}
+\subsection{Tuples}\label{tuples}
 
 The first compound data type we're going to talk about are called
 \textbf{tuple}s. Tuples are an ordered list of a fixed size. Like this:
@@ -1054,7 +968,7 @@ well.
 Tuples are a very simple data structure, and so are not often what you
 want. Let's move on to their bigger sibling, structs.
 
-\subsubsection{Structs}\label{structs}
+\subsection{Structs}\label{structs}
 
 A struct is another form of a `record type,' just like a tuple. There's
 a difference: structs give each element that they contain a name, called
@@ -1109,7 +1023,7 @@ However, you can use \texttt{mut} to make them mutable:
 
 This will print \texttt{The point is at (5, 0)}.
 
-\subsubsection{Tuple Structs and
+\subsection{Tuple Structs and
 Newtypes}\label{tuple-structs-and-newtypes}
 
 Rust has another data type that's like a hybrid between a tuple and a
@@ -1164,7 +1078,7 @@ println!("length is {} inches", integer_length);
 As you can see here, you can extract the inner integer type through a
 destructuring \texttt{let}.
 
-\subsubsection{Enums}\label{enums}
+\subsection{Enums}\label{enums}
 
 Finally, Rust has a ``sum type'', an \textbf{enum}. Enums are an
 incredibly useful feature of Rust, and are used throughout the standard
@@ -1185,27 +1099,33 @@ example:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{let} \NormalTok{x = }\DecValTok{5i}\NormalTok{;}
-\KeywordTok{let} \NormalTok{y = }\DecValTok{10i}\NormalTok{;}
+\KeywordTok{fn} \NormalTok{cmp(a: }\KeywordTok{int}\NormalTok{, b: }\KeywordTok{int}\NormalTok{) -> Ordering \{}
+    \KeywordTok{if} \NormalTok{a < b \{ Less \}}
+    \KeywordTok{else} \KeywordTok{if} \NormalTok{a > b \{ Greater \}}
+    \KeywordTok{else} \NormalTok{\{ Equal \}}
+\NormalTok{\}}
 
-\KeywordTok{let} \NormalTok{ordering = x.cmp(&y);}
+\KeywordTok{fn} \NormalTok{main() \{}
+    \KeywordTok{let} \NormalTok{x = }\DecValTok{5i}\NormalTok{;}
+    \KeywordTok{let} \NormalTok{y = }\DecValTok{10i}\NormalTok{;}
 
-\KeywordTok{if} \NormalTok{ordering == Less \{}
-    \OtherTok{println!}\NormalTok{(}\StringTok{"less"}\NormalTok{);}
-\NormalTok{\} }\KeywordTok{else} \KeywordTok{if} \NormalTok{ordering == Greater \{}
-    \OtherTok{println!}\NormalTok{(}\StringTok{"greater"}\NormalTok{);}
-\NormalTok{\} }\KeywordTok{else} \KeywordTok{if} \NormalTok{ordering == Equal \{}
-    \OtherTok{println!}\NormalTok{(}\StringTok{"equal"}\NormalTok{);}
+    \KeywordTok{let} \NormalTok{ordering = cmp(x, y);}
+
+    \KeywordTok{if} \NormalTok{ordering == Less \{}
+        \OtherTok{println!}\NormalTok{(}\StringTok{"less"}\NormalTok{);}
+    \NormalTok{\} }\KeywordTok{else} \KeywordTok{if} \NormalTok{ordering == Greater \{}
+        \OtherTok{println!}\NormalTok{(}\StringTok{"greater"}\NormalTok{);}
+    \NormalTok{\} }\KeywordTok{else} \KeywordTok{if} \NormalTok{ordering == Equal \{}
+        \OtherTok{println!}\NormalTok{(}\StringTok{"equal"}\NormalTok{);}
+    \NormalTok{\}}
 \NormalTok{\}}
 \end{Highlighting}
 \end{Shaded}
 
 \texttt{cmp} is a function that compares two things, and returns an
-\texttt{Ordering}. The call looks a little bit strange: rather than
-\texttt{cmp(x, y)}, we say \texttt{x.cmp(\&y)}. We haven't covered
-methods and references yet, so it should look a little bit foreign.
-Right now, just pretend it says \texttt{cmp(x, y)}, and we'll get to
-those details soon.
+\texttt{Ordering}. We return either \texttt{Less}, \texttt{Greater}, or
+\texttt{Equal}, depending on if the two values are greater, less, or
+equal.
 
 The \texttt{ordering} variable has the type \texttt{Ordering}, and so
 contains one of the three values. We can then do a bunch of
@@ -1216,12 +1136,354 @@ tedious. Rust has a feature that not only makes them nicer to read, but
 also makes sure that you never miss a case. Before we get to that,
 though, let's talk about another kind of enum: one with values.
 
-This enum has two variants, one of which has a value.:
+This enum has two variants, one of which has a value:
+
+```\{rust\} enum OptionalInt \{ Value(int), Missing, \}
+
+fn main() \{ let x = Value(5); let y = Missing;
+
+\begin{verbatim}
+match x {
+    Value(n) => println!("x is {:d}", n),
+    Missing  => println!("x is missing!"),
+}
+
+match y {
+    Value(n) => println!("y is {:d}", n),
+    Missing  => println!("y is missing!"),
+}
+\end{verbatim}
+
+\}
+
+\begin{verbatim}
+
+This enum represents an `int` that we may or may not have. In the `Missing`
+case, we have no value, but in the `Value` case, we do. This enum is specific
+to `int`s, though. We can make it usable by any type, but we haven't quite
+gotten there yet!
+
+You can have any number of values in an enum:
+\end{verbatim}
+
+enum OptionalColor \{ Color(int, int, int), Missing \} ```
+
+Enums with values are quite useful, but as I mentioned, they're even
+more useful when they're generic across types. But before we get to
+generics, let's talk about how to fix this big \texttt{if}/\texttt{else}
+statements we've been writing. We'll do that with \texttt{match}.
+
+\section{Match}\label{match}
+
+Often, a simple \texttt{if}/\texttt{else} isn't enough, because you have
+more than two possible options. And \texttt{else} conditions can get
+incredibly complicated. So what's the solution?
+
+Rust has a keyword, \texttt{match}, that allows you to replace
+complicated \texttt{if}/\texttt{else} groupings with something more
+powerful. Check it out:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{let} \NormalTok{x = }\DecValTok{5i}\NormalTok{;}
+
+\KeywordTok{match} \NormalTok{x \{}
+    \DecValTok{1} \NormalTok{=> }\OtherTok{println!}\NormalTok{(}\StringTok{"one"}\NormalTok{),}
+    \DecValTok{2} \NormalTok{=> }\OtherTok{println!}\NormalTok{(}\StringTok{"two"}\NormalTok{),}
+    \DecValTok{3} \NormalTok{=> }\OtherTok{println!}\NormalTok{(}\StringTok{"three"}\NormalTok{),}
+    \DecValTok{4} \NormalTok{=> }\OtherTok{println!}\NormalTok{(}\StringTok{"four"}\NormalTok{),}
+    \DecValTok{5} \NormalTok{=> }\OtherTok{println!}\NormalTok{(}\StringTok{"five"}\NormalTok{),}
+    \NormalTok{_ => }\OtherTok{println!}\NormalTok{(}\StringTok{"something else"}\NormalTok{),}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\texttt{match} takes an expression, and then branches based on its
+value. Each `arm' of the branch is of the form
+\texttt{val =\textgreater{} expression}. When the value matches, that
+arm's expression will be evaluated. It's called \texttt{match} because
+of the term `pattern matching,' which \texttt{match} is an
+implementation of.
+
+So what's the big advantage here? Well, there are a few. First of all,
+\texttt{match} does `exhaustiveness checking.' Do you see that last arm,
+the one with the underscore (\texttt{\_})? If we remove that arm, Rust
+will give us an error:
+
+\texttt{\{ignore,notrust\} error: non-exhaustive patterns: `\_` not covered}
+
+In other words, Rust is trying to tell us we forgot a value. Because
+\texttt{x} is an integer, Rust knows that it can have a number of
+different values. For example, \texttt{6i}. But without the \texttt{\_},
+there is no arm that could match, and so Rust refuses to compile.
+\texttt{\_} is sort of like a catch-all arm. If none of the other arms
+match, the arm with \texttt{\_} will. And since we have this catch-all
+arm, we now have an arm for every possible value of \texttt{x}, and so
+our program will now compile.
+
+\texttt{match} statements also destructure enums, as well. Remember this
+code from the section on enums?
+
+```\{rust\} fn cmp(a: int, b: int) -\textgreater{} Ordering \{ if a
+\textless{} b \{ Less \} else if a \textgreater{} b \{ Greater \} else
+\{ Equal \} \}
+
+fn main() \{ let x = 5i; let y = 10i;
+
+\begin{verbatim}
+let ordering = cmp(x, y);
+
+if ordering == Less {
+    println!("less");
+} else if ordering == Greater {
+    println!("greater");
+} else if ordering == Equal {
+    println!("equal");
+}
+\end{verbatim}
+
+\} ```
+
+We can re-write this as a \texttt{match}:
+
+```\{rust\} fn cmp(a: int, b: int) -\textgreater{} Ordering \{ if a
+\textless{} b \{ Less \} else if a \textgreater{} b \{ Greater \} else
+\{ Equal \} \}
+
+fn main() \{ let x = 5i; let y = 10i;
+
+\begin{verbatim}
+match cmp(x, y) {
+    Less    => println!("less"),
+    Greater => println!("greater"),
+    Equal   => println!("equal"),
+}
+\end{verbatim}
+
+\} ```
+
+This version has way less noise, and it also checks exhaustively to make
+sure that we have covered all possible variants of \texttt{Ordering}.
+With our \texttt{if}/\texttt{else} version, if we had forgotten the
+\texttt{Greater} case, for example, our program would have happily
+compiled. If we forget in the \texttt{match}, it will not. Rust helps us
+make sure to cover all of our bases.
+
+\texttt{match} is also an expression, which means we can use it on the
+right hand side of a \texttt{let} binding. We could also implement the
+previous line like this:
+
+```\{rust\} fn cmp(a: int, b: int) -\textgreater{} Ordering \{ if a
+\textless{} b \{ Less \} else if a \textgreater{} b \{ Greater \} else
+\{ Equal \} \}
+
+fn main() \{ let x = 5i; let y = 10i;
+
+\begin{verbatim}
+let result = match cmp(x, y) {
+    Less    => "less",
+    Greater => "greater",
+    Equal   => "equal",
+};
+
+println!("{}", result);
+\end{verbatim}
+
+\} ```
+
+In this case, it doesn't make a lot of sense, as we are just making a
+temporary string where we don't need to, but sometimes, it's a nice
+pattern.
+
+\section{Looping}\label{looping}
+
+Looping is the last basic construct that we haven't learned yet in Rust.
+Rust has two main looping constructs: \texttt{for} and \texttt{while}.
+
+\subsection{\texttt{for}}\label{for}
+
+The \texttt{for} loop is used to loop a particular number of times.
+Rust's \texttt{for} loops work a bit differently than in other systems
+languages, however. Rust's \texttt{for} loop doesn't look like this C
+\texttt{for} loop:
+
+\texttt{\{ignore,c\} for (x = 0; x \textless{} 10; x++) \{     printf( "\%d\textbackslash{}n", x ); \}}
+
+It looks like this:
+
+\texttt{\{rust\} for x in range(0i, 10i) \{     println!("\{:d\}", x); \}}
+
+In slightly more abstract terms,
+
+\texttt{\{ignore,notrust\} for var in expression \{     code \}}
+
+The expression is an iterator, which we will discuss in more depth later
+in the guide. The iterator gives back a series of elements. Each element
+is one iteration of the loop. That value is then bound to the name
+\texttt{var}, which is valid for the loop body. Once the body is over,
+the next value is fetched from the iterator, and we loop another time.
+When there are no more values, the \texttt{for} loop is over.
+
+In our example, the \texttt{range} function is a function, provided by
+Rust, that takes a start and an end position, and gives an iterator over
+those values. The upper bound is exclusive, though, so our loop will
+print \texttt{0} through \texttt{9}, not \texttt{10}.
+
+Rust does not have the ``C style'' \texttt{for} loop on purpose.
+Manually controlling each element of the loop is complicated and error
+prone, even for experienced C developers. There's an old joke that goes,
+``There are two hard problems in computer science: naming things, cache
+invalidation, and off-by-one errors.'' The joke, of course, being that
+the setup says ``two hard problems'' but then lists three things. This
+happens quite a bit with ``C style'' \texttt{for} loops.
+
+We'll talk more about \texttt{for} when we cover \textbf{vector}s, later
+in the Guide.
+
+\subsection{\texttt{while}}\label{while}
+
+The other kind of looping construct in Rust is the \texttt{while} loop.
+It looks like this:
+
+```\{rust\} let mut x = 5u; let mut done = false;
+
+while !done \{ x += x - 3; println!(``\{\}'', x); if x \% 5 == 0 \{ done
+= true; \} \} ```
+
+\texttt{while} loops are the correct choice when you're not sure how
+many times you need to loop.
+
+If you need an infinite loop, you may be tempted to write this:
+
+\texttt{\{rust,ignore\} while true \{}
+
+Rust has a dedicated keyword, \texttt{loop}, to handle this case:
+
+\texttt{\{rust,ignore\} loop \{}
+
+Rust's control-flow analysis treats this construct differently than a
+\texttt{while true}, since we know that it will always loop. The details
+of what that \emph{means} aren't super important to understand at this
+stage, but in general, the more information we can give to the compiler,
+the better it can do with safety and code generation. So you should
+always prefer \texttt{loop} when you plan to loop infinitely.
+
+\subsection{Ending iteration early}\label{ending-iteration-early}
+
+Let's take a look at that \texttt{while} loop we had earlier:
+
+```\{rust\} let mut x = 5u; let mut done = false;
+
+while !done \{ x += x - 3; println!(``\{\}'', x); if x \% 5 == 0 \{ done
+= true; \} \} ```
+
+We had to keep a dedicated \texttt{mut} boolean variable binding,
+\texttt{done}, to know when we should skip out of the loop. Rust has two
+keywords to help us with modifying iteration: \texttt{break} and
+\texttt{continue}.
+
+In this case, we can write the loop in a better way with \texttt{break}:
+
+```\{rust\} let mut x = 5u;
+
+loop \{ x += x - 3; println!(``\{\}'', x); if x \% 5 == 0 \{ break; \}
+\}
+
+\begin{verbatim}
+
+We now loop forever with `loop`, and use `break` to break out early.
+
+`continue` is similar, but instead of ending the loop, goes to the next
+iteration: This will only print the odd numbers:
+\end{verbatim}
+
+for x in range(0i, 10i) \{ if x \% 2 == 0 \{ continue; \}
+
+\begin{verbatim}
+println!("{:d}", x);
+\end{verbatim}
+
+\} ```
+
+Both \texttt{continue} and \texttt{break} are valid in both kinds of
+loops.
+
+We have now learned all of the most basic Rust concepts. We're ready to
+start building our guessing game, but we need to know how to do one last
+thing first: get input from the keyboard. You can't have a guessing game
+without the ability to guess!
+
+\section{Standard Input}\label{standard-input}
+
+Getting input from the keyboard is pretty easy, but uses some things we
+haven't seen before. Here's a simple program that reads some input, and
+then prints it back out:
+
+```\{rust,ignore\} use std::io;
+
+fn main() \{ println!(``Type something!'');
+
+\begin{verbatim}
+let input = std::io::stdin().read_line().ok().expect("Failed to read line");
+
+println!("{}", input);
+\end{verbatim}
+
+\} ```
+
+Let's go over these chunks, one by one:
+
+\texttt{\{rust,ignore\} std::io::stdin();}
+
+This calls a function, \texttt{stdin()}, that lives inside the
+\texttt{std::io} module. As you can imagine, everything in \texttt{std}
+is provided by Rust, the `standard library.' We'll talk more about the
+module system later.
+
+Since writing the fully qualified name all the time is annoying, we can
+use the \texttt{use} statement to import it in:
+
+```\{rust\} use std::io::stdin;
+
+stdin(); ```
+
+However, it's considered better practice to not import individual
+functions, but to import the module, and only use one level of
+qualification:
+
+```\{rust\} use std::io;
+
+io::stdin(); ```
+
+Let's update our example to use this style:
+
+```\{rust,ignore\} use std::io;
+
+fn main() \{ println!(``Type something!'');
+
+\begin{verbatim}
+let input = io::stdin().read_line().ok().expect("Failed to read line");
+
+println!("{}", input);
+\end{verbatim}
+
+\} ```
+
+Next up:
+
+\texttt{\{rust,ignore\} .read\_line()}
+
+The \texttt{read\_line()} method can be called on the result of
+\texttt{stdin()} to return a full line of input. Nice and easy.
+
+\texttt{\{rust,ignore\} .ok().expect("Failed to read line");}
+
+Do you remember this code?
 
 \begin{verbatim}
 enum OptionalInt {
     Value(int),
-    Missing
+    Missing,
 }
 
 fn main() {
@@ -1240,43 +1502,772 @@ fn main() {
 }
 \end{verbatim}
 
-This enum represents an \texttt{int} that we may or may not have. In the
-\texttt{Missing} case, we have no value, but in the \texttt{Value} case,
-we do. This enum is specific to \texttt{int}s, though. We can make it
-usable by any type, but we haven't quite gotten there yet!
+We had to match each time, to see if we had a value or not. In this
+case, though, we \emph{know} that \texttt{x} has a \texttt{Value}. But
+\texttt{match} forces us to handle the \texttt{missing} case. This is
+what we want 99\% of the time, but sometimes, we know better than the
+compiler.
 
-You can have any number of values in an enum:
+Likewise, \texttt{read\_line()} does not return a line of input. It
+\emph{might} return a line of input. It might also fail to do so. This
+could happen if our program isn't running in a terminal, but as part of
+a cron job, or some other context where there's no standard input.
+Because of this, \texttt{read\_line} returns a type very similar to our
+\texttt{OptionalInt}: an \texttt{IoResult\textless{}T\textgreater{}}. We
+haven't talked about \texttt{IoResult\textless{}T\textgreater{}} yet
+because it is the \textbf{generic} form of our \texttt{OptionalInt}.
+Until then, you can think of it as being the same thing, just for any
+type, not just \texttt{int}s.
+
+Rust provides a method on these
+\texttt{IoResult\textless{}T\textgreater{}}s called \texttt{ok()}, which
+does the same thing as our \texttt{match} statement, but assuming that
+we have a valid value. If we don't, it will terminate our program. In
+this case, if we can't get input, our program doesn't work, so we're
+okay with that. In most cases, we would want to handle the error case
+explicitly. The result of \texttt{ok()} has a method, \texttt{expect()},
+which allows us to give an error message if this crash happens.
+
+We will cover the exact details of how all of this works later in the
+Guide. For now, this gives you enough of a basic understanding to work
+with.
+
+Back to the code we were working on! Here's a refresher:
+
+```\{rust,ignore\} use std::io;
+
+fn main() \{ println!(``Type something!'');
 
 \begin{verbatim}
-enum OptionalColor {
-    Color(int, int, int),
-    Missing
+let input = io::stdin().read_line().ok().expect("Failed to read line");
+
+println!("{}", input);
+\end{verbatim}
+
+\} ```
+
+With long lines like this, Rust gives you some flexibility with the
+whitespace. We \emph{could} write the example like this:
+
+```\{rust,ignore\} use std::io;
+
+fn main() \{ println!(``Type something!'');
+
+\begin{verbatim}
+let input = io::stdin()
+              .read_line()
+              .ok()
+              .expect("Failed to read line");
+
+println!("{}", input);
+\end{verbatim}
+
+\} ```
+
+Sometimes, this makes things more readable. Sometimes, less. Use your
+judgement here.
+
+That's all you need to get basic input from the standard input! It's not
+too complicated, but there are a number of small parts.
+
+\section{Guessing Game}\label{guessing-game}
+
+Okay! We've got the basics of Rust down. Let's write a bigger program.
+
+For our first project, we'll implement a classic beginner programming
+problem: the guessing game. Here's how it works: Our program will
+generate a random integer between one and a hundred. It will then prompt
+us to enter a guess. Upon entering our guess, it will tell us if we're
+too low or too high. Once we guess correctly, it will congratulate us,
+and print the number of guesses we've taken to the screen. Sound good?
+
+\subsection{Set up}\label{set-up}
+
+Let's set up a new project. Go to your projects directory, and make a
+new directory for the project, as well as a \texttt{src} directory for
+our code:
+
+\texttt{\{bash\} \$ cd \textasciitilde{}/projects \$ mkdir guessing\_game \$ cd guessing\_game \$ mkdir src}
+
+Great. Next, let's make a \texttt{Cargo.toml} file so Cargo knows how to
+build our project:
+
+```\{ignore\} {[}package{]}
+
+name = ``guessing\_game'' version = ``0.1.0'' authors = {[}
+``someone@example.com'' {]}
+
+{[}{[}bin{]}{]}
+
+name = ``guessing\_game'' ```
+
+Finally, we need our source file. Let's just make it hello world for
+now, so we can check that our setup works. In
+\texttt{src/guessing\_game.rs}:
+
+\texttt{\{rust\} fn main() \{     println!("Hello world!"); \}}
+
+Let's make sure that worked:
+
+\texttt{\{bash\} \$ cargo build    Compiling guessing\_game v0.1.0 (file:/home/you/projects/guessing\_game) \$}
+
+Excellent! Open up your \texttt{src/guessing\_game.rs} again. We'll be
+writing all of our code in this file. We'll talk about multiple-file
+projects later on in the guide.
+
+\subsection{Processing a Guess}\label{processing-a-guess}
+
+Let's get to it! The first thing we need to do for our guessing game is
+allow our player to input a guess. Put this in your
+\texttt{src/guessing\_game.rs}:
+
+```\{rust,no\_run\} use std::io;
+
+fn main() \{ println!(``Guess the number!'');
+
+\begin{verbatim}
+println!("Please input your guess.");
+
+let input = io::stdin().read_line()
+                       .ok()
+                       .expect("Failed to read line");
+
+println!("You guessed: {}", input);
+\end{verbatim}
+
+\} ```
+
+You've seen this code before, when we talked about standard input. We
+import the \texttt{std::io} module with \texttt{use}, and then our
+\texttt{main} function contains our program's logic. We print a little
+message announcing the game, ask the user to input a guess, get their
+input, and then print it out.
+
+Because we talked about this in the section on standard I/O, I won't go
+into more details here. If you need a refresher, go re-read that
+section.
+
+\subsection{Generating a secret
+number}\label{generating-a-secret-number}
+
+Next, we need to generate a secret number. To do that, we need to use
+Rust's random number generation, which we haven't talked about yet. Rust
+includes a bunch of interesting functions in its standard library. If
+you need a bit of code, it's possible that it's already been written for
+you! In this case, we do know that Rust has random number generation,
+but we don't know how to use it.
+
+Enter the docs. Rust has a page specifically to document the standard
+library. You can find that page \href{std/index.html}{here}. There's a
+lot of information on that page, but the best part is the search bar.
+Right up at the top, there's a box that you can enter in a search term.
+The search is pretty primitive right now, but is getting better all the
+time. If you type `random' in that box, the page will update to
+\href{http://doc.rust-lang.org/std/index.html?search=random}{this one}.
+The very first result is a link to
+\href{http://doc.rust-lang.org/std/rand/fn.random.html}{std::rand::random}.
+If we click on that result, we'll be taken to its documentation page.
+
+This page shows us a few things: the type signature of the function,
+some explanatory text, and then an example. Let's modify our code to add
+in the \texttt{random} function:
+
+```\{rust,ignore\} use std::io; use std::rand;
+
+fn main() \{ println!(``Guess the number!'');
+
+\begin{verbatim}
+let secret_number = (rand::random() % 100i) + 1i;
+
+println!("The secret number is: {}", secret_number);
+
+println!("Please input your guess.");
+
+let input = io::stdin().read_line()
+                       .ok()
+                       .expect("Failed to read line");
+
+
+println!("You guessed: {}", input);
+\end{verbatim}
+
+\} ```
+
+The first thing we changed was to \texttt{use std::rand}, as the docs
+explained. We then added in a \texttt{let} expression to create a
+variable binding named \texttt{secret\_number}, and we printed out its
+result. Let's try to compile this using \texttt{cargo build}:
+
+\texttt{\{notrust,no\_run\} \$ cargo build    Compiling guessing\_game v0.1.0 (file:/home/you/projects/guessing\_game) src/guessing\_game.rs:7:26: 7:34 error: the type of this value must be known in this context src/guessing\_game.rs:7     let secret\_number = (rand::random() \% 100i) + 1i;                                                 \^{}\textasciitilde{}\textasciitilde{}\textasciitilde{}\textasciitilde{}\textasciitilde{}\textasciitilde{}\textasciitilde{} error: aborting due to previous error}
+
+It didn't work! Rust says ``the type of this value must be known in this
+context.'' What's up with that? Well, as it turns out,
+\texttt{rand::random()} can generate many kinds of random values, not
+just integers. And in this case, Rust isn't sure what kind of value
+\texttt{random()} should generate. So we have to help it. With number
+literals, we just add an \texttt{i} onto the end to tell Rust they're
+integers, but that does not work with functions. There's a different
+syntax, and it looks like this:
+
+\texttt{\{rust,ignore\} rand::random::\textless{}int\textgreater{}();}
+
+This says ``please give me a random \texttt{int} value.'' We can change
+our code to use this hint\ldots{}
+
+```\{rust,no\_run\} use std::io; use std::rand;
+
+fn main() \{ println!(``Guess the number!'');
+
+\begin{verbatim}
+let secret_number = (rand::random::<int>() % 100i) + 1i;
+
+println!("The secret number is: {}", secret_number);
+
+println!("Please input your guess.");
+
+let input = io::stdin().read_line()
+                       .ok()
+                       .expect("Failed to read line");
+
+
+println!("You guessed: {}", input);
+\end{verbatim}
+
+\} ```
+
+\ldots{} and then recompile:
+
+\texttt{\{notrust,ignore\} \$ cargo build   Compiling guessing\_game v0.1.0 (file:/home/steve/tmp/guessing\_game) \$}
+
+Excellent! Try running our new program a few times:
+
+\texttt{\{notrust,ignore\} \$ ./target/guessing\_game  Guess the number! The secret number is: 7 Please input your guess. 4 You guessed: 4 \$ ./target/guessing\_game  Guess the number! The secret number is: 83 Please input your guess. 5 You guessed: 5 \$ ./target/guessing\_game  Guess the number! The secret number is: -29 Please input your guess. 42 You guessed: 42}
+
+Wait. Negative 29? We wanted a number between one and a hundred! We have
+two options here: we can either ask \texttt{random()} to generate an
+unsigned integer, which can only be positive, or we can use the
+\texttt{abs()} function. Let's go with the unsigned integer approach. If
+we want a random positive number, we should ask for a random positive
+number. Our code looks like this now:
+
+```\{rust,no\_run\} use std::io; use std::rand;
+
+fn main() \{ println!(``Guess the number!'');
+
+\begin{verbatim}
+let secret_number = (rand::random::<uint>() % 100u) + 1u;
+
+println!("The secret number is: {}", secret_number);
+
+println!("Please input your guess.");
+
+let input = io::stdin().read_line()
+                       .ok()
+                       .expect("Failed to read line");
+
+
+println!("You guessed: {}", input);
+\end{verbatim}
+
+\} ```
+
+And trying it out:
+
+\texttt{\{notrust,ignore\} \$ cargo build    Compiling guessing\_game v0.1.0 (file:/home/you/projects/guessing\_game) \$ ./target/guessing\_game  Guess the number! The secret number is: 57 Please input your guess. 3 You guessed: 3}
+
+Great! Next up: let's compare our guess to the secret guess.
+
+\subsection{Comparing guesses}\label{comparing-guesses}
+
+If you remember, earlier in the tutorial, we made a \texttt{cmp}
+function that compared two numbers. Let's add that in, along with a
+\texttt{match} statement to compare the guess to the secret guess:
+
+```\{rust,ignore\} use std::io; use std::rand;
+
+fn main() \{ println!(``Guess the number!'');
+
+\begin{verbatim}
+let secret_number = (rand::random::<uint>() % 100u) + 1u;
+
+println!("The secret number is: {}", secret_number);
+
+println!("Please input your guess.");
+
+let input = io::stdin().read_line()
+                       .ok()
+                       .expect("Failed to read line");
+
+
+println!("You guessed: {}", input);
+
+match cmp(input, secret_number) { 
+    Less    => println!("Too small!"),
+    Greater => println!("Too big!"),
+    Equal   => { println!("You win!"); },
 }
 \end{verbatim}
 
-Enums with values are quite useful, but as I mentioned, they're even
-more useful when they're generic across types. But before we get to
-generics, let's talk about how to fix this big \texttt{if}/\texttt{else}
-statements we've been writing. We'll do that with \texttt{match}.
+\}
 
-\subsection{Match}\label{match}
+fn cmp(a: int, b: int) -\textgreater{} Ordering \{ if a \textless{} b \{
+Less \} else if a \textgreater{} b \{ Greater \} else \{ Equal \} \} ```
 
-\subsection{Looping}\label{looping}
+If we try to compile, we'll get some errors:
 
-for
+\texttt{\{notrust,ignore\} \$ cargo build \$ cargo build    Compiling guessing\_game v0.1.0 (file:/home/you/projects/guessing\_game) src/guessing\_game.rs:20:15: 20:20 error: mismatched types: expected `int` but found `collections::string::String` (expected int but found struct collections::string::String) src/guessing\_game.rs:20     match cmp(input, secret\_number) \{                                       \^{}\textasciitilde{}\textasciitilde{}\textasciitilde{}\textasciitilde{} src/guessing\_game.rs:20:22: 20:35 error: mismatched types: expected `int` but found `uint` (expected int but found uint) src/guessing\_game.rs:20     match cmp(input, secret\_number) \{                                              \^{}\textasciitilde{}\textasciitilde{}\textasciitilde{}\textasciitilde{}\textasciitilde{}\textasciitilde{}\textasciitilde{}\textasciitilde{}\textasciitilde{}\textasciitilde{}\textasciitilde{}\textasciitilde{} error: aborting due to 2 previous errors}
 
-while
+This often happens when writing Rust programs, and is one of Rust's
+greatest strengths. You try out some code, see if it compiles, and Rust
+tells you that you've done something wrong. In this case, our
+\texttt{cmp} function works on integers, but we've given it unsigned
+integers. In this case, the fix is easy, because we wrote the
+\texttt{cmp} function! Let's change it to take \texttt{uint}s:
 
-loop
+```\{rust,ignore\} use std::io; use std::rand;
 
-break/continue
+fn main() \{ println!(``Guess the number!'');
 
-\subsection{Guessing Game: complete}\label{guessing-game-complete}
+\begin{verbatim}
+let secret_number = (rand::random::<uint>() % 100u) + 1u;
+
+println!("The secret number is: {}", secret_number);
+
+println!("Please input your guess.");
+
+let input = io::stdin().read_line()
+                       .ok()
+                       .expect("Failed to read line");
+
+
+println!("You guessed: {}", input);
+
+match cmp(input, secret_number) {
+    Less    => println!("Too small!"),
+    Greater => println!("Too big!"),
+    Equal   => { println!("You win!"); },
+}
+\end{verbatim}
+
+\}
+
+fn cmp(a: uint, b: uint) -\textgreater{} Ordering \{ if a \textless{} b
+\{ Less \} else if a \textgreater{} b \{ Greater \} else \{ Equal \} \}
+```
+
+And try compiling again:
+
+\texttt{\{notrust,ignore\} \$ cargo build    Compiling guessing\_game v0.1.0 (file:/home/you/projects/guessing\_game) src/guessing\_game.rs:20:15: 20:20 error: mismatched types: expected `uint` but found `collections::string::String` (expected uint but found struct collections::string::String) src/guessing\_game.rs:20     match cmp(input, secret\_number) \{                                       \^{}\textasciitilde{}\textasciitilde{}\textasciitilde{}\textasciitilde{} error: aborting due to previous error}
+
+This error is similar to the last one: we expected to get a
+\texttt{uint}, but we got a \texttt{String} instead! That's because our
+\texttt{input} variable is coming from the standard input, and you can
+guess anything. Try it:
+
+\texttt{\{notrust,ignore\} \$ ./target/guessing\_game  Guess the number! The secret number is: 73 Please input your guess. hello You guessed: hello}
+
+Oops! Also, you'll note that we just ran our program even though it
+didn't compile. This works because the older version we did successfully
+compile was still lying around. Gotta be careful!
+
+Anyway, we have a \texttt{String}, but we need a \texttt{uint}. What to
+do? Well, there's a function for that:
+
+\texttt{\{rust,ignore\} let input = io::stdin().read\_line()                        .ok()                        .expect("Failed to read line"); let guess: Option\textless{}uint\textgreater{} = from\_str(input.as\_slice());}
+
+The \texttt{from\_str} function takes in a \texttt{\&str} value and
+converts it into something. We tell it what kind of something with a
+type hint. Remember our type hint with \texttt{random()}? It looked like
+this:
+
+\texttt{\{rust,ignore\} rand::random::\textless{}uint\textgreater{}();}
+
+There's an alternate way of providing a hint too, and that's declaring
+the type in a \texttt{let}:
+
+\texttt{\{rust,ignore\} let x: uint = rand::random();}
+
+In this case, we say \texttt{x} is a \texttt{uint} explicitly, so Rust
+is able to properly tell \texttt{random()} what to generate. In a
+similar fashion, both of these work:
+
+\texttt{\{rust,ignore\} let guess = from\_str::\textless{}Option\textless{}uint\textgreater{}\textgreater{}("5"); let guess: Option\textless{}uint\textgreater{} = from\_str("5");}
+
+In this case, I happen to prefer the latter, and in the
+\texttt{random()} case, I prefer the former. I think the nested
+\texttt{\textless{}\textgreater{}}s make the first option especially
+ugly and a bit harder to read.
+
+Anyway, with us now convering our input to a number, our code looks like
+this:
+
+```\{rust,ignore\} use std::io; use std::rand;
+
+fn main() \{ println!(``Guess the number!'');
+
+\begin{verbatim}
+let secret_number = (rand::random::<uint>() % 100u) + 1u;
+
+println!("The secret number is: {}", secret_number);
+
+println!("Please input your guess.");
+
+let input = io::stdin().read_line()
+                       .ok()
+                       .expect("Failed to read line");
+let input_num: Option<uint> = from_str(input.as_slice());
+
+
+
+println!("You guessed: {}", input_num);
+
+match cmp(input_num, secret_number) {
+    Less    => println!("Too small!"),
+    Greater => println!("Too big!"),
+    Equal   => { println!("You win!"); },
+}
+\end{verbatim}
+
+\}
+
+fn cmp(a: uint, b: uint) -\textgreater{} Ordering \{ if a \textless{} b
+\{ Less \} else if a \textgreater{} b \{ Greater \} else \{ Equal \} \}
+```
+
+Let's try it out!
+
+\texttt{\{notrust,ignore\} \$ cargo build    Compiling guessing\_game v0.1.0 (file:/home/steve/tmp/guessing\_game) src/guessing\_game.rs:22:15: 22:24 error: mismatched types: expected `uint` but found `core::option::Option\textless{}uint\textgreater{}` (expected uint but found enum core::option::Option) src/guessing\_game.rs:22     match cmp(input\_num, secret\_number) \{                                       \^{}\textasciitilde{}\textasciitilde{}\textasciitilde{}\textasciitilde{}\textasciitilde{}\textasciitilde{}\textasciitilde{}\textasciitilde{} error: aborting due to previous error}
+
+Oh yeah! Our \texttt{input\_num} has the type
+\texttt{Option\textless{}uint\textgreater{}}, rather than \texttt{uint}.
+We need to unwrap the Option. If you remember from before,
+\texttt{match} is a great way to do that. Try this code:
+
+```\{rust,no\_run\} use std::io; use std::rand;
+
+fn main() \{ println!(``Guess the number!'');
+
+\begin{verbatim}
+let secret_number = (rand::random::<uint>() % 100u) + 1u;
+
+println!("The secret number is: {}", secret_number);
+
+println!("Please input your guess.");
+
+let input = io::stdin().read_line()
+                       .ok()
+                       .expect("Failed to read line");
+let input_num: Option<uint> = from_str(input.as_slice());
+
+let num = match input_num {
+    Some(num) => num,
+    None      => {
+        println!("Please input a number!");
+        return;
+    }
+};
+
+
+println!("You guessed: {}", num);
+
+match cmp(num, secret_number) {
+    Less    => println!("Too small!"),
+    Greater => println!("Too big!"),
+    Equal   => { println!("You win!"); },
+}
+\end{verbatim}
+
+\}
+
+fn cmp(a: uint, b: uint) -\textgreater{} Ordering \{ if a \textless{} b
+\{ Less \} else if a \textgreater{} b \{ Greater \} else \{ Equal \} \}
+```
+
+We use a \texttt{match} to either give us the \texttt{uint} inside of
+the \texttt{Option}, or we print an error message and return. Let's give
+this a shot:
+
+\texttt{\{notrust,ignore\} \$ cargo build    Compiling guessing\_game v0.1.0 (file:/home/you/projects/guessing\_game) \$ ./target/guessing\_game  Guess the number! The secret number is: 17 Please input your guess. 5 Please input a number! \$}
+
+Uh, what? But we did!
+
+\ldots{} actually, we didn't. See, when you get a line of input from
+\texttt{stdin()}, you get all the input. Including the
+\texttt{\textbackslash{}n} character from you pressing Enter. So,
+\texttt{from\_str()} sees the string \texttt{"5\textbackslash{}n"} and
+says ``nope, that's not a number, there's non-number stuff in there!''
+Luckily for us, \texttt{\&str}s have an easy method we can use defined
+on them: \texttt{trim()}. One small modification, and our code looks
+like this:
+
+```\{rust,no\_run\} use std::io; use std::rand;
+
+fn main() \{ println!(``Guess the number!'');
+
+\begin{verbatim}
+let secret_number = (rand::random::<uint>() % 100u) + 1u;
+
+println!("The secret number is: {}", secret_number);
+
+println!("Please input your guess.");
+
+let input = io::stdin().read_line()
+                       .ok()
+                       .expect("Failed to read line");
+let input_num: Option<uint> = from_str(input.as_slice().trim());
+
+let num = match input_num {
+    Some(num) => num,
+    None      => {
+        println!("Please input a number!");
+        return;
+    }
+};
+
+
+println!("You guessed: {}", num);
+
+match cmp(num, secret_number) {
+    Less    => println!("Too small!"),
+    Greater => println!("Too big!"),
+    Equal   => { println!("You win!"); },
+}
+\end{verbatim}
+
+\}
+
+fn cmp(a: uint, b: uint) -\textgreater{} Ordering \{ if a \textless{} b
+\{ Less \} else if a \textgreater{} b \{ Greater \} else \{ Equal \} \}
+```
+
+Let's try it!
+
+\texttt{\{notrust,ignore\} \$ cargo build    Compiling guessing\_game v0.1.0 (file:/home/you/projects/guessing\_game) \$ ./target/guessing\_game  Guess the number! The secret number is: 58 Please input your guess.   76   You guessed: 76 Too big! \$}
+
+Nice! You can see I even added spaces before my guess, and it still
+figured out that I guessed 76. Run the program a few times, and verify
+that guessing the number works, as well as guessing a number too small.
+
+The Rust compiler helped us out quite a bit there! This technique is
+called ``lean on the compiler,'' and it's often useful when working on
+some code. Let the error messages help guide you towards the correct
+types.
+
+Now we've got most of the game working, but we can only make one guess.
+Let's change that by adding loops!
+
+\subsection{Looping}\label{looping-1}
+
+As we already discussed, the \texttt{loop} key word gives us an infinite
+loop. So let's add that in:
+
+```\{rust,no\_run\} use std::io; use std::rand;
+
+fn main() \{ println!(``Guess the number!'');
+
+\begin{verbatim}
+let secret_number = (rand::random::<uint>() % 100u) + 1u;
+
+println!("The secret number is: {}", secret_number);
+
+loop {
+
+    println!("Please input your guess.");
+
+    let input = io::stdin().read_line()
+                           .ok()
+                           .expect("Failed to read line");
+    let input_num: Option<uint> = from_str(input.as_slice().trim());
+
+    let num = match input_num {
+        Some(num) => num,
+        None      => {
+            println!("Please input a number!");
+            return;
+        }
+    };
+
+
+    println!("You guessed: {}", num);
+
+    match cmp(num, secret_number) {
+        Less    => println!("Too small!"),
+        Greater => println!("Too big!"),
+        Equal   => { println!("You win!"); },
+    }
+}
+\end{verbatim}
+
+\}
+
+fn cmp(a: uint, b: uint) -\textgreater{} Ordering \{ if a \textless{} b
+\{ Less \} else if a \textgreater{} b \{ Greater \} else \{ Equal \} \}
+```
+
+And try it out. But wait, didn't we just add an infinite loop? Yup.
+Remember that \texttt{return}? If we give a non-number answer, we'll
+\texttt{return} and quit. Observe:
+
+\texttt{\{notrust,ignore\} \$ cargo build    Compiling guessing\_game v0.1.0 (file:/home/you/projects/guessing\_game) steve@computer:\textasciitilde{}/tmp/guessing\_game\$ ./target/guessing\_game  Guess the number! The secret number is: 59 Please input your guess. 45 You guessed: 45 Too small! Please input your guess. 60 You guessed: 60 Too big! Please input your guess. 59 You guessed: 59 You win! Please input your guess. quit Please input a number! \$}
+
+Ha! \texttt{quit} actually quits. As does any other non-number input.
+Well, this is suboptimal to say the least. First, let's actually quit
+when you win the game:
+
+```\{rust,no\_run\} use std::io; use std::rand;
+
+fn main() \{ println!(``Guess the number!'');
+
+\begin{verbatim}
+let secret_number = (rand::random::<uint>() % 100u) + 1u;
+
+println!("The secret number is: {}", secret_number);
+
+loop {
+
+    println!("Please input your guess.");
+
+    let input = io::stdin().read_line()
+                           .ok()
+                           .expect("Failed to read line");
+    let input_num: Option<uint> = from_str(input.as_slice().trim());
+
+    let num = match input_num {
+        Some(num) => num,
+        None      => {
+            println!("Please input a number!");
+            return;
+        }
+    };
+
+
+    println!("You guessed: {}", num);
+
+    match cmp(num, secret_number) {
+        Less    => println!("Too small!"),
+        Greater => println!("Too big!"),
+        Equal   => {
+            println!("You win!");
+            return;
+        },
+    }
+}
+\end{verbatim}
+
+\}
+
+fn cmp(a: uint, b: uint) -\textgreater{} Ordering \{ if a \textless{} b
+\{ Less \} else if a \textgreater{} b \{ Greater \} else \{ Equal \} \}
+```
+
+By adding the \texttt{return} line after the \texttt{You win!}, we'll
+exit the program when we win. We have just one more tweak to make: when
+someone inputs a non-number, we don't want to quit, we just want to
+ignore it. Change that \texttt{return} to \texttt{continue}:
+
+```\{rust,no\_run\} use std::io; use std::rand;
+
+fn main() \{ println!(``Guess the number!'');
+
+\begin{verbatim}
+let secret_number = (rand::random::<uint>() % 100u) + 1u;
+
+println!("The secret number is: {}", secret_number);
+
+loop {
+
+    println!("Please input your guess.");
+
+    let input = io::stdin().read_line()
+                           .ok()
+                           .expect("Failed to read line");
+    let input_num: Option<uint> = from_str(input.as_slice().trim());
+
+    let num = match input_num {
+        Some(num) => num,
+        None      => {
+            println!("Please input a number!");
+            continue;
+        }
+    };
+
+
+    println!("You guessed: {}", num);
+
+    match cmp(num, secret_number) {
+        Less    => println!("Too small!"),
+        Greater => println!("Too big!"),
+        Equal   => {
+            println!("You win!");
+            return;
+        },
+    }
+}
+\end{verbatim}
+
+\}
+
+fn cmp(a: uint, b: uint) -\textgreater{} Ordering \{ if a \textless{} b
+\{ Less \} else if a \textgreater{} b \{ Greater \} else \{ Equal \} \}
+```
+
+Now we should be good! Let's try:
+
+\texttt{\{rust,ignore\} \$ cargo build    Compiling guessing\_game v0.1.0 (file:/home/you/projects/guessing\_game) \$ ./target/guessing\_game  Guess the number! The secret number is: 61 Please input your guess. 10 You guessed: 10 Too small! Please input your guess. 99 You guessed: 99 Too big! Please input your guess. foo Please input a number! Please input your guess. 61 You guessed: 61 You win!}
+
+Awesome! With one tiny last tweak, we have finished the guessing game.
+Can you think of what it is? That's right, we don't want to print out
+the secret number. It was good for testing, but it kind of ruins the
+game. Here's our final source:
+
+```\{rust,no\_run\} use std::io; use std::rand;
+
+fn main() \{ println!(``Guess the number!'');
+
+\begin{verbatim}
+let secret_number = (rand::random::<uint>() % 100u) + 1u;
+
+loop {
+
+    println!("Please input your guess.");
+
+    let input = io::stdin().read_line()
+                           .ok()
+                           .expect("Failed to read line");
+    let input_num: Option<uint> = from_str(input.as_slice().trim());
+
+    let num = match input_num {
+        Some(num) => num,
+        None      => {
+            println!("Please input a number!");
+            continue;
+        }
+    };
+
+
+    println!("You guessed: {}", num);
+
+    match cmp(num, secret_number) {
+        Less    => println!("Too small!"),
+        Greater => println!("Too big!"),
+        Equal   => {
+            println!("You win!");
+            return;
+        },
+    }
+}
+\end{verbatim}
+
+\}
+
+fn cmp(a: uint, b: uint) -\textgreater{} Ordering \{ if a \textless{} b
+\{ Less \} else if a \textgreater{} b \{ Greater \} else \{ Equal \} \}
+```
+
+\subsection{Complete!}\label{complete}
 
 At this point, you have successfully built the Guessing Game!
-Congratulations! For reference,
-\href{https://github.com/steveklabnik/guessing_game}{We've placed the
-sample code on GitHub}.
+Congratulations!
 
 You've now learned the basic syntax of Rust. All of this is relatively
 close to various other programming languages you have used in the past.
@@ -1286,37 +2277,37 @@ foundation for the rest of your Rust education.
 Now that you're an expert at the basics, it's time to learn about some
 of Rust's more unique features.
 
-\subsection{iterators}\label{iterators}
+\section{iterators}\label{iterators}
 
-\subsection{Lambdas}\label{lambdas}
+\section{Lambdas}\label{lambdas}
 
-\subsection{Testing}\label{testing}
+\section{Testing}\label{testing}
 
 attributes
 
 stability markers
 
-\subsection{Crates and Modules}\label{crates-and-modules}
+\section{Crates and Modules}\label{crates-and-modules}
 
 visibility
 
-\subsection{Generics}\label{generics}
+\section{Generics}\label{generics}
 
-\subsection{Traits}\label{traits}
+\section{Traits}\label{traits}
 
-\subsection{Operators and built-in
+\section{Operators and built-in
 Traits}\label{operators-and-built-in-traits}
 
-\subsection{Ownership and Lifetimes}\label{ownership-and-lifetimes}
+\section{Ownership and Lifetimes}\label{ownership-and-lifetimes}
 
 Move vs.~Copy
 
 Allocation
 
-\subsection{Tasks}\label{tasks}
+\section{Tasks}\label{tasks}
 
-\subsection{Macros}\label{macros}
+\section{Macros}\label{macros}
 
-\subsection{Unsafe}\label{unsafe}
+\section{Unsafe}\label{unsafe}
 
 \end{document}

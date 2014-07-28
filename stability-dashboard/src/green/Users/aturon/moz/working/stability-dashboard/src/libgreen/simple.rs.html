@@ -131,6 +131,8 @@
 <span id='91'>91</span>
 <span id='92'>92</span>
 <span id='93'>93</span>
+<span id='94'>94</span>
+<span id='95'>95</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -161,7 +163,9 @@
 <span class='kw'>impl</span> <span class='ident'>Runtime</span> <span class='kw'>for</span> <span class='ident'>SimpleTask</span> {
     <span class='comment'>// Implement the simple tasks of descheduling and rescheduling, but only in</span>
     <span class='comment'>// a simple number of cases.</span>
-    <span class='kw'>fn</span> <span class='ident'>deschedule</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>times</span>: <span class='ident'>uint</span>, <span class='kw-2'>mut</span> <span class='ident'>cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>,
+    <span class='kw'>fn</span> <span class='ident'>deschedule</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>SimpleTask</span><span class='op'>&gt;</span>,
+                  <span class='ident'>times</span>: <span class='ident'>uint</span>,
+                  <span class='kw-2'>mut</span> <span class='ident'>cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>,
                   <span class='ident'>f</span>: <span class='op'>|</span><span class='ident'>BlockedTask</span><span class='op'>|</span> <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>BlockedTask</span><span class='op'>&gt;</span>) {
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>times</span> <span class='op'>==</span> <span class='number'>1</span>);
 
@@ -188,7 +192,7 @@
         }
         <span class='ident'>Local</span>::<span class='ident'>put</span>(<span class='ident'>cur_task</span>);
     }
-    <span class='kw'>fn</span> <span class='ident'>reawaken</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='kw-2'>mut</span> <span class='ident'>to_wake</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) {
+    <span class='kw'>fn</span> <span class='ident'>reawaken</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>SimpleTask</span><span class='op'>&gt;</span>, <span class='kw-2'>mut</span> <span class='ident'>to_wake</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) {
         <span class='kw'>let</span> <span class='ident'>me</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>SimpleTask</span>;
         <span class='ident'>to_wake</span>.<span class='ident'>put_runtime</span>(<span class='self'>self</span>);
         <span class='kw'>unsafe</span> {
@@ -203,9 +207,9 @@
     <span class='comment'>// purpose. A &quot;simple task&quot; is just that, a very simple task that can&#39;t</span>
     <span class='comment'>// really do a whole lot. The only purpose of the task is to get us off our</span>
     <span class='comment'>// feet and running.</span>
-    <span class='kw'>fn</span> <span class='ident'>yield_now</span>(<span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>_cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) { <span class='macro'>fail</span><span class='macro'>!</span>() }
-    <span class='kw'>fn</span> <span class='ident'>maybe_yield</span>(<span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>_cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) { <span class='macro'>fail</span><span class='macro'>!</span>() }
-    <span class='kw'>fn</span> <span class='ident'>spawn_sibling</span>(<span class='kw-2'>~</span><span class='self'>self</span>,
+    <span class='kw'>fn</span> <span class='ident'>yield_now</span>(<span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>SimpleTask</span><span class='op'>&gt;</span>, <span class='ident'>_cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) { <span class='macro'>fail</span><span class='macro'>!</span>() }
+    <span class='kw'>fn</span> <span class='ident'>maybe_yield</span>(<span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>SimpleTask</span><span class='op'>&gt;</span>, <span class='ident'>_cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) { <span class='macro'>fail</span><span class='macro'>!</span>() }
+    <span class='kw'>fn</span> <span class='ident'>spawn_sibling</span>(<span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>SimpleTask</span><span class='op'>&gt;</span>,
                      <span class='ident'>_cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>,
                      <span class='ident'>_opts</span>: <span class='ident'>TaskOpts</span>,
                      <span class='ident'>_f</span>: <span class='kw'>proc</span>():<span class='ident'>Send</span>) {
@@ -214,7 +218,7 @@
     <span class='kw'>fn</span> <span class='ident'>local_io</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>rtio</span>::<span class='ident'>LocalIo</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;&gt;</span> { <span class='prelude-val'>None</span> }
     <span class='kw'>fn</span> <span class='ident'>stack_bounds</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='ident'>uint</span>, <span class='ident'>uint</span>) { <span class='macro'>fail</span><span class='macro'>!</span>() }
     <span class='kw'>fn</span> <span class='ident'>can_block</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='boolval'>true</span> }
-    <span class='kw'>fn</span> <span class='ident'>wrap</span>(<span class='kw-2'>~</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span><span class='op'>&gt;</span> { <span class='macro'>fail</span><span class='macro'>!</span>() }
+    <span class='kw'>fn</span> <span class='ident'>wrap</span>(<span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>SimpleTask</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span><span class='op'>&gt;</span> { <span class='macro'>fail</span><span class='macro'>!</span>() }
 }
 
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>task</span>() <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span> {

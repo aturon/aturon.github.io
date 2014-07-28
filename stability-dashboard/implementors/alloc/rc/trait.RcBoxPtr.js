@@ -1,6 +1,6 @@
 (function() {var implementors = {};
-implementors['sync'] = [];
 implementors['std'] = [];
+implementors['sync'] = [];
 
             if (window.register_implementors) {
                 window.register_implementors(implementors);

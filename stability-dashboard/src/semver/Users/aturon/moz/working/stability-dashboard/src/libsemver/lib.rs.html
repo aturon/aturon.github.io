@@ -496,6 +496,8 @@
 <span id='456'>456</span>
 <span id='457'>457</span>
 <span id='458'>458</span>
+<span id='459'>459</span>
+<span id='460'>460</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2012-2013 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -534,34 +536,22 @@
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>license</span> <span class='op'>=</span> <span class='string'>&quot;MIT/ASL2&quot;</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>doc</span>(<span class='ident'>html_logo_url</span> <span class='op'>=</span> <span class='string'>&quot;http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png&quot;</span>,
        <span class='ident'>html_favicon_url</span> <span class='op'>=</span> <span class='string'>&quot;http://www.rust-lang.org/favicon.ico&quot;</span>,
-       <span class='ident'>html_root_url</span> <span class='op'>=</span> <span class='string'>&quot;http://doc.rust-lang.org/0.11.0/&quot;</span>)]</span>
+       <span class='ident'>html_root_url</span> <span class='op'>=</span> <span class='string'>&quot;http://doc.rust-lang.org/master/&quot;</span>)]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>default_type_params</span>)]</span>
 
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>char</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cmp</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fmt</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fmt</span>::<span class='ident'>Show</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>option</span>::{<span class='prelude-ty'>Option</span>, <span class='prelude-val'>Some</span>, <span class='prelude-val'>None</span>};
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>string</span>::<span class='ident'>String</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fmt</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>hash</span>;
 
 <span class='doccomment'>/// An identifier in the pre-release or build metadata. If the identifier can</span>
 <span class='doccomment'>/// be parsed as a decimal value, it will be represented with `Numeric`.</span>
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>)]</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Eq</span>, <span class='ident'>PartialOrd</span>, <span class='ident'>Ord</span>, <span class='ident'>Hash</span>)]</span>
 <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>missing_doc</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>Identifier</span> {
     <span class='ident'>Numeric</span>(<span class='ident'>uint</span>),
     <span class='ident'>AlphaNumeric</span>(<span class='ident'>String</span>)
-}
-
-<span class='kw'>impl</span> <span class='ident'>cmp</span>::<span class='ident'>PartialOrd</span> <span class='kw'>for</span> <span class='ident'>Identifier</span> {
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>partial_cmp</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='ident'>Identifier</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Ordering</span><span class='op'>&gt;</span> {
-        <span class='kw'>match</span> (<span class='self'>self</span>, <span class='ident'>other</span>) {
-            (<span class='kw-2'>&amp;</span><span class='ident'>Numeric</span>(<span class='ident'>a</span>), <span class='kw-2'>&amp;</span><span class='ident'>Numeric</span>(<span class='kw-2'>ref</span> <span class='ident'>b</span>)) <span class='op'>=&gt;</span> <span class='ident'>a</span>.<span class='ident'>partial_cmp</span>(<span class='ident'>b</span>),
-            (<span class='kw-2'>&amp;</span><span class='ident'>Numeric</span>(_), _) <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>(<span class='ident'>Less</span>),
-            (<span class='kw-2'>&amp;</span><span class='ident'>AlphaNumeric</span>(<span class='kw-2'>ref</span> <span class='ident'>a</span>), <span class='kw-2'>&amp;</span><span class='ident'>AlphaNumeric</span>(<span class='kw-2'>ref</span> <span class='ident'>b</span>)) <span class='op'>=&gt;</span> <span class='ident'>a</span>.<span class='ident'>partial_cmp</span>(<span class='ident'>b</span>),
-            (<span class='kw-2'>&amp;</span><span class='ident'>AlphaNumeric</span>(_), _) <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>(<span class='ident'>Greater</span>)
-        }
-    }
 }
 
 <span class='kw'>impl</span> <span class='ident'>fmt</span>::<span class='ident'>Show</span> <span class='kw'>for</span> <span class='ident'>Identifier</span> {
@@ -576,7 +566,7 @@
 
 
 <span class='doccomment'>/// Represents a version number conforming to the semantic versioning scheme.</span>
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>Eq</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Version</span> {
     <span class='doccomment'>/// The major version, to be incremented on incompatible changes.</span>
     <span class='kw'>pub</span> <span class='ident'>major</span>: <span class='ident'>uint</span>,
@@ -628,20 +618,25 @@
 }
 
 <span class='kw'>impl</span> <span class='ident'>cmp</span>::<span class='ident'>PartialOrd</span> <span class='kw'>for</span> <span class='ident'>Version</span> {
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>partial_cmp</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='ident'>Version</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Ordering</span><span class='op'>&gt;</span> {
-        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>major</span>.<span class='ident'>partial_cmp</span>(<span class='kw-2'>&amp;</span><span class='ident'>other</span>.<span class='ident'>major</span>) {
-            <span class='prelude-val'>Some</span>(<span class='ident'>Equal</span>) <span class='op'>=&gt;</span> {}
+        <span class='prelude-val'>Some</span>(<span class='self'>self</span>.<span class='ident'>cmp</span>(<span class='ident'>other</span>))
+    }
+}
+
+<span class='kw'>impl</span> <span class='ident'>cmp</span>::<span class='ident'>Ord</span> <span class='kw'>for</span> <span class='ident'>Version</span> {
+    <span class='kw'>fn</span> <span class='ident'>cmp</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='ident'>Version</span>) <span class='op'>-&gt;</span> <span class='ident'>Ordering</span> {
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>major</span>.<span class='ident'>cmp</span>(<span class='kw-2'>&amp;</span><span class='ident'>other</span>.<span class='ident'>major</span>) {
+            <span class='ident'>Equal</span> <span class='op'>=&gt;</span> {}
             <span class='ident'>r</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='ident'>r</span>,
         }
 
-        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>minor</span>.<span class='ident'>partial_cmp</span>(<span class='kw-2'>&amp;</span><span class='ident'>other</span>.<span class='ident'>minor</span>) {
-            <span class='prelude-val'>Some</span>(<span class='ident'>Equal</span>) <span class='op'>=&gt;</span> {}
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>minor</span>.<span class='ident'>cmp</span>(<span class='kw-2'>&amp;</span><span class='ident'>other</span>.<span class='ident'>minor</span>) {
+            <span class='ident'>Equal</span> <span class='op'>=&gt;</span> {}
             <span class='ident'>r</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='ident'>r</span>,
         }
 
-        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>patch</span>.<span class='ident'>partial_cmp</span>(<span class='kw-2'>&amp;</span><span class='ident'>other</span>.<span class='ident'>patch</span>) {
-            <span class='prelude-val'>Some</span>(<span class='ident'>Equal</span>) <span class='op'>=&gt;</span> {}
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>patch</span>.<span class='ident'>cmp</span>(<span class='kw-2'>&amp;</span><span class='ident'>other</span>.<span class='ident'>patch</span>) {
+            <span class='ident'>Equal</span> <span class='op'>=&gt;</span> {}
             <span class='ident'>r</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='ident'>r</span>,
         }
 
@@ -649,11 +644,20 @@
         <span class='comment'>// but the version of ord defined for vec</span>
         <span class='comment'>// says that [] &lt; [pre] so we alter it here</span>
         <span class='kw'>match</span> (<span class='self'>self</span>.<span class='ident'>pre</span>.<span class='ident'>len</span>(), <span class='ident'>other</span>.<span class='ident'>pre</span>.<span class='ident'>len</span>()) {
-            (<span class='number'>0</span>, <span class='number'>0</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>(<span class='ident'>Equal</span>),
-            (<span class='number'>0</span>, _) <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>(<span class='ident'>Greater</span>),
-            (_, <span class='number'>0</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>(<span class='ident'>Less</span>),
-            (_, _) <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='ident'>pre</span>.<span class='ident'>partial_cmp</span>(<span class='kw-2'>&amp;</span><span class='ident'>other</span>.<span class='ident'>pre</span>)
+            (<span class='number'>0</span>, <span class='number'>0</span>) <span class='op'>=&gt;</span> <span class='ident'>Equal</span>,
+            (<span class='number'>0</span>, _) <span class='op'>=&gt;</span> <span class='ident'>Greater</span>,
+            (_, <span class='number'>0</span>) <span class='op'>=&gt;</span> <span class='ident'>Less</span>,
+            (_, _) <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='ident'>pre</span>.<span class='ident'>cmp</span>(<span class='kw-2'>&amp;</span><span class='ident'>other</span>.<span class='ident'>pre</span>)
         }
+    }
+}
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>hash</span>::<span class='ident'>Writer</span><span class='op'>&gt;</span> <span class='ident'>hash</span>::<span class='ident'>Hash</span><span class='op'>&lt;</span><span class='ident'>S</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>Version</span> {
+    <span class='kw'>fn</span> <span class='ident'>hash</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>into</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>S</span>) {
+        <span class='self'>self</span>.<span class='ident'>major</span>.<span class='ident'>hash</span>(<span class='ident'>into</span>);
+        <span class='self'>self</span>.<span class='ident'>minor</span>.<span class='ident'>hash</span>(<span class='ident'>into</span>);
+        <span class='self'>self</span>.<span class='ident'>patch</span>.<span class='ident'>hash</span>(<span class='ident'>into</span>);
+        <span class='self'>self</span>.<span class='ident'>pre</span>.<span class='ident'>hash</span>(<span class='ident'>into</span>);
     }
 }
 

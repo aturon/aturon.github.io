@@ -39,7 +39,7 @@
     </nav>
 
     <section id='main' class="content mod">
-<h1 class='fqn'>Module <a href='../index.html'>serialize</a>::<a class='mod' href=''>json</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-28857' href='../../src/serialize/Users/aturon/moz/working/stability-dashboard/src/libserialize/json.rs.html#14-3332'>[src]</a></span></h1>
+<h1 class='fqn'>Module <a href='../index.html'>serialize</a>::<a class='mod' href=''>json</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-28451' href='../../src/serialize/Users/aturon/moz/working/stability-dashboard/src/libserialize/json.rs.html#14-3386'>[src]</a></span></h1>
 <div class='docblock'><p>JSON parsing and serialization</p>
 
 <h1 id="what-is-json?" class='section-header'><a
@@ -115,68 +115,155 @@ You can also use the <code>json::Encoder</code> object, which implements the <co
                            href="#examples-of-use">Examples of use</a></h1>
 <h2 id="using-autoserialization" class='section-header'><a
                            href="#using-autoserialization">Using Autoserialization</a></h2>
-<p>Create a struct called TestStruct1 and serialize and deserialize it to and from JSON
-using the serialization API, using the derived serialization code.</p>
+<p>Create a struct called <code>TestStruct</code> and serialize and deserialize it to and from JSON using the
+serialization API, using the derived serialization code.</p>
 <span id='rust-example-raw-1' class='rusttest'>extern crate serialize;
 use serialize::json;
 
-#[deriving(Decodable, Encodable)] //generate Decodable, Encodable impl.
-pub struct TestStruct1  {
+// Automatically generate `Decodable` and `Encodable` trait implementations
+#[deriving(Decodable, Encodable)]
+pub struct TestStruct  {
     data_int: u8,
     data_str: String,
     data_vector: Vec&lt;u8&gt;,
 }
 
 fn main() {
-    let object = TestStruct1
-         {data_int: 1, data_str:&quot;toto&quot;.to_string(), data_vector:vec![2,3,4,5]};
+    let object = TestStruct {
+        data_int: 1,
+        data_str: &quot;toto&quot;.to_string(),
+        data_vector: vec![2,3,4,5],
+    };
 
     // Serialize using `json::encode`
     let encoded = json::encode(&amp;object);
 
     // Deserialize using `json::decode`
-    let decoded: TestStruct1 = json::decode(encoded.as_slice()).unwrap();
+    let decoded: TestStruct = json::decode(encoded.as_slice()).unwrap();
 }</span><pre id='rust-example-rendered-1' class='rust '>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>serialize</span>;
 <span class='kw'>use</span> <span class='ident'>serialize</span>::<span class='ident'>json</span>;
 
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Decodable</span>, <span class='ident'>Encodable</span>)]</span> <span class='comment'>//generate Decodable, Encodable impl.</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>TestStruct1</span>  {
+<span class='comment'>// Automatically generate `Decodable` and `Encodable` trait implementations</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Decodable</span>, <span class='ident'>Encodable</span>)]</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>TestStruct</span>  {
     <span class='ident'>data_int</span>: <span class='ident'>u8</span>,
     <span class='ident'>data_str</span>: <span class='ident'>String</span>,
     <span class='ident'>data_vector</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>,
 }
 
 <span class='kw'>fn</span> <span class='ident'>main</span>() {
-    <span class='kw'>let</span> <span class='ident'>object</span> <span class='op'>=</span> <span class='ident'>TestStruct1</span>
-         {<span class='ident'>data_int</span>: <span class='number'>1</span>, <span class='ident'>data_str</span>:<span class='string'>&quot;toto&quot;</span>.<span class='ident'>to_string</span>(), <span class='ident'>data_vector</span>:<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>2</span>,<span class='number'>3</span>,<span class='number'>4</span>,<span class='number'>5</span>]};
+    <span class='kw'>let</span> <span class='ident'>object</span> <span class='op'>=</span> <span class='ident'>TestStruct</span> {
+        <span class='ident'>data_int</span>: <span class='number'>1</span>,
+        <span class='ident'>data_str</span>: <span class='string'>&quot;toto&quot;</span>.<span class='ident'>to_string</span>(),
+        <span class='ident'>data_vector</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>2</span>,<span class='number'>3</span>,<span class='number'>4</span>,<span class='number'>5</span>],
+    };
 
     <span class='comment'>// Serialize using `json::encode`</span>
     <span class='kw'>let</span> <span class='ident'>encoded</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>encode</span>(<span class='kw-2'>&amp;</span><span class='ident'>object</span>);
 
     <span class='comment'>// Deserialize using `json::decode`</span>
-    <span class='kw'>let</span> <span class='ident'>decoded</span>: <span class='ident'>TestStruct1</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>decode</span>(<span class='ident'>encoded</span>.<span class='ident'>as_slice</span>()).<span class='ident'>unwrap</span>();
+    <span class='kw'>let</span> <span class='ident'>decoded</span>: <span class='ident'>TestStruct</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>decode</span>(<span class='ident'>encoded</span>.<span class='ident'>as_slice</span>()).<span class='ident'>unwrap</span>();
 }
 </pre>
 
-<h2 id="using-tojson" class='section-header'><a
-                           href="#using-tojson">Using <code>ToJson</code></a></h2>
-<p>This example uses the <code>ToJson</code> trait to generate the JSON string.</p>
-<span id='rust-example-raw-2' class='rusttest'>extern crate serialize;
+<h2 id="using-the-tojson-trait" class='section-header'><a
+                           href="#using-the-tojson-trait">Using the <code>ToJson</code> trait</a></h2>
+<p>The examples above use the <code>ToJson</code> trait to generate the JSON string, which required
+for custom mappings.</p>
+
+<h3 id="simple-example-of-tojson-usage" class='section-header'><a
+                           href="#simple-example-of-tojson-usage">Simple example of <code>ToJson</code> usage</a></h3><span id='rust-example-raw-2' class='rusttest'>extern crate serialize;
+use serialize::json::ToJson;
+use serialize::json;
+
+// A custom data structure
+struct ComplexNum {
+    a: f64,
+    b: f64,
+}
+
+// JSON value representation
+impl ToJson for ComplexNum {
+    fn to_json(&amp;self) -&gt; json::Json {
+        json::String(format!(&quot;{}+{}i&quot;, self.a, self.b))
+    }
+}
+
+// Only generate `Encodable` trait implementation
+#[deriving(Encodable)]
+pub struct ComplexNumRecord {
+    uid: u8,
+    dsc: String,
+    val: json::Json,
+}
+
+fn main() {
+    let num = ComplexNum { a: 0.0001, b: 12.539 };
+    let data: String = json::encode(&amp;ComplexNumRecord{
+        uid: 1,
+        dsc: &quot;test&quot;.to_string(),
+        val: num.to_json(),
+    });
+    println!(&quot;data: {}&quot;, data);
+    // data: {&quot;uid&quot;:1,&quot;dsc&quot;:&quot;test&quot;,&quot;val&quot;:&quot;0.0001+12.539j&quot;};
+}</span><pre id='rust-example-rendered-2' class='rust '>
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>serialize</span>;
+<span class='kw'>use</span> <span class='ident'>serialize</span>::<span class='ident'>json</span>::<span class='ident'>ToJson</span>;
+<span class='kw'>use</span> <span class='ident'>serialize</span>::<span class='ident'>json</span>;
+
+<span class='comment'>// A custom data structure</span>
+<span class='kw'>struct</span> <span class='ident'>ComplexNum</span> {
+    <span class='ident'>a</span>: <span class='ident'>f64</span>,
+    <span class='ident'>b</span>: <span class='ident'>f64</span>,
+}
+
+<span class='comment'>// JSON value representation</span>
+<span class='kw'>impl</span> <span class='ident'>ToJson</span> <span class='kw'>for</span> <span class='ident'>ComplexNum</span> {
+    <span class='kw'>fn</span> <span class='ident'>to_json</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>json</span>::<span class='ident'>Json</span> {
+        <span class='ident'>json</span>::<span class='ident'>String</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}+{}i&quot;</span>, <span class='self'>self</span>.<span class='ident'>a</span>, <span class='self'>self</span>.<span class='ident'>b</span>))
+    }
+}
+
+<span class='comment'>// Only generate `Encodable` trait implementation</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Encodable</span>)]</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ComplexNumRecord</span> {
+    <span class='ident'>uid</span>: <span class='ident'>u8</span>,
+    <span class='ident'>dsc</span>: <span class='ident'>String</span>,
+    <span class='ident'>val</span>: <span class='ident'>json</span>::<span class='ident'>Json</span>,
+}
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='ident'>num</span> <span class='op'>=</span> <span class='ident'>ComplexNum</span> { <span class='ident'>a</span>: <span class='number'>0.0001</span>, <span class='ident'>b</span>: <span class='number'>12.539</span> };
+    <span class='kw'>let</span> <span class='ident'>data</span>: <span class='ident'>String</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>encode</span>(<span class='kw-2'>&amp;</span><span class='ident'>ComplexNumRecord</span>{
+        <span class='ident'>uid</span>: <span class='number'>1</span>,
+        <span class='ident'>dsc</span>: <span class='string'>&quot;test&quot;</span>.<span class='ident'>to_string</span>(),
+        <span class='ident'>val</span>: <span class='ident'>num</span>.<span class='ident'>to_json</span>(),
+    });
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;data: {}&quot;</span>, <span class='ident'>data</span>);
+    <span class='comment'>// data: {&quot;uid&quot;:1,&quot;dsc&quot;:&quot;test&quot;,&quot;val&quot;:&quot;0.0001+12.539j&quot;};</span>
+}
+</pre>
+
+<h3 id="verbose-example-of-tojson-usage" class='section-header'><a
+                           href="#verbose-example-of-tojson-usage">Verbose example of <code>ToJson</code> usage</a></h3><span id='rust-example-raw-3' class='rusttest'>extern crate serialize;
 use std::collections::TreeMap;
 use serialize::json::ToJson;
 use serialize::json;
 
+// Only generate `Decodable` trait implementation
 #[deriving(Decodable)]
-pub struct TestStruct1  {
+pub struct TestStruct {
     data_int: u8,
     data_str: String,
     data_vector: Vec&lt;u8&gt;,
 }
 
-impl ToJson for TestStruct1 {
-    fn to_json( &amp;self ) -&gt; json::Json {
+// Specify encoding method manually
+impl ToJson for TestStruct {
+    fn to_json(&amp;self) -&gt; json::Json {
         let mut d = TreeMap::new();
+        // All standard types implement `to_json()`, so use it
         d.insert(&quot;data_int&quot;.to_string(), self.data_int.to_json());
         d.insert(&quot;data_str&quot;.to_string(), self.data_str.to_json());
         d.insert(&quot;data_vector&quot;.to_string(), self.data_vector.to_json());
@@ -186,27 +273,35 @@ impl ToJson for TestStruct1 {
 
 fn main() {
     // Serialize using `ToJson`
-    let test2 = TestStruct1 {data_int: 1, data_str:&quot;toto&quot;.to_string(), data_vector:vec![2,3,4,5]};
-    let tjson: json::Json = test2.to_json();
-    let json_str: String = tjson.to_string();
+    let input_data = TestStruct {
+        data_int: 1,
+        data_str: &quot;toto&quot;.to_string(),
+        data_vector: vec![2,3,4,5],
+    };
+    let json_obj: json::Json = input_data.to_json();
+    let json_str: String = json_obj.to_string();
 
     // Deserialize like before
-    let decoded: TestStruct1 = json::decode(json_str.as_slice()).unwrap();
-}</span><pre id='rust-example-rendered-2' class='rust '>
+    let decoded: TestStruct = json::decode(json_str.as_slice()).unwrap();
+}</span><pre id='rust-example-rendered-3' class='rust '>
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>serialize</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>TreeMap</span>;
 <span class='kw'>use</span> <span class='ident'>serialize</span>::<span class='ident'>json</span>::<span class='ident'>ToJson</span>;
 <span class='kw'>use</span> <span class='ident'>serialize</span>::<span class='ident'>json</span>;
 
+<span class='comment'>// Only generate `Decodable` trait implementation</span>
 <span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Decodable</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>TestStruct1</span>  {
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>TestStruct</span> {
     <span class='ident'>data_int</span>: <span class='ident'>u8</span>,
     <span class='ident'>data_str</span>: <span class='ident'>String</span>,
     <span class='ident'>data_vector</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>,
 }
 
-<span class='kw'>impl</span> <span class='ident'>ToJson</span> <span class='kw'>for</span> <span class='ident'>TestStruct1</span> {
-    <span class='kw'>fn</span> <span class='ident'>to_json</span>( <span class='kw-2'>&amp;</span><span class='self'>self</span> ) <span class='op'>-&gt;</span> <span class='ident'>json</span>::<span class='ident'>Json</span> {
+<span class='comment'>// Specify encoding method manually</span>
+<span class='kw'>impl</span> <span class='ident'>ToJson</span> <span class='kw'>for</span> <span class='ident'>TestStruct</span> {
+    <span class='kw'>fn</span> <span class='ident'>to_json</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>json</span>::<span class='ident'>Json</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>TreeMap</span>::<span class='ident'>new</span>();
+        <span class='comment'>// All standard types implement `to_json()`, so use it</span>
         <span class='ident'>d</span>.<span class='ident'>insert</span>(<span class='string'>&quot;data_int&quot;</span>.<span class='ident'>to_string</span>(), <span class='self'>self</span>.<span class='ident'>data_int</span>.<span class='ident'>to_json</span>());
         <span class='ident'>d</span>.<span class='ident'>insert</span>(<span class='string'>&quot;data_str&quot;</span>.<span class='ident'>to_string</span>(), <span class='self'>self</span>.<span class='ident'>data_str</span>.<span class='ident'>to_json</span>());
         <span class='ident'>d</span>.<span class='ident'>insert</span>(<span class='string'>&quot;data_vector&quot;</span>.<span class='ident'>to_string</span>(), <span class='self'>self</span>.<span class='ident'>data_vector</span>.<span class='ident'>to_json</span>());
@@ -216,12 +311,16 @@ fn main() {
 
 <span class='kw'>fn</span> <span class='ident'>main</span>() {
     <span class='comment'>// Serialize using `ToJson`</span>
-    <span class='kw'>let</span> <span class='ident'>test2</span> <span class='op'>=</span> <span class='ident'>TestStruct1</span> {<span class='ident'>data_int</span>: <span class='number'>1</span>, <span class='ident'>data_str</span>:<span class='string'>&quot;toto&quot;</span>.<span class='ident'>to_string</span>(), <span class='ident'>data_vector</span>:<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>2</span>,<span class='number'>3</span>,<span class='number'>4</span>,<span class='number'>5</span>]};
-    <span class='kw'>let</span> <span class='ident'>tjson</span>: <span class='ident'>json</span>::<span class='ident'>Json</span> <span class='op'>=</span> <span class='ident'>test2</span>.<span class='ident'>to_json</span>();
-    <span class='kw'>let</span> <span class='ident'>json_str</span>: <span class='ident'>String</span> <span class='op'>=</span> <span class='ident'>tjson</span>.<span class='ident'>to_string</span>();
+    <span class='kw'>let</span> <span class='ident'>input_data</span> <span class='op'>=</span> <span class='ident'>TestStruct</span> {
+        <span class='ident'>data_int</span>: <span class='number'>1</span>,
+        <span class='ident'>data_str</span>: <span class='string'>&quot;toto&quot;</span>.<span class='ident'>to_string</span>(),
+        <span class='ident'>data_vector</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>2</span>,<span class='number'>3</span>,<span class='number'>4</span>,<span class='number'>5</span>],
+    };
+    <span class='kw'>let</span> <span class='ident'>json_obj</span>: <span class='ident'>json</span>::<span class='ident'>Json</span> <span class='op'>=</span> <span class='ident'>input_data</span>.<span class='ident'>to_json</span>();
+    <span class='kw'>let</span> <span class='ident'>json_str</span>: <span class='ident'>String</span> <span class='op'>=</span> <span class='ident'>json_obj</span>.<span class='ident'>to_string</span>();
 
     <span class='comment'>// Deserialize like before</span>
-    <span class='kw'>let</span> <span class='ident'>decoded</span>: <span class='ident'>TestStruct1</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>decode</span>(<span class='ident'>json_str</span>.<span class='ident'>as_slice</span>()).<span class='ident'>unwrap</span>();
+    <span class='kw'>let</span> <span class='ident'>decoded</span>: <span class='ident'>TestStruct</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>decode</span>(<span class='ident'>json_str</span>.<span class='ident'>as_slice</span>()).<span class='ident'>unwrap</span>();
 }
 </pre>
 </div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>

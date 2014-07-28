@@ -385,7 +385,6 @@
 <span id='345'>345</span>
 <span id='346'>346</span>
 <span id='347'>347</span>
-<span id='348'>348</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -403,7 +402,6 @@
 
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>str</span>;
 <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>super</span>::<span class='ident'>TermInfo</span>;
 
 <span class='comment'>// These are the orders ncurses uses in its compiled format (as of 5.9). Not sure if portable.</span>
@@ -603,9 +601,9 @@
 
     <span class='comment'>// don&#39;t read NUL</span>
     <span class='kw'>let</span> <span class='ident'>bytes</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>file</span>.<span class='ident'>read_exact</span>(<span class='ident'>names_bytes</span> <span class='kw'>as</span> <span class='ident'>uint</span> <span class='op'>-</span> <span class='number'>1</span>));
-    <span class='kw'>let</span> <span class='ident'>names_str</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>str</span>::<span class='ident'>from_utf8</span>(<span class='ident'>bytes</span>.<span class='ident'>as_slice</span>()) {
-        <span class='prelude-val'>Some</span>(<span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='ident'>s</span>.<span class='ident'>to_string</span>(),
-        <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;input not utf-8&quot;</span>.<span class='ident'>to_string</span>()),
+    <span class='kw'>let</span> <span class='ident'>names_str</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>String</span>::<span class='ident'>from_utf8</span>(<span class='ident'>bytes</span>) {
+        <span class='prelude-val'>Ok</span>(<span class='ident'>s</span>)  <span class='op'>=&gt;</span> <span class='ident'>s</span>,
+        <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;input not utf-8&quot;</span>.<span class='ident'>to_string</span>()),
     };
 
     <span class='kw'>let</span> <span class='ident'>term_names</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>names_str</span>.<span class='ident'>as_slice</span>()

@@ -39,7 +39,7 @@
     </nav>
 
     <section id='main' class="content mod">
-<h1 class='fqn'>Crate <a class='mod' href=''>green</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a href='stability.html'>[stability dashboard]</a> <a id='src-0' href='../src/green/Users/aturon/moz/working/stability-dashboard/src/libgreen/lib.rs.html#11-620'>[src]</a></span></h1>
+<h1 class='fqn'>Crate <a class='mod' href=''>green</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a href='stability.html'>[stability dashboard]</a> <a id='src-0' href='../src/green/Users/aturon/moz/working/stability-dashboard/src/libgreen/lib.rs.html#11-629'>[src]</a></span></h1>
 <div class='docblock'><p>The &quot;green scheduling&quot; library</p>
 
 <p>This library provides M:N threading for rust programs. Internally this has
@@ -219,43 +219,56 @@ fn main() {
 available on <code>std::task::TaskBuilder</code> to allow spawning a green task,
 possibly pinned to a particular scheduler thread:</p>
 <span id='rust-example-raw-3' class='rusttest'>extern crate green;
+extern crate rustuv;
+
 fn main() {
-    use std::task::TaskBuilder;
-    use green::{SchedPool, PoolConfig, GreenTaskBuilder};
-    
-    let config = PoolConfig::new();
-    let mut pool = SchedPool::new(config);
-    
-    // Spawn tasks into the pool of schedulers
-    TaskBuilder::new().green(&amp;mut pool).spawn(proc() {
-        // this code is running inside the pool of schedulers
-    
-        spawn(proc() {
-            // this code is also running inside the same scheduler pool
-        });
+use std::task::TaskBuilder;
+use green::{SchedPool, PoolConfig, GreenTaskBuilder};
+
+let mut config = PoolConfig::new();
+
+// Optional: Set the event loop to be rustuv&#39;s to allow I/O to work
+config.event_loop_factory = rustuv::event_loop;
+
+let mut pool = SchedPool::new(config);
+
+// Spawn tasks into the pool of schedulers
+TaskBuilder::new().green(&amp;mut pool).spawn(proc() {
+    // this code is running inside the pool of schedulers
+
+    spawn(proc() {
+        // this code is also running inside the same scheduler pool
     });
-    
-    // Dynamically add a new scheduler to the scheduler pool. This adds another
-    // OS thread that green threads can be multiplexed on to.
-    let mut handle = pool.spawn_sched();
-    
-    // Pin a task to the spawned scheduler
-    TaskBuilder::new().green_pinned(&amp;mut pool, &amp;mut handle).spawn(proc() {
-        /* ... */
-    });
-    
-    // Handles keep schedulers alive, so be sure to drop all handles before
-    // destroying the sched pool
-    drop(handle);
-    
-    // Required to shut down this scheduler pool.
-    // The task will fail if `shutdown` is not called.
-    pool.shutdown();
+});
+
+// Dynamically add a new scheduler to the scheduler pool. This adds another
+// OS thread that green threads can be multiplexed on to.
+let mut handle = pool.spawn_sched();
+
+// Pin a task to the spawned scheduler
+TaskBuilder::new().green_pinned(&amp;mut pool, &amp;mut handle).spawn(proc() {
+    /* ... */
+});
+
+// Handles keep schedulers alive, so be sure to drop all handles before
+// destroying the sched pool
+drop(handle);
+
+// Required to shut down this scheduler pool.
+// The task will fail if `shutdown` is not called.
+pool.shutdown();
 }</span><pre id='rust-example-rendered-3' class='rust '>
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>green</span>;
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>rustuv</span>;
+
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>task</span>::<span class='ident'>TaskBuilder</span>;
 <span class='kw'>use</span> <span class='ident'>green</span>::{<span class='ident'>SchedPool</span>, <span class='ident'>PoolConfig</span>, <span class='ident'>GreenTaskBuilder</span>};
 
-<span class='kw'>let</span> <span class='ident'>config</span> <span class='op'>=</span> <span class='ident'>PoolConfig</span>::<span class='ident'>new</span>();
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>config</span> <span class='op'>=</span> <span class='ident'>PoolConfig</span>::<span class='ident'>new</span>();
+
+<span class='comment'>// Optional: Set the event loop to be rustuv&#39;s to allow I/O to work</span>
+<span class='ident'>config</span>.<span class='ident'>event_loop_factory</span> <span class='op'>=</span> <span class='ident'>rustuv</span>::<span class='ident'>event_loop</span>;
+
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>pool</span> <span class='op'>=</span> <span class='ident'>SchedPool</span>::<span class='ident'>new</span>(<span class='ident'>config</span>);
 
 <span class='comment'>// Spawn tasks into the pool of schedulers</span>
@@ -336,7 +349,7 @@ use this to wake each other up.</p>
                 </table><h2 id='macros' class='section-header'><a href="#macros">Macros</a></h2>
 <table>
                     <tr>
-                        <td><a class='stability Experimental' title='Experimental'></a><a class='macro' href='macro.green_start!.html'
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='macro' href='macro.green_start!.html'
                                title='green::green_start!'>green_start!</a></td>
                         <td class='docblock short'><p>A helper macro for booting a program with libgreen</p>
 </td>

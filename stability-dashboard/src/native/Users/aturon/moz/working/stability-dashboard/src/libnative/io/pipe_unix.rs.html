@@ -322,6 +322,7 @@
 <span id='282'>282</span>
 <span id='283'>283</span>
 <span id='284'>284</span>
+<span id='285'>285</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2014 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -554,7 +555,8 @@
 }
 
 <span class='kw'>impl</span> <span class='ident'>rtio</span>::<span class='ident'>RtioUnixListener</span> <span class='kw'>for</span> <span class='ident'>UnixListener</span> {
-    <span class='kw'>fn</span> <span class='ident'>listen</span>(<span class='kw-2'>~</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>rtio</span>::<span class='ident'>RtioUnixAcceptor</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>listen</span>(<span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>UnixListener</span><span class='op'>&gt;</span>)
+              <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>rtio</span>::<span class='ident'>RtioUnixAcceptor</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>native_listen</span>(<span class='number'>128</span>).<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>a</span><span class='op'>|</span> {
             <span class='kw'>box</span> <span class='ident'>a</span> <span class='kw'>as</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>rtio</span>::<span class='ident'>RtioUnixAcceptor</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;</span>
         })

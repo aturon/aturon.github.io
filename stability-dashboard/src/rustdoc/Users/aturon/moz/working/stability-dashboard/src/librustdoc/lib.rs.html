@@ -482,6 +482,53 @@
 <span id='442'>442</span>
 <span id='443'>443</span>
 <span id='444'>444</span>
+<span id='445'>445</span>
+<span id='446'>446</span>
+<span id='447'>447</span>
+<span id='448'>448</span>
+<span id='449'>449</span>
+<span id='450'>450</span>
+<span id='451'>451</span>
+<span id='452'>452</span>
+<span id='453'>453</span>
+<span id='454'>454</span>
+<span id='455'>455</span>
+<span id='456'>456</span>
+<span id='457'>457</span>
+<span id='458'>458</span>
+<span id='459'>459</span>
+<span id='460'>460</span>
+<span id='461'>461</span>
+<span id='462'>462</span>
+<span id='463'>463</span>
+<span id='464'>464</span>
+<span id='465'>465</span>
+<span id='466'>466</span>
+<span id='467'>467</span>
+<span id='468'>468</span>
+<span id='469'>469</span>
+<span id='470'>470</span>
+<span id='471'>471</span>
+<span id='472'>472</span>
+<span id='473'>473</span>
+<span id='474'>474</span>
+<span id='475'>475</span>
+<span id='476'>476</span>
+<span id='477'>477</span>
+<span id='478'>478</span>
+<span id='479'>479</span>
+<span id='480'>480</span>
+<span id='481'>481</span>
+<span id='482'>482</span>
+<span id='483'>483</span>
+<span id='484'>484</span>
+<span id='485'>485</span>
+<span id='486'>486</span>
+<span id='487'>487</span>
+<span id='488'>488</span>
+<span id='489'>489</span>
+<span id='490'>490</span>
+<span id='491'>491</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -514,8 +561,8 @@
 
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>File</span>, <span class='ident'>MemWriter</span>};
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>str</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>gc</span>::<span class='ident'>Gc</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
 <span class='kw'>use</span> <span class='ident'>serialize</span>::{<span class='ident'>json</span>, <span class='ident'>Decodable</span>, <span class='ident'>Encodable</span>};
 <span class='kw'>use</span> <span class='ident'>externalfiles</span>::<span class='ident'>ExternalHtml</span>;
 
@@ -587,9 +634,11 @@
         <span class='ident'>optopt</span>(<span class='string'>&quot;w&quot;</span>, <span class='string'>&quot;output-format&quot;</span>, <span class='string'>&quot;the output type to write&quot;</span>,
                <span class='string'>&quot;[html|json]&quot;</span>),
         <span class='ident'>optopt</span>(<span class='string'>&quot;o&quot;</span>, <span class='string'>&quot;output&quot;</span>, <span class='string'>&quot;where to place the output&quot;</span>, <span class='string'>&quot;PATH&quot;</span>),
+        <span class='ident'>optopt</span>(<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;crate-name&quot;</span>, <span class='string'>&quot;specify the name of this crate&quot;</span>, <span class='string'>&quot;NAME&quot;</span>),
         <span class='ident'>optmulti</span>(<span class='string'>&quot;L&quot;</span>, <span class='string'>&quot;library-path&quot;</span>, <span class='string'>&quot;directory to add to crate search path&quot;</span>,
                  <span class='string'>&quot;DIR&quot;</span>),
         <span class='ident'>optmulti</span>(<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;cfg&quot;</span>, <span class='string'>&quot;pass a --cfg to rustc&quot;</span>, <span class='string'>&quot;&quot;</span>),
+        <span class='ident'>optmulti</span>(<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;extern&quot;</span>, <span class='string'>&quot;pass an --extern to rustc&quot;</span>, <span class='string'>&quot;NAME=PATH&quot;</span>),
         <span class='ident'>optmulti</span>(<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;plugin-path&quot;</span>, <span class='string'>&quot;directory to load plugins from&quot;</span>, <span class='string'>&quot;DIR&quot;</span>),
         <span class='ident'>optmulti</span>(<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;passes&quot;</span>, <span class='string'>&quot;space separated list of passes to also run, a \
                                 value of `list` will print available passes&quot;</span>,
@@ -600,6 +649,7 @@
         <span class='ident'>optflag</span>(<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;run code examples as tests&quot;</span>),
         <span class='ident'>optmulti</span>(<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;test-args&quot;</span>, <span class='string'>&quot;arguments to pass to the test runner&quot;</span>,
                  <span class='string'>&quot;ARGS&quot;</span>),
+        <span class='ident'>optopt</span>(<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;target&quot;</span>, <span class='string'>&quot;target triple to document&quot;</span>, <span class='string'>&quot;TRIPLE&quot;</span>),
         <span class='ident'>optmulti</span>(<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;markdown-css&quot;</span>, <span class='string'>&quot;CSS files to include via &lt;link&gt; in a rendered Markdown file&quot;</span>,
                  <span class='string'>&quot;FILES&quot;</span>),
         <span class='ident'>optmulti</span>(<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;html-in-header&quot;</span>,
@@ -615,7 +665,8 @@
                  Markdown file or generated documentation&quot;</span>,
                  <span class='string'>&quot;FILES&quot;</span>),
         <span class='ident'>optopt</span>(<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;markdown-playground-url&quot;</span>,
-               <span class='string'>&quot;URL to send code snippets to&quot;</span>, <span class='string'>&quot;URL&quot;</span>)
+               <span class='string'>&quot;URL to send code snippets to&quot;</span>, <span class='string'>&quot;URL&quot;</span>),
+        <span class='ident'>optflag</span>(<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;markdown-no-toc&quot;</span>, <span class='string'>&quot;don&#39;t include table of contents&quot;</span>)
     )
 }
 
@@ -646,6 +697,18 @@
         }
     }
 
+    <span class='kw'>if</span> <span class='ident'>matches</span>.<span class='ident'>opt_strs</span>(<span class='string'>&quot;passes&quot;</span>).<span class='ident'>as_slice</span>() <span class='op'>==</span> <span class='kw-2'>&amp;</span>[<span class='string'>&quot;list&quot;</span>.<span class='ident'>to_string</span>()] {
+        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Available passes for running rustdoc:&quot;</span>);
+        <span class='kw'>for</span> <span class='kw-2'>&amp;</span>(<span class='ident'>name</span>, _, <span class='ident'>description</span>) <span class='kw'>in</span> <span class='ident'>PASSES</span>.<span class='ident'>iter</span>() {
+            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{:&gt;20s} - {}&quot;</span>, <span class='ident'>name</span>, <span class='ident'>description</span>);
+        }
+        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='string'>&quot;\nDefault passes for rustdoc:&quot;</span>); <span class='comment'>// FIXME: #9970</span>
+        <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='ident'>name</span> <span class='kw'>in</span> <span class='ident'>DEFAULT_PASSES</span>.<span class='ident'>iter</span>() {
+            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{:&gt;20s}&quot;</span>, <span class='ident'>name</span>);
+        }
+        <span class='kw'>return</span> <span class='number'>0</span>;
+    }
+
     <span class='kw'>if</span> <span class='ident'>matches</span>.<span class='ident'>free</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
         <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;expected an input file to act on&quot;</span>);
         <span class='kw'>return</span> <span class='number'>1</span>;
@@ -653,9 +716,16 @@
         <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;only one input file may be specified&quot;</span>);
         <span class='kw'>return</span> <span class='number'>1</span>;
     }
-    <span class='kw'>let</span> <span class='ident'>input</span> <span class='op'>=</span> <span class='ident'>matches</span>.<span class='ident'>free</span>.<span class='ident'>get</span>(<span class='number'>0</span>).<span class='ident'>as_slice</span>();
+    <span class='kw'>let</span> <span class='ident'>input</span> <span class='op'>=</span> <span class='ident'>matches</span>.<span class='ident'>free</span>[<span class='number'>0</span>].<span class='ident'>as_slice</span>();
 
     <span class='kw'>let</span> <span class='ident'>libs</span> <span class='op'>=</span> <span class='ident'>matches</span>.<span class='ident'>opt_strs</span>(<span class='string'>&quot;L&quot;</span>).<span class='ident'>iter</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='ident'>s</span>.<span class='ident'>as_slice</span>())).<span class='ident'>collect</span>();
+    <span class='kw'>let</span> <span class='ident'>externs</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>parse_externs</span>(<span class='kw-2'>&amp;</span><span class='ident'>matches</span>) {
+        <span class='prelude-val'>Ok</span>(<span class='ident'>ex</span>) <span class='op'>=&gt;</span> <span class='ident'>ex</span>,
+        <span class='prelude-val'>Err</span>(<span class='ident'>err</span>) <span class='op'>=&gt;</span> {
+            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>err</span>);
+            <span class='kw'>return</span> <span class='number'>1</span>;
+        }
+    };
 
     <span class='kw'>let</span> <span class='ident'>test_args</span> <span class='op'>=</span> <span class='ident'>matches</span>.<span class='ident'>opt_strs</span>(<span class='string'>&quot;test-args&quot;</span>);
     <span class='kw'>let</span> <span class='ident'>test_args</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>test_args</span>.<span class='ident'>iter</span>()
@@ -679,29 +749,18 @@
 
     <span class='kw'>match</span> (<span class='ident'>should_test</span>, <span class='ident'>markdown_input</span>) {
         (<span class='boolval'>true</span>, <span class='boolval'>true</span>) <span class='op'>=&gt;</span> {
-            <span class='kw'>return</span> <span class='ident'>markdown</span>::<span class='ident'>test</span>(<span class='ident'>input</span>, <span class='ident'>libs</span>, <span class='ident'>test_args</span>)
+            <span class='kw'>return</span> <span class='ident'>markdown</span>::<span class='ident'>test</span>(<span class='ident'>input</span>, <span class='ident'>libs</span>, <span class='ident'>externs</span>, <span class='ident'>test_args</span>)
         }
         (<span class='boolval'>true</span>, <span class='boolval'>false</span>) <span class='op'>=&gt;</span> {
-            <span class='kw'>return</span> <span class='ident'>test</span>::<span class='ident'>run</span>(<span class='ident'>input</span>, <span class='ident'>cfgs</span>, <span class='ident'>libs</span>, <span class='ident'>test_args</span>)
+            <span class='kw'>return</span> <span class='ident'>test</span>::<span class='ident'>run</span>(<span class='ident'>input</span>, <span class='ident'>cfgs</span>, <span class='ident'>libs</span>, <span class='ident'>externs</span>, <span class='ident'>test_args</span>)
         }
         (<span class='boolval'>false</span>, <span class='boolval'>true</span>) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='ident'>markdown</span>::<span class='ident'>render</span>(<span class='ident'>input</span>, <span class='ident'>output</span>.<span class='ident'>unwrap_or</span>(<span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;doc&quot;</span>)),
-                                                 <span class='kw-2'>&amp;</span><span class='ident'>matches</span>, <span class='kw-2'>&amp;</span><span class='ident'>external_html</span>),
+                                                 <span class='kw-2'>&amp;</span><span class='ident'>matches</span>, <span class='kw-2'>&amp;</span><span class='ident'>external_html</span>,
+                                                 <span class='op'>!</span><span class='ident'>matches</span>.<span class='ident'>opt_present</span>(<span class='string'>&quot;markdown-no-toc&quot;</span>)),
         (<span class='boolval'>false</span>, <span class='boolval'>false</span>) <span class='op'>=&gt;</span> {}
     }
 
-    <span class='kw'>if</span> <span class='ident'>matches</span>.<span class='ident'>opt_strs</span>(<span class='string'>&quot;passes&quot;</span>).<span class='ident'>as_slice</span>() <span class='op'>==</span> <span class='kw-2'>&amp;</span>[<span class='string'>&quot;list&quot;</span>.<span class='ident'>to_string</span>()] {
-        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Available passes for running rustdoc:&quot;</span>);
-        <span class='kw'>for</span> <span class='kw-2'>&amp;</span>(<span class='ident'>name</span>, _, <span class='ident'>description</span>) <span class='kw'>in</span> <span class='ident'>PASSES</span>.<span class='ident'>iter</span>() {
-            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{:&gt;20s} - {}&quot;</span>, <span class='ident'>name</span>, <span class='ident'>description</span>);
-        }
-        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='string'>&quot;\nDefault passes for rustdoc:&quot;</span>); <span class='comment'>// FIXME: #9970</span>
-        <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='ident'>name</span> <span class='kw'>in</span> <span class='ident'>DEFAULT_PASSES</span>.<span class='ident'>iter</span>() {
-            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{:&gt;20s}&quot;</span>, <span class='ident'>name</span>);
-        }
-        <span class='kw'>return</span> <span class='number'>0</span>;
-    }
-
-    <span class='kw'>let</span> (<span class='ident'>krate</span>, <span class='ident'>res</span>) <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>acquire_input</span>(<span class='ident'>input</span>, <span class='kw-2'>&amp;</span><span class='ident'>matches</span>) {
+    <span class='kw'>let</span> (<span class='ident'>krate</span>, <span class='ident'>res</span>) <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>acquire_input</span>(<span class='ident'>input</span>, <span class='ident'>externs</span>, <span class='kw-2'>&amp;</span><span class='ident'>matches</span>) {
         <span class='prelude-val'>Ok</span>(<span class='ident'>pair</span>) <span class='op'>=&gt;</span> <span class='ident'>pair</span>,
         <span class='prelude-val'>Err</span>(<span class='ident'>s</span>) <span class='op'>=&gt;</span> {
             <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;input error: {}&quot;</span>, <span class='ident'>s</span>);
@@ -738,19 +797,45 @@
 <span class='doccomment'>/// Looks inside the command line arguments to extract the relevant input format</span>
 <span class='doccomment'>/// and files and then generates the necessary rustdoc output for formatting.</span>
 <span class='kw'>fn</span> <span class='ident'>acquire_input</span>(<span class='ident'>input</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>,
+                 <span class='ident'>externs</span>: <span class='ident'>core</span>::<span class='ident'>Externs</span>,
                  <span class='ident'>matches</span>: <span class='kw-2'>&amp;</span><span class='ident'>getopts</span>::<span class='ident'>Matches</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Output</span>, <span class='ident'>String</span><span class='op'>&gt;</span> {
     <span class='kw'>match</span> <span class='ident'>matches</span>.<span class='ident'>opt_str</span>(<span class='string'>&quot;r&quot;</span>).<span class='ident'>as_ref</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='ident'>s</span>.<span class='ident'>as_slice</span>()) {
-        <span class='prelude-val'>Some</span>(<span class='string'>&quot;rust&quot;</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>rust_input</span>(<span class='ident'>input</span>, <span class='ident'>matches</span>)),
+        <span class='prelude-val'>Some</span>(<span class='string'>&quot;rust&quot;</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>rust_input</span>(<span class='ident'>input</span>, <span class='ident'>externs</span>, <span class='ident'>matches</span>)),
         <span class='prelude-val'>Some</span>(<span class='string'>&quot;json&quot;</span>) <span class='op'>=&gt;</span> <span class='ident'>json_input</span>(<span class='ident'>input</span>),
         <span class='prelude-val'>Some</span>(<span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;unknown input format: {}&quot;</span>, <span class='ident'>s</span>)),
         <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
             <span class='kw'>if</span> <span class='ident'>input</span>.<span class='ident'>ends_with</span>(<span class='string'>&quot;.json&quot;</span>) {
                 <span class='ident'>json_input</span>(<span class='ident'>input</span>)
             } <span class='kw'>else</span> {
-                <span class='prelude-val'>Ok</span>(<span class='ident'>rust_input</span>(<span class='ident'>input</span>, <span class='ident'>matches</span>))
+                <span class='prelude-val'>Ok</span>(<span class='ident'>rust_input</span>(<span class='ident'>input</span>, <span class='ident'>externs</span>, <span class='ident'>matches</span>))
             }
         }
     }
+}
+
+<span class='doccomment'>/// Extracts `--extern CRATE=PATH` arguments from `matches` and</span>
+<span class='doccomment'>/// returns a `HashMap` mapping crate names to their paths or else an</span>
+<span class='doccomment'>/// error message.</span>
+<span class='kw'>fn</span> <span class='ident'>parse_externs</span>(<span class='ident'>matches</span>: <span class='kw-2'>&amp;</span><span class='ident'>getopts</span>::<span class='ident'>Matches</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>core</span>::<span class='ident'>Externs</span>, <span class='ident'>String</span><span class='op'>&gt;</span> {
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>externs</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
+    <span class='kw'>for</span> <span class='ident'>arg</span> <span class='kw'>in</span> <span class='ident'>matches</span>.<span class='ident'>opt_strs</span>(<span class='string'>&quot;extern&quot;</span>).<span class='ident'>iter</span>() {
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>parts</span> <span class='op'>=</span> <span class='ident'>arg</span>.<span class='ident'>as_slice</span>().<span class='ident'>splitn</span>(<span class='string'>&#39;=&#39;</span>, <span class='number'>1</span>);
+        <span class='kw'>let</span> <span class='ident'>name</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>parts</span>.<span class='ident'>next</span>() {
+            <span class='prelude-val'>Some</span>(<span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='ident'>s</span>,
+            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
+                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;--extern value must not be empty&quot;</span>.<span class='ident'>to_string</span>());
+            }
+        };
+        <span class='kw'>let</span> <span class='ident'>location</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>parts</span>.<span class='ident'>next</span>() {
+            <span class='prelude-val'>Some</span>(<span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='ident'>s</span>,
+            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
+                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;--extern value must be of the format `foo=bar`&quot;</span>.<span class='ident'>to_string</span>());
+            }
+        };
+        <span class='kw'>let</span> <span class='ident'>locs</span> <span class='op'>=</span> <span class='ident'>externs</span>.<span class='ident'>find_or_insert</span>(<span class='ident'>name</span>.<span class='ident'>to_string</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>());
+        <span class='ident'>locs</span>.<span class='ident'>push</span>(<span class='ident'>location</span>.<span class='ident'>to_string</span>());
+    }
+    <span class='prelude-val'>Ok</span>(<span class='ident'>externs</span>)
 }
 
 <span class='doccomment'>/// Interprets the input file as a rust source file, passing it through the</span>
@@ -758,7 +843,7 @@
 <span class='doccomment'>/// generated from the cleaned AST of the crate.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// This form of input will run all of the plug/cleaning passes</span>
-<span class='kw'>fn</span> <span class='ident'>rust_input</span>(<span class='ident'>cratefile</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>matches</span>: <span class='kw-2'>&amp;</span><span class='ident'>getopts</span>::<span class='ident'>Matches</span>) <span class='op'>-&gt;</span> <span class='ident'>Output</span> {
+<span class='kw'>fn</span> <span class='ident'>rust_input</span>(<span class='ident'>cratefile</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>externs</span>: <span class='ident'>core</span>::<span class='ident'>Externs</span>, <span class='ident'>matches</span>: <span class='kw-2'>&amp;</span><span class='ident'>getopts</span>::<span class='ident'>Matches</span>) <span class='op'>-&gt;</span> <span class='ident'>Output</span> {
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>default_passes</span> <span class='op'>=</span> <span class='op'>!</span><span class='ident'>matches</span>.<span class='ident'>opt_present</span>(<span class='string'>&quot;no-defaults&quot;</span>);
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>passes</span> <span class='op'>=</span> <span class='ident'>matches</span>.<span class='ident'>opt_strs</span>(<span class='string'>&quot;passes&quot;</span>);
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>plugins</span> <span class='op'>=</span> <span class='ident'>matches</span>.<span class='ident'>opt_strs</span>(<span class='string'>&quot;plugins&quot;</span>);
@@ -769,16 +854,25 @@
                                  .<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='ident'>s</span>.<span class='ident'>as_slice</span>()))
                                  .<span class='ident'>collect</span>();
     <span class='kw'>let</span> <span class='ident'>cfgs</span> <span class='op'>=</span> <span class='ident'>matches</span>.<span class='ident'>opt_strs</span>(<span class='string'>&quot;cfg&quot;</span>);
+    <span class='kw'>let</span> <span class='ident'>triple</span> <span class='op'>=</span> <span class='ident'>matches</span>.<span class='ident'>opt_str</span>(<span class='string'>&quot;target&quot;</span>);
+
     <span class='kw'>let</span> <span class='ident'>cr</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='ident'>cratefile</span>);
     <span class='macro'>info</span><span class='macro'>!</span>(<span class='string'>&quot;starting to run rustc&quot;</span>);
-    <span class='kw'>let</span> (<span class='ident'>krate</span>, <span class='ident'>analysis</span>) <span class='op'>=</span> <span class='ident'>std</span>::<span class='ident'>task</span>::<span class='ident'>try</span>(<span class='kw'>proc</span>() {
+    <span class='kw'>let</span> (<span class='kw-2'>mut</span> <span class='ident'>krate</span>, <span class='ident'>analysis</span>) <span class='op'>=</span> <span class='ident'>std</span>::<span class='ident'>task</span>::<span class='ident'>try</span>(<span class='kw'>proc</span>() {
         <span class='kw'>let</span> <span class='ident'>cr</span> <span class='op'>=</span> <span class='ident'>cr</span>;
-        <span class='ident'>core</span>::<span class='ident'>run_core</span>(<span class='ident'>libs</span>.<span class='ident'>move_iter</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span>.<span class='ident'>clone</span>()).<span class='ident'>collect</span>(),
+        <span class='ident'>core</span>::<span class='ident'>run_core</span>(<span class='ident'>libs</span>.<span class='ident'>move_iter</span>().<span class='ident'>collect</span>(),
                        <span class='ident'>cfgs</span>,
-                       <span class='kw-2'>&amp;</span><span class='ident'>cr</span>)
+                       <span class='ident'>externs</span>,
+                       <span class='kw-2'>&amp;</span><span class='ident'>cr</span>,
+                       <span class='ident'>triple</span>)
     }).<span class='ident'>map_err</span>(<span class='op'>|</span><span class='ident'>boxed_any</span><span class='op'>|</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{:?}&quot;</span>, <span class='ident'>boxed_any</span>)).<span class='ident'>unwrap</span>();
     <span class='macro'>info</span><span class='macro'>!</span>(<span class='string'>&quot;finished with rustc&quot;</span>);
     <span class='ident'>analysiskey</span>.<span class='ident'>replace</span>(<span class='prelude-val'>Some</span>(<span class='ident'>analysis</span>));
+
+    <span class='kw'>match</span> <span class='ident'>matches</span>.<span class='ident'>opt_str</span>(<span class='string'>&quot;crate-name&quot;</span>) {
+        <span class='prelude-val'>Some</span>(<span class='ident'>name</span>) <span class='op'>=&gt;</span> <span class='ident'>krate</span>.<span class='ident'>name</span> <span class='op'>=</span> <span class='ident'>name</span>,
+        <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {}
+    }
 
     <span class='comment'>// Process all of the crate attributes, extracting plugin metadata along</span>
     <span class='comment'>// with the passes which we are supposed to run.</span>
@@ -810,7 +904,7 @@
     }
     <span class='kw'>if</span> <span class='ident'>default_passes</span> {
         <span class='kw'>for</span> <span class='ident'>name</span> <span class='kw'>in</span> <span class='ident'>DEFAULT_PASSES</span>.<span class='ident'>iter</span>().<span class='ident'>rev</span>() {
-            <span class='ident'>passes</span>.<span class='ident'>unshift</span>(<span class='ident'>name</span>.<span class='ident'>to_string</span>());
+            <span class='ident'>passes</span>.<span class='ident'>insert</span>(<span class='number'>0</span>, <span class='ident'>name</span>.<span class='ident'>to_string</span>());
         }
     }
 
@@ -914,7 +1008,7 @@
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>encoder</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>Encoder</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>w</span> <span class='kw'>as</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>io</span>::<span class='ident'>Writer</span>);
             <span class='ident'>krate</span>.<span class='ident'>encode</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>encoder</span>).<span class='ident'>unwrap</span>();
         }
-        <span class='ident'>str</span>::<span class='ident'>from_utf8_owned</span>(<span class='ident'>w</span>.<span class='ident'>unwrap</span>()).<span class='ident'>unwrap</span>()
+        <span class='ident'>String</span>::<span class='ident'>from_utf8</span>(<span class='ident'>w</span>.<span class='ident'>unwrap</span>()).<span class='ident'>unwrap</span>()
     };
     <span class='kw'>let</span> <span class='ident'>crate_json</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>json</span>::<span class='ident'>from_str</span>(<span class='ident'>crate_json_str</span>.<span class='ident'>as_slice</span>()) {
         <span class='prelude-val'>Ok</span>(<span class='ident'>j</span>) <span class='op'>=&gt;</span> <span class='ident'>j</span>,

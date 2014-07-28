@@ -39,11 +39,86 @@
     </nav>
 
     <section id='main' class="content mod">
-<h1 class='fqn'>Module <a href='../index.html'>num</a>::<a class='mod' href=''>bigint</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-12' href='../../src/num/Users/aturon/moz/working/stability-dashboard/src/libnum/bigint.rs.html#11-2866'>[src]</a></span></h1>
+<h1 class='fqn'>Module <a href='../index.html'>num</a>::<a class='mod' href=''>bigint</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-12' href='../../src/num/Users/aturon/moz/working/stability-dashboard/src/libnum/bigint.rs.html#11-2892'>[src]</a></span></h1>
 <div class='docblock'><p>A Big integer (signed version: <code>BigInt</code>, unsigned version: <code>BigUint</code>).</p>
 
 <p>A <code>BigUint</code> is represented as an array of <code>BigDigit</code>s.
 A <code>BigInt</code> is a combination of <code>BigUint</code> and <code>Sign</code>.</p>
+
+<p>Common numerical operations are overloaded, so we can treat them
+the same way we treat other numbers.</p>
+
+<h2 id="example" class='section-header'><a
+                           href="#example">Example</a></h2><span id='rust-example-raw-0' class='rusttest'>extern crate num;
+fn main() {
+    use num::bigint::BigUint;
+    use std::num::{Zero, One};
+    use std::mem::replace;
+    
+    // Calculate large fibonacci numbers.
+    fn fib(n: uint) -&gt; BigUint {
+        let mut f0: BigUint = Zero::zero();
+        let mut f1: BigUint = One::one();
+        for _ in range(0, n) {
+            let f2 = f0 + f1;
+            // This is a low cost way of swapping f0 with f1 and f1 with f2.
+            f0 = replace(&amp;mut f1, f2);
+        }
+        f0
+    }
+    
+    // This is a very large number.
+    println!(&quot;fib(1000) = {}&quot;, fib(1000));
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='kw'>use</span> <span class='ident'>num</span>::<span class='ident'>bigint</span>::<span class='ident'>BigUint</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>num</span>::{<span class='ident'>Zero</span>, <span class='ident'>One</span>};
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>::<span class='ident'>replace</span>;
+
+<span class='comment'>// Calculate large fibonacci numbers.</span>
+<span class='kw'>fn</span> <span class='ident'>fib</span>(<span class='ident'>n</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>BigUint</span> {
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>f0</span>: <span class='ident'>BigUint</span> <span class='op'>=</span> <span class='ident'>Zero</span>::<span class='ident'>zero</span>();
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>f1</span>: <span class='ident'>BigUint</span> <span class='op'>=</span> <span class='ident'>One</span>::<span class='ident'>one</span>();
+    <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0</span>, <span class='ident'>n</span>) {
+        <span class='kw'>let</span> <span class='ident'>f2</span> <span class='op'>=</span> <span class='ident'>f0</span> <span class='op'>+</span> <span class='ident'>f1</span>;
+        <span class='comment'>// This is a low cost way of swapping f0 with f1 and f1 with f2.</span>
+        <span class='ident'>f0</span> <span class='op'>=</span> <span class='ident'>replace</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>f1</span>, <span class='ident'>f2</span>);
+    }
+    <span class='ident'>f0</span>
+}
+
+<span class='comment'>// This is a very large number.</span>
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;fib(1000) = {}&quot;</span>, <span class='ident'>fib</span>(<span class='number'>1000</span>));
+</pre>
+
+<p>It&#39;s easy to generate large random numbers:</p>
+<span id='rust-example-raw-1' class='rusttest'>extern crate num;
+fn main() {
+    use num::bigint::{ToBigInt, RandBigInt};
+    use std::rand;
+    
+    let mut rng = rand::task_rng();
+    let a = rng.gen_bigint(1000u);
+    
+    let low = -10000i.to_bigint().unwrap();
+    let high = 10000i.to_bigint().unwrap();
+    let b = rng.gen_bigint_range(&amp;low, &amp;high);
+    
+    // Probably an even larger number.
+    println!(&quot;{}&quot;, a * b);
+}</span><pre id='rust-example-rendered-1' class='rust '>
+<span class='kw'>use</span> <span class='ident'>num</span>::<span class='ident'>bigint</span>::{<span class='ident'>ToBigInt</span>, <span class='ident'>RandBigInt</span>};
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rand</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>rng</span> <span class='op'>=</span> <span class='ident'>rand</span>::<span class='ident'>task_rng</span>();
+<span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>rng</span>.<span class='ident'>gen_bigint</span>(<span class='number'>1000u</span>);
+
+<span class='kw'>let</span> <span class='ident'>low</span> <span class='op'>=</span> <span class='op'>-</span><span class='number'>10000i</span>.<span class='ident'>to_bigint</span>().<span class='ident'>unwrap</span>();
+<span class='kw'>let</span> <span class='ident'>high</span> <span class='op'>=</span> <span class='number'>10000i</span>.<span class='ident'>to_bigint</span>().<span class='ident'>unwrap</span>();
+<span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='ident'>rng</span>.<span class='ident'>gen_bigint_range</span>(<span class='kw-2'>&amp;</span><span class='ident'>low</span>, <span class='kw-2'>&amp;</span><span class='ident'>high</span>);
+
+<span class='comment'>// Probably an even larger number.</span>
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>a</span> <span class='op'>*</span> <span class='ident'>b</span>);
+</pre>
 </div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
                     <tr>

@@ -501,7 +501,7 @@
 <span class='doccomment'>//! The EventLoop and internal synchronous I/O interface.</span>
 
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
-<span class='kw'>use</span> <span class='ident'>alloc</span>::<span class='ident'>owned</span>::<span class='ident'>Box</span>;
+<span class='kw'>use</span> <span class='ident'>alloc</span>::<span class='ident'>boxed</span>::<span class='ident'>Box</span>;
 <span class='kw'>use</span> <span class='ident'>collections</span>::<span class='ident'>string</span>::<span class='ident'>String</span>;
 <span class='kw'>use</span> <span class='ident'>collections</span>::<span class='ident'>vec</span>::<span class='ident'>Vec</span>;
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>fmt</span>;
@@ -565,7 +565,7 @@
 
     <span class='doccomment'>/// Optional environment to specify for the program. If this is None, then</span>
     <span class='doccomment'>/// it will inherit the current process&#39;s environment.</span>
-    <span class='kw'>pub</span> <span class='ident'>env</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> [(<span class='ident'>CString</span>, <span class='ident'>CString</span>)]<span class='op'>&gt;</span>,
+    <span class='kw'>pub</span> <span class='ident'>env</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> [(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>CString</span>, <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>CString</span>)]<span class='op'>&gt;</span>,
 
     <span class='doccomment'>/// Optional working directory for the new process. If this is None, then</span>
     <span class='doccomment'>/// the current directory of the running process is inherited.</span>
@@ -624,7 +624,7 @@
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>LocalIo</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Returns the local I/O: either the local scheduler&#39;s I/O services or</span>
     <span class='doccomment'>/// the native I/O services.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>borrow</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>LocalIo</span><span class='op'>&gt;</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>borrow</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>LocalIo</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;&gt;</span> {
         <span class='comment'>// FIXME(#11053): bad</span>
         <span class='comment'>//</span>
         <span class='comment'>// This is currently very unsafely implemented. We don&#39;t actually</span>
@@ -728,7 +728,7 @@
 }
 
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>RtioTcpListener</span> : <span class='ident'>RtioSocket</span> {
-    <span class='kw'>fn</span> <span class='ident'>listen</span>(<span class='kw-2'>~</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>RtioTcpAcceptor</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;&gt;</span>;
+    <span class='kw'>fn</span> <span class='ident'>listen</span>(<span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Self</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>RtioTcpAcceptor</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;&gt;</span>;
 }
 
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>RtioTcpAcceptor</span> : <span class='ident'>RtioSocket</span> {
@@ -819,7 +819,7 @@
 }
 
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>RtioUnixListener</span> {
-    <span class='kw'>fn</span> <span class='ident'>listen</span>(<span class='kw-2'>~</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>RtioUnixAcceptor</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;&gt;</span>;
+    <span class='kw'>fn</span> <span class='ident'>listen</span>(<span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Self</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>RtioUnixAcceptor</span> <span class='op'>+</span> <span class='ident'>Send</span><span class='op'>&gt;&gt;</span>;
 }
 
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>RtioUnixAcceptor</span> {

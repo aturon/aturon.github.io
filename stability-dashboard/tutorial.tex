@@ -71,7 +71,7 @@
 \begin{document}
 \maketitle
 
-0.11.0 (305cf1f1098dc87e346003e6bf7e7cca5705a135 2014-07-10 11:19:20 -0700)
+0.12.0-pre (2c50add48 2014-07-27 23:03:52 -0700)
 
 Copyright © 2011-2014 The Rust Project Developers. Licensed under the
 \href{http://www.apache.org/licenses/LICENSE-2.0}{Apache License,
@@ -859,8 +859,8 @@ When an enum has simple integer discriminators, you can apply the
 value as an \texttt{int}:
 
 \begin{verbatim}
-# #[deriving(Show)] enum Direction { North }
-println!( "{} => {}", North, North as int );
+# enum Direction { North, East, South, West }
+println!( "North => {}", North as int );
 \end{verbatim}
 
 It is possible to set the discriminator values to chosen constant
@@ -893,8 +893,15 @@ better static guarantees.
 
 This declaration defines a type \texttt{Shape} that can refer to such
 shapes, and two functions, \texttt{Circle} and \texttt{Rectangle}, which
-can be used to construct values of the type. To create a new Circle,
-write \texttt{Circle(Point \{ x: 0.0, y: 0.0 \}, 10.0)}.
+can be used to construct values of the type.
+
+To create a new \texttt{Circle}, write:
+
+\begin{verbatim}
+# struct Point { x: f64, y: f64 }
+# enum Shape { Circle(Point, f64), Rectangle(Point, Point) }
+let circle = Circle(Point { x: 0.0, y: 0.0 }, 10.0);
+\end{verbatim}
 
 All of these variant constructors may be used as patterns. The only way
 to access the contents of an enum instance is the destructuring of a
@@ -902,6 +909,7 @@ match. For example:
 
 \begin{verbatim}
 use std::f64;
+
 # struct Point {x: f64, y: f64}
 # enum Shape { Circle(Point, f64), Rectangle(Point, Point) }
 fn area(sh: Shape) -> f64 {
@@ -910,6 +918,9 @@ fn area(sh: Shape) -> f64 {
         Rectangle(Point { x, y }, Point { x: x2, y: y2 }) => (x2 - x) * (y2 - y)
     }
 }
+
+let rect = Rectangle(Point { x: 0.0, y: 0.0 }, Point { x: 2.0, y: 2.0 });
+println!("area: {}", area(rect));
 \end{verbatim}
 
 Use a lone \texttt{\_} to ignore an individual field. Ignore all fields
@@ -932,8 +943,9 @@ fn point_from_direction(dir: Direction) -> Point {
 Enum variants may also be structs. For example:
 
 \begin{verbatim}
-# #![feature(struct_variant)]
+#![feature(struct_variant)]
 use std::f64;
+
 # struct Point { x: f64, y: f64 }
 # fn square(x: f64) -> f64 { x * x }
 enum Shape {
@@ -948,7 +960,14 @@ fn area(sh: Shape) -> f64 {
         }
     }
 }
-# fn main() {}
+
+fn main() {
+    let rect = Rectangle {
+        top_left: Point { x: 0.0, y: 0.0 },
+        bottom_right: Point { x: 2.0, y: -2.0 }
+    };
+    println!("area: {}", area(rect));
+}
 \end{verbatim}
 
 \begin{quote}
@@ -1132,16 +1151,26 @@ let mut b = Foo { x: 5, y: box 10 };
 b.x = 10;
 \end{verbatim}
 
-If an object doesn't contain any non-Send types, it consists of a single
-ownership tree and is itself given the \texttt{Send} trait which allows
-it to be sent between tasks. Custom destructors can only be implemented
-directly on types that are \texttt{Send}, but non-\texttt{Send} types
-can still \emph{contain} types with custom destructors. Example of types
-which are not \texttt{Send} are
+If an object doesn't contain any non-\texttt{Send} types, it consists of
+a single ownership tree and is itself given the \texttt{Send} trait
+which allows it to be sent between tasks. Custom destructors can only be
+implemented directly on types that are \texttt{Send}, but
+non-\texttt{Send} types can still \emph{contain} types with custom
+destructors. Example of types which are not \texttt{Send} are
 \href{http://doc.rust-lang.org/std/gc/struct.Gc.html}{\texttt{Gc\textless{}T\textgreater{}}}
 and
 \href{http://doc.rust-lang.org/std/rc/struct.Rc.html}{\texttt{Rc\textless{}T\textgreater{}}},
 the shared-ownership types.
+
+\begin{quote}
+\emph{Note:} See a \hyperref[ownership-escape-hatches]{later chapter}
+for a discussion about
+\href{http://doc.rust-lang.org/std/gc/struct.Gc.html}{\texttt{Gc\textless{}T\textgreater{}}}
+and
+\href{http://doc.rust-lang.org/std/rc/struct.Rc.html}{\texttt{Rc\textless{}T\textgreater{}}},
+and the \hyperref[traits]{chapter about traits} for a discussion about
+\texttt{Send}.
+\end{quote}
 
 \section{Implementing a linked list}\label{implementing-a-linked-list}
 
@@ -1655,7 +1684,7 @@ Now we can call \texttt{compute\_distance()} in various ways:
 # let on_the_stack :     Point  =     Point { x: 3.0, y: 4.0 };
 # let on_the_heap  : Box<Point> = box Point { x: 7.0, y: 9.0 };
 # fn compute_distance(p1: &Point, p2: &Point) -> f64 { 0.0 }
-compute_distance(&on_the_stack, on_the_heap);
+compute_distance(&on_the_stack, &*on_the_heap);
 \end{verbatim}
 
 Here the \texttt{\&} operator is used to take the address of the
@@ -1666,11 +1695,9 @@ this \emph{borrowing} the local variable \texttt{on\_the\_stack},
 because we are creating an alias: that is, another route to the same
 data.
 
-In the case of \texttt{owned\_box}, however, no explicit action is
-necessary. The compiler will automatically convert a box
-\texttt{box point} to a reference like \texttt{\&point}. This is another
-form of borrowing; in this case, the contents of the owned box are being
-lent out.
+Likewise, in the case of \texttt{owned\_box}, the \texttt{\&} operator
+is used in conjunction with the \texttt{*} operator to take a reference
+to the contents of the box.
 
 Whenever a value is borrowed, there are some limitations on what you can
 do with the original. For example, if the contents of a variable have
@@ -1835,6 +1862,13 @@ let string = "foobar";
 let view: &str = string.slice(0, 3);
 \end{verbatim}
 
+Square brackets denote indexing into a slice or fixed-size vector:
+
+\begin{verbatim}
+let crayons: [&str, ..3] = ["BananaMania", "Beaver", "Bittersweet"];
+println!("Crayon 2 is '{}'", crayons[2]);
+\end{verbatim}
+
 Mutable slices also exist, just as there are mutable references.
 However, there are no mutable string slices. Strings are a multi-byte
 encoding (UTF-8) of Unicode code points, so they cannot be freely
@@ -1847,20 +1881,6 @@ view[0] = 5;
 
 // The type of a mutable slice is written as `&mut [T]`
 let ys: &mut [int] = &mut [1i, 2i, 3i];
-\end{verbatim}
-
-Square brackets denote indexing into a slice or fixed-size vector:
-
-\begin{verbatim}
-# enum Crayon { Almond, AntiqueBrass, Apricot,
-#               Aquamarine, Asparagus, AtomicTangerine,
-#               BananaMania, Beaver, Bittersweet };
-# fn draw_scene(c: Crayon) { }
-let crayons: [Crayon, ..3] = [BananaMania, Beaver, Bittersweet];
-match crayons[0] {
-    Bittersweet => draw_scene(crayons[0]),
-    _ => ()
-}
 \end{verbatim}
 
 A slice or fixed-size vector can be destructured using pattern matching:
@@ -1881,7 +1901,8 @@ Both vectors and strings support a number of useful
 \href{std/slice/index.html}{\texttt{std::slice}}, and
 \href{std/str/index.html}{\texttt{std::str}}.
 
-\section{Ownership escape hatches}\label{ownership-escape-hatches}
+\hyperdef{}{ownership-escape-hatches}{\section{Ownership escape
+hatches}\label{ownership-escape-hatches}}
 
 Ownership can cleanly describe tree-like data structures, and references
 provide non-owning pointers. However, more flexibility is often desired
@@ -1931,6 +1952,11 @@ handled via dynamic checks and can fail at runtime.
 The \texttt{Rc} and \texttt{Gc} types are not sendable, so they cannot
 be used to share memory between tasks. Safe immutable and mutable shared
 memory is provided by the \texttt{sync::arc} module.
+
+\begin{quote}
+\emph{Note:} See a \hyperref[traits]{later chapter} for a discussion
+about \texttt{Send} and sendable types.
+\end{quote}
 
 \section{Closures}\label{closures}
 
@@ -2151,8 +2177,8 @@ is defined like any other function, except for the name \texttt{self}.
 
 The type of \texttt{self} is the type on which the method is
 implemented, or a pointer thereof. As an argument it is written either
-\texttt{self}, \texttt{\&self}, or \texttt{\textasciitilde{}self}. A
-caller must in turn have a compatible pointer type to call the method.
+\texttt{self}, \texttt{\&self}, or \texttt{self: TYPE}. A caller must in
+turn have a compatible pointer type to call the method.
 
 \begin{verbatim}
 # fn draw_circle(p: Point, f: f64) { }
@@ -2164,7 +2190,7 @@ caller must in turn have a compatible pointer type to call the method.
 # }
 impl Shape {
     fn draw_reference(&self) { /* ... */ }
-    fn draw_owned(~self) { /* ... */ }
+    fn draw_owned(self: Box<Shape>) { /* ... */ }
     fn draw_value(self) { /* ... */ }
 }
 
@@ -2188,7 +2214,7 @@ great lengths to convert a callee to a reference.
 # }
 # impl Shape {
 #    fn draw_reference(&self) { /* ... */ }
-#    fn draw_owned(~self) { /* ... */ }
+#    fn draw_owned(self: Box<Shape>) { /* ... */ }
 #    fn draw_value(self) { /* ... */ }
 # }
 # let s = Circle(Point { x: 1.0, y: 2.0 }, 3.0);
@@ -2636,7 +2662,7 @@ elements.
 fn print_all<T: Printable + Clone>(printable_things: Vec<T>) {
     let mut i = 0;
     while i < printable_things.len() {
-        let copy_of_thing = printable_things.get(i).clone();
+        let copy_of_thing = printable_things[i].clone();
         copy_of_thing.print();
         i += 1;
     }
@@ -2830,16 +2856,17 @@ let nonsense = mycircle.radius() * mycircle.area();
 \subsection{Deriving implementations for
 traits}\label{deriving-implementations-for-traits}
 
-A small number of traits in \texttt{std} and \texttt{extra} can have
-implementations that can be automatically derived. These instances are
-specified by placing the \texttt{deriving} attribute on a data type
-declaration. For example, the following will mean that \texttt{Circle}
-has an implementation for \texttt{PartialEq} and can be used with the
-equality operators, and that a value of type \texttt{ABC} can be
-randomly generated and converted to a string:
+A small number of traits in can have implementations that can be
+automatically derived. These instances are specified by placing the
+\texttt{deriving} attribute on a data type declaration. For example, the
+following will mean that \texttt{Circle} has an implementation for
+\texttt{PartialEq} and can be used with the equality operators, and that
+a value of type \texttt{ABC} can be randomly generated and converted to
+a string:
 
 \begin{verbatim}
 extern crate rand;
+use std::rand::{task_rng, Rng};
 
 #[deriving(PartialEq)]
 struct Circle { radius: f64 }
@@ -2850,6 +2877,13 @@ enum ABC { A, B, C }
 fn main() {
     // Use the Show trait to print "A, B, C."
     println!("{}, {}, {}", A, B, C);
+
+    let mut rng = task_rng();
+
+    // Use the Rand trait to generate a random variants.
+    for _ in range(0i, 10) {
+        println!("{}", rng.gen::<ABC>());
+    }
 }
 \end{verbatim}
 
@@ -3421,8 +3455,8 @@ In Rust terminology, we need a way to refer to other crates.
 For that, Rust offers you the \texttt{extern crate} declaration:
 
 \begin{verbatim}
+// `num` ships with Rust.
 extern crate num;
-// `num` ships with Rust (much like `extra`; more details further down).
 
 fn main() {
     // The rational number '1/2':

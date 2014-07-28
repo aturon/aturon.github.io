@@ -1,8 +1,9 @@
 (function() {var implementors = {};
 implementors['rand'] = [];
 implementors['sync'] = [];
-implementors['collections'] = [];
 implementors['rustrt'] = [];
+implementors['collections'] = [];
+implementors['unicode'] = [];
 implementors['core'] = [];
 
             if (window.register_implementors) {

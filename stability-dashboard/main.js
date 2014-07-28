@@ -42,6 +42,9 @@
             $('.docblock.short').width(function() {
                 return contentWidth - 40 - $(this).prev().width();
             }).addClass('nowrap');
+            $('.summary-column').width(function() {
+                return contentWidth - 40 - $(this).prev().width();
+            })
         }, 150);
     }
     resizeShortBlocks();
@@ -357,8 +360,8 @@
                 }, 20);
             });
 
-            $(document).off('keypress.searchnav');
-            $(document).on('keypress.searchnav', function(e) {
+            $(document).off('keydown.searchnav');
+            $(document).on('keydown.searchnav', function(e) {
                 var $active = $results.filter('.highlighted');
 
                 if (e.which === 38) { // up

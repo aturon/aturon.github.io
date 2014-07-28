@@ -620,6 +620,8 @@
 <span id='580'>580</span>
 <span id='581'>581</span>
 <span id='582'>582</span>
+<span id='583'>583</span>
+<span id='584'>584</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -888,7 +890,7 @@
 
     <span class='comment'>// Runtime glue functions and helpers</span>
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>put_with_sched</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>sched</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>) {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>put_with_sched</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>, <span class='ident'>sched</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Scheduler</span><span class='op'>&gt;</span>) {
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>sched</span>.<span class='ident'>is_none</span>());
         <span class='self'>self</span>.<span class='ident'>sched</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>sched</span>);
         <span class='self'>self</span>.<span class='ident'>put</span>();
@@ -899,18 +901,18 @@
         <span class='self'>self</span>.<span class='ident'>task</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>task</span>);
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>swap</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>swap</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>task</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>task</span>.<span class='ident'>take_unwrap</span>();
         <span class='ident'>task</span>.<span class='ident'>put_runtime</span>(<span class='self'>self</span>);
         <span class='kw'>return</span> <span class='ident'>task</span>;
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>put</span>(<span class='kw-2'>~</span><span class='self'>self</span>) {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>put</span>(<span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) {
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>sched</span>.<span class='ident'>is_some</span>());
         <span class='ident'>Local</span>::<span class='ident'>put</span>(<span class='self'>self</span>.<span class='ident'>swap</span>());
     }
 
-    <span class='kw'>fn</span> <span class='ident'>terminate</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>!</span> {
+    <span class='kw'>fn</span> <span class='ident'>terminate</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='op'>!</span> {
         <span class='kw'>let</span> <span class='ident'>sched</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>sched</span>.<span class='ident'>take_unwrap</span>();
         <span class='ident'>sched</span>.<span class='ident'>terminate_current_task</span>(<span class='self'>self</span>)
     }
@@ -934,7 +936,7 @@
     <span class='comment'>// *not* a cheap operation to clone a handle. Until the day comes that we</span>
     <span class='comment'>// need to optimize this, a lock should do just fine (it&#39;s completely</span>
     <span class='comment'>// uncontended except for when the task is rescheduled).</span>
-    <span class='kw'>fn</span> <span class='ident'>reawaken_remotely</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>) {
+    <span class='kw'>fn</span> <span class='ident'>reawaken_remotely</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) {
         <span class='kw'>unsafe</span> {
             <span class='kw'>let</span> <span class='ident'>mtx</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>nasty_deschedule_lock</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>NativeMutex</span>;
             <span class='kw'>let</span> <span class='ident'>handle</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>handle</span>.<span class='ident'>get_mut_ref</span>() <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>SchedHandle</span>;
@@ -945,19 +947,21 @@
 }
 
 <span class='kw'>impl</span> <span class='ident'>Runtime</span> <span class='kw'>for</span> <span class='ident'>GreenTask</span> {
-    <span class='kw'>fn</span> <span class='ident'>yield_now</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) {
+    <span class='kw'>fn</span> <span class='ident'>yield_now</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>, <span class='ident'>cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) {
         <span class='self'>self</span>.<span class='ident'>put_task</span>(<span class='ident'>cur_task</span>);
         <span class='kw'>let</span> <span class='ident'>sched</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>sched</span>.<span class='ident'>take_unwrap</span>();
         <span class='ident'>sched</span>.<span class='ident'>yield_now</span>(<span class='self'>self</span>);
     }
 
-    <span class='kw'>fn</span> <span class='ident'>maybe_yield</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) {
+    <span class='kw'>fn</span> <span class='ident'>maybe_yield</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>, <span class='ident'>cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) {
         <span class='self'>self</span>.<span class='ident'>put_task</span>(<span class='ident'>cur_task</span>);
         <span class='kw'>let</span> <span class='ident'>sched</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>sched</span>.<span class='ident'>take_unwrap</span>();
         <span class='ident'>sched</span>.<span class='ident'>maybe_yield</span>(<span class='self'>self</span>);
     }
 
-    <span class='kw'>fn</span> <span class='ident'>deschedule</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>times</span>: <span class='ident'>uint</span>, <span class='ident'>cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>,
+    <span class='kw'>fn</span> <span class='ident'>deschedule</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>,
+                  <span class='ident'>times</span>: <span class='ident'>uint</span>,
+                  <span class='ident'>cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>,
                   <span class='ident'>f</span>: <span class='op'>|</span><span class='ident'>BlockedTask</span><span class='op'>|</span> <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>BlockedTask</span><span class='op'>&gt;</span>) {
         <span class='self'>self</span>.<span class='ident'>put_task</span>(<span class='ident'>cur_task</span>);
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>sched</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>sched</span>.<span class='ident'>take_unwrap</span>();
@@ -1006,7 +1010,7 @@
         }
     }
 
-    <span class='kw'>fn</span> <span class='ident'>reawaken</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>to_wake</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) {
+    <span class='kw'>fn</span> <span class='ident'>reawaken</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>, <span class='ident'>to_wake</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) {
         <span class='self'>self</span>.<span class='ident'>put_task</span>(<span class='ident'>to_wake</span>);
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>sched</span>.<span class='ident'>is_none</span>());
 
@@ -1057,7 +1061,7 @@
         }
     }
 
-    <span class='kw'>fn</span> <span class='ident'>spawn_sibling</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>,
+    <span class='kw'>fn</span> <span class='ident'>spawn_sibling</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>,
                      <span class='ident'>cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>,
                      <span class='ident'>opts</span>: <span class='ident'>TaskOpts</span>,
                      <span class='ident'>f</span>: <span class='kw'>proc</span>():<span class='ident'>Send</span>) {
@@ -1094,7 +1098,7 @@
 
     <span class='kw'>fn</span> <span class='ident'>can_block</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='boolval'>false</span> }
 
-    <span class='kw'>fn</span> <span class='ident'>wrap</span>(<span class='kw-2'>~</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span><span class='op'>&gt;</span> { <span class='self'>self</span> <span class='kw'>as</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span><span class='op'>&gt;</span> }
+    <span class='kw'>fn</span> <span class='ident'>wrap</span>(<span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>GreenTask</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span><span class='op'>&gt;</span> { <span class='self'>self</span> <span class='kw'>as</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span><span class='op'>&gt;</span> }
 }
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>

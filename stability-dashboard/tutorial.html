@@ -21,9 +21,9 @@
 
     <div id="versioninfo">
   <img src="http://www.rust-lang.org/logos/rust-logo-32x32-blk.png" width="32" height="32" alt><br>
-  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.11.0</span><br>
-  <a href="http://github.com/rust-lang/rust/commit/305cf1f1098dc87e346003e6bf7e7cca5705a135"
-    class="hash white-sticker">305cf1f1</a>
+  <span class="white-sticker"><a href="http://rust-lang.org">Rust</a> 0.12.0-pre</span><br>
+  <a href="http://github.com/rust-lang/rust/commit/2c50add48273cf1ef44b47eceb5d9446fc81ce41"
+    class="hash white-sticker"></a>
 </div>
 
 
@@ -927,10 +927,10 @@ does not have a discriminator, it defaults to 0. For example, the value of
 <p>When an enum has simple integer discriminators, you can apply the <code>as</code> cast
 operator to convert a variant to its discriminator value as an <code>int</code>:</p>
 <span id='rust-example-raw-29' class='rusttest'>fn main() {
-    #[deriving(Show)] enum Direction { North }
-    println!( &quot;{} =&gt; {}&quot;, North, North as int );
+    enum Direction { North, East, South, West }
+    println!( &quot;North =&gt; {}&quot;, North as int );
 }</span><pre id='rust-example-rendered-29' class='rust '>
-<span class='macro'>println</span><span class='macro'>!</span>( <span class='string'>&quot;{} =&gt; {}&quot;</span>, <span class='ident'>North</span>, <span class='ident'>North</span> <span class='kw'>as</span> <span class='ident'>int</span> );
+<span class='macro'>println</span><span class='macro'>!</span>( <span class='string'>&quot;North =&gt; {}&quot;</span>, <span class='ident'>North</span> <span class='kw'>as</span> <span class='ident'>int</span> );
 </pre>
 
 <p>It is possible to set the discriminator values to chosen constant values:</p>
@@ -970,14 +970,23 @@ includes an identifier of the actual form that it holds, much like the
 
 <p>This declaration defines a type <code>Shape</code> that can refer to such shapes, and two
 functions, <code>Circle</code> and <code>Rectangle</code>, which can be used to construct values of
-the type. To create a new Circle, write <code>Circle(Point { x: 0.0, y: 0.0 },
-10.0)</code>.</p>
+the type.</p>
+
+<p>To create a new <code>Circle</code>, write:</p>
+<span id='rust-example-raw-32' class='rusttest'>fn main() {
+    struct Point { x: f64, y: f64 }
+    enum Shape { Circle(Point, f64), Rectangle(Point, Point) }
+    let circle = Circle(Point { x: 0.0, y: 0.0 }, 10.0);
+}</span><pre id='rust-example-rendered-32' class='rust '>
+<span class='kw'>let</span> <span class='ident'>circle</span> <span class='op'>=</span> <span class='ident'>Circle</span>(<span class='ident'>Point</span> { <span class='ident'>x</span>: <span class='number'>0.0</span>, <span class='ident'>y</span>: <span class='number'>0.0</span> }, <span class='number'>10.0</span>);
+</pre>
 
 <p>All of these variant constructors may be used as patterns. The only way to
 access the contents of an enum instance is the destructuring of a match. For
 example:</p>
-<span id='rust-example-raw-32' class='rusttest'>fn main() {
+<span id='rust-example-raw-33' class='rusttest'>fn main() {
     use std::f64;
+    
     struct Point {x: f64, y: f64}
     enum Shape { Circle(Point, f64), Rectangle(Point, Point) }
     fn area(sh: Shape) -&gt; f64 {
@@ -986,19 +995,26 @@ example:</p>
             Rectangle(Point { x, y }, Point { x: x2, y: y2 }) =&gt; (x2 - x) * (y2 - y)
         }
     }
-}</span><pre id='rust-example-rendered-32' class='rust '>
+    
+    let rect = Rectangle(Point { x: 0.0, y: 0.0 }, Point { x: 2.0, y: 2.0 });
+    println!(&quot;area: {}&quot;, area(rect));
+}</span><pre id='rust-example-rendered-33' class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>f64</span>;
+
 <span class='kw'>fn</span> <span class='ident'>area</span>(<span class='ident'>sh</span>: <span class='ident'>Shape</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span> {
     <span class='kw'>match</span> <span class='ident'>sh</span> {
         <span class='ident'>Circle</span>(_, <span class='ident'>size</span>) <span class='op'>=&gt;</span> <span class='ident'>f64</span>::<span class='ident'>consts</span>::<span class='ident'>PI</span> <span class='op'>*</span> <span class='ident'>size</span> <span class='op'>*</span> <span class='ident'>size</span>,
         <span class='ident'>Rectangle</span>(<span class='ident'>Point</span> { <span class='ident'>x</span>, <span class='ident'>y</span> }, <span class='ident'>Point</span> { <span class='ident'>x</span>: <span class='ident'>x2</span>, <span class='ident'>y</span>: <span class='ident'>y2</span> }) <span class='op'>=&gt;</span> (<span class='ident'>x2</span> <span class='op'>-</span> <span class='ident'>x</span>) <span class='op'>*</span> (<span class='ident'>y2</span> <span class='op'>-</span> <span class='ident'>y</span>)
     }
 }
+
+<span class='kw'>let</span> <span class='ident'>rect</span> <span class='op'>=</span> <span class='ident'>Rectangle</span>(<span class='ident'>Point</span> { <span class='ident'>x</span>: <span class='number'>0.0</span>, <span class='ident'>y</span>: <span class='number'>0.0</span> }, <span class='ident'>Point</span> { <span class='ident'>x</span>: <span class='number'>2.0</span>, <span class='ident'>y</span>: <span class='number'>2.0</span> });
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;area: {}&quot;</span>, <span class='ident'>area</span>(<span class='ident'>rect</span>));
 </pre>
 
 <p>Use a lone <code>_</code> to ignore an individual field. Ignore all fields of a variant
 like: <code>Circle(..)</code>. Nullary enum patterns are written without parentheses:</p>
-<span id='rust-example-raw-33' class='rusttest'>fn main() {
+<span id='rust-example-raw-34' class='rusttest'>fn main() {
     struct Point { x: f64, y: f64 }
     enum Direction { North, East, South, West }
     fn point_from_direction(dir: Direction) -&gt; Point {
@@ -1009,7 +1025,7 @@ like: <code>Circle(..)</code>. Nullary enum patterns are written without parenth
             West  =&gt; Point { x: -1.0, y:  0.0 }
         }
     }
-}</span><pre id='rust-example-rendered-33' class='rust '>
+}</span><pre id='rust-example-rendered-34' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>point_from_direction</span>(<span class='ident'>dir</span>: <span class='ident'>Direction</span>) <span class='op'>-&gt;</span> <span class='ident'>Point</span> {
     <span class='kw'>match</span> <span class='ident'>dir</span> {
         <span class='ident'>North</span> <span class='op'>=&gt;</span> <span class='ident'>Point</span> { <span class='ident'>x</span>:  <span class='number'>0.0</span>, <span class='ident'>y</span>:  <span class='number'>1.0</span> },
@@ -1021,8 +1037,9 @@ like: <code>Circle(..)</code>. Nullary enum patterns are written without parenth
 </pre>
 
 <p>Enum variants may also be structs. For example:</p>
-<span id='rust-example-raw-34' class='rusttest'>#![feature(struct_variant)]
+<span id='rust-example-raw-35' class='rusttest'>#![feature(struct_variant)]
 use std::f64;
+
 struct Point { x: f64, y: f64 }
 fn square(x: f64) -&gt; f64 { x * x }
 enum Shape {
@@ -1037,8 +1054,17 @@ fn area(sh: Shape) -&gt; f64 {
         }
     }
 }
-fn main() {}</span><pre id='rust-example-rendered-34' class='rust '>
+
+fn main() {
+    let rect = Rectangle {
+        top_left: Point { x: 0.0, y: 0.0 },
+        bottom_right: Point { x: 2.0, y: -2.0 }
+    };
+    println!(&quot;area: {}&quot;, area(rect));
+}</span><pre id='rust-example-rendered-35' class='rust '>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>struct_variant</span>)]</span>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>f64</span>;
+
 <span class='kw'>enum</span> <span class='ident'>Shape</span> {
     <span class='ident'>Circle</span> { <span class='ident'>center</span>: <span class='ident'>Point</span>, <span class='ident'>radius</span>: <span class='ident'>f64</span> },
     <span class='ident'>Rectangle</span> { <span class='ident'>top_left</span>: <span class='ident'>Point</span>, <span class='ident'>bottom_right</span>: <span class='ident'>Point</span> }
@@ -1050,6 +1076,14 @@ fn main() {}</span><pre id='rust-example-rendered-34' class='rust '>
             (<span class='ident'>bottom_right</span>.<span class='ident'>x</span> <span class='op'>-</span> <span class='ident'>top_left</span>.<span class='ident'>x</span>) <span class='op'>*</span> (<span class='ident'>top_left</span>.<span class='ident'>y</span> <span class='op'>-</span> <span class='ident'>bottom_right</span>.<span class='ident'>y</span>)
         }
     }
+}
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='ident'>rect</span> <span class='op'>=</span> <span class='ident'>Rectangle</span> {
+        <span class='ident'>top_left</span>: <span class='ident'>Point</span> { <span class='ident'>x</span>: <span class='number'>0.0</span>, <span class='ident'>y</span>: <span class='number'>0.0</span> },
+        <span class='ident'>bottom_right</span>: <span class='ident'>Point</span> { <span class='ident'>x</span>: <span class='number'>2.0</span>, <span class='ident'>y</span>: <span class='op'>-</span><span class='number'>2.0</span> }
+    };
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;area: {}&quot;</span>, <span class='ident'>area</span>(<span class='ident'>rect</span>));
 }
 </pre>
 
@@ -1065,12 +1099,12 @@ found in the manual.</p>
 have names. Thus, you cannot access their fields with dot notation.  Tuples
 can have any arity (number of elements) except for 0 (though you may consider
 unit, <code>()</code>, as the empty tuple if you like).</p>
-<span id='rust-example-raw-35' class='rusttest'>fn main() {
+<span id='rust-example-raw-36' class='rusttest'>fn main() {
     let mytup: (int, int, f64) = (10, 20, 30.0);
     match mytup {
       (a, b, c) =&gt; println!(&quot;{}&quot;, a + b + (c as int))
     }
-}</span><pre id='rust-example-rendered-35' class='rust '>
+}</span><pre id='rust-example-rendered-36' class='rust '>
 <span class='kw'>let</span> <span class='ident'>mytup</span>: (<span class='ident'>int</span>, <span class='ident'>int</span>, <span class='ident'>f64</span>) <span class='op'>=</span> (<span class='number'>10</span>, <span class='number'>20</span>, <span class='number'>30.0</span>);
 <span class='kw'>match</span> <span class='ident'>mytup</span> {
   (<span class='ident'>a</span>, <span class='ident'>b</span>, <span class='ident'>c</span>) <span class='op'>=&gt;</span> <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>a</span> <span class='op'>+</span> <span class='ident'>b</span> <span class='op'>+</span> (<span class='ident'>c</span> <span class='kw'>as</span> <span class='ident'>int</span>))
@@ -1085,13 +1119,13 @@ different type from <code>Bar(1, 2)</code>), and tuple structs&#39; <em>fields</
 names.</p>
 
 <p>For example:</p>
-<span id='rust-example-raw-36' class='rusttest'>fn main() {
+<span id='rust-example-raw-37' class='rusttest'>fn main() {
     struct MyTup(int, int, f64);
     let mytup: MyTup = MyTup(10, 20, 30.0);
     match mytup {
       MyTup(a, b, c) =&gt; println!(&quot;{}&quot;, a + b + (c as int))
     }
-}</span><pre id='rust-example-rendered-36' class='rust '>
+}</span><pre id='rust-example-rendered-37' class='rust '>
 <span class='kw'>struct</span> <span class='ident'>MyTup</span>(<span class='ident'>int</span>, <span class='ident'>int</span>, <span class='ident'>f64</span>);
 <span class='kw'>let</span> <span class='ident'>mytup</span>: <span class='ident'>MyTup</span> <span class='op'>=</span> <span class='ident'>MyTup</span>(<span class='number'>10</span>, <span class='number'>20</span>, <span class='number'>30.0</span>);
 <span class='kw'>match</span> <span class='ident'>mytup</span> {
@@ -1105,18 +1139,18 @@ names.</p>
 sometimes called &quot;newtypes&quot; (after Haskell&#39;s &quot;newtype&quot; feature). These are
 used to define new types in such a way that the new name is not just a
 synonym for an existing type but is rather its own distinct type.</p>
-<span id='rust-example-raw-37' class='rusttest'>fn main() {
+<span id='rust-example-raw-38' class='rusttest'>fn main() {
     struct GizmoId(int);
-}</span><pre id='rust-example-rendered-37' class='rust '>
+}</span><pre id='rust-example-rendered-38' class='rust '>
 <span class='kw'>struct</span> <span class='ident'>GizmoId</span>(<span class='ident'>int</span>);
 </pre>
 
 <p>Types like this can be useful to differentiate between data that have
 the same underlying type but must be used in different ways.</p>
-<span id='rust-example-raw-38' class='rusttest'>fn main() {
+<span id='rust-example-raw-39' class='rusttest'>fn main() {
     struct Inches(int);
     struct Centimeters(int);
-}</span><pre id='rust-example-rendered-38' class='rust '>
+}</span><pre id='rust-example-rendered-39' class='rust '>
 <span class='kw'>struct</span> <span class='ident'>Inches</span>(<span class='ident'>int</span>);
 <span class='kw'>struct</span> <span class='ident'>Centimeters</span>(<span class='ident'>int</span>);
 </pre>
@@ -1124,12 +1158,12 @@ the same underlying type but must be used in different ways.</p>
 <p>The above definitions allow for a simple way for programs to avoid
 confusing numbers that correspond to different units. Their integer
 values can be extracted with pattern matching:</p>
-<span id='rust-example-raw-39' class='rusttest'>fn main() {
+<span id='rust-example-raw-40' class='rusttest'>fn main() {
     struct Inches(int);
     let length_with_unit = Inches(10);
     let Inches(integer_length) = length_with_unit;
     println!(&quot;length is {} inches&quot;, integer_length);
-}</span><pre id='rust-example-rendered-39' class='rust '>
+}</span><pre id='rust-example-rendered-40' class='rust '>
 <span class='kw'>let</span> <span class='ident'>length_with_unit</span> <span class='op'>=</span> <span class='ident'>Inches</span>(<span class='number'>10</span>);
 <span class='kw'>let</span> <span class='ident'>Inches</span>(<span class='ident'>integer_length</span>) <span class='op'>=</span> <span class='ident'>length_with_unit</span>;
 <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;length is {} inches&quot;</span>, <span class='ident'>integer_length</span>);
@@ -1144,11 +1178,11 @@ back to <a href="#crates-and-the-module-system">later</a>). The <code>fn</code> 
 function. A function has an argument list, which is a parenthesized
 list of <code>name: type</code> pairs separated by commas. An arrow <code>-&gt;</code>
 separates the argument list and the function&#39;s return type.</p>
-<span id='rust-example-raw-40' class='rusttest'>fn main() {
+<span id='rust-example-raw-41' class='rusttest'>fn main() {
     fn line(a: int, b: int, x: int) -&gt; int {
         return a * x + b;
     }
-}</span><pre id='rust-example-rendered-40' class='rust '>
+}</span><pre id='rust-example-rendered-41' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>line</span>(<span class='ident'>a</span>: <span class='ident'>int</span>, <span class='ident'>b</span>: <span class='ident'>int</span>, <span class='ident'>x</span>: <span class='ident'>int</span>) <span class='op'>-&gt;</span> <span class='ident'>int</span> {
     <span class='kw'>return</span> <span class='ident'>a</span> <span class='op'>*</span> <span class='ident'>x</span> <span class='op'>+</span> <span class='ident'>b</span>;
 }
@@ -1158,11 +1192,11 @@ separates the argument list and the function&#39;s return type.</p>
 is optionally followed by an expression to return. A function can
 also return a value by having its top-level block produce an
 expression.</p>
-<span id='rust-example-raw-41' class='rusttest'>fn main() {
+<span id='rust-example-raw-42' class='rusttest'>fn main() {
     fn line(a: int, b: int, x: int) -&gt; int {
         a * x + b
     }
-}</span><pre id='rust-example-rendered-41' class='rust '>
+}</span><pre id='rust-example-rendered-42' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>line</span>(<span class='ident'>a</span>: <span class='ident'>int</span>, <span class='ident'>b</span>: <span class='ident'>int</span>, <span class='ident'>x</span>: <span class='ident'>int</span>) <span class='op'>-&gt;</span> <span class='ident'>int</span> {
     <span class='ident'>a</span> <span class='op'>*</span> <span class='ident'>x</span> <span class='op'>+</span> <span class='ident'>b</span>
 }
@@ -1174,24 +1208,24 @@ returning early from a function. Functions that do not return a value
 are said to return unit, <code>()</code>, and both the return type and the return
 value may be omitted from the definition. The following two functions
 are equivalent.</p>
-<span id='rust-example-raw-42' class='rusttest'>fn main() {
+<span id='rust-example-raw-43' class='rusttest'>fn main() {
     fn do_nothing_the_hard_way() -&gt; () { return (); }
     
     fn do_nothing_the_easy_way() { }
-}</span><pre id='rust-example-rendered-42' class='rust '>
+}</span><pre id='rust-example-rendered-43' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>do_nothing_the_hard_way</span>() <span class='op'>-&gt;</span> () { <span class='kw'>return</span> (); }
 
 <span class='kw'>fn</span> <span class='ident'>do_nothing_the_easy_way</span>() { }
 </pre>
 
 <p>Ending the function with a semicolon like so is equivalent to returning <code>()</code>.</p>
-<span id='rust-example-raw-43' class='rusttest'>fn main() {
+<span id='rust-example-raw-44' class='rusttest'>fn main() {
     fn line(a: int, b: int, x: int) -&gt; int { a * x + b  }
     fn oops(a: int, b: int, x: int) -&gt; ()  { a * x + b; }
     
     assert!(8 == line(5, 3, 1));
     assert!(() == oops(5, 3, 1));
-}</span><pre id='rust-example-rendered-43' class='rust '>
+}</span><pre id='rust-example-rendered-44' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>line</span>(<span class='ident'>a</span>: <span class='ident'>int</span>, <span class='ident'>b</span>: <span class='ident'>int</span>, <span class='ident'>x</span>: <span class='ident'>int</span>) <span class='op'>-&gt;</span> <span class='ident'>int</span> { <span class='ident'>a</span> <span class='op'>*</span> <span class='ident'>x</span> <span class='op'>+</span> <span class='ident'>b</span>  }
 <span class='kw'>fn</span> <span class='ident'>oops</span>(<span class='ident'>a</span>: <span class='ident'>int</span>, <span class='ident'>b</span>: <span class='ident'>int</span>, <span class='ident'>x</span>: <span class='ident'>int</span>) <span class='op'>-&gt;</span> ()  { <span class='ident'>a</span> <span class='op'>*</span> <span class='ident'>x</span> <span class='op'>+</span> <span class='ident'>b</span>; }
 
@@ -1202,9 +1236,9 @@ are equivalent.</p>
 <p>As with <code>match</code> expressions and <code>let</code> bindings, function arguments support
 pattern destructuring. Like <code>let</code>, argument patterns must be irrefutable,
 as in this example that unpacks the first value from a tuple and returns it.</p>
-<span id='rust-example-raw-44' class='rusttest'>fn main() {
+<span id='rust-example-raw-45' class='rusttest'>fn main() {
     fn first((value, _): (int, f64)) -&gt; int { value }
-}</span><pre id='rust-example-rendered-44' class='rust '>
+}</span><pre id='rust-example-rendered-45' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>first</span>((<span class='ident'>value</span>, _): (<span class='ident'>int</span>, <span class='ident'>f64</span>)) <span class='op'>-&gt;</span> <span class='ident'>int</span> { <span class='ident'>value</span> }
 </pre>
 
@@ -1219,13 +1253,13 @@ dynamic failures are possible from accessing freed resources. When a task
 fails, destructors of all objects in the task are called.</p>
 
 <p>The <code>box</code> operator performs memory allocation on the heap:</p>
-<span id='rust-example-raw-45' class='rusttest'>fn main() {
+<span id='rust-example-raw-46' class='rusttest'>fn main() {
     {
         // an integer allocated on the heap
         let y = box 10i;
     }
     // the destructor frees the heap memory as soon as `y` goes out of scope
-}</span><pre id='rust-example-rendered-45' class='rust '>
+}</span><pre id='rust-example-rendered-46' class='rust '>
 {
     <span class='comment'>// an integer allocated on the heap</span>
     <span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='number'>10i</span>;
@@ -1247,7 +1281,7 @@ calling the destructor, and the owner determines whether the object is mutable.<
 <p>Ownership is recursive, so mutability is inherited recursively and a destructor
 destroys the contained tree of owned objects. Variables are top-level owners
 and destroy the contained object when they go out of scope.</p>
-<span id='rust-example-raw-46' class='rusttest'>fn main() {
+<span id='rust-example-raw-47' class='rusttest'>fn main() {
     // the struct owns the objects contained in the `x` and `y` fields
     struct Foo { x: int, y: Box&lt;int&gt; }
     
@@ -1261,7 +1295,7 @@ and destroy the contained object when they go out of scope.</p>
     // `b` is mutable, and the mutability is inherited by the objects it owns
     let mut b = Foo { x: 5, y: box 10 };
     b.x = 10;
-}</span><pre id='rust-example-rendered-46' class='rust '>
+}</span><pre id='rust-example-rendered-47' class='rust '>
 <span class='comment'>// the struct owns the objects contained in the `x` and `y` fields</span>
 <span class='kw'>struct</span> <span class='ident'>Foo</span> { <span class='ident'>x</span>: <span class='ident'>int</span>, <span class='ident'>y</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span> }
 
@@ -1277,24 +1311,30 @@ and destroy the contained object when they go out of scope.</p>
 <span class='ident'>b</span>.<span class='ident'>x</span> <span class='op'>=</span> <span class='number'>10</span>;
 </pre>
 
-<p>If an object doesn&#39;t contain any non-Send types, it consists of a single
+<p>If an object doesn&#39;t contain any non-<code>Send</code> types, it consists of a single
 ownership tree and is itself given the <code>Send</code> trait which allows it to be sent
 between tasks. Custom destructors can only be implemented directly on types
 that are <code>Send</code>, but non-<code>Send</code> types can still <em>contain</em> types with custom
 destructors. Example of types which are not <code>Send</code> are <a href="http://doc.rust-lang.org/std/gc/struct.Gc.html"><code>Gc&lt;T&gt;</code></a> and
 <a href="http://doc.rust-lang.org/std/rc/struct.Rc.html"><code>Rc&lt;T&gt;</code></a>, the shared-ownership types.</p>
 
+<blockquote>
+<p><em>Note:</em> See a <a href="#ownership-escape-hatches">later chapter</a> for a discussion about
+<a href="http://doc.rust-lang.org/std/gc/struct.Gc.html"><code>Gc&lt;T&gt;</code></a> and <a href="http://doc.rust-lang.org/std/rc/struct.Rc.html"><code>Rc&lt;T&gt;</code></a>, and the <a href="#traits">chapter about traits</a> for
+a discussion about <code>Send</code>.</p>
+</blockquote>
+
 <h1 id="implementing-a-linked-list" class='section-header'><a
                            href="#implementing-a-linked-list">9 Implementing a linked list</a></h1>
 <p>An <code>enum</code> is a natural fit for describing a linked list, because it can express
 a <code>List</code> type as being <em>either</em> the end of the list (<code>Nil</code>) or another node
 (<code>Cons</code>). The full definition of the <code>Cons</code> variant will require some thought.</p>
-<span id='rust-example-raw-47' class='rusttest'>fn main() {
+<span id='rust-example-raw-48' class='rusttest'>fn main() {
     enum List {
         Cons(...), // an incomplete definition of the next element in a List
         Nil        // the end of a List
     }
-}</span><pre id='rust-example-rendered-47' class='rust '>
+}</span><pre id='rust-example-rendered-48' class='rust '>
 <span class='kw'>enum</span> <span class='ident'>List</span> {
     <span class='ident'>Cons</span>(...), <span class='comment'>// an incomplete definition of the next element in a List</span>
     <span class='ident'>Nil</span>        <span class='comment'>// the end of a List</span>
@@ -1303,14 +1343,14 @@ a <code>List</code> type as being <em>either</em> the end of the list (<code>Nil
 
 <p>The obvious approach is to define <code>Cons</code> as containing an element in the list
 along with the next <code>List</code> node. However, this will generate a compiler error.</p>
-<span id='rust-example-raw-48' class='rusttest'>fn main() {
+<span id='rust-example-raw-49' class='rusttest'>fn main() {
     // error: illegal recursive enum type; wrap the inner value in a box to make it
     // representable
     enum List {
         Cons(u32, List), // an element (`u32`) and the next node in the list
         Nil
     }
-}</span><pre id='rust-example-rendered-48' class='rust '>
+}</span><pre id='rust-example-rendered-49' class='rust '>
 <span class='comment'>// error: illegal recursive enum type; wrap the inner value in a box to make it</span>
 <span class='comment'>// representable</span>
 <span class='kw'>enum</span> <span class='ident'>List</span> {
@@ -1326,7 +1366,7 @@ solving it will require introducing the concept of <em>boxing</em>.</p>
                            href="#boxes">9.1 Boxes</a></h2>
 <p>A value in Rust is stored directly inside the owner. If a <code>struct</code> contains
 four <code>u32</code> fields, it will be four times as large as a single <code>u32</code>.</p>
-<span id='rust-example-raw-49' class='rusttest'>fn main() {
+<span id='rust-example-raw-50' class='rusttest'>fn main() {
     use std::mem::size_of; // bring `size_of` into the current scope, for convenience
     
     struct Foo {
@@ -1346,7 +1386,7 @@ four <code>u32</code> fields, it will be four times as large as a single <code>u
     }
     
     assert_eq!(size_of::&lt;Bar&gt;(), size_of::&lt;u32&gt;() * 16);
-}</span><pre id='rust-example-rendered-49' class='rust '>
+}</span><pre id='rust-example-rendered-50' class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>::<span class='ident'>size_of</span>; <span class='comment'>// bring `size_of` into the current scope, for convenience</span>
 
 <span class='kw'>struct</span> <span class='ident'>Foo</span> {
@@ -1376,13 +1416,13 @@ type was invalid because the size was infinite!</p>
 allocation to provide the invariant of always being the size of a pointer,
 regardless of the contained type. This can be leveraged to create a valid <code>List</code>
 definition:</p>
-<span id='rust-example-raw-50' class='rusttest'>fn main() {
+<span id='rust-example-raw-51' class='rusttest'>fn main() {
     
     enum List {
         Cons(u32, Box&lt;List&gt;),
         Nil
     }
-}</span><pre id='rust-example-rendered-50' class='rust '>
+}</span><pre id='rust-example-rendered-51' class='rust '>
 
 <span class='kw'>enum</span> <span class='ident'>List</span> {
     <span class='ident'>Cons</span>(<span class='ident'>u32</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>List</span><span class='op'>&gt;</span>),
@@ -1395,13 +1435,13 @@ owned box. Much like an unboxed value, an owned box has a single owner and is
 therefore limited to expressing a tree-like data structure.</p>
 
 <p>Consider an instance of our <code>List</code> type:</p>
-<span id='rust-example-raw-51' class='rusttest'>fn main() {
+<span id='rust-example-raw-52' class='rusttest'>fn main() {
     enum List {
         Cons(u32, Box&lt;List&gt;),
         Nil
     }
     let list = Cons(1, box Cons(2, box Cons(3, box Nil)));
-}</span><pre id='rust-example-rendered-51' class='rust '>
+}</span><pre id='rust-example-rendered-52' class='rust '>
 <span class='kw'>let</span> <span class='ident'>list</span> <span class='op'>=</span> <span class='ident'>Cons</span>(<span class='number'>1</span>, <span class='kw'>box</span> <span class='ident'>Cons</span>(<span class='number'>2</span>, <span class='kw'>box</span> <span class='ident'>Cons</span>(<span class='number'>3</span>, <span class='kw'>box</span> <span class='ident'>Nil</span>)));
 </pre>
 
@@ -1430,14 +1470,14 @@ memory is cleaned up when the box is destroyed.</p>
 <p>Rust uses a shallow copy for parameter passing, assignment and returning from
 functions. Passing around the <code>List</code> will copy only as deep as the pointer to
 the box rather than doing an implicit heap allocation.</p>
-<span id='rust-example-raw-52' class='rusttest'>fn main() {
+<span id='rust-example-raw-53' class='rusttest'>fn main() {
     enum List {
         Cons(u32, Box&lt;List&gt;),
         Nil
     }
     let xs = Cons(1, box Cons(2, box Cons(3, box Nil)));
     let ys = xs; // copies `Cons(u32, pointer)` shallowly
-}</span><pre id='rust-example-rendered-52' class='rust '>
+}</span><pre id='rust-example-rendered-53' class='rust '>
 <span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> <span class='ident'>Cons</span>(<span class='number'>1</span>, <span class='kw'>box</span> <span class='ident'>Cons</span>(<span class='number'>2</span>, <span class='kw'>box</span> <span class='ident'>Cons</span>(<span class='number'>3</span>, <span class='kw'>box</span> <span class='ident'>Nil</span>)));
 <span class='kw'>let</span> <span class='ident'>ys</span> <span class='op'>=</span> <span class='ident'>xs</span>; <span class='comment'>// copies `Cons(u32, pointer)` shallowly</span>
 </pre>
@@ -1445,7 +1485,7 @@ the box rather than doing an implicit heap allocation.</p>
 <p>Rust will consider a shallow copy of a type with a destructor like <code>List</code> to
 <em>move ownership</em> of the value. After a value has been moved, the source
 location cannot be used unless it is reinitialized.</p>
-<span id='rust-example-raw-53' class='rusttest'>fn main() {
+<span id='rust-example-raw-54' class='rusttest'>fn main() {
     enum List {
         Cons(u32, Box&lt;List&gt;),
         Nil
@@ -1458,7 +1498,7 @@ location cannot be used unless it is reinitialized.</p>
     xs = Nil;
     
     // `xs` can be used again
-}</span><pre id='rust-example-rendered-53' class='rust '>
+}</span><pre id='rust-example-rendered-54' class='rust '>
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>xs</span> <span class='op'>=</span> <span class='ident'>Nil</span>;
 <span class='kw'>let</span> <span class='ident'>ys</span> <span class='op'>=</span> <span class='ident'>xs</span>;
 
@@ -1473,11 +1513,11 @@ location cannot be used unless it is reinitialized.</p>
 as it is only called a single time.</p>
 
 <p>Avoiding a move can be done with the library-defined <code>clone</code> method:</p>
-<span id='rust-example-raw-54' class='rusttest'>fn main() {
+<span id='rust-example-raw-55' class='rusttest'>fn main() {
     let x = box 5i;
     let y = x.clone(); // `y` is a newly allocated box
     let z = x; // no new memory allocated, `x` can no longer be used
-}</span><pre id='rust-example-rendered-54' class='rust '>
+}</span><pre id='rust-example-rendered-55' class='rust '>
 <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='number'>5i</span>;
 <span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>clone</span>(); <span class='comment'>// `y` is a newly allocated box</span>
 <span class='kw'>let</span> <span class='ident'>z</span> <span class='op'>=</span> <span class='ident'>x</span>; <span class='comment'>// no new memory allocated, `x` can no longer be used</span>
@@ -1485,7 +1525,7 @@ as it is only called a single time.</p>
 
 <p>The <code>clone</code> method is provided by the <code>Clone</code> trait, and can be derived for
 our <code>List</code> type. Traits will be explained in detail <a href="#traits">later</a>.</p>
-<span id='rust-example-raw-55' class='rusttest'>fn main() {
+<span id='rust-example-raw-56' class='rusttest'>fn main() {
     #[deriving(Clone)]
     enum List {
         Cons(u32, Box&lt;List&gt;),
@@ -1500,7 +1540,7 @@ our <code>List</code> type. Traits will be explained in detail <a href="#traits"
     let z = x;
     
     // and now, it can no longer be used since it has been moved
-}</span><pre id='rust-example-rendered-55' class='rust '>
+}</span><pre id='rust-example-rendered-56' class='rust '>
 <span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
 <span class='kw'>enum</span> <span class='ident'>List</span> {
     <span class='ident'>Cons</span>(<span class='ident'>u32</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>List</span><span class='op'>&gt;</span>),
@@ -1518,12 +1558,12 @@ our <code>List</code> type. Traits will be explained in detail <a href="#traits"
 </pre>
 
 <p>The mutability of a value may be changed by moving it to a new owner:</p>
-<span id='rust-example-raw-56' class='rusttest'>fn main() {
+<span id='rust-example-raw-57' class='rusttest'>fn main() {
     let r = box 13i;
     let mut s = r; // box becomes mutable
     *s += 1;
     let t = s; // box becomes immutable
-}</span><pre id='rust-example-rendered-56' class='rust '>
+}</span><pre id='rust-example-rendered-57' class='rust '>
 <span class='kw'>let</span> <span class='ident'>r</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='number'>13i</span>;
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>r</span>; <span class='comment'>// box becomes mutable</span>
 <span class='op'>*</span><span class='ident'>s</span> <span class='op'>+=</span> <span class='number'>1</span>;
@@ -1532,7 +1572,7 @@ our <code>List</code> type. Traits will be explained in detail <a href="#traits"
 
 <p>A simple way to define a function prepending to the <code>List</code> type is to take
 advantage of moves:</p>
-<span id='rust-example-raw-57' class='rusttest'>fn main() {
+<span id='rust-example-raw-58' class='rusttest'>fn main() {
     enum List {
         Cons(u32, Box&lt;List&gt;),
         Nil
@@ -1546,7 +1586,7 @@ advantage of moves:</p>
     xs = prepend(xs, 1);
     xs = prepend(xs, 2);
     xs = prepend(xs, 3);
-}</span><pre id='rust-example-rendered-57' class='rust '>
+}</span><pre id='rust-example-rendered-58' class='rust '>
 <span class='kw'>enum</span> <span class='ident'>List</span> {
     <span class='ident'>Cons</span>(<span class='ident'>u32</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>List</span><span class='op'>&gt;</span>),
     <span class='ident'>Nil</span>
@@ -1568,18 +1608,18 @@ ownership of a list to be passed in rather than just mutating it in-place.</p>
 <h2 id="references" class='section-header'><a
                            href="#references">9.3 References</a></h2>
 <p>The obvious signature for a <code>List</code> equality comparison is the following:</p>
-<span id='rust-example-raw-58' class='rusttest'>fn main() {
+<span id='rust-example-raw-59' class='rusttest'>fn main() {
     fn eq(xs: List, ys: List) -&gt; bool { /* ... */ }
-}</span><pre id='rust-example-rendered-58' class='rust '>
+}</span><pre id='rust-example-rendered-59' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>eq</span>(<span class='ident'>xs</span>: <span class='ident'>List</span>, <span class='ident'>ys</span>: <span class='ident'>List</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='comment'>/* ... */</span> }
 </pre>
 
 <p>However, this will cause both lists to be moved into the function. Ownership
 isn&#39;t required to compare the lists, so the function should take <em>references</em>
 (&amp;T) instead.</p>
-<span id='rust-example-raw-59' class='rusttest'>fn main() {
+<span id='rust-example-raw-60' class='rusttest'>fn main() {
     fn eq(xs: &amp;List, ys: &amp;List) -&gt; bool { /* ... */ }
-}</span><pre id='rust-example-rendered-59' class='rust '>
+}</span><pre id='rust-example-rendered-60' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>eq</span>(<span class='ident'>xs</span>: <span class='kw-2'>&amp;</span><span class='ident'>List</span>, <span class='ident'>ys</span>: <span class='kw-2'>&amp;</span><span class='ident'>List</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='comment'>/* ... */</span> }
 </pre>
 
@@ -1587,7 +1627,7 @@ isn&#39;t required to compare the lists, so the function should take <em>referen
 operator. It can be dereferenced by using the <code>*</code> operator. In a pattern, such as <code>match</code> expression
 branches, the <code>ref</code> keyword can be used to bind to a variable name by-reference rather than
 by-value. A recursive definition of equality using references is as follows:</p>
-<span id='rust-example-raw-60' class='rusttest'>fn main() {
+<span id='rust-example-raw-61' class='rusttest'>fn main() {
     enum List {
         Cons(u32, Box&lt;List&gt;),
         Nil
@@ -1608,7 +1648,7 @@ by-value. A recursive definition of equality using references is as follows:</p>
     let xs = Cons(5, box Cons(10, box Nil));
     let ys = Cons(5, box Cons(10, box Nil));
     assert!(eq(&amp;xs, &amp;ys));
-}</span><pre id='rust-example-rendered-60' class='rust '>
+}</span><pre id='rust-example-rendered-61' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>eq</span>(<span class='ident'>xs</span>: <span class='kw-2'>&amp;</span><span class='ident'>List</span>, <span class='ident'>ys</span>: <span class='kw-2'>&amp;</span><span class='ident'>List</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='comment'>// Match on the next node in both lists.</span>
     <span class='kw'>match</span> (<span class='ident'>xs</span>, <span class='ident'>ys</span>) {
@@ -1644,12 +1684,12 @@ element type.</p>
 <p><em>Note:</em> The following code introduces generics, which are explained in a
 <a href="#generics">dedicated section</a>.</p>
 </blockquote>
-<span id='rust-example-raw-61' class='rusttest'>fn main() {
+<span id='rust-example-raw-62' class='rusttest'>fn main() {
     enum List&lt;T&gt; {
         Cons(T, Box&lt;List&lt;T&gt;&gt;),
         Nil
     }
-}</span><pre id='rust-example-rendered-61' class='rust '>
+}</span><pre id='rust-example-rendered-62' class='rust '>
 <span class='kw'>enum</span> <span class='ident'>List</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='ident'>Cons</span>(<span class='ident'>T</span>, <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>List</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>),
     <span class='ident'>Nil</span>
@@ -1658,7 +1698,7 @@ element type.</p>
 
 <p>The old <code>List</code> of <code>u32</code> is now available as <code>List&lt;u32&gt;</code>. The <code>prepend</code>
 definition has to be updated too:</p>
-<span id='rust-example-raw-62' class='rusttest'>fn main() {
+<span id='rust-example-raw-63' class='rusttest'>fn main() {
     enum List&lt;T&gt; {
         Cons(T, Box&lt;List&lt;T&gt;&gt;),
         Nil
@@ -1666,7 +1706,7 @@ definition has to be updated too:</p>
     fn prepend&lt;T&gt;(xs: List&lt;T&gt;, value: T) -&gt; List&lt;T&gt; {
         Cons(value, box xs)
     }
-}</span><pre id='rust-example-rendered-62' class='rust '>
+}</span><pre id='rust-example-rendered-63' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>prepend</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>xs</span>: <span class='ident'>List</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>value</span>: <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>List</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='ident'>Cons</span>(<span class='ident'>value</span>, <span class='kw'>box</span> <span class='ident'>xs</span>)
 }
@@ -1676,7 +1716,7 @@ definition has to be updated too:</p>
 versions for each set of type parameters.</p>
 
 <p>Using the generic <code>List&lt;T&gt;</code> works much like before, thanks to type inference:</p>
-<span id='rust-example-raw-63' class='rusttest'>fn main() {
+<span id='rust-example-raw-64' class='rusttest'>fn main() {
     enum List&lt;T&gt; {
         Cons(T, Box&lt;List&lt;T&gt;&gt;),
         Nil
@@ -1688,7 +1728,7 @@ versions for each set of type parameters.</p>
     xs = prepend(xs, 10i); // Here the compiler infers `xs`&#39;s type as `List&lt;int&gt;`.
     xs = prepend(xs, 15i);
     xs = prepend(xs, 20i);
-}</span><pre id='rust-example-rendered-63' class='rust '>
+}</span><pre id='rust-example-rendered-64' class='rust '>
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>xs</span> <span class='op'>=</span> <span class='ident'>Nil</span>; <span class='comment'>// Unknown type! This is a `List&lt;T&gt;`, but `T` can be anything.</span>
 <span class='ident'>xs</span> <span class='op'>=</span> <span class='ident'>prepend</span>(<span class='ident'>xs</span>, <span class='number'>10i</span>); <span class='comment'>// Here the compiler infers `xs`&#39;s type as `List&lt;int&gt;`.</span>
 <span class='ident'>xs</span> <span class='op'>=</span> <span class='ident'>prepend</span>(<span class='ident'>xs</span>, <span class='number'>15i</span>);
@@ -1697,7 +1737,7 @@ versions for each set of type parameters.</p>
 
 <p>The code sample above demonstrates type inference making most type annotations optional. It is
 equivalent to the following type-annotated code:</p>
-<span id='rust-example-raw-64' class='rusttest'>fn main() {
+<span id='rust-example-raw-65' class='rusttest'>fn main() {
     enum List&lt;T&gt; {
         Cons(T, Box&lt;List&lt;T&gt;&gt;),
         Nil
@@ -1709,7 +1749,7 @@ equivalent to the following type-annotated code:</p>
     xs = prepend::&lt;int&gt;(xs, 10);
     xs = prepend::&lt;int&gt;(xs, 15);
     xs = prepend::&lt;int&gt;(xs, 20);
-}</span><pre id='rust-example-rendered-64' class='rust '>
+}</span><pre id='rust-example-rendered-65' class='rust '>
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>xs</span>: <span class='ident'>List</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Nil</span>::<span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>;
 <span class='ident'>xs</span> <span class='op'>=</span> <span class='ident'>prepend</span>::<span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>(<span class='ident'>xs</span>, <span class='number'>10</span>);
 <span class='ident'>xs</span> <span class='op'>=</span> <span class='ident'>prepend</span>::<span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>(<span class='ident'>xs</span>, <span class='number'>15</span>);
@@ -1729,7 +1769,7 @@ without a move of ownership.</p>
 
 <p>We can add a <em>trait bound</em> on the <code>PartialEq</code> trait to require that the type implement the <code>==</code> operator.
 Two more <code>ref</code> annotations need to be added to avoid attempting to move out the element types:</p>
-<span id='rust-example-raw-65' class='rusttest'>fn main() {
+<span id='rust-example-raw-66' class='rusttest'>fn main() {
     enum List&lt;T&gt; {
         Cons(T, Box&lt;List&lt;T&gt;&gt;),
         Nil
@@ -1750,7 +1790,7 @@ Two more <code>ref</code> annotations need to be added to avoid attempting to mo
     let xs = Cons(&#39;c&#39;, box Cons(&#39;a&#39;, box Cons(&#39;t&#39;, box Nil)));
     let ys = Cons(&#39;c&#39;, box Cons(&#39;a&#39;, box Cons(&#39;t&#39;, box Nil)));
     assert!(eq(&amp;xs, &amp;ys));
-}</span><pre id='rust-example-rendered-65' class='rust '>
+}</span><pre id='rust-example-rendered-66' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>eq</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>PartialEq</span><span class='op'>&gt;</span>(<span class='ident'>xs</span>: <span class='kw-2'>&amp;</span><span class='ident'>List</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>ys</span>: <span class='kw-2'>&amp;</span><span class='ident'>List</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='comment'>// Match on the next node in both lists.</span>
     <span class='kw'>match</span> (<span class='ident'>xs</span>, <span class='ident'>ys</span>) {
@@ -1773,7 +1813,7 @@ Two more <code>ref</code> annotations need to be added to avoid attempting to mo
 <code>!=</code> operators available. We&#39;ll need to provide an <code>impl</code> for the <code>PartialEq</code> trait and a definition of the
 <code>eq</code> method. In a method, the <code>self</code> parameter refers to an instance of the type we&#39;re implementing
 on.</p>
-<span id='rust-example-raw-66' class='rusttest'>fn main() {
+<span id='rust-example-raw-67' class='rusttest'>fn main() {
     enum List&lt;T&gt; {
         Cons(T, Box&lt;List&lt;T&gt;&gt;),
         Nil
@@ -1803,7 +1843,7 @@ on.</p>
     // The PartialEq trait also allows us to use the shorthand infix operators.
     assert!(xs == ys);    // `xs == ys` is short for `xs.eq(&amp;ys)`
     assert!(!(xs != ys)); // `xs != ys` is short for `xs.ne(&amp;ys)`
-}</span><pre id='rust-example-rendered-66' class='rust '>
+}</span><pre id='rust-example-rendered-67' class='rust '>
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>PartialEq</span><span class='op'>&gt;</span> <span class='ident'>PartialEq</span> <span class='kw'>for</span> <span class='ident'>List</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='kw'>fn</span> <span class='ident'>eq</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>ys</span>: <span class='kw-2'>&amp;</span><span class='ident'>List</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
         <span class='comment'>// Match on the next node in both lists.</span>
@@ -1847,13 +1887,13 @@ always be preferred when they are usable.</p>
 <p>Note that returning large unboxed values via boxes is unnecessary. A large
 value is returned via a hidden output parameter, and the decision on where to
 place the return value should be left to the caller:</p>
-<span id='rust-example-raw-67' class='rusttest'>fn main() {
+<span id='rust-example-raw-68' class='rusttest'>fn main() {
     fn foo() -&gt; (u64, u64, u64, u64, u64, u64) {
         (5, 5, 5, 5, 5, 5)
     }
     
     let x = box foo(); // allocates a box, and writes the integers directly to it
-}</span><pre id='rust-example-rendered-67' class='rust '>
+}</span><pre id='rust-example-rendered-68' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>foo</span>() <span class='op'>-&gt;</span> (<span class='ident'>u64</span>, <span class='ident'>u64</span>, <span class='ident'>u64</span>, <span class='ident'>u64</span>, <span class='ident'>u64</span>, <span class='ident'>u64</span>) {
     (<span class='number'>5</span>, <span class='number'>5</span>, <span class='number'>5</span>, <span class='number'>5</span>, <span class='number'>5</span>, <span class='number'>5</span>)
 }
@@ -1863,7 +1903,7 @@ place the return value should be left to the caller:</p>
 
 <p>Beyond the properties granted by the size, an owned box behaves as a regular
 value by inheriting the mutability and lifetime of the owner:</p>
-<span id='rust-example-raw-68' class='rusttest'>fn main() {
+<span id='rust-example-raw-69' class='rusttest'>fn main() {
     let x = 5i; // immutable
     let mut y = 5i; // mutable
     y += 2;
@@ -1871,7 +1911,7 @@ value by inheriting the mutability and lifetime of the owner:</p>
     let x = box 5i; // immutable
     let mut y = box 5i; // mutable
     *y += 2; // the `*` operator is needed to access the contained value
-}</span><pre id='rust-example-rendered-68' class='rust '>
+}</span><pre id='rust-example-rendered-69' class='rust '>
 <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='number'>5i</span>; <span class='comment'>// immutable</span>
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='number'>5i</span>; <span class='comment'>// mutable</span>
 <span class='ident'>y</span> <span class='op'>+=</span> <span class='number'>2</span>;
@@ -1891,12 +1931,12 @@ any object, and the compiler verifies that it cannot outlive the lifetime of
 the object.</p>
 
 <p>As an example, consider a simple struct type, <code>Point</code>:</p>
-<span id='rust-example-raw-69' class='rusttest'>fn main() {
+<span id='rust-example-raw-70' class='rusttest'>fn main() {
     struct Point {
         x: f64,
         y: f64
     }
-}</span><pre id='rust-example-rendered-69' class='rust '>
+}</span><pre id='rust-example-rendered-70' class='rust '>
 <span class='kw'>struct</span> <span class='ident'>Point</span> {
     <span class='ident'>x</span>: <span class='ident'>f64</span>,
     <span class='ident'>y</span>: <span class='ident'>f64</span>
@@ -1906,11 +1946,11 @@ the object.</p>
 <p>We can use this simple definition to allocate points in many different
 ways. For example, in this code, each of these local variables
 contains a point, but allocated in a different location:</p>
-<span id='rust-example-raw-70' class='rusttest'>fn main() {
+<span id='rust-example-raw-71' class='rusttest'>fn main() {
     struct Point { x: f64, y: f64 }
     let on_the_stack :     Point  =     Point { x: 3.0, y: 4.0 };
     let on_the_heap  : Box&lt;Point&gt; = box Point { x: 7.0, y: 9.0 };
-}</span><pre id='rust-example-rendered-70' class='rust '>
+}</span><pre id='rust-example-rendered-71' class='rust '>
 <span class='kw'>let</span> <span class='ident'>on_the_stack</span> :     <span class='ident'>Point</span>  <span class='op'>=</span>     <span class='ident'>Point</span> { <span class='ident'>x</span>: <span class='number'>3.0</span>, <span class='ident'>y</span>: <span class='number'>4.0</span> };
 <span class='kw'>let</span> <span class='ident'>on_the_heap</span>  : <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Point</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>Point</span> { <span class='ident'>x</span>: <span class='number'>7.0</span>, <span class='ident'>y</span>: <span class='number'>9.0</span> };
 </pre>
@@ -1922,14 +1962,14 @@ it takes the points by value. But this will cause the points to be
 copied when we call the function. For points, this is probably not so
 bad, but often copies are expensive. So we’d like to define a function
 that takes the points by pointer. We can use references to do this:</p>
-<span id='rust-example-raw-71' class='rusttest'>fn main() {
+<span id='rust-example-raw-72' class='rusttest'>fn main() {
     struct Point { x: f64, y: f64 }
     fn compute_distance(p1: &amp;Point, p2: &amp;Point) -&gt; f64 {
         let x_d = p1.x - p2.x;
         let y_d = p1.y - p2.y;
         (x_d * x_d + y_d * y_d).sqrt()
     }
-}</span><pre id='rust-example-rendered-71' class='rust '>
+}</span><pre id='rust-example-rendered-72' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>compute_distance</span>(<span class='ident'>p1</span>: <span class='kw-2'>&amp;</span><span class='ident'>Point</span>, <span class='ident'>p2</span>: <span class='kw-2'>&amp;</span><span class='ident'>Point</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span> {
     <span class='kw'>let</span> <span class='ident'>x_d</span> <span class='op'>=</span> <span class='ident'>p1</span>.<span class='ident'>x</span> <span class='op'>-</span> <span class='ident'>p2</span>.<span class='ident'>x</span>;
     <span class='kw'>let</span> <span class='ident'>y_d</span> <span class='op'>=</span> <span class='ident'>p1</span>.<span class='ident'>y</span> <span class='op'>-</span> <span class='ident'>p2</span>.<span class='ident'>y</span>;
@@ -1938,14 +1978,14 @@ that takes the points by pointer. We can use references to do this:</p>
 </pre>
 
 <p>Now we can call <code>compute_distance()</code> in various ways:</p>
-<span id='rust-example-raw-72' class='rusttest'>fn main() {
+<span id='rust-example-raw-73' class='rusttest'>fn main() {
     struct Point{ x: f64, y: f64 };
     let on_the_stack :     Point  =     Point { x: 3.0, y: 4.0 };
     let on_the_heap  : Box&lt;Point&gt; = box Point { x: 7.0, y: 9.0 };
     fn compute_distance(p1: &amp;Point, p2: &amp;Point) -&gt; f64 { 0.0 }
-    compute_distance(&amp;on_the_stack, on_the_heap);
-}</span><pre id='rust-example-rendered-72' class='rust '>
-<span class='ident'>compute_distance</span>(<span class='kw-2'>&amp;</span><span class='ident'>on_the_stack</span>, <span class='ident'>on_the_heap</span>);
+    compute_distance(&amp;on_the_stack, &amp;*on_the_heap);
+}</span><pre id='rust-example-rendered-73' class='rust '>
+<span class='ident'>compute_distance</span>(<span class='kw-2'>&amp;</span><span class='ident'>on_the_stack</span>, <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>on_the_heap</span>);
 </pre>
 
 <p>Here the <code>&amp;</code> operator is used to take the address of the variable
@@ -1955,11 +1995,9 @@ reference. We also call this <em>borrowing</em> the local variable
 <code>on_the_stack</code>, because we are creating an alias: that is, another
 route to the same data.</p>
 
-<p>In the case of <code>owned_box</code>, however, no
-explicit action is necessary. The compiler will automatically convert
-a box <code>box point</code> to a reference like
-<code>&amp;point</code>. This is another form of borrowing; in this case, the
-contents of the owned box are being lent out.</p>
+<p>Likewise, in the case of <code>owned_box</code>,
+the <code>&amp;</code> operator is used in conjunction with the <code>*</code> operator
+to take a reference to the contents of the box.</p>
 
 <p>Whenever a value is borrowed, there are some limitations on what you
 can do with the original. For example, if the contents of a variable
@@ -1979,14 +2017,14 @@ make full use of it again.</p>
 mutation—even if the object was declared as <code>mut</code>.  <code>Freeze</code> objects have
 freezing enforced statically at compile-time. An example of a non-<code>Freeze</code> type
 is <a href="http://doc.rust-lang.org/std/cell/struct.RefCell.html"><code>RefCell&lt;T&gt;</code></a>.</p>
-<span id='rust-example-raw-73' class='rusttest'>fn main() {
+<span id='rust-example-raw-74' class='rusttest'>fn main() {
     let mut x = 5i;
     {
         let y = &amp;x; // `x` is now frozen. It cannot be modified or re-assigned.
     }
     // `x` is now unfrozen again
     x = 3;
-}</span><pre id='rust-example-rendered-73' class='rust '>
+}</span><pre id='rust-example-rendered-74' class='rust '>
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='number'>5i</span>;
 {
     <span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>x</span>; <span class='comment'>// `x` is now frozen. It cannot be modified or re-assigned.</span>
@@ -1998,12 +2036,12 @@ is <a href="http://doc.rust-lang.org/std/cell/struct.RefCell.html"><code>RefCell
                            href="#dereferencing-pointers">12 Dereferencing pointers</a></h1>
 <p>Rust uses the unary star operator (<code>*</code>) to access the contents of a
 box or pointer, similarly to C.</p>
-<span id='rust-example-raw-74' class='rusttest'>fn main() {
+<span id='rust-example-raw-75' class='rusttest'>fn main() {
     let owned = box 10i;
     let borrowed = &amp;20i;
     
     let sum = *owned + *borrowed;
-}</span><pre id='rust-example-rendered-74' class='rust '>
+}</span><pre id='rust-example-rendered-75' class='rust '>
 <span class='kw'>let</span> <span class='ident'>owned</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='number'>10i</span>;
 <span class='kw'>let</span> <span class='ident'>borrowed</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='number'>20i</span>;
 
@@ -2013,7 +2051,7 @@ box or pointer, similarly to C.</p>
 <p>Dereferenced mutable pointers may appear on the left hand side of
 assignments. Such an assignment modifies the value that the pointer
 points to.</p>
-<span id='rust-example-raw-75' class='rusttest'>fn main() {
+<span id='rust-example-raw-76' class='rusttest'>fn main() {
     let mut owned = box 10i;
     
     let mut value = 20i;
@@ -2021,7 +2059,7 @@ points to.</p>
     
     *owned = *borrowed + 100;
     *borrowed = *owned + 1000;
-}</span><pre id='rust-example-rendered-75' class='rust '>
+}</span><pre id='rust-example-rendered-76' class='rust '>
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>owned</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='number'>10i</span>;
 
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>value</span> <span class='op'>=</span> <span class='number'>20i</span>;
@@ -2034,7 +2072,7 @@ points to.</p>
 <p>Pointers have high operator precedence, but lower precedence than the
 dot operator used for field and method access. This precedence order
 can sometimes make code awkward and parenthesis-filled.</p>
-<span id='rust-example-raw-76' class='rusttest'>fn main() {
+<span id='rust-example-raw-77' class='rusttest'>fn main() {
     struct Point { x: f64, y: f64 }
     enum Shape { Rectangle(Point, Point) }
     impl Shape { fn area(&amp;self) -&gt; int { 0 } }
@@ -2042,7 +2080,7 @@ can sometimes make code awkward and parenthesis-filled.</p>
     let end = box Point { x: (*start).x + 100.0, y: (*start).y + 100.0 };
     let rect = &amp;Rectangle(*start, *end);
     let area = (*rect).area();
-}</span><pre id='rust-example-rendered-76' class='rust '>
+}</span><pre id='rust-example-rendered-77' class='rust '>
 <span class='kw'>let</span> <span class='ident'>start</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>Point</span> { <span class='ident'>x</span>: <span class='number'>10.0</span>, <span class='ident'>y</span>: <span class='number'>20.0</span> };
 <span class='kw'>let</span> <span class='ident'>end</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>Point</span> { <span class='ident'>x</span>: (<span class='op'>*</span><span class='ident'>start</span>).<span class='ident'>x</span> <span class='op'>+</span> <span class='number'>100.0</span>, <span class='ident'>y</span>: (<span class='op'>*</span><span class='ident'>start</span>).<span class='ident'>y</span> <span class='op'>+</span> <span class='number'>100.0</span> };
 <span class='kw'>let</span> <span class='ident'>rect</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>Rectangle</span>(<span class='op'>*</span><span class='ident'>start</span>, <span class='op'>*</span><span class='ident'>end</span>);
@@ -2052,7 +2090,7 @@ can sometimes make code awkward and parenthesis-filled.</p>
 <p>To combat this ugliness the dot operator applies <em>automatic pointer
 dereferencing</em> to the receiver (the value on the left-hand side of the
 dot), so in most cases, explicitly dereferencing the receiver is not necessary.</p>
-<span id='rust-example-raw-77' class='rusttest'>fn main() {
+<span id='rust-example-raw-78' class='rusttest'>fn main() {
     struct Point { x: f64, y: f64 }
     enum Shape { Rectangle(Point, Point) }
     impl Shape { fn area(&amp;self) -&gt; int { 0 } }
@@ -2060,7 +2098,7 @@ dot), so in most cases, explicitly dereferencing the receiver is not necessary.<
     let end = box Point { x: start.x + 100.0, y: start.y + 100.0 };
     let rect = &amp;Rectangle(*start, *end);
     let area = rect.area();
-}</span><pre id='rust-example-rendered-77' class='rust '>
+}</span><pre id='rust-example-rendered-78' class='rust '>
 <span class='kw'>let</span> <span class='ident'>start</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>Point</span> { <span class='ident'>x</span>: <span class='number'>10.0</span>, <span class='ident'>y</span>: <span class='number'>20.0</span> };
 <span class='kw'>let</span> <span class='ident'>end</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>Point</span> { <span class='ident'>x</span>: <span class='ident'>start</span>.<span class='ident'>x</span> <span class='op'>+</span> <span class='number'>100.0</span>, <span class='ident'>y</span>: <span class='ident'>start</span>.<span class='ident'>y</span> <span class='op'>+</span> <span class='number'>100.0</span> };
 <span class='kw'>let</span> <span class='ident'>rect</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>Rectangle</span>(<span class='op'>*</span><span class='ident'>start</span>, <span class='op'>*</span><span class='ident'>end</span>);
@@ -2070,11 +2108,11 @@ dot), so in most cases, explicitly dereferencing the receiver is not necessary.<
 <p>You can write an expression that dereferences any number of pointers
 automatically. For example, if you feel inclined, you could write
 something silly like</p>
-<span id='rust-example-raw-78' class='rusttest'>fn main() {
+<span id='rust-example-raw-79' class='rusttest'>fn main() {
     struct Point { x: f64, y: f64 }
     let point = &amp;box Point { x: 10.0, y: 20.0 };
     println!(&quot;{:f}&quot;, point.x);
-}</span><pre id='rust-example-rendered-78' class='rust '>
+}</span><pre id='rust-example-rendered-79' class='rust '>
 <span class='kw'>let</span> <span class='ident'>point</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw'>box</span> <span class='ident'>Point</span> { <span class='ident'>x</span>: <span class='number'>10.0</span>, <span class='ident'>y</span>: <span class='number'>20.0</span> };
 <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{:f}&quot;</span>, <span class='ident'>point</span>.<span class='ident'>x</span>);
 </pre>
@@ -2093,14 +2131,14 @@ valid UTF-8 sequence.</p>
 <p>Fixed-size vectors are an unboxed block of memory, with the element length as
 part of the type. A fixed-size vector owns the elements it contains, so the
 elements are mutable if the vector is mutable. Fixed-size strings do not exist.</p>
-<span id='rust-example-raw-79' class='rusttest'>fn main() {
+<span id='rust-example-raw-80' class='rusttest'>fn main() {
     // A fixed-size vector
     let numbers = [1i, 2, 3];
     let more_numbers = numbers;
     
     // The type of a fixed-size vector is written as `[Type, ..length]`
     let five_zeroes: [int, ..5] = [0, ..5];
-}</span><pre id='rust-example-rendered-79' class='rust '>
+}</span><pre id='rust-example-rendered-80' class='rust '>
 <span class='comment'>// A fixed-size vector</span>
 <span class='kw'>let</span> <span class='ident'>numbers</span> <span class='op'>=</span> [<span class='number'>1i</span>, <span class='number'>2</span>, <span class='number'>3</span>];
 <span class='kw'>let</span> <span class='ident'>more_numbers</span> <span class='op'>=</span> <span class='ident'>numbers</span>;
@@ -2112,7 +2150,7 @@ elements are mutable if the vector is mutable. Fixed-size strings do not exist.<
 <p>A unique vector is dynamically sized, and has a destructor to clean up
 allocated memory on the heap. A unique vector owns the elements it contains, so
 the elements are mutable if the vector is mutable.</p>
-<span id='rust-example-raw-80' class='rusttest'>fn main() {
+<span id='rust-example-raw-81' class='rusttest'>fn main() {
     use std::string::String;
     
     // A dynamically sized vector (unique vector)
@@ -2127,7 +2165,7 @@ the elements are mutable if the vector is mutable.</p>
     
     let mut string = String::from_str(&quot;fo&quot;);
     string.push_char(&#39;o&#39;);
-}</span><pre id='rust-example-rendered-80' class='rust '>
+}</span><pre id='rust-example-rendered-81' class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>string</span>::<span class='ident'>String</span>;
 
 <span class='comment'>// A dynamically sized vector (unique vector)</span>
@@ -2147,7 +2185,7 @@ the elements are mutable if the vector is mutable.</p>
 <p>Slices are similar to fixed-size vectors, but the length is not part of the
 type. They simply point into a block of memory and do not have ownership over
 the elements.</p>
-<span id='rust-example-raw-81' class='rusttest'>fn main() {
+<span id='rust-example-raw-82' class='rusttest'>fn main() {
     // A slice
     let xs = &amp;[1, 2, 3];
     
@@ -2163,7 +2201,7 @@ the elements.</p>
     
     // A string slice type is written as `&amp;str`
     let view: &amp;str = string.slice(0, 3);
-}</span><pre id='rust-example-rendered-81' class='rust '>
+}</span><pre id='rust-example-rendered-82' class='rust '>
 <span class='comment'>// A slice</span>
 <span class='kw'>let</span> <span class='ident'>xs</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span>[<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>];
 
@@ -2181,18 +2219,27 @@ the elements.</p>
 <span class='kw'>let</span> <span class='ident'>view</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span> <span class='op'>=</span> <span class='ident'>string</span>.<span class='ident'>slice</span>(<span class='number'>0</span>, <span class='number'>3</span>);
 </pre>
 
+<p>Square brackets denote indexing into a slice or fixed-size vector:</p>
+<span id='rust-example-raw-83' class='rusttest'>fn main() {
+    let crayons: [&amp;str, ..3] = [&quot;BananaMania&quot;, &quot;Beaver&quot;, &quot;Bittersweet&quot;];
+    println!(&quot;Crayon 2 is &#39;{}&#39;&quot;, crayons[2]);
+}</span><pre id='rust-example-rendered-83' class='rust '>
+<span class='kw'>let</span> <span class='ident'>crayons</span>: [<span class='kw-2'>&amp;</span><span class='ident'>str</span>, ..<span class='number'>3</span>] <span class='op'>=</span> [<span class='string'>&quot;BananaMania&quot;</span>, <span class='string'>&quot;Beaver&quot;</span>, <span class='string'>&quot;Bittersweet&quot;</span>];
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Crayon 2 is &#39;{}&#39;&quot;</span>, <span class='ident'>crayons</span>[<span class='number'>2</span>]);
+</pre>
+
 <p>Mutable slices also exist, just as there are mutable references. However, there
 are no mutable string slices. Strings are a multi-byte encoding (UTF-8) of
 Unicode code points, so they cannot be freely mutated without the ability to
 alter the length.</p>
-<span id='rust-example-raw-82' class='rusttest'>fn main() {
+<span id='rust-example-raw-84' class='rusttest'>fn main() {
     let mut xs = [1i, 2i, 3i];
     let view = xs.mut_slice(0, 2);
     view[0] = 5;
     
     // The type of a mutable slice is written as `&amp;mut [T]`
     let ys: &amp;mut [int] = &amp;mut [1i, 2i, 3i];
-}</span><pre id='rust-example-rendered-82' class='rust '>
+}</span><pre id='rust-example-rendered-84' class='rust '>
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>xs</span> <span class='op'>=</span> [<span class='number'>1i</span>, <span class='number'>2i</span>, <span class='number'>3i</span>];
 <span class='kw'>let</span> <span class='ident'>view</span> <span class='op'>=</span> <span class='ident'>xs</span>.<span class='ident'>mut_slice</span>(<span class='number'>0</span>, <span class='number'>2</span>);
 <span class='ident'>view</span>[<span class='number'>0</span>] <span class='op'>=</span> <span class='number'>5</span>;
@@ -2201,27 +2248,8 @@ alter the length.</p>
 <span class='kw'>let</span> <span class='ident'>ys</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> [<span class='ident'>int</span>] <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> [<span class='number'>1i</span>, <span class='number'>2i</span>, <span class='number'>3i</span>];
 </pre>
 
-<p>Square brackets denote indexing into a slice or fixed-size vector:</p>
-<span id='rust-example-raw-83' class='rusttest'>fn main() {
-    enum Crayon { Almond, AntiqueBrass, Apricot,
-                  Aquamarine, Asparagus, AtomicTangerine,
-                  BananaMania, Beaver, Bittersweet };
-    fn draw_scene(c: Crayon) { }
-    let crayons: [Crayon, ..3] = [BananaMania, Beaver, Bittersweet];
-    match crayons[0] {
-        Bittersweet =&gt; draw_scene(crayons[0]),
-        _ =&gt; ()
-    }
-}</span><pre id='rust-example-rendered-83' class='rust '>
-<span class='kw'>let</span> <span class='ident'>crayons</span>: [<span class='ident'>Crayon</span>, ..<span class='number'>3</span>] <span class='op'>=</span> [<span class='ident'>BananaMania</span>, <span class='ident'>Beaver</span>, <span class='ident'>Bittersweet</span>];
-<span class='kw'>match</span> <span class='ident'>crayons</span>[<span class='number'>0</span>] {
-    <span class='ident'>Bittersweet</span> <span class='op'>=&gt;</span> <span class='ident'>draw_scene</span>(<span class='ident'>crayons</span>[<span class='number'>0</span>]),
-    _ <span class='op'>=&gt;</span> ()
-}
-</pre>
-
 <p>A slice or fixed-size vector can be destructured using pattern matching:</p>
-<span id='rust-example-raw-84' class='rusttest'>fn main() {
+<span id='rust-example-raw-85' class='rusttest'>fn main() {
     let numbers: &amp;[int] = &amp;[1, 2, 3];
     let score = match numbers {
         [] =&gt; 0,
@@ -2229,7 +2257,7 @@ alter the length.</p>
         [a, b] =&gt; a * 6 + b * 4,
         [a, b, c, ..rest] =&gt; a * 5 + b * 3 + c * 2 + rest.len() as int
     };
-}</span><pre id='rust-example-rendered-84' class='rust '>
+}</span><pre id='rust-example-rendered-85' class='rust '>
 <span class='kw'>let</span> <span class='ident'>numbers</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>int</span>] <span class='op'>=</span> <span class='kw-2'>&amp;</span>[<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>];
 <span class='kw'>let</span> <span class='ident'>score</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>numbers</span> {
     [] <span class='op'>=&gt;</span> <span class='number'>0</span>,
@@ -2250,7 +2278,7 @@ single parent ownership.</p>
 <p>The standard library provides the <code>std::rc::Rc</code> pointer type to express <em>shared ownership</em> over a
 reference counted box. As soon as all of the <code>Rc</code> pointers go out of scope, the box and the
 contained value are destroyed.</p>
-<span id='rust-example-raw-85' class='rusttest'>fn main() {
+<span id='rust-example-raw-86' class='rusttest'>fn main() {
     use std::rc::Rc;
     
     // A fixed-size array allocated in a reference-counted box
@@ -2263,7 +2291,7 @@ contained value are destroyed.</p>
     // the variable is mutable, but not the contents of the box
     let mut a = Rc::new([10, 9, 8, 7, 6, 5, 4, 3, 2, 1]);
     a = z;
-}</span><pre id='rust-example-rendered-85' class='rust '>
+}</span><pre id='rust-example-rendered-86' class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rc</span>::<span class='ident'>Rc</span>;
 
 <span class='comment'>// A fixed-size array allocated in a reference-counted box</span>
@@ -2281,7 +2309,7 @@ contained value are destroyed.</p>
 <p>A garbage collected pointer is provided via <code>std::gc::Gc</code>, with a task-local garbage collector
 having ownership of the box. It allows the creation of cycles, and the individual <code>Gc</code> pointers do
 not have a destructor.</p>
-<span id='rust-example-raw-86' class='rusttest'>fn main() {
+<span id='rust-example-raw-87' class='rusttest'>fn main() {
     use std::gc::GC;
     
     // A fixed-size array allocated in a garbage-collected box
@@ -2290,7 +2318,7 @@ not have a destructor.</p>
     let z = x;
     
     assert!(*z == [1i, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-}</span><pre id='rust-example-rendered-86' class='rust '>
+}</span><pre id='rust-example-rendered-87' class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>gc</span>::<span class='ident'>GC</span>;
 
 <span class='comment'>// A fixed-size array allocated in a garbage-collected box</span>
@@ -2308,18 +2336,22 @@ via dynamic checks and can fail at runtime.</p>
 <p>The <code>Rc</code> and <code>Gc</code> types are not sendable, so they cannot be used to share memory between tasks. Safe
 immutable and mutable shared memory is provided by the <code>sync::arc</code> module.</p>
 
+<blockquote>
+<p><em>Note:</em> See a <a href="#traits">later chapter</a> for a discussion about <code>Send</code> and sendable types.</p>
+</blockquote>
+
 <h1 id="closures" class='section-header'><a
                            href="#closures">15 Closures</a></h1>
 <p>Named functions, like those we&#39;ve seen so far, may not refer to local
 variables declared outside the function: they do not close over their
 environment (sometimes referred to as &quot;capturing&quot; variables in their
 environment). For example, you couldn&#39;t write the following:</p>
-<span id='rust-example-raw-87' class='rusttest'>fn main() {
+<span id='rust-example-raw-88' class='rusttest'>fn main() {
     let x = 3;
     
     // `fun` cannot refer to `x`
     fn fun() -&gt; () { println!(&quot;{}&quot;, x); }
-}</span><pre id='rust-example-rendered-87' class='rust '>
+}</span><pre id='rust-example-rendered-88' class='rust '>
 <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='number'>3</span>;
 
 <span class='comment'>// `fun` cannot refer to `x`</span>
@@ -2329,7 +2361,7 @@ environment). For example, you couldn&#39;t write the following:</p>
 <p>A <em>closure</em> does support accessing the enclosing scope; below we will create
 2 <em>closures</em> (nameless functions). Compare how <code>||</code> replaces <code>()</code> and how
 they try to access <code>x</code>:</p>
-<span id='rust-example-raw-88' class='rusttest'>fn main() {
+<span id='rust-example-raw-89' class='rusttest'>fn main() {
     let x = 3;
     
     // `fun` is an invalid definition
@@ -2348,7 +2380,7 @@ they try to access <code>x</code>:</p>
     
     fun_arg(7);     // Still won&#39;t work
     closure_arg(7); // Prints: 10
-}</span><pre id='rust-example-rendered-88' class='rust '>
+}</span><pre id='rust-example-rendered-89' class='rust '>
 <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='number'>3</span>;
 
 <span class='comment'>// `fun` is an invalid definition</span>
@@ -2380,13 +2412,13 @@ explicitly for function definitions.  (As previously mentioned in the
 <a href="#functions">Functions section</a>, omitting the return type from a
 function declaration is synonymous with an explicit declaration of
 return type unit, <code>()</code>.)</p>
-<span id='rust-example-raw-89' class='rusttest'>fn main() {
+<span id='rust-example-raw-90' class='rusttest'>fn main() {
     fn  fun   (x: int)         { println!(&quot;{}&quot;, x) } // this is same as saying `-&gt; ()`
     fn  square(x: int) -&gt; uint { (x * x) as uint }   // other return types are explicit
     
     // Error: mismatched types: expected `()` but found `uint`
     fn  badfun(x: int)         { (x * x) as uint }
-}</span><pre id='rust-example-rendered-89' class='rust '>
+}</span><pre id='rust-example-rendered-90' class='rust '>
 <span class='kw'>fn</span>  <span class='ident'>fun</span>   (<span class='ident'>x</span>: <span class='ident'>int</span>)         { <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>x</span>) } <span class='comment'>// this is same as saying `-&gt; ()`</span>
 <span class='kw'>fn</span>  <span class='ident'>square</span>(<span class='ident'>x</span>: <span class='ident'>int</span>) <span class='op'>-&gt;</span> <span class='ident'>uint</span> { (<span class='ident'>x</span> <span class='op'>*</span> <span class='ident'>x</span>) <span class='kw'>as</span> <span class='ident'>uint</span> }   <span class='comment'>// other return types are explicit</span>
 
@@ -2400,7 +2432,7 @@ omitted, since both a human reader and the compiler can deduce the
 types from the immediate context.  This is in contrast to function
 declarations, which require types to be specified and are not subject
 to type inference. Compare:</p>
-<span id='rust-example-raw-90' class='rusttest'>fn main() {
+<span id='rust-example-raw-91' class='rusttest'>fn main() {
     // `fun` as a function declaration cannot infer the type of `x`, so it must be provided
     fn  fun       (x: int) { println!(&quot;{}&quot;, x) }
     let closure = |x     | { println!(&quot;{}&quot;, x) }; // infers `x: int`, return type `()`
@@ -2417,7 +2449,7 @@ to type inference. Compare:</p>
     // Error: mismatched types
     // inference already assigned `closure` the type `|int| -&gt; ()`
     closure(&quot;String&quot;);
-}</span><pre id='rust-example-rendered-90' class='rust '>
+}</span><pre id='rust-example-rendered-91' class='rust '>
 <span class='comment'>// `fun` as a function declaration cannot infer the type of `x`, so it must be provided</span>
 <span class='kw'>fn</span>  <span class='ident'>fun</span>       (<span class='ident'>x</span>: <span class='ident'>int</span>) { <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>x</span>) }
 <span class='kw'>let</span> <span class='ident'>closure</span> <span class='op'>=</span> <span class='op'>|</span><span class='ident'>x</span>     <span class='op'>|</span> { <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>x</span>) }; <span class='comment'>// infers `x: int`, return type `()`</span>
@@ -2441,23 +2473,23 @@ types may be annotated on closures, using the same notation as shown
 earlier.  In the example below, since different types provide an
 implementation for the operator <code>*</code>, the argument type for the <code>x</code>
 parameter must be explicitly provided.</p>
-<span id='rust-example-raw-91' class='rusttest'>fn main() {
+<span id='rust-example-raw-92' class='rusttest'>fn main() {
     // Error: the type of `x` must be known to be used with `x * x`
     let square = |x     | -&gt; uint { (x * x) as uint };
-}</span><pre id='rust-example-rendered-91' class='rust '>
+}</span><pre id='rust-example-rendered-92' class='rust '>
 <span class='comment'>// Error: the type of `x` must be known to be used with `x * x`</span>
 <span class='kw'>let</span> <span class='ident'>square</span> <span class='op'>=</span> <span class='op'>|</span><span class='ident'>x</span>     <span class='op'>|</span> <span class='op'>-&gt;</span> <span class='ident'>uint</span> { (<span class='ident'>x</span> <span class='op'>*</span> <span class='ident'>x</span>) <span class='kw'>as</span> <span class='ident'>uint</span> };
 </pre>
 
 <p>In the corrected version, the argument type is explicitly annotated,
 while the return type can still be inferred.</p>
-<span id='rust-example-raw-92' class='rusttest'>fn main() {
+<span id='rust-example-raw-93' class='rusttest'>fn main() {
     let square_explicit = |x: int| -&gt; uint { (x * x) as uint };
     let square_infer    = |x: int|         { (x * x) as uint };
     
     println!(&quot;{}&quot;, square_explicit(20));  // 400
     println!(&quot;{}&quot;, square_infer(-20));    // 400
-}</span><pre id='rust-example-rendered-92' class='rust '>
+}</span><pre id='rust-example-rendered-93' class='rust '>
 <span class='kw'>let</span> <span class='ident'>square_explicit</span> <span class='op'>=</span> <span class='op'>|</span><span class='ident'>x</span>: <span class='ident'>int</span><span class='op'>|</span> <span class='op'>-&gt;</span> <span class='ident'>uint</span> { (<span class='ident'>x</span> <span class='op'>*</span> <span class='ident'>x</span>) <span class='kw'>as</span> <span class='ident'>uint</span> };
 <span class='kw'>let</span> <span class='ident'>square_infer</span>    <span class='op'>=</span> <span class='op'>|</span><span class='ident'>x</span>: <span class='ident'>int</span><span class='op'>|</span>         { (<span class='ident'>x</span> <span class='op'>*</span> <span class='ident'>x</span>) <span class='kw'>as</span> <span class='ident'>uint</span> };
 
@@ -2468,13 +2500,13 @@ while the return type can still be inferred.</p>
 <p>There are several forms of closure, each with its own role. The most
 common, called a <em>stack closure</em>, has type <code>||</code> and can directly
 access local variables in the enclosing scope.</p>
-<span id='rust-example-raw-93' class='rusttest'>fn main() {
+<span id='rust-example-raw-94' class='rusttest'>fn main() {
     let mut max = 0;
     let f = |x: int| if x &gt; max { max = x };
     for x in [1, 2, 3].iter() {
         f(*x);
     }
-}</span><pre id='rust-example-rendered-93' class='rust '>
+}</span><pre id='rust-example-rendered-94' class='rust '>
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>max</span> <span class='op'>=</span> <span class='number'>0</span>;
 <span class='kw'>let</span> <span class='ident'>f</span> <span class='op'>=</span> <span class='op'>|</span><span class='ident'>x</span>: <span class='ident'>int</span><span class='op'>|</span> <span class='kw'>if</span> <span class='ident'>x</span> <span class='op'>&gt;</span> <span class='ident'>max</span> { <span class='ident'>max</span> <span class='op'>=</span> <span class='ident'>x</span> };
 <span class='kw'>for</span> <span class='ident'>x</span> <span class='kw'>in</span> [<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>].<span class='ident'>iter</span>() {
@@ -2503,14 +2535,14 @@ for spawning <a href="guide-tasks.html">tasks</a>.</p>
 <p>Closures can be used to spawn tasks.
 A practical example of this pattern is found when using the <code>spawn</code> function,
 which starts a new task.</p>
-<span id='rust-example-raw-94' class='rusttest'>fn main() {
+<span id='rust-example-raw-95' class='rusttest'>fn main() {
     use std::task::spawn;
     
     // proc is the closure which will be spawned.
     spawn(proc() {
         println!(&quot;I&#39;m a new task&quot;)
     });
-}</span><pre id='rust-example-rendered-94' class='rust '>
+}</span><pre id='rust-example-rendered-95' class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>task</span>::<span class='ident'>spawn</span>;
 
 <span class='comment'>// proc is the closure which will be spawned.</span>
@@ -2527,13 +2559,13 @@ that expect a <code>||</code>. Thus, when writing a higher-order function that
 only calls its function argument, and does nothing else with it, you
 should almost always declare the type of that argument as <code>||</code>. That way,
 callers may pass any kind of closure.</p>
-<span id='rust-example-raw-95' class='rusttest'>fn main() {
+<span id='rust-example-raw-96' class='rusttest'>fn main() {
     fn call_twice(f: ||) { f(); f(); }
     let closure = || { &quot;I&#39;m a closure, and it doesn&#39;t matter what type I am&quot;; };
     fn function() { &quot;I&#39;m a normal function&quot;; }
     call_twice(closure);
     call_twice(function);
-}</span><pre id='rust-example-rendered-95' class='rust '>
+}</span><pre id='rust-example-rendered-96' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>call_twice</span>(<span class='ident'>f</span>: <span class='op'>||</span>) { <span class='ident'>f</span>(); <span class='ident'>f</span>(); }
 <span class='kw'>let</span> <span class='ident'>closure</span> <span class='op'>=</span> <span class='op'>||</span> { <span class='string'>&quot;I&#39;m a closure, and it doesn&#39;t matter what type I am&quot;</span>; };
 <span class='kw'>fn</span> <span class='ident'>function</span>() { <span class='string'>&quot;I&#39;m a normal function&quot;</span>; }
@@ -2558,7 +2590,7 @@ Methods are called with dot notation, as in <code>my_vec.len()</code>.</p>
 <p><em>Implementations</em>, written with the <code>impl</code> keyword, can define
 methods on most Rust types, including structs and enums.
 As an example, let&#39;s define a <code>draw</code> method on our <code>Shape</code> enum.</p>
-<span id='rust-example-raw-96' class='rusttest'>fn main() {
+<span id='rust-example-raw-97' class='rusttest'>fn main() {
     fn draw_circle(p: Point, f: f64) { }
     fn draw_rectangle(p: Point, p: Point) { }
     struct Point {
@@ -2582,7 +2614,7 @@ As an example, let&#39;s define a <code>draw</code> method on our <code>Shape</c
     
     let s = Circle(Point { x: 1.0, y: 2.0 }, 3.0);
     s.draw();
-}</span><pre id='rust-example-rendered-96' class='rust '>
+}</span><pre id='rust-example-rendered-97' class='rust '>
 <span class='kw'>struct</span> <span class='ident'>Point</span> {
     <span class='ident'>x</span>: <span class='ident'>f64</span>,
     <span class='ident'>y</span>: <span class='ident'>f64</span>
@@ -2612,9 +2644,9 @@ like any other function, except for the name <code>self</code>.</p>
 
 <p>The type of <code>self</code> is the type on which the method is implemented,
 or a pointer thereof. As an argument it is written either <code>self</code>,
-<code>&amp;self</code>, or <code>~self</code>.
+<code>&amp;self</code>, or <code>self: TYPE</code>.
 A caller must in turn have a compatible pointer type to call the method.</p>
-<span id='rust-example-raw-97' class='rusttest'>fn main() {
+<span id='rust-example-raw-98' class='rusttest'>fn main() {
     fn draw_circle(p: Point, f: f64) { }
     fn draw_rectangle(p: Point, p: Point) { }
     struct Point { x: f64, y: f64 }
@@ -2624,7 +2656,7 @@ A caller must in turn have a compatible pointer type to call the method.</p>
     }
     impl Shape {
         fn draw_reference(&amp;self) { /* ... */ }
-        fn draw_owned(~self) { /* ... */ }
+        fn draw_owned(self: Box&lt;Shape&gt;) { /* ... */ }
         fn draw_value(self) { /* ... */ }
     }
     
@@ -2633,10 +2665,10 @@ A caller must in turn have a compatible pointer type to call the method.</p>
     (&amp;s).draw_reference();
     (box s).draw_owned();
     s.draw_value();
-}</span><pre id='rust-example-rendered-97' class='rust '>
+}</span><pre id='rust-example-rendered-98' class='rust '>
 <span class='kw'>impl</span> <span class='ident'>Shape</span> {
     <span class='kw'>fn</span> <span class='ident'>draw_reference</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) { <span class='comment'>/* ... */</span> }
-    <span class='kw'>fn</span> <span class='ident'>draw_owned</span>(<span class='kw-2'>~</span><span class='self'>self</span>) { <span class='comment'>/* ... */</span> }
+    <span class='kw'>fn</span> <span class='ident'>draw_owned</span>(<span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Shape</span><span class='op'>&gt;</span>) { <span class='comment'>/* ... */</span> }
     <span class='kw'>fn</span> <span class='ident'>draw_value</span>(<span class='self'>self</span>) { <span class='comment'>/* ... */</span> }
 }
 
@@ -2650,7 +2682,7 @@ A caller must in turn have a compatible pointer type to call the method.</p>
 <p>Methods typically take a reference self type,
 so the compiler will go to great lengths to convert a callee
 to a reference.</p>
-<span id='rust-example-raw-98' class='rusttest'>fn main() {
+<span id='rust-example-raw-99' class='rusttest'>fn main() {
     fn draw_circle(p: Point, f: f64) { }
     fn draw_rectangle(p: Point, p: Point) { }
     struct Point { x: f64, y: f64 }
@@ -2660,7 +2692,7 @@ to a reference.</p>
     }
     impl Shape {
        fn draw_reference(&amp;self) { /* ... */ }
-       fn draw_owned(~self) { /* ... */ }
+       fn draw_owned(self: Box&lt;Shape&gt;) { /* ... */ }
        fn draw_value(self) { /* ... */ }
     }
     let s = Circle(Point { x: 1.0, y: 2.0 }, 3.0);
@@ -2678,7 +2710,7 @@ to a reference.</p>
     
     // ... and dereferenced and borrowed
     (&amp;box s).draw_reference();
-}</span><pre id='rust-example-rendered-98' class='rust '>
+}</span><pre id='rust-example-rendered-99' class='rust '>
 <span class='comment'>// As with typical function arguments, owned pointers</span>
 <span class='comment'>// are automatically converted to references</span>
 
@@ -2698,12 +2730,12 @@ to a reference.</p>
 <p>Implementations may also define standalone (sometimes called &quot;static&quot;)
 methods. The absence of a <code>self</code> parameter distinguishes such methods.
 These methods are the preferred way to define constructor functions.</p>
-<span id='rust-example-raw-99' class='rusttest'>fn main() {
+<span id='rust-example-raw-100' class='rusttest'>fn main() {
     impl Circle {
         fn area(&amp;self) -&gt; f64 { /* ... */ }
         fn new(area: f64) -&gt; Circle { /* ... */ }
     }
-}</span><pre id='rust-example-rendered-99' class='rust '>
+}</span><pre id='rust-example-rendered-100' class='rust '>
 <span class='kw'>impl</span> <span class='ident'>Circle</span> {
     <span class='kw'>fn</span> <span class='ident'>area</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span> { <span class='comment'>/* ... */</span> }
     <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>area</span>: <span class='ident'>f64</span>) <span class='op'>-&gt;</span> <span class='ident'>Circle</span> { <span class='comment'>/* ... */</span> }
@@ -2711,14 +2743,14 @@ These methods are the preferred way to define constructor functions.</p>
 </pre>
 
 <p>To call such a method, just prefix it with the type name and a double colon:</p>
-<span id='rust-example-raw-100' class='rusttest'>fn main() {
+<span id='rust-example-raw-101' class='rusttest'>fn main() {
     use std::f64::consts::PI;
     struct Circle { radius: f64 }
     impl Circle {
         fn new(area: f64) -&gt; Circle { Circle { radius: (area / PI).sqrt() } }
     }
     let c = Circle::new(42.5);
-}</span><pre id='rust-example-rendered-100' class='rust '>
+}</span><pre id='rust-example-rendered-101' class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>f64</span>::<span class='ident'>consts</span>::<span class='ident'>PI</span>;
 <span class='kw'>struct</span> <span class='ident'>Circle</span> { <span class='ident'>radius</span>: <span class='ident'>f64</span> }
 <span class='kw'>impl</span> <span class='ident'>Circle</span> {
@@ -2736,7 +2768,7 @@ with a variety of types. Consider a generic <code>map</code> function, which
 takes a function <code>function</code> and a vector <code>vector</code> and returns a new
 vector consisting of the result of applying <code>function</code> to each element
 of <code>vector</code>:</p>
-<span id='rust-example-raw-101' class='rusttest'>fn main() {
+<span id='rust-example-raw-102' class='rusttest'>fn main() {
     fn map&lt;T, U&gt;(vector: &amp;[T], function: |v: &amp;T| -&gt; U) -&gt; Vec&lt;U&gt; {
         let mut accumulator = Vec::new();
         for element in vector.iter() {
@@ -2744,7 +2776,7 @@ of <code>vector</code>:</p>
         }
         return accumulator;
     }
-}</span><pre id='rust-example-rendered-101' class='rust '>
+}</span><pre id='rust-example-rendered-102' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>map</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>U</span><span class='op'>&gt;</span>(<span class='ident'>vector</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>T</span>], <span class='ident'>function</span>: <span class='op'>|</span><span class='ident'>v</span>: <span class='kw-2'>&amp;</span><span class='ident'>T</span><span class='op'>|</span> <span class='op'>-&gt;</span> <span class='ident'>U</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>U</span><span class='op'>&gt;</span> {
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>accumulator</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
     <span class='kw'>for</span> <span class='ident'>element</span> <span class='kw'>in</span> <span class='ident'>vector</span>.<span class='ident'>iter</span>() {
@@ -2770,7 +2802,7 @@ the broadest set of types possible, since some types are expensive or
 illegal to copy and pass by value.</p>
 
 <p>Generic <code>type</code>, <code>struct</code>, and <code>enum</code> declarations follow the same pattern:</p>
-<span id='rust-example-raw-102' class='rusttest'>type Set&lt;T&gt; = std::collections::HashMap&lt;T, ()&gt;;
+<span id='rust-example-raw-103' class='rusttest'>type Set&lt;T&gt; = std::collections::HashMap&lt;T, ()&gt;;
 
 struct Stack&lt;T&gt; {
     elements: Vec&lt;T&gt;
@@ -2780,7 +2812,7 @@ enum Option&lt;T&gt; {
     Some(T),
     None
 }
-fn main() {}</span><pre id='rust-example-rendered-102' class='rust '>
+fn main() {}</span><pre id='rust-example-rendered-103' class='rust '>
 <span class='kw'>type</span> <span class='ident'>Set</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='ident'>T</span>, ()<span class='op'>&gt;</span>;
 
 <span class='kw'>struct</span> <span class='ident'>Stack</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
@@ -2801,7 +2833,7 @@ Because Rust does not have null pointers (except in unsafe code), we need
 another way to write a function whose result isn&#39;t defined on every possible
 combination of arguments of the appropriate types. The usual way is to write
 a function that returns <code>Option&lt;T&gt;</code> instead of <code>T</code>.</p>
-<span id='rust-example-raw-103' class='rusttest'>fn main() {
+<span id='rust-example-raw-104' class='rusttest'>fn main() {
     struct Point { x: f64, y: f64 }
     enum Shape { Circle(Point, f64), Rectangle(Point, Point) }
     fn radius(shape: Shape) -&gt; Option&lt;f64&gt; {
@@ -2810,7 +2842,7 @@ a function that returns <code>Option&lt;T&gt;</code> instead of <code>T</code>.<
             Rectangle(..)     =&gt; None
         }
     }
-}</span><pre id='rust-example-rendered-103' class='rust '>
+}</span><pre id='rust-example-rendered-104' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>radius</span>(<span class='ident'>shape</span>: <span class='ident'>Shape</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>f64</span><span class='op'>&gt;</span> {
     <span class='kw'>match</span> <span class='ident'>shape</span> {
         <span class='ident'>Circle</span>(_, <span class='ident'>radius</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>(<span class='ident'>radius</span>),
@@ -2853,12 +2885,12 @@ If we have a function with a type parameter <code>T</code>,
 can we copy values of type <code>T</code> inside that function?
 In Rust, we can&#39;t,
 and if we try to run the following code the compiler will complain.</p>
-<span id='rust-example-raw-104' class='rusttest'>fn main() {
+<span id='rust-example-raw-105' class='rusttest'>fn main() {
     // This does not compile
     fn head_bad&lt;T&gt;(v: &amp;[T]) -&gt; T {
         v[0] // error: copying a non-copyable value
     }
-}</span><pre id='rust-example-rendered-104' class='rust '>
+}</span><pre id='rust-example-rendered-105' class='rust '>
 <span class='comment'>// This does not compile</span>
 <span class='kw'>fn</span> <span class='ident'>head_bad</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>v</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>T</span>]) <span class='op'>-&gt;</span> <span class='ident'>T</span> {
     <span class='ident'>v</span>[<span class='number'>0</span>] <span class='comment'>// error: copying a non-copyable value</span>
@@ -2870,12 +2902,12 @@ that the <code>head</code> function is only for copyable types.
 In Rust, copyable types are those that <em>implement the <code>Clone</code> trait</em>.
 We can then explicitly create a second copy of the value we are returning
 by calling the <code>clone</code> method:</p>
-<span id='rust-example-raw-105' class='rusttest'>fn main() {
+<span id='rust-example-raw-106' class='rusttest'>fn main() {
     // This does
     fn head&lt;T: Clone&gt;(v: &amp;[T]) -&gt; T {
         v[0].clone()
     }
-}</span><pre id='rust-example-rendered-105' class='rust '>
+}</span><pre id='rust-example-rendered-106' class='rust '>
 <span class='comment'>// This does</span>
 <span class='kw'>fn</span> <span class='ident'>head</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Clone</span><span class='op'>&gt;</span>(<span class='ident'>v</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>T</span>]) <span class='op'>-&gt;</span> <span class='ident'>T</span> {
     <span class='ident'>v</span>[<span class='number'>0</span>].<span class='ident'>clone</span>()
@@ -2922,7 +2954,7 @@ trait provides one method called <code>drop</code>, which is automatically
 called when a value of the type that implements this trait is
 destroyed, either because the value went out of scope or because the
 garbage collector reclaimed it.</p>
-<span id='rust-example-raw-106' class='rusttest'>fn main() {
+<span id='rust-example-raw-107' class='rusttest'>fn main() {
     struct TimeBomb {
         explosivity: uint
     }
@@ -2934,7 +2966,7 @@ garbage collector reclaimed it.</p>
             }
         }
     }
-}</span><pre id='rust-example-rendered-106' class='rust '>
+}</span><pre id='rust-example-rendered-107' class='rust '>
 <span class='kw'>struct</span> <span class='ident'>TimeBomb</span> {
     <span class='ident'>explosivity</span>: <span class='ident'>uint</span>
 }
@@ -2957,11 +2989,11 @@ may call it.</p>
 For example, we could declare the trait
 <code>Printable</code> for things that can be printed to the console,
 with a single method signature:</p>
-<span id='rust-example-raw-107' class='rusttest'>fn main() {
+<span id='rust-example-raw-108' class='rusttest'>fn main() {
     trait Printable {
         fn print(&amp;self);
     }
-}</span><pre id='rust-example-rendered-107' class='rust '>
+}</span><pre id='rust-example-rendered-108' class='rust '>
 <span class='kw'>trait</span> <span class='ident'>Printable</span> {
     <span class='kw'>fn</span> <span class='ident'>print</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>);
 }
@@ -2979,7 +3011,7 @@ a particular trait gives an implementation of the methods that
 trait provides.  For instance, the following impls of
 <code>Printable</code> for <code>int</code> and <code>String</code> give implementations of the <code>print</code>
 method.</p>
-<span id='rust-example-raw-108' class='rusttest'>fn main() {
+<span id='rust-example-raw-109' class='rusttest'>fn main() {
     trait Printable { fn print(&amp;self); }
     impl Printable for int {
         fn print(&amp;self) { println!(&quot;{}&quot;, *self) }
@@ -2991,7 +3023,7 @@ method.</p>
     
     1.print();
     (&quot;foo&quot;.to_string()).print();
-}</span><pre id='rust-example-rendered-108' class='rust '>
+}</span><pre id='rust-example-rendered-109' class='rust '>
 <span class='kw'>impl</span> <span class='ident'>Printable</span> <span class='kw'>for</span> <span class='ident'>int</span> {
     <span class='kw'>fn</span> <span class='ident'>print</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) { <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='op'>*</span><span class='self'>self</span>) }
 }
@@ -3011,7 +3043,7 @@ implementation for most or all of the types that implement that trait.
 For instance, suppose that we wanted <code>bool</code>s and <code>f32</code>s to be
 printable, and that we wanted the implementation of <code>print</code> for those
 types to be exactly as it is for <code>int</code>, above:</p>
-<span id='rust-example-raw-109' class='rusttest'>fn main() {
+<span id='rust-example-raw-110' class='rusttest'>fn main() {
     trait Printable { fn print(&amp;self); }
     impl Printable for f32 {
         fn print(&amp;self) { println!(&quot;{}&quot;, *self) }
@@ -3023,7 +3055,7 @@ types to be exactly as it is for <code>int</code>, above:</p>
     
     true.print();
     3.14159.print();
-}</span><pre id='rust-example-rendered-109' class='rust '>
+}</span><pre id='rust-example-rendered-110' class='rust '>
 <span class='kw'>impl</span> <span class='ident'>Printable</span> <span class='kw'>for</span> <span class='ident'>f32</span> {
     <span class='kw'>fn</span> <span class='ident'>print</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) { <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='op'>*</span><span class='self'>self</span>) }
 }
@@ -3037,7 +3069,7 @@ types to be exactly as it is for <code>int</code>, above:</p>
 in three places.  Instead of doing that, we can simply include the
 definition of <code>print</code> right in the trait definition, instead of just
 giving its signature.  That is, we can write the following:</p>
-<span id='rust-example-raw-110' class='rusttest'>extern crate debug;
+<span id='rust-example-raw-111' class='rusttest'>extern crate debug;
 
 fn main() {
 trait Printable {
@@ -3059,7 +3091,7 @@ impl Printable for f32 {}
 (&quot;foo&quot;.to_string()).print();
 true.print();
 3.14159.print();
-}</span><pre id='rust-example-rendered-110' class='rust '>
+}</span><pre id='rust-example-rendered-111' class='rust '>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>debug</span>;
 
 <span class='kw'>trait</span> <span class='ident'>Printable</span> {
@@ -3091,7 +3123,7 @@ default method for <code>print</code>, as is being done above in the impl for
                            href="#type-parameterized-traits">17.4 Type-parameterized traits</a></h2>
 <p>Traits may be parameterized by type variables.  For example, a trait
 for generalized sequence types might look like the following:</p>
-<span id='rust-example-raw-111' class='rusttest'>fn main() {
+<span id='rust-example-raw-112' class='rusttest'>fn main() {
     trait Seq&lt;T&gt; {
         fn length(&amp;self) -&gt; uint;
     }
@@ -3099,7 +3131,7 @@ for generalized sequence types might look like the following:</p>
     impl&lt;T&gt; Seq&lt;T&gt; for Vec&lt;T&gt; {
         fn length(&amp;self) -&gt; uint { self.len() }
     }
-}</span><pre id='rust-example-rendered-111' class='rust '>
+}</span><pre id='rust-example-rendered-112' class='rust '>
 <span class='kw'>trait</span> <span class='ident'>Seq</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='kw'>fn</span> <span class='ident'>length</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>uint</span>;
 }
@@ -3125,7 +3157,7 @@ the impl, would be a compile-time error.</p>
 of as a type parameter. An implementation of the trait for any given
 type <code>T</code> replaces the <code>Self</code> type parameter with <code>T</code>. The following
 trait describes types that support an equality operation:</p>
-<span id='rust-example-raw-112' class='rusttest'>fn main() {
+<span id='rust-example-raw-113' class='rusttest'>fn main() {
     // In a trait, `self` refers to the self argument.
     // `Self` refers to the type implementing the trait.
     trait PartialEq {
@@ -3136,7 +3168,7 @@ trait describes types that support an equality operation:</p>
     impl PartialEq for int {
         fn equals(&amp;self, other: &amp;int) -&gt; bool { *other == *self }
     }
-}</span><pre id='rust-example-rendered-112' class='rust '>
+}</span><pre id='rust-example-rendered-113' class='rust '>
 <span class='comment'>// In a trait, `self` refers to the self argument.</span>
 <span class='comment'>// `Self` refers to the type implementing the trait.</span>
 <span class='kw'>trait</span> <span class='ident'>PartialEq</span> {
@@ -3158,7 +3190,7 @@ type <code>int</code>, only using <code>self</code> as the name of the receiver.
 methods.  These methods are called by prefixing the method name with the trait
 name and a double colon.  The compiler uses type inference to decide which
 implementation to use.</p>
-<span id='rust-example-raw-113' class='rusttest'>fn main() {
+<span id='rust-example-raw-114' class='rusttest'>fn main() {
     use std::f64::consts::PI;
     trait Shape { fn new(area: f64) -&gt; Self; }
     struct Circle { radius: f64 }
@@ -3174,7 +3206,7 @@ implementation to use.</p>
     let area = 42.5;
     let c: Circle = Shape::new(area);
     let s: Square = Shape::new(area);
-}</span><pre id='rust-example-rendered-113' class='rust '>
+}</span><pre id='rust-example-rendered-114' class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>f64</span>::<span class='ident'>consts</span>::<span class='ident'>PI</span>;
 <span class='kw'>trait</span> <span class='ident'>Shape</span> { <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>area</span>: <span class='ident'>f64</span>) <span class='op'>-&gt;</span> <span class='ident'>Self</span>; }
 <span class='kw'>struct</span> <span class='ident'>Circle</span> { <span class='ident'>radius</span>: <span class='ident'>f64</span> }
@@ -3198,14 +3230,14 @@ implementation to use.</p>
 abstract properties that types can have. We can use this language to
 define <em>bounds</em> on type parameters, so that we can then operate on
 generic types.</p>
-<span id='rust-example-raw-114' class='rusttest'>fn main() {
+<span id='rust-example-raw-115' class='rusttest'>fn main() {
     trait Printable { fn print(&amp;self); }
     fn print_all&lt;T: Printable&gt;(printable_things: Vec&lt;T&gt;) {
         for thing in printable_things.iter() {
             thing.print();
         }
     }
-}</span><pre id='rust-example-rendered-114' class='rust '>
+}</span><pre id='rust-example-rendered-115' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>print_all</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Printable</span><span class='op'>&gt;</span>(<span class='ident'>printable_things</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) {
     <span class='kw'>for</span> <span class='ident'>thing</span> <span class='kw'>in</span> <span class='ident'>printable_things</span>.<span class='ident'>iter</span>() {
         <span class='ident'>thing</span>.<span class='ident'>print</span>();
@@ -3221,21 +3253,21 @@ whose element type does not have a <code>Printable</code> implementation.</p>
 
 <p>Type parameters can have multiple bounds by separating them with <code>+</code>,
 as in this version of <code>print_all</code> that copies elements.</p>
-<span id='rust-example-raw-115' class='rusttest'>fn main() {
+<span id='rust-example-raw-116' class='rusttest'>fn main() {
     trait Printable { fn print(&amp;self); }
     fn print_all&lt;T: Printable + Clone&gt;(printable_things: Vec&lt;T&gt;) {
         let mut i = 0;
         while i &lt; printable_things.len() {
-            let copy_of_thing = printable_things.get(i).clone();
+            let copy_of_thing = printable_things[i].clone();
             copy_of_thing.print();
             i += 1;
         }
     }
-}</span><pre id='rust-example-rendered-115' class='rust '>
+}</span><pre id='rust-example-rendered-116' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>print_all</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Printable</span> <span class='op'>+</span> <span class='ident'>Clone</span><span class='op'>&gt;</span>(<span class='ident'>printable_things</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) {
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='number'>0</span>;
     <span class='kw'>while</span> <span class='ident'>i</span> <span class='op'>&lt;</span> <span class='ident'>printable_things</span>.<span class='ident'>len</span>() {
-        <span class='kw'>let</span> <span class='ident'>copy_of_thing</span> <span class='op'>=</span> <span class='ident'>printable_things</span>.<span class='ident'>get</span>(<span class='ident'>i</span>).<span class='ident'>clone</span>();
+        <span class='kw'>let</span> <span class='ident'>copy_of_thing</span> <span class='op'>=</span> <span class='ident'>printable_things</span>[<span class='ident'>i</span>].<span class='ident'>clone</span>();
         <span class='ident'>copy_of_thing</span>.<span class='ident'>print</span>();
         <span class='ident'>i</span> <span class='op'>+=</span> <span class='number'>1</span>;
     }
@@ -3253,7 +3285,7 @@ the preferred way to use traits polymorphically.</p>
 <p>The above allows us to define functions that polymorphically act on
 values of a single unknown type that conforms to a given trait.
 However, consider this function:</p>
-<span id='rust-example-raw-116' class='rusttest'>fn main() {
+<span id='rust-example-raw-117' class='rusttest'>fn main() {
     type Circle = int; type Rectangle = int;
     impl Drawable for int { fn draw(&amp;self) {} }
     fn new_circle() -&gt; int { 1 }
@@ -3264,7 +3296,7 @@ However, consider this function:</p>
     }
     let c: Circle = new_circle();
     draw_all(vec![c]);
-}</span><pre id='rust-example-rendered-116' class='rust '>
+}</span><pre id='rust-example-rendered-117' class='rust '>
 <span class='kw'>trait</span> <span class='ident'>Drawable</span> { <span class='kw'>fn</span> <span class='ident'>draw</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>); }
 
 <span class='kw'>fn</span> <span class='ident'>draw_all</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Drawable</span><span class='op'>&gt;</span>(<span class='ident'>shapes</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) {
@@ -3277,12 +3309,12 @@ However, consider this function:</p>
 a vector containing both circles and rectangles. When such behavior is
 needed, a trait name can alternately be used as a type, called
 an <em>object</em>.</p>
-<span id='rust-example-raw-117' class='rusttest'>fn main() {
+<span id='rust-example-raw-118' class='rusttest'>fn main() {
     trait Drawable { fn draw(&amp;self); }
     fn draw_all(shapes: &amp;[Box&lt;Drawable&gt;]) {
         for shape in shapes.iter() { shape.draw(); }
     }
-}</span><pre id='rust-example-rendered-117' class='rust '>
+}</span><pre id='rust-example-rendered-118' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>draw_all</span>(<span class='ident'>shapes</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Drawable</span><span class='op'>&gt;</span>]) {
     <span class='kw'>for</span> <span class='ident'>shape</span> <span class='kw'>in</span> <span class='ident'>shapes</span>.<span class='ident'>iter</span>() { <span class='ident'>shape</span>.<span class='ident'>draw</span>(); }
 }
@@ -3292,7 +3324,7 @@ an <em>object</em>.</p>
 type denotes any owned box value that implements the <code>Drawable</code> trait.
 To construct such a value, you use the <code>as</code> operator to cast a value
 to an object:</p>
-<span id='rust-example-raw-118' class='rusttest'>fn main() {
+<span id='rust-example-raw-119' class='rusttest'>fn main() {
     type Circle = int; type Rectangle = bool;
     trait Drawable { fn draw(&amp;self); }
     fn new_circle() -&gt; Circle { 1 }
@@ -3305,7 +3337,7 @@ to an object:</p>
     let c: Box&lt;Circle&gt; = box new_circle();
     let r: Box&lt;Rectangle&gt; = box new_rectangle();
     draw_all([c as Box&lt;Drawable&gt;, r as Box&lt;Drawable&gt;]);
-}</span><pre id='rust-example-rendered-118' class='rust '>
+}</span><pre id='rust-example-rendered-119' class='rust '>
 
 <span class='kw'>impl</span> <span class='ident'>Drawable</span> <span class='kw'>for</span> <span class='ident'>Circle</span> { <span class='kw'>fn</span> <span class='ident'>draw</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) { <span class='comment'>/* ... */</span> } }
 <span class='kw'>impl</span> <span class='ident'>Drawable</span> <span class='kw'>for</span> <span class='ident'>Rectangle</span> { <span class='kw'>fn</span> <span class='ident'>draw</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) { <span class='comment'>/* ... */</span> } }
@@ -3322,7 +3354,7 @@ only be referred to via one of the pointer types.
 Other pointer types work as well.
 Casts to traits may only be done with compatible pointers so,
 for example, an <code>&amp;Circle</code> may not be cast to a <code>Box&lt;Drawable&gt;</code>.</p>
-<span id='rust-example-raw-119' class='rusttest'>fn main() {
+<span id='rust-example-raw-120' class='rusttest'>fn main() {
     type Circle = int; type Rectangle = int;
     trait Drawable { fn draw(&amp;self); }
     impl Drawable for int { fn draw(&amp;self) {} }
@@ -3332,7 +3364,7 @@ for example, an <code>&amp;Circle</code> may not be cast to a <code>Box&lt;Drawa
     let owny: Box&lt;Drawable&gt; = box new_circle() as Box&lt;Drawable&gt;;
     // A borrowed object
     let stacky: &amp;Drawable = &amp;new_circle() as &amp;Drawable;
-}</span><pre id='rust-example-rendered-119' class='rust '>
+}</span><pre id='rust-example-rendered-120' class='rust '>
 <span class='comment'>// An owned object</span>
 <span class='kw'>let</span> <span class='ident'>owny</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Drawable</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>new_circle</span>() <span class='kw'>as</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Drawable</span><span class='op'>&gt;</span>;
 <span class='comment'>// A borrowed object</span>
@@ -3353,13 +3385,13 @@ of their contents and so the compiler cannot reason about those properties.</p>
 <p>You can instruct the compiler, however, that the contents of a trait object must
 ascribe to a particular bound with a trailing colon (<code>:</code>). These are examples of
 valid types:</p>
-<span id='rust-example-raw-120' class='rusttest'>fn main() {
+<span id='rust-example-raw-121' class='rusttest'>fn main() {
     trait Foo {}
     trait Bar&lt;T&gt; {}
     
     fn sendable_foo(f: Box&lt;Foo + Send&gt;) { /* ... */ }
     fn shareable_bar&lt;T: Share&gt;(b: &amp;Bar&lt;T&gt; + Share) { /* ... */ }
-}</span><pre id='rust-example-rendered-120' class='rust '>
+}</span><pre id='rust-example-rendered-121' class='rust '>
 <span class='kw'>trait</span> <span class='ident'>Foo</span> {}
 <span class='kw'>trait</span> <span class='ident'>Bar</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {}
 
@@ -3381,16 +3413,16 @@ for traits of the same storage class.</p>
 Types that implement a trait must also implement its supertraits.
 For example,
 we can define a <code>Circle</code> trait that inherits from <code>Shape</code>.</p>
-<span id='rust-example-raw-121' class='rusttest'>fn main() {
+<span id='rust-example-raw-122' class='rusttest'>fn main() {
     trait Shape { fn area(&amp;self) -&gt; f64; }
     trait Circle : Shape { fn radius(&amp;self) -&gt; f64; }
-}</span><pre id='rust-example-rendered-121' class='rust '>
+}</span><pre id='rust-example-rendered-122' class='rust '>
 <span class='kw'>trait</span> <span class='ident'>Shape</span> { <span class='kw'>fn</span> <span class='ident'>area</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span>; }
 <span class='kw'>trait</span> <span class='ident'>Circle</span> : <span class='ident'>Shape</span> { <span class='kw'>fn</span> <span class='ident'>radius</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span>; }
 </pre>
 
 <p>Now, we can implement <code>Circle</code> on a type only if we also implement <code>Shape</code>.</p>
-<span id='rust-example-raw-122' class='rusttest'>fn main() {
+<span id='rust-example-raw-123' class='rusttest'>fn main() {
     use std::f64::consts::PI;
     trait Shape { fn area(&amp;self) -&gt; f64; }
     trait Circle : Shape { fn radius(&amp;self) -&gt; f64; }
@@ -3403,7 +3435,7 @@ we can define a <code>Circle</code> trait that inherits from <code>Shape</code>.
     impl Shape for CircleStruct {
         fn area(&amp;self) -&gt; f64 { PI * square(self.radius) }
     }
-}</span><pre id='rust-example-rendered-122' class='rust '>
+}</span><pre id='rust-example-rendered-123' class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>f64</span>::<span class='ident'>consts</span>::<span class='ident'>PI</span>;
 <span class='kw'>struct</span> <span class='ident'>CircleStruct</span> { <span class='ident'>center</span>: <span class='ident'>Point</span>, <span class='ident'>radius</span>: <span class='ident'>f64</span> }
 <span class='kw'>impl</span> <span class='ident'>Circle</span> <span class='kw'>for</span> <span class='ident'>CircleStruct</span> {
@@ -3422,14 +3454,14 @@ This is a silly way to compute the radius of a circle
 <p>In type-parameterized functions,
 methods of the supertrait may be called on values of subtrait-bound type parameters.
 Referring to the previous example of <code>trait Circle : Shape</code>:</p>
-<span id='rust-example-raw-123' class='rusttest'>fn main() {
+<span id='rust-example-raw-124' class='rusttest'>fn main() {
     trait Shape { fn area(&amp;self) -&gt; f64; }
     trait Circle : Shape { fn radius(&amp;self) -&gt; f64; }
     fn radius_times_area&lt;T: Circle&gt;(c: T) -&gt; f64 {
         // `c` is both a Circle and a Shape
         c.radius() * c.area()
     }
-}</span><pre id='rust-example-rendered-123' class='rust '>
+}</span><pre id='rust-example-rendered-124' class='rust '>
 <span class='kw'>fn</span> <span class='ident'>radius_times_area</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Circle</span><span class='op'>&gt;</span>(<span class='ident'>c</span>: <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span> {
     <span class='comment'>// `c` is both a Circle and a Shape</span>
     <span class='ident'>c</span>.<span class='ident'>radius</span>() <span class='op'>*</span> <span class='ident'>c</span>.<span class='ident'>area</span>()
@@ -3437,7 +3469,7 @@ Referring to the previous example of <code>trait Circle : Shape</code>:</p>
 </pre>
 
 <p>Likewise, supertrait methods may also be called on trait objects.</p>
-<span id='rust-example-raw-124' class='rusttest'>fn main() {
+<span id='rust-example-raw-125' class='rusttest'>fn main() {
     use std::f64::consts::PI;
     trait Shape { fn area(&amp;self) -&gt; f64; }
     trait Circle : Shape { fn radius(&amp;self) -&gt; f64; }
@@ -3450,7 +3482,7 @@ Referring to the previous example of <code>trait Circle : Shape</code>:</p>
     let concrete = box CircleStruct{center:Point{x:3.0,y:4.0},radius:5.0};
     let mycircle: Box&lt;Circle&gt; = concrete as Box&lt;Circle&gt;;
     let nonsense = mycircle.radius() * mycircle.area();
-}</span><pre id='rust-example-rendered-124' class='rust '>
+}</span><pre id='rust-example-rendered-125' class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>f64</span>::<span class='ident'>consts</span>::<span class='ident'>PI</span>;
 
 <span class='kw'>let</span> <span class='ident'>concrete</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>CircleStruct</span>{<span class='ident'>center</span>:<span class='ident'>Point</span>{<span class='ident'>x</span>:<span class='number'>3.0</span>,<span class='ident'>y</span>:<span class='number'>4.0</span>},<span class='ident'>radius</span>:<span class='number'>5.0</span>};
@@ -3464,13 +3496,14 @@ Referring to the previous example of <code>trait Circle : Shape</code>:</p>
 
 <h2 id="deriving-implementations-for-traits" class='section-header'><a
                            href="#deriving-implementations-for-traits">17.8 Deriving implementations for traits</a></h2>
-<p>A small number of traits in <code>std</code> and <code>extra</code> can have implementations
+<p>A small number of traits in can have implementations
 that can be automatically derived. These instances are specified by
 placing the <code>deriving</code> attribute on a data type declaration. For
 example, the following will mean that <code>Circle</code> has an implementation
 for <code>PartialEq</code> and can be used with the equality operators, and that a value
 of type <code>ABC</code> can be randomly generated and converted to a string:</p>
-<span id='rust-example-raw-125' class='rusttest'>extern crate rand;
+<span id='rust-example-raw-126' class='rusttest'>extern crate rand;
+use std::rand::{task_rng, Rng};
 
 #[deriving(PartialEq)]
 struct Circle { radius: f64 }
@@ -3481,8 +3514,16 @@ enum ABC { A, B, C }
 fn main() {
     // Use the Show trait to print &quot;A, B, C.&quot;
     println!(&quot;{}, {}, {}&quot;, A, B, C);
-}</span><pre id='rust-example-rendered-125' class='rust '>
+
+    let mut rng = task_rng();
+
+    // Use the Rand trait to generate a random variants.
+    for _ in range(0i, 10) {
+        println!(&quot;{}&quot;, rng.gen::&lt;ABC&gt;());
+    }
+}</span><pre id='rust-example-rendered-126' class='rust '>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>rand</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rand</span>::{<span class='ident'>task_rng</span>, <span class='ident'>Rng</span>};
 
 <span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>PartialEq</span>)]</span>
 <span class='kw'>struct</span> <span class='ident'>Circle</span> { <span class='ident'>radius</span>: <span class='ident'>f64</span> }
@@ -3493,6 +3534,13 @@ fn main() {
 <span class='kw'>fn</span> <span class='ident'>main</span>() {
     <span class='comment'>// Use the Show trait to print &quot;A, B, C.&quot;</span>
     <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}, {}, {}&quot;</span>, <span class='ident'>A</span>, <span class='ident'>B</span>, <span class='ident'>C</span>);
+
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>rng</span> <span class='op'>=</span> <span class='ident'>task_rng</span>();
+
+    <span class='comment'>// Use the Rand trait to generate a random variants.</span>
+    <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0i</span>, <span class='number'>10</span>) {
+        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>rng</span>.<span class='ident'>gen</span>::<span class='op'>&lt;</span><span class='ident'>ABC</span><span class='op'>&gt;</span>());
+    }
 }
 </pre>
 
@@ -3514,10 +3562,10 @@ In Rust, the content of all source code that the compiler directly had to compil
 that binary is collectively called a &#39;crate&#39;.</p>
 
 <p>For example, for a simple hello world program your crate only consists of this code:</p>
-<span id='rust-example-raw-126' class='rusttest'>// `main.rs`
+<span id='rust-example-raw-127' class='rusttest'>// `main.rs`
 fn main() {
     println!(&quot;Hello world!&quot;);
-}</span><pre id='rust-example-rendered-126' class='rust '>
+}</span><pre id='rust-example-rendered-127' class='rust '>
 <span class='comment'>// `main.rs`</span>
 <span class='kw'>fn</span> <span class='ident'>main</span>() {
     <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Hello world!&quot;</span>);
@@ -3535,7 +3583,7 @@ from which it produces either a library or an executable.</p>
 root module. That root module is called the &#39;crate root&#39;.</p>
 
 <p>All modules in a crate below the crate root are declared with the <code>mod</code> keyword:</p>
-<span id='rust-example-raw-127' class='rusttest'>// This is the crate root
+<span id='rust-example-raw-128' class='rusttest'>// This is the crate root
 
 mod farm {
     // This is the body of module &#39;farm&#39; declared in the crate root.
@@ -3552,7 +3600,7 @@ mod farm {
 
 fn main() {
     println!(&quot;Hello farm!&quot;);
-}</span><pre id='rust-example-rendered-127' class='rust '>
+}</span><pre id='rust-example-rendered-128' class='rust '>
 <span class='comment'>// This is the crate root</span>
 
 <span class='kw'>mod</span> <span class='ident'>farm</span> {
@@ -3581,7 +3629,7 @@ which contains a function <code>hay</code>.</p>
                            href="#paths-and-visibility">18.3 Paths and visibility</a></h2>
 <p>We&#39;ve now defined a nice module hierarchy. But how do we access the items in it from our <code>main</code> function?
 One way to do it is to simply fully qualifying it:</p>
-<span id='rust-example-raw-128' class='rusttest'>mod farm {
+<span id='rust-example-raw-129' class='rusttest'>mod farm {
     fn chicken() { println!(&quot;cluck cluck&quot;); }
     // ...
 }
@@ -3590,7 +3638,7 @@ fn main() {
     println!(&quot;Hello chicken!&quot;);
 
     ::farm::chicken(); // Won&#39;t compile yet, see further down
-}</span><pre id='rust-example-rendered-128' class='rust '>
+}</span><pre id='rust-example-rendered-129' class='rust '>
 <span class='kw'>mod</span> <span class='ident'>farm</span> {
     <span class='kw'>fn</span> <span class='ident'>chicken</span>() { <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;cluck cluck&quot;</span>); }
     <span class='comment'>// ...</span>
@@ -3617,7 +3665,7 @@ get a <code>function &#39;chicken&#39; is private</code> error. That&#39;s becau
 
 <p>To make them visible outside their containing modules, you need to mark them
 <em>public</em> with <code>pub</code>:</p>
-<span id='rust-example-raw-129' class='rusttest'>mod farm {
+<span id='rust-example-raw-130' class='rusttest'>mod farm {
     pub fn chicken() { println!(&quot;cluck cluck&quot;); }
     pub fn cow() { println!(&quot;mooo&quot;); }
     // ...
@@ -3626,7 +3674,7 @@ get a <code>function &#39;chicken&#39; is private</code> error. That&#39;s becau
 fn main() {
     println!(&quot;Hello chicken!&quot;);
     ::farm::chicken(); // This compiles now
-}</span><pre id='rust-example-rendered-129' class='rust '>
+}</span><pre id='rust-example-rendered-130' class='rust '>
 <span class='kw'>mod</span> <span class='ident'>farm</span> {
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>chicken</span>() { <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;cluck cluck&quot;</span>); }
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>cow</span>() { <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;mooo&quot;</span>); }
@@ -3648,7 +3696,7 @@ struct level.</p>
 
 <p>Fields are <em>private</em> by default, and can be made <em>public</em> with
 the <code>pub</code> keyword:</p>
-<span id='rust-example-raw-130' class='rusttest'>mod farm {
+<span id='rust-example-raw-131' class='rusttest'>mod farm {
 pub type Chicken = int;
 struct Human(int);
 impl Human { pub fn rest(&amp;self) { } }
@@ -3679,7 +3727,7 @@ fn main() {
     // `let chicken_counter = f.chickens.len();`
 }
 fn make_me_a_farm() -&gt; farm::Farm { farm::make_me_a_farm() }
-fn make_me_a_chicken() -&gt; farm::Chicken { 0 }</span><pre id='rust-example-rendered-130' class='rust '>
+fn make_me_a_chicken() -&gt; farm::Chicken { 0 }</span><pre id='rust-example-rendered-131' class='rust '>
 <span class='kw'>mod</span> <span class='ident'>farm</span> {
     <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Farm</span> {
         <span class='ident'>chickens</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Chicken</span><span class='op'>&gt;</span>,
@@ -3731,13 +3779,13 @@ inside some directory (usually the same as of the source file containing the
 as the body of the module. If it finds both, that&#39;s a compile error.</p>
 
 <p>To move the content of <code>mod farm</code> into its own file, you can write:</p>
-<span id='rust-example-raw-131' class='rusttest'>// `main.rs` - contains body of the crate root
+<span id='rust-example-raw-132' class='rusttest'>// `main.rs` - contains body of the crate root
 mod farm; // Compiler will look for `farm.rs` and `farm/mod.rs`
 
 fn main() {
     println!(&quot;Hello farm!&quot;);
     ::farm::cow();
-}</span><pre id='rust-example-rendered-131' class='rust '>
+}</span><pre id='rust-example-rendered-132' class='rust '>
 <span class='comment'>// `main.rs` - contains body of the crate root</span>
 <span class='kw'>mod</span> <span class='ident'>farm</span>; <span class='comment'>// Compiler will look for `farm.rs` and `farm/mod.rs`</span>
 
@@ -3746,14 +3794,14 @@ fn main() {
     ::<span class='ident'>farm</span>::<span class='ident'>cow</span>();
 }
 </pre>
-<span id='rust-example-raw-132' class='rusttest'>// `farm.rs` - contains body of module &#39;farm&#39; in the crate root
+<span id='rust-example-raw-133' class='rusttest'>// `farm.rs` - contains body of module &#39;farm&#39; in the crate root
 pub fn chicken() { println!(&quot;cluck cluck&quot;); }
 pub fn cow() { println!(&quot;mooo&quot;); }
 
 pub mod barn {
     pub fn hay() { println!(&quot;...&quot;); }
 }
-fn main() { }</span><pre id='rust-example-rendered-132' class='rust '>
+fn main() { }</span><pre id='rust-example-rendered-133' class='rust '>
 <span class='comment'>// `farm.rs` - contains body of module &#39;farm&#39; in the crate root</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>chicken</span>() { <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;cluck cluck&quot;</span>); }
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>cow</span>() { <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;mooo&quot;</span>); }
@@ -3773,7 +3821,7 @@ Both will result in duplicate and mutually incompatible definitions.</p>
 <p>When <code>rustc</code> resolves these module declarations, it starts by looking in the
 parent directory of the file containing the <code>mod foo</code> declaration. For example,
 given a file with the module body:</p>
-<span id='rust-example-raw-133' class='rusttest'>fn main() {
+<span id='rust-example-raw-134' class='rusttest'>fn main() {
     // `src/main.rs`
     mod plants;
     mod animals {
@@ -3782,7 +3830,7 @@ given a file with the module body:</p>
             mod humans;
         }
     }
-}</span><pre id='rust-example-rendered-133' class='rust '>
+}</span><pre id='rust-example-rendered-134' class='rust '>
 <span class='comment'>// `src/main.rs`</span>
 <span class='kw'>mod</span> <span class='ident'>plants</span>;
 <span class='kw'>mod</span> <span class='ident'>animals</span> {
@@ -3807,22 +3855,22 @@ src/animals/mammals/humans/mod.rs</code></pre>
 <p>Keep in mind that identical module hierarchies can still lead to different path
 lookups depending on how and where you&#39;ve moved a module body to its own file.
 For example, if you move the <code>animals</code> module into its own file:</p>
-<span id='rust-example-raw-134' class='rusttest'>fn main() {
+<span id='rust-example-raw-135' class='rusttest'>fn main() {
     // `src/main.rs`
     mod plants;
     mod animals;
-}</span><pre id='rust-example-rendered-134' class='rust '>
+}</span><pre id='rust-example-rendered-135' class='rust '>
 <span class='comment'>// `src/main.rs`</span>
 <span class='kw'>mod</span> <span class='ident'>plants</span>;
 <span class='kw'>mod</span> <span class='ident'>animals</span>;
 </pre>
-<span id='rust-example-raw-135' class='rusttest'>fn main() {
+<span id='rust-example-raw-136' class='rusttest'>fn main() {
     // `src/animals.rs` or `src/animals/mod.rs`
     mod fish;
     mod mammals {
         mod humans;
     }
-}</span><pre id='rust-example-rendered-135' class='rust '>
+}</span><pre id='rust-example-rendered-136' class='rust '>
 <span class='comment'>// `src/animals.rs` or `src/animals/mod.rs`</span>
 <span class='kw'>mod</span> <span class='ident'>fish</span>;
 <span class='kw'>mod</span> <span class='ident'>mammals</span> {
@@ -3854,10 +3902,10 @@ For example, if you move the <code>animals</code> module into its own file:</p>
 <p>If you need to override where <code>rustc</code> will look for the file containing a
 module&#39;s source code, use the <code>path</code> compiler directive. For example, to load a
 <code>classified</code> module from a different file:</p>
-<span id='rust-example-raw-136' class='rusttest'>fn main() {
+<span id='rust-example-raw-137' class='rusttest'>fn main() {
     #[path=&quot;../../area51/alien.rs&quot;]
     mod classified;
-}</span><pre id='rust-example-rendered-136' class='rust '>
+}</span><pre id='rust-example-rendered-137' class='rust '>
 <span class='attribute'>#[<span class='ident'>path</span><span class='op'>=</span><span class='string'>&quot;../../area51/alien.rs&quot;</span>]</span>
 <span class='kw'>mod</span> <span class='ident'>classified</span>;
 </pre>
@@ -3871,9 +3919,9 @@ them into the local scope of your module: <code>use</code>-statements.</p>
 <p>They work like this: At the beginning of any module body, <code>fn</code> body, or any other block
 you can write a list of <code>use</code>-statements, consisting of the keyword <code>use</code> and a <strong>global path</strong> to an item
 without the <code>::</code> prefix. For example, this imports <code>cow</code> into the local scope:</p>
-<span id='rust-example-raw-137' class='rusttest'>use farm::cow;
+<span id='rust-example-raw-138' class='rusttest'>use farm::cow;
 mod farm { pub fn cow() { println!(&quot;I&#39;m a hidden ninja cow!&quot;) } }
-fn main() { cow() }</span><pre id='rust-example-rendered-137' class='rust '>
+fn main() { cow() }</span><pre id='rust-example-rendered-138' class='rust '>
 <span class='kw'>use</span> <span class='ident'>farm</span>::<span class='ident'>cow</span>;
 </pre>
 
@@ -3888,7 +3936,7 @@ of <code>mod foo;</code> and <code>use</code>-statements, and which tend to work
 <p>However, it&#39;s also possible to import things relative to the module of the <code>use</code>-statement:
 Adding a <code>super::</code> in front of the path will start in the parent module,
 while adding a <code>self::</code> prefix will start in the current module:</p>
-<span id='rust-example-raw-138' class='rusttest'>fn main() {
+<span id='rust-example-raw-139' class='rusttest'>fn main() {
     mod workaround {
     pub fn some_parent_item(){ println!(&quot;...&quot;) }
     mod foo {
@@ -3898,7 +3946,7 @@ while adding a <code>self::</code> prefix will start in the current module:</p>
     pub mod some_child_module { pub fn some_item() {} }
     }
     }
-}</span><pre id='rust-example-rendered-138' class='rust '>
+}</span><pre id='rust-example-rendered-139' class='rust '>
 <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>some_parent_item</span>;
 <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>some_child_module</span>::<span class='ident'>some_item</span>;
 </pre>
@@ -3910,7 +3958,7 @@ For each name you mention in a module/block, <code>rust</code>
 will first look at all items that are defined locally,
 and only if that results in no match look at items you brought in
 scope with corresponding <code>use</code> statements.</p>
-<span id='rust-example-raw-139' class='rusttest'>// FIXME: Allow unused import in doc test
+<span id='rust-example-raw-140' class='rusttest'>// FIXME: Allow unused import in doc test
 use farm::cow;
 // ...
 mod farm { pub fn cow() { println!(&quot;Hidden ninja cow is hidden.&quot;) } }
@@ -3918,7 +3966,7 @@ fn cow() { println!(&quot;Mooo!&quot;) }
 
 fn main() {
     cow() // resolves to the locally defined `cow()` function
-}</span><pre id='rust-example-rendered-139' class='rust '>
+}</span><pre id='rust-example-rendered-140' class='rust '>
 <span class='kw'>use</span> <span class='ident'>farm</span>::<span class='ident'>cow</span>;
 <span class='comment'>// ...</span>
 <span class='kw'>fn</span> <span class='ident'>cow</span>() { <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Mooo!&quot;</span>) }
@@ -3935,12 +3983,12 @@ mutually recursive, order independent definitions.</p>
 
 <p>One odd consequence of that rule is that <code>use</code> statements also go in front of any <code>mod</code> declaration,
 even if they refer to things inside them:</p>
-<span id='rust-example-raw-140' class='rusttest'>use farm::cow;
+<span id='rust-example-raw-141' class='rusttest'>use farm::cow;
 mod farm {
     pub fn cow() { println!(&quot;Moooooo?&quot;) }
 }
 
-fn main() { cow() }</span><pre id='rust-example-rendered-140' class='rust '>
+fn main() { cow() }</span><pre id='rust-example-rendered-141' class='rust '>
 <span class='kw'>use</span> <span class='ident'>farm</span>::<span class='ident'>cow</span>;
 <span class='kw'>mod</span> <span class='ident'>farm</span> {
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>cow</span>() { <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Moooooo?&quot;</span>) }
@@ -3950,7 +3998,7 @@ fn main() { cow() }</span><pre id='rust-example-rendered-140' class='rust '>
 </pre>
 
 <p>This is what our <code>farm</code> example looks like with <code>use</code> statements:</p>
-<span id='rust-example-raw-141' class='rusttest'>use farm::chicken;
+<span id='rust-example-raw-142' class='rusttest'>use farm::chicken;
 use farm::cow;
 use farm::barn;
 
@@ -3970,7 +4018,7 @@ fn main() {
     chicken();
     cow();
     barn::hay();
-}</span><pre id='rust-example-rendered-141' class='rust '>
+}</span><pre id='rust-example-rendered-142' class='rust '>
 <span class='kw'>use</span> <span class='ident'>farm</span>::<span class='ident'>chicken</span>;
 <span class='kw'>use</span> <span class='ident'>farm</span>::<span class='ident'>cow</span>;
 <span class='kw'>use</span> <span class='ident'>farm</span>::<span class='ident'>barn</span>;
@@ -3995,14 +4043,14 @@ fn main() {
 </pre>
 
 <p>And here an example with multiple files:</p>
-<span id='rust-example-raw-142' class='rusttest'>// `a.rs` - crate root
+<span id='rust-example-raw-143' class='rusttest'>// `a.rs` - crate root
 use b::foo;
 use b::c::bar;
 mod b;
 fn main() {
     foo();
     bar();
-}</span><pre id='rust-example-rendered-142' class='rust '>
+}</span><pre id='rust-example-rendered-143' class='rust '>
 <span class='comment'>// `a.rs` - crate root</span>
 <span class='kw'>use</span> <span class='ident'>b</span>::<span class='ident'>foo</span>;
 <span class='kw'>use</span> <span class='ident'>b</span>::<span class='ident'>c</span>::<span class='ident'>bar</span>;
@@ -4012,19 +4060,19 @@ fn main() {
     <span class='ident'>bar</span>();
 }
 </pre>
-<span id='rust-example-raw-143' class='rusttest'>fn main() {
+<span id='rust-example-raw-144' class='rusttest'>fn main() {
     // `b/mod.rs`
     pub mod c;
     pub fn foo() { println!(&quot;Foo!&quot;); }
-}</span><pre id='rust-example-rendered-143' class='rust '>
+}</span><pre id='rust-example-rendered-144' class='rust '>
 <span class='comment'>// `b/mod.rs`</span>
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>c</span>;
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>foo</span>() { <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Foo!&quot;</span>); }
 </pre>
-<span id='rust-example-raw-144' class='rusttest'>fn main() {
+<span id='rust-example-raw-145' class='rusttest'>fn main() {
     // `b/c.rs`
     pub fn bar() { println!(&quot;Bar!&quot;); }
-}</span><pre id='rust-example-rendered-144' class='rust '>
+}</span><pre id='rust-example-rendered-145' class='rust '>
 <span class='comment'>// `b/c.rs`</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>bar</span>() { <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Bar!&quot;</span>); }
 </pre>
@@ -4034,25 +4082,25 @@ fn main() {
 <ol>
 <li>Explicit mention multiple names as the last element of an <code>use</code> path:</li>
 </ol>
-<span id='rust-example-raw-145' class='rusttest'>use farm::{chicken, cow};
+<span id='rust-example-raw-146' class='rusttest'>use farm::{chicken, cow};
 mod farm {
     pub fn cow() { println!(&quot;Did I already mention how hidden and ninja I am?&quot;) }
     pub fn chicken() { println!(&quot;I&#39;m Bat-chicken, guardian of the hidden tutorial code.&quot;) }
 }
-fn main() { cow(); chicken() }</span><pre id='rust-example-rendered-145' class='rust '>
+fn main() { cow(); chicken() }</span><pre id='rust-example-rendered-146' class='rust '>
 <span class='kw'>use</span> <span class='ident'>farm</span>::{<span class='ident'>chicken</span>, <span class='ident'>cow</span>};
 </pre>
 
 <ol>
 <li>Import everything in a module with a wildcard:</li>
 </ol>
-<span id='rust-example-raw-146' class='rusttest'>#![feature(globs)]
+<span id='rust-example-raw-147' class='rusttest'>#![feature(globs)]
 use farm::*;
 mod farm {
     pub fn cow() { println!(&quot;Bat-chicken? What a stupid name!&quot;) }
     pub fn chicken() { println!(&quot;Says the &#39;hidden ninja&#39; cow.&quot;) }
 }
-fn main() { cow(); chicken() }</span><pre id='rust-example-rendered-146' class='rust '>
+fn main() { cow(); chicken() }</span><pre id='rust-example-rendered-147' class='rust '>
 <span class='kw'>use</span> <span class='ident'>farm</span>::<span class='op'>*</span>;
 </pre>
 
@@ -4063,13 +4111,13 @@ the manual.</p>
 </blockquote>
 
 <p>However, that&#39;s not all. You can also rename an item while you&#39;re bringing it into scope:</p>
-<span id='rust-example-raw-147' class='rusttest'>use egg_layer = farm::chicken;
+<span id='rust-example-raw-148' class='rusttest'>use egg_layer = farm::chicken;
 mod farm { pub fn chicken() { println!(&quot;Laying eggs is fun!&quot;)  } }
 // ...
 
 fn main() {
     egg_layer();
-}</span><pre id='rust-example-rendered-147' class='rust '>
+}</span><pre id='rust-example-rendered-148' class='rust '>
 <span class='kw'>use</span> <span class='ident'>egg_layer</span> <span class='op'>=</span> <span class='ident'>farm</span>::<span class='ident'>chicken</span>;
 <span class='comment'>// ...</span>
 
@@ -4087,7 +4135,7 @@ without touching the original, and with both being interchangeable.</p>
 <p>It is also possible to reexport items to be accessible under your module.</p>
 
 <p>For that, you write <code>pub use</code>:</p>
-<span id='rust-example-raw-148' class='rusttest'>mod farm {
+<span id='rust-example-raw-149' class='rusttest'>mod farm {
     pub use self::barn::hay;
 
     pub fn chicken() { println!(&quot;cluck cluck&quot;); }
@@ -4102,7 +4150,7 @@ fn main() {
     farm::chicken();
     farm::cow();
     farm::hay();
-}</span><pre id='rust-example-rendered-148' class='rust '>
+}</span><pre id='rust-example-rendered-149' class='rust '>
 <span class='kw'>mod</span> <span class='ident'>farm</span> {
     <span class='kw'>pub</span> <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>barn</span>::<span class='ident'>hay</span>;
 
@@ -4141,15 +4189,15 @@ as there really is no reason to start from scratch each time you start a new pro
 <p>In Rust terminology, we need a way to refer to other crates.</p>
 
 <p>For that, Rust offers you the <code>extern crate</code> declaration:</p>
-<span id='rust-example-raw-149' class='rusttest'>extern crate num;
-// `num` ships with Rust (much like `extra`; more details further down).
+<span id='rust-example-raw-150' class='rusttest'>// `num` ships with Rust.
+extern crate num;
 
 fn main() {
     // The rational number &#39;1/2&#39;:
     let one_half = ::num::rational::Ratio::new(1i, 2);
-}</span><pre id='rust-example-rendered-149' class='rust '>
+}</span><pre id='rust-example-rendered-150' class='rust '>
+<span class='comment'>// `num` ships with Rust.</span>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>num</span>;
-<span class='comment'>// `num` ships with Rust (much like `extra`; more details further down).</span>
 
 <span class='kw'>fn</span> <span class='ident'>main</span>() {
     <span class='comment'>// The rational number &#39;1/2&#39;:</span>
@@ -4176,7 +4224,7 @@ Both <code>use</code> and local declarations can shadow them, so the rule is tha
 of both <code>use</code> and local declarations.</p>
 
 <p>Which can result in something like this:</p>
-<span id='rust-example-raw-150' class='rusttest'>extern crate num;
+<span id='rust-example-raw-151' class='rusttest'>extern crate num;
 
 use farm::dog;
 use num::rational::Ratio;
@@ -4188,7 +4236,7 @@ mod farm {
 fn main() {
     farm::dog();
     let a_third = Ratio::new(1i, 3);
-}</span><pre id='rust-example-rendered-150' class='rust '>
+}</span><pre id='rust-example-rendered-151' class='rust '>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>num</span>;
 
 <span class='kw'>use</span> <span class='ident'>farm</span>::<span class='ident'>dog</span>;
@@ -4219,7 +4267,7 @@ based on the link metadata, allowing you to use two different versions of the sa
 without conflict.</p>
 
 <p>Therefore, if you plan to compile your crate as a library, you should annotate it with that information:</p>
-<span id='rust-example-raw-151' class='rusttest'>fn main() {
+<span id='rust-example-raw-152' class='rusttest'>fn main() {
     #![allow(unused_attribute)]
     // `lib.rs`
     
@@ -4228,7 +4276,7 @@ without conflict.</p>
     
     // ...
     fn farm() {}
-}</span><pre id='rust-example-rendered-151' class='rust '>
+}</span><pre id='rust-example-rendered-152' class='rust '>
 <span class='comment'>// `lib.rs`</span>
 
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_id</span> <span class='op'>=</span> <span class='string'>&quot;farm#2.5&quot;</span>]</span>
@@ -4239,11 +4287,11 @@ without conflict.</p>
 <p>You can also specify crate id information in a <code>extern crate</code> statement.  For
 example, these <code>extern crate</code> statements would both accept and select the
 crate define above:</p>
-<span id='rust-example-raw-152' class='rusttest'>fn main() {
+<span id='rust-example-raw-153' class='rusttest'>fn main() {
     extern crate farm;
     extern crate farm = &quot;farm#2.5&quot;;
     extern crate my_farm = &quot;farm&quot;;
-}</span><pre id='rust-example-rendered-152' class='rust '>
+}</span><pre id='rust-example-rendered-153' class='rust '>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>farm</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>farm</span> <span class='op'>=</span> <span class='string'>&quot;farm#2.5&quot;</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>my_farm</span> <span class='op'>=</span> <span class='string'>&quot;farm&quot;</span>;
@@ -4251,7 +4299,7 @@ crate define above:</p>
 
 <p>Other crate settings and metadata include things like enabling/disabling certain errors or warnings,
 or setting the crate type (library or executable) explicitly:</p>
-<span id='rust-example-raw-153' class='rusttest'>fn main() {
+<span id='rust-example-raw-154' class='rusttest'>fn main() {
     #![allow(unused_attribute)]
     // `lib.rs`
     // ...
@@ -4263,7 +4311,7 @@ or setting the crate type (library or executable) explicitly:</p>
     // Turn on a warning
     #[warn(non_camel_case_types)]
     fn farm() {}
-}</span><pre id='rust-example-rendered-153' class='rust '>
+}</span><pre id='rust-example-rendered-154' class='rust '>
 <span class='comment'>// `lib.rs`</span>
 <span class='comment'>// ...</span>
 
@@ -4280,7 +4328,7 @@ or setting the crate type (library or executable) explicitly:</p>
 <p>Now for something that you can actually compile yourself.</p>
 
 <p>We define two crates, and use one of them as a library in the other.</p>
-<span id='rust-example-raw-154' class='rusttest'>fn main() {
+<span id='rust-example-raw-155' class='rusttest'>fn main() {
     #![allow(unused_attribute)]
     // `world.rs`
     #![crate_id = &quot;world#0.42&quot;]
@@ -4288,15 +4336,15 @@ or setting the crate type (library or executable) explicitly:</p>
     mod secret_module_to_make_this_test_run {
     pub fn explore() -&gt; &amp;&#39;static str { &quot;world&quot; }
     }
-}</span><pre id='rust-example-rendered-154' class='rust '>
+}</span><pre id='rust-example-rendered-155' class='rust '>
 <span class='comment'>// `world.rs`</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_id</span> <span class='op'>=</span> <span class='string'>&quot;world#0.42&quot;</span>]</span>
 
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>explore</span>() <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> { <span class='string'>&quot;world&quot;</span> }
 </pre>
-<span id='rust-example-raw-155' class='rusttest'>// `main.rs`
+<span id='rust-example-raw-156' class='rusttest'>// `main.rs`
 extern crate world;
-fn main() { println!(&quot;hello {}&quot;, world::explore()); }</span><pre id='rust-example-rendered-155' class='rust '>
+fn main() { println!(&quot;hello {}&quot;, world::explore()); }</span><pre id='rust-example-rendered-156' class='rust '>
 <span class='comment'>// `main.rs`</span>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>world</span>;
 <span class='kw'>fn</span> <span class='ident'>main</span>() { <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;hello {}&quot;</span>, <span class='ident'>world</span>::<span class='ident'>explore</span>()); }
@@ -4323,16 +4371,16 @@ those magical predefined items like <code>range</code> are coming from.</p>
 in the <code>std</code> library, which is a crate that ships with Rust.</p>
 
 <p>The only magical thing that happens is that <code>rustc</code> automatically inserts this line into your crate root:</p>
-<span id='rust-example-raw-156' class='rusttest'>fn main() {
+<span id='rust-example-raw-157' class='rusttest'>fn main() {
     extern crate std;
-}</span><pre id='rust-example-rendered-156' class='rust '>
+}</span><pre id='rust-example-rendered-157' class='rust '>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>std</span>;
 </pre>
 
 <p>As well as this line into every module body:</p>
-<span id='rust-example-raw-157' class='rusttest'>fn main() {
+<span id='rust-example-raw-158' class='rusttest'>fn main() {
     use std::prelude::*;
-}</span><pre id='rust-example-rendered-157' class='rust '>
+}</span><pre id='rust-example-rendered-158' class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
 </pre>
 
@@ -4343,7 +4391,7 @@ without needing to import them. And if you need something from <code>std</code> 
 you just have to import it with an <code>use</code> statement.</p>
 
 <p>For example, it re-exports <code>range</code> which is defined in <code>std::iter::range</code>:</p>
-<span id='rust-example-raw-158' class='rusttest'>use iter_range = std::iter::range;
+<span id='rust-example-raw-159' class='rusttest'>use iter_range = std::iter::range;
 
 fn main() {
     // `range` is imported by default
@@ -4354,7 +4402,7 @@ fn main() {
 
     // Or from not using the automatic import.
     for _ in ::std::iter::range(0u, 10) {}
-}</span><pre id='rust-example-rendered-158' class='rust '>
+}</span><pre id='rust-example-rendered-159' class='rust '>
 <span class='kw'>use</span> <span class='ident'>iter_range</span> <span class='op'>=</span> <span class='ident'>std</span>::<span class='ident'>iter</span>::<span class='ident'>range</span>;
 
 <span class='kw'>fn</span> <span class='ident'>main</span>() {
@@ -4370,19 +4418,19 @@ fn main() {
 </pre>
 
 <p>Both auto-insertions can be disabled with an attribute if necessary:</p>
-<span id='rust-example-raw-159' class='rusttest'>fn main() {
+<span id='rust-example-raw-160' class='rusttest'>fn main() {
     #![allow(unused_attribute)]
     // In the crate root:
     #![no_std]
-}</span><pre id='rust-example-rendered-159' class='rust '>
+}</span><pre id='rust-example-rendered-160' class='rust '>
 <span class='comment'>// In the crate root:</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>no_std</span>]</span>
 </pre>
-<span id='rust-example-raw-160' class='rusttest'>fn main() {
+<span id='rust-example-raw-161' class='rusttest'>fn main() {
     #![allow(unused_attribute)]
     // In any module:
     #![no_implicit_prelude]
-}</span><pre id='rust-example-rendered-160' class='rust '>
+}</span><pre id='rust-example-rendered-161' class='rust '>
 <span class='comment'>// In any module:</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>no_implicit_prelude</span>]</span>
 </pre>

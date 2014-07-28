@@ -730,9 +730,6 @@
 <span id='690'>690</span>
 <span id='691'>691</span>
 <span id='692'>692</span>
-<span id='693'>693</span>
-<span id='694'>694</span>
-<span id='695'>695</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -748,29 +745,29 @@
 
 <span class='kw'>use</span> <span class='ident'>intrinsics</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>kinds</span>::<span class='ident'>marker</span>;
-<span class='kw'>use</span> <span class='ident'>ty</span>::<span class='ident'>Unsafe</span>;
+<span class='kw'>use</span> <span class='ident'>cell</span>::<span class='ident'>UnsafeCell</span>;
 
 <span class='doccomment'>/// An atomic boolean type.</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>AtomicBool</span> {
-    <span class='ident'>v</span>: <span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>,
+    <span class='ident'>v</span>: <span class='ident'>UnsafeCell</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>,
     <span class='ident'>nocopy</span>: <span class='ident'>marker</span>::<span class='ident'>NoCopy</span>
 }
 
 <span class='doccomment'>/// A signed atomic integer type, supporting basic atomic arithmetic operations</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>AtomicInt</span> {
-    <span class='ident'>v</span>: <span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>,
+    <span class='ident'>v</span>: <span class='ident'>UnsafeCell</span><span class='op'>&lt;</span><span class='ident'>int</span><span class='op'>&gt;</span>,
     <span class='ident'>nocopy</span>: <span class='ident'>marker</span>::<span class='ident'>NoCopy</span>
 }
 
 <span class='doccomment'>/// An unsigned atomic integer type, supporting basic atomic arithmetic operations</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>AtomicUint</span> {
-    <span class='ident'>v</span>: <span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>,
+    <span class='ident'>v</span>: <span class='ident'>UnsafeCell</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>,
     <span class='ident'>nocopy</span>: <span class='ident'>marker</span>::<span class='ident'>NoCopy</span>
 }
 
 <span class='doccomment'>/// An unsafe atomic pointer. Only supports basic atomic operations</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>AtomicPtr</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
-    <span class='ident'>p</span>: <span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>,
+    <span class='ident'>p</span>: <span class='ident'>UnsafeCell</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>,
     <span class='ident'>nocopy</span>: <span class='ident'>marker</span>::<span class='ident'>NoCopy</span>
 }
 
@@ -805,17 +802,14 @@
 }
 
 <span class='doccomment'>/// An `AtomicBool` initialized to `false`</span>
-<span class='kw'>pub</span> <span class='kw'>static</span> <span class='ident'>INIT_ATOMIC_BOOL</span> : <span class='ident'>AtomicBool</span> <span class='op'>=</span> <span class='ident'>AtomicBool</span> { <span class='ident'>v</span>: <span class='ident'>Unsafe</span>{<span class='ident'>value</span>: <span class='number'>0</span>,
-                                                                  <span class='ident'>marker1</span>: <span class='ident'>marker</span>::<span class='ident'>InvariantType</span>},
-                                                        <span class='ident'>nocopy</span>: <span class='ident'>marker</span>::<span class='ident'>NoCopy</span> };
+<span class='kw'>pub</span> <span class='kw'>static</span> <span class='ident'>INIT_ATOMIC_BOOL</span>: <span class='ident'>AtomicBool</span> <span class='op'>=</span>
+        <span class='ident'>AtomicBool</span> { <span class='ident'>v</span>: <span class='ident'>UnsafeCell</span> { <span class='ident'>value</span>: <span class='number'>0</span> }, <span class='ident'>nocopy</span>: <span class='ident'>marker</span>::<span class='ident'>NoCopy</span> };
 <span class='doccomment'>/// An `AtomicInt` initialized to `0`</span>
-<span class='kw'>pub</span> <span class='kw'>static</span> <span class='ident'>INIT_ATOMIC_INT</span>  : <span class='ident'>AtomicInt</span>  <span class='op'>=</span> <span class='ident'>AtomicInt</span>  { <span class='ident'>v</span>: <span class='ident'>Unsafe</span>{<span class='ident'>value</span>: <span class='number'>0</span>,
-                                                                  <span class='ident'>marker1</span>: <span class='ident'>marker</span>::<span class='ident'>InvariantType</span>},
-                                                        <span class='ident'>nocopy</span>: <span class='ident'>marker</span>::<span class='ident'>NoCopy</span> };
+<span class='kw'>pub</span> <span class='kw'>static</span> <span class='ident'>INIT_ATOMIC_INT</span>: <span class='ident'>AtomicInt</span> <span class='op'>=</span>
+        <span class='ident'>AtomicInt</span> { <span class='ident'>v</span>: <span class='ident'>UnsafeCell</span> { <span class='ident'>value</span>: <span class='number'>0</span> }, <span class='ident'>nocopy</span>: <span class='ident'>marker</span>::<span class='ident'>NoCopy</span> };
 <span class='doccomment'>/// An `AtomicUint` initialized to `0`</span>
-<span class='kw'>pub</span> <span class='kw'>static</span> <span class='ident'>INIT_ATOMIC_UINT</span> : <span class='ident'>AtomicUint</span> <span class='op'>=</span> <span class='ident'>AtomicUint</span> { <span class='ident'>v</span>: <span class='ident'>Unsafe</span>{<span class='ident'>value</span>: <span class='number'>0</span>,
-                                                                  <span class='ident'>marker1</span>: <span class='ident'>marker</span>::<span class='ident'>InvariantType</span>},
-                                                        <span class='ident'>nocopy</span>: <span class='ident'>marker</span>::<span class='ident'>NoCopy</span> };
+<span class='kw'>pub</span> <span class='kw'>static</span> <span class='ident'>INIT_ATOMIC_UINT</span>: <span class='ident'>AtomicUint</span> <span class='op'>=</span>
+        <span class='ident'>AtomicUint</span> { <span class='ident'>v</span>: <span class='ident'>UnsafeCell</span> { <span class='ident'>value</span>: <span class='number'>0</span>, }, <span class='ident'>nocopy</span>: <span class='ident'>marker</span>::<span class='ident'>NoCopy</span> };
 
 <span class='comment'>// NB: Needs to be -1 (0b11111111...) to make fetch_nand work correctly</span>
 <span class='kw'>static</span> <span class='ident'>UINT_TRUE</span>: <span class='ident'>uint</span> <span class='op'>=</span> <span class='op'>-</span><span class='number'>1</span>;
@@ -824,7 +818,7 @@
     <span class='doccomment'>/// Create a new `AtomicBool`</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>v</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='ident'>AtomicBool</span> {
         <span class='kw'>let</span> <span class='ident'>val</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>v</span> { <span class='ident'>UINT_TRUE</span> } <span class='kw'>else</span> { <span class='number'>0</span> };
-        <span class='ident'>AtomicBool</span> { <span class='ident'>v</span>: <span class='ident'>Unsafe</span>::<span class='ident'>new</span>(<span class='ident'>val</span>), <span class='ident'>nocopy</span>: <span class='ident'>marker</span>::<span class='ident'>NoCopy</span> }
+        <span class='ident'>AtomicBool</span> { <span class='ident'>v</span>: <span class='ident'>UnsafeCell</span>::<span class='ident'>new</span>(<span class='ident'>val</span>), <span class='ident'>nocopy</span>: <span class='ident'>marker</span>::<span class='ident'>NoCopy</span> }
     }
 
     <span class='doccomment'>/// Load the value</span>
@@ -877,7 +871,7 @@
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// fn with_lock(spinlock: &amp;Arc&lt;AtomicBool&gt;, f: || -&gt; ()) {</span>
     <span class='doccomment'>///     // CAS loop until we are able to replace `false` with `true`</span>
-    <span class='doccomment'>///     while spinlock.compare_and_swap(false, true, SeqCst) == false {</span>
+    <span class='doccomment'>///     while spinlock.compare_and_swap(false, true, SeqCst) != false {</span>
     <span class='doccomment'>///         // Since tasks may not be preemptive (if they are green threads)</span>
     <span class='doccomment'>///         // yield to the scheduler to let the other task run. Low level</span>
     <span class='doccomment'>///         // concurrent code needs to take into account Rust&#39;s two threading</span>
@@ -1025,7 +1019,7 @@
 <span class='kw'>impl</span> <span class='ident'>AtomicInt</span> {
     <span class='doccomment'>/// Create a new `AtomicInt`</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>v</span>: <span class='ident'>int</span>) <span class='op'>-&gt;</span> <span class='ident'>AtomicInt</span> {
-        <span class='ident'>AtomicInt</span> {<span class='ident'>v</span>: <span class='ident'>Unsafe</span>::<span class='ident'>new</span>(<span class='ident'>v</span>), <span class='ident'>nocopy</span>: <span class='ident'>marker</span>::<span class='ident'>NoCopy</span>}
+        <span class='ident'>AtomicInt</span> {<span class='ident'>v</span>: <span class='ident'>UnsafeCell</span>::<span class='ident'>new</span>(<span class='ident'>v</span>), <span class='ident'>nocopy</span>: <span class='ident'>marker</span>::<span class='ident'>NoCopy</span>}
     }
 
     <span class='doccomment'>/// Load the value</span>
@@ -1137,7 +1131,7 @@
 <span class='kw'>impl</span> <span class='ident'>AtomicUint</span> {
     <span class='doccomment'>/// Create a new `AtomicUint`</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>v</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>AtomicUint</span> {
-        <span class='ident'>AtomicUint</span> { <span class='ident'>v</span>: <span class='ident'>Unsafe</span>::<span class='ident'>new</span>(<span class='ident'>v</span>), <span class='ident'>nocopy</span>: <span class='ident'>marker</span>::<span class='ident'>NoCopy</span> }
+        <span class='ident'>AtomicUint</span> { <span class='ident'>v</span>: <span class='ident'>UnsafeCell</span>::<span class='ident'>new</span>(<span class='ident'>v</span>), <span class='ident'>nocopy</span>: <span class='ident'>marker</span>::<span class='ident'>NoCopy</span> }
     }
 
     <span class='doccomment'>/// Load the value</span>
@@ -1249,7 +1243,7 @@
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>AtomicPtr</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Create a new `AtomicPtr`</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>p</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>AtomicPtr</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
-        <span class='ident'>AtomicPtr</span> { <span class='ident'>p</span>: <span class='ident'>Unsafe</span>::<span class='ident'>new</span>(<span class='ident'>p</span> <span class='kw'>as</span> <span class='ident'>uint</span>), <span class='ident'>nocopy</span>: <span class='ident'>marker</span>::<span class='ident'>NoCopy</span> }
+        <span class='ident'>AtomicPtr</span> { <span class='ident'>p</span>: <span class='ident'>UnsafeCell</span>::<span class='ident'>new</span>(<span class='ident'>p</span> <span class='kw'>as</span> <span class='ident'>uint</span>), <span class='ident'>nocopy</span>: <span class='ident'>marker</span>::<span class='ident'>NoCopy</span> }
     }
 
     <span class='doccomment'>/// Load the value</span>

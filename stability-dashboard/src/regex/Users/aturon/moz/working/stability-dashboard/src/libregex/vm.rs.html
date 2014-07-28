@@ -739,7 +739,7 @@
         <span class='comment'>// Make sure multi-line mode isn&#39;t enabled for it, otherwise we can&#39;t</span>
         <span class='comment'>// drop the initial .*?</span>
         <span class='kw'>let</span> <span class='ident'>prefix_anchor</span> <span class='op'>=</span>
-            <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>prog</span>.<span class='ident'>insts</span>.<span class='ident'>get</span>(<span class='number'>1</span>) {
+            <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>prog</span>.<span class='ident'>insts</span>[<span class='number'>1</span>] {
                 <span class='ident'>EmptyBegin</span>(<span class='ident'>flags</span>) <span class='kw'>if</span> <span class='ident'>flags</span> <span class='kw-2'>&amp;</span> <span class='ident'>FLAG_MULTI</span> <span class='op'>==</span> <span class='number'>0</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
                 _ <span class='op'>=&gt;</span> <span class='boolval'>false</span>,
             };
@@ -808,7 +808,7 @@
     <span class='kw'>fn</span> <span class='ident'>step</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>groups</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> [<span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>], <span class='ident'>nlist</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Threads</span>,
             <span class='ident'>caps</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> [<span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>], <span class='ident'>pc</span>: <span class='ident'>uint</span>)
            <span class='op'>-&gt;</span> <span class='ident'>StepState</span> {
-        <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>prog</span>.<span class='ident'>insts</span>.<span class='ident'>get</span>(<span class='ident'>pc</span>) {
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>prog</span>.<span class='ident'>insts</span>[<span class='ident'>pc</span>] {
             <span class='ident'>Match</span> <span class='op'>=&gt;</span> {
                 <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>which</span> {
                     <span class='ident'>Exists</span> <span class='op'>=&gt;</span> {
@@ -875,7 +875,7 @@
         <span class='comment'>//</span>
         <span class='comment'>// We make a minor optimization by indicating that the state is &quot;empty&quot;</span>
         <span class='comment'>// so that its capture groups are not filled in.</span>
-        <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>prog</span>.<span class='ident'>insts</span>.<span class='ident'>get</span>(<span class='ident'>pc</span>) {
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>prog</span>.<span class='ident'>insts</span>[<span class='ident'>pc</span>] {
             <span class='ident'>EmptyBegin</span>(<span class='ident'>flags</span>) <span class='op'>=&gt;</span> {
                 <span class='kw'>let</span> <span class='ident'>multi</span> <span class='op'>=</span> <span class='ident'>flags</span> <span class='kw-2'>&amp;</span> <span class='ident'>FLAG_MULTI</span> <span class='op'>&gt;</span> <span class='number'>0</span>;
                 <span class='ident'>nlist</span>.<span class='ident'>add</span>(<span class='ident'>pc</span>, <span class='ident'>groups</span>, <span class='boolval'>true</span>);
@@ -1097,8 +1097,8 @@
 
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>contains</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>pc</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
-        <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>sparse</span>.<span class='ident'>get</span>(<span class='ident'>pc</span>);
-        <span class='ident'>s</span> <span class='op'>&lt;</span> <span class='self'>self</span>.<span class='ident'>size</span> <span class='op'>&amp;&amp;</span> <span class='self'>self</span>.<span class='ident'>queue</span>.<span class='ident'>get</span>(<span class='ident'>s</span>).<span class='ident'>pc</span> <span class='op'>==</span> <span class='ident'>pc</span>
+        <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>sparse</span>[<span class='ident'>pc</span>];
+        <span class='ident'>s</span> <span class='op'>&lt;</span> <span class='self'>self</span>.<span class='ident'>size</span> <span class='op'>&amp;&amp;</span> <span class='self'>self</span>.<span class='ident'>queue</span>[<span class='ident'>s</span>].<span class='ident'>pc</span> <span class='op'>==</span> <span class='ident'>pc</span>
     }
 
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
@@ -1108,7 +1108,7 @@
 
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>pc</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>i</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>uint</span> {
-        <span class='self'>self</span>.<span class='ident'>queue</span>.<span class='ident'>get</span>(<span class='ident'>i</span>).<span class='ident'>pc</span>
+        <span class='self'>self</span>.<span class='ident'>queue</span>[<span class='ident'>i</span>].<span class='ident'>pc</span>
     }
 
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>

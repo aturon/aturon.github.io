@@ -115,6 +115,11 @@
 <span id='75'>75</span>
 <span id='76'>76</span>
 <span id='77'>77</span>
+<span id='78'>78</span>
+<span id='79'>79</span>
+<span id='80'>80</span>
+<span id='81'>81</span>
+<span id='82'>82</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -138,7 +143,6 @@
 <span class='doccomment'>//! provide for basic string-related manipulations. This crate does not</span>
 <span class='doccomment'>//! (yet) aim to provide a full set of Unicode tables.</span>
 
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_id</span> <span class='op'>=</span> <span class='string'>&quot;unicode#0.11.0&quot;</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_name</span> <span class='op'>=</span> <span class='string'>&quot;unicode&quot;</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>experimental</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>license</span> <span class='op'>=</span> <span class='string'>&quot;MIT/ASL2&quot;</span>]</span>
@@ -148,16 +152,11 @@
        <span class='ident'>html_root_url</span> <span class='op'>=</span> <span class='string'>&quot;http://doc.rust-lang.org/&quot;</span>,
        <span class='ident'>html_playground_url</span> <span class='op'>=</span> <span class='string'>&quot;http://play.rust-lang.org/&quot;</span>)]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>no_std</span>]</span>
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>unused_attribute</span>)]</span> <span class='comment'>// NOTE: remove after stage0</span>
 
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>core</span>;
 
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>tables</span>::<span class='ident'>normalization</span>::<span class='ident'>canonical_combining_class</span>;
+<span class='comment'>// regex module</span>
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>tables</span>::<span class='ident'>regex</span>;
-
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>u_char</span>::<span class='ident'>UnicodeChar</span>;
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>u_str</span>::<span class='ident'>UnicodeStrSlice</span>;
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>u_str</span>::<span class='ident'>Words</span>;
 
 <span class='kw'>mod</span> <span class='ident'>decompose</span>;
 <span class='kw'>mod</span> <span class='ident'>tables</span>;
@@ -185,13 +184,24 @@
     <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>char</span>::{<span class='ident'>from_digit</span>, <span class='ident'>escape_unicode</span>, <span class='ident'>escape_default</span>};
     <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>char</span>::{<span class='ident'>len_utf8_bytes</span>, <span class='ident'>Char</span>};
 
-    <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>decompose</span>::<span class='ident'>decompose_canonical</span>;
-    <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>decompose</span>::<span class='ident'>decompose_compatible</span>;
+    <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>decompose</span>::{<span class='ident'>decompose_canonical</span>, <span class='ident'>decompose_compatible</span>};
+
+    <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>tables</span>::<span class='ident'>normalization</span>::<span class='ident'>canonical_combining_class</span>;
 
     <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>u_char</span>::{<span class='ident'>is_alphabetic</span>, <span class='ident'>is_XID_start</span>, <span class='ident'>is_XID_continue</span>};
     <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>u_char</span>::{<span class='ident'>is_lowercase</span>, <span class='ident'>is_uppercase</span>, <span class='ident'>is_whitespace</span>};
     <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>u_char</span>::{<span class='ident'>is_alphanumeric</span>, <span class='ident'>is_control</span>, <span class='ident'>is_digit</span>};
     <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>u_char</span>::{<span class='ident'>to_uppercase</span>, <span class='ident'>to_lowercase</span>, <span class='ident'>width</span>, <span class='ident'>UnicodeChar</span>};
+}
+
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>str</span> {
+    <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>u_str</span>::{<span class='ident'>UnicodeStrSlice</span>, <span class='ident'>Words</span>, <span class='ident'>Graphemes</span>, <span class='ident'>GraphemeIndices</span>};
+}
+
+<span class='comment'>// this lets us use #[deriving(Clone)]</span>
+<span class='kw'>mod</span> <span class='ident'>std</span> {
+    <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>clone</span>;
+    <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>cmp</span>;
 }
 </pre>
 </section>

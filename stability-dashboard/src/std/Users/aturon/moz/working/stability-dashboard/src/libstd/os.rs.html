@@ -2188,6 +2188,44 @@
 <span id='2148'>2148</span>
 <span id='2149'>2149</span>
 <span id='2150'>2150</span>
+<span id='2151'>2151</span>
+<span id='2152'>2152</span>
+<span id='2153'>2153</span>
+<span id='2154'>2154</span>
+<span id='2155'>2155</span>
+<span id='2156'>2156</span>
+<span id='2157'>2157</span>
+<span id='2158'>2158</span>
+<span id='2159'>2159</span>
+<span id='2160'>2160</span>
+<span id='2161'>2161</span>
+<span id='2162'>2162</span>
+<span id='2163'>2163</span>
+<span id='2164'>2164</span>
+<span id='2165'>2165</span>
+<span id='2166'>2166</span>
+<span id='2167'>2167</span>
+<span id='2168'>2168</span>
+<span id='2169'>2169</span>
+<span id='2170'>2170</span>
+<span id='2171'>2171</span>
+<span id='2172'>2172</span>
+<span id='2173'>2173</span>
+<span id='2174'>2174</span>
+<span id='2175'>2175</span>
+<span id='2176'>2176</span>
+<span id='2177'>2177</span>
+<span id='2178'>2178</span>
+<span id='2179'>2179</span>
+<span id='2180'>2180</span>
+<span id='2181'>2181</span>
+<span id='2182'>2182</span>
+<span id='2183'>2183</span>
+<span id='2184'>2184</span>
+<span id='2185'>2185</span>
+<span id='2186'>2186</span>
+<span id='2187'>2187</span>
+<span id='2188'>2188</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -2223,7 +2261,7 @@
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>non_snake_case_functions</span>)]</span>
 
 <span class='kw'>use</span> <span class='ident'>clone</span>::<span class='ident'>Clone</span>;
-<span class='kw'>use</span> <span class='ident'>collections</span>::<span class='ident'>Collection</span>;
+<span class='kw'>use</span> <span class='ident'>collections</span>::{<span class='ident'>Collection</span>, <span class='ident'>MutableSeq</span>};
 <span class='kw'>use</span> <span class='ident'>fmt</span>;
 <span class='kw'>use</span> <span class='ident'>io</span>::{<span class='ident'>IoResult</span>, <span class='ident'>IoError</span>};
 <span class='kw'>use</span> <span class='ident'>iter</span>::<span class='ident'>Iterator</span>;
@@ -2238,7 +2276,6 @@
 <span class='kw'>use</span> <span class='ident'>result</span>::{<span class='prelude-val'>Err</span>, <span class='prelude-val'>Ok</span>, <span class='prelude-ty'>Result</span>};
 <span class='kw'>use</span> <span class='ident'>slice</span>::{<span class='ident'>Vector</span>, <span class='ident'>ImmutableVector</span>, <span class='ident'>MutableVector</span>, <span class='ident'>ImmutableEqVector</span>};
 <span class='kw'>use</span> <span class='ident'>str</span>::{<span class='ident'>Str</span>, <span class='ident'>StrSlice</span>, <span class='ident'>StrAllocating</span>};
-<span class='kw'>use</span> <span class='ident'>str</span>;
 <span class='kw'>use</span> <span class='ident'>string</span>::<span class='ident'>String</span>;
 <span class='kw'>use</span> <span class='ident'>sync</span>::<span class='ident'>atomics</span>::{<span class='ident'>AtomicInt</span>, <span class='ident'>INIT_ATOMIC_INT</span>, <span class='ident'>SeqCst</span>};
 <span class='kw'>use</span> <span class='ident'>vec</span>::<span class='ident'>Vec</span>;
@@ -2247,8 +2284,6 @@
 <span class='kw'>use</span> <span class='ident'>c_str</span>::<span class='ident'>ToCStr</span>;
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>unix</span>)]</span>
 <span class='kw'>use</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span>;
-<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>windows</span>)]</span>
-<span class='kw'>use</span> <span class='ident'>str</span>::<span class='ident'>OwnedStr</span>;
 
 <span class='doccomment'>/// Get the number of cores available</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>num_cpus</span>() <span class='op'>-&gt;</span> <span class='ident'>uint</span> {
@@ -2328,7 +2363,7 @@
             <span class='macro'>fail</span><span class='macro'>!</span>();
         }
     }
-    <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='ident'>str</span>::<span class='ident'>from_utf16</span>(<span class='ident'>str</span>::<span class='ident'>truncate_utf16_at_nul</span>(<span class='ident'>buf</span>))
+    <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='ident'>String</span>::<span class='ident'>from_utf16</span>(::<span class='ident'>str</span>::<span class='ident'>truncate_utf16_at_nul</span>(<span class='ident'>buf</span>))
               .<span class='ident'>expect</span>(<span class='string'>&quot;GetCurrentDirectoryW returned invalid UTF-16&quot;</span>))
 }
 
@@ -2342,7 +2377,6 @@
     <span class='kw'>use</span> <span class='ident'>slice</span>::{<span class='ident'>MutableVector</span>, <span class='ident'>ImmutableVector</span>};
     <span class='kw'>use</span> <span class='ident'>string</span>::<span class='ident'>String</span>;
     <span class='kw'>use</span> <span class='ident'>str</span>::<span class='ident'>StrSlice</span>;
-    <span class='kw'>use</span> <span class='ident'>str</span>;
     <span class='kw'>use</span> <span class='ident'>vec</span>::<span class='ident'>Vec</span>;
 
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>fill_utf16_buf_and_decode</span>(<span class='ident'>f</span>: <span class='op'>|</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u16</span>, <span class='ident'>DWORD</span><span class='op'>|</span> <span class='op'>-&gt;</span> <span class='ident'>DWORD</span>)
@@ -2371,7 +2405,7 @@
                     <span class='comment'>// We want to explicitly catch the case when the</span>
                     <span class='comment'>// closure returned invalid UTF-16, rather than</span>
                     <span class='comment'>// set `res` to None and continue.</span>
-                    <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>str</span>::<span class='ident'>from_utf16</span>(<span class='ident'>sub</span>)
+                    <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_utf16</span>(<span class='ident'>sub</span>)
                         .<span class='ident'>expect</span>(<span class='string'>&quot;fill_utf16_buf_and_decode: closure created invalid UTF-16&quot;</span>);
                     <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>option</span>::<span class='prelude-val'>Some</span>(<span class='ident'>s</span>)
                 }
@@ -2399,7 +2433,7 @@ Serialize access through a global lock.
 <span class='doccomment'>/// Returns a vector of (variable, value) pairs, for all the environment</span>
 <span class='doccomment'>/// variables of the current process.</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>/// Invalid UTF-8 bytes are replaced with \uFFFD. See `str::from_utf8_lossy()`</span>
+<span class='doccomment'>/// Invalid UTF-8 bytes are replaced with \uFFFD. See `String::from_utf8_lossy()`</span>
 <span class='doccomment'>/// for details.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// # Example</span>
@@ -2414,8 +2448,8 @@ Serialize access through a global lock.
 <span class='doccomment'>/// ```</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>env</span>() <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span>(<span class='ident'>String</span>,<span class='ident'>String</span>)<span class='op'>&gt;</span> {
     <span class='ident'>env_as_bytes</span>().<span class='ident'>move_iter</span>().<span class='ident'>map</span>(<span class='op'>|</span>(<span class='ident'>k</span>,<span class='ident'>v</span>)<span class='op'>|</span> {
-        <span class='kw'>let</span> <span class='ident'>k</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='ident'>str</span>::<span class='ident'>from_utf8_lossy</span>(<span class='ident'>k</span>.<span class='ident'>as_slice</span>()).<span class='ident'>as_slice</span>());
-        <span class='kw'>let</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='ident'>str</span>::<span class='ident'>from_utf8_lossy</span>(<span class='ident'>v</span>.<span class='ident'>as_slice</span>()).<span class='ident'>as_slice</span>());
+        <span class='kw'>let</span> <span class='ident'>k</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_utf8_lossy</span>(<span class='ident'>k</span>.<span class='ident'>as_slice</span>()).<span class='ident'>into_string</span>();
+        <span class='kw'>let</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_utf8_lossy</span>(<span class='ident'>v</span>.<span class='ident'>as_slice</span>()).<span class='ident'>into_string</span>();
         (<span class='ident'>k</span>,<span class='ident'>v</span>)
     }).<span class='ident'>collect</span>()
 }
@@ -2457,7 +2491,7 @@ Serialize access through a global lock.
                 <span class='kw'>let</span> <span class='ident'>p</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>ch</span>.<span class='ident'>offset</span>(<span class='ident'>i</span>);
                 <span class='kw'>let</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='ident'>ptr</span>::<span class='ident'>position</span>(<span class='ident'>p</span>, <span class='op'>|</span><span class='ident'>c</span><span class='op'>|</span> <span class='op'>*</span><span class='ident'>c</span> <span class='op'>==</span> <span class='number'>0</span>);
                 <span class='ident'>raw</span>::<span class='ident'>buf_as_slice</span>(<span class='ident'>p</span>, <span class='ident'>len</span>, <span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> {
-                    <span class='ident'>result</span>.<span class='ident'>push</span>(<span class='ident'>str</span>::<span class='ident'>from_utf16_lossy</span>(<span class='ident'>s</span>).<span class='ident'>into_bytes</span>());
+                    <span class='ident'>result</span>.<span class='ident'>push</span>(<span class='ident'>String</span>::<span class='ident'>from_utf16_lossy</span>(<span class='ident'>s</span>).<span class='ident'>into_bytes</span>());
                 });
                 <span class='ident'>i</span> <span class='op'>+=</span> <span class='ident'>len</span> <span class='kw'>as</span> <span class='ident'>int</span> <span class='op'>+</span> <span class='number'>1</span>;
             }
@@ -2507,7 +2541,7 @@ Serialize access through a global lock.
 <span class='doccomment'>/// None if the variable isn&#39;t set.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// Any invalid UTF-8 bytes in the value are replaced by \uFFFD. See</span>
-<span class='doccomment'>/// `str::from_utf8_lossy()` for details.</span>
+<span class='doccomment'>/// `String::from_utf8_lossy()` for details.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// # Failure</span>
 <span class='doccomment'>///</span>
@@ -2525,7 +2559,7 @@ Serialize access through a global lock.
 <span class='doccomment'>/// }</span>
 <span class='doccomment'>/// ```</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>getenv</span>(<span class='ident'>n</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
-    <span class='ident'>getenv_as_bytes</span>(<span class='ident'>n</span>).<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>v</span><span class='op'>|</span> <span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='ident'>str</span>::<span class='ident'>from_utf8_lossy</span>(<span class='ident'>v</span>.<span class='ident'>as_slice</span>()).<span class='ident'>as_slice</span>()))
+    <span class='ident'>getenv_as_bytes</span>(<span class='ident'>n</span>).<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>v</span><span class='op'>|</span> <span class='ident'>String</span>::<span class='ident'>from_utf8_lossy</span>(<span class='ident'>v</span>.<span class='ident'>as_slice</span>()).<span class='ident'>into_string</span>())
 }
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>unix</span>)]</span>
@@ -2607,7 +2641,7 @@ Serialize access through a global lock.
     <span class='kw'>fn</span> <span class='ident'>_setenv</span>(<span class='ident'>n</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>v</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) {
         <span class='kw'>let</span> <span class='ident'>n</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u16</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>n</span>.<span class='ident'>utf16_units</span>().<span class='ident'>collect</span>();
         <span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='ident'>n</span>.<span class='ident'>append_one</span>(<span class='number'>0</span>);
-        <span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u16</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>str</span>::<span class='ident'>from_utf8</span>(<span class='ident'>v</span>).<span class='ident'>unwrap</span>().<span class='ident'>utf16_units</span>().<span class='ident'>collect</span>();
+        <span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u16</span><span class='op'>&gt;</span> <span class='op'>=</span> ::<span class='ident'>str</span>::<span class='ident'>from_utf8</span>(<span class='ident'>v</span>).<span class='ident'>unwrap</span>().<span class='ident'>utf16_units</span>().<span class='ident'>collect</span>();
         <span class='kw'>let</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='ident'>v</span>.<span class='ident'>append_one</span>(<span class='number'>0</span>);
 
         <span class='kw'>unsafe</span> {
@@ -2900,8 +2934,6 @@ Serialize access through a global lock.
 
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>windows</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>load_self</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span> {
-        <span class='kw'>use</span> <span class='ident'>str</span>::<span class='ident'>OwnedStr</span>;
-
         <span class='kw'>unsafe</span> {
             <span class='kw'>use</span> <span class='ident'>os</span>::<span class='ident'>win32</span>::<span class='ident'>fill_utf16_buf_and_decode</span>;
             <span class='ident'>fill_utf16_buf_and_decode</span>(<span class='op'>|</span><span class='ident'>buf</span>, <span class='ident'>sz</span><span class='op'>|</span> {
@@ -3028,13 +3060,24 @@ Serialize access through a global lock.
     }
 }
 
-<span class='doccomment'>/**
- * Convert a relative path to an absolute path
- *
- * If the given path is relative, return it prepended with the current working
- * directory. If the given path is already an absolute path, return it
- * as is.
- */</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// Convert a relative path to an absolute path</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// If the given path is relative, return it prepended with the current working</span>
+<span class='doccomment'>/// directory. If the given path is already an absolute path, return it</span>
+<span class='doccomment'>/// as is.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// # Example</span>
+<span class='doccomment'>/// ```rust</span>
+<span class='doccomment'>/// use std::os;</span>
+<span class='doccomment'>/// use std::path::Path;</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// // Assume we&#39;re in a path like /home/someuser</span>
+<span class='doccomment'>/// let rel_path = Path::new(&quot;..&quot;);</span>
+<span class='doccomment'>/// let abs_path = os::make_absolute(&amp;rel_path);</span>
+<span class='doccomment'>/// println!(&quot;The absolute path is {}&quot;, abs_path.display());</span>
+<span class='doccomment'>/// // Prints &quot;The absolute path is /home&quot;</span>
+<span class='doccomment'>/// ```</span>
 <span class='comment'>// NB: this is here rather than in path because it is a form of environment</span>
 <span class='comment'>// querying; what it does depends on the process working directory, not just</span>
 <span class='comment'>// the input paths.</span>
@@ -3050,6 +3093,16 @@ Serialize access through a global lock.
 
 <span class='doccomment'>/// Changes the current working directory to the specified path, returning</span>
 <span class='doccomment'>/// whether the change was completed successfully or not.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// # Example</span>
+<span class='doccomment'>/// ```rust</span>
+<span class='doccomment'>/// use std::os;</span>
+<span class='doccomment'>/// use std::path::Path;</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// let root = Path::new(&quot;/&quot;);</span>
+<span class='doccomment'>/// assert!(os::change_dir(&amp;root));</span>
+<span class='doccomment'>/// println!(&quot;Succesfully changed working directory to {}!&quot;, root.display());</span>
+<span class='doccomment'>/// ```</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>change_dir</span>(<span class='ident'>p</span>: <span class='kw-2'>&amp;</span><span class='ident'>Path</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>return</span> <span class='ident'>chdir</span>(<span class='ident'>p</span>);
 
@@ -3121,6 +3174,13 @@ Serialize access through a global lock.
 }
 
 <span class='doccomment'>/// Return the string corresponding to an `errno()` value of `errnum`.</span>
+<span class='doccomment'>/// # Example</span>
+<span class='doccomment'>/// ```rust</span>
+<span class='doccomment'>/// use std::os;</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// // Same as println!(&quot;{}&quot;, last_os_error());</span>
+<span class='doccomment'>/// println!(&quot;{}&quot;, os::error_string(os::errno() as uint));</span>
+<span class='doccomment'>/// ```</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>error_string</span>(<span class='ident'>errnum</span>: <span class='ident'>uint</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
     <span class='kw'>return</span> <span class='ident'>strerror</span>(<span class='ident'>errnum</span>);
 
@@ -3166,7 +3226,7 @@ Serialize access through a global lock.
                 <span class='macro'>fail</span><span class='macro'>!</span>(<span class='string'>&quot;strerror_r failure&quot;</span>);
             }
 
-            <span class='ident'>str</span>::<span class='ident'>raw</span>::<span class='ident'>from_c_str</span>(<span class='ident'>p</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>c_char</span>).<span class='ident'>into_string</span>()
+            ::<span class='ident'>string</span>::<span class='ident'>raw</span>::<span class='ident'>from_buf</span>(<span class='ident'>p</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>u8</span>)
         }
     }
 
@@ -3213,7 +3273,7 @@ Serialize access through a global lock.
                 <span class='kw'>return</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;OS Error {} (FormatMessageW() returned error {})&quot;</span>, <span class='ident'>errnum</span>, <span class='ident'>fm_err</span>);
             }
 
-            <span class='kw'>let</span> <span class='ident'>msg</span> <span class='op'>=</span> <span class='ident'>str</span>::<span class='ident'>from_utf16</span>(<span class='ident'>str</span>::<span class='ident'>truncate_utf16_at_nul</span>(<span class='ident'>buf</span>));
+            <span class='kw'>let</span> <span class='ident'>msg</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_utf16</span>(::<span class='ident'>str</span>::<span class='ident'>truncate_utf16_at_nul</span>(<span class='ident'>buf</span>));
             <span class='kw'>match</span> <span class='ident'>msg</span> {
                 <span class='prelude-val'>Some</span>(<span class='ident'>msg</span>) <span class='op'>=&gt;</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;OS Error {}: {}&quot;</span>, <span class='ident'>errnum</span>, <span class='ident'>msg</span>),
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;OS Error {} (FormatMessageW() returned invalid UTF-16)&quot;</span>, <span class='ident'>errnum</span>),
@@ -3349,7 +3409,7 @@ Serialize access through a global lock.
 <span class='kw'>fn</span> <span class='ident'>real_args</span>() <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
     <span class='ident'>real_args_as_bytes</span>().<span class='ident'>move_iter</span>()
                         .<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>v</span><span class='op'>|</span> {
-                            <span class='ident'>str</span>::<span class='ident'>from_utf8_lossy</span>(<span class='ident'>v</span>.<span class='ident'>as_slice</span>()).<span class='ident'>into_string</span>()
+                            <span class='ident'>String</span>::<span class='ident'>from_utf8_lossy</span>(<span class='ident'>v</span>.<span class='ident'>as_slice</span>()).<span class='ident'>into_string</span>()
                         }).<span class='ident'>collect</span>()
 }
 
@@ -3370,7 +3430,7 @@ Serialize access through a global lock.
 
         <span class='comment'>// Push it onto the list.</span>
         <span class='kw'>let</span> <span class='ident'>opt_s</span> <span class='op'>=</span> <span class='ident'>slice</span>::<span class='ident'>raw</span>::<span class='ident'>buf_as_slice</span>(<span class='ident'>ptr</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> _, <span class='ident'>len</span>, <span class='op'>|</span><span class='ident'>buf</span><span class='op'>|</span> {
-            <span class='ident'>str</span>::<span class='ident'>from_utf16</span>(<span class='ident'>str</span>::<span class='ident'>truncate_utf16_at_nul</span>(<span class='ident'>buf</span>))
+            <span class='ident'>String</span>::<span class='ident'>from_utf16</span>(::<span class='ident'>str</span>::<span class='ident'>truncate_utf16_at_nul</span>(<span class='ident'>buf</span>))
         });
         <span class='ident'>opt_s</span>.<span class='ident'>expect</span>(<span class='string'>&quot;CommandLineToArgvW returned invalid UTF-16&quot;</span>)
     });
@@ -3407,7 +3467,17 @@ Serialize access through a global lock.
 <span class='doccomment'>/// via the command line).</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// The arguments are interpreted as utf-8, with invalid bytes replaced with \uFFFD.</span>
-<span class='doccomment'>/// See `str::from_utf8_lossy` for details.</span>
+<span class='doccomment'>/// See `String::from_utf8_lossy` for details.</span>
+<span class='doccomment'>/// # Example</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// ```rust</span>
+<span class='doccomment'>/// use std::os;</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// // Prints each argument on a separate line</span>
+<span class='doccomment'>/// for argument in os::args().iter() {</span>
+<span class='doccomment'>///     println!(&quot;{}&quot;, argument);</span>
+<span class='doccomment'>/// }</span>
+<span class='doccomment'>/// ```</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>args</span>() <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
     <span class='ident'>real_args</span>()
 }
@@ -3468,12 +3538,9 @@ Serialize access through a global lock.
 <span class='doccomment'>/// The memory map is released (unmapped) when the destructor is run, so don&#39;t</span>
 <span class='doccomment'>/// let it leave scope by accident if you want it to stick around.</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>MemoryMap</span> {
-    <span class='doccomment'>/// Pointer to the memory created or modified by this map.</span>
-    <span class='kw'>pub</span> <span class='ident'>data</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span>,
-    <span class='doccomment'>/// Number of bytes this map applies to</span>
-    <span class='kw'>pub</span> <span class='ident'>len</span>: <span class='ident'>uint</span>,
-    <span class='doccomment'>/// Type of mapping</span>
-    <span class='kw'>pub</span> <span class='ident'>kind</span>: <span class='ident'>MemoryMapKind</span>,
+    <span class='ident'>data</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span>,
+    <span class='ident'>len</span>: <span class='ident'>uint</span>,
+    <span class='ident'>kind</span>: <span class='ident'>MemoryMapKind</span>,
 }
 
 <span class='doccomment'>/// Type of memory map</span>
@@ -3806,6 +3873,15 @@ Serialize access through a global lock.
             }
         }
     }
+}
+
+<span class='kw'>impl</span> <span class='ident'>MemoryMap</span> {
+    <span class='doccomment'>/// Returns the pointer to the memory created or modified by this map.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>data</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span> { <span class='self'>self</span>.<span class='ident'>data</span> }
+    <span class='doccomment'>/// Returns the number of bytes this map applies to.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>len</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>uint</span> { <span class='self'>self</span>.<span class='ident'>len</span> }
+    <span class='doccomment'>/// Returns the type of mapping this represents.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>kind</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>MemoryMapKind</span> { <span class='self'>self</span>.<span class='ident'>kind</span> }
 }
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_os</span> <span class='op'>=</span> <span class='string'>&quot;linux&quot;</span>)]</span>

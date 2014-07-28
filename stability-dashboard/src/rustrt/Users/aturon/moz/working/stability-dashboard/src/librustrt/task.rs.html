@@ -680,6 +680,9 @@
 <span id='640'>640</span>
 <span id='641'>641</span>
 <span id='642'>642</span>
+<span id='643'>643</span>
+<span id='644'>644</span>
+<span id='645'>645</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -699,7 +702,7 @@
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
 
 <span class='kw'>use</span> <span class='ident'>alloc</span>::<span class='ident'>arc</span>::<span class='ident'>Arc</span>;
-<span class='kw'>use</span> <span class='ident'>alloc</span>::<span class='ident'>owned</span>::{<span class='ident'>AnyOwnExt</span>, <span class='ident'>Box</span>};
+<span class='kw'>use</span> <span class='ident'>alloc</span>::<span class='ident'>boxed</span>::{<span class='ident'>BoxAny</span>, <span class='ident'>Box</span>};
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>any</span>::<span class='ident'>Any</span>;
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>atomics</span>::{<span class='ident'>AtomicUint</span>, <span class='ident'>SeqCst</span>};
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>iter</span>::<span class='ident'>Take</span>;
@@ -886,7 +889,7 @@
     <span class='doccomment'>/// }).destroy();</span>
     <span class='doccomment'>/// # }</span>
     <span class='doccomment'>/// ```</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>run</span>(<span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='op'>||</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>run</span>(<span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>, <span class='ident'>f</span>: <span class='op'>||</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span> {
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='self'>self</span>.<span class='ident'>is_destroyed</span>(), <span class='string'>&quot;cannot re-use a destroyed task&quot;</span>);
 
         <span class='comment'>// First, make sure that no one else is in TLS. This does not allow</span>
@@ -922,7 +925,7 @@
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// The returned task cannot be used for running any more code, but it may</span>
     <span class='doccomment'>/// be used to extract the runtime as necessary.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>destroy</span>(<span class='kw-2'>~</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>destroy</span>(<span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span> {
         <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_destroyed</span>() {
             <span class='self'>self</span>
         } <span class='kw'>else</span> {
@@ -935,7 +938,7 @@
     <span class='doccomment'>/// This function consumes ownership of the task, deallocating it once it&#39;s</span>
     <span class='doccomment'>/// done being processed. It is assumed that TLD and the local heap have</span>
     <span class='doccomment'>/// already been destroyed and/or annihilated.</span>
-    <span class='kw'>fn</span> <span class='ident'>cleanup</span>(<span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>result</span>: <span class='prelude-ty'>Result</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>cleanup</span>(<span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>, <span class='ident'>result</span>: <span class='prelude-ty'>Result</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span> {
         <span class='comment'>// The first thing to do when cleaning up is to deallocate our local</span>
         <span class='comment'>// resources, such as TLD and GC data.</span>
         <span class='comment'>//</span>
@@ -1059,7 +1062,7 @@
         <span class='kw'>unsafe</span> {
             <span class='kw'>let</span> <span class='ident'>imp</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>imp</span>.<span class='ident'>take_unwrap</span>();
             <span class='kw'>let</span> <span class='ident'>vtable</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>::<span class='op'>&lt;</span>_, <span class='kw-2'>&amp;</span><span class='ident'>raw</span>::<span class='ident'>TraitObject</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='ident'>imp</span>).<span class='ident'>vtable</span>;
-            <span class='kw'>match</span> <span class='ident'>imp</span>.<span class='ident'>wrap</span>().<span class='ident'>move</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>() {
+            <span class='kw'>match</span> <span class='ident'>imp</span>.<span class='ident'>wrap</span>().<span class='ident'>downcast</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>() {
                 <span class='prelude-val'>Ok</span>(<span class='ident'>t</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>(<span class='ident'>t</span>),
                 <span class='prelude-val'>Err</span>(<span class='ident'>t</span>) <span class='op'>=&gt;</span> {
                     <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>::<span class='op'>&lt;</span>_, <span class='ident'>raw</span>::<span class='ident'>TraitObject</span><span class='op'>&gt;</span>(<span class='ident'>t</span>).<span class='ident'>data</span>;
@@ -1077,7 +1080,9 @@
 
     <span class='doccomment'>/// Spawns a sibling to this task. The newly spawned task is configured with</span>
     <span class='doccomment'>/// the `opts` structure and will run `f` as the body of its code.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>spawn_sibling</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>opts</span>: <span class='ident'>TaskOpts</span>, <span class='ident'>f</span>: <span class='kw'>proc</span>(): <span class='ident'>Send</span>) {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>spawn_sibling</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>,
+                         <span class='ident'>opts</span>: <span class='ident'>TaskOpts</span>,
+                         <span class='ident'>f</span>: <span class='kw'>proc</span>(): <span class='ident'>Send</span>) {
         <span class='kw'>let</span> <span class='ident'>ops</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>imp</span>.<span class='ident'>take_unwrap</span>();
         <span class='ident'>ops</span>.<span class='ident'>spawn_sibling</span>(<span class='self'>self</span>, <span class='ident'>opts</span>, <span class='ident'>f</span>)
     }
@@ -1085,7 +1090,8 @@
     <span class='doccomment'>/// Deschedules the current task, invoking `f` `amt` times. It is not</span>
     <span class='doccomment'>/// recommended to use this function directly, but rather communication</span>
     <span class='doccomment'>/// primitives in `std::comm` should be used.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>deschedule</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>amt</span>: <span class='ident'>uint</span>,
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>deschedule</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>,
+                      <span class='ident'>amt</span>: <span class='ident'>uint</span>,
                       <span class='ident'>f</span>: <span class='op'>|</span><span class='ident'>BlockedTask</span><span class='op'>|</span> <span class='op'>-&gt;</span> ::<span class='ident'>core</span>::<span class='ident'>result</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>BlockedTask</span><span class='op'>&gt;</span>) {
         <span class='kw'>let</span> <span class='ident'>ops</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>imp</span>.<span class='ident'>take_unwrap</span>();
         <span class='ident'>ops</span>.<span class='ident'>deschedule</span>(<span class='ident'>amt</span>, <span class='self'>self</span>, <span class='ident'>f</span>)
@@ -1094,7 +1100,7 @@
     <span class='doccomment'>/// Wakes up a previously blocked task, optionally specifying whether the</span>
     <span class='doccomment'>/// current task can accept a change in scheduling. This function can only</span>
     <span class='doccomment'>/// be called on tasks that were previously blocked in `deschedule`.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>reawaken</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>) {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>reawaken</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) {
         <span class='kw'>let</span> <span class='ident'>ops</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>imp</span>.<span class='ident'>take_unwrap</span>();
         <span class='ident'>ops</span>.<span class='ident'>reawaken</span>(<span class='self'>self</span>);
     }
@@ -1102,14 +1108,14 @@
     <span class='doccomment'>/// Yields control of this task to another task. This function will</span>
     <span class='doccomment'>/// eventually return, but possibly not immediately. This is used as an</span>
     <span class='doccomment'>/// opportunity to allow other tasks a chance to run.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>yield_now</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>) {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>yield_now</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) {
         <span class='kw'>let</span> <span class='ident'>ops</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>imp</span>.<span class='ident'>take_unwrap</span>();
         <span class='ident'>ops</span>.<span class='ident'>yield_now</span>(<span class='self'>self</span>);
     }
 
     <span class='doccomment'>/// Similar to `yield_now`, except that this function may immediately return</span>
     <span class='doccomment'>/// without yielding (depending on what the runtime decides to do).</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>maybe_yield</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>) {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>maybe_yield</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) {
         <span class='kw'>let</span> <span class='ident'>ops</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>imp</span>.<span class='ident'>take_unwrap</span>();
         <span class='ident'>ops</span>.<span class='ident'>maybe_yield</span>(<span class='self'>self</span>);
     }

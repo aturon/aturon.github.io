@@ -178,6 +178,14 @@
 <span id='138'>138</span>
 <span id='139'>139</span>
 <span id='140'>140</span>
+<span id='141'>141</span>
+<span id='142'>142</span>
+<span id='143'>143</span>
+<span id='144'>144</span>
+<span id='145'>145</span>
+<span id='146'>146</span>
+<span id='147'>147</span>
+<span id='148'>148</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2014 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -193,6 +201,7 @@
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>string</span>::<span class='ident'>String</span>;
 
+<span class='kw'>use</span> <span class='ident'>core</span>;
 <span class='kw'>use</span> <span class='ident'>getopts</span>;
 <span class='kw'>use</span> <span class='ident'>testing</span>;
 
@@ -200,7 +209,7 @@
 
 <span class='kw'>use</span> <span class='ident'>html</span>::<span class='ident'>escape</span>::<span class='ident'>Escape</span>;
 <span class='kw'>use</span> <span class='ident'>html</span>::<span class='ident'>markdown</span>;
-<span class='kw'>use</span> <span class='ident'>html</span>::<span class='ident'>markdown</span>::{<span class='ident'>MarkdownWithToc</span>, <span class='ident'>find_testable_code</span>, <span class='ident'>reset_headers</span>};
+<span class='kw'>use</span> <span class='ident'>html</span>::<span class='ident'>markdown</span>::{<span class='ident'>Markdown</span>, <span class='ident'>MarkdownWithToc</span>, <span class='ident'>find_testable_code</span>, <span class='ident'>reset_headers</span>};
 <span class='kw'>use</span> <span class='ident'>test</span>::<span class='ident'>Collector</span>;
 
 <span class='doccomment'>/// Separate any lines at the start of the file that begin with `%`.</span>
@@ -222,7 +231,7 @@
 <span class='doccomment'>/// Render `input` (e.g. &quot;foo.md&quot;) into an HTML file in `output`</span>
 <span class='doccomment'>/// (e.g. output = &quot;bar&quot; =&gt; &quot;bar/foo.html&quot;).</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>render</span>(<span class='ident'>input</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='kw-2'>mut</span> <span class='ident'>output</span>: <span class='ident'>Path</span>, <span class='ident'>matches</span>: <span class='kw-2'>&amp;</span><span class='ident'>getopts</span>::<span class='ident'>Matches</span>,
-              <span class='ident'>external_html</span>: <span class='kw-2'>&amp;</span><span class='ident'>ExternalHtml</span>) <span class='op'>-&gt;</span> <span class='ident'>int</span> {
+              <span class='ident'>external_html</span>: <span class='kw-2'>&amp;</span><span class='ident'>ExternalHtml</span>, <span class='ident'>include_toc</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='ident'>int</span> {
     <span class='kw'>let</span> <span class='ident'>input_p</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='ident'>input</span>);
     <span class='ident'>output</span>.<span class='ident'>push</span>(<span class='ident'>input_p</span>.<span class='ident'>filestem</span>().<span class='ident'>unwrap</span>());
     <span class='ident'>output</span>.<span class='ident'>set_extension</span>(<span class='string'>&quot;html&quot;</span>);
@@ -256,9 +265,15 @@
                          <span class='string'>&quot;invalid markdown file: expecting initial line with `% ...TITLE...`&quot;</span>);
         <span class='kw'>return</span> <span class='number'>5</span>;
     }
-    <span class='kw'>let</span> <span class='ident'>title</span> <span class='op'>=</span> <span class='ident'>metadata</span>.<span class='ident'>get</span>(<span class='number'>0</span>).<span class='ident'>as_slice</span>();
+    <span class='kw'>let</span> <span class='ident'>title</span> <span class='op'>=</span> <span class='ident'>metadata</span>[<span class='number'>0</span>].<span class='ident'>as_slice</span>();
 
     <span class='ident'>reset_headers</span>();
+
+    <span class='kw'>let</span> <span class='ident'>rendered</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>include_toc</span> {
+        <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>MarkdownWithToc</span>(<span class='ident'>text</span>))
+    } <span class='kw'>else</span> {
+        <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>Markdown</span>(<span class='ident'>text</span>))
+    };
 
     <span class='kw'>let</span> <span class='ident'>err</span> <span class='op'>=</span> <span class='macro'>write</span><span class='macro'>!</span>(
         <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>out</span>,
@@ -293,7 +308,7 @@
         <span class='ident'>css</span> <span class='op'>=</span> <span class='ident'>css</span>,
         <span class='ident'>in_header</span> <span class='op'>=</span> <span class='ident'>external_html</span>.<span class='ident'>in_header</span>,
         <span class='ident'>before_content</span> <span class='op'>=</span> <span class='ident'>external_html</span>.<span class='ident'>before_content</span>,
-        <span class='ident'>text</span> <span class='op'>=</span> <span class='ident'>MarkdownWithToc</span>(<span class='ident'>text</span>),
+        <span class='ident'>text</span> <span class='op'>=</span> <span class='ident'>rendered</span>,
         <span class='ident'>after_content</span> <span class='op'>=</span> <span class='ident'>external_html</span>.<span class='ident'>after_content</span>,
         <span class='ident'>playground</span> <span class='op'>=</span> <span class='ident'>playground</span>,
         );
@@ -310,12 +325,13 @@
 }
 
 <span class='doccomment'>/// Run any tests/code examples in the markdown file `input`.</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>test</span>(<span class='ident'>input</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>libs</span>: <span class='ident'>HashSet</span><span class='op'>&lt;</span><span class='ident'>Path</span><span class='op'>&gt;</span>, <span class='kw-2'>mut</span> <span class='ident'>test_args</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>int</span> {
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>test</span>(<span class='ident'>input</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>libs</span>: <span class='ident'>HashSet</span><span class='op'>&lt;</span><span class='ident'>Path</span><span class='op'>&gt;</span>, <span class='ident'>externs</span>: <span class='ident'>core</span>::<span class='ident'>Externs</span>,
+            <span class='kw-2'>mut</span> <span class='ident'>test_args</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>int</span> {
     <span class='kw'>let</span> <span class='ident'>input_str</span> <span class='op'>=</span> <span class='macro'>load_or_return</span><span class='macro'>!</span>(<span class='ident'>input</span>, <span class='number'>1</span>, <span class='number'>2</span>);
 
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>collector</span> <span class='op'>=</span> <span class='ident'>Collector</span>::<span class='ident'>new</span>(<span class='ident'>input</span>.<span class='ident'>to_string</span>(), <span class='ident'>libs</span>, <span class='boolval'>true</span>);
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>collector</span> <span class='op'>=</span> <span class='ident'>Collector</span>::<span class='ident'>new</span>(<span class='ident'>input</span>.<span class='ident'>to_string</span>(), <span class='ident'>libs</span>, <span class='ident'>externs</span>, <span class='boolval'>true</span>);
     <span class='ident'>find_testable_code</span>(<span class='ident'>input_str</span>.<span class='ident'>as_slice</span>(), <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>collector</span>);
-    <span class='ident'>test_args</span>.<span class='ident'>unshift</span>(<span class='string'>&quot;rustdoctest&quot;</span>.<span class='ident'>to_string</span>());
+    <span class='ident'>test_args</span>.<span class='ident'>insert</span>(<span class='number'>0</span>, <span class='string'>&quot;rustdoctest&quot;</span>.<span class='ident'>to_string</span>());
     <span class='ident'>testing</span>::<span class='ident'>test_main</span>(<span class='ident'>test_args</span>.<span class='ident'>as_slice</span>(), <span class='ident'>collector</span>.<span class='ident'>tests</span>);
     <span class='number'>0</span>
 }

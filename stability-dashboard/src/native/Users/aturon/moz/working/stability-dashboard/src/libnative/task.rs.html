@@ -419,6 +419,8 @@
 <span id='379'>379</span>
 <span id='380'>380</span>
 <span id='381'>381</span>
+<span id='382'>382</span>
+<span id='383'>383</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -553,21 +555,21 @@
 }
 
 <span class='kw'>impl</span> <span class='ident'>rt</span>::<span class='ident'>Runtime</span> <span class='kw'>for</span> <span class='ident'>Ops</span> {
-    <span class='kw'>fn</span> <span class='ident'>yield_now</span>(<span class='kw-2'>~</span><span class='self'>self</span>, <span class='kw-2'>mut</span> <span class='ident'>cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) {
+    <span class='kw'>fn</span> <span class='ident'>yield_now</span>(<span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Ops</span><span class='op'>&gt;</span>, <span class='kw-2'>mut</span> <span class='ident'>cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) {
         <span class='comment'>// put the task back in TLS and then invoke the OS thread yield</span>
         <span class='ident'>cur_task</span>.<span class='ident'>put_runtime</span>(<span class='self'>self</span>);
         <span class='ident'>Local</span>::<span class='ident'>put</span>(<span class='ident'>cur_task</span>);
         <span class='ident'>Thread</span>::<span class='ident'>yield_now</span>();
     }
 
-    <span class='kw'>fn</span> <span class='ident'>maybe_yield</span>(<span class='kw-2'>~</span><span class='self'>self</span>, <span class='kw-2'>mut</span> <span class='ident'>cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) {
+    <span class='kw'>fn</span> <span class='ident'>maybe_yield</span>(<span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Ops</span><span class='op'>&gt;</span>, <span class='kw-2'>mut</span> <span class='ident'>cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) {
         <span class='comment'>// just put the task back in TLS, on OS threads we never need to</span>
         <span class='comment'>// opportunistically yield b/c the OS will do that for us (preemption)</span>
         <span class='ident'>cur_task</span>.<span class='ident'>put_runtime</span>(<span class='self'>self</span>);
         <span class='ident'>Local</span>::<span class='ident'>put</span>(<span class='ident'>cur_task</span>);
     }
 
-    <span class='kw'>fn</span> <span class='ident'>wrap</span>(<span class='kw-2'>~</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>wrap</span>(<span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Ops</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span><span class='op'>&gt;</span> {
         <span class='self'>self</span> <span class='kw'>as</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span><span class='op'>&gt;</span>
     }
 
@@ -614,7 +616,9 @@
     <span class='comment'>// `awoken` field which indicates whether we were actually woken up via some</span>
     <span class='comment'>// invocation of `reawaken`. This flag is only ever accessed inside the</span>
     <span class='comment'>// lock, so there&#39;s no need to make it atomic.</span>
-    <span class='kw'>fn</span> <span class='ident'>deschedule</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='ident'>times</span>: <span class='ident'>uint</span>, <span class='kw-2'>mut</span> <span class='ident'>cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>,
+    <span class='kw'>fn</span> <span class='ident'>deschedule</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Ops</span><span class='op'>&gt;</span>,
+                  <span class='ident'>times</span>: <span class='ident'>uint</span>,
+                  <span class='kw-2'>mut</span> <span class='ident'>cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>,
                   <span class='ident'>f</span>: <span class='op'>|</span><span class='ident'>BlockedTask</span><span class='op'>|</span> <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>BlockedTask</span><span class='op'>&gt;</span>) {
         <span class='kw'>let</span> <span class='ident'>me</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Ops</span>;
         <span class='ident'>cur_task</span>.<span class='ident'>put_runtime</span>(<span class='self'>self</span>);
@@ -672,7 +676,7 @@
 
     <span class='comment'>// See the comments on `deschedule` for why the task is forgotten here, and</span>
     <span class='comment'>// why it&#39;s valid to do so.</span>
-    <span class='kw'>fn</span> <span class='ident'>reawaken</span>(<span class='kw-2'>mut</span> <span class='kw-2'>~</span><span class='self'>self</span>, <span class='kw-2'>mut</span> <span class='ident'>to_wake</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) {
+    <span class='kw'>fn</span> <span class='ident'>reawaken</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Ops</span><span class='op'>&gt;</span>, <span class='kw-2'>mut</span> <span class='ident'>to_wake</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>) {
         <span class='kw'>unsafe</span> {
             <span class='kw'>let</span> <span class='ident'>me</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='self'>self</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Ops</span>;
             <span class='ident'>to_wake</span>.<span class='ident'>put_runtime</span>(<span class='self'>self</span>);
@@ -683,7 +687,7 @@
         }
     }
 
-    <span class='kw'>fn</span> <span class='ident'>spawn_sibling</span>(<span class='kw-2'>~</span><span class='self'>self</span>,
+    <span class='kw'>fn</span> <span class='ident'>spawn_sibling</span>(<span class='self'>self</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Ops</span><span class='op'>&gt;</span>,
                      <span class='kw-2'>mut</span> <span class='ident'>cur_task</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Task</span><span class='op'>&gt;</span>,
                      <span class='ident'>opts</span>: <span class='ident'>TaskOpts</span>,
                      <span class='ident'>f</span>: <span class='kw'>proc</span>():<span class='ident'>Send</span>) {

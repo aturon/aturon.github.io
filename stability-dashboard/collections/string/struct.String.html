@@ -24,7 +24,7 @@
 
     <section class="sidebar">
         <a href='../../collections/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
-        <p class='location'><a href='../index.html'>collections</a>&#8203;::<a href='index.html'>string</a></p><div class='block struct'><h2>Structs</h2><a class='struct current' href='struct.String.html'>String</a></div>
+        <p class='location'><a href='../index.html'>collections</a>&#8203;::<a href='index.html'>string</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='raw/index.html'>raw</a></div><div class='block struct'><h2>Structs</h2><a class='struct current' href='struct.String.html'>String</a></div>
     </section>
 
     <nav class="sub">
@@ -39,7 +39,7 @@
     </nav>
 
     <section id='main' class="content struct">
-<h1 class='fqn'>Struct <a href='../index.html'>collections</a>::<a href='index.html'>string</a>::<a class='struct' href=''>String</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-27422' href='../../src/collections/Users/aturon/moz/working/stability-dashboard/src/libcollections/string.rs.html#29-31'>[src]</a></span></h1>
+<h1 class='fqn'>Struct <a href='../index.html'>collections</a>::<a href='index.html'>string</a>::<a class='struct' href=''>String</a><a class='stability Experimental' title=''>Experimental</a><span class='out-of-band'><a id='src-27328' href='../../src/collections/Users/aturon/moz/working/stability-dashboard/src/libcollections/string.rs.html#31-33'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct String {
     // some fields omitted
 }</pre><div class='docblock'><p>A growable string stored as a UTF-8 encoded buffer.</p>
@@ -47,10 +47,10 @@
 <div class='docblock'><p>Creates a new string buffer initialized with the empty string.</p>
 </div><h4 id='method.with_capacity' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.with_capacity' class='fnname'>with_capacity</a>(capacity: <a href='../../core/primitive.uint.html'>uint</a>) -&gt; <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h4>
 <div class='docblock'><p>Creates a new string buffer with the given capacity.</p>
-</div><h4 id='method.from_raw_parts' class='method'><a class='stability Experimental' title='Experimental'></a><code>unsafe fn <a href='#method.from_raw_parts' class='fnname'>from_raw_parts</a>(length: <a href='../../core/primitive.uint.html'>uint</a>, capacity: <a href='../../core/primitive.uint.html'>uint</a>, ptr: *mut <a href='../../core/primitive.u8.html'>u8</a>) -&gt; <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h4>
-<div class='docblock'><p>Creates a new string buffer from length, capacity, and a pointer.</p>
 </div><h4 id='method.from_str' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.from_str' class='fnname'>from_str</a>(string: &amp;<a href='../primitive.str.html'>str</a>) -&gt; <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h4>
 <div class='docblock'><p>Creates a new string buffer from the given string.</p>
+</div><h4 id='method.from_raw_parts' class='method'><a class='stability Deprecated' title='Deprecated: Replaced by string::raw::from_parts'></a><code>unsafe fn <a href='#method.from_raw_parts' class='fnname'>from_raw_parts</a>(length: <a href='../../core/primitive.uint.html'>uint</a>, capacity: <a href='../../core/primitive.uint.html'>uint</a>, ptr: *mut <a href='../../core/primitive.u8.html'>u8</a>) -&gt; <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h4>
+<div class='docblock'><p>Deprecated. Replaced by <code>string::raw::from_parts</code></p>
 </div><h4 id='method.from_owned_str' class='method'><a class='stability Deprecated' title='Deprecated: obsoleted by the removal of ~str'></a><code>fn <a href='#method.from_owned_str' class='fnname'>from_owned_str</a>(string: <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a>) -&gt; <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h4>
 <h4 id='method.from_utf8' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.from_utf8' class='fnname'>from_utf8</a>(vec: <a class='struct' href='../../collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='../../core/primitive.u8.html'>u8</a>&gt;) -&gt; <a class='type' href='../../core/result/type.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a>, <a class='struct' href='../../collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='../../core/primitive.u8.html'>u8</a>&gt;&gt;</code></h4>
 <div class='docblock'><p>Returns the vector as a string buffer, if possible, taking care not to
@@ -58,6 +58,90 @@ copy it.</p>
 
 <p>Returns <code>Err</code> with the original vector if the vector contains invalid
 UTF-8.</p>
+
+<h1 id="example" class='section-header'><a
+                           href="#example">Example</a></h1><span id='rust-example-raw-0' class='rusttest'>fn main() {
+    let hello_vec = vec![104, 101, 108, 108, 111];
+    let string = String::from_utf8(hello_vec);
+    assert_eq!(string, Ok(&quot;hello&quot;.to_string()));
+}</span><pre id='rust-example-rendered-0' class='rust '>
+<span class='kw'>let</span> <span class='ident'>hello_vec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>104</span>, <span class='number'>101</span>, <span class='number'>108</span>, <span class='number'>108</span>, <span class='number'>111</span>];
+<span class='kw'>let</span> <span class='ident'>string</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_utf8</span>(<span class='ident'>hello_vec</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>string</span>, <span class='prelude-val'>Ok</span>(<span class='string'>&quot;hello&quot;</span>.<span class='ident'>to_string</span>()));
+</pre>
+</div><h4 id='method.from_utf8_lossy' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.from_utf8_lossy' class='fnname'>from_utf8_lossy</a>&lt;'a&gt;(v: &amp;'a <a href='../primitive.slice.html'>[<a href='../../core/primitive.u8.html'>u8</a>]</a>) -&gt; <a class='type' href='../../collections/str/type.MaybeOwned.html' title='collections::str::MaybeOwned'>MaybeOwned</a>&lt;'a&gt;</code></h4>
+<div class='docblock'><p>Converts a vector of bytes to a new utf-8 string.
+Any invalid utf-8 sequences are replaced with U+FFFD REPLACEMENT CHARACTER.</p>
+
+<h1 id="example-1" class='section-header'><a
+                           href="#example-1">Example</a></h1><span id='rust-example-raw-1' class='rusttest'>fn main() {
+    let input = b&quot;Hello \xF0\x90\x80World&quot;;
+    let output = String::from_utf8_lossy(input);
+    assert_eq!(output.as_slice(), &quot;Hello \uFFFDWorld&quot;);
+}</span><pre id='rust-example-rendered-1' class='rust '>
+<span class='kw'>let</span> <span class='ident'>input</span> <span class='op'>=</span> <span class='string'>b&quot;Hello \xF0\x90\x80World&quot;</span>;
+<span class='kw'>let</span> <span class='ident'>output</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_utf8_lossy</span>(<span class='ident'>input</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>output</span>.<span class='ident'>as_slice</span>(), <span class='string'>&quot;Hello \uFFFDWorld&quot;</span>);
+</pre>
+</div><h4 id='method.from_utf16' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.from_utf16' class='fnname'>from_utf16</a>(v: &amp;<a href='../primitive.slice.html'>[<a href='../../core/primitive.u16.html'>u16</a>]</a>) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;</code></h4>
+<div class='docblock'><p>Decode a UTF-16 encoded vector <code>v</code> into a <code>String</code>, returning <code>None</code>
+if <code>v</code> contains any invalid data.</p>
+
+<h1 id="example-2" class='section-header'><a
+                           href="#example-2">Example</a></h1><span id='rust-example-raw-2' class='rusttest'>fn main() {
+    // 𝄞music
+    let mut v = [0xD834, 0xDD1E, 0x006d, 0x0075,
+                 0x0073, 0x0069, 0x0063];
+    assert_eq!(String::from_utf16(v), Some(&quot;𝄞music&quot;.to_string()));
+    
+    // 𝄞mu&lt;invalid&gt;ic
+    v[4] = 0xD800;
+    assert_eq!(String::from_utf16(v), None);
+}</span><pre id='rust-example-rendered-2' class='rust '>
+<span class='comment'>// 𝄞music</span>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>v</span> <span class='op'>=</span> [<span class='number'>0xD834</span>, <span class='number'>0xDD1E</span>, <span class='number'>0x006d</span>, <span class='number'>0x0075</span>,
+             <span class='number'>0x0073</span>, <span class='number'>0x0069</span>, <span class='number'>0x0063</span>];
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>String</span>::<span class='ident'>from_utf16</span>(<span class='ident'>v</span>), <span class='prelude-val'>Some</span>(<span class='string'>&quot;𝄞music&quot;</span>.<span class='ident'>to_string</span>()));
+
+<span class='comment'>// 𝄞mu&lt;invalid&gt;ic</span>
+<span class='ident'>v</span>[<span class='number'>4</span>] <span class='op'>=</span> <span class='number'>0xD800</span>;
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>String</span>::<span class='ident'>from_utf16</span>(<span class='ident'>v</span>), <span class='prelude-val'>None</span>);
+</pre>
+</div><h4 id='method.from_utf16_lossy' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.from_utf16_lossy' class='fnname'>from_utf16_lossy</a>(v: &amp;<a href='../primitive.slice.html'>[<a href='../../core/primitive.u16.html'>u16</a>]</a>) -&gt; <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h4>
+<div class='docblock'><p>Decode a UTF-16 encoded vector <code>v</code> into a string, replacing
+invalid data with the replacement character (U+FFFD).</p>
+
+<h1 id="example-3" class='section-header'><a
+                           href="#example-3">Example</a></h1><span id='rust-example-raw-3' class='rusttest'>fn main() {
+    // 𝄞mus&lt;invalid&gt;ic&lt;invalid&gt;
+    let v = [0xD834, 0xDD1E, 0x006d, 0x0075,
+             0x0073, 0xDD1E, 0x0069, 0x0063,
+             0xD834];
+    
+    assert_eq!(String::from_utf16_lossy(v),
+               &quot;𝄞mus\uFFFDic\uFFFD&quot;.to_string());
+}</span><pre id='rust-example-rendered-3' class='rust '>
+<span class='comment'>// 𝄞mus&lt;invalid&gt;ic&lt;invalid&gt;</span>
+<span class='kw'>let</span> <span class='ident'>v</span> <span class='op'>=</span> [<span class='number'>0xD834</span>, <span class='number'>0xDD1E</span>, <span class='number'>0x006d</span>, <span class='number'>0x0075</span>,
+         <span class='number'>0x0073</span>, <span class='number'>0xDD1E</span>, <span class='number'>0x0069</span>, <span class='number'>0x0063</span>,
+         <span class='number'>0xD834</span>];
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>String</span>::<span class='ident'>from_utf16_lossy</span>(<span class='ident'>v</span>),
+           <span class='string'>&quot;𝄞mus\uFFFDic\uFFFD&quot;</span>.<span class='ident'>to_string</span>());
+</pre>
+</div><h4 id='method.from_chars' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.from_chars' class='fnname'>from_chars</a>(chs: &amp;<a href='../primitive.slice.html'>[<a href='../../core/primitive.char.html'>char</a>]</a>) -&gt; <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h4>
+<div class='docblock'><p>Convert a vector of chars to a string</p>
+
+<h1 id="example-4" class='section-header'><a
+                           href="#example-4">Example</a></h1><span id='rust-example-raw-4' class='rusttest'>fn main() {
+    let chars = [&#39;h&#39;, &#39;e&#39;, &#39;l&#39;, &#39;l&#39;, &#39;o&#39;];
+    let string = String::from_chars(chars);
+    assert_eq!(string.as_slice(), &quot;hello&quot;);
+}</span><pre id='rust-example-rendered-4' class='rust '>
+<span class='kw'>let</span> <span class='ident'>chars</span> <span class='op'>=</span> [<span class='string'>&#39;h&#39;</span>, <span class='string'>&#39;e&#39;</span>, <span class='string'>&#39;l&#39;</span>, <span class='string'>&#39;l&#39;</span>, <span class='string'>&#39;o&#39;</span>];
+<span class='kw'>let</span> <span class='ident'>string</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_chars</span>(<span class='ident'>chars</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>string</span>.<span class='ident'>as_slice</span>(), <span class='string'>&quot;hello&quot;</span>);
+</pre>
 </div><h4 id='method.into_bytes' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.into_bytes' class='fnname'>into_bytes</a>(self) -&gt; <a class='struct' href='../../collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='../../core/primitive.u8.html'>u8</a>&gt;</code></h4>
 <div class='docblock'><p>Return the underlying byte buffer, encoded as UTF-8.</p>
 </div><h4 id='method.append' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.append' class='fnname'>append</a>(self, second: &amp;<a href='../primitive.str.html'>str</a>) -&gt; <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h4>
@@ -65,6 +149,21 @@ UTF-8.</p>
 again.</p>
 </div><h4 id='method.from_char' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.from_char' class='fnname'>from_char</a>(length: <a href='../../core/primitive.uint.html'>uint</a>, ch: <a href='../../core/primitive.char.html'>char</a>) -&gt; <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h4>
 <div class='docblock'><p>Creates a string buffer by repeating a character <code>length</code> times.</p>
+</div><h4 id='method.from_byte' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.from_byte' class='fnname'>from_byte</a>(b: <a href='../../core/primitive.u8.html'>u8</a>) -&gt; <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h4>
+<div class='docblock'><p>Convert a byte to a UTF-8 string</p>
+
+<h1 id="failure" class='section-header'><a
+                           href="#failure">Failure</a></h1>
+<p>Fails if invalid UTF-8</p>
+
+<h1 id="example-5" class='section-header'><a
+                           href="#example-5">Example</a></h1><span id='rust-example-raw-5' class='rusttest'>fn main() {
+    let string = String::from_byte(104);
+    assert_eq!(string.as_slice(), &quot;h&quot;);
+}</span><pre id='rust-example-rendered-5' class='rust '>
+<span class='kw'>let</span> <span class='ident'>string</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_byte</span>(<span class='number'>104</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>string</span>.<span class='ident'>as_slice</span>(), <span class='string'>&quot;h&quot;</span>);
+</pre>
 </div><h4 id='method.push_str' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.push_str' class='fnname'>push_str</a>(&amp;mut self, string: &amp;<a href='../primitive.str.html'>str</a>)</code></h4>
 <div class='docblock'><p>Pushes the given string onto this string buffer.</p>
 </div><h4 id='method.grow' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.grow' class='fnname'>grow</a>(&amp;mut self, count: <a href='../../core/primitive.uint.html'>uint</a>, ch: <a href='../../core/primitive.char.html'>char</a>)</code></h4>
@@ -117,9 +216,18 @@ string buffer is empty.</p>
 <div class='docblock'><p>Views the string buffer as a mutable sequence of bytes.</p>
 
 <p>Callers must preserve the valid UTF-8 property.</p>
-</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a&gt; <a class='trait' href='../../collections/str/trait.IntoMaybeOwned.html' title='collections::str::IntoMaybeOwned'>IntoMaybeOwned</a>&lt;'a&gt; for <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h3><div class='impl-methods'><h4 id='method.into_maybe_owned' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.into_maybe_owned' class='fnname'>into_maybe_owned</a>(self) -&gt; <a class='type' href='../../collections/str/type.MaybeOwned.html' title='collections::str::MaybeOwned'>MaybeOwned</a>&lt;'a&gt;</code></h4>
-</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../collections/str/trait.OwnedStr.html' title='collections::str::OwnedStr'>OwnedStr</a> for <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h3><div class='impl-methods'><h4 id='method.into_bytes' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.into_bytes' class='fnname'>into_bytes</a>(self) -&gt; <a class='struct' href='../../collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='../../core/primitive.u8.html'>u8</a>&gt;</code></h4>
-<h4 id='method.append' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.append' class='fnname'>append</a>(self, rhs: &amp;<a href='../primitive.str.html'>str</a>) -&gt; <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h4>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a&gt; <a class='trait' href='../../collections/str/trait.IntoMaybeOwned.html' title='collections::str::IntoMaybeOwned'>IntoMaybeOwned</a>&lt;'a&gt; for <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h3><div class='docblock'>
+<h1 id="example-6" class='section-header'><a
+                           href="#example-6">Example</a></h1><span id='rust-example-raw-6' class='rusttest'>fn main() {
+    let owned_string = String::from_str(&quot;orange&quot;);
+    let maybe_owned_string = owned_string.into_maybe_owned();
+    assert_eq!(true, maybe_owned_string.is_owned());
+}</span><pre id='rust-example-rendered-6' class='rust '>
+<span class='kw'>let</span> <span class='ident'>owned_string</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;orange&quot;</span>);
+<span class='kw'>let</span> <span class='ident'>maybe_owned_string</span> <span class='op'>=</span> <span class='ident'>owned_string</span>.<span class='ident'>into_maybe_owned</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='boolval'>true</span>, <span class='ident'>maybe_owned_string</span>.<span class='ident'>is_owned</span>());
+</pre>
+</div><div class='impl-methods'><h4 id='method.into_maybe_owned' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.into_maybe_owned' class='fnname'>into_maybe_owned</a>(self) -&gt; <a class='type' href='../../collections/str/type.MaybeOwned.html' title='collections::str::MaybeOwned'>MaybeOwned</a>&lt;'a&gt;</code></h4>
 </div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../collections/trait.Collection.html' title='collections::Collection'>Collection</a> for <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h3><div class='impl-methods'><h4 id='method.len' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.len' class='fnname'>len</a>(&amp;self) -&gt; <a href='../../core/primitive.uint.html'>uint</a></code></h4>
 <h4 id='method.is_empty' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#tymethod.is_empty' class='fnname'>is_empty</a>(&amp;self) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
 </div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../collections/trait.Mutable.html' title='collections::Mutable'>Mutable</a> for <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h3><div class='impl-methods'><h4 id='method.clear' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.clear' class='fnname'>clear</a>(&amp;mut self)</code></h4>
@@ -137,19 +245,19 @@ string buffer is empty.</p>
 <h4 id='method.lev_distance' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.lev_distance' class='fnname'>lev_distance</a>(&amp;self, t: &amp;<a href='../primitive.str.html'>str</a>) -&gt; <a href='../../core/primitive.uint.html'>uint</a></code></h4>
 <h4 id='method.nfd_chars' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.nfd_chars' class='fnname'>nfd_chars</a>&lt;'a&gt;(&amp;'a self) -&gt; <a class='struct' href='../../collections/str/struct.Decompositions.html' title='collections::str::Decompositions'>Decompositions</a>&lt;'a&gt;</code></h4>
 <h4 id='method.nfkd_chars' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.nfkd_chars' class='fnname'>nfkd_chars</a>&lt;'a&gt;(&amp;'a self) -&gt; <a class='struct' href='../../collections/str/struct.Decompositions.html' title='collections::str::Decompositions'>Decompositions</a>&lt;'a&gt;</code></h4>
-</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../core/default/trait.Default.html' title='core::default::Default'>Default</a> for <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h3><div class='impl-methods'><h4 id='method.default' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.default' class='fnname'>default</a>() -&gt; <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../core/default/trait.Default.html' title='core::default::Default'>Default</a> for <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h3><div class='impl-methods'><h4 id='method.default' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.default' class='fnname'>default</a>() -&gt; <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h4>
 </div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../core/fmt/trait.Show.html' title='core::fmt::Show'>Show</a> for <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h3><div class='impl-methods'><h4 id='method.fmt' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='../../core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='../../core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
 </div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;H: <a class='trait' href='../../collections/hash/trait.Writer.html' title='collections::hash::Writer'>Writer</a>&gt; <a class='trait' href='../../collections/hash/trait.Hash.html' title='collections::hash::Hash'>Hash</a>&lt;H&gt; for <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h3><div class='impl-methods'><h4 id='method.hash' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.hash' class='fnname'>hash</a>(&amp;self, hasher: &amp;mut H)</code></h4>
-</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, S: <a class='trait' href='../../collections/str/trait.Str.html' title='collections::str::Str'>Str</a>&gt; <a class='trait' href='../../core/cmp/trait.Equiv.html' title='core::cmp::Equiv'>Equiv</a>&lt;S&gt; for <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h3><div class='impl-methods'><h4 id='method.equiv' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.equiv' class='fnname'>equiv</a>(&amp;self, other: &amp;S) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, S: <a class='trait' href='../../collections/str/trait.Str.html' title='collections::str::Str'>Str</a>&gt; <a class='trait' href='../../core/cmp/trait.Equiv.html' title='core::cmp::Equiv'>Equiv</a>&lt;S&gt; for <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h3><div class='impl-methods'><h4 id='method.equiv' class='method'><a class='stability Experimental' title='Experimental: Better solutions may be discovered.'></a><code>fn <a href='#method.equiv' class='fnname'>equiv</a>(&amp;self, other: &amp;S) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
 </div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;S: <a class='trait' href='../../collections/str/trait.Str.html' title='collections::str::Str'>Str</a>&gt; <a class='trait' href='../../core/ops/trait.Add.html' title='core::ops::Add'>Add</a>&lt;S, <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a>&gt; for <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h3><div class='impl-methods'><h4 id='method.add' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.add' class='fnname'>add</a>(&amp;self, other: &amp;S) -&gt; <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h4>
-</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../core/cmp/trait.Ord.html' title='core::cmp::Ord'>Ord</a> for <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h3><div class='impl-methods'><h4 id='method.cmp' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.cmp' class='fnname'>cmp</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a>) -&gt; <a class='type' href='../../core/cmp/type.Ordering.html' title='core::cmp::Ordering'>Ordering</a></code></h4>
-</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../core/cmp/trait.Eq.html' title='core::cmp::Eq'>Eq</a> for <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h3><div class='impl-methods'></div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a> for <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h3><div class='impl-methods'><h4 id='method.partial_cmp' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.partial_cmp' class='fnname'>partial_cmp</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a>) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='type' href='../../core/cmp/type.Ordering.html' title='core::cmp::Ordering'>Ordering</a>&gt;</code></h4>
-<h4 id='method.lt' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.lt' class='fnname'>lt</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
-<h4 id='method.le' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.le' class='fnname'>le</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
-<h4 id='method.gt' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.gt' class='fnname'>gt</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
-<h4 id='method.ge' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.ge' class='fnname'>ge</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
-</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h3><div class='impl-methods'><h4 id='method.eq' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.eq' class='fnname'>eq</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
-<h4 id='method.ne' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.ne' class='fnname'>ne</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../core/cmp/trait.Ord.html' title='core::cmp::Ord'>Ord</a> for <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h3><div class='impl-methods'><h4 id='method.cmp' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#method.cmp' class='fnname'>cmp</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a>) -&gt; <a class='type' href='../../core/cmp/type.Ordering.html' title='core::cmp::Ordering'>Ordering</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../core/cmp/trait.Eq.html' title='core::cmp::Eq'>Eq</a> for <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h3><div class='impl-methods'></div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a> for <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h3><div class='impl-methods'><h4 id='method.partial_cmp' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#method.partial_cmp' class='fnname'>partial_cmp</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a>) -&gt; <a class='type' href='../../core/option/type.Option.html' title='core::option::Option'>Option</a>&lt;<a class='type' href='../../core/cmp/type.Ordering.html' title='core::cmp::Ordering'>Ordering</a>&gt;</code></h4>
+<h4 id='method.lt' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#method.lt' class='fnname'>lt</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.le' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#method.le' class='fnname'>le</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.gt' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#method.gt' class='fnname'>gt</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ge' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#method.ge' class='fnname'>ge</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h3><div class='impl-methods'><h4 id='method.eq' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#method.eq' class='fnname'>eq</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#method.ne' class='fnname'>ne</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a>) -&gt; <a href='../../core/primitive.bool.html'>bool</a></code></h4>
 </div><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl <a class='trait' href='../../core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h3><div class='impl-methods'><h4 id='method.clone' class='method'><a class='stability Unstable' title='Unstable'></a><code>fn <a href='#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../collections/string/struct.String.html' title='collections::string::String'>String</a></code></h4>
 <h4 id='method.clone_from' class='method'><a class='stability Experimental' title='Experimental: this function is mostly unused'></a><code>fn <a href='#tymethod.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
 </div></section>

@@ -952,6 +952,8 @@
 <span id='912'>912</span>
 <span id='913'>913</span>
 <span id='914'>914</span>
+<span id='915'>915</span>
+<span id='916'>916</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2013 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -975,11 +977,11 @@
 
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
 
-<span class='kw'>use</span> <span class='ident'>alloc</span>::<span class='ident'>owned</span>::<span class='ident'>Box</span>;
+<span class='kw'>use</span> <span class='ident'>alloc</span>::<span class='ident'>boxed</span>::<span class='ident'>Box</span>;
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>fmt</span>;
 <span class='kw'>use</span> <span class='ident'>core</span>::<span class='ident'>fmt</span>::<span class='ident'>Show</span>;
 
-<span class='kw'>use</span> <span class='ident'>Collection</span>;
+<span class='kw'>use</span> {<span class='ident'>Collection</span>, <span class='ident'>MutableSeq</span>};
 <span class='kw'>use</span> <span class='ident'>vec</span>::<span class='ident'>Vec</span>;
 
 <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>missing_doc</span>)]</span>
@@ -1320,12 +1322,12 @@
                 <span class='kw'>return</span> (<span class='ident'>Node</span>::<span class='ident'>new_leaf</span>(<span class='self'>self</span>.<span class='ident'>clone</span>().<span class='ident'>elts</span>), <span class='boolval'>false</span>);
             }
             <span class='comment'>//If there is an index, insert at that index.</span>
-            _ <span class='op'>=&gt;</span> {
-                <span class='kw'>if</span> <span class='ident'>index</span>.<span class='ident'>unwrap</span>() <span class='op'>&gt;=</span> <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>len</span>() {
+            <span class='prelude-val'>Some</span>(<span class='ident'>i</span>) <span class='op'>=&gt;</span> {
+                <span class='kw'>if</span> <span class='ident'>i</span> <span class='op'>&gt;=</span> <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>len</span>() {
                     <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>push</span>(<span class='ident'>to_insert</span>.<span class='ident'>clone</span>());
                 }
                 <span class='kw'>else</span> {
-                    <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>insert</span>(<span class='ident'>index</span>.<span class='ident'>unwrap</span>(), <span class='ident'>to_insert</span>.<span class='ident'>clone</span>());
+                    <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>insert</span>(<span class='ident'>i</span>, <span class='ident'>to_insert</span>.<span class='ident'>clone</span>());
                 }
             }
         }
@@ -1481,8 +1483,8 @@
                                          <span class='self'>self</span>.<span class='ident'>clone</span>().<span class='ident'>rightmost_child</span>),
                         <span class='ident'>outcome</span>);
             }
-            _ <span class='op'>=&gt;</span> {
-                <span class='kw'>if</span> <span class='ident'>index</span>.<span class='ident'>unwrap</span>() <span class='op'>==</span> <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>len</span>() {
+            <span class='prelude-val'>Some</span>(<span class='ident'>i</span>) <span class='op'>=&gt;</span> {
+                <span class='kw'>if</span> <span class='ident'>i</span> <span class='op'>==</span> <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>len</span>() {
                     <span class='kw'>let</span> <span class='ident'>new_outcome</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>clone</span>().<span class='ident'>rightmost_child</span>.<span class='ident'>insert</span>(<span class='ident'>k</span>.<span class='ident'>clone</span>(),
                                                                        <span class='ident'>v</span>.<span class='ident'>clone</span>(),
                                                                        <span class='ident'>ub</span>.<span class='ident'>clone</span>());
@@ -1490,7 +1492,7 @@
                     <span class='ident'>outcome</span> <span class='op'>=</span> <span class='ident'>new_outcome</span>.<span class='ident'>val1</span>();
                 }
                 <span class='kw'>else</span> {
-                    <span class='kw'>let</span> <span class='ident'>new_outcome</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>get</span>(<span class='ident'>index</span>.<span class='ident'>unwrap</span>()).<span class='ident'>left</span>.<span class='ident'>clone</span>().<span class='ident'>insert</span>(<span class='ident'>k</span>.<span class='ident'>clone</span>(),
+                    <span class='kw'>let</span> <span class='ident'>new_outcome</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>get</span>(<span class='ident'>i</span>).<span class='ident'>left</span>.<span class='ident'>clone</span>().<span class='ident'>insert</span>(<span class='ident'>k</span>.<span class='ident'>clone</span>(),
                                                                                  <span class='ident'>v</span>.<span class='ident'>clone</span>(),
                                                                                  <span class='ident'>ub</span>.<span class='ident'>clone</span>());
                     <span class='ident'>new_branch</span> <span class='op'>=</span> <span class='ident'>new_outcome</span>.<span class='ident'>clone</span>().<span class='ident'>val0</span>();
@@ -1502,11 +1504,11 @@
                     <span class='comment'>//If we have a leaf, we do not need to resize the tree,</span>
                     <span class='comment'>//so we can return false.</span>
                     <span class='ident'>LeafNode</span>(..) <span class='op'>=&gt;</span> {
-                        <span class='kw'>if</span> <span class='ident'>index</span>.<span class='ident'>unwrap</span>() <span class='op'>==</span> <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>len</span>() {
+                        <span class='kw'>if</span> <span class='ident'>i</span> <span class='op'>==</span> <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>len</span>() {
                             <span class='self'>self</span>.<span class='ident'>rightmost_child</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>new_branch</span>.<span class='ident'>clone</span>();
                         }
                         <span class='kw'>else</span> {
-                            <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>get_mut</span>(<span class='ident'>index</span>.<span class='ident'>unwrap</span>()).<span class='ident'>left</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>new_branch</span>.<span class='ident'>clone</span>();
+                            <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>get_mut</span>(<span class='ident'>i</span>).<span class='ident'>left</span> <span class='op'>=</span> <span class='kw'>box</span> <span class='ident'>new_branch</span>.<span class='ident'>clone</span>();
                         }
                         <span class='kw'>return</span> (<span class='ident'>Node</span>::<span class='ident'>new_branch</span>(<span class='self'>self</span>.<span class='ident'>clone</span>().<span class='ident'>elts</span>,
                                                  <span class='self'>self</span>.<span class='ident'>clone</span>().<span class='ident'>rightmost_child</span>),
@@ -1544,13 +1546,13 @@
                                                      <span class='self'>self</span>.<span class='ident'>clone</span>().<span class='ident'>rightmost_child</span>),
                                     <span class='boolval'>false</span>);
                             }
-                        _ <span class='op'>=&gt;</span> {
-                            <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>insert</span>(<span class='ident'>new_elt_index</span>.<span class='ident'>unwrap</span>(), <span class='ident'>new_elt</span>);
-                            <span class='kw'>if</span> <span class='ident'>new_elt_index</span>.<span class='ident'>unwrap</span>() <span class='op'>+</span> <span class='number'>1</span> <span class='op'>&gt;=</span> <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>len</span>() {
+                        <span class='prelude-val'>Some</span>(<span class='ident'>i</span>) <span class='op'>=&gt;</span> {
+                            <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>insert</span>(<span class='ident'>i</span>, <span class='ident'>new_elt</span>);
+                            <span class='kw'>if</span> <span class='ident'>i</span> <span class='op'>+</span> <span class='number'>1</span> <span class='op'>&gt;=</span> <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>len</span>() {
                                 <span class='self'>self</span>.<span class='ident'>rightmost_child</span> <span class='op'>=</span> <span class='ident'>branch</span>.<span class='ident'>clone</span>().<span class='ident'>rightmost_child</span>;
                             }
                             <span class='kw'>else</span> {
-                                <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>get_mut</span>(<span class='ident'>new_elt_index</span>.<span class='ident'>unwrap</span>() <span class='op'>+</span> <span class='number'>1</span>).<span class='ident'>left</span> <span class='op'>=</span>
+                                <span class='self'>self</span>.<span class='ident'>elts</span>.<span class='ident'>get_mut</span>(<span class='ident'>i</span> <span class='op'>+</span> <span class='number'>1</span>).<span class='ident'>left</span> <span class='op'>=</span>
                                     <span class='ident'>branch</span>.<span class='ident'>clone</span>().<span class='ident'>rightmost_child</span>;
                             }
                         }
@@ -1736,6 +1738,8 @@
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
 
     <span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>BTree</span>, <span class='ident'>Node</span>, <span class='ident'>LeafElt</span>};
+
+    <span class='kw'>use</span> <span class='ident'>MutableSeq</span>;
 
     <span class='comment'>//Tests the functionality of the insert methods (which are unfinished).</span>
     <span class='attribute'>#[<span class='ident'>test</span>]</span>

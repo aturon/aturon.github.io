@@ -234,15 +234,6 @@
 <span id='194'>194</span>
 <span id='195'>195</span>
 <span id='196'>196</span>
-<span id='197'>197</span>
-<span id='198'>198</span>
-<span id='199'>199</span>
-<span id='200'>200</span>
-<span id='201'>201</span>
-<span id='202'>202</span>
-<span id='203'>203</span>
-<span id='204'>204</span>
-<span id='205'>205</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2013-2014 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -272,7 +263,7 @@
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rt</span>::<span class='ident'>bookkeeping</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rt</span>::<span class='ident'>mutex</span>::<span class='ident'>StaticNativeMutex</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rt</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ty</span>::<span class='ident'>Unsafe</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cell</span>::<span class='ident'>UnsafeCell</span>;
 
 <span class='kw'>use</span> <span class='ident'>task</span>;
 
@@ -287,35 +278,26 @@
     <span class='doccomment'>/// Internal lock which protects the remaining fields</span>
     <span class='kw'>pub</span> <span class='ident'>lock</span>: <span class='ident'>StaticNativeMutex</span>,
 
-    <span class='comment'>// You&#39;ll notice that the remaining fields are Unsafe&lt;T&gt;, and this is</span>
+    <span class='comment'>// You&#39;ll notice that the remaining fields are UnsafeCell&lt;T&gt;, and this is</span>
     <span class='comment'>// because all helper thread operations are done through &amp;self, but we need</span>
     <span class='comment'>// these to be mutable (once `lock` is held).</span>
 
     <span class='doccomment'>/// Lazily allocated channel to send messages to the helper thread.</span>
-    <span class='kw'>pub</span> <span class='ident'>chan</span>: <span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Sender</span><span class='op'>&lt;</span><span class='ident'>M</span><span class='op'>&gt;&gt;</span>,
+    <span class='kw'>pub</span> <span class='ident'>chan</span>: <span class='ident'>UnsafeCell</span><span class='op'>&lt;</span><span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Sender</span><span class='op'>&lt;</span><span class='ident'>M</span><span class='op'>&gt;&gt;</span>,
 
     <span class='doccomment'>/// OS handle used to wake up a blocked helper thread</span>
-    <span class='kw'>pub</span> <span class='ident'>signal</span>: <span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>,
+    <span class='kw'>pub</span> <span class='ident'>signal</span>: <span class='ident'>UnsafeCell</span><span class='op'>&lt;</span><span class='ident'>uint</span><span class='op'>&gt;</span>,
 
     <span class='doccomment'>/// Flag if this helper thread has booted and been initialized yet.</span>
-    <span class='kw'>pub</span> <span class='ident'>initialized</span>: <span class='ident'>Unsafe</span><span class='op'>&lt;</span><span class='ident'>bool</span><span class='op'>&gt;</span>,
+    <span class='kw'>pub</span> <span class='ident'>initialized</span>: <span class='ident'>UnsafeCell</span><span class='op'>&lt;</span><span class='ident'>bool</span><span class='op'>&gt;</span>,
 }
 
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>helper_init</span>( (<span class='kw'>static</span> <span class='kw-2'>mut</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>name</span>:<span class='ident'>ident</span>: <span class='ident'>Helper</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>m</span>:<span class='ident'>ty</span><span class='op'>&gt;</span>) <span class='op'>=&gt;</span> (
     <span class='kw'>static</span> <span class='kw-2'>mut</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>name</span>: <span class='ident'>Helper</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>m</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Helper</span> {
         <span class='ident'>lock</span>: ::<span class='ident'>std</span>::<span class='ident'>rt</span>::<span class='ident'>mutex</span>::<span class='ident'>NATIVE_MUTEX_INIT</span>,
-        <span class='ident'>chan</span>: ::<span class='ident'>std</span>::<span class='ident'>ty</span>::<span class='ident'>Unsafe</span> {
-            <span class='ident'>value</span>: <span class='number'>0</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Sender</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>m</span><span class='op'>&gt;</span>,
-            <span class='ident'>marker1</span>: ::<span class='ident'>std</span>::<span class='ident'>kinds</span>::<span class='ident'>marker</span>::<span class='ident'>InvariantType</span>,
-        },
-        <span class='ident'>signal</span>: ::<span class='ident'>std</span>::<span class='ident'>ty</span>::<span class='ident'>Unsafe</span> {
-            <span class='ident'>value</span>: <span class='number'>0</span>,
-            <span class='ident'>marker1</span>: ::<span class='ident'>std</span>::<span class='ident'>kinds</span>::<span class='ident'>marker</span>::<span class='ident'>InvariantType</span>,
-        },
-        <span class='ident'>initialized</span>: ::<span class='ident'>std</span>::<span class='ident'>ty</span>::<span class='ident'>Unsafe</span> {
-            <span class='ident'>value</span>: <span class='boolval'>false</span>,
-            <span class='ident'>marker1</span>: ::<span class='ident'>std</span>::<span class='ident'>kinds</span>::<span class='ident'>marker</span>::<span class='ident'>InvariantType</span>,
-        },
+        <span class='ident'>chan</span>: ::<span class='ident'>std</span>::<span class='ident'>cell</span>::<span class='ident'>UnsafeCell</span> { <span class='ident'>value</span>: <span class='number'>0</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>Sender</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>m</span><span class='op'>&gt;</span> },
+        <span class='ident'>signal</span>: ::<span class='ident'>std</span>::<span class='ident'>cell</span>::<span class='ident'>UnsafeCell</span> { <span class='ident'>value</span>: <span class='number'>0</span> },
+        <span class='ident'>initialized</span>: ::<span class='ident'>std</span>::<span class='ident'>cell</span>::<span class='ident'>UnsafeCell</span> { <span class='ident'>value</span>: <span class='boolval'>false</span> },
     };
 ) )
 
