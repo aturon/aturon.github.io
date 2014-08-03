@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="generator" content="rustdoc">
-    <title>Convenience methods</title>
+    <title>Ownership variants</title>
 
     <link rel="stylesheet" type="text/css" href="../../rust-book.css">
 
@@ -153,53 +153,36 @@
 <div id='page'>
 
 
-    <h1 class="title">Convenience methods</h1>
-    
-<h3 id="provide-small,-coherent-sets-of-convenience-methods.-<strong>[rfc]</strong>" class='section-header'><a
-                           href="#provide-small,-coherent-sets-of-convenience-methods.-<strong>[rfc]</strong>">Provide small, coherent sets of convenience methods. <strong>[RFC]</strong></a></h3>
-<p><em>Convenience methods</em> wrap up existing functionality in a more convenient
-way. The work done by a convenience method varies widely:</p>
+    <h1 class="title">Ownership variants</h1>
+    <p>Functions often come in multiple variants: immutably borrowed, mutably
+borrowed, and owned.</p>
+
+<p>The right default depends on the function in question. Variants should
+be marked through suffixes.</p>
+
+<h4 id="immutably-borrowed-by-default" class='section-header'><a
+                           href="#immutably-borrowed-by-default">Immutably borrowed by default</a></h4>
+<p>If <code>foo</code> uses/produces an immutable borrow by default, use:</p>
 
 <ul>
-<li><em>Re-providing functions as methods</em>. For example, the <code>std::path::Path</code> type
-provides methods like <code>stat</code> on <code>Path</code>s that simply invoke the corresponding
-function in <code>std::io::fs</code>.</li>
-<li><em>Skipping through conversions</em>. For example, the <code>str</code> type provides a
-<code>.len()</code> convenience method which is also expressible as <code>.as_bytes().len()</code>.
-Sometimes the conversion is more complex: the <code>str</code> module also provides
-<code>from_chars</code>, which encapsulates a simple use of iterators.</li>
-<li><em>Encapsulating common arguments</em>. For example, vectors of <code>&amp;str</code>s
-provide a <code>connect</code> as well as a special case, <code>concat</code>, that is expressible
-using <code>connect</code> with a fixed separator of <code>&quot;&quot;</code>.</li>
-<li><p><em>Providing more efficient special cases</em>. The <code>connect</code> and <code>concat</code> example
-also applies here: singling out <code>concat</code> as a special case allows for a more
-efficient implementation.</p>
-
-<p>Note, however, that the <code>connect</code> method actually detects the special case
-internally and invokes <code>concat</code>. Usually, it is not necessary to add a public
-convenience method just for efficiency gains; there should also be a
-<em>conceptual</em> reason to add it, e.g. because it is such a common special case.</p></li>
+<li>The <code>_mut</code> suffix (e.g. <code>foo_mut</code>) for the mutably borrowed variant.</li>
+<li>The <code>_owned</code> suffix (e.g. <code>foo_owned</code>) for the owned variant.</li>
 </ul>
 
-<p>It is tempting to add convenience methods in a one-off, haphazard way as
-common use patterns emerge. Avoid this temptation, and instead <em>design</em> small,
-coherent sets of convenience methods that are easy to remember:</p>
+<h4 id="owned-by-default" class='section-header'><a
+                           href="#owned-by-default">Owned by default</a></h4>
+<p>If <code>foo</code> uses/produces owned data by default, use:</p>
 
 <ul>
-<li><em>Small</em>: Avoid combinatorial explosions of convenience methods. For example,
-instead of adding <code>_str</code> variants of methods that provide a <code>str</code> output,
-instead ensure that the normal output type of methods is easily convertible to
-<code>str</code>.</li>
-<li><em>Coherent</em>: Look for small groups of convenience methods that make sense to
-include together. For example, the <code>Path</code> API mentioned above includes a small
-selection of the most common filesystem operations that take a <code>Path</code>
-argument.  If one convenience method strongly suggests the existence of others,
-consider adding the whole group.</li>
-<li><em>Memorable</em>: It is not worth saving a few characters of typing if you have to
-look up the name of a convenience method every time you use it. Add
-convenience methods with names that are obvious and easy to remember, and add
-them for the most common or painful use cases.</li>
+<li>The <code>_ref</code> suffix (e.g. <code>foo_ref</code>) for the immutably borrowed variant.</li>
+<li>The <code>_mut</code> suffix (e.g. <code>foo_mut</code>) for the mutably borrowed variant.</li>
 </ul>
+
+<h4 id="exceptions" class='section-header'><a
+                           href="#exceptions">Exceptions</a></h4>
+<p>For mutably borrowed variants, if the <code>mut</code> qualifier is part of a
+type name (e.g. <code>as_mut_slice</code>), it should appear as it would appear
+in the type.</p>
 
     <script type="text/javascript">
         window.playgroundUrl = "";

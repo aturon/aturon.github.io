@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="generator" content="rustdoc">
-    <title>Convenience methods</title>
+    <title>Iterators</title>
 
     <link rel="stylesheet" type="text/css" href="../../rust-book.css">
 
@@ -153,52 +153,38 @@
 <div id='page'>
 
 
-    <h1 class="title">Convenience methods</h1>
+    <h1 class="title">Iterators</h1>
     
-<h3 id="provide-small,-coherent-sets-of-convenience-methods.-<strong>[rfc]</strong>" class='section-header'><a
-                           href="#provide-small,-coherent-sets-of-convenience-methods.-<strong>[rfc]</strong>">Provide small, coherent sets of convenience methods. <strong>[RFC]</strong></a></h3>
-<p><em>Convenience methods</em> wrap up existing functionality in a more convenient
-way. The work done by a convenience method varies widely:</p>
+<h4 id="method-names" class='section-header'><a
+                           href="#method-names">Method names</a></h4>
+<p>For a container with elements of type <code>U</code>, iterator methods should be named:</p>
+<pre class='rust '>
+<span class='kw'>fn</span> <span class='ident'>iter</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span>           <span class='comment'>// where T implements Iterator&lt;&amp;U&gt;</span>
+<span class='kw'>fn</span> <span class='ident'>iter_mut</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span>   <span class='comment'>// where T implements Iterator&lt;&amp;mut U&gt;</span>
+<span class='kw'>fn</span> <span class='ident'>iter_owned</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span>      <span class='comment'>// where T implements Iterator&lt;U&gt;</span>
+</pre>
+
+<p>The default iterator variant yields shared references <code>&amp;U</code>.</p>
+
+<h4 id="type-names" class='section-header'><a
+                           href="#type-names">Type names</a></h4>
+<p>Iterators require introducing and exporting new types. These types should use
+the following naming convention:</p>
 
 <ul>
-<li><em>Re-providing functions as methods</em>. For example, the <code>std::path::Path</code> type
-provides methods like <code>stat</code> on <code>Path</code>s that simply invoke the corresponding
-function in <code>std::io::fs</code>.</li>
-<li><em>Skipping through conversions</em>. For example, the <code>str</code> type provides a
-<code>.len()</code> convenience method which is also expressible as <code>.as_bytes().len()</code>.
-Sometimes the conversion is more complex: the <code>str</code> module also provides
-<code>from_chars</code>, which encapsulates a simple use of iterators.</li>
-<li><em>Encapsulating common arguments</em>. For example, vectors of <code>&amp;str</code>s
-provide a <code>connect</code> as well as a special case, <code>concat</code>, that is expressible
-using <code>connect</code> with a fixed separator of <code>&quot;&quot;</code>.</li>
-<li><p><em>Providing more efficient special cases</em>. The <code>connect</code> and <code>concat</code> example
-also applies here: singling out <code>concat</code> as a special case allows for a more
-efficient implementation.</p>
-
-<p>Note, however, that the <code>connect</code> method actually detects the special case
-internally and invokes <code>concat</code>. Usually, it is not necessary to add a public
-convenience method just for efficiency gains; there should also be a
-<em>conceptual</em> reason to add it, e.g. because it is such a common special case.</p></li>
-</ul>
-
-<p>It is tempting to add convenience methods in a one-off, haphazard way as
-common use patterns emerge. Avoid this temptation, and instead <em>design</em> small,
-coherent sets of convenience methods that are easy to remember:</p>
+<li><p><strong>Base name</strong>. If the iterator yields something that can be described with a
+specific noun, the base name should be the pluralization of that noun
+(e.g. an iterator yielding words is called <code>Words</code>). Generic contains use the
+base name <code>Items</code>.</p></li>
+<li><p><strong>Flavor prefix</strong>. Iterators often come in multiple flavors, with the default
+flavor providing immutable references. Other flavors should prefix their name:</p>
 
 <ul>
-<li><em>Small</em>: Avoid combinatorial explosions of convenience methods. For example,
-instead of adding <code>_str</code> variants of methods that provide a <code>str</code> output,
-instead ensure that the normal output type of methods is easily convertible to
-<code>str</code>.</li>
-<li><em>Coherent</em>: Look for small groups of convenience methods that make sense to
-include together. For example, the <code>Path</code> API mentioned above includes a small
-selection of the most common filesystem operations that take a <code>Path</code>
-argument.  If one convenience method strongly suggests the existence of others,
-consider adding the whole group.</li>
-<li><em>Memorable</em>: It is not worth saving a few characters of typing if you have to
-look up the name of a convenience method every time you use it. Add
-convenience methods with names that are obvious and easy to remember, and add
-them for the most common or painful use cases.</li>
+<li>Moving iterators have a prefix of <code>Move</code>.</li>
+<li>If the default iterator yields an immutable reference, an iterator
+yielding a mutable reference has a prefix <code>Mut</code>.</li>
+<li>Reverse iterators have a prefix of <code>Rev</code>.</li>
+</ul></li>
 </ul>
 
     <script type="text/javascript">
