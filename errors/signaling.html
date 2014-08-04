@@ -237,10 +237,13 @@ parameters beyond their static type.</p>
 
 <h3 id="for-preventable-errors,-prefer-result." class='section-header'><a
                            href="#for-preventable-errors,-prefer-result.">For preventable errors, prefer <code>Result</code>.</a></h3>
-<p>For preventable errors, API designers have to make a choice:
-* Permit erroneous input, return <code>Result</code>, and use the <code>Err</code> variant to inform
-  the client of the error.
-* Treat erroneous input as a <em>contract violation</em> (i.e., assertion failure) and <code>fail!</code>.</p>
+<p>For preventable errors, API designers have to make a choice:</p>
+
+<ul>
+<li>Permit erroneous input, return <code>Result</code>, and use the <code>Err</code> variant to inform
+the client of the error.</li>
+<li>Treat erroneous input as a <em>contract violation</em> (i.e., assertion failure) and <code>fail!</code>.</li>
+</ul>
 
 <p>The right choice depends on the <em>overall design</em> of an API: some APIs make it
 very easy to obtain and work with valid inputs, in which case working with <code>Result</code> would be a needless distraction.</p>
@@ -314,19 +317,19 @@ intended as assertions.  If there is no other way to check in advance for the
 validity of invoking an operation <code>foo</code>, however, the API may provide a
 <code>checked_foo</code> variant that returns a <code>Result</code>.</p>
 
-<p>The main examples in <code>libstd</code> providing both variants are:
-* Channels, which are the primary point of failure propagation between tasks. As
-  such, calling <code>recv()</code> is an <em>assertion</em> that the other end of the channel is
-  still alive, which will propagate failures from the other end of the
-  channel. On the other hand, since there is no separate way to atomically test
-  whether the other end has hung up, channels provide a <code>recv_opt</code> variant that
-  produces a <code>Result</code>.</p>
+<p>The main examples in <code>libstd</code> providing both variants are:</p>
+
+<ul>
+<li><p>Channels, which are the primary point of failure propagation between tasks. As
+such, calling <code>recv()</code> is an <em>assertion</em> that the other end of the channel is
+still alive, which will propagate failures from the other end of the
+channel. On the other hand, since there is no separate way to atomically test
+whether the other end has hung up, channels provide a <code>recv_opt</code> variant that
+produces a <code>Result</code>.</p>
 
 <blockquote>
 <p><strong>[FIXME]</strong> The <code>_opt</code> suffix needs to be replaced by a <code>checked_</code> prefix.</p>
-</blockquote>
-
-<ul>
+</blockquote></li>
 <li><p><code>RefCell</code>, which provides a dynamic version of the borrowing rules. Calling
 the <code>borrow()</code> method is intended as an assertion that the cell is in a
 borrowable state, and will <code>fail!</code> otherwise. On the other hand, there is no
