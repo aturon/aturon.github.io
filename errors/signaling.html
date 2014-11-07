@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="generator" content="rustdoc">
-    <title>Signaling errors [RFC]</title>
+    <title>Signaling errors [RFC [#236](https://github.com/rust-lang/rfcs/pull/236)]</title>
 
     <link rel="stylesheet" type="text/css" href="../rust-book.css">
 
@@ -153,19 +153,26 @@
 <div id='page'>
 
 
-    <h1 class="title">Signaling errors [RFC]</h1>
+    <h1 class="title">Signaling errors [RFC [#236](https://github.com/rust-lang/rfcs/pull/236)]</h1>
     <p>Errors fall into one of three categories:</p>
 
 <ul>
-<li>Catastrophic errors, e.g. out of memory.</li>
-<li>Unpreventable errors, e.g. file not found.</li>
-<li>Preventable errors, e.g. wrong input encoding, index out of bounds.</li>
+<li>Catastrophic errors, e.g. out-of-memory.</li>
+<li>Contract violations, e.g. wrong input encoding, index out of bounds.</li>
+<li>Obstructions, e.g. file not found, parse error.</li>
 </ul>
 
-<p>The signaling strategy is determined by the error category.</p>
+<p>The basic principle of the convention is that:</p>
 
-<h2 id="catastrophic-errors" class='section-header'><a
-                           href="#catastrophic-errors">Catastrophic errors</a></h2>
+<ul>
+<li>Catastrophic errors and programming errors (bugs) can and should only be
+recovered at a <em>coarse grain</em>, i.e. a task boundary.</li>
+<li>Obstructions preventing an operation should be reported at a maximally <em>fine
+grain</em> -- to the immediate invoker of the operation.</li>
+</ul>
+
+<h3 id="catastrophic-errors" class='section-header'><a
+                           href="#catastrophic-errors">Catastrophic errors</a></h3>
 <p>An error is <em>catastrophic</em> if there is no meaningful way for the current task to
 continue after the error occurs.</p>
 
@@ -173,189 +180,111 @@ continue after the error occurs.</p>
 
 <p><strong>Canonical examples</strong>: out of memory, stack overflow.</p>
 
-<blockquote>
-<p><strong>[FIXME]</strong> These are believed to be the <em>only</em> catastrophic errors in
-Rust/libstd at the moment. We should confirm, and say so.</p>
-</blockquote>
+<h4 id="for-catastrophic-errors,-panic." class='section-header'><a
+                           href="#for-catastrophic-errors,-panic.">For catastrophic errors, panic.</a></h4>
+<p>For errors like stack overflow, Rust currently aborts the process, but
+could in principle panic, which (in the best case) would allow
+reporting and recovery from a supervisory task.</p>
 
-<h3 id="for-catastrophic-errors,-use-fail!." class='section-header'><a
-                           href="#for-catastrophic-errors,-use-fail!.">For catastrophic errors, use <code>fail!</code>.</a></h3>
-<p>Invoking <code>fail!</code> causes the current task to fail, which:</p>
+<h3 id="contract-violations" class='section-header'><a
+                           href="#contract-violations">Contract violations</a></h3>
+<p>An API may define a contract that goes beyond the type checking enforced by the
+compiler. For example, slices support an indexing operation, with the contract
+that the supplied index must be in bounds.</p>
+
+<p>Contracts can be complex and involve more than a single function invocation. For
+example, the <code>RefCell</code> type requires that <code>borrow_mut</code> not be called until all
+existing borrows have been relinquished.</p>
+
+<h4 id="for-contract-violations,-panic." class='section-header'><a
+                           href="#for-contract-violations,-panic.">For contract violations, panic.</a></h4>
+<p>A contract violation is always a bug, and for bugs we follow the Erlang
+philosophy of &quot;let it crash&quot;: we assume that software <em>will</em> have bugs, and we
+design coarse-grained task boundaries to report, and perhaps recover, from these
+bugs.</p>
+
+<h4 id="contract-design" class='section-header'><a
+                           href="#contract-design">Contract design</a></h4>
+<p>One subtle aspect of these guidelines is that the contract for a function is
+chosen by an API designer -- and so the designer also determines what counts as
+a violation.</p>
+
+<p>This RFC does not attempt to give hard-and-fast rules for designing
+contracts. However, here are some rough guidelines:</p>
 
 <ul>
-<li>unwinds the task&#39;s stack</li>
-<li>poisons any channels or other synchronization connecting the task to others</li>
+<li><p>Prefer expressing contracts through static types whenever possible.</p></li>
+<li><p>It <em>must</em> be possible to write code that uses the API without violating the
+contract.</p></li>
+<li><p>Contracts are most justified when violations are <em>inarguably</em> bugs -- but this
+is surprisingly rare.</p></li>
+<li><p>Consider whether the API client could benefit from the contract-checking
+logic.  The checks may be expensive. Or there may be useful programming
+patterns where the client does not want to check inputs before hand, but would
+rather attempt the operation and then find out whether the inputs were invalid.</p></li>
+<li><p>When a contract violation is the <em>only</em> kind of error a function may encounter
+-- i.e., there are no obstructions to its success other than &quot;bad&quot; inputs --
+using <code>Result</code> or <code>Option</code> instead is especially warranted. Clients can then use
+<code>unwrap</code> to assert that they have passed valid input, or re-use the error
+checking done by the API for their own purposes.</p></li>
+<li><p>When in doubt, use loose contracts and instead return a <code>Result</code> or <code>Option</code>.</p></li>
 </ul>
 
-<p>For example,
-<a href="http://static.rust-lang.org/doc/master/std/rt/heap/fn.allocate.html"><code>rt::heap::allocate</code></a>
-fails the task if allocation fails.</p>
+<h3 id="obstructions" class='section-header'><a
+                           href="#obstructions">Obstructions</a></h3>
+<p>An operation is <em>obstructed</em> if it cannot be completed for some reason, even
+though the operation&#39;s contract has been satisfied. Obstructed operations may
+have (documented!) side effects -- they are not required to roll back after
+encountering an obstruction.  However, they should leave the data structures in
+a &quot;coherent&quot; state (satisfying their invariants, continuing to guarantee safety,
+etc.).</p>
 
-<p>Task failure does not mean that the entire program must abort.
-For example, by breaking a program into a parent task that monitors its
-children, the program <em>can</em> meaningfully recover from task failures at the
-global level. See <a href="handling.html">the error handling section</a> for guidance
-on working with task failure.</p>
+<p>Obstructions may involve external conditions (e.g., I/O), or they may involve
+aspects of the input that are not covered by the contract.</p>
 
-<h2 id="unpreventable-errors" class='section-header'><a
-                           href="#unpreventable-errors">Unpreventable errors</a></h2>
-<p>An error is <em>unpreventable</em> if it is caused by circumstances out of the
-program&#39;s control.</p>
+<p><strong>Canonical examples</strong>: file not found, parse error.</p>
 
-<p>Unpreventable errors are common for operations that involve I/O or other access
-to shared resources.</p>
-
-<p><strong>Canonical example</strong>: file not found.</p>
-
-<h3 id="for-unpreventable-errors,-use-result." class='section-header'><a
-                           href="#for-unpreventable-errors,-use-result.">For unpreventable errors, use <code>Result</code>.</a></h3>
+<h4 id="for-obstructions,-use-result" class='section-header'><a
+                           href="#for-obstructions,-use-result">For obstructions, use <code>Result</code></a></h4>
 <p>The
 <a href="http://static.rust-lang.org/doc/master/std/result/index.html"><code>Result&lt;T,E&gt;</code> type</a>
 represents either a success (yielding <code>T</code>) or failure (yielding <code>E</code>). By
 returning a <code>Result</code>, a function allows its clients to discover and react to
-external circumstances that are obstructing an operation.</p>
+obstructions in a fine-grained way.</p>
 
-<p>The <code>E</code> component in <code>Result&lt;T,E&gt;</code> should convey details about the external
-circumstances that caused the error. Use an <code>enum</code> when multiple kinds of errors
-are possible.</p>
+<h6 id="what-about-option?" class='section-header'><a
+                           href="#what-about-option?">What about <code>Option</code>?</a></h6>
+<p>The <code>Option</code> type should not be used for &quot;obstructed&quot; operations; it
+should only be used when a <code>None</code> return value could be considered a
+&quot;successful&quot; execution of the operation.</p>
 
-<p>For example, the
-<a href="http://static.rust-lang.org/doc/master/std/io/index.html"><code>std::io</code></a> module
-uses the <code>Result</code> type pervasively, with
-<a href="http://static.rust-lang.org/doc/master/std/io/struct.IoError.html"><code>IoError</code></a>
-providing details when an error occurs.</p>
+<p>This is of course a somewhat subjective question, but a good litmus
+test is: would a reasonable client ever ignore the result? The
+<code>Result</code> type provides a lint that ensures the result is actually
+inspected, while <code>Option</code> does not, and this difference of behavior
+can help when deciding between the two types.</p>
 
-<h2 id="preventable-errors" class='section-header'><a
-                           href="#preventable-errors">Preventable errors</a></h2>
-<p>An error is <em>preventable</em> if its absence can be guaranteed by restricting the
-arguments given to the operation.</p>
+<p>Another litmus test: can the operation be understood as asking a
+question (possibly with sideeffects)? Operations like <code>pop</code> on a
+vector can be viewed as asking for the contents of the first element,
+with the side effect of removing it if it exists -- with an <code>Option</code>
+return value.</p>
 
-<p>Preventable errors are common for operations that impose constraints on their
-parameters beyond their static type.</p>
-
-<p><strong>Canonical examples</strong>: wrong input encoding, index out of bounds.</p>
-
-<h3 id="for-preventable-errors,-prefer-result." class='section-header'><a
-                           href="#for-preventable-errors,-prefer-result.">For preventable errors, prefer <code>Result</code>.</a></h3>
-<p>For preventable errors, API designers have to make a choice:</p>
-
-<ul>
-<li>Permit erroneous input, return <code>Result</code>, and use the <code>Err</code> variant to inform
-the client of the error.</li>
-<li>Treat erroneous input as a <em>contract violation</em> (i.e., assertion failure) and <code>fail!</code>.</li>
-</ul>
-
-<p>The right choice depends on the <em>overall design</em> of an API: some APIs make it
-very easy to obtain and work with valid inputs, in which case working with <code>Result</code> would be a needless distraction.</p>
-
-<p>But when in doubt, prefer <code>Result</code>.</p>
-
-<h4 id="when-to-return-a-result" class='section-header'><a
-                           href="#when-to-return-a-result">When to return a <code>Result</code></a></h4>
-<p>For preventable errors in APIs where</p>
-
-<ul>
-<li>ensuring input validity ahead of time is difficult or expensive, or</li>
-<li>validity checking is a useful byproduct of attempting an operation,</li>
-</ul>
-
-<p>return a <code>Result</code>.</p>
-
-<p>Following the principle of
-<a href="../features/functions-and-methods/output.html">returning useful intermediate results</a>,
-the <code>Result</code>&#39;s error component should give detail about which part of the input
-was invalid -- information that is typically produced during input validation or
-processing anyway.</p>
-
-<p>For example, a function <code>from_str</code> for parsing into a given type should return a
-<code>Result</code> with error component giving the location or span of parsing failure.</p>
-
-<p>If clients believe they are providing valid input, they can use <code>unwrap</code> on the
-<code>Result</code> to assert as much; this will produce a failure <em>in the client&#39;s
-code</em> if things go wrong.</p>
-
-<h4 id="when-to-fail!" class='section-header'><a
-                           href="#when-to-fail!">When to <code>fail!</code></a></h4>
-<p>For preventable errors in APIs where</p>
-
-<ul>
-<li>input validity can be easily checked, or</li>
-<li>parts of the API naturally produce valid inputs for other parts, or</li>
-<li>invalid inputs clearly represent a logic error,</li>
-</ul>
-
-<p>using <code>fail!</code> is acceptable.</p>
-
-<p>The expectations on the input then become a <em>contract</em> for the function, and
-violating them is akin to an assertion failure -- a bug. The failure conditions
-should be clearly stated in a <code>Failure</code> section of the function&#39;s doc comment.</p>
-
-<p>The benefit of using <code>fail!</code> is that the signatures of the API&#39;s functions are
-simpler, and using the API does not require the client to constantly <code>unwrap</code>.</p>
-
-<p>For example, slice indexing fails on an out of bounds error, which is a
-preventable error and nearly always represents a bug. Moreover, most uses of
-array indexing naturally incorporate a bounds check already, e.g. looping over
-array indices.</p>
-
-<blockquote>
-<p><strong>[FIXME]</strong> <code>std</code> also contains some more dubious examples, like the
-<a href="http://static.rust-lang.org/doc/master/std/c_str/trait.ToCStr.html#tymethod.to_c_str"><code>to_c_str</code></a>
-method, which fails when the string contains an interior
-<code>null</code>. What do we want to say about those?</p>
-</blockquote>
-
-<h4 id="do-not-provide-both-result-and-fail!-variants.-[rfc]" class='section-header'><a
-                           href="#do-not-provide-both-result-and-fail!-variants.-[rfc]">Do not provide both <code>Result</code> and <code>fail!</code> variants. [RFC]</a></h4>
-<p>An API should not provide both <code>Result</code>-producing and <code>fail</code>ing versions of an
+<h3 id="do-not-provide-both-result-and-panic!-variants." class='section-header'><a
+                           href="#do-not-provide-both-result-and-panic!-variants.">Do not provide both <code>Result</code> and <code>panic!</code> variants.</a></h3>
+<p>An API should not provide both <code>Result</code>-producing and <code>panic</code>king versions of an
 operation. It should provide just the <code>Result</code> version, allowing clients to use
-<code>try!</code> or <code>unwrap</code> instead as needed.</p>
+<code>try!</code> or <code>unwrap</code> instead as needed. This is part of the general pattern of
+cutting down on redundant variants by instead using method chaining.</p>
 
-<p>There is one exception to this rule, however. Some APIs are strongly oriented
-around failure, in the sense that their functions/methods are explicitly
-intended as assertions.  If there is no other way to check in advance for the
-validity of invoking an operation <code>foo</code>, however, the API may provide a
-<code>checked_foo</code> variant that returns a <code>Result</code>.</p>
-
-<p>The main examples in <code>libstd</code> providing both variants are:</p>
-
-<ul>
-<li><p>Channels, which are the primary point of failure propagation between tasks. As
-such, calling <code>recv()</code> is an <em>assertion</em> that the other end of the channel is
-still alive, which will propagate failures from the other end of the
-channel. On the other hand, since there is no separate way to atomically test
-whether the other end has hung up, channels provide a <code>recv_opt</code> variant that
-produces a <code>Result</code>.</p>
-
-<blockquote>
-<p><strong>[FIXME]</strong> The <code>_opt</code> suffix needs to be replaced by a <code>checked_</code> prefix.</p>
-</blockquote></li>
-<li><p><code>RefCell</code>, which provides a dynamic version of the borrowing rules. Calling
-the <code>borrow()</code> method is intended as an assertion that the cell is in a
-borrowable state, and will <code>fail!</code> otherwise. On the other hand, there is no
-separate way to check the state of the <code>RefCell</code>, so the module provides a
-<code>try_borrow</code> variant that produces a <code>Result</code>.</p>
-
-<blockquote>
-<p><strong>[FIXME]</strong> The <code>try_</code> prefix needs to be replaced by a <code>checked_</code> prefix.</p>
-</blockquote></li>
-</ul>
-
-<h3 id="avoid-option-for-error-signaling.-[rfc]" class='section-header'><a
-                           href="#avoid-option-for-error-signaling.-[rfc]">Avoid <code>Option</code> for error signaling. [RFC]</a></h3>
-<p>The <code>Option</code> type should be reserved for cases that do not represent errors, but
-rather possible outcomes for well-formed inputs under normal circumstances.</p>
-
-<p>For example,
-<a href="http://static.rust-lang.org/doc/master/std/vec/struct.Vec.html">the <code>Vec::pop</code> method</a>
-returns an <code>Option</code>, yielding <code>None</code> when the vector is empty.</p>
-
-<p>Even when there is no interesting error information to return, prefer
-<code>Result&lt;T,()&gt;</code> to <code>Option&lt;T&gt;</code> as a way of signaling that the <code>Err</code> case represents an
-erroneous outcome, not a normal outcome.</p>
-
-<p>Rather than providing a <code>try_frob</code> function yielding an <code>Option</code>, provide a
-<code>frob</code> function yielding a <code>Result</code>.</p>
+<p>There is one exception to this rule, however: synchronization between
+threads. Operations on mutexes, channels, and other means of
+synchronization usually propagate panics by default (e.g. by poisoning
+the mutex) but <em>also</em> provide a means of halting the propagation by
+&quot;catching&quot; the panic. Since there is no way to check for panic
+propagation in advance (due to the race conditions inherent with these
+synchronization constructs), both panicking and non-panicking versions
+are provided.</p>
 
     <script type="text/javascript">
         window.playgroundUrl = "";
