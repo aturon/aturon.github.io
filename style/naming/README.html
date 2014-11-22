@@ -155,8 +155,8 @@
 
     <h1 class="title">Naming conventions</h1>
     
-<h3 id="general-conventions" class='section-header'><a
-                           href="#general-conventions">General conventions</a></h3>
+<h3 id="general-conventions-[rfc-#430]" class='section-header'><a
+                           href="#general-conventions-[rfc-#430]">General conventions [RFC #430]</a></h3>
 <blockquote>
 <p>The guidelines below were approved by <a href="https://github.com/rust-lang/rfcs/pull/430">RFC #430</a>.</p>
 </blockquote>
@@ -237,51 +237,124 @@ In <code>CamelCase</code>, acronyms count as one word: use <code>Uuid</code> rat
 consist of a single letter unless it is the last &quot;word&quot;. So, we have
 <code>btree_map</code> rather than <code>b_tree_map</code>, but <code>PI_2</code> rather than <code>PI2</code>.</p>
 
-<h3 id="referring-to-types-in-function/method-names-[fixme]" class='section-header'><a
-                           href="#referring-to-types-in-function/method-names-[fixme]">Referring to types in function/method names [FIXME]</a></h3>
-<!-- `&T` -> `ref` -->
-
-<!-- `&mut T` -> `mut` -->
-
+<h3 id="referring-to-types-in-function/method-names-[rfc-344]" class='section-header'><a
+                           href="#referring-to-types-in-function/method-names-[rfc-344]">Referring to types in function/method names [RFC 344]</a></h3>
 <blockquote>
-<p><strong>[FIXME]</strong> We should establish general conventions for type names
-when they appear as part of functions/methods. For example, that
-<code>&amp;[U]</code> is generally called <code>slice</code>.</p>
+<p>The guidelines below were approved by <a href="https://github.com/rust-lang/rfcs/pull/344">RFC #344</a>.</p>
 </blockquote>
 
-<h3 id="avoid-redundant-prefixes-[fixme:-needs-rfc]" class='section-header'><a
-                           href="#avoid-redundant-prefixes-[fixme:-needs-rfc]">Avoid redundant prefixes [FIXME: needs RFC]</a></h3>
-<p>Names of items within a module should not be prefixed with that module&#39;s name,
-since clients can always reference the item qualified by the module name.</p>
+<p>Function names often involve type names, the most common example being conversions
+like <code>as_slice</code>. If the type has a purely textual name (ignoring parameters), it
+is straightforward to convert between type conventions and function conventions:</p>
+
+<table><thead>
+<tr>
+<th>Type name</th>
+<th>Text in methods</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code>String</code></td>
+<td><code>string</code></td>
+</tr>
+<tr>
+<td><code>Vec&lt;T&gt;</code></td>
+<td><code>vec</code></td>
+</tr>
+<tr>
+<td><code>YourType</code></td>
+<td><code>your_type</code></td>
+</tr>
+</tbody></table>
+
+<p>Types that involve notation follow the convention below. There is some
+overlap on these rules; apply the most specific applicable rule:</p>
+
+<table><thead>
+<tr>
+<th>Type name</th>
+<th>Text in methods</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code>&amp;str</code></td>
+<td><code>str</code></td>
+</tr>
+<tr>
+<td><code>&amp;[T]</code></td>
+<td><code>slice</code></td>
+</tr>
+<tr>
+<td><code>&amp;mut [T]</code></td>
+<td><code>mut_slice</code></td>
+</tr>
+<tr>
+<td><code>&amp;[u8]</code></td>
+<td><code>bytes</code></td>
+</tr>
+<tr>
+<td><code>&amp;T</code></td>
+<td><code>ref</code></td>
+</tr>
+<tr>
+<td><code>&amp;mut T</code></td>
+<td><code>mut</code></td>
+</tr>
+<tr>
+<td><code>*const T</code></td>
+<td><code>ptr</code></td>
+</tr>
+<tr>
+<td><code>*mut T</code></td>
+<td><code>mut_ptr</code></td>
+</tr>
+</tbody></table>
+
+<h3 id="avoid-redundant-prefixes-[rfc-356]" class='section-header'><a
+                           href="#avoid-redundant-prefixes-[rfc-356]">Avoid redundant prefixes [RFC 356]</a></h3>
+<blockquote>
+<p>The guidelines below were approved by <a href="https://github.com/rust-lang/rfcs/pull/356">RFC #356</a>.</p>
+</blockquote>
+
+<p>Names of items within a module should not be prefixed with that module&#39;s name:</p>
 
 <p>Prefer</p>
 <pre class='rust '>
 <span class='kw'>mod</span> <span class='ident'>foo</span> {
-    <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Bar</span> { ... }
+    <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Error</span> { ... }
 }
 </pre>
 
 <p>over</p>
 <pre class='rust '>
 <span class='kw'>mod</span> <span class='ident'>foo</span> {
-    <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>FooBar</span> { ... }
+    <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>FooError</span> { ... }
 }
 </pre>
 
-<h3 id="fallible-functions-[fixme]" class='section-header'><a
-                           href="#fallible-functions-[fixme]">Fallible functions [FIXME]</a></h3>
-<blockquote>
-<p><strong>[FIXME]</strong> Should we have a standard marker for functions that can
-cause task failure?</p>
+<p>This convention avoids stuttering (like <code>io::IoError</code>). Library clients can
+rename on import to avoid clashes.</p>
 
-<p>See <a href="https://github.com/rust-lang/rust/issues/13159">https://github.com/rust-lang/rust/issues/13159</a></p>
+<h3 id="getter/setter-methods-[rfc-344]" class='section-header'><a
+                           href="#getter/setter-methods-[rfc-344]">Getter/setter methods [RFC 344]</a></h3>
+<blockquote>
+<p>The guidelines below were approved by <a href="https://github.com/rust-lang/rfcs/pull/344">RFC #344</a>.</p>
 </blockquote>
 
-<h3 id="getter/setter-methods-[fixme]" class='section-header'><a
-                           href="#getter/setter-methods-[fixme]">Getter/setter methods [FIXME]</a></h3>
-<blockquote>
-<p><strong>[FIXME]</strong> Need a naming and signature convention here.</p>
-</blockquote>
+<p>Some data structures do not wish to provide direct access to their fields, but
+instead offer &quot;getter&quot; and &quot;setter&quot; methods for manipulating the field state
+(often providing checking or other functionality).</p>
+
+<p>The convention for a field <code>foo: T</code> is:</p>
+
+<ul>
+<li>A method <code>foo(&amp;self) -&gt; &amp;T</code> for getting the current value of the field.</li>
+<li>A method <code>set_foo(&amp;self, val: T)</code> for setting the field. (The <code>val</code> argument
+here may take <code>&amp;T</code> or some other type, depending on the context.)</li>
+</ul>
+
+<p>Note that this convention is about getters/setters on ordinary data types, <em>not</em>
+on <a href="../ownership/builders.html">builder objects</a>.</p>
 
 <h3 id="escape-hatches-[fixme]" class='section-header'><a
                            href="#escape-hatches-[fixme]">Escape hatches [FIXME]</a></h3>

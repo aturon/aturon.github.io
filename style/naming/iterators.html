@@ -155,8 +155,12 @@
 
     <h1 class="title">Iterators</h1>
     
-<h4 id="method-names" class='section-header'><a
-                           href="#method-names">Method names</a></h4>
+<h4 id="method-names-[rfc-#199]" class='section-header'><a
+                           href="#method-names-[rfc-#199]">Method names [RFC #199]</a></h4>
+<blockquote>
+<p>The guidelines below were approved by <a href="https://github.com/rust-lang/rfcs/pull/199">RFC #199</a>.</p>
+</blockquote>
+
 <p>For a container with elements of type <code>U</code>, iterator methods should be named:</p>
 <pre class='rust '>
 <span class='kw'>fn</span> <span class='ident'>iter</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span>           <span class='comment'>// where T implements Iterator&lt;&amp;U&gt;</span>
@@ -166,26 +170,23 @@
 
 <p>The default iterator variant yields shared references <code>&amp;U</code>.</p>
 
-<h4 id="type-names-[rfc---awaiting-revision]" class='section-header'><a
-                           href="#type-names-[rfc---awaiting-revision]">Type names [RFC - awaiting revision]</a></h4>
-<p>Iterators require introducing and exporting new types. These types should use
-the following naming convention:</p>
+<h4 id="type-names-[rfc-#344]" class='section-header'><a
+                           href="#type-names-[rfc-#344]">Type names [RFC #344]</a></h4>
+<blockquote>
+<p>The guidelines below were approved by <a href="https://github.com/rust-lang/rfcs/pull/344">RFC #344</a>.</p>
+</blockquote>
 
-<ul>
-<li><p><strong>Base name</strong>. If the iterator yields something that can be described with a
-specific noun, the base name should be the pluralization of that noun
-(e.g. an iterator yielding words is called <code>Words</code>). Generic contains use the
-base name <code>Items</code>.</p></li>
-<li><p><strong>Flavor prefix</strong>. Iterators often come in multiple flavors, with the default
-flavor providing immutable references. Other flavors should prefix their name:</p>
+<p>The name of an iterator type should be the same as the method that
+produces the iterator.</p>
 
-<ul>
-<li>Moving iterators have a prefix of <code>Move</code>.</li>
-<li>If the default iterator yields an immutable reference, an iterator
-yielding a mutable reference has a prefix <code>Mut</code>.</li>
-<li>Reverse iterators have a prefix of <code>Rev</code>.</li>
-</ul></li>
-</ul>
+<p>For example:
+* <code>iter</code> should yield an <code>Iter</code>
+* <code>iter_mut</code> should yield an <code>IterMut</code>
+* <code>into_iter</code> should yield an <code>IntoIter</code>
+* <code>keys</code> should yield <code>Keys</code></p>
+
+<p>These type names make the most sense when prefixed with their owning module,
+e.g. <code>vec::IntoIter</code>.</p>
 
     <script type="text/javascript">
         window.playgroundUrl = "";

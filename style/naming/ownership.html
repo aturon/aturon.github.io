@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="generator" content="rustdoc">
-    <title>Ownership variants</title>
+    <title>Ownership variants [RFC #199]</title>
 
     <link rel="stylesheet" type="text/css" href="../../rust-book.css">
 
@@ -153,8 +153,12 @@
 <div id='page'>
 
 
-    <h1 class="title">Ownership variants</h1>
-    <p>Functions often come in multiple variants: immutably borrowed, mutably
+    <h1 class="title">Ownership variants [RFC #199]</h1>
+    <blockquote>
+<p>The guidelines below were approved by <a href="https://github.com/rust-lang/rfcs/pull/199">RFC #199</a>.</p>
+</blockquote>
+
+<p>Functions often come in multiple variants: immutably borrowed, mutably
 borrowed, and owned.</p>
 
 <p>The right default depends on the function in question. Variants should
@@ -180,6 +184,11 @@ be marked through suffixes.</p>
 
 <h4 id="exceptions" class='section-header'><a
                            href="#exceptions">Exceptions</a></h4>
+<p>In the case of iterators, the moving variant can also be understood as
+an <code>into</code> conversion, <code>into_iter</code>, and <code>for x in v.into_iter()</code> reads
+arguably better than <code>for x in v.iter_move()</code>, so the convention is
+<code>into_iter</code>.</p>
+
 <p>For mutably borrowed variants, if the <code>mut</code> qualifier is part of a
 type name (e.g. <code>as_mut_slice</code>), it should appear as it would appear
 in the type.</p>
