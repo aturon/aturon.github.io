@@ -4,7 +4,7 @@
  <title>Aaron Turon</title>
  <link href="http://aturon.github.io/blog/atom.xml" rel="self"/>
  <link href="http://aturon.github.io/blog/"/>
- <updated>2015-08-25T15:19:53-07:00</updated>
+ <updated>2015-08-25T15:49:43-07:00</updated>
  <id>http://aturon.github.io</id>
  <author>
    <name>Aaron Turon</name>
@@ -19,10 +19,9 @@
    <id>http://aturon.github.io/2015/08/21/epoch</id>
    <content type="html">&lt;h2 id=&quot;tl;dr&quot;&gt;TL;DR&lt;/h2&gt;
 
-&lt;p&gt;It&amp;rsquo;s widespread folklore that one advantage of a good garbage collector
-is the ease of building high-performance lock-free data structures. Manual
-memory management for these data structures is not easy, and a GC makes it
-trivial.&lt;/p&gt;
+&lt;p&gt;It&amp;rsquo;s widespread folklore that one advantage of garbage collection is the ease of
+building high-performance lock-free data structures. Manual memory management
+for these data structures is not easy, and a GC makes it trivial.&lt;/p&gt;
 
 &lt;p&gt;This post shows that, &lt;strong&gt;using Rust, it&amp;rsquo;s possible to build a memory management API
 for concurrent data structures&lt;/strong&gt; that:&lt;/p&gt;
@@ -638,10 +637,24 @@ a thread exits. These global garbage lists are collected by the thread that
 successfully increments the global epoch.&lt;/p&gt;
 
 &lt;p&gt;Finally, what does it mean to &amp;ldquo;collect&amp;rdquo; the garbage? As mentioned above, the
-library &lt;em&gt;only&lt;/em&gt; deallocates the memory; it does not run destructors. There are
-many reasons for this:&lt;/p&gt;
+library &lt;em&gt;only&lt;/em&gt; deallocates the memory; it does not run
+destructors.&lt;/p&gt;
 
-&lt;p&gt;-&lt;/p&gt;
+&lt;p&gt;Conceptually, the framework splits up the destruction of an object into two
+pieces: destroying/moving out interior data, and deallocating the object
+containing it. The former should happen at the same time as invoking &lt;code&gt;unlinked&lt;/code&gt;
+&amp;ndash; that&amp;rsquo;s the point where there is a unique thread that owns the object in every
+sense except the ability to actually deallocate it. The latter happens at some
+unknown later point, when the object is known to no longer be referenced. This
+does impose an obligation on the user: access through a snapshot should only
+read data that will be valid until deallocation. But this is basically always
+the case for lock-free data structures, which tend to have a clear split between
+data relevant to the container (i.e., &lt;code&gt;Atomic&lt;/code&gt; fields), and the actual data
+contained (like the &lt;code&gt;data&lt;/code&gt; field in &lt;code&gt;Node&lt;/code&gt;).&lt;/p&gt;
+
+&lt;p&gt;Splitting up the tear down of an object this way means that destructors run
+synchronously, at predictable times, alleviating one of the pain points of GC,
+and allowing the framework to be used with non-&lt;code&gt;&amp;#39;static&lt;/code&gt; (and non-&lt;code&gt;Send&lt;/code&gt;) data.&lt;/p&gt;
 
 &lt;h2 id=&quot;benchmarks&quot;&gt;Benchmarks&lt;/h2&gt;
 

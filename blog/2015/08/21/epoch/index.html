@@ -36,10 +36,10 @@
 
           
           &nbsp;&nbsp;&nbsp;
-          <small><a href="/archive">Archive</a></small>
+          <small><a href="/blog/archive">Archive</a></small>
           
           &nbsp;&nbsp;&nbsp;
-          <small><a href="/atom.xml">Feed</a></small>
+          <small><a href="/blog/atom.xml">Feed</a></small>
           
         </h3>
       </header>
@@ -50,10 +50,9 @@
   <time datetime="2015-08-21T00:00:00-07:00" class="post-date">21 Aug 2015</time>
   <h2 id="tl;dr">TL;DR</h2>
 
-<p>It&rsquo;s widespread folklore that one advantage of a good garbage collector
-is the ease of building high-performance lock-free data structures. Manual
-memory management for these data structures is not easy, and a GC makes it
-trivial.</p>
+<p>It&rsquo;s widespread folklore that one advantage of garbage collection is the ease of
+building high-performance lock-free data structures. Manual memory management
+for these data structures is not easy, and a GC makes it trivial.</p>
 
 <p>This post shows that, <strong>using Rust, it&rsquo;s possible to build a memory management API
 for concurrent data structures</strong> that:</p>
@@ -669,10 +668,24 @@ a thread exits. These global garbage lists are collected by the thread that
 successfully increments the global epoch.</p>
 
 <p>Finally, what does it mean to &ldquo;collect&rdquo; the garbage? As mentioned above, the
-library <em>only</em> deallocates the memory; it does not run destructors. There are
-many reasons for this:</p>
+library <em>only</em> deallocates the memory; it does not run
+destructors.</p>
 
-<p>-</p>
+<p>Conceptually, the framework splits up the destruction of an object into two
+pieces: destroying/moving out interior data, and deallocating the object
+containing it. The former should happen at the same time as invoking <code>unlinked</code>
+&ndash; that&rsquo;s the point where there is a unique thread that owns the object in every
+sense except the ability to actually deallocate it. The latter happens at some
+unknown later point, when the object is known to no longer be referenced. This
+does impose an obligation on the user: access through a snapshot should only
+read data that will be valid until deallocation. But this is basically always
+the case for lock-free data structures, which tend to have a clear split between
+data relevant to the container (i.e., <code>Atomic</code> fields), and the actual data
+contained (like the <code>data</code> field in <code>Node</code>).</p>
+
+<p>Splitting up the tear down of an object this way means that destructors run
+synchronously, at predictable times, alleviating one of the pain points of GC,
+and allowing the framework to be used with non-<code>&#39;static</code> (and non-<code>Send</code>) data.</p>
 
 <h2 id="benchmarks">Benchmarks</h2>
 
@@ -686,7 +699,7 @@ many reasons for this:</p>
 
       <footer class="footer">
         <small>
-          &copy; <time datetime="2015-08-25T15:19:53-07:00">2015</time>. All rights reserved.
+          &copy; <time datetime="2015-08-25T15:49:43-07:00">2015</time>. All rights reserved.
         </small>
       </footer>
     </div>
