@@ -4,7 +4,7 @@
  <title>Aaron Turon</title>
  <link href="http://aturon.github.io/blog/atom.xml" rel="self"/>
  <link href="http://aturon.github.io/blog/"/>
- <updated>2015-08-25T15:49:43-07:00</updated>
+ <updated>2015-08-25T16:22:17-07:00</updated>
  <id>http://aturon.github.io</id>
  <author>
    <name>Aaron Turon</name>
@@ -657,6 +657,58 @@ synchronously, at predictable times, alleviating one of the pain points of GC,
 and allowing the framework to be used with non-&lt;code&gt;&amp;#39;static&lt;/code&gt; (and non-&lt;code&gt;Send&lt;/code&gt;) data.&lt;/p&gt;
 
 &lt;h2 id=&quot;benchmarks&quot;&gt;Benchmarks&lt;/h2&gt;
+
+&lt;p&gt;To test the overhead of the Crossbeam implementation, I implemented a basic
+lock-free queue (a vanilla
+&lt;a href=&quot;http://www.research.ibm.com/people/m/michael/podc-1996.pdf&quot;&gt;Michael-Scott queue&lt;/a&gt;)
+on top of it, and built the same queue in Scala. In general, JVM-based languages
+are a good test case for the &amp;ldquo;strong concurrent GC&amp;rdquo; path toward lock-free data
+structures. For both tests, I also compared against the java.util.concurrent queue
+implementation (ConcurrentLinkedQueue), which is a highly tuned variant of the
+Michael-Scott queue.&lt;/p&gt;
+
+&lt;p&gt;I tested these queues in two ways:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;A multi-producer, single-consumer (MPSC) scenario in which two threads
+repeatedly send messages and one thread receives them, both in a tight loop.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;A multi-producer, multi-consumer (MPMC) scenario in which two threads send and
+two thread receive in a tight loop.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Benchmarks like these are fairly typical for measuring the scalability of a
+lock-free data structure under &amp;ldquo;contention&amp;rdquo; &amp;ndash; multiple threads competing to
+make concurrent updates simultaenously. &lt;strong&gt;There are many variations that should be
+benchmarked when building a production queue implementation; the goal here is
+just to gauge the ballpark overhead of the memory management scheme&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;For the MPSC test, I also compared against Rust&amp;rsquo;s built in channels, which use
+an algorithm optimized for this scenario (but that doesn&amp;rsquo;t support MPMC).&lt;/p&gt;
+
+&lt;p&gt;Here are the results, given in nanosecond per message (lower is better):&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/public/bench-mpsc.png&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/public/bench-mpmc.png&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;The first takeaway is that the Crossbeam implementation &amp;ndash; which has not been
+tuned &amp;ndash; is competitive in all cases. But why do the Java/Scala versions fare so
+much better in the MPMC test than the MPSC test?&lt;/p&gt;
+
+&lt;p&gt;The answer is simple: garbage collection. In the MPSC test, the producers tend
+to overrun the consumer over time, meaning that the amount of data in the queue
+slowly grows. That in turn increases the cost of each garbage collection, which
+involves walking over the live data set.&lt;/p&gt;
+
+&lt;p&gt;In the epoch scheme, by contrast, the cost of managing garbage is relatively
+fixed: it&amp;rsquo;s proportional to the number of threads, not the amount of live
+data. This turns out to yield both better and more consistent/predictable
+performance.&lt;/p&gt;
+
+&lt;p&gt;Finally, one comparison I did not include on the chart (because it would dwarf
+the others) was using a &lt;code&gt;Mutex&lt;/code&gt; around a deque in Rust. For the MPMC test,
+performance was around 3040ns/operation, over 20x slower than the Crossbeam
+implementation.&lt;/p&gt;
 
 &lt;h2 id=&quot;looking-ahead&quot;&gt;Looking ahead&lt;/h2&gt;
 </content>
