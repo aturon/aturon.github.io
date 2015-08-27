@@ -4,7 +4,7 @@
  <title>Aaron Turon</title>
  <link href="http://aturon.github.io/blog/atom.xml" rel="self"/>
  <link href="http://aturon.github.io/blog/"/>
- <updated>2015-08-25T16:30:50-07:00</updated>
+ <updated>2015-08-27T11:58:42-07:00</updated>
  <id>http://aturon.github.io</id>
  <author>
    <name>Aaron Turon</name>
@@ -14,22 +14,25 @@
  
  <entry>
    <title>Lock-freedom without garbage collection</title>
-   <link href="http://aturon.github.io/blog/2015/08/21/epoch/"/>
-   <updated>2015-08-21T00:00:00-07:00</updated>
-   <id>http://aturon.github.io/2015/08/21/epoch</id>
+   <link href="http://aturon.github.io/blog/2015/08/27/epoch/"/>
+   <updated>2015-08-27T00:00:00-07:00</updated>
+   <id>http://aturon.github.io/2015/08/27/epoch</id>
    <content type="html">&lt;h2 id=&quot;tl;dr&quot;&gt;TL;DR&lt;/h2&gt;
 
 &lt;p&gt;It&amp;rsquo;s widespread folklore that one advantage of garbage collection is the ease of
 building high-performance lock-free data structures. Manual memory management
 for these data structures is not easy, and a GC makes it trivial.&lt;/p&gt;
 
-&lt;p&gt;This post shows that, &lt;strong&gt;using Rust, it&amp;rsquo;s possible to build a memory management API
-for concurrent data structures&lt;/strong&gt; that:&lt;/p&gt;
+&lt;p&gt;This post shows that, using Rust, it&amp;rsquo;s possible to build a memory management API
+for concurrent data structures that:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;Makes it as &lt;strong&gt;easy to implement lock-free data structures&lt;/strong&gt; as a GC does;&lt;/li&gt;
-&lt;li&gt;Has &lt;strong&gt;smaller and more predictable overhead&lt;/strong&gt; than concurrent GC.&lt;/li&gt;
+&lt;li&gt;Makes it as easy to implement lock-free data structures as a GC does;&lt;/li&gt;
+&lt;li&gt;Has smaller and more predictable overhead than concurrent GC.&lt;/li&gt;
 &lt;/ul&gt;
+
+&lt;p&gt;In the benchmarks I show below, Rust is able to easily beat a tuned Java
+lock-free queue implementation, with an implementation that&amp;rsquo;s as easy to write.&lt;/p&gt;
 
 &lt;p&gt;I&amp;rsquo;ve implemented &amp;ldquo;epoch-based memory reclamation&amp;rdquo; in a new library called
 &lt;a href=&quot;https://github.com/aturon/crossbeam&quot;&gt;Crossbeam&lt;/a&gt;, which is ready to use in for
@@ -39,6 +42,7 @@ data structures, the epoch algorithm, and the entire Rust API.&lt;/p&gt;
 &lt;h3 id=&quot;contents&quot;&gt;Contents&lt;/h3&gt;
 
 &lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;#benchmarks&quot;&gt;Benchmarks&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;#lock-free-data-structures&quot;&gt;Lock-free data structures&lt;/a&gt;
 
 &lt;ul&gt;
@@ -56,9 +60,82 @@ data structures, the epoch algorithm, and the entire Rust API.&lt;/p&gt;
 &lt;li&gt;&lt;a href=&quot;#treiber&amp;#x27;s-stack-on-epochs&quot;&gt;Treiber&amp;rsquo;s stack on epochs&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;#managing-garbage&quot;&gt;Managing garbage&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;#benchmarks&quot;&gt;Benchmarks&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;#looking-ahead&quot;&gt;Looking ahead&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
+
+&lt;h2 id=&quot;benchmarks&quot;&gt;Benchmarks&lt;/h2&gt;
+
+&lt;p&gt;Before looking in depth at the API design and usage for epoch reclamation, let&amp;rsquo;s
+cut right to the chase: performance.&lt;/p&gt;
+
+&lt;p&gt;To test the overhead my Crossbeam implementation relative to a full GC, I
+implemented a basic lock-free queue (a vanilla
+&lt;a href=&quot;http://www.research.ibm.com/people/m/michael/podc-1996.pdf&quot;&gt;Michael-Scott queue&lt;/a&gt;)
+on top of it, and built the same queue in Scala. In general, JVM-based languages
+are a good test case for the &amp;ldquo;strong concurrent GC&amp;rdquo; path toward lock-free data
+structures.&lt;/p&gt;
+
+&lt;p&gt;In addition to these implementations, I compared against:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;A more efficient &amp;ldquo;segmented&amp;rdquo; queue that allocates nodes with multiple slots. I
+wrote this queue in Rust, on top of Crossbeam.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;A Rust single-threaded queue protected by a mutex.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;The java.util.concurrent queue implementation (ConcurrentLinkedQueue), which
+is a highly tuned variant of the Michael-Scott queue.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I tested these queues in two ways:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;A multi-producer, single-consumer (MPSC) scenario in which two threads
+repeatedly send messages and one thread receives them, both in a tight loop.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;A multi-producer, multi-consumer (MPMC) scenario in which two threads send and
+two thread receive in a tight loop.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Benchmarks like these are fairly typical for measuring the scalability of a
+lock-free data structure under &amp;ldquo;contention&amp;rdquo; &amp;ndash; multiple threads competing to
+make concurrent updates simultaenously. &lt;strong&gt;There are many variations that should be
+benchmarked when building a production queue implementation; the goal here is
+just to gauge the ballpark overhead of the memory management scheme&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;For the MPSC test, I also compared against the algorithm used in Rust&amp;rsquo;s built-in
+channels, which is optimized for this scenario (and hence doesn&amp;rsquo;t support MPMC).&lt;/p&gt;
+
+&lt;p&gt;The machine is a 4 core 2.6Ghz Intel Core i7 with 16GB RAM.&lt;/p&gt;
+
+&lt;p&gt;Here are the results, given in nanosecond per message (lower is better):&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/public/bench-mpsc.png&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/public/bench-mpmc.png&quot;&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;analysis&quot;&gt;Analysis&lt;/h3&gt;
+
+&lt;p&gt;The first takeaway is that the Crossbeam implementation &amp;ndash; which has not been
+tuned &amp;ndash; is competitive in all cases.&lt;/p&gt;
+
+&lt;p&gt;The second takeaway is that Rust has the fastest queue in all cases.&lt;/p&gt;
+
+&lt;p&gt;But the Java/Scala versions fare much better in the MPMC test than they do in
+MPSC test. Why is that?&lt;/p&gt;
+
+&lt;p&gt;The answer is simple: garbage collection. In the MPSC test, the producers tend
+to overrun the consumer over time, meaning that the amount of data in the queue
+slowly grows. That in turn increases the cost of each garbage collection, which
+involves walking over the live data set.&lt;/p&gt;
+
+&lt;p&gt;In the epoch scheme, by contrast, the cost of managing garbage is relatively
+fixed: it&amp;rsquo;s proportional to the number of threads, not the amount of live
+data. This turns out to yield both better and more consistent/predictable
+performance.&lt;/p&gt;
+
+&lt;p&gt;Finally, one comparison I did not include on the chart (because it would dwarf
+the others) was using a &lt;code&gt;Mutex&lt;/code&gt; around a deque in Rust. For the MPMC test,
+performance was around 3040ns/operation, over 20x slower than the Crossbeam
+implementation. This is a vivid demonstration of why lock-free data structure
+are important &amp;ndash; so let&amp;rsquo;s start by diving into what those are.&lt;/p&gt;
 
 &lt;h2 id=&quot;lock-free-data-structures&quot;&gt;Lock-free data structures&lt;/h2&gt;
 
@@ -146,6 +223,7 @@ not familiar with them.&lt;/p&gt;
                 &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;head&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;compare_and_swap&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;head&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;next&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Release&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;head&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
 
                     &lt;span class=&quot;c1&quot;&gt;// extract out the data from the now-unlinked node&lt;/span&gt;
+                    &lt;span class=&quot;c1&quot;&gt;// **NOTE**: leaks the node!&lt;/span&gt;
                     &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Some&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;unsafe&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ptr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;read&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;head&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
                 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
             &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
@@ -191,12 +269,12 @@ attempt to free the node pointer after it has removed it from the stack.&lt;/p&g
 
 &lt;p&gt;What would go wrong if we did just that?&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;c1&quot;&gt;// extract out the data from the now-unlinked node&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;unsafe&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;head&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;take&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ret&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Some&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;unsafe&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ptr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;read&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;head&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
 
 &lt;span class=&quot;c1&quot;&gt;// free the node&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;mem&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;drop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Box&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;from_raw&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;head&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
 
-&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ret&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;The problem is that other threads could also be running &lt;code&gt;pop&lt;/code&gt; at the same
 time. The earlier line, &lt;code&gt;let next = unsafe { (*head).next };&lt;/code&gt;, reads &lt;code&gt;next&lt;/code&gt; out
@@ -216,7 +294,7 @@ they all come down to the same core observations:&lt;/p&gt;
 &lt;li&gt;&lt;p&gt;There are two sources of reachability at play &amp;ndash; the data structure, and the
 snapshots in threads accessing it. Before we delete a node, we need to know that
 it cannot be reached in either of these ways.&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;Once a node has been unliked from the data structure, no &lt;em&gt;new&lt;/em&gt; snapshots
+&lt;li&gt;&lt;p&gt;Once a node has been unlinked from the data structure, no &lt;em&gt;new&lt;/em&gt; snapshots
 reaching it will be created.&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
 
@@ -249,8 +327,9 @@ through live data&lt;/strong&gt;; it&amp;rsquo;s purely a matter of checking epo
 &lt;p&gt;When a thread wants to perform an operation on the data structure, it first sets
 its &amp;ldquo;active&amp;rdquo; flag, and then updates its local epoch to match the global one. If
 the thread removes a node from the data structure, it adds that node to the
-garbage list for the current global epoch. When it completes its operation, it
-clears the &amp;ldquo;active&amp;rdquo; thread.&lt;/p&gt;
+garbage list for the current global epoch. (Note: it&amp;rsquo;s very important that the
+garbage go into the &lt;em&gt;current&lt;/em&gt; global epoch, not the previous local snapshot.)
+When it completes its operation, it clears the &amp;ldquo;active&amp;rdquo; thread.&lt;/p&gt;
 
 &lt;p&gt;To try to collect the garbage (which can be done at any point), a thread walks
 over the flags for all participating threads, and checks whether all active
@@ -285,7 +364,8 @@ allocated until the thread becomes inactive.&lt;/p&gt;&lt;/li&gt;
 
 &lt;p&gt;We&amp;rsquo;ll leverage Rust&amp;rsquo;s ownership system &amp;ndash; in particular, ownership-based
 resource management (aka RAII) &amp;ndash; to capture these constraints directly in the
-type signatures of an epoch API.&lt;/p&gt;
+type signatures of an epoch API. This will in turn help ensure we use epoch
+management correctly.&lt;/p&gt;
 
 &lt;h3 id=&quot;guard&quot;&gt;&lt;code&gt;Guard&lt;/code&gt;&lt;/h3&gt;
 
@@ -358,7 +438,7 @@ next.&lt;/p&gt;
 
 &lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Atomic&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
     &lt;span class=&quot;c-Doc&quot;&gt;/// Create a new, null atomic pointer.&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Atomic&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Atomic&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;We&amp;rsquo;ll look at operations one at a time, since the signatures are somewhat subtle.&lt;/p&gt;
@@ -397,10 +477,10 @@ because we want to add additional links to the same node in the data
 structure. In that case, we&amp;rsquo;ll need to tie the lifetime to a guard:&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Atomic&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
     &lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;store_and_ref&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&amp;#39;a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-                         &lt;span class=&quot;n&quot;&gt;val&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Owned&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-                         &lt;span class=&quot;n&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Ordering&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-                         &lt;span class=&quot;n&quot;&gt;_&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;&amp;#39;a&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Guard&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-                         &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Shared&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&amp;#39;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+                             &lt;span class=&quot;n&quot;&gt;val&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Owned&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                             &lt;span class=&quot;n&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Ordering&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                             &lt;span class=&quot;n&quot;&gt;_&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;&amp;#39;a&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Guard&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+                             &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Shared&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&amp;#39;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Note that the runtime representation of &lt;code&gt;val&lt;/code&gt; and the return value is exactly
@@ -434,10 +514,10 @@ for deletion. In that case, we effectively &amp;ldquo;own&amp;rdquo; the pointer
 is swapping a &lt;code&gt;Shared&lt;/code&gt; pointer with a fresh &lt;code&gt;Owned&lt;/code&gt; one:&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Atomic&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
     &lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cas&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-           &lt;span class=&quot;n&quot;&gt;old&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Shared&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-           &lt;span class=&quot;n&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Owned&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-           &lt;span class=&quot;n&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Ordering&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-           &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Result&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Owned&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+               &lt;span class=&quot;n&quot;&gt;old&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Shared&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+               &lt;span class=&quot;n&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Owned&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+               &lt;span class=&quot;n&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Ordering&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+               &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Result&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Owned&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;As with &lt;code&gt;store&lt;/code&gt;, this operation does not require a guard; it produces no new
@@ -447,11 +527,11 @@ ownership of the &lt;code&gt;new&lt;/code&gt; pointer is returned to the caller.
 &lt;p&gt;We then have an analog to &lt;code&gt;store_and_ref&lt;/code&gt;:&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Atomic&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
     &lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cas_and_ref&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&amp;#39;a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-                       &lt;span class=&quot;n&quot;&gt;old&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Shared&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-                       &lt;span class=&quot;n&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Owned&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-                       &lt;span class=&quot;n&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Ordering&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-                       &lt;span class=&quot;n&quot;&gt;_&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;&amp;#39;a&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Guard&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-                       &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Result&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Shared&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&amp;#39;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Owned&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+                           &lt;span class=&quot;n&quot;&gt;old&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Shared&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                           &lt;span class=&quot;n&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Owned&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                           &lt;span class=&quot;n&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Ordering&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                           &lt;span class=&quot;n&quot;&gt;_&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;&amp;#39;a&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Guard&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+                           &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Result&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Shared&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&amp;#39;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Owned&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;In this case, on a successful CAS we acquire a &lt;code&gt;Shared&lt;/code&gt; pointer to the data we
 inserted.&lt;/p&gt;
@@ -459,10 +539,10 @@ inserted.&lt;/p&gt;
 &lt;p&gt;Finally, we can replace one &lt;code&gt;Shared&lt;/code&gt; pointer with another:&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Atomic&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
     &lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;unsafe&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cas_shared&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-                         &lt;span class=&quot;n&quot;&gt;old&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Shared&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-                         &lt;span class=&quot;n&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Shared&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-                         &lt;span class=&quot;n&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Ordering&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-                         &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+                             &lt;span class=&quot;n&quot;&gt;old&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Shared&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                             &lt;span class=&quot;n&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Option&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Shared&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                             &lt;span class=&quot;n&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Ordering&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+                             &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;The boolean return value is &lt;code&gt;true&lt;/code&gt; when the CAS is successful. This operation is
@@ -656,63 +736,13 @@ contained (like the &lt;code&gt;data&lt;/code&gt; field in &lt;code&gt;Node&lt;/
 synchronously, at predictable times, alleviating one of the pain points of GC,
 and allowing the framework to be used with non-&lt;code&gt;&amp;#39;static&lt;/code&gt; (and non-&lt;code&gt;Send&lt;/code&gt;) data.&lt;/p&gt;
 
-&lt;h2 id=&quot;benchmarks&quot;&gt;Benchmarks&lt;/h2&gt;
-
-&lt;p&gt;To test the overhead of the Crossbeam implementation, I implemented a basic
-lock-free queue (a vanilla
-&lt;a href=&quot;http://www.research.ibm.com/people/m/michael/podc-1996.pdf&quot;&gt;Michael-Scott queue&lt;/a&gt;)
-on top of it, and built the same queue in Scala. In general, JVM-based languages
-are a good test case for the &amp;ldquo;strong concurrent GC&amp;rdquo; path toward lock-free data
-structures. For both tests, I also compared against the java.util.concurrent queue
-implementation (ConcurrentLinkedQueue), which is a highly tuned variant of the
-Michael-Scott queue.&lt;/p&gt;
-
-&lt;p&gt;I tested these queues in two ways:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;A multi-producer, single-consumer (MPSC) scenario in which two threads
-repeatedly send messages and one thread receives them, both in a tight loop.&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;A multi-producer, multi-consumer (MPMC) scenario in which two threads send and
-two thread receive in a tight loop.&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Benchmarks like these are fairly typical for measuring the scalability of a
-lock-free data structure under &amp;ldquo;contention&amp;rdquo; &amp;ndash; multiple threads competing to
-make concurrent updates simultaenously. &lt;strong&gt;There are many variations that should be
-benchmarked when building a production queue implementation; the goal here is
-just to gauge the ballpark overhead of the memory management scheme&lt;/strong&gt;.&lt;/p&gt;
-
-&lt;p&gt;For the MPSC test, I also compared against Rust&amp;rsquo;s built in channels, which use
-an algorithm optimized for this scenario (but that doesn&amp;rsquo;t support MPMC).&lt;/p&gt;
-
-&lt;p&gt;The machine is a 4 core 2.6Ghz Intel Core i7 with 16GB RAM.&lt;/p&gt;
-
-&lt;p&gt;Here are the results, given in nanosecond per message (lower is better):&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/blog/public/bench-mpsc.png&quot;&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/blog/public/bench-mpmc.png&quot;&gt;&lt;/p&gt;
-
-&lt;p&gt;The first takeaway is that the Crossbeam implementation &amp;ndash; which has not been
-tuned &amp;ndash; is competitive in all cases. But why do the Java/Scala versions fare so
-much better in the MPMC test than the MPSC test?&lt;/p&gt;
-
-&lt;p&gt;The answer is simple: garbage collection. In the MPSC test, the producers tend
-to overrun the consumer over time, meaning that the amount of data in the queue
-slowly grows. That in turn increases the cost of each garbage collection, which
-involves walking over the live data set.&lt;/p&gt;
-
-&lt;p&gt;In the epoch scheme, by contrast, the cost of managing garbage is relatively
-fixed: it&amp;rsquo;s proportional to the number of threads, not the amount of live
-data. This turns out to yield both better and more consistent/predictable
-performance.&lt;/p&gt;
-
-&lt;p&gt;Finally, one comparison I did not include on the chart (because it would dwarf
-the others) was using a &lt;code&gt;Mutex&lt;/code&gt; around a deque in Rust. For the MPMC test,
-performance was around 3040ns/operation, over 20x slower than the Crossbeam
-implementation.&lt;/p&gt;
-
 &lt;h2 id=&quot;looking-ahead&quot;&gt;Looking ahead&lt;/h2&gt;
+
+&lt;p&gt;Crossbeam is still in its infancy. The work here is laying the foundation for
+exploring a wide range of lock-free data structures in Rust, and I hope for
+Crossbeam to eventually play a role similar to java.util.concurrent for Rust &amp;ndash;
+including a lock-free hashmap, work-stealing deques, and lightweight task
+engine. If you&amp;rsquo;re interested in this work, I&amp;rsquo;d love to have help!&lt;/p&gt;
 </content>
  </entry>
  

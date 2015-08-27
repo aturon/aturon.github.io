@@ -49,12 +49,12 @@
   
   <article class="post">
     <h1 class="post-title">
-      <a href="/blog/2015/08/21/epoch/">
+      <a href="/blog/2015/08/27/epoch/">
         Lock-freedom without garbage collection
       </a>
     </h1>
 
-    <time datetime="2015-08-21T00:00:00-07:00" class="post-date">21 Aug 2015</time>
+    <time datetime="2015-08-27T00:00:00-07:00" class="post-date">27 Aug 2015</time>
 
     <h2 id="tl;dr">TL;DR</h2>
 
@@ -62,13 +62,16 @@
 building high-performance lock-free data structures. Manual memory management
 for these data structures is not easy, and a GC makes it trivial.</p>
 
-<p>This post shows that, <strong>using Rust, it&rsquo;s possible to build a memory management API
-for concurrent data structures</strong> that:</p>
+<p>This post shows that, using Rust, it&rsquo;s possible to build a memory management API
+for concurrent data structures that:</p>
 
 <ul>
-<li>Makes it as <strong>easy to implement lock-free data structures</strong> as a GC does;</li>
-<li>Has <strong>smaller and more predictable overhead</strong> than concurrent GC.</li>
+<li>Makes it as easy to implement lock-free data structures as a GC does;</li>
+<li>Has smaller and more predictable overhead than concurrent GC.</li>
 </ul>
+
+<p>In the benchmarks I show below, Rust is able to easily beat a tuned Java
+lock-free queue implementation, with an implementation that&rsquo;s as easy to write.</p>
 
 <p>I&rsquo;ve implemented &ldquo;epoch-based memory reclamation&rdquo; in a new library called
 <a href="https://github.com/aturon/crossbeam">Crossbeam</a>, which is ready to use in for
@@ -78,6 +81,7 @@ data structures, the epoch algorithm, and the entire Rust API.</p>
 <h3 id="contents">Contents</h3>
 
 <ul>
+<li><a href="#benchmarks">Benchmarks</a></li>
 <li><a href="#lock-free-data-structures">Lock-free data structures</a>
 
 <ul>
@@ -95,9 +99,82 @@ data structures, the epoch algorithm, and the entire Rust API.</p>
 <li><a href="#treiber&#x27;s-stack-on-epochs">Treiber&rsquo;s stack on epochs</a></li>
 <li><a href="#managing-garbage">Managing garbage</a></li>
 </ul></li>
-<li><a href="#benchmarks">Benchmarks</a></li>
 <li><a href="#looking-ahead">Looking ahead</a></li>
 </ul>
+
+<h2 id="benchmarks">Benchmarks</h2>
+
+<p>Before looking in depth at the API design and usage for epoch reclamation, let&rsquo;s
+cut right to the chase: performance.</p>
+
+<p>To test the overhead my Crossbeam implementation relative to a full GC, I
+implemented a basic lock-free queue (a vanilla
+<a href="http://www.research.ibm.com/people/m/michael/podc-1996.pdf">Michael-Scott queue</a>)
+on top of it, and built the same queue in Scala. In general, JVM-based languages
+are a good test case for the &ldquo;strong concurrent GC&rdquo; path toward lock-free data
+structures.</p>
+
+<p>In addition to these implementations, I compared against:</p>
+
+<ul>
+<li><p>A more efficient &ldquo;segmented&rdquo; queue that allocates nodes with multiple slots. I
+wrote this queue in Rust, on top of Crossbeam.</p></li>
+<li><p>A Rust single-threaded queue protected by a mutex.</p></li>
+<li><p>The java.util.concurrent queue implementation (ConcurrentLinkedQueue), which
+is a highly tuned variant of the Michael-Scott queue.</p></li>
+</ul>
+
+<p>I tested these queues in two ways:</p>
+
+<ul>
+<li><p>A multi-producer, single-consumer (MPSC) scenario in which two threads
+repeatedly send messages and one thread receives them, both in a tight loop.</p></li>
+<li><p>A multi-producer, multi-consumer (MPMC) scenario in which two threads send and
+two thread receive in a tight loop.</p></li>
+</ul>
+
+<p>Benchmarks like these are fairly typical for measuring the scalability of a
+lock-free data structure under &ldquo;contention&rdquo; &ndash; multiple threads competing to
+make concurrent updates simultaenously. <strong>There are many variations that should be
+benchmarked when building a production queue implementation; the goal here is
+just to gauge the ballpark overhead of the memory management scheme</strong>.</p>
+
+<p>For the MPSC test, I also compared against the algorithm used in Rust&rsquo;s built-in
+channels, which is optimized for this scenario (and hence doesn&rsquo;t support MPMC).</p>
+
+<p>The machine is a 4 core 2.6Ghz Intel Core i7 with 16GB RAM.</p>
+
+<p>Here are the results, given in nanosecond per message (lower is better):</p>
+
+<p><img src="/blog/public/bench-mpsc.png"></p>
+
+<p><img src="/blog/public/bench-mpmc.png"></p>
+
+<h3 id="analysis">Analysis</h3>
+
+<p>The first takeaway is that the Crossbeam implementation &ndash; which has not been
+tuned &ndash; is competitive in all cases.</p>
+
+<p>The second takeaway is that Rust has the fastest queue in all cases.</p>
+
+<p>But the Java/Scala versions fare much better in the MPMC test than they do in
+MPSC test. Why is that?</p>
+
+<p>The answer is simple: garbage collection. In the MPSC test, the producers tend
+to overrun the consumer over time, meaning that the amount of data in the queue
+slowly grows. That in turn increases the cost of each garbage collection, which
+involves walking over the live data set.</p>
+
+<p>In the epoch scheme, by contrast, the cost of managing garbage is relatively
+fixed: it&rsquo;s proportional to the number of threads, not the amount of live
+data. This turns out to yield both better and more consistent/predictable
+performance.</p>
+
+<p>Finally, one comparison I did not include on the chart (because it would dwarf
+the others) was using a <code>Mutex</code> around a deque in Rust. For the MPMC test,
+performance was around 3040ns/operation, over 20x slower than the Crossbeam
+implementation. This is a vivid demonstration of why lock-free data structure
+are important &ndash; so let&rsquo;s start by diving into what those are.</p>
 
 <h2 id="lock-free-data-structures">Lock-free data structures</h2>
 
@@ -185,6 +262,7 @@ not familiar with them.</p>
                 <span class="k">if</span> <span class="bp">self</span><span class="p">.</span><span class="n">head</span><span class="p">.</span><span class="n">compare_and_swap</span><span class="p">(</span><span class="n">head</span><span class="p">,</span> <span class="n">next</span><span class="p">,</span> <span class="n">Release</span><span class="p">)</span> <span class="o">==</span> <span class="n">head</span> <span class="p">{</span>
 
                     <span class="c1">// extract out the data from the now-unlinked node</span>
+                    <span class="c1">// **NOTE**: leaks the node!</span>
                     <span class="k">return</span> <span class="nb">Some</span><span class="p">(</span><span class="k">unsafe</span> <span class="p">{</span> <span class="n">ptr</span><span class="o">::</span><span class="n">read</span><span class="p">(</span><span class="o">&amp;</span><span class="p">(</span><span class="o">*</span><span class="n">head</span><span class="p">).</span><span class="n">data</span><span class="p">)</span> <span class="p">})</span>
                 <span class="p">}</span>
             <span class="p">}</span>
@@ -230,12 +308,12 @@ attempt to free the node pointer after it has removed it from the stack.</p>
 
 <p>What would go wrong if we did just that?</p>
 <div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="c1">// extract out the data from the now-unlinked node</span>
-<span class="kd">let</span> <span class="n">data</span> <span class="o">=</span> <span class="k">unsafe</span> <span class="p">{</span> <span class="p">(</span><span class="o">*</span><span class="n">head</span><span class="p">).</span><span class="n">data</span><span class="p">.</span><span class="n">take</span><span class="p">()</span> <span class="p">};</span>
+<span class="kd">let</span> <span class="n">ret</span> <span class="o">=</span> <span class="nb">Some</span><span class="p">(</span><span class="k">unsafe</span> <span class="p">{</span> <span class="n">ptr</span><span class="o">::</span><span class="n">read</span><span class="p">(</span><span class="o">&amp;</span><span class="p">(</span><span class="o">*</span><span class="n">head</span><span class="p">).</span><span class="n">data</span><span class="p">)</span> <span class="p">});</span>
 
 <span class="c1">// free the node</span>
 <span class="n">mem</span><span class="o">::</span><span class="nb">drop</span><span class="p">(</span><span class="n">Box</span><span class="o">::</span><span class="n">from_raw</span><span class="p">(</span><span class="n">head</span><span class="p">));</span>
 
-<span class="k">return</span> <span class="n">data</span>
+<span class="k">return</span> <span class="n">ret</span>
 </code></pre></div>
 <p>The problem is that other threads could also be running <code>pop</code> at the same
 time. The earlier line, <code>let next = unsafe { (*head).next };</code>, reads <code>next</code> out
@@ -255,7 +333,7 @@ they all come down to the same core observations:</p>
 <li><p>There are two sources of reachability at play &ndash; the data structure, and the
 snapshots in threads accessing it. Before we delete a node, we need to know that
 it cannot be reached in either of these ways.</p></li>
-<li><p>Once a node has been unliked from the data structure, no <em>new</em> snapshots
+<li><p>Once a node has been unlinked from the data structure, no <em>new</em> snapshots
 reaching it will be created.</p></li>
 </ol>
 
@@ -288,8 +366,9 @@ through live data</strong>; it&rsquo;s purely a matter of checking epoch counts.
 <p>When a thread wants to perform an operation on the data structure, it first sets
 its &ldquo;active&rdquo; flag, and then updates its local epoch to match the global one. If
 the thread removes a node from the data structure, it adds that node to the
-garbage list for the current global epoch. When it completes its operation, it
-clears the &ldquo;active&rdquo; thread.</p>
+garbage list for the current global epoch. (Note: it&rsquo;s very important that the
+garbage go into the <em>current</em> global epoch, not the previous local snapshot.)
+When it completes its operation, it clears the &ldquo;active&rdquo; thread.</p>
 
 <p>To try to collect the garbage (which can be done at any point), a thread walks
 over the flags for all participating threads, and checks whether all active
@@ -324,7 +403,8 @@ allocated until the thread becomes inactive.</p></li>
 
 <p>We&rsquo;ll leverage Rust&rsquo;s ownership system &ndash; in particular, ownership-based
 resource management (aka RAII) &ndash; to capture these constraints directly in the
-type signatures of an epoch API.</p>
+type signatures of an epoch API. This will in turn help ensure we use epoch
+management correctly.</p>
 
 <h3 id="guard"><code>Guard</code></h3>
 
@@ -397,7 +477,7 @@ next.</p>
 
 <span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">Atomic</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span>
     <span class="c-Doc">/// Create a new, null atomic pointer.</span>
-    <span class="k">pub</span> <span class="k">fn</span> <span class="n">new</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Atomic</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">;</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="n">null</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Atomic</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>We&rsquo;ll look at operations one at a time, since the signatures are somewhat subtle.</p>
@@ -436,10 +516,10 @@ because we want to add additional links to the same node in the data
 structure. In that case, we&rsquo;ll need to tie the lifetime to a guard:</p>
 <div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">Atomic</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span>
     <span class="k">pub</span> <span class="k">fn</span> <span class="n">store_and_ref</span><span class="o">&lt;</span><span class="nl">&#39;a</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span>
-                         <span class="n">val</span><span class="o">:</span> <span class="n">Owned</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">,</span>
-                         <span class="n">ord</span><span class="o">:</span> <span class="nb">Ordering</span><span class="p">,</span>
-                         <span class="n">_</span><span class="o">:</span> <span class="o">&amp;</span><span class="n">&#39;a</span> <span class="n">Guard</span><span class="p">)</span>
-                         <span class="o">-&gt;</span> <span class="n">Shared</span><span class="o">&lt;</span><span class="nl">&#39;a</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span><span class="p">;</span>
+                             <span class="n">val</span><span class="o">:</span> <span class="n">Owned</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">,</span>
+                             <span class="n">ord</span><span class="o">:</span> <span class="nb">Ordering</span><span class="p">,</span>
+                             <span class="n">_</span><span class="o">:</span> <span class="o">&amp;</span><span class="n">&#39;a</span> <span class="n">Guard</span><span class="p">)</span>
+                             <span class="o">-&gt;</span> <span class="n">Shared</span><span class="o">&lt;</span><span class="nl">&#39;a</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>Note that the runtime representation of <code>val</code> and the return value is exactly
@@ -473,10 +553,10 @@ for deletion. In that case, we effectively &ldquo;own&rdquo; the pointer.</p></l
 is swapping a <code>Shared</code> pointer with a fresh <code>Owned</code> one:</p>
 <div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">Atomic</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span>
     <span class="k">pub</span> <span class="k">fn</span> <span class="n">cas</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span>
-           <span class="n">old</span><span class="o">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Shared</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span><span class="p">,</span>
-           <span class="n">new</span><span class="o">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Owned</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span><span class="p">,</span>
-           <span class="n">ord</span><span class="o">:</span> <span class="nb">Ordering</span><span class="p">)</span>
-           <span class="o">-&gt;</span> <span class="nb">Result</span><span class="o">&lt;</span><span class="p">(),</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Owned</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;&gt;</span><span class="p">;</span>
+               <span class="n">old</span><span class="o">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Shared</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+               <span class="n">new</span><span class="o">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Owned</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+               <span class="n">ord</span><span class="o">:</span> <span class="nb">Ordering</span><span class="p">)</span>
+               <span class="o">-&gt;</span> <span class="nb">Result</span><span class="o">&lt;</span><span class="p">(),</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Owned</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;&gt;</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>As with <code>store</code>, this operation does not require a guard; it produces no new
@@ -486,11 +566,11 @@ ownership of the <code>new</code> pointer is returned to the caller.</p>
 <p>We then have an analog to <code>store_and_ref</code>:</p>
 <div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">Atomic</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span>
     <span class="k">pub</span> <span class="k">fn</span> <span class="n">cas_and_ref</span><span class="o">&lt;</span><span class="nl">&#39;a</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span>
-                       <span class="n">old</span><span class="o">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Shared</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span><span class="p">,</span>
-                       <span class="n">new</span><span class="o">:</span> <span class="n">Owned</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">,</span>
-                       <span class="n">ord</span><span class="o">:</span> <span class="nb">Ordering</span><span class="p">,</span>
-                       <span class="n">_</span><span class="o">:</span> <span class="o">&amp;</span><span class="n">&#39;a</span> <span class="n">Guard</span><span class="p">)</span>
-                       <span class="o">-&gt;</span> <span class="nb">Result</span><span class="o">&lt;</span><span class="n">Shared</span><span class="o">&lt;</span><span class="nl">&#39;a</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">Owned</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span><span class="p">;</span>
+                           <span class="n">old</span><span class="o">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Shared</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+                           <span class="n">new</span><span class="o">:</span> <span class="n">Owned</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">,</span>
+                           <span class="n">ord</span><span class="o">:</span> <span class="nb">Ordering</span><span class="p">,</span>
+                           <span class="n">_</span><span class="o">:</span> <span class="o">&amp;</span><span class="n">&#39;a</span> <span class="n">Guard</span><span class="p">)</span>
+                           <span class="o">-&gt;</span> <span class="nb">Result</span><span class="o">&lt;</span><span class="n">Shared</span><span class="o">&lt;</span><span class="nl">&#39;a</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">Owned</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span><span class="p">;</span>
 </code></pre></div>
 <p>In this case, on a successful CAS we acquire a <code>Shared</code> pointer to the data we
 inserted.</p>
@@ -498,10 +578,10 @@ inserted.</p>
 <p>Finally, we can replace one <code>Shared</code> pointer with another:</p>
 <div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">Atomic</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span>
     <span class="k">pub</span> <span class="k">unsafe</span> <span class="k">fn</span> <span class="n">cas_shared</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span>
-                         <span class="n">old</span><span class="o">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Shared</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span><span class="p">,</span>
-                         <span class="n">new</span><span class="o">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Shared</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span><span class="p">,</span>
-                         <span class="n">ord</span><span class="o">:</span> <span class="nb">Ordering</span><span class="p">)</span>
-                         <span class="o">-&gt;</span> <span class="kt">bool</span><span class="p">;</span>
+                             <span class="n">old</span><span class="o">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Shared</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+                             <span class="n">new</span><span class="o">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Shared</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+                             <span class="n">ord</span><span class="o">:</span> <span class="nb">Ordering</span><span class="p">)</span>
+                             <span class="o">-&gt;</span> <span class="kt">bool</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>The boolean return value is <code>true</code> when the CAS is successful. This operation is
@@ -695,63 +775,13 @@ contained (like the <code>data</code> field in <code>Node</code>).</p>
 synchronously, at predictable times, alleviating one of the pain points of GC,
 and allowing the framework to be used with non-<code>&#39;static</code> (and non-<code>Send</code>) data.</p>
 
-<h2 id="benchmarks">Benchmarks</h2>
-
-<p>To test the overhead of the Crossbeam implementation, I implemented a basic
-lock-free queue (a vanilla
-<a href="http://www.research.ibm.com/people/m/michael/podc-1996.pdf">Michael-Scott queue</a>)
-on top of it, and built the same queue in Scala. In general, JVM-based languages
-are a good test case for the &ldquo;strong concurrent GC&rdquo; path toward lock-free data
-structures. For both tests, I also compared against the java.util.concurrent queue
-implementation (ConcurrentLinkedQueue), which is a highly tuned variant of the
-Michael-Scott queue.</p>
-
-<p>I tested these queues in two ways:</p>
-
-<ul>
-<li><p>A multi-producer, single-consumer (MPSC) scenario in which two threads
-repeatedly send messages and one thread receives them, both in a tight loop.</p></li>
-<li><p>A multi-producer, multi-consumer (MPMC) scenario in which two threads send and
-two thread receive in a tight loop.</p></li>
-</ul>
-
-<p>Benchmarks like these are fairly typical for measuring the scalability of a
-lock-free data structure under &ldquo;contention&rdquo; &ndash; multiple threads competing to
-make concurrent updates simultaenously. <strong>There are many variations that should be
-benchmarked when building a production queue implementation; the goal here is
-just to gauge the ballpark overhead of the memory management scheme</strong>.</p>
-
-<p>For the MPSC test, I also compared against Rust&rsquo;s built in channels, which use
-an algorithm optimized for this scenario (but that doesn&rsquo;t support MPMC).</p>
-
-<p>The machine is a 4 core 2.6Ghz Intel Core i7 with 16GB RAM.</p>
-
-<p>Here are the results, given in nanosecond per message (lower is better):</p>
-
-<p><img src="/blog/public/bench-mpsc.png"></p>
-
-<p><img src="/blog/public/bench-mpmc.png"></p>
-
-<p>The first takeaway is that the Crossbeam implementation &ndash; which has not been
-tuned &ndash; is competitive in all cases. But why do the Java/Scala versions fare so
-much better in the MPMC test than the MPSC test?</p>
-
-<p>The answer is simple: garbage collection. In the MPSC test, the producers tend
-to overrun the consumer over time, meaning that the amount of data in the queue
-slowly grows. That in turn increases the cost of each garbage collection, which
-involves walking over the live data set.</p>
-
-<p>In the epoch scheme, by contrast, the cost of managing garbage is relatively
-fixed: it&rsquo;s proportional to the number of threads, not the amount of live
-data. This turns out to yield both better and more consistent/predictable
-performance.</p>
-
-<p>Finally, one comparison I did not include on the chart (because it would dwarf
-the others) was using a <code>Mutex</code> around a deque in Rust. For the MPMC test,
-performance was around 3040ns/operation, over 20x slower than the Crossbeam
-implementation.</p>
-
 <h2 id="looking-ahead">Looking ahead</h2>
+
+<p>Crossbeam is still in its infancy. The work here is laying the foundation for
+exploring a wide range of lock-free data structures in Rust, and I hope for
+Crossbeam to eventually play a role similar to java.util.concurrent for Rust &ndash;
+including a lock-free hashmap, work-stealing deques, and lightweight task
+engine. If you&rsquo;re interested in this work, I&rsquo;d love to have help!</p>
 
   </article>
   
@@ -770,7 +800,7 @@ implementation.</p>
 
       <footer class="footer">
         <small>
-          &copy; <time datetime="2015-08-25T16:30:50-07:00">2015</time>. All rights reserved.
+          &copy; <time datetime="2015-08-27T11:58:42-07:00">2015</time>. All rights reserved.
         </small>
       </footer>
     </div>
