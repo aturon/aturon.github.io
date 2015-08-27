@@ -308,9 +308,9 @@ attempt to free the node pointer after it has removed it from the stack.</p>
 <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div>
 <p>The problem is that other threads could also be running <code>pop</code> at the same
-time. The earlier line, <code>let next = unsafe { (*head).next };</code>, reads <code>next</code> out
-of a snapshot taken of <code>head</code>. If that snapshot pointed to the node we just
-deallocated, we&rsquo;d have a use-after-free bug on our hands!</p>
+time. Those threads could have a snapshot of the current head; nothing would
+prevent them from reading <code>(*head).next</code> on that snapshot just after we
+deallocate the node they&rsquo;re pointing to &ndash; a use-after-free bug in the making!</p>
 
 <p>So that&rsquo;s the crux. We want to use lock-free algorithms, but many follow a
 similar pattern to the stack above, leaving us with no clear point where it&rsquo;s
@@ -778,28 +778,12 @@ engine. If you&rsquo;re interested in this work, I&rsquo;d love to have help!</p
 </article>
 
 
-<aside class="related">
-  <h2>Related Posts</h2>
-  <ul class="related-posts">
-    
-      <li>
-        <h3>
-          <a href="/blog/2015/08/21/epoch/">
-            Lock-freedom without garbage collection
-            <small><time datetime="2015-08-21T00:00:00-07:00">21 Aug 2015</time></small>
-          </a>
-        </h3>
-      </li>
-    
-  </ul>
-</aside>
-
 
       </main>
 
       <footer class="footer">
         <small>
-          &copy; <time datetime="2015-08-27T12:06:32-07:00">2015</time>. All rights reserved.
+          &copy; <time datetime="2015-08-27T12:10:41-07:00">2015</time>. All rights reserved.
         </small>
       </footer>
     </div>
