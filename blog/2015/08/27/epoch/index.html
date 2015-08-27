@@ -520,24 +520,11 @@ the <em>ownership</em> situation from Rust&rsquo;s perspective changes radically
 
 <p>Finally, we can store a shared pointer back into the data structure:</p>
 <div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">Atomic</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span>
-    <span class="k">pub</span> <span class="k">unsafe</span> <span class="k">fn</span> <span class="n">store_shared</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="o">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Shared</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="n">ord</span><span class="o">:</span> <span class="nb">Ordering</span><span class="p">);</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="n">store_shared</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="o">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Shared</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="n">ord</span><span class="o">:</span> <span class="nb">Ordering</span><span class="p">);</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>This operation does not require a guard, because we&rsquo;re not learning any new
-information about the lifetime of a pointer. It is unsafe because the <code>Shared</code>
-pointer we provide has a limited lifetime, but we are essentially claiming it
-can live forever. Put differently, data that is reachable through a chain of
-<code>Atomic</code> is live, independent from any epoch &ndash; the epochs manage cleanup of
-data that is no longer reachable from the data structure.</p>
-
-<p>In general, <code>store_shared</code> is safe to use when:</p>
-
-<ul>
-<li><p>We know for certain that the same pointer is already reachable through some
-other path in the data structure, or,</p></li>
-<li><p>We just removed the pointer from the data structure, but did not schedule it
-for deletion. In that case, we effectively &ldquo;own&rdquo; the pointer.</p></li>
-</ul>
+information about the lifetime of a pointer.</p>
 
 <h4 id="cas">CAS</h4>
 
@@ -569,15 +556,14 @@ inserted.</p>
 
 <p>Finally, we can replace one <code>Shared</code> pointer with another:</p>
 <div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">Atomic</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span>
-    <span class="k">pub</span> <span class="k">unsafe</span> <span class="k">fn</span> <span class="n">cas_shared</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="n">cas_shared</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span>
                              <span class="n">old</span><span class="o">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Shared</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span><span class="p">,</span>
                              <span class="n">new</span><span class="o">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Shared</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span><span class="p">,</span>
                              <span class="n">ord</span><span class="o">:</span> <span class="nb">Ordering</span><span class="p">)</span>
                              <span class="o">-&gt;</span> <span class="kt">bool</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>The boolean return value is <code>true</code> when the CAS is successful. This operation is
-unsafe for exactly the same reason that <code>store_shared</code> is.</p>
+<p>The boolean return value is <code>true</code> when the CAS is successful.</p>
 
 <h3 id="freeing-memory">Freeing memory</h3>
 
@@ -647,7 +633,7 @@ epoch API:</p>
             <span class="kd">let</span> <span class="n">head</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">head</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">Relaxed</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">guard</span><span class="p">);</span>
 
             <span class="c1">// update `next` pointer with snapshot</span>
-            <span class="k">unsafe</span> <span class="p">{</span> <span class="n">n</span><span class="p">.</span><span class="n">next</span><span class="p">.</span><span class="n">store_shared</span><span class="p">(</span><span class="n">head</span><span class="p">,</span> <span class="n">Relaxed</span><span class="p">);</span> <span class="p">}</span>
+            <span class="n">n</span><span class="p">.</span><span class="n">next</span><span class="p">.</span><span class="n">store_shared</span><span class="p">(</span><span class="n">head</span><span class="p">,</span> <span class="n">Relaxed</span><span class="p">);</span>
 
             <span class="c1">// if snapshot is still good, link in the new node</span>
             <span class="k">match</span> <span class="bp">self</span><span class="p">.</span><span class="n">head</span><span class="p">.</span><span class="n">cas_and_ref</span><span class="p">(</span><span class="n">head</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">Release</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">guard</span><span class="p">)</span> <span class="p">{</span>
@@ -670,16 +656,14 @@ epoch API:</p>
                     <span class="kd">let</span> <span class="n">next</span> <span class="o">=</span> <span class="n">head</span><span class="p">.</span><span class="n">next</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">Relaxed</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">guard</span><span class="p">);</span>
 
                     <span class="c1">// if snapshot is still good, update from `head` to `next`</span>
-                    <span class="kd">let</span> <span class="n">success</span> <span class="o">=</span> <span class="k">unsafe</span> <span class="p">{</span>
-                        <span class="bp">self</span><span class="p">.</span><span class="n">head</span><span class="p">.</span><span class="n">cas_shared</span><span class="p">(</span><span class="nb">Some</span><span class="p">(</span><span class="n">head</span><span class="p">),</span> <span class="n">next</span><span class="p">,</span> <span class="n">Release</span><span class="p">)</span>
-                    <span class="p">};</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="p">.</span><span class="n">head</span><span class="p">.</span><span class="n">cas_shared</span><span class="p">(</span><span class="nb">Some</span><span class="p">(</span><span class="n">head</span><span class="p">),</span> <span class="n">next</span><span class="p">,</span> <span class="n">Release</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">unsafe</span> <span class="p">{</span>
+                            <span class="c1">// mark the node as unlinked</span>
+                            <span class="n">guard</span><span class="p">.</span><span class="n">unlinked</span><span class="p">(</span><span class="n">head</span><span class="p">);</span>
 
-                    <span class="k">if</span> <span class="n">success</span> <span class="p">{</span>
-                        <span class="c1">// mark the node as unlinked</span>
-                        <span class="k">unsafe</span> <span class="p">{</span> <span class="n">guard</span><span class="p">.</span><span class="n">unlinked</span><span class="p">(</span><span class="n">head</span><span class="p">);</span> <span class="p">}</span>
-
-                        <span class="c1">// extract out the data from the now-unlinked node</span>
-                        <span class="k">return</span> <span class="nb">Some</span><span class="p">(</span><span class="k">unsafe</span> <span class="p">{</span> <span class="n">ptr</span><span class="o">::</span><span class="n">read</span><span class="p">(</span><span class="o">&amp;</span><span class="p">(</span><span class="o">*</span><span class="n">head</span><span class="p">).</span><span class="n">data</span><span class="p">)</span> <span class="p">})</span>
+                            <span class="c1">// extract out the data from the now-unlinked node</span>
+                            <span class="k">return</span> <span class="nb">Some</span><span class="p">(</span><span class="n">ptr</span><span class="o">::</span><span class="n">read</span><span class="p">(</span><span class="o">&amp;</span><span class="p">(</span><span class="o">*</span><span class="n">head</span><span class="p">).</span><span class="n">data</span><span class="p">))</span>
+                        <span class="p">}</span>
                     <span class="p">}</span>
                 <span class="p">}</span>
 
@@ -777,7 +761,7 @@ engine. If you&rsquo;re interested in this work, I&rsquo;d love to have help!</p
 
       <footer class="footer">
         <small>
-          &copy; <time datetime="2015-08-27T13:47:00-07:00">2015</time>. All rights reserved.
+          &copy; <time datetime="2015-08-27T14:41:33-07:00">2015</time>. All rights reserved.
         </small>
       </footer>
     </div>
