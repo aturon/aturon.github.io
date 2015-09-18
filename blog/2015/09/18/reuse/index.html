@@ -388,7 +388,9 @@ In practice that means that after the first virtual call, additional calls
 on <code>self</code> are statically-dispatched.</li>
 </ul></li>
 <li><p>Their non-virtual methods become inherent methods for the trait, DST style
-(e.g. <code>is_parent_of</code>). These are always statically-dispatched.</p></li>
+(e.g. <code>is_parent_of</code>). These are always statically-dispatched. (Note: it may
+be preferable to write these as extension traits with blanket impls, to gain
+further static dispatch through monomorphization, at a cost in code size.)</p></li>
 <li><p>Default implementations of methods can be done via &hellip; defaulted methods!</p></li>
 </ul>
 
@@ -438,7 +440,8 @@ accessors require virtual dispatch (much more expensive than a fixed offset).</l
 <li>cheap downcasting;
 
 <ul>
-<li><strong>Yes</strong>: see the <code>as_activatable</code> pattern.</li>
+<li><strong>Sort of</strong>: see the <code>as_activatable</code> pattern. But not as fast as a type tag
+check. (The latter can be encoded if we have fields, however.)</li>
 </ul></li>
 <li>thin pointers;
 
@@ -783,7 +786,7 @@ and thereby get something more like inheritance.</p>
 <p>I won&rsquo;t recap the whole proposal here (it&rsquo;s worth a read in full!), but in short
 it makes enums into full-blown hierarchies, defining types at every level (and
 structs at the leaves):</p>
-<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="kr">unsized</span> <span class="k">enum</span> <span class="n">Node</span> <span class="p">{</span>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">enum</span> <span class="n">Node</span> <span class="p">{</span>
   <span class="c1">// where this node is positioned after layout</span>
   <span class="n">position</span><span class="o">:</span> <span class="n">Rectangle</span><span class="p">,</span>
   <span class="p">...</span>
@@ -806,8 +809,8 @@ structs at the leaves):</p>
 <p>Given such a hierarchy, you can write:</p>
 <div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="n">takes_any_node</span><span class="o">&lt;</span><span class="n">T</span><span class="o">:</span> <span class="n">Node</span><span class="o">&gt;</span><span class="p">(</span><span class="n">n</span><span class="o">:</span> <span class="o">&amp;</span><span class="n">T</span><span class="p">)</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
 </code></pre></div>
-<p>That is, you can use an enum as a <em>bound</em>, which stands for &ldquo;any variant of this
-enum&rdquo;, but will be statically resolved via monomorphization.</p>
+<p>That is, you can use an enum as a <em>bound</em>, which stands for &ldquo;any type under this
+point in the hierarchy&rdquo;, but will be statically resolved via monomorphization.</p>
 
 <p>This immediately opens the door to specialization for reuse:</p>
 <div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">trait</span> <span class="n">ParsePlainAttribute</span> <span class="p">{</span>
@@ -998,7 +1001,7 @@ magical proposal for &ldquo;common fields&rdquo; (which included an associated
 
       <footer class="footer">
         <small>
-          &copy; <time datetime="2015-09-18T10:16:14-07:00">2015</time>. All rights reserved.
+          &copy; <time datetime="2015-09-18T11:12:47-07:00">2015</time>. All rights reserved.
         </small>
       </footer>
     </div>
