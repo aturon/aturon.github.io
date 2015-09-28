@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["scope",""]],"struct":[["Scope",""],["ScopedJoinHandle",""]]});
+initSidebarItems({"fn":[["scope","Create a new `scope`, for scoped concurrency operations."]],"struct":[["Scope",""],["ScopedJoinHandle",""]]});
