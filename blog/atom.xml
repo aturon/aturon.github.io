@@ -4,7 +4,7 @@
  <title>Aaron Turon</title>
  <link href="http://aturon.github.io/blog/atom.xml" rel="self"/>
  <link href="http://aturon.github.io/blog/"/>
- <updated>2015-09-28T17:29:23-07:00</updated>
+ <updated>2015-09-29T09:01:30-07:00</updated>
  <id>http://aturon.github.io</id>
  <author>
    <name>Aaron Turon</name>
@@ -25,6 +25,11 @@ different ways of carrying it out.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Heads up&lt;/strong&gt;: I&amp;rsquo;m going to gloss over some details in this post, in the interest
 of getting across the high-level situation as I see it. Of course, any actual
 proposal will need to address the questions that I skip over.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Update&lt;/strong&gt;: I removed the &amp;ldquo;elision&amp;rdquo; terminology, which was more confusing than
+helpful. I also now mention some implementation issues for the return type
+inference proposal. And I&amp;rsquo;ve toned down my preference in the wrapup; I&amp;rsquo;m
+becoming less certain :)&lt;/p&gt;
 
 &lt;h2 id=&quot;the-original-proposal&quot;&gt;The original proposal&lt;/h2&gt;
 
@@ -168,13 +173,13 @@ feature, when they are orthogonal.&lt;/p&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/blockquote&gt;
 
-&lt;p&gt;Here &amp;ldquo;type inference&amp;rdquo; means something akin to leaving off a type annotation
-that&amp;rsquo;s required today (like the return type of a function), without any change
-to semantics; I&amp;rsquo;m going to call this &lt;strong&gt;type elision&lt;/strong&gt;.  By contrast, &amp;ldquo;type
-abstraction&amp;rdquo; means &lt;em&gt;hiding&lt;/em&gt; some information about a type from clients,
-similarly to what we often do with
-&lt;a href=&quot;http://aturon.github.io/features/types/newtype.html&quot;&gt;newtypes&lt;/a&gt; today. The
-original proposal coupled these two features together.&lt;/p&gt;
+&lt;p&gt;Here &amp;ldquo;type inference&amp;rdquo; means something akin to leaving off a type
+annotation that&amp;rsquo;s required today (like the return type of a function),
+without any change to semantics.  By contrast, &amp;ldquo;type abstraction&amp;rdquo;
+means &lt;em&gt;hiding&lt;/em&gt; some information about a type from clients, similarly
+to what we often do with
+&lt;a href=&quot;http://aturon.github.io/features/types/newtype.html&quot;&gt;newtypes&lt;/a&gt;
+today. The original proposal coupled these two features together.&lt;/p&gt;
 
 &lt;p&gt;This is going to turn out to be a central question for this blog post. &lt;em&gt;Should&lt;/em&gt;
 these two aspects of the feature be treated separately or coupled? Are both
@@ -236,12 +241,12 @@ type (e.g., returning a pair of different unboxed closures)&lt;/li&gt;
 &lt;li&gt;applicable to struct definitions, not just function signatures&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&quot;option-1:-type-elision&quot;&gt;Option 1: type elision&lt;/h2&gt;
+&lt;h2 id=&quot;option-1:-return-type-inference&quot;&gt;Option 1: return type inference&lt;/h2&gt;
 
-&lt;p&gt;I&amp;rsquo;ll start with the simpler design: attack only the elision aspect of the
+&lt;p&gt;I&amp;rsquo;ll start with the simpler design: attack only the type inference aspect of the
 original proposal, without actually hiding any details about a type from clients.&lt;/p&gt;
 
-&lt;p&gt;The simplest way to do this would be to allow wildcards to elide types in return
+&lt;p&gt;The simplest way to do this would be to allow wildcards to leave off types in return
 position:&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
     &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;1.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;u8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rev&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
@@ -284,14 +289,21 @@ implements &lt;code&gt;Clone&lt;/code&gt; and &lt;code&gt;ExactSizeIterator&lt;/
 facts, despite them not being written down.&lt;/p&gt;
 
 &lt;p&gt;On the one hand, this approach is uncomfortably implicit (since bounds can be
-left off), and it may leak information about the type that we do not intend.&lt;/p&gt;
+left off), and it may leak information about the type that we do not
+intend.&lt;/p&gt;
+
+&lt;p&gt;There are also some implementation concerns &amp;ndash; the typechecker will need to
+check function definitions in a particular order to discover concrete types, and
+must ensure that return type inference isn&amp;rsquo;t used in a cycle between
+functions. Note, however, that type inference continues to be purely local.&lt;/p&gt;
 
 &lt;p&gt;On the other hand:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;p&gt;It&amp;rsquo;s dead simple. There are no thorny questions about type equality, scoping
-of type abstractions, or what &lt;code&gt;~&lt;/code&gt; means in various contexts. It&amp;rsquo;s just an
-extension of elision.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;It&amp;rsquo;s dead simple from the programmer&amp;rsquo;s perspective. There are no
+thorny questions about type equality, scoping of type abstractions,
+or what &lt;code&gt;~&lt;/code&gt; means in various contexts. It&amp;rsquo;s just an extension of
+inference.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;It behaves exactly like associated types today.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;It accounts for conditional trait implementations easily, since those will
 automatically be known about the return type whenever they are applicable.&lt;/p&gt;&lt;/li&gt;
@@ -388,10 +400,10 @@ be exported.&lt;/p&gt;&lt;/li&gt;
 &lt;p&gt;For now, I want to focus on the original motivation: avoiding having to fully
 name a type, while providing an interface to it.&lt;/p&gt;
 
-&lt;h3 id=&quot;integrating-elision&quot;&gt;Integrating elision&lt;/h3&gt;
+&lt;h3 id=&quot;integrating-return-type-inference&quot;&gt;Integrating return type inference&lt;/h3&gt;
 
 &lt;p&gt;The other part of the &lt;code&gt;@&lt;/code&gt; proposal is that, when used in function signatures,
-you can elide the type before the &lt;code&gt;@&lt;/code&gt; (i.e., the concrete type being
+you can leave off the type before the &lt;code&gt;@&lt;/code&gt; (i.e., the concrete type being
 abstracted):&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;Iterator&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Item&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;u8&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
     &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;1.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;u8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rev&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
@@ -449,9 +461,10 @@ signatures.&lt;/p&gt;
 &lt;p&gt;Some benefits:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;p&gt;The design feels a bit more &amp;ldquo;principled&amp;rdquo; than the pure elision design: except
-for OIBIT traits, the entire interface to a type must be written explicitly,
-so there&amp;rsquo;s no accidental leakage and everything is fully documented.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;The design feels a bit more &amp;ldquo;principled&amp;rdquo; than the pure type inference design:
+except for OIBIT traits, the entire interface to a type must be written
+explicitly, so there&amp;rsquo;s no accidental leakage and everything is fully
+documented.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;The use in &lt;code&gt;type&lt;/code&gt; gives a lighter weight form of newtypes that doesn&amp;rsquo;t require
 manually forwarding trait impls (akin to &amp;ldquo;generalized newtype deriving&amp;rdquo; from
 the Haskell world). However, these types would likely not function as complete
@@ -463,10 +476,11 @@ problem.&lt;/p&gt;&lt;/li&gt;
 &lt;p&gt;Some drawbacks:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;p&gt;Complexity. This variant is &lt;em&gt;way&lt;/em&gt; more complicated than pure elision. And it&amp;rsquo;s
-not clear that type abstraction is a feature that Rust really needs, given
-that we already have privacy and the newtype pattern. We could provide
-&amp;ldquo;newtype deriving&amp;rdquo; in a much simpler way to address the pain points there.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Complexity. This variant is &lt;em&gt;way&lt;/em&gt; more complicated than pure type
+inference. And it&amp;rsquo;s not clear that type abstraction is a feature that Rust
+really needs, given that we already have privacy and the newtype pattern. We
+could provide &amp;ldquo;newtype deriving&amp;rdquo; in a much simpler way to address the pain
+points there.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;Verbosity. Even with aliases, the signatures involve here tend to be much more
 complicated. Of course, that&amp;rsquo;s part of the point: this proposal is trying to
 be explicit about signatures.&lt;/p&gt;&lt;/li&gt;
@@ -479,9 +493,11 @@ longer be understood as a straight-up alias, since repeated uses of &lt;code&gt;
 
 &lt;p&gt;We absolutely need to expand Rust in this area; I stand by the design
 constraints listed here. But we managed to ship a relatively slim Rust 1.0, and
-I&amp;rsquo;d like to fight to keep the language as small as we can manage.
-In that light, I&amp;rsquo;m leaning pretty heavily toward elision here, despite its break
-from full signature explicitness.&lt;/p&gt;
+I&amp;rsquo;d like to fight to keep the language as small and concise as we can manage.&lt;/p&gt;
+
+&lt;p&gt;In that light, I&amp;rsquo;m leaning somewhat toward return type inference here, despite
+its break from full signature explicitness. But I remain concerned about the
+fact that the bound is not actually all that meaningful.&lt;/p&gt;
 </content>
  </entry>
  

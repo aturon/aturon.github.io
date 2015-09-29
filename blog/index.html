@@ -65,6 +65,11 @@ different ways of carrying it out.</p>
 of getting across the high-level situation as I see it. Of course, any actual
 proposal will need to address the questions that I skip over.</p>
 
+<p><strong>Update</strong>: I removed the &ldquo;elision&rdquo; terminology, which was more confusing than
+helpful. I also now mention some implementation issues for the return type
+inference proposal. And I&rsquo;ve toned down my preference in the wrapup; I&rsquo;m
+becoming less certain :)</p>
+
 <h2 id="the-original-proposal">The original proposal</h2>
 
 <p>This post is about a topic near-and-dear to me &ndash; my
@@ -207,13 +212,13 @@ feature, when they are orthogonal.</p>
 <span class="p">}</span>
 </code></pre></div></blockquote>
 
-<p>Here &ldquo;type inference&rdquo; means something akin to leaving off a type annotation
-that&rsquo;s required today (like the return type of a function), without any change
-to semantics; I&rsquo;m going to call this <strong>type elision</strong>.  By contrast, &ldquo;type
-abstraction&rdquo; means <em>hiding</em> some information about a type from clients,
-similarly to what we often do with
-<a href="http://aturon.github.io/features/types/newtype.html">newtypes</a> today. The
-original proposal coupled these two features together.</p>
+<p>Here &ldquo;type inference&rdquo; means something akin to leaving off a type
+annotation that&rsquo;s required today (like the return type of a function),
+without any change to semantics.  By contrast, &ldquo;type abstraction&rdquo;
+means <em>hiding</em> some information about a type from clients, similarly
+to what we often do with
+<a href="http://aturon.github.io/features/types/newtype.html">newtypes</a>
+today. The original proposal coupled these two features together.</p>
 
 <p>This is going to turn out to be a central question for this blog post. <em>Should</em>
 these two aspects of the feature be treated separately or coupled? Are both
@@ -275,12 +280,12 @@ type (e.g., returning a pair of different unboxed closures)</li>
 <li>applicable to struct definitions, not just function signatures</li>
 </ul>
 
-<h2 id="option-1:-type-elision">Option 1: type elision</h2>
+<h2 id="option-1:-return-type-inference">Option 1: return type inference</h2>
 
-<p>I&rsquo;ll start with the simpler design: attack only the elision aspect of the
+<p>I&rsquo;ll start with the simpler design: attack only the type inference aspect of the
 original proposal, without actually hiding any details about a type from clients.</p>
 
-<p>The simplest way to do this would be to allow wildcards to elide types in return
+<p>The simplest way to do this would be to allow wildcards to leave off types in return
 position:</p>
 <div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="n">foo</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">_</span> <span class="p">{</span>
     <span class="p">(</span><span class="mf">1.</span><span class="p">.</span><span class="mi">10</span><span class="k">u8</span><span class="p">).</span><span class="n">rev</span><span class="p">().</span><span class="n">skip</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
@@ -323,14 +328,21 @@ implements <code>Clone</code> and <code>ExactSizeIterator</code> &ndash; and cli
 facts, despite them not being written down.</p>
 
 <p>On the one hand, this approach is uncomfortably implicit (since bounds can be
-left off), and it may leak information about the type that we do not intend.</p>
+left off), and it may leak information about the type that we do not
+intend.</p>
+
+<p>There are also some implementation concerns &ndash; the typechecker will need to
+check function definitions in a particular order to discover concrete types, and
+must ensure that return type inference isn&rsquo;t used in a cycle between
+functions. Note, however, that type inference continues to be purely local.</p>
 
 <p>On the other hand:</p>
 
 <ul>
-<li><p>It&rsquo;s dead simple. There are no thorny questions about type equality, scoping
-of type abstractions, or what <code>~</code> means in various contexts. It&rsquo;s just an
-extension of elision.</p></li>
+<li><p>It&rsquo;s dead simple from the programmer&rsquo;s perspective. There are no
+thorny questions about type equality, scoping of type abstractions,
+or what <code>~</code> means in various contexts. It&rsquo;s just an extension of
+inference.</p></li>
 <li><p>It behaves exactly like associated types today.</p></li>
 <li><p>It accounts for conditional trait implementations easily, since those will
 automatically be known about the return type whenever they are applicable.</p></li>
@@ -427,10 +439,10 @@ be exported.</p></li>
 <p>For now, I want to focus on the original motivation: avoiding having to fully
 name a type, while providing an interface to it.</p>
 
-<h3 id="integrating-elision">Integrating elision</h3>
+<h3 id="integrating-return-type-inference">Integrating return type inference</h3>
 
 <p>The other part of the <code>@</code> proposal is that, when used in function signatures,
-you can elide the type before the <code>@</code> (i.e., the concrete type being
+you can leave off the type before the <code>@</code> (i.e., the concrete type being
 abstracted):</p>
 <div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="n">foo</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="o">@</span><span class="nb">Iterator</span><span class="o">&lt;</span><span class="n">Item</span> <span class="o">=</span> <span class="kt">u8</span><span class="o">&gt;</span> <span class="p">{</span>
     <span class="p">(</span><span class="mf">1.</span><span class="p">.</span><span class="mi">10</span><span class="k">u8</span><span class="p">).</span><span class="n">rev</span><span class="p">().</span><span class="n">skip</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
@@ -488,9 +500,10 @@ signatures.</p>
 <p>Some benefits:</p>
 
 <ul>
-<li><p>The design feels a bit more &ldquo;principled&rdquo; than the pure elision design: except
-for OIBIT traits, the entire interface to a type must be written explicitly,
-so there&rsquo;s no accidental leakage and everything is fully documented.</p></li>
+<li><p>The design feels a bit more &ldquo;principled&rdquo; than the pure type inference design:
+except for OIBIT traits, the entire interface to a type must be written
+explicitly, so there&rsquo;s no accidental leakage and everything is fully
+documented.</p></li>
 <li><p>The use in <code>type</code> gives a lighter weight form of newtypes that doesn&rsquo;t require
 manually forwarding trait impls (akin to &ldquo;generalized newtype deriving&rdquo; from
 the Haskell world). However, these types would likely not function as complete
@@ -502,10 +515,11 @@ problem.</p></li>
 <p>Some drawbacks:</p>
 
 <ul>
-<li><p>Complexity. This variant is <em>way</em> more complicated than pure elision. And it&rsquo;s
-not clear that type abstraction is a feature that Rust really needs, given
-that we already have privacy and the newtype pattern. We could provide
-&ldquo;newtype deriving&rdquo; in a much simpler way to address the pain points there.</p></li>
+<li><p>Complexity. This variant is <em>way</em> more complicated than pure type
+inference. And it&rsquo;s not clear that type abstraction is a feature that Rust
+really needs, given that we already have privacy and the newtype pattern. We
+could provide &ldquo;newtype deriving&rdquo; in a much simpler way to address the pain
+points there.</p></li>
 <li><p>Verbosity. Even with aliases, the signatures involve here tend to be much more
 complicated. Of course, that&rsquo;s part of the point: this proposal is trying to
 be explicit about signatures.</p></li>
@@ -518,9 +532,11 @@ longer be understood as a straight-up alias, since repeated uses of <code>@</cod
 
 <p>We absolutely need to expand Rust in this area; I stand by the design
 constraints listed here. But we managed to ship a relatively slim Rust 1.0, and
-I&rsquo;d like to fight to keep the language as small as we can manage.
-In that light, I&rsquo;m leaning pretty heavily toward elision here, despite its break
-from full signature explicitness.</p>
+I&rsquo;d like to fight to keep the language as small and concise as we can manage.</p>
+
+<p>In that light, I&rsquo;m leaning somewhat toward return type inference here, despite
+its break from full signature explicitness. But I remain concerned about the
+fact that the bound is not actually all that meaningful.</p>
 
   </article>
   
@@ -539,7 +555,7 @@ from full signature explicitness.</p>
 
       <footer class="footer">
         <small>
-          &copy; <time datetime="2015-09-28T17:29:23-07:00">2015</time>. All rights reserved.
+          &copy; <time datetime="2015-09-29T09:01:30-07:00">2015</time>. All rights reserved.
         </small>
       </footer>
     </div>
