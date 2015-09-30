@@ -49,7 +49,11 @@
 <pre class='rust struct'>pub struct Scope&lt;'a&gt; {
     // some fields omitted
 }</pre><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;'a&gt; <a class='struct' href='../crossbeam/struct.Scope.html' title='crossbeam::Scope'>Scope</a>&lt;'a&gt;</code></h3><div class='impl-items'><h4 id='method.defer' class='method'><code>fn <a href='#method.defer' class='fnname'>defer</a>&lt;F&gt;(&amp;self, f: F) <span class='where'>where F: <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.FnOnce.html' title='core::ops::FnOnce'>FnOnce</a>() + 'a</span></code></h4>
-<h4 id='method.spawn' class='method'><code>fn <a href='#method.spawn' class='fnname'>spawn</a>&lt;F, T&gt;(&amp;self, f: F) -&gt; <a class='struct' href='../crossbeam/struct.ScopedJoinHandle.html' title='crossbeam::ScopedJoinHandle'>ScopedJoinHandle</a>&lt;T&gt; <span class='where'>where F: <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.FnOnce.html' title='core::ops::FnOnce'>FnOnce</a>() -&gt; T + <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a> + 'a, T: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a> + 'a</span></code></h4>
+<div class='docblock'><p>Schedule code to be executed when exiting the scope.</p>
+
+<p>This is akin to having a destructor on the stack, except that it is
+<em>guaranteed</em> to be run.</p>
+</div><h4 id='method.spawn' class='method'><code>fn <a href='#method.spawn' class='fnname'>spawn</a>&lt;F, T&gt;(&amp;self, f: F) -&gt; <a class='struct' href='../crossbeam/struct.ScopedJoinHandle.html' title='crossbeam::ScopedJoinHandle'>ScopedJoinHandle</a>&lt;T&gt; <span class='where'>where F: <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.FnOnce.html' title='core::ops::FnOnce'>FnOnce</a>() -&gt; T + <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a> + 'a, T: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a> + 'a</span></code></h4>
 <div class='docblock'><p>Create a scoped thread.</p>
 
 <p><code>spawn</code> is similar to the <a href="http://doc.rust-lang.org/std/thread/fn.spawn.html"><code>spawn</code></a> function in Rust&#39;s standard library. The
@@ -105,7 +109,7 @@ note: reference must be valid for the static lifetime...
 note: ...but borrowed value is only valid for the block suffix following statement 0 at ...
     let array = [1, 2, 3];
     let mut guards = vec![];
-     
+
     for i in &amp;array {
         let guard = std::thread::spawn(move || {
             println!(&quot;element: {}&quot;, i);
@@ -114,15 +118,18 @@ error: aborting due to previous error
 </code></pre>
 
 <p>Because <a href="http://doc.rust-lang.org/std/thread/fn.spawn.html"><code>std::thread::spawn</code></a> doesn&#39;t know about this scope, it requires a
-<code>&#39;static</code> lifetime. One way of giving it a proper lifetime is to <a href="http://doc.rust-lang.org/std/boxed/struct.Box.html"><code>Box</code></a> it up:</p>
+<code>&#39;static</code> lifetime. One way of giving it a proper lifetime is to use an <a href="http://doc.rust-lang.org/stable/std/sync/struct.Arc.html"><code>Arc</code></a>:</p>
 <pre class='rust rust-example-rendered'>
-<span class='kw'>let</span> <span class='ident'>array</span> <span class='op'>=</span> <span class='ident'>Box</span>::<span class='ident'>new</span>([<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>]);
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>Arc</span>;
+
+<span class='kw'>let</span> <span class='ident'>array</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>([<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>]);
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>guards</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[];
 
 <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> (<span class='number'>0</span>..<span class='ident'>array</span>.<span class='ident'>len</span>()) {
-    <span class='kw'>let</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='ident'>array</span>[<span class='ident'>i</span>];
+    <span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>array</span>.<span class='ident'>clone</span>();
+
     <span class='kw'>let</span> <span class='ident'>guard</span> <span class='op'>=</span> <span class='ident'>std</span>::<span class='ident'>thread</span>::<span class='ident'>spawn</span>(<span class='kw'>move</span> <span class='op'>||</span> {
-        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;element: {}&quot;</span>, <span class='ident'>i</span>);
+        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;element: {}&quot;</span>, <span class='ident'>a</span>[<span class='ident'>i</span>]);
     });
 
     <span class='ident'>guards</span>.<span class='ident'>push</span>(<span class='ident'>guard</span>);
@@ -132,7 +139,8 @@ error: aborting due to previous error
     <span class='ident'>guard</span>.<span class='ident'>join</span>().<span class='ident'>unwrap</span>();
 }</pre>
 
-<p>But this introduces unnecessary allocation: we know that we&#39;re joining the threads before
+<p>But this introduces unnecessary allocation, as <code>Arc&lt;T&gt;</code> puts its data on the heap, and we
+also end up dealing with reference counts. We know that we&#39;re joining the threads before
 our function returns, so just taking a reference <em>should</em> be safe. Rust can&#39;t know that,
 though.</p>
 

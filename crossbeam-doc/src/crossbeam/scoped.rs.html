@@ -292,6 +292,16 @@
 <span id="250">250</span>
 <span id="251">251</span>
 <span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cell</span>::<span class='ident'>RefCell</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
@@ -329,27 +339,27 @@
     }
 }
 
+<span class='doccomment'>/// A handle to a scoped thread</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ScopedJoinHandle</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='ident'>inner</span>: <span class='ident'>Rc</span><span class='op'>&lt;</span><span class='ident'>RefCell</span><span class='op'>&lt;</span><span class='ident'>JoinState</span><span class='op'>&gt;&gt;</span>,
     <span class='ident'>packet</span>: <span class='ident'>Arc</span><span class='op'>&lt;</span><span class='ident'>AtomicOption</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>,
     <span class='ident'>thread</span>: <span class='ident'>thread</span>::<span class='ident'>Thread</span>,
 }
 
-<span class='doccomment'>/// Create a new `scope`, for scoped concurrency operations.</span>
+<span class='doccomment'>/// Create a new `scope`, for deferred destructors.</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>/// Using crossbeam for concurrency involves creating a [`Scope`][scope]. That&#39;s the job of</span>
-<span class='doccomment'>/// `scope`.</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// [scope]: struct.Scope.html</span>
+<span class='doccomment'>/// Scopes, in particular, support [*scoped thread spaawning*](struct.Scope.html#method.spawn).</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// # Examples</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>/// Creating a scope:</span>
+<span class='doccomment'>/// Creating and using a scope:</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// ```</span>
 <span class='doccomment'>/// crossbeam::scope(|scope| {</span>
-<span class='doccomment'>///     // do stuff with scope here</span>
+<span class='doccomment'>///     scope.defer(|| println!(&quot;Exiting scope&quot;));</span>
+<span class='doccomment'>///     scope.spawn(|| println!(&quot;Running child thread in scope&quot;))</span>
 <span class='doccomment'>/// });</span>
+<span class='doccomment'>/// // Prints messages in the reverse order written</span>
 <span class='doccomment'>/// ```</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>scope</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>F</span>, <span class='ident'>R</span><span class='op'>&gt;</span>(<span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>R</span> <span class='kw'>where</span> <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='ident'>Scope</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>R</span> {
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>scope</span> <span class='op'>=</span> <span class='ident'>Scope</span> { <span class='ident'>dtors</span>: <span class='ident'>RefCell</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>) };
@@ -381,6 +391,10 @@
         }
     }
 
+    <span class='doccomment'>/// Schedule code to be executed when exiting the scope.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// This is akin to having a destructor on the stack, except that it is</span>
+    <span class='doccomment'>/// *guaranteed* to be run.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>defer</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='kw'>where</span> <span class='ident'>F</span>: <span class='ident'>FnOnce</span>() <span class='op'>+</span> <span class='lifetime'>&#39;a</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>dtors</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>dtors</span>.<span class='ident'>borrow_mut</span>();
         <span class='op'>*</span><span class='ident'>dtors</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>DtorChain</span> {
@@ -449,7 +463,7 @@
     <span class='doccomment'>/// note: ...but borrowed value is only valid for the block suffix following statement 0 at ...</span>
     <span class='doccomment'>///     let array = [1, 2, 3];</span>
     <span class='doccomment'>///     let mut guards = vec![];</span>
-    <span class='doccomment'>///     </span>
+    <span class='doccomment'>///</span>
     <span class='doccomment'>///     for i in &amp;array {</span>
     <span class='doccomment'>///         let guard = std::thread::spawn(move || {</span>
     <span class='doccomment'>///             println!(&quot;element: {}&quot;, i);</span>
@@ -458,18 +472,21 @@
     <span class='doccomment'>/// ```</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// Because [`std::thread::spawn`][spawn] doesn&#39;t know about this scope, it requires a</span>
-    <span class='doccomment'>/// `&#39;static` lifetime. One way of giving it a proper lifetime is to [`Box`][box] it up:</span>
+    <span class='doccomment'>/// `&#39;static` lifetime. One way of giving it a proper lifetime is to use an [`Arc`][arc]:</span>
     <span class='doccomment'>///</span>
-    <span class='doccomment'>/// [box]: http://doc.rust-lang.org/std/boxed/struct.Box.html</span>
+    <span class='doccomment'>/// [arc]: http://doc.rust-lang.org/stable/std/sync/struct.Arc.html</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// ```</span>
-    <span class='doccomment'>/// let array = Box::new([1, 2, 3]);</span>
+    <span class='doccomment'>/// use std::sync::Arc;</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// let array = Arc::new([1, 2, 3]);</span>
     <span class='doccomment'>/// let mut guards = vec![];</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// for i in (0..array.len()) {</span>
-    <span class='doccomment'>///     let i = array[i];</span>
+    <span class='doccomment'>///     let a = array.clone();</span>
+    <span class='doccomment'>///</span>
     <span class='doccomment'>///     let guard = std::thread::spawn(move || {</span>
-    <span class='doccomment'>///         println!(&quot;element: {}&quot;, i);</span>
+    <span class='doccomment'>///         println!(&quot;element: {}&quot;, a[i]);</span>
     <span class='doccomment'>///     });</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>///     guards.push(guard);</span>
@@ -480,7 +497,8 @@
     <span class='doccomment'>/// }</span>
     <span class='doccomment'>/// ```</span>
     <span class='doccomment'>///</span>
-    <span class='doccomment'>/// But this introduces unnecessary allocation: we know that we&#39;re joining the threads before</span>
+    <span class='doccomment'>/// But this introduces unnecessary allocation, as `Arc&lt;T&gt;` puts its data on the heap, and we</span>
+    <span class='doccomment'>/// also end up dealing with reference counts. We know that we&#39;re joining the threads before</span>
     <span class='doccomment'>/// our function returns, so just taking a reference _should_ be safe. Rust can&#39;t know that,</span>
     <span class='doccomment'>/// though.</span>
     <span class='doccomment'>///</span>
@@ -530,11 +548,13 @@
 }
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>ScopedJoinHandle</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+    <span class='doccomment'>/// Join the scoped thread, returning the result it produced.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>join</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>T</span> {
         <span class='self'>self</span>.<span class='ident'>inner</span>.<span class='ident'>borrow_mut</span>().<span class='ident'>join</span>();
         <span class='self'>self</span>.<span class='ident'>packet</span>.<span class='ident'>take</span>(<span class='ident'>Ordering</span>::<span class='ident'>Relaxed</span>).<span class='ident'>unwrap</span>()
     }
 
+    <span class='doccomment'>/// Get the underlying thread handle.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>thread</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>thread</span>::<span class='ident'>Thread</span> {
         <span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>thread</span>
     }
