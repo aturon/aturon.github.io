@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="API documentation for the Rust `pin` fn in crate `crossbeam`.">
-    <meta name="keywords" content="rust, rustlang, rust-lang, pin">
+    <meta name="description" content="API documentation for the Rust `Stealer` struct in crate `crossbeam`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Stealer">
 
-    <title>crossbeam::mem::epoch::pin - Rust</title>
+    <title>crossbeam::sync::chase_lev::Stealer - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../../../main.css">
 
@@ -26,7 +26,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='../../index.html'>crossbeam</a>::<wbr><a href='../index.html'>mem</a>::<wbr><a href='index.html'>epoch</a></p><script>window.sidebarCurrent = {name: 'pin', ty: 'fn', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'><a href='../../index.html'>crossbeam</a>::<wbr><a href='../index.html'>sync</a>::<wbr><a href='index.html'>chase_lev</a></p><script>window.sidebarCurrent = {name: 'Stealer', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -40,20 +40,23 @@
         </form>
     </nav>
 
-    <section id='main' class="content fn">
-<h1 class='fqn'><span class='in-band'>Function <a href='../../index.html'>crossbeam</a>::<wbr><a href='../index.html'>mem</a>::<wbr><a href='index.html'>epoch</a>::<wbr><a class='fn' href=''>pin</a></span><span class='out-of-band'><span id='render-detail'>
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../../index.html'>crossbeam</a>::<wbr><a href='../index.html'>sync</a>::<wbr><a href='index.html'>chase_lev</a>::<wbr><a class='struct' href=''>Stealer</a></span><span class='out-of-band'><span id='render-detail'>
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-366' class='srclink' href='../../../src/crossbeam/mem/epoch/mod.rs.html#407-421' title='goto source code'>[src]</a></span></h1>
-<pre class='rust fn'>pub fn pin() -&gt; <a class='struct' href='../../../crossbeam/mem/epoch/struct.Guard.html' title='crossbeam::mem::epoch::Guard'>Guard</a></pre><div class='docblock'><p>Pin the current epoch.</p>
+        </span><a id='src-683' class='srclink' href='../../../src/crossbeam/sync/chase_lev.rs.html#84-86' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Stealer&lt;T&gt; {
+    // some fields omitted
+}</pre><div class='docblock'><p>The stealing half of the work-stealing deque. Stealers have access to the
+opposite end of the deque from the worker, and they only have access to the
+<code>steal</code> method.</p>
 
-<p>Threads generally pin before interacting with a lock-free data
-structure. Pinning requires a full memory barrier, so is somewhat
-expensive. It is rentrant -- you can safely acquire nested guards, and only
-the first guard requires a barrier. Thus, in cases where you expect to
-perform several lock-free operations in quick succession, you may consider
-pinning around the entire set of operations.</p>
+<p>Stealers can be cloned to have more than one handle active at a time.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;T&gt; <a class='struct' href='../../../crossbeam/sync/chase_lev/struct.Stealer.html' title='crossbeam::sync::chase_lev::Stealer'>Stealer</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.steal' class='method'><code>fn <a href='#method.steal' class='fnname'>steal</a>(&amp;self) -&gt; <a class='enum' href='../../../crossbeam/sync/chase_lev/enum.Steal.html' title='crossbeam::sync::chase_lev::Steal'>Steal</a>&lt;T&gt;</code></h4>
+<div class='docblock'><p>Steals work off the end of the queue (opposite of the worker&#39;s end)</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;T&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../../../crossbeam/sync/chase_lev/struct.Stealer.html' title='crossbeam::sync::chase_lev::Stealer'>Stealer</a>&lt;T&gt;</code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../../crossbeam/sync/chase_lev/struct.Stealer.html' title='crossbeam::sync::chase_lev::Stealer'>Stealer</a>&lt;T&gt;</code></h4>
+<h4 id='method.clone_from' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>
 
