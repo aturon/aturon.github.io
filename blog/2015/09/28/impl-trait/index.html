@@ -174,7 +174,7 @@ haven&rsquo;t really been discussed. But they all have to be tackled.</p>
 <p>First I&rsquo;ll go quickly through the main questions, then talk about design
 priorities, and finally present two possible designs.</p>
 
-<h3 id="is-impl-trait-a-type?">Is <code>impl Trait</code> a type?</h3>
+<h3 id="is-impl-trait-a-type">Is <code>impl Trait</code> a type?</h3>
 
 <p>Can <code>impl Trait</code> appear everywhere a type can?</p>
 
@@ -184,7 +184,7 @@ definitions, type aliases, etc? In each case, what should the semantics be?</p>
 <p>The RFC gave answers to many of these questions, although I think today I would
 answer some of them differently.</p>
 
-<h3 id="is-impl-trait-&quot;sealed&quot;?">Is <code>impl Trait</code> &quot;sealed&rdquo;?</h3>
+<h3 id="is-impl-trait-quot-sealed-quot">Is <code>impl Trait</code> &quot;sealed&rdquo;?</h3>
 
 <p>As @Ericson2314 astutely remarked on thread:</p>
 
@@ -216,7 +216,7 @@ today. The original proposal coupled these two features together.</p>
 these two aspects of the feature be treated separately or coupled? Are both
 needed? What are the tradeoffs?</p>
 
-<h3 id="how-do-you-deal-with-clone-or-iterator-adapters?">How do you deal with <code>Clone</code> or <code>Iterator</code> adapters?</h3>
+<h3 id="how-do-you-deal-with-clone-or-iterator-adapters">How do you deal with <code>Clone</code> or <code>Iterator</code> adapters?</h3>
 
 <p>It&rsquo;s pretty common that a trait is <em>conditionally</em> implemented:</p>
 <div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">:</span> <span class="nb">Clone</span><span class="o">&gt;</span> <span class="nb">Clone</span> <span class="k">for</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
@@ -226,7 +226,7 @@ statement about which traits are implemented. This is especially painful for
 things like the iterator adapters, which are often <code>Clone</code> if the original
 iterator is, <code>DoubleEndedIterator</code> if the original iterator is, etc.</p>
 
-<h3 id="do-marker-traits-(send,-sync,-...)-have-to-be-mentioned?">Do marker traits (<code>Send</code>, <code>Sync</code>, &hellip;) have to be mentioned?</h3>
+<h3 id="do-marker-traits-send-sync-have-to-be-mentioned">Do marker traits (<code>Send</code>, <code>Sync</code>, &hellip;) have to be mentioned?</h3>
 
 <p>When you use the
 <a href="http://aturon.github.io/features/types/newtype.html">newtype pattern</a> today,
@@ -272,7 +272,7 @@ type (e.g., returning a pair of different unboxed closures)</li>
 <li>applicable to struct definitions, not just function signatures</li>
 </ul>
 
-<h2 id="option-1:-return-type-inference">Option 1: return type inference</h2>
+<h2 id="option-1-return-type-inference">Option 1: return type inference</h2>
 
 <p>I&rsquo;ll start with the simpler design: attack only the type inference aspect of the
 original proposal, without actually hiding any details about a type from clients.</p>
@@ -367,7 +367,7 @@ considered to be particularly complicated. (See
 <a href="https://www.reddit.com/r/rust/comments/397xn3/why_does_anything_have_higher_priority_than/">this reddit post</a>
 for example.)</p>
 
-<h2 id="option-2:-type-abstraction">Option 2: type abstraction</h2>
+<h2 id="option-2-type-abstraction">Option 2: type abstraction</h2>
 
 <p>On the other end of the spectrum, we could try to address all of the use cases
 outlined, including type abstraction.</p>
@@ -444,7 +444,7 @@ abstracted):</p>
 except for the stated trait bound</em>. So clients here don&rsquo;t know that the iterator
 is also <code>Clone</code>.</p>
 
-<h3 id="scaling-up:-marker-and-conditional-traits">Scaling up: marker and conditional traits</h3>
+<h3 id="scaling-up-marker-and-conditional-traits">Scaling up: marker and conditional traits</h3>
 
 <p>To make this kind of &ldquo;sealing&rdquo; work, we&rsquo;d have to deal with two additional
 thorny problems: marker traits and conditional traits.</p>
@@ -483,7 +483,7 @@ could say something like:</p>
 since you&rsquo;d reuse the same alias over and over. By contrast, today each adapter
 introduces a separate newtype which must be examined separately to find its API.</p>
 
-<h3 id="benefits/drawbacks">Benefits/drawbacks</h3>
+<h3 id="benefits-drawbacks">Benefits/drawbacks</h3>
 
 <p>So in all, it seems feasible to introduce a type abstraction feature, <code>@</code>, along
 with an elided form for function signatures, and have reasonably concise
@@ -539,6 +539,15 @@ fact that the bound is not actually all that meaningful.</p>
     
       <li>
         <h3>
+          <a href="/blog/2016/07/05/rfc-refinement/">
+            Refining Rust's RFCs
+            <small><time datetime="2016-07-05T00:00:00-07:00">05 Jul 2016</time></small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
           <a href="/blog/2015/09/18/reuse/">
             Specialize to reuse
             <small><time datetime="2015-09-18T00:00:00-07:00">18 Sep 2015</time></small>
@@ -563,7 +572,7 @@ fact that the bound is not actually all that meaningful.</p>
 
       <footer class="footer">
         <small>
-          &copy; <time datetime="2015-09-29T09:01:30-07:00">2015</time>. All rights reserved.
+          &copy; <time datetime="2016-07-05T17:37:12-07:00">2016</time>. All rights reserved.
         </small>
       </footer>
     </div>

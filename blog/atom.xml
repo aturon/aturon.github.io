@@ -4,13 +4,381 @@
  <title>Aaron Turon</title>
  <link href="http://aturon.github.io/blog/atom.xml" rel="self"/>
  <link href="http://aturon.github.io/blog/"/>
- <updated>2015-09-29T09:01:30-07:00</updated>
+ <updated>2016-07-05T17:37:12-07:00</updated>
  <id>http://aturon.github.io</id>
  <author>
    <name>Aaron Turon</name>
    <email>aturon@mozilla.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Refining Rust's RFCs</title>
+   <link href="http://aturon.github.io/blog/2016/07/05/rfc-refinement/"/>
+   <updated>2016-07-05T00:00:00-07:00</updated>
+   <id>http://aturon.github.io/2016/07/05/rfc-refinement</id>
+   <content type="html">&lt;p&gt;At the heart of Rust&amp;rsquo;s open development is the &lt;strong&gt;RFC process&lt;/strong&gt;. Every major
+change to the language, compiler, core libraries, tooling, and policy go through
+an RFC writeup and consensus-building process. The process served us incredibly
+well in clarifying our technical direction on the road to 1.0, and has continued
+to be highly active since then, with on average about 2 RFCs merged every week.&lt;/p&gt;
+
+&lt;p&gt;But it&amp;rsquo;s not all roses. There&amp;rsquo;s been a growing sense among both Rust leadership
+and the broader community that the RFC process needs some further refinement as
+we continue to grow the community. I want to lay out my view of the problems and
+sketch some possible solutions, based on extensive discussion and brainstorming
+with many others on the team.&lt;/p&gt;
+
+&lt;p&gt;Each idea operates at a different scale (from big-picture to low-level
+mechanics), but they are intended to fit together into a whole; each one
+supports the others. Ultimately, these should result in a single RFC, but in the
+meantime I&amp;rsquo;ll start a discuss thread for each proposal.&lt;/p&gt;
+
+&lt;p&gt;There is a clear common theme to all of the problems I want to raise:
+&lt;strong&gt;communication&lt;/strong&gt;. We need to find ways to better scale up lines of
+communication around the RFC process, and for Rust core development in general.
+There is also a cross-cutting concern: a need to increase our focus
+on &lt;strong&gt;mentoring&lt;/strong&gt; and &lt;strong&gt;the path to team membership&lt;/strong&gt;. @wycats has a great saying
+about measuring the health of the team structure:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Being a very active contributor who is not yet on a subteam should feel very
+close to actually being on that subteam.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Shooting for such a state of affairs has many benefits, not least of which
+is increasing the scalability of our community.&lt;/p&gt;
+
+&lt;h2 id=&quot;proposal-roadmap&quot;&gt;Proposal: Roadmap&lt;/h2&gt;
+
+&lt;h4 id=&quot;the-problem&quot;&gt;The problem&lt;/h4&gt;
+
+&lt;p&gt;&lt;strong&gt;Lack of clear rallying points&lt;/strong&gt;. One thing that made the run-up to the 1.0
+release so exhilarating was the way the release focused our effort: there was a
+big overarching goal we were all working toward, which led to a number of fairly
+clear-cut subgoals that everyone could pitch in on.&lt;/p&gt;
+
+&lt;p&gt;Since then, though, we&amp;rsquo;ve never had quite as clear of a &amp;ldquo;north star&amp;rdquo;. We&amp;rsquo;ve
+communicated some
+&lt;a href=&quot;http://blog.rust-lang.org/2015/08/14/Next-year.html&quot;&gt;very high-level plans&lt;/a&gt;,
+and had success rallying efforts around self-contained projects like
+&lt;a href=&quot;http://blog.rust-lang.org/2016/04/19/MIR.html&quot;&gt;MIR&lt;/a&gt;. But we don&amp;rsquo;t have a
+systematic way of rallying our efforts around important goals on a regular
+basis. This gap is a shame, because there are many people eager to contribute,
+who we should be directing toward common, important goals with good mentoring
+opportunities. Likewise, there are lots of people who could provide useful
+perspective on goals, or even provide leadership on initiatives, who don&amp;rsquo;t have
+an outlet today.&lt;/p&gt;
+
+&lt;p&gt;Relatedly, it can be difficult to contribute at the RFC level. Is the problem
+you want to solve a priority for the relevant team or wider community? When it
+comes to the core language, there is only so much design work that can be in
+flight at once (since it all needs to fit together), so &lt;strong&gt;greater clarity on
+priorities and motivations is essential&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;h4 id=&quot;the-proposal&quot;&gt;The proposal&lt;/h4&gt;
+
+&lt;p&gt;&lt;strong&gt;Idea&lt;/strong&gt;: publish a &lt;em&gt;roadmap&lt;/em&gt; on a regular cadence, e.g. every two release
+  cycles (12 weeks).&lt;/p&gt;
+
+&lt;p&gt;The roadmap would contain, at a minimum, a &lt;em&gt;small&lt;/em&gt; set of &amp;ldquo;major initiatives&amp;rdquo; for
+that period. An initiative might cover any phase of development, e.g.:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;em&gt;Early investigation&lt;/em&gt;: For example,
+&lt;a href=&quot;http://blog.rust-lang.org/2016/05/13/rustup.html&quot;&gt;building out NDK support in rustup&lt;/a&gt;
+or exploring implications of various memory model choices.&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Design&lt;/em&gt;: For example, working out a revised design for &lt;code&gt;rand&lt;/code&gt; or const generics.&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Implementation&lt;/em&gt;: For example, the
+&lt;a href=&quot;http://blog.rust-lang.org/2016/04/19/MIR.html&quot;&gt;MIR initiative&lt;/a&gt; or
+&lt;a href=&quot;https://internals.rust-lang.org/t/the-rustbuild-feature-thread/3643/&quot;&gt;rustbuild&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Documentation&lt;/em&gt;: For example, focused effort on updating API docs in a portion
+of the standard library.&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Community&lt;/em&gt;: For example, launching
+&lt;a href=&quot;https://github.com/rust-community/rustbridge&quot;&gt;RustBridge&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;And potentially many other categories as well.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Initiatives are intended to be a primary rallying point for the community&lt;/strong&gt;,
+  and thus should share some basic traits:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Clear scope&lt;/strong&gt;: an initiative should have clear-cut goals that can actually
+be &lt;em&gt;finished&lt;/em&gt;. So, an open-ended goal like &amp;ldquo;MIR&amp;rdquo; doesn&amp;rsquo;t fly, but &amp;ldquo;Get
+MIR-trans working on all of crates.io&amp;rdquo; does.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Timeboxed&lt;/strong&gt;: relatedly, an initiative should realistically last at most,
+say, 24 weeks (two roadmaps).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Commitment&lt;/strong&gt;: There should be some level of commitment from multiple people
+to actually work on the initiative. In particular, the initiative should list
+some primary points of contact, and ideally mentors.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Each initiative would have a dedicated status page with this information, links
+to issues or other materials, and potentially a FAQ. We&amp;rsquo;ve often found that
+there are recurring questions (&amp;ldquo;When is MIR going to be turned on by default?&amp;rdquo;)
+about big, ongoing work. The roadmap and status pages give us a highly visible,
+central and curated place to put this information.&lt;/p&gt;
+
+&lt;p&gt;The roadmap should be set via an open consensus process in which anyone can
+propose or influence initiatives. The initiatives should fit criteria like those
+listed above, and should also fit into an overall vision for Rust&amp;rsquo;s evolution
+over a longer period.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Details to be worked out&lt;/em&gt;:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Cadence&lt;/li&gt;
+&lt;li&gt;Can initiatives be added mid-stream?&lt;/li&gt;
+&lt;li&gt;Full guidelines for initiatives; how many should be in flight at once? Needs
+to be a small number to make this practical and useful (it&amp;rsquo;s a form of
+curation/rallying).&lt;/li&gt;
+&lt;li&gt;What is the process for deciding on the initiatives?&lt;/li&gt;
+&lt;li&gt;Do we divvy things up by subteam? That would make the discussion easier, but
+doesn&amp;rsquo;t allow for cross-cutting initiatives very easily.&lt;/li&gt;
+&lt;li&gt;Can we find less boring terms than &amp;ldquo;Roadmap&amp;rdquo; and &amp;ldquo;Initiative&amp;rdquo;?&lt;/li&gt;
+&lt;li&gt;Can we also include the &amp;ldquo;feature pipeline&amp;rdquo; and other long-running concerns
+into a roadmap somehow?&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;proposal-rfc-staging&quot;&gt;Proposal: RFC staging&lt;/h2&gt;
+
+&lt;h4 id=&quot;the-problem&quot;&gt;The problem&lt;/h4&gt;
+
+&lt;p&gt;RFCs are hard to keep up with in part because reading a full design &amp;ndash; and all
+the commentary around it &amp;ndash; can be a lot of work, and there tend to be a large
+number of active RFCs in flight at any time. &lt;strong&gt;RFC discussions are often hard to
+follow, due to the overwhelming number of comments, sometimes stretching over
+multiple forums.&lt;/strong&gt; Naturally, this problem is exacerbated by &amp;ldquo;controversial&amp;rdquo;
+RFCs, which is where we most need broad input and careful discussion. It can
+also be hard to track RFCs that are in some sense &amp;ldquo;competing&amp;rdquo; (offering
+alternative proposals for a common problem), or to correlate discussion between
+the discuss forum and github.&lt;/p&gt;
+
+&lt;p&gt;It&amp;rsquo;s also problematic to start off with a full proposal. What we really want is
+to get the community on the same page first about the importance of the problem
+being solved, and &lt;em&gt;then&lt;/em&gt; to proceed to the design phase, perhaps considering
+multiple competing designs.&lt;/p&gt;
+
+&lt;p&gt;Finally, RFCs are sometimes closed as &amp;ldquo;postponed&amp;rdquo;, but ideally that should not
+simply &lt;em&gt;terminate&lt;/em&gt; the discussion; instead, the discussion should simply
+continue elsewhere, or somehow be marked as being at a different stage.&lt;/p&gt;
+
+&lt;h4 id=&quot;the-proposal&quot;&gt;The proposal&lt;/h4&gt;
+
+&lt;p&gt;&lt;strong&gt;Idea&lt;/strong&gt;: introduce stages into the RFC process, including one for reaching
+  consensus on &lt;em&gt;motivation&lt;/em&gt; prior to considering a design.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Idea&lt;/strong&gt;: move the focus away from an RFC PR as the primary venue for RFC
+  discussion.&lt;/p&gt;
+
+&lt;p&gt;Put differently, the idea is to orient the RFC process around &lt;em&gt;problems&lt;/em&gt; first,
+and solutions second.&lt;/p&gt;
+
+&lt;p&gt;The rough phases I have in mind are:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Problem consensus&lt;/li&gt;
+&lt;li&gt;RFC drafting&lt;/li&gt;
+&lt;li&gt;RFC PR(s)&lt;/li&gt;
+&lt;li&gt;FCP&lt;/li&gt;
+&lt;li&gt;RFC merged&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Concretely, what this would look like is having some venue for tracking the
+problems we might want to solve, perhaps a revamped version of the RFC issue
+tracker. Whatever this venue is, it would track the progression through all of
+the phases. Let&amp;rsquo;s call this venue the &amp;ldquo;Problem Tracker&amp;rdquo;.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;em&gt;Phase 1: Problem consensus&lt;/em&gt;. The initial discussion is essentially about
+&lt;strong&gt;reaching consensus on the motivation section of an RFC&lt;/strong&gt;, which should include
+examples and make a compelling case that solving the problem is important enough
+to warrant expending energy and potential complexity. The subteam would sign off
+on that motivation, at which point there is some level of commitment to solve
+the problem. That puts the focus where it should be &amp;ndash; solving problems &amp;ndash; and
+should make it much easier for subteam members to engage early on in the RFC
+lifecycle.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;em&gt;Phase 2: RFC drafting&lt;/em&gt;. This phase can proceed in parallel with the previous
+one. During this phase, people sketch designs and work toward one or more full
+RFC drafts. Brainstorming and discussion on specific drafts would happen
+within dedicated &amp;ldquo;pre-RFC&amp;rdquo; &lt;a href=&quot;http://internals.rust-lang.org/&quot;&gt;discuss posts&lt;/a&gt;,
+which are linked from the Problem Tracker. In particular, newly-opened RFC PRs
+today often get an avalanche of comments and early revisions, making it very
+hard to join the discussion even a week later. Pushing early feedback to our
+forum instead will make the eventual RFC PR discussion more focused and easier
+to participate in.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;em&gt;Phase 3: RFC PR(s)&lt;/em&gt;. At some point, a &lt;em&gt;shepherd&lt;/em&gt; (see below) can determine
+that an RFC draft is of sufficiently high quality and steady state that a PR
+should be opened, at which point discussion proceeds as it does
+today. Multiple RFC PRs might be open for the same basic problem &amp;ndash; and
+indeed, this is a good way to take the &amp;ldquo;Alternatives&amp;rdquo; section more
+seriously. All open PRs would be linked from the Problem Tracker.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Phases 4 and 5 work just as today.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;One interesting aspect of this phasing: it&amp;rsquo;s possible to approve a Motivation
+section, then get all the way to RFC PR, only to close out the PR for one reason
+or another. In such cases, it should be possible to go back to the Problem
+Tracker and build a new, alternative RFC draft with the same Motivation section.&lt;/p&gt;
+
+&lt;p&gt;Note that, in this regime, you don&amp;rsquo;t ever open an RFC PR out of hand &amp;ndash; it must
+go through the earlier phases, including the pre-RFC discuss post. While this
+may feel like more process, I think that globally it will make the whole thing
+more efficient, by weeding out poorly motivated RFCs earlier, by focusing
+attention on the problem, by producing higher quality RFC PRs, and (as we&amp;rsquo;ll
+see) by decentralizing the process a bit more. In addition, it makes it easier
+to cope with the problem of &amp;ldquo;Does this need an RFC?&amp;rdquo;&lt;/p&gt;
+
+&lt;p&gt;As part of this proposal, &lt;strong&gt;I think we should &amp;ldquo;reboot&amp;rdquo; the notion of a
+&lt;em&gt;shepherd&lt;/em&gt;.&lt;/strong&gt; The idea would be to create a broader network of people around a
+subteam who are empowered to help move the RFC process along in various ways,
+but aren&amp;rsquo;t necessarily responsible for the final decision. So, for example, we
+would have a larger set of &amp;ldquo;lang shepherds&amp;rdquo; who help lang RFCs progress. The
+powers and responsibilities of shepherds would include:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&amp;ldquo;Calling to question&amp;rdquo; &amp;ndash; that is, proposing that the subteam move to make a
+decision on problem consensus or moving to FCP.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Working with the community to help brainstorm, draft, and revise pre-RFCs.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Moving to from pre-RFC to RFC PR phase.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Acting as the &amp;ldquo;scribe&amp;rdquo; for the RFC process, by keeping the Problem Tracker up
+to date. In particular, the subteams currently attempt to provide &amp;ldquo;summary&amp;rdquo;
+comments for contentious RFCs, to help people track the discussion. This
+proposal would give those comments more formal status, as something that would
+go directly on the Problem Tracker, and that any shepherd could provide at any
+point.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;All subteam members can act as shepherds as well.&lt;/p&gt;
+
+&lt;p&gt;In general, I envision the Problem Tracker as the go-to place to see where
+things stand for a given problem/set of proposals, including summarization of
+discussion and pros/cons for the proposals. The shepherds would play a special
+role in establishing that official record.&lt;/p&gt;
+
+&lt;p&gt;I think these changes make the RFC process both more accessible and more
+scalable. More accessible because it&amp;rsquo;s easier to get involved and get quick
+feedback in lightweight ways (before writing up an entire design). More scalable
+because of increased parallelism, and because the big decision points happen at
+either an easier stage (establishing motivation) or with many fewer proposals in
+flight (the RFC PR stage).&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Details to be worked out&lt;/em&gt;:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;What happens to current RFC PRs? Are they grandfathered in, or moved into this
+new process?&lt;/li&gt;
+&lt;li&gt;Where does the &amp;ldquo;problem tracker&amp;rdquo; live?&lt;/li&gt;
+&lt;li&gt;What are good guidelines around an initial &amp;ldquo;motivation&amp;rdquo;?&lt;/li&gt;
+&lt;li&gt;How and where can we keep an &amp;ldquo;official record&amp;rdquo; of the progression of a
+problem, including links to (and summaries of) pre-RFC and RFC PR threads?&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;proposal-async-decisions&quot;&gt;Proposal: Async decisions&lt;/h2&gt;
+
+&lt;h4 id=&quot;the-problem&quot;&gt;The problem&lt;/h4&gt;
+
+&lt;p&gt;There is room for improvement around the way that the subteams themselves
+work. Today, subteams reach decisions on RFCs and other issues in (bi)weekly
+meetings. There are at least two problems with doing so. First, since the
+meetings have a limited duration, &lt;strong&gt;we often run out of time without finishing
+the active business, introducing delays&lt;/strong&gt;; similarly, because of the high amount
+of RFC activity, &lt;strong&gt;the subteams often operate in &amp;ldquo;reactive&amp;rdquo; mode, more than
+actively leading&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;Another issue is that meetings provide, in some sense, the &amp;ldquo;wrong defaults&amp;rdquo; for
+making decisions. We have to be careful to ensure that all the rationale for a
+decision is present in the online discussion thread, and that any new rationale
+that came up during a meeting means that the decision is delayed, to give the
+full community a chance to respond. The point is that, &lt;strong&gt;while we work hard to
+provide this transparency, it requires that extra work&lt;/strong&gt;. At the same time,
+there is often good discussion in meetings wherein the subteam members build up
+a set of shared values &amp;ndash; thereby missing the opportunity to argue for those
+values to the wider community. Finding a way to move decision-making to a more
+public, asynchronous system seems ideal, though meetings &lt;em&gt;do&lt;/em&gt; have the benefit
+of providing a steady cadence to ensure that business is getting done.&lt;/p&gt;
+
+&lt;h4 id=&quot;the-proposal&quot;&gt;The proposal&lt;/h4&gt;
+
+&lt;p&gt;&lt;strong&gt;Idea&lt;/strong&gt;: move away from video meetings for decision-making, instead reaching
+  decisions entirely in the associated comment threads.&lt;/p&gt;
+
+&lt;p&gt;By moving the decision-making process fully online, we make it transparent by
+default. That is not to say that subteam members &amp;ndash; or anyone else &amp;ndash; will never
+have private conversation, of course. Just that this particular bit of business
+is better conducted online.&lt;/p&gt;
+
+&lt;p&gt;The key to making this work is automation. Right now, the meetings provide a
+convenient &amp;ldquo;forcing function&amp;rdquo; to ensure that decisions are being reached in a
+somewhat timely fashion. To ensure that we still make steady progress, we need a
+&lt;em&gt;dashboard&lt;/em&gt; for every subteam member, showing them precisely what outstanding
+items they need to weigh in on &amp;ndash; and that list needs to be kept manageably
+short.&lt;/p&gt;
+
+&lt;p&gt;We&amp;rsquo;ll need a dashboard tool that can pick up on special text from subteam
+members for:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Calling an RFC/issue into FCP
+
+&lt;ul&gt;
+&lt;li&gt;&amp;ldquo;process: fcp&amp;rdquo;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Approving/disapproving FCP
+
+&lt;ul&gt;
+&lt;li&gt;&amp;ldquo;process: fcp r+&amp;rdquo;&lt;/li&gt;
+&lt;li&gt;&amp;ldquo;process: fcp r-&amp;rdquo;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Extending FCP
+
+&lt;ul&gt;
+&lt;li&gt;&amp;ldquo;process: fcp extend&amp;rdquo; (for one more week by default; possibly give parameter?)&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Approving stabilization/RFC merging
+
+&lt;ul&gt;
+&lt;li&gt;&amp;ldquo;process: r+&amp;rdquo; (ideally followed up by some commentary)&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Weakly objecting
+
+&lt;ul&gt;
+&lt;li&gt;Just leave a comment, followed by a &amp;ldquo;process: r+&amp;rdquo; once you are satisfied
+that the objection is addressed or that it&amp;rsquo;s OK not to address it.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Strongly objecting (i.e. blocking acceptance)
+
+&lt;ul&gt;
+&lt;li&gt;&amp;ldquo;process: r-&amp;rdquo; (followed up with objection)&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Abstaining (possibly?)
+
+&lt;ul&gt;
+&lt;li&gt;&amp;ldquo;process: ack&amp;rdquo;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The dashboard tool would track the current status of RFCs/issues facing a
+decision, and would track the various timelines involved, e.g. that RFC FCP
+lasts for one week.&lt;/p&gt;
+
+&lt;p&gt;We can and should continue to hold video subteam meetings (they&amp;rsquo;re high
+bandwidth!), but for more forward-looking purposes: discussing specific
+early-stage RFCs, brainstorming, and prioritization. We can explore recording
+these meetings, and potentially opening them up to additional stakeholders who
+are not part of the subteam.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Details to be worked out&lt;/em&gt;:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;A plausible story for automation that retains the consensus process and is
+likely to keep things moving.&lt;/li&gt;
+&lt;li&gt;Can the automation itself be responsible for moving to FCP/merging? Or at
+least provide a pushbutton way for doing so?&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Resurrecting impl Trait</title>
@@ -143,7 +511,7 @@ haven&amp;rsquo;t really been discussed. But they all have to be tackled.&lt;/p&
 &lt;p&gt;First I&amp;rsquo;ll go quickly through the main questions, then talk about design
 priorities, and finally present two possible designs.&lt;/p&gt;
 
-&lt;h3 id=&quot;is-impl-trait-a-type?&quot;&gt;Is &lt;code&gt;impl Trait&lt;/code&gt; a type?&lt;/h3&gt;
+&lt;h3 id=&quot;is-impl-trait-a-type&quot;&gt;Is &lt;code&gt;impl Trait&lt;/code&gt; a type?&lt;/h3&gt;
 
 &lt;p&gt;Can &lt;code&gt;impl Trait&lt;/code&gt; appear everywhere a type can?&lt;/p&gt;
 
@@ -153,7 +521,7 @@ definitions, type aliases, etc? In each case, what should the semantics be?&lt;/
 &lt;p&gt;The RFC gave answers to many of these questions, although I think today I would
 answer some of them differently.&lt;/p&gt;
 
-&lt;h3 id=&quot;is-impl-trait-&amp;quot;sealed&amp;quot;?&quot;&gt;Is &lt;code&gt;impl Trait&lt;/code&gt; &amp;quot;sealed&amp;rdquo;?&lt;/h3&gt;
+&lt;h3 id=&quot;is-impl-trait-quot-sealed-quot&quot;&gt;Is &lt;code&gt;impl Trait&lt;/code&gt; &amp;quot;sealed&amp;rdquo;?&lt;/h3&gt;
 
 &lt;p&gt;As @Ericson2314 astutely remarked on thread:&lt;/p&gt;
 
@@ -185,7 +553,7 @@ today. The original proposal coupled these two features together.&lt;/p&gt;
 these two aspects of the feature be treated separately or coupled? Are both
 needed? What are the tradeoffs?&lt;/p&gt;
 
-&lt;h3 id=&quot;how-do-you-deal-with-clone-or-iterator-adapters?&quot;&gt;How do you deal with &lt;code&gt;Clone&lt;/code&gt; or &lt;code&gt;Iterator&lt;/code&gt; adapters?&lt;/h3&gt;
+&lt;h3 id=&quot;how-do-you-deal-with-clone-or-iterator-adapters&quot;&gt;How do you deal with &lt;code&gt;Clone&lt;/code&gt; or &lt;code&gt;Iterator&lt;/code&gt; adapters?&lt;/h3&gt;
 
 &lt;p&gt;It&amp;rsquo;s pretty common that a trait is &lt;em&gt;conditionally&lt;/em&gt; implemented:&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Clone&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Clone&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Vec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
@@ -195,7 +563,7 @@ statement about which traits are implemented. This is especially painful for
 things like the iterator adapters, which are often &lt;code&gt;Clone&lt;/code&gt; if the original
 iterator is, &lt;code&gt;DoubleEndedIterator&lt;/code&gt; if the original iterator is, etc.&lt;/p&gt;
 
-&lt;h3 id=&quot;do-marker-traits-(send,-sync,-...)-have-to-be-mentioned?&quot;&gt;Do marker traits (&lt;code&gt;Send&lt;/code&gt;, &lt;code&gt;Sync&lt;/code&gt;, &amp;hellip;) have to be mentioned?&lt;/h3&gt;
+&lt;h3 id=&quot;do-marker-traits-send-sync-have-to-be-mentioned&quot;&gt;Do marker traits (&lt;code&gt;Send&lt;/code&gt;, &lt;code&gt;Sync&lt;/code&gt;, &amp;hellip;) have to be mentioned?&lt;/h3&gt;
 
 &lt;p&gt;When you use the
 &lt;a href=&quot;http://aturon.github.io/features/types/newtype.html&quot;&gt;newtype pattern&lt;/a&gt; today,
@@ -241,7 +609,7 @@ type (e.g., returning a pair of different unboxed closures)&lt;/li&gt;
 &lt;li&gt;applicable to struct definitions, not just function signatures&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&quot;option-1:-return-type-inference&quot;&gt;Option 1: return type inference&lt;/h2&gt;
+&lt;h2 id=&quot;option-1-return-type-inference&quot;&gt;Option 1: return type inference&lt;/h2&gt;
 
 &lt;p&gt;I&amp;rsquo;ll start with the simpler design: attack only the type inference aspect of the
 original proposal, without actually hiding any details about a type from clients.&lt;/p&gt;
@@ -336,7 +704,7 @@ considered to be particularly complicated. (See
 &lt;a href=&quot;https://www.reddit.com/r/rust/comments/397xn3/why_does_anything_have_higher_priority_than/&quot;&gt;this reddit post&lt;/a&gt;
 for example.)&lt;/p&gt;
 
-&lt;h2 id=&quot;option-2:-type-abstraction&quot;&gt;Option 2: type abstraction&lt;/h2&gt;
+&lt;h2 id=&quot;option-2-type-abstraction&quot;&gt;Option 2: type abstraction&lt;/h2&gt;
 
 &lt;p&gt;On the other end of the spectrum, we could try to address all of the use cases
 outlined, including type abstraction.&lt;/p&gt;
@@ -413,7 +781,7 @@ abstracted):&lt;/p&gt;
 except for the stated trait bound&lt;/em&gt;. So clients here don&amp;rsquo;t know that the iterator
 is also &lt;code&gt;Clone&lt;/code&gt;.&lt;/p&gt;
 
-&lt;h3 id=&quot;scaling-up:-marker-and-conditional-traits&quot;&gt;Scaling up: marker and conditional traits&lt;/h3&gt;
+&lt;h3 id=&quot;scaling-up-marker-and-conditional-traits&quot;&gt;Scaling up: marker and conditional traits&lt;/h3&gt;
 
 &lt;p&gt;To make this kind of &amp;ldquo;sealing&amp;rdquo; work, we&amp;rsquo;d have to deal with two additional
 thorny problems: marker traits and conditional traits.&lt;/p&gt;
@@ -452,7 +820,7 @@ could say something like:&lt;/p&gt;
 since you&amp;rsquo;d reuse the same alias over and over. By contrast, today each adapter
 introduces a separate newtype which must be examined separately to find its API.&lt;/p&gt;
 
-&lt;h3 id=&quot;benefits/drawbacks&quot;&gt;Benefits/drawbacks&lt;/h3&gt;
+&lt;h3 id=&quot;benefits-drawbacks&quot;&gt;Benefits/drawbacks&lt;/h3&gt;
 
 &lt;p&gt;So in all, it seems feasible to introduce a type abstraction feature, &lt;code&gt;@&lt;/code&gt;, along
 with an elided form for function signatures, and have reasonably concise
@@ -712,7 +1080,7 @@ explicitly).&lt;/p&gt;
 &lt;p&gt;The details here aren&amp;rsquo;t so important, as long as specialization supports &lt;em&gt;some&lt;/em&gt;
 mechanism like this (which was always the intent).&lt;/p&gt;
 
-&lt;h2 id=&quot;ending-1:-the-trait-based-approach&quot;&gt;Ending 1: the trait-based approach&lt;/h2&gt;
+&lt;h2 id=&quot;ending-1-the-trait-based-approach&quot;&gt;Ending 1: the trait-based approach&lt;/h2&gt;
 
 &lt;p&gt;It should already be clear that specialization has a connection to inheritance,
 because items left off of a specialized impl are inherited from the impl
@@ -1225,7 +1593,7 @@ likely need some way to express visibility choices. Fitting that into the
 existing syntax is not going to be easy. Whereas with struct composition or
 inheritance, it just &amp;ldquo;falls out&amp;rdquo; of the struct definitions.&lt;/p&gt;
 
-&lt;h2 id=&quot;ending-2:-the-enum-based-approach&quot;&gt;Ending 2: the enum-based approach&lt;/h2&gt;
+&lt;h2 id=&quot;ending-2-the-enum-based-approach&quot;&gt;Ending 2: the enum-based approach&lt;/h2&gt;
 
 &lt;p&gt;Whew! So all of the proposals we just saw took traits as the sole source of
 dynamic dispatch and tried to close remaining gaps through slight enrichments of
@@ -1442,7 +1810,7 @@ magical proposal for &amp;ldquo;common fields&amp;rdquo; (which included an asso
    <link href="http://aturon.github.io/blog/2015/08/27/epoch/"/>
    <updated>2015-08-27T00:00:00-07:00</updated>
    <id>http://aturon.github.io/2015/08/27/epoch</id>
-   <content type="html">&lt;h2 id=&quot;tl;dr&quot;&gt;TL;DR&lt;/h2&gt;
+   <content type="html">&lt;h2 id=&quot;tl-dr&quot;&gt;TL;DR&lt;/h2&gt;
 
 &lt;p&gt;It&amp;rsquo;s widespread folklore that one advantage of garbage collection is the ease of
 building high-performance lock-free data structures. Manual memory management
@@ -1596,7 +1964,7 @@ garbage collector or some other means of reclaiming memory. So before lock-free
 concurrency can really take off in Rust, we need a story for memory reclamation
 &amp;ndash; and that&amp;rsquo;s what this blog post is all about.&lt;/p&gt;
 
-&lt;h3 id=&quot;treiber&amp;#39;s-stack&quot;&gt;Treiber&amp;rsquo;s stack&lt;/h3&gt;
+&lt;h3 id=&quot;treiber-39-s-stack&quot;&gt;Treiber&amp;rsquo;s stack&lt;/h3&gt;
 
 &lt;p&gt;To make things more concrete, let&amp;rsquo;s look at the &amp;ldquo;Hello world&amp;rdquo; of lock-free data
 structures: Treiber&amp;rsquo;s stack. The stack is represented as a singly-linked list,
@@ -1989,7 +2357,7 @@ the pointer is actually freed.&lt;/p&gt;
 here and the &lt;code&gt;Guard&lt;/code&gt;; if we have a reachable &lt;code&gt;Shared&lt;/code&gt; pointer, we know that the
 guard it came from is active.&lt;/p&gt;
 
-&lt;h3 id=&quot;treiber&amp;#39;s-stack-on-epochs&quot;&gt;Treiber&amp;rsquo;s stack on epochs&lt;/h3&gt;
+&lt;h3 id=&quot;treiber-39-s-stack-on-epochs&quot;&gt;Treiber&amp;rsquo;s stack on epochs&lt;/h3&gt;
 
 &lt;p&gt;Without further ado, here is the code for Treiber&amp;rsquo;s stack using the Crossbeam
 epoch API:&lt;/p&gt;
