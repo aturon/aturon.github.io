@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="UTF-8">
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>
+    
+      The Rust Platform &middot; Aaron Turon
+    
+  </title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/blog/styles.css">
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/blog/public/apple-touch-icon-precomposed.png">
+  <link rel="shortcut icon" href="/blog/public/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/atom+xml" title="Aaron Turon" href="/blog/atom.xml">
+</head>
+
+
+  <body>
+
+    <div class="container content">
+      <header class="masthead">
+        <h3 class="masthead-title">
+          <a href="/blog/" title="Home">Aaron Turon</a>
+          <small></small>
+
+          
+          &nbsp;&nbsp;&nbsp;
+          <small><a href="/blog/archive">Archive</a></small>
+          
+          &nbsp;&nbsp;&nbsp;
+          <small><a href="/blog/atom.xml">Feed</a></small>
+          
+        </h3>
+      </header>
+
+      <main>
+        <article class="post">
+  <h1 class="post-title">The Rust Platform</h1>
+  <time datetime="2016-07-27T00:00:00-07:00" class="post-date">27 Jul 2016</time>
+  <p>A programming language is much more than its compiler and standard library. It&rsquo;s
+a community. Tools. Documentation. An ecosystem. All of these elements affect
+how a language feels, how productive it is, and how applicable it is.</p>
+
+<p>Rust is a very young language &ndash;
+<a href="https://blog.rust-lang.org/2016/05/16/rust-at-one-year.html">barely a year past 1.0</a>
+&ndash; and building out and maturing the full complement of ecosystem and tooling is
+crucial to its success. That building is happening, but sometimes at an
+explosive rate that makes it hard to track what&rsquo;s going on, to find the right
+library for a task, or to choose between several options on
+<a href="https://crates.io/">crates.io</a>. It can be hard to coordinate versions of
+libraries that all work well together. And we lack tools to push toward
+maturity in a community-wide way, or to incentivize work toward a common
+quality standard.</p>
+
+<p>On the other hand, the core parts of Rust get a tremendous amount of
+focus. But we have tended to be pretty conservative in what is considered
+&ldquo;core&rdquo;: today, essentially it&rsquo;s <code>rustc</code>, <code>cargo</code>, <code>libstd</code>/<code>libcore</code>, and a
+couple of other crates. The standard library also takes a deliberately
+minimalistic approach, to avoid the well-known pitfalls of large standard
+libraries that are versioned with the compiler and quickly stagnate, while the
+real action happens in the broader ecosystem (&ldquo;<code>std</code> is where code goes to die&rdquo;).</p>
+
+<p><strong>In short, there are batteries out there, but we&rsquo;re failing to include them</strong> (or
+even tell you where to shop for them).</p>
+
+<p>Can we provide a &ldquo;batteries included&rdquo; experience for Rust that doesn&rsquo;t lead to
+stagnation, one that instead works directly with and through the ecosystem?</p>
+
+<p>I think we can, and I want to lay out a plan that&rsquo;s emerged after discussion
+with many on the core and subteams.</p>
+
+<h2 id="what-is-quot-the-rust-platform-quot">What is &ldquo;The Rust Platform&rdquo;?</h2>
+
+<blockquote>
+<p>The core ideas here draw significant inspiration from the
+<a href="https://en.wikipedia.org/wiki/Haskell_Platform">Haskell Platform</a>, which is
+working toward similar goals for Haskell.</p>
+</blockquote>
+
+<p>The basic idea of the Rust Platform is simple:</p>
+
+<ul>
+<li><p>Distribute a wide range of artifacts in a single &ldquo;Rust Platform Package&rdquo;, including:</p>
+
+<ul>
+<li>The compiler, Cargo, rust-lang crates (e.g. <code>std</code>, <code>libc</code>), docs</li>
+<li>Best-of-breed libraries drawn from the wider ecosystem (going beyond rust-lang crates)</li>
+<li>Best-of-breed Tools drawn from the wider ecosystem (e.g. <code>rustfmt</code>, <code>clippy</code>,
+<a href="https://blog.rust-lang.org/2016/05/13/rustup.html">NDKs</a>, editor plugins,
+lints)</li>
+<li><a href="https://blog.rust-lang.org/2016/05/13/rustup.html">Cross-compilation targets</a></li>
+<li>&ldquo;Language bridges&rdquo;: integration with other languages like JS, Ruby, Python, etc.</li>
+</ul></li>
+<li><p>Periodically curate the ecosystem, determining consensus choices for what
+artifacts, and at what versions, to distribute.</p></li>
+</ul>
+
+<p>In general, <a href="https://blog.rust-lang.org/2016/05/13/rustup.html">rustup</a> is
+intended to be the primary mechanism for distribution; it&rsquo;s expected that it
+will soon replace the guts of our official installers, becoming the primary way
+to acquire the Rust Platform and all that comes with it.</p>
+
+<p>As you&rsquo;d expect, the real meat here is in the details. For example, it&rsquo;s
+probably unclear what it even means to &ldquo;distribute&rdquo; a library, given Cargo&rsquo;s
+approach to dependency management. Read on!</p>
+
+<h2 id="library-mechanics">Library mechanics</h2>
+
+<h3 id="cargo-metapackages">Cargo metapackages</h3>
+
+<p>The most novel part of the proposal is the idea of curating and distributing
+crates. <strong>The goal is to provide an experience that feels much like <code>std</code>, but
+provides much greater agility, avoiding the typical pitfalls of large standard
+libraries.</strong></p>
+
+<p>The key to making sense of library &ldquo;packaging&rdquo; for Rust is the idea of a
+<em>metapackage</em> for Cargo, which aggregates together a number of library
+dependencies as a single name and version. Concretely, this might look like:</p>
+<div class="highlight"><pre><code class="language-toml" data-lang="toml"><span class="p">[</span><span class="n">dependencies</span><span class="p">]</span>
+<span class="n">rust-platform</span> <span class="o">=</span> <span class="s">&quot;2.7&quot;</span>
+</code></pre></div>
+<p>which is effectively then shorthand for something like:</p>
+<div class="highlight"><pre><code class="language-toml" data-lang="toml"><span class="p">[</span><span class="n">dependencies</span><span class="p">]</span>
+<span class="n">mio</span> <span class="o">=</span> <span class="s">&quot;1.2&quot;</span>
+<span class="n">regex</span> <span class="o">=</span> <span class="s">&quot;2.0&quot;</span>
+<span class="n">log</span> <span class="o">=</span> <span class="s">&quot;1.1&quot;</span>
+<span class="n">serde</span> <span class="o">=</span> <span class="s">&quot;3.0&quot;</span>
+</code></pre></div>
+<p>Metapackages give <em>technical</em> meaning to curation: we can provide a collection
+of crates with assurance that they&rsquo;ll all play well together (at the versions
+stated within the Rust Platform metapackage).</p>
+
+<p>With the platform metapackage, we can talk coherently about things like the
+&ldquo;Rust Platform 2.0 Series&rdquo; as a chapter in Rust&rsquo;s evolution. After all, core
+libraries play a major role in shaping the idioms of a language. Evolution in
+these core libraries has an effect rivaling changes to the language itself.</p>
+
+<p>With those basics out of the way, let&rsquo;s look at the ways that the library part
+of the platform is, and is not, like a bigger <code>std</code>.</p>
+
+<h3 id="stability-without-stagnation">Stability without stagnation</h3>
+
+<p>The fact that <code>std</code> is coupled with <code>rustc</code> means that upgrading the compiler
+entails upgrading the standard library, like it or not. So the two need to
+provide the same
+<a href="http://blog.rust-lang.org/2014/10/30/Stability.html">backwards-compatibility guarantees</a>,
+making it infeasible to do a new, major version of <code>std</code> with breaking changes
+(unless we produced a new major version of Rust itself).</p>
+
+<p>Moreover, <code>std</code> is forcibly tied to the Rust release schedule, meaning that new
+versions arrive every six weeks, period.</p>
+
+<p>Given these constraints, we&rsquo;ve chosen to take a minimalist route with <code>std</code>, to
+avoid accumulating a mass of deprecated APIs over time.</p>
+
+<p>With the platform metapackage, things are quite different. On the one hand, we
+can provide an experience that <em>feels</em> a lot like <code>std</code> (see below for more on
+that). But it doesn&rsquo;t suffer from the deficits of <code>std</code>. Why? It all comes down
+to versioning:</p>
+
+<ul>
+<li><p><strong>Stability</strong>: Doing a <code>rustup</code> to the latest platform will never break your
+existing code, for one simple reason: existing <code>Cargo.toml</code> files will be
+pinned to a prior version of the platform metapackage, which is fundamentally
+just a collection of normal dependencies. So you can upgrade the compiler and
+toolchain, but be using an old version of the platform metapackage in perpetuity.
+In short, the metapackage version is <em>orthogonal</em> to the toolchain version.</p></li>
+<li><p><strong>Without stagnation</strong>: Because of the versioning orthogonality, we can be
+more free to make breaking changes to the platform libraries. That could come
+in the form of upgrading to a new major version of one of the platform crates,
+or even dropping a crate altogether. These changes are never <em>forced</em> on users.</p></li>
+</ul>
+
+<p>But we can do even better. In practice, while code will continue working with an
+old metapackage version, people are going to want to upgrade. We can smooth that
+process by allowing metapackage dependencies to be <em>overridden</em> if they appear
+explicitly in the <code>Cargo.toml</code> file. So, for example, if you say:</p>
+<div class="highlight"><pre><code class="language-toml" data-lang="toml"><span class="p">[</span><span class="n">dependencies</span><span class="p">]</span>
+<span class="n">rust-platform</span> <span class="o">=</span> <span class="s">&quot;2.7&quot;</span>
+<span class="n">regex</span> <span class="o">=</span> <span class="s">&quot;3.0&quot;</span>
+</code></pre></div>
+<p>you&rsquo;re getting the versions stipulated by platform 2.7 in general, but
+specifying a different version of <code>regex</code>.</p>
+
+<p>There are lots of uses for this kind of override. It can allow you to track
+progress of a given platform library more aggressively (not just every six
+weeks), or to try out a new, experimental major version. Or you can use it to
+<em>downgrade</em> a dependency where you can otherwise transition to a new version of
+the platform.</p>
+
+<h3 id="approaching-std-ergonomics">Approaching <code>std</code> ergonomics</h3>
+
+<p>There are several steps we can take, above and beyond the idea of a metapackage,
+to make the experience of using the Rust Platform libraries approximate using
+<code>std</code> itself.</p>
+
+<ul>
+<li><p><strong><code>cargo new</code></strong>. A simple step: have <code>cargo new</code> automatically insert a
+dependency on the version of the platform associated with the current
+toolchain.</p></li>
+<li><p><strong>Global coherence</strong>. When we assemble a version of the platform, we can do
+integration testing against the whole thing, making sure that the libraries
+not only compile together, but <em>work</em> together. Moreover, libraries in the
+platform can assume the inclusion of other libraries in the platform, meaning
+that example code and documentation can cross-reference between libraries,
+with the precise APIs that will be shipped.</p></li>
+<li><p><strong>Precompilation</strong>. If we implement metapackages naively, then the first time
+you compile something that depends on the platform, you&rsquo;re going to be
+compiling some large number of crates that you&rsquo;re not yet using. There are a
+few ways we could solve this, but certainly one option would be to provide
+binary distribution of the libraries through, much like we already do for
+<code>std</code>. Likely this would work via a general mechanism in Cargo and crates.io.</p></li>
+<li><p><strong>No <code>extern crate</code></strong>. Getting a bit more aggressive, we might drop the need
+for <code>extern crate</code> when using platform crates, giving a truly <code>std</code>-like
+feel.</p></li>
+</ul>
+
+<h2 id="versioning-and-release-cadence">Versioning and release cadence</h2>
+
+<p>I&rsquo;ve already alluded to &ldquo;major versions&rdquo; of the platform in a few senses. Here&rsquo;s
+what I&rsquo;m thinking in more detail:</p>
+
+<p>First off, <code>rustc</code> itself is separately versioned: the Rust Platform 5.0 might
+ship with <code>rustc</code> 1.89. In other words, <strong>a new major version of the platform
+does <em>not</em> imply breaking changes to the language or standard library</strong>. As
+discussed above, the metapackage approach makes it possible to release new major
+versions without forcibly breaking any existing code; people can upgrade their
+platform dependency orthogonally from the compiler, at their own pace, in a
+fine-grained way.</p>
+
+<p>With that out of the way, here&rsquo;s a plausible versioning scheme and cadence:</p>
+
+<ul>
+<li><p>A new <strong>minor version</strong> of the platform is released every six weeks,
+essentially subsuming the existing release process. New minor releases should
+only include minor version upgrades of libraries and tools (or expansions to
+include new libs/tools).</p></li>
+<li><p>A new <strong>major version</strong> of the platform is released roughly every 18-24
+months. This is the opportunity to move to new major versions of platform
+libraries or to drop existing libraries. It also gives us a way to recognize
+major shifts in the way you write Rust code, for example by moving to a new
+set of libraries that depend on a major new language feature (say,
+specialization or HKT).</p></li>
+</ul>
+
+<p>More broadly, I see major version releases as a way to lay out a <em>narrative arc</em>
+for Rust, recognizing major new chapters in its development.</p>
+
+<ul>
+<li><p>That&rsquo;s helpful internally, because it provides medium-term focus toward
+shipping The Next Iteration of Rust, which we as a community can rally around.</p></li>
+<li><p>It&rsquo;s also helpful externally, because people less immediately involved in
+Rust&rsquo;s development will have a much easier way to understand the accumulation of
+major changes that make up each major release.</p></li>
+</ul>
+
+<p>These ideas are closely tied to the recent
+<a href="http://aturon.github.io/blog/2016/07/05/rfc-refinement/">Roadmap proposal</a>,
+providing a clear &ldquo;north star&rdquo; toward which quarterly plans can head.</p>
+
+<h2 id="two-level-curation">Two-level curation</h2>
+
+<p>So far I&rsquo;ve focused on artifacts that officially ship as part of the
+platform. Curating at that level is going to be a lot of work, and we&rsquo;ll want to
+be quite selective about what&rsquo;s included. (For reference, the
+<a href="https://www.haskell.org/platform/">Haskell Platform</a> has about 35 libraries
+packaged).</p>
+
+<p>But there are some additional opportunities for curation. What I&rsquo;d love to see
+is a kind of <em>two-level</em> scheme. Imagine that, somewhere on the Rust home page,
+we have a listing of major areas of libraries and tools. Think: &ldquo;Parsing&rdquo;,
+&ldquo;Networking&rdquo;, &ldquo;Serialization&rdquo;, &ldquo;Debugging&rdquo;. Under each of these categories, we
+have a very small number of immediate links to libraries that are part of the
+official platform. But we also have a &ldquo;see more&rdquo; link that provides a more
+comprehensive list.</p>
+
+<p>That leads to two tiers of curation:</p>
+
+<ul>
+<li><p><strong>Tier one</strong>: shown on front page; shipped with the platform; highly curated
+and reviewed; driven by consensus process; integration tested and
+cross-referenced with the rest of the platform.</p></li>
+<li><p><strong>Tier two</strong>: shown in &ldquo;see more&rdquo;; lightly curated, according to a clearly
+stated set of objective criteria. Things like: platform compatibility; CI;
+documentation; API conventions; versioned at 1.0 or above.</p></li>
+</ul>
+
+<p>By providing two tiers, we release some of the pressure around being in the
+platform proper, and we provide valuable base-level quality curation and
+standardization across the ecosystem. The second tier gives us a way to motivate
+the ecosystem toward common quality and consistency goals: anyone is welcome to
+get their crate on a &ldquo;see more&rdquo; page, but they have to meet a minimum bar
+first.</p>
+
+<h2 id="the-rust-lang-crates">The <code>rust-lang</code> crates</h2>
+
+<p>One small note: our previous attempt at a kind of &ldquo;extended <code>std</code>&rdquo; was the
+<a href="https://github.com/rust-lang/rfcs/pull/1242">rust-lang crates</a> concept. These
+crates are &ldquo;owned&rdquo; by the Rust community, and governed by the RFC process, much
+like <code>std</code>. They&rsquo;re also held to similar quality standards.</p>
+
+<p>Ultimately, it&rsquo;s proved pretty heavy weight to require full RFCs and transfer of
+control over the crates, and so the set of rust-lang crates has grown
+slowly. The platform model is more of a &ldquo;federated&rdquo; approach, providing
+decentralized ownership and evolution, while periodically trying to pull
+together a coherent global story.</p>
+
+<p>However, I expect the rust-lang crates to stick around, and for the set to
+slowly grow over time; there is definitely scope for some very important crates
+to be completely &ldquo;owned by the community&rdquo;. These crates will likely become part
+of the platform as well, though there may be some crates that the community
+maintains that aren&rsquo;t high-profile enough to appear there.</p>
+
+<h2 id="open-questions">Open questions</h2>
+
+<p>The biggest open question about what I described above is: how does curation
+work? Obviously, it can&rsquo;t run entirely through the libs team; that doesn&rsquo;t
+scale, and the team doesn&rsquo;t have the needed domain expertise anyway.</p>
+
+<p>What I envision is something that fits into the
+<a href="http://aturon.github.io/blog/2016/07/05/rfc-refinement/">Roadmap planning proposal</a>. In
+a given quarter, we set out as an initiative to curate crates in a few areas &ndash;
+let&rsquo;s say, networking and parsing. During that quarter, the libs team works
+closely with the portion of the community actively working in that space, acting
+as API consultants and reviewers, and helping <em>shepherd consensus</em> toward a
+reasonable selection. Working in an incremental way &ndash; a sort of quarterly
+round-robin between areas &ndash; seems like a good balance between focus and
+coverage. But there are a lot of details to sort out.</p>
+
+<p>It&rsquo;s also not entirely clear what will need to go into each minor
+release. Hopefully it can be kept relatively minimal (e.g., with library/tool
+maintainers largely driving the version choice for a given minor release).</p>
+
+<p>More broadly, this post has focused on just one part of the platform:
+libraries. There are many other areas to explore, including the mechanics around
+shipping tools, what kind of cross-language integration we want to ship, how we
+do testing and integration, and so on. I&rsquo;m hoping that this post gets the
+discussion rolling, and that we can develop these plans incrementally over time
+as we begin building up the different parts of the platform.</p>
+
+<h2 id="wrap-up">Wrap-up</h2>
+
+<p>Although the mechanics are not all that earth-shattering, I think that
+introducing the Rust Platform could have a massive impact on how the Rust
+community works, and on what life as a Rust user feels like. It tells a clear
+story about Rust&rsquo;s evolution, and lets us rally around that story as we hammer
+out the work needed to bring it to life. I&rsquo;m eager to hear what you think!</p>
+
+</article>
+
+
+<aside class="related">
+  <h2>Related Posts</h2>
+  <ul class="related-posts">
+    
+      <li>
+        <h3>
+          <a href="/blog/2016/07/05/rfc-refinement/">
+            Refining Rust's RFCs
+            <small><time datetime="2016-07-05T00:00:00-07:00">05 Jul 2016</time></small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/blog/2015/09/28/impl-trait/">
+            Resurrecting impl Trait
+            <small><time datetime="2015-09-28T00:00:00-07:00">28 Sep 2015</time></small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/blog/2015/09/18/reuse/">
+            Specialize to reuse
+            <small><time datetime="2015-09-18T00:00:00-07:00">18 Sep 2015</time></small>
+          </a>
+        </h3>
+      </li>
+    
+  </ul>
+</aside>
+
+
+      </main>
+
+      <footer class="footer">
+        <small>
+          &copy; <time datetime="2016-07-27T15:24:11-07:00">2016</time>. All rights reserved.
+        </small>
+      </footer>
+    </div>
+
+  </body>
+</html>
