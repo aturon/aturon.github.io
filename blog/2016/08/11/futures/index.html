@@ -281,7 +281,7 @@ a few requests ahead, while the current request is being processed. Doing so is
 as easy as inserting one more combinator in the right place:</p>
 <div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="kd">let</span> <span class="n">requests</span> <span class="o">=</span> <span class="n">ParseStream</span><span class="o">::</span><span class="n">new</span><span class="p">(</span><span class="n">input</span><span class="p">);</span>
 <span class="kd">let</span> <span class="n">responses</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">req</span><span class="o">|</span> <span class="n">service</span><span class="p">.</span><span class="n">process</span><span class="p">(</span><span class="n">req</span><span class="p">)).</span><span class="n">buffered</span><span class="p">(</span><span class="mi">32</span><span class="p">);</span> <span class="c1">// &lt;--</span>
-<span class="n">StreamWriter</span><span class="o">::</span><span class="n">new</span><span class="p">(</span><span class="n">responses</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+<span class="n">StreamWriter</span><span class="o">::</span><span class="n">new</span><span class="p">(</span><span class="n">responsesm</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
 </code></pre></div>
 <p>The
 <a href="http://alexcrichton.com/futures-rs/futures/stream/trait.Stream.html#method.buffered"><code>buffered</code> combinator</a>
@@ -352,6 +352,11 @@ core Linux machine:</p>
 
 <p>It seems safe to say that futures are not imposing significant overhead.</p>
 
+<p><strong>Update</strong>: to provide some extra evidence, we&rsquo;ve
+  <a href="https://github.com/alexcrichton/futures-rs/blob/master/futures-minihttp/README.md">added a comparison</a>
+  of minihttp against a directly-coded state machine version in Rust (see &quot;raw
+  mio&rdquo; in the link). The two are within 0.3% of each other.</p>
+
 <h2 id="the-future">The future</h2>
 
 <p>Thus concludes our whirlwind introduction to zero-cost futures in Rust. We&rsquo;ll
@@ -389,7 +394,7 @@ general in Rust, and follow up posts will go into more detail on the mechanics.<
 <a href="https://github.com/alexcrichton/futures-rs/tree/master/futures-minihttp">minihttp</a>
 by providing a <em>service</em>: a function that takes an HTTP request, and returns a
 <em>future</em> of an HTTP response. This kind of RPC/service abstraction opens the
-door to writing a lot of reusable &quot;middleware&rdquo; for servers, and has gotten a lot
+door to writing a lot of reusable &ldquo;middleware&rdquo; for servers, and has gotten a lot
 of traction in Twitter&rsquo;s <a href="https://twitter.github.io/finagle/">Finagle</a> library
 for Scala; it&rsquo;s also being used in Facebook&rsquo;s
 <a href="https://github.com/facebook/wangle">Wangle</a> library. In the Rust world, there&rsquo;s
@@ -463,7 +468,7 @@ and <code>aturon</code> on Rust&rsquo;s
 
       <footer class="footer">
         <small>
-          &copy; <time datetime="2016-08-11T09:52:21-07:00">2016</time>. All rights reserved.
+          &copy; <time datetime="2016-08-11T10:34:52-07:00">2016</time>. All rights reserved.
         </small>
       </footer>
     </div>

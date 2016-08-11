@@ -4,7 +4,7 @@
  <title>Aaron Turon</title>
  <link href="http://aturon.github.io/blog/atom.xml" rel="self"/>
  <link href="http://aturon.github.io/blog/"/>
- <updated>2016-08-11T09:52:21-07:00</updated>
+ <updated>2016-08-11T10:34:52-07:00</updated>
  <id>http://aturon.github.io</id>
  <author>
    <name>Aaron Turon</name>
@@ -250,7 +250,7 @@ a few requests ahead, while the current request is being processed. Doing so is
 as easy as inserting one more combinator in the right place:&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requests&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParseStream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;input&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 &lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;responses&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requests&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;req&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;service&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;process&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;req&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;buffered&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// &amp;lt;--&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;StreamWriter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;responses&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;output&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;StreamWriter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;responsesm&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;output&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;The
 &lt;a href=&quot;http://alexcrichton.com/futures-rs/futures/stream/trait.Stream.html#method.buffered&quot;&gt;&lt;code&gt;buffered&lt;/code&gt; combinator&lt;/a&gt;
@@ -321,6 +321,11 @@ core Linux machine:&lt;/p&gt;
 
 &lt;p&gt;It seems safe to say that futures are not imposing significant overhead.&lt;/p&gt;
 
+&lt;p&gt;&lt;strong&gt;Update&lt;/strong&gt;: to provide some extra evidence, we&amp;rsquo;ve
+  &lt;a href=&quot;https://github.com/alexcrichton/futures-rs/blob/master/futures-minihttp/README.md&quot;&gt;added a comparison&lt;/a&gt;
+  of minihttp against a directly-coded state machine version in Rust (see &amp;quot;raw
+  mio&amp;rdquo; in the link). The two are within 0.3% of each other.&lt;/p&gt;
+
 &lt;h2 id=&quot;the-future&quot;&gt;The future&lt;/h2&gt;
 
 &lt;p&gt;Thus concludes our whirlwind introduction to zero-cost futures in Rust. We&amp;rsquo;ll
@@ -358,7 +363,7 @@ general in Rust, and follow up posts will go into more detail on the mechanics.&
 &lt;a href=&quot;https://github.com/alexcrichton/futures-rs/tree/master/futures-minihttp&quot;&gt;minihttp&lt;/a&gt;
 by providing a &lt;em&gt;service&lt;/em&gt;: a function that takes an HTTP request, and returns a
 &lt;em&gt;future&lt;/em&gt; of an HTTP response. This kind of RPC/service abstraction opens the
-door to writing a lot of reusable &amp;quot;middleware&amp;rdquo; for servers, and has gotten a lot
+door to writing a lot of reusable &amp;ldquo;middleware&amp;rdquo; for servers, and has gotten a lot
 of traction in Twitter&amp;rsquo;s &lt;a href=&quot;https://twitter.github.io/finagle/&quot;&gt;Finagle&lt;/a&gt; library
 for Scala; it&amp;rsquo;s also being used in Facebook&amp;rsquo;s
 &lt;a href=&quot;https://github.com/facebook/wangle&quot;&gt;Wangle&lt;/a&gt; library. In the Rust world, there&amp;rsquo;s
