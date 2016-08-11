@@ -4,13 +4,392 @@
  <title>Aaron Turon</title>
  <link href="http://aturon.github.io/blog/atom.xml" rel="self"/>
  <link href="http://aturon.github.io/blog/"/>
- <updated>2016-07-27T15:40:56-07:00</updated>
+ <updated>2016-08-11T08:16:46-07:00</updated>
  <id>http://aturon.github.io</id>
  <author>
    <name>Aaron Turon</name>
    <email>aturon@mozilla.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Zero-cost futures in Rust</title>
+   <link href="http://aturon.github.io/blog/2016/08/11/futures/"/>
+   <updated>2016-08-11T00:00:00-07:00</updated>
+   <id>http://aturon.github.io/2016/08/11/futures</id>
+   <content type="html">&lt;p&gt;One of the key gaps in Rust&amp;rsquo;s ecosystem has been a strong story for fast and
+productive &lt;em&gt;asynchronous I/O&lt;/em&gt;. We have good foundations, like the
+&lt;a href=&quot;http://github.com/carllerche/mio&quot;&gt;mio&lt;/a&gt; library, but they&amp;rsquo;re very low level: you
+have to wire up state machines and juggle callbacks directly.&lt;/p&gt;
+
+&lt;p&gt;We&amp;rsquo;ve wanted something higher level, with better ergonomics, but also better
+&lt;em&gt;composability&lt;/em&gt;, supporting an ecosystem of asynchronous abstractions that all
+work together. This story might sound familiar: it&amp;rsquo;s the same goal that&amp;rsquo;s led to
+the introduction of &lt;em&gt;futures&lt;/em&gt; (aka promises) in
+&lt;a href=&quot;https://en.wikipedia.org/wiki/Futures_and_promises#List_of_implementations&quot;&gt;many languages&lt;/a&gt;,
+with some supporting &lt;em&gt;async/await&lt;/em&gt; sugar on top.&lt;/p&gt;
+
+&lt;p&gt;A major tenant of Rust is the ability to build
+&lt;a href=&quot;https://blog.rust-lang.org/2015/05/11/traits.html&quot;&gt;zero-cost abstractions&lt;/a&gt;, and
+that leads to one additional goal for our async I/O story: ideally, an
+abstraction like futures should compile down to something equivalent to the
+state-machine-and-callback-juggling code we&amp;rsquo;re writing today (with no additional
+runtime overhead).&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Over the past couple of months, Alex Crichton and I have developed a
+&lt;a href=&quot;https://github.com/alexcrichton/futures-rs&quot;&gt;&lt;em&gt;zero-cost futures library&lt;/em&gt;&lt;/a&gt; for
+Rust, one that we believe achieves these goals&lt;/strong&gt;. (Thanks to Carl Lerche, Yehuda
+Katz, and Nicholas Matsakis for insights along the way.)&lt;/p&gt;
+
+&lt;p&gt;Today, we&amp;rsquo;re excited to kick off a blog series about the new library. This post
+gives the highlights, a few key ideas, and some preliminary
+benchmarks. Follow-up posts will showcase how Rust&amp;rsquo;s features come together in
+the design of this zero-cost abstraction. And there&amp;rsquo;s already a
+&lt;a href=&quot;https://github.com/alexcrichton/futures-rs/blob/master/TUTORIAL.md&quot;&gt;tutorial&lt;/a&gt;
+to get you going.&lt;/p&gt;
+
+&lt;h2 id=&quot;why-async-i-o&quot;&gt;Why async I/O?&lt;/h2&gt;
+
+&lt;p&gt;Before delving into futures, it&amp;rsquo;ll be helpful to talk a bit about the past.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s start with a simple piece of I/O you might want to perform: reading a
+certain number of bytes from a socket. Rust provides a function,
+&lt;a href=&quot;https://static.rust-lang.org/doc/master/std/io/trait.Read.html#method.read_exact&quot;&gt;&lt;code&gt;read_exact&lt;/code&gt;&lt;/a&gt;,
+to do this:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;c1&quot;&gt;// reads 256 bytes into `my_vec`&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;socket&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;read_exact&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;my_vec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[..&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;256&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Quick quiz: what happens if we haven&amp;rsquo;t received enough bytes from the socket yet?&lt;/p&gt;
+
+&lt;p&gt;In today&amp;rsquo;s Rust, the answer is that the current thread blocks, sleeping until
+more bytes are available. But that wasn&amp;rsquo;t always the case.&lt;/p&gt;
+
+&lt;p&gt;Early on, Rust had a &amp;ldquo;green threading&amp;rdquo; model, not unlike Go&amp;rsquo;s. You could spin up
+a large number of lightweight &lt;em&gt;tasks&lt;/em&gt;, which were then scheduled onto real OS
+threads (sometimes called &amp;ldquo;M:N threading&amp;rdquo;). In the green threading model, a
+function like &lt;code&gt;read_exact&lt;/code&gt; would block the current &lt;em&gt;task&lt;/em&gt;, but not the
+underlying OS thread; instead, the task scheduler would switch to another
+task. That&amp;rsquo;s great, because you can scale up to a very large number of tasks,
+most of which are blocked, while using only a small number of OS threads.&lt;/p&gt;
+
+&lt;p&gt;The problem is that green threads were
+&lt;a href=&quot;https://mail.mozilla.org/pipermail/rust-dev/2013-November/006314.html&quot;&gt;at odds&lt;/a&gt;
+with Rust&amp;rsquo;s ambitions to be a true C replacement, with no imposed runtime system
+or FFI costs: we were unable to find an implementation strategy that didn&amp;rsquo;t
+impose serious global costs. You can read more
+&lt;a href=&quot;https://github.com/aturon/rfcs/blob/remove-runtime/active/0000-remove-runtime.md&quot;&gt;in the RFC that removed green threading&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;So if we want to handle a large number of simultaneous connections, many of
+which are waiting for I/O, but we want to keep the number of OS threads to a
+minimum, what else can we do?&lt;/p&gt;
+
+&lt;p&gt;Asynchronous I/O is the answer &amp;ndash; and in fact, it&amp;rsquo;s used to implement green
+threading as well.&lt;/p&gt;
+
+&lt;p&gt;In a nutshell, with async I/O you can &lt;em&gt;attempt&lt;/em&gt; an I/O operation without
+blocking. If it can&amp;rsquo;t complete immediately, you can retry at some later
+point. To make this work, the OS provides tools like
+&lt;a href=&quot;https://en.wikipedia.org/wiki/Epoll&quot;&gt;epoll&lt;/a&gt;, allowing you to query which of a
+large set of I/O objects are &lt;em&gt;ready&lt;/em&gt; for reading or writing &amp;ndash; which is
+essentially the API that &lt;a href=&quot;http://github.com/carllerche/mio&quot;&gt;mio&lt;/a&gt; provides.&lt;/p&gt;
+
+&lt;p&gt;The problem is that there&amp;rsquo;s a lot of painful work tracking all of the I/O events
+you&amp;rsquo;re interested in, and dispatching those to the right callbacks (not to
+mention programming in a purely callback-driven way). That&amp;rsquo;s one of the key
+problems that futures solve.&lt;/p&gt;
+
+&lt;h2 id=&quot;futures&quot;&gt;Futures&lt;/h2&gt;
+
+&lt;p&gt;So what &lt;em&gt;is&lt;/em&gt; a future?&lt;/p&gt;
+
+&lt;p&gt;In essence, a future represents a value that might not be ready yet. Usually,
+the future becomes &lt;em&gt;complete&lt;/em&gt; (the value is ready) due to an event happening
+somewhere else. While we&amp;rsquo;ve been looking at this from the perspective of basic
+I/O, you can use a future to represent a wide range of events, e.g.:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;A database query&lt;/strong&gt; that&amp;rsquo;s executing in a thread pool. When the query finishes,
+the future is completed, and its value is the result of the query.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;An RPC invocation&lt;/strong&gt; to a server. When the server replies, the future is
+completed, and its value is the server&amp;rsquo;s response.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;A timeout&lt;/strong&gt;. When time is up, the future is completed, and its value is just
+&lt;code&gt;()&lt;/code&gt; (the &amp;ldquo;unit&amp;rdquo; value in Rust).&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;A long-running CPU-intensive task&lt;/strong&gt;, running on a thread pool. When the task
+finishes, the future is completed, and its value is the return value of the
+task.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Reading bytes from a socket&lt;/strong&gt;. When the bytes are ready, the future is completed
+&amp;ndash; and depending on the buffering strategy, the bytes might be returned
+directly, or written as a side-effect into some existing buffer.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;And so on and so forth. The point is that futures are applicable to asynchronous
+events of all shapes and sizes. The asynchrony is reflected in the fact that you
+get a &lt;em&gt;future&lt;/em&gt; right away, without blocking, even though the &lt;em&gt;value&lt;/em&gt; the future
+represents will become ready only at some unknown time in the&amp;hellip; future.&lt;/p&gt;
+
+&lt;p&gt;In Rust, we represent futures as a
+&lt;a href=&quot;http://alexcrichton.com/futures-rs/futures/trait.Future.html&quot;&gt;trait&lt;/a&gt; (i.e., an
+interface), roughly:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// ... lots more elided ...&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The &lt;code&gt;Item&lt;/code&gt; type says what kind of value the future will yield once it&amp;rsquo;s complete.&lt;/p&gt;
+
+&lt;p&gt;Going back to our earlier list of examples, we can write several functions
+producing different futures (using
+&lt;a href=&quot;https://github.com/rust-lang/rfcs/pull/1522&quot;&gt;&lt;code&gt;impl&lt;/code&gt; syntax&lt;/a&gt;):&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;c1&quot;&gt;// Lookup a row in a table by the given id, yielding the row when finished&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get_row&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;i32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Item&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Row&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Makes an RPC call that will yield an i32&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;id_rpc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RpcServer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Item&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;i32&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Writes an entire string to a TcpStream, yielding back the stream when finished&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;write_string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;socket&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TcpStream&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Item&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TcpStream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;All of these functions will return their future &lt;em&gt;immediately&lt;/em&gt;, whether or not
+the event the future represents is complete; the functions are
+non-blocking.&lt;/p&gt;
+
+&lt;p&gt;Things really start getting interesting with futures when you combine
+them. There are endless ways of doing so, e.g.:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&quot;http://alexcrichton.com/futures-rs/futures/trait.Future.html#method.and_then&quot;&gt;&lt;strong&gt;Sequential composition&lt;/strong&gt;&lt;/a&gt;:
+&lt;code&gt;f.and_then(|val| some_new_future(val))&lt;/code&gt;. Gives you a future that executes the
+future &lt;code&gt;f&lt;/code&gt;, takes the &lt;code&gt;val&lt;/code&gt; it produces to build another future
+&lt;code&gt;some_new_future(val)&lt;/code&gt;, and then executes that future.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&quot;http://alexcrichton.com/futures-rs/futures/trait.Future.html#method.map&quot;&gt;&lt;strong&gt;Mapping&lt;/strong&gt;&lt;/a&gt;:
+&lt;code&gt;f.map(|val| some_new_value(val))&lt;/code&gt;. Gives you a future that
+executes the future &lt;code&gt;f&lt;/code&gt; and yields the result of &lt;code&gt;some_new_value(val)&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&quot;http://alexcrichton.com/futures-rs/futures/trait.Future.html#method.join&quot;&gt;&lt;strong&gt;Joining&lt;/strong&gt;&lt;/a&gt;:
+&lt;code&gt;f.join(g)&lt;/code&gt;. Gives you a future that executes the futures &lt;code&gt;f&lt;/code&gt; and
+&lt;code&gt;g&lt;/code&gt; in parallel, and completes when &lt;em&gt;both&lt;/em&gt; of them are complete, returning
+both of their values.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&quot;http://alexcrichton.com/futures-rs/futures/trait.Future.html#method.select&quot;&gt;&lt;strong&gt;Selecting&lt;/strong&gt;&lt;/a&gt;:
+&lt;code&gt;f.select(g)&lt;/code&gt;. Gives you a future that executes the futures &lt;code&gt;f&lt;/code&gt;
+and &lt;code&gt;g&lt;/code&gt; in parallel, and completes when &lt;em&gt;one of&lt;/em&gt; them is complete, returning
+its value and the other future. (Want to add a timeout to any future? Just do
+a &lt;code&gt;select&lt;/code&gt; of that future and a timeout future!)&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;As a simple example using the futures above, we might write something like:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;n&quot;&gt;id_rpc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;my_server&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;and_then&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;get_row&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;row&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;json&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;encode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;row&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;and_then&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;encoded&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;write_string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;my_socket&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;encoded&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;See
+&lt;a href=&quot;https://github.com/alexcrichton/futures-rs/blob/master/futures-minihttp/techempower2/src/main.rs&quot;&gt;this code&lt;/a&gt;
+for a more fleshed out example.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;This is non-blocking code that moves through several states: first we do an RPC
+call to acquire an ID; then we look up the corresponding row; then we encode it
+to json; then we write it to a socket. &lt;strong&gt;Under the hood, this code will compile
+down to an actual state machine which progresses via callbacks (with no
+overhead)&lt;/strong&gt;, but we get to write it in a style that&amp;rsquo;s not far from simple
+&lt;em&gt;blocking&lt;/em&gt; code. (Rustaceans will note that this story is very similar to
+&lt;code&gt;Iterator&lt;/code&gt; in the standard library.)  Ergonomic, high-level code that compiles
+to state-machine-and-callbacks: that&amp;rsquo;s what we were after!&lt;/p&gt;
+
+&lt;p&gt;It&amp;rsquo;s also worth considering that each of the futures being used here might come
+from a different library. The futures abstraction allows them to all be combined
+seamlessly together.&lt;/p&gt;
+
+&lt;h2 id=&quot;streams&quot;&gt;Streams&lt;/h2&gt;
+
+&lt;p&gt;But wait &amp;ndash; there&amp;rsquo;s more! As you keep pushing on the future &amp;ldquo;combinators&amp;rdquo;,
+you&amp;rsquo;re able to not just reach parity with simple blocking code, but to do things
+that can be tricky or painful to write otherwise. To see an example, we&amp;rsquo;ll need one
+more concept: streams.&lt;/p&gt;
+
+&lt;p&gt;Futures are all about a &lt;em&gt;single&lt;/em&gt; value that will eventually be produced, but
+many event sources naturally produce a &lt;em&gt;stream&lt;/em&gt; of values over time. For
+example, incoming TCP connections or incoming requests on a socket are both
+naturally streams.&lt;/p&gt;
+
+&lt;p&gt;Our futures library includes a
+&lt;a href=&quot;http://alexcrichton.com/futures-rs/futures/stream/trait.Stream.html&quot;&gt;&lt;code&gt;Stream&lt;/code&gt; trait&lt;/a&gt;
+as well, which is very similar to futures, but set up to produce a sequence of
+values over time. It has a set of combinators, some of which work with
+futures. For example, if &lt;code&gt;s&lt;/code&gt; is a stream, you can write:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;and_then&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;val&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;some_future&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;val&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This code will give you a new stream that works by first pulling a value &lt;code&gt;val&lt;/code&gt;
+from &lt;code&gt;s&lt;/code&gt;, then computing &lt;code&gt;some_future(val)&lt;/code&gt; from it, then executing that future
+and yielding its value &amp;ndash; then doing it all over again to produce the next value
+in the stream.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s see a real example:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;c1&quot;&gt;// Given an `input` I/O object create a stream of requests&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requests&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParseStream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;input&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// For each request, run our service&amp;#39;s `process` function to handle the request&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// and generate a response&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;responses&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requests&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;and_then&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;req&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;service&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;process&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;req&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Create a new future that&amp;#39;ll write out each response to an `output` I/O object&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;StreamWriter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;responses&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;output&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Here, we&amp;rsquo;ve written the core of a simple server by operating on streams. It&amp;rsquo;s
+not rocket science, but it is a bit exciting to be manipulating values like
+&lt;code&gt;responses&lt;/code&gt; that represent the entirety of what the server is producing.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s make things more interesting. Assume the protocol is pipelined, i.e., that
+the client can send additional requests on the socket before hearing back from
+the ones being processed. We want to actually process the requests sequentially,
+but there&amp;rsquo;s an opportunity for some parallelism here: we could read &lt;em&gt;and parse&lt;/em&gt;
+a few requests ahead, while the current request is being processed. Doing so is
+as easy as inserting one more combinator in the right place:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requests&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParseStream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;input&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;responses&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requests&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;req&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;service&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;process&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;req&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;buffered&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// &amp;lt;--&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;StreamWriter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;buffered&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;output&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The
+&lt;a href=&quot;http://alexcrichton.com/futures-rs/futures/stream/trait.Stream.html#method.buffered&quot;&gt;&lt;code&gt;buffered&lt;/code&gt; combinator&lt;/a&gt;
+takes a stream of &lt;em&gt;futures&lt;/em&gt; and buffers it by some fixed amount. Buffering the
+stream means that it will eagerly pull out more than the requested number of
+items, and stash the resulting futures in a buffer for later processing. In this
+case, that means that we will read and parse up to 32 extra requests in parallel,
+while running &lt;code&gt;process&lt;/code&gt; on the current one.&lt;/p&gt;
+
+&lt;p&gt;These are relatively simple examples of using futures and streams, but hopefully
+they convey some sense of how the combinators can empower you to do very
+high-level async programming.&lt;/p&gt;
+
+&lt;h2 id=&quot;zero-cost&quot;&gt;Zero cost?&lt;/h2&gt;
+
+&lt;p&gt;I&amp;rsquo;ve claimed a few times that our futures library provides a zero-cost
+abstraction, in that it compiles to something very close to the state machine
+code you&amp;rsquo;d write by hand. To make that a bit more concrete:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;None of the future combinators impose any allocation. When we do things like
+chain uses of &lt;code&gt;and_then&lt;/code&gt;, not only are we not allocating, we are in fact
+building up a big &lt;code&gt;enum&lt;/code&gt; that represents the state machine. (There is one
+allocation needed per &amp;ldquo;task&amp;rdquo;, which usually works out to one per connection.)&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;When an event arrives, only one dynamic dispatch is required.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;There are essentially no imposed synchronization costs; if you want to
+associate data that lives on your event loop and access it in a
+single-threaded way from futures, we give you the tools to do so.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;And so on. Later blog posts will get into the details of these claims and show
+how we leverage Rust to get to zero cost.&lt;/p&gt;
+
+&lt;p&gt;But the proof is in the pudding. We wrote a simple HTTP server framework,
+&lt;a href=&quot;https://github.com/alexcrichton/futures-rs/tree/master/futures-minihttp&quot;&gt;minihttp&lt;/a&gt;,
+which supports pipelining and TLS. &lt;strong&gt;This server uses futures at every level of
+its implementation, from reading bytes off a socket to processing streams of
+requests&lt;/strong&gt;. Besides being a pleasant way to write the server, this provides a
+pretty strong stress test for the overhead of the futures abstraction.&lt;/p&gt;
+
+&lt;p&gt;To get a basic assessment of that overhead, we then implemented the
+&lt;a href=&quot;https://www.techempower.com/benchmarks/#section=data-r12&amp;amp;hw=peak&amp;amp;test=plaintext&quot;&gt;TechEmpower &amp;ldquo;plaintext&amp;rdquo; benchmark&lt;/a&gt;. This
+microbenchmark tests a &amp;ldquo;hello world&amp;rdquo; HTTP server by throwing a huge number of
+concurrent and pipelined requests at it. Since the &amp;ldquo;work&amp;rdquo; that the server is
+doing to process the requests is trivial, the performance is largely a
+reflection of the basic overhead of the server framework.&lt;/p&gt;
+
+&lt;p&gt;TechEmpower is used to compare a very large number of web frameworks across many
+different languages. We
+&lt;a href=&quot;https://github.com/alexcrichton/futures-rs/blob/master/futures-minihttp/README.md&quot;&gt;compared&lt;/a&gt;
+minihttp to a few of the top contenders:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/TechEmpower/FrameworkBenchmarks/tree/master/frameworks/Java/rapidoid&quot;&gt;rapidoid&lt;/a&gt;,
+a Java framework, which was the top performer in the last round of official benchmarks.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/TechEmpower/FrameworkBenchmarks/tree/master/frameworks/Go/go-std&quot;&gt;Go&lt;/a&gt;,
+an implementation that uses Go&amp;rsquo;s standard library&amp;rsquo;s HTTP support.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/TechEmpower/FrameworkBenchmarks/tree/master/frameworks/Go/fasthttp&quot;&gt;fasthttp&lt;/a&gt;,
+a competitor to Go&amp;rsquo;s standard library.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/TechEmpower/FrameworkBenchmarks/tree/master/frameworks/JavaScript/nodejs&quot;&gt;node.js&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Here are the results, in number of &amp;ldquo;Hello world!&amp;quot;s served per second on an 8
+core Linux machine:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/public/bench-pipelined.png&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;It seems safe to say that futures are not imposing significant overhead.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-future&quot;&gt;The future&lt;/h2&gt;
+
+&lt;p&gt;Thus concludes our whirlwind introduction to zero-cost futures in Rust. We&amp;rsquo;ll
+see more details about the design in the posts to come.&lt;/p&gt;
+
+&lt;p&gt;At this point, the library is quite usable, and pretty thoroughly documented; it
+comes with a
+&lt;a href=&quot;https://github.com/alexcrichton/futures-rs/blob/master/TUTORIAL.md&quot;&gt;tutorial&lt;/a&gt;
+and plenty of examples, including:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;a simple &lt;a href=&quot;https://github.com/alexcrichton/futures-rs/blob/master/futures-mio/src/bin/echo.rs&quot;&gt;TCP echo server&lt;/a&gt;;&lt;/li&gt;
+&lt;li&gt;an efficient
+&lt;a href=&quot;https://github.com/alexcrichton/futures-rs/blob/master/futures-socks5/src/main.rs&quot;&gt;SOCKSv5 proxy server&lt;/a&gt;;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;minihttp&lt;/code&gt;, a highly-efficient
+&lt;a href=&quot;https://github.com/alexcrichton/futures-rs/tree/master/futures-minihttp&quot;&gt;HTTP server&lt;/a&gt;
+that supports TLS and uses
+&lt;a href=&quot;https://crates.io/crates/httparse&quot;&gt;Hyper&amp;rsquo;s parser&lt;/a&gt;;&lt;/li&gt;
+&lt;li&gt;an example
+&lt;a href=&quot;https://github.com/alexcrichton/futures-rs/tree/master/futures-minihttp/tls-example&quot;&gt;use of minihttp&lt;/a&gt;
+for TLS connections;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;as well as a variety of integrations, e.g. a futures-based interface to
+&lt;a href=&quot;http://alexcrichton.com/futures-rs/futures_curl&quot;&gt;curl&lt;/a&gt;. We&amp;rsquo;re actively working
+with several people in the Rust community to integrate with their work; if
+you&amp;rsquo;re interested, please reach out to Alex or myself!&lt;/p&gt;
+
+&lt;p&gt;If you want to do low-level I/O programming with futures, you can use
+&lt;a href=&quot;http://alexcrichton.com/futures-rs/futures_mio&quot;&gt;futures-mio&lt;/a&gt; to do so on top of
+mio. We think this is an exciting direction to take async I/O programming in
+general in Rust, and follow up posts will go into more detail on the mechanics.&lt;/p&gt;
+
+&lt;p&gt;Alternatively, if you just want to speak HTTP, you can work on top of
+&lt;a href=&quot;https://github.com/alexcrichton/futures-rs/tree/master/futures-minihttp&quot;&gt;minihttp&lt;/a&gt;
+by providing a &lt;em&gt;service&lt;/em&gt;: a function that takes an HTTP request, and returns a
+&lt;em&gt;future&lt;/em&gt; of an HTTP response. This kind of RPC/service abstraction opens the
+door to writing a lot of reusable &amp;quot;middleware&amp;rdquo; for servers, and has gotten a lot
+of traction in Twitter&amp;rsquo;s &lt;a href=&quot;https://twitter.github.io/finagle/&quot;&gt;Finagle&lt;/a&gt; library
+for Scala; it&amp;rsquo;s also being used in Facebook&amp;rsquo;s
+&lt;a href=&quot;https://github.com/facebook/wangle&quot;&gt;Wangle&lt;/a&gt; library. In the Rust world, there&amp;rsquo;s
+already a library called
+&lt;a href=&quot;https://medium.com/@carllerche/announcing-tokio-df6bb4ddb34#.g9ugbqg71&quot;&gt;Tokio&lt;/a&gt;
+in the works that builds a general service abstraction on our futures library,
+and could serve a role similar to Finagle.&lt;/p&gt;
+
+&lt;p&gt;There&amp;rsquo;s an enormous amount of work ahead:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;First off, we&amp;rsquo;re eager to hear feedback on the core future and stream
+abstractions, and there are some specific design details for some combinators
+we&amp;rsquo;re unsure about.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Second, while we&amp;rsquo;ve built a number of future abstractions around basic I/O
+concepts, there&amp;rsquo;s definitely more room to explore, and we&amp;rsquo;d appreciate help
+exploring it.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;More broadly, there are endless futures &amp;ldquo;bindings&amp;rdquo; for various libraries (both
+in C and in Rust) to write; if you&amp;rsquo;ve got a library you&amp;rsquo;d like futures bindings
+for, we&amp;rsquo;re excited to help!&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Thinking more long term, an obvious eventual step would be to explore
+&lt;code&gt;async&lt;/code&gt;/&lt;code&gt;await&lt;/code&gt; notation on top of futures, perhaps in the same way as proposed
+in &lt;a href=&quot;https://tc39.github.io/ecmascript-asyncawait/&quot;&gt;Javascript&lt;/a&gt;. But we want to
+gain more experience using futures directly as a library, first, before
+considering such a step.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Whatever your interests might be, we&amp;rsquo;d love to hear from you &amp;ndash; we&amp;rsquo;re &lt;code&gt;acrichto&lt;/code&gt;
+and &lt;code&gt;aturon&lt;/code&gt; on Rust&amp;rsquo;s
+&lt;a href=&quot;https://www.rust-lang.org/en-US/community.html&quot;&gt;IRC channels&lt;/a&gt;. Come say hi!&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>The Rust Platform</title>
