@@ -4,7 +4,7 @@
  <title>Aaron Turon</title>
  <link href="http://aturon.github.io/blog/atom.xml" rel="self"/>
  <link href="http://aturon.github.io/blog/"/>
- <updated>2016-08-11T08:16:46-07:00</updated>
+ <updated>2016-08-11T08:37:49-07:00</updated>
  <id>http://aturon.github.io</id>
  <author>
    <name>Aaron Turon</name>
@@ -18,7 +18,7 @@
    <updated>2016-08-11T00:00:00-07:00</updated>
    <id>http://aturon.github.io/2016/08/11/futures</id>
    <content type="html">&lt;p&gt;One of the key gaps in Rust&amp;rsquo;s ecosystem has been a strong story for fast and
-productive &lt;em&gt;asynchronous I/O&lt;/em&gt;. We have good foundations, like the
+productive &lt;em&gt;asynchronous I/O&lt;/em&gt;. We have solid foundations, like the
 &lt;a href=&quot;http://github.com/carllerche/mio&quot;&gt;mio&lt;/a&gt; library, but they&amp;rsquo;re very low level: you
 have to wire up state machines and juggle callbacks directly.&lt;/p&gt;
 
@@ -67,8 +67,8 @@ more bytes are available. But that wasn&amp;rsquo;t always the case.&lt;/p&gt;
 &lt;p&gt;Early on, Rust had a &amp;ldquo;green threading&amp;rdquo; model, not unlike Go&amp;rsquo;s. You could spin up
 a large number of lightweight &lt;em&gt;tasks&lt;/em&gt;, which were then scheduled onto real OS
 threads (sometimes called &amp;ldquo;M:N threading&amp;rdquo;). In the green threading model, a
-function like &lt;code&gt;read_exact&lt;/code&gt; would block the current &lt;em&gt;task&lt;/em&gt;, but not the
-underlying OS thread; instead, the task scheduler would switch to another
+function like &lt;code&gt;read_exact&lt;/code&gt; blocks the current &lt;em&gt;task&lt;/em&gt;, but not the
+underlying OS thread; instead, the task scheduler switches to another
 task. That&amp;rsquo;s great, because you can scale up to a very large number of tasks,
 most of which are blocked, while using only a small number of OS threads.&lt;/p&gt;
 
@@ -122,7 +122,7 @@ task.&lt;/p&gt;&lt;/li&gt;
 directly, or written as a side-effect into some existing buffer.&lt;/p&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;And so on and so forth. The point is that futures are applicable to asynchronous
+&lt;p&gt;And so on. The point is that futures are applicable to asynchronous
 events of all shapes and sizes. The asynchrony is reflected in the fact that you
 get a &lt;em&gt;future&lt;/em&gt; right away, without blocking, even though the &lt;em&gt;value&lt;/em&gt; the future
 represents will become ready only at some unknown time in the&amp;hellip; future.&lt;/p&gt;
@@ -215,7 +215,7 @@ many event sources naturally produce a &lt;em&gt;stream&lt;/em&gt; of values ove
 example, incoming TCP connections or incoming requests on a socket are both
 naturally streams.&lt;/p&gt;
 
-&lt;p&gt;Our futures library includes a
+&lt;p&gt;The futures library includes a
 &lt;a href=&quot;http://alexcrichton.com/futures-rs/futures/stream/trait.Stream.html&quot;&gt;&lt;code&gt;Stream&lt;/code&gt; trait&lt;/a&gt;
 as well, which is very similar to futures, but set up to produce a sequence of
 values over time. It has a set of combinators, some of which work with
@@ -296,7 +296,8 @@ pretty strong stress test for the overhead of the futures abstraction.&lt;/p&gt;
 microbenchmark tests a &amp;ldquo;hello world&amp;rdquo; HTTP server by throwing a huge number of
 concurrent and pipelined requests at it. Since the &amp;ldquo;work&amp;rdquo; that the server is
 doing to process the requests is trivial, the performance is largely a
-reflection of the basic overhead of the server framework.&lt;/p&gt;
+reflection of the basic overhead of the server framework (and in our case, the
+futures framework).&lt;/p&gt;
 
 &lt;p&gt;TechEmpower is used to compare a very large number of web frameworks across many
 different languages. We
@@ -340,7 +341,7 @@ that supports TLS and uses
 &lt;a href=&quot;https://crates.io/crates/httparse&quot;&gt;Hyper&amp;rsquo;s parser&lt;/a&gt;;&lt;/li&gt;
 &lt;li&gt;an example
 &lt;a href=&quot;https://github.com/alexcrichton/futures-rs/tree/master/futures-minihttp/tls-example&quot;&gt;use of minihttp&lt;/a&gt;
-for TLS connections;&lt;/li&gt;
+for TLS connections,&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;p&gt;as well as a variety of integrations, e.g. a futures-based interface to
