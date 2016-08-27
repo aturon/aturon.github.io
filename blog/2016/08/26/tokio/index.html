@@ -61,40 +61,45 @@ consists of Carl Lerche, Alex Crichton, and myself; more on that below.</p>
 
 <p>There are three primary levels of abstraction in Tokio:</p>
 
-<ul>
-<li>At the highest level is a <em>service</em>, which is where you write a server
-application. Following the <a href="http://finagle.github.io/">Finagle</a> model, a service is a simple thing: it&rsquo;s
-a function from requests to <em>futures</em> of responses. This simple model is
-incredibly powerful: it separates the implementation of request processing
-from the implementation of the underlying protocol, and makes it possible to
-factor out an ecosystem of <em>middleware</em>. All of this seamlessly support async
-I/O via futures. Middleware runs the gamut from connection pooling to
-retry/timeout logic to logging to load balancing &ndash; all of which can be
-written independently from any particular service or protocol. Read
-<a href="https://monkey.org/%7Emarius/funsrv.pdf">Your Server as a Function</a> for the inspiration.</li>
-</ul>
+<h3 id="services">Services</h3>
+
+<p>At the highest level is a <em>service</em>, which is where you write a server
+  application. Following the <a href="http://finagle.github.io/">Finagle</a> model, a service is a simple thing: it&rsquo;s
+  a function from requests to <em>futures</em> of responses. This simple model is
+  incredibly powerful: it separates the implementation of request processing
+  from the implementation of the underlying protocol, and makes it possible to
+  factor out an ecosystem of <em>middleware</em>. All of this seamlessly support async
+  I/O via futures. Middleware runs the gamut from connection pooling to
+  retry/timeout logic to logging to load balancing &ndash; all of which can be
+  written independently from any particular service or protocol. Read
+  <a href="https://monkey.org/%7Emarius/funsrv.pdf">Your Server as a Function</a> for the inspiration.</p>
 
 <p>The <a href="https://github.com/tokio-rs/tokio-service">tokio-service</a> crate provides core trait definitions for
   services. Servers that can process particular request/response types (like
-  HTTP) are offered as standalone crates. <strong>Building an http server is just a
+  HTTP) are offered as standalone crates. Building an http server is just a
   matter of writing a function from http requests to futures of http
-  responses.</strong></p>
+  responses.</p>
 
-<ul>
-<li><p>In the middle are <em>protocols</em>, like HTTP or Mux. Here, too, there is a lot of
-complexity worth factoring out, both at the transport layer and in the
-protocol &ldquo;dispatch&rdquo; layer. <strong>The <a href="https://github.com/tokio-rs/tokio-proto">tokio-proto</a> crate provides re-usable
-components for building new protocol implementations</strong>. We expect for there to
-be a similar kind of &ldquo;middleware&rdquo; ecosystem at these lower levels.</p></li>
-<li><p>At the lowest level is the <em>event loop</em>, which is where we bridge the OS&rsquo;s I/O
-facilities into the world of futures. <strong>The <a href="https://github.com/tokio-rs/tokio-core">tokio-core</a> crate provides a
-generic event loop for doing async I/O with futures</strong>. If you want complete
-control, that&rsquo;s the entry point for you; it&rsquo;s particularly useful for cases
-that don&rsquo;t fit so nicely into the service model, such as proxy servers.</p></li>
-</ul>
+<h3 id="protocols">Protocols</h3>
 
-<p><strong>In short, we want the Tokio project to be a &ldquo;one stop shop&rdquo; for doing
-futures-based I/O</strong>, whether at the highest level of prebuilt protocols, or
+<p>In the middle are <em>protocols</em>, like HTTP or Mux. Here, too, there is a lot of
+  complexity worth factoring out, both at the transport layer and in the
+  protocol &ldquo;dispatch&rdquo; layer. The <a href="https://github.com/tokio-rs/tokio-proto">tokio-proto</a> crate provides re-usable
+  components for building new protocol implementations. We expect for there to
+  be a similar kind of &ldquo;middleware&rdquo; ecosystem at these lower levels.</p>
+
+<h3 id="event-loop">Event loop</h3>
+
+<p>At the lowest level is the <em>event loop</em>, which is where we bridge the OS&rsquo;s I/O
+  facilities into the world of futures. The <a href="https://github.com/tokio-rs/tokio-core">tokio-core</a> crate provides a
+  generic event loop for doing async I/O with futures. If you want complete
+  control, that&rsquo;s the entry point for you; it&rsquo;s particularly useful for cases
+  that don&rsquo;t fit so nicely into the service model, such as proxy servers.</p>
+
+<h3 id="the-stack-as-a-whole">The stack as a whole</h3>
+
+<p>In short, we want the Tokio project to be a &ldquo;one stop shop&rdquo; for doing
+futures-based I/O, whether at the highest level of prebuilt protocols, or
 the lowest level of the core event loop.</p>
 
 <p>In our view, the lowest layers should strive to be zero cost and fully general,
@@ -179,7 +184,7 @@ hello, and join in the fun!</p>
 
       <footer class="footer">
         <small>
-          &copy; <time datetime="2016-08-26T17:28:19-07:00">2016</time>. All rights reserved.
+          &copy; <time datetime="2016-08-26T17:33:15-07:00">2016</time>. All rights reserved.
         </small>
       </footer>
     </div>
