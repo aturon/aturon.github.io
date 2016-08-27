@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="UTF-8">
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>
+    
+      Expanding the Tokio project &middot; Aaron Turon
+    
+  </title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/blog/styles.css">
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/blog/public/apple-touch-icon-precomposed.png">
+  <link rel="shortcut icon" href="/blog/public/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/atom+xml" title="Aaron Turon" href="/blog/atom.xml">
+</head>
+
+
+  <body>
+
+    <div class="container content">
+      <header class="masthead">
+        <h3 class="masthead-title">
+          <a href="/blog/" title="Home">Aaron Turon</a>
+          <small></small>
+
+          
+          &nbsp;&nbsp;&nbsp;
+          <small><a href="/blog/archive">Archive</a></small>
+          
+          &nbsp;&nbsp;&nbsp;
+          <small><a href="/blog/atom.xml">Feed</a></small>
+          
+        </h3>
+      </header>
+
+      <main>
+        <article class="post">
+  <h1 class="post-title">Expanding the Tokio project</h1>
+  <time datetime="2016-08-26T00:00:00-07:00" class="post-date">26 Aug 2016</time>
+  <p>If you&rsquo;ve been following Rust in the last month, you&rsquo;ve probably seen the
+announcements of the <a href="http://aturon.github.io/blog/2016/08/11/futures/">Futures</a> library and the <a href="https://medium.com/@carllerche/announcing-tokio-df6bb4ddb34">Tokio</a> framework that sits on
+top of it. There&rsquo;s been some confusion about how these projects fit together,
+and what the overall story is shaping up to be.</p>
+
+<p><strong>Today, we&rsquo;re happy to announce the formation of the Tokio Core Team, as well
+as an overall plan for the two projects and how they fit together</strong>. The team
+consists of Carl Lerche, Alex Crichton, and myself; more on that below.</p>
+
+<h2 id="an-early-vision-of-the-i-o-stack">An early vision of the I/O stack</h2>
+
+<p>There are three primary levels of abstraction in Tokio:</p>
+
+<ul>
+<li>At the highest level is a <em>service</em>, which is where you write a server
+application. Following the <a href="http://finagle.github.io/">Finagle</a> model, a service is a simple thing: it&rsquo;s
+a function from requests to <em>futures</em> of responses. This simple model is
+incredibly powerful: it separates the implementation of request processing
+from the implementation of the underlying protocol, and makes it possible to
+factor out an ecosystem of <em>middleware</em>. All of this seamlessly support async
+I/O via futures. Middleware runs the gamut from connection pooling to
+retry/timeout logic to logging to load balancing &ndash; all of which can be
+written independently from any particular service or protocol. Read
+<a href="https://monkey.org/%7Emarius/funsrv.pdf">Your Server as a Function</a> for the inspiration.</li>
+</ul>
+
+<p>The <a href="https://github.com/tokio-rs/tokio-service">tokio-service</a> crate provides core trait definitions for
+  services. Servers that can process particular request/response types (like
+  HTTP) are offered as standalone crates. <strong>Building an http server is just a
+  matter of writing a function from http requests to futures of http
+  responses.</strong></p>
+
+<ul>
+<li><p>In the middle are <em>protocols</em>, like HTTP or Mux. Here, too, there is a lot of
+complexity worth factoring out, both at the transport layer and in the
+protocol &ldquo;dispatch&rdquo; layer. <strong>The <a href="https://github.com/tokio-rs/tokio-proto">tokio-proto</a> crate provides re-usable
+components for building new protocol implementations</strong>. We expect for there to
+be a similar kind of &ldquo;middleware&rdquo; ecosystem at these lower levels.</p></li>
+<li><p>At the lowest level is the <em>event loop</em>, which is where we bridge the OS&rsquo;s I/O
+facilities into the world of futures. <strong>The <a href="https://github.com/tokio-rs/tokio-core">tokio-core</a> crate provides a
+generic event loop for doing async I/O with futures</strong>. If you want complete
+control, that&rsquo;s the entry point for you; it&rsquo;s particularly useful for cases
+that don&rsquo;t fit so nicely into the service model, such as proxy servers.</p></li>
+</ul>
+
+<p><strong>In short, we want the Tokio project to be a &ldquo;one stop shop&rdquo; for doing
+futures-based I/O</strong>, whether at the highest level of prebuilt protocols, or
+the lowest level of the core event loop.</p>
+
+<p>In our view, the lowest layers should strive to be zero cost and fully general,
+allowing them to be used in a large number of contexts. As you go up the stack,
+getting closer to an actual application, things tend to get more specific and
+opinionated, and may impose some cost. <a href="http://aturon.github.io/blog/2016/08/11/futures/">Futures</a> themselves are a zero-cost and
+very general abstraction in Rust, and the <a href="https://github.com/tokio-rs/tokio-core">tokio-core</a> crate imposes very little
+cost. Particular protocol implementations and middleware, on the other hand, can
+be more opinionated.</p>
+
+<p>We&rsquo;ll have a lot more to say about all of these layers (and the ones beneath
+them, like futures) in the coming weeks on our various blogs. Stay tuned!</p>
+
+<h2 id="a-note-on-project-management">A note on project management</h2>
+
+<p>We&rsquo;re following a Rust-like model, starting with a core team that reaches major
+decisions through a consensus process. At the moment, this process is fairly
+informal: it plays out on the issue tracker, PRs, and gitter channels. But as
+the library begins to mature, we plan to move toward an RFC-like process for
+major changes. We are eager for the Tokio project to truly be a Rust community
+project. It&rsquo;s going to have a lot of stakeholders, and we want to make sure
+those stakeholders have a voice just as we do in the Rust project itself.</p>
+
+<p>As for the core futures library, it remains separate from the Tokio project, in
+part because we imagine it heading toward ownership by the rust-lang org in the
+relatively near future. (That&rsquo;s a possible eventual path for Tokio as well, but
+the road will be much longer.)</p>
+
+<h2 id="jumping-in">Jumping in</h2>
+
+<p>Tokio is an ambitious project, and it&rsquo;s going to take a strong community to
+really get it off the ground.  Many from the Rust community have already jumped
+in to contribute, even in these extremely early days; that&rsquo;s helped us get some
+of our early-stage integrations going, including <a href="https://github.com/tokio-rs/tokio-curl">curl</a>, <a href="https://github.com/tokio-rs/tokio-tls">tls</a> and
+<a href="https://github.com/tokio-rs/tokio-redis">redis</a>. We&rsquo;re also working with Sean McArthur to get a Tokio-integrated <a href="https://github.com/hyperium/hyper/">Hyper</a>
+off the ground. If you&rsquo;re interested in any of this, any other integrations, or
+the core libraries, we&rsquo;d love to <a href="https://gitter.im/tokio-rs/tokio">hear from you</a>!</p>
+
+<p>If you&rsquo;re coming to RustConf, we&rsquo;ll see you there, either at the
+<a href="https://tokiohacknight.splashthat.com/">Tokio hack night</a> or at the talk about futures at RustConf itself. Come say
+hello, and join in the fun!</p>
+
+</article>
+
+
+<aside class="related">
+  <h2>Related Posts</h2>
+  <ul class="related-posts">
+    
+      <li>
+        <h3>
+          <a href="/blog/2016/08/11/futures/">
+            Zero-cost futures in Rust
+            <small><time datetime="2016-08-11T00:00:00-07:00">11 Aug 2016</time></small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/blog/2016/07/27/rust-platform/">
+            The Rust Platform
+            <small><time datetime="2016-07-27T00:00:00-07:00">27 Jul 2016</time></small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/blog/2016/07/05/rfc-refinement/">
+            Refining Rust's RFCs
+            <small><time datetime="2016-07-05T00:00:00-07:00">05 Jul 2016</time></small>
+          </a>
+        </h3>
+      </li>
+    
+  </ul>
+</aside>
+
+
+      </main>
+
+      <footer class="footer">
+        <small>
+          &copy; <time datetime="2016-08-26T17:28:19-07:00">2016</time>. All rights reserved.
+        </small>
+      </footer>
+    </div>
+
+  </body>
+</html>
