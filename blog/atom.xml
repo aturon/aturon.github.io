@@ -4,13 +4,511 @@
  <title>Aaron Turon</title>
  <link href="http://aturon.github.io/blog/atom.xml" rel="self"/>
  <link href="http://aturon.github.io/blog/"/>
- <updated>2016-08-26T17:28:19-07:00</updated>
+ <updated>2016-09-07T09:26:58-07:00</updated>
  <id>http://aturon.github.io</id>
  <author>
    <name>Aaron Turon</name>
    <email>aturon@mozilla.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Designing futures for Rust</title>
+   <link href="http://aturon.github.io/blog/2016/09/07/futures-design/"/>
+   <updated>2016-09-07T00:00:00-07:00</updated>
+   <id>http://aturon.github.io/2016/09/07/futures-design</id>
+   <content type="html">&lt;p&gt;I &lt;a href=&quot;http://aturon.github.io/blog/2016/08/11/futures/&quot;&gt;recently wrote&lt;/a&gt; about the
+importance of asynchronous I/O in Rust and the aims of the new
+&lt;a href=&quot;https://github.com/alexcrichton/futures-rs&quot;&gt;futures&lt;/a&gt; library. This post deepens
+the story by explaining the core &lt;em&gt;design&lt;/em&gt; of that library. If you&amp;rsquo;re looking for
+more on the &lt;em&gt;use&lt;/em&gt; of the library, you&amp;rsquo;ll have to wait; we&amp;rsquo;re very actively
+working on the &lt;a href=&quot;http://aturon.github.io/blog/2016/08/26/tokio/&quot;&gt;Tokio stack&lt;/a&gt; and
+will have more to say once that&amp;rsquo;s settled down a bit.&lt;/p&gt;
+
+&lt;p&gt;To recap, &lt;strong&gt;the aim is robust and ergonomic async I/O with no performance
+penalty&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Robust&lt;/strong&gt;: the library should have a strong story for error handling,
+cancellation, timeouts, backpressure, and other typical concerns for writing
+robust servers. This being Rust, we&amp;rsquo;ll also of course
+&lt;a href=&quot;https://blog.rust-lang.org/2015/04/10/Fearless-Concurrency.html&quot;&gt;guarantee thread safety&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Ergonomic&lt;/strong&gt;: the library should make writing asynchronous code as painless
+as possible—ideally, as easy as writing synchronous code, but with greater
+expressivity. While the latter will require
+&lt;a href=&quot;https://en.wikipedia.org/wiki/Await&quot;&gt;&lt;code&gt;async&lt;/code&gt;/&lt;code&gt;await&lt;/code&gt;&lt;/a&gt; to fully achieve, the
+futures library provides a high-level way of expressing and combining
+asynchronous computation, similar to Rust&amp;rsquo;s successful
+&lt;a href=&quot;https://static.rust-lang.org/doc/master/std/iter/trait.Iterator.html&quot;&gt;&lt;code&gt;Iterator&lt;/code&gt; API&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Zero cost&lt;/strong&gt;: code written using the library should compile down to something
+equivalent (or better than) &amp;ldquo;hand-rolled&amp;rdquo; server implementations, which would
+typically use manual state machines and careful memory management.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Achieving these goals requires a mix of existing techniques in Rust, and some
+new ideas about how to build a futures library; this post will cover both. In a
+nutshell:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Leverage Rust&amp;rsquo;s traits and closures for ergonomics and cost-avoidance&lt;/strong&gt;.
+Traits and closures in Rust do &lt;em&gt;not&lt;/em&gt; require heap allocation or dynamic
+dispatch—facts we take heavy advantage of. We also use the trait system to
+package up the futures API in a simple and convenient way.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Design the core &lt;code&gt;Future&lt;/code&gt; abstraction to be &lt;em&gt;demand-driven&lt;/em&gt;, rather than callback-oriented&lt;/strong&gt;.
+(In async I/O terms, follow the &amp;ldquo;readiness&amp;rdquo; style rather than the &amp;ldquo;completion&amp;rdquo; style.)
+That means that composing futures together does not involve creating
+intermediate callbacks. As we&amp;rsquo;ll see, the approach also has benefits for
+backpressure and cancellation.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Provide a &lt;em&gt;task&lt;/em&gt; abstraction, similar to a green thread, that drives a future to completion&lt;/strong&gt;.
+Housing futures within a task is what enables the library code to compile down
+to the traditional model, i.e., with big state machines that can serve as a
+callback for a large number of underlying events.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Let&amp;rsquo;s dive in!&lt;/p&gt;
+
+&lt;h2 id=&quot;background-traits-in-rust&quot;&gt;Background: traits in Rust&lt;/h2&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;We&amp;rsquo;ll start with a quick review of traits in Rust. If you want more reading on
+these topics, you might check out the longer
+&lt;a href=&quot;https://blog.rust-lang.org/2015/05/11/traits.html&quot;&gt;overview of traits&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;To understand how the futures design works, you need to have a basic grasp on
+Rust&amp;rsquo;s traits. I won&amp;rsquo;t attempt a complete introduction here, but I&amp;rsquo;ll try to hit
+the most relevant highlights for making sense of what&amp;rsquo;s going on.&lt;/p&gt;
+
+&lt;p&gt;Traits provide Rust&amp;rsquo;s sole notion of &lt;em&gt;interface&lt;/em&gt;, meaning that a trait
+is an abstraction that can apply to many concrete types. For example, here&amp;rsquo;s a
+simplified trait for hashing:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Hash&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hash&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;u64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This trait stipulates that the type implementing it must provide a &lt;code&gt;hash&lt;/code&gt;
+method, which
+&lt;a href=&quot;http://blog.skylight.io/rust-means-never-having-to-close-a-socket/&quot;&gt;borrows&lt;/a&gt;
+&lt;code&gt;self&lt;/code&gt; and produces a &lt;code&gt;u64&lt;/code&gt;. To implement the trait, you have to give a concrete
+definition for the method, like the following simple-minded one:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Hash&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hash&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;u64&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Hash&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;i32&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// etc&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Once these implementations are in place, you can make calls like &lt;code&gt;true.hash()&lt;/code&gt;
+to invoke the method directly. But often the methods are called via &lt;em&gt;generics&lt;/em&gt;,
+which is where traits truly act as an abstraction:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;print_hash&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Hash&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nb&quot;&gt;println&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;The hash is {}&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;hash&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The &lt;code&gt;print_hash&lt;/code&gt; function is generic over an unknown type &lt;code&gt;T&lt;/code&gt;, but requires that
+&lt;code&gt;T&lt;/code&gt; implements the &lt;code&gt;Hash&lt;/code&gt; trait. That means we can use it with &lt;code&gt;bool&lt;/code&gt; and &lt;code&gt;i32&lt;/code&gt;
+values:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;n&quot;&gt;print_hash&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;   &lt;span class=&quot;c1&quot;&gt;// instantiates T = bool&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;print_hash&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;12&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;     &lt;span class=&quot;c1&quot;&gt;// instantiates T = i32&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;strong&gt;Generics are compiled away, resulting in static dispatch&lt;/strong&gt;. That is, as with
+C++ templates, the compiler will generate &lt;em&gt;two copies&lt;/em&gt; of the &lt;code&gt;print_hash&lt;/code&gt;
+method to handle the above code, one for each concrete argument type.  That in
+turn means that the internal call to &lt;code&gt;t.hash()&lt;/code&gt;—the point where the
+abstraction is actually used—has zero cost: it will be compiled to a direct,
+static call to the relevant implementation:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;c1&quot;&gt;// The compiled code:&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;__print_hash_bool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// invoke specialized bool version directly&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;__print_hash_i32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;12&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;     &lt;span class=&quot;c1&quot;&gt;// invoke specialized i32 version directly&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Compiling down to non-generic code is essential for making an abstraction like
+futures work without overhead: most of the time, that non-generic code will also
+be inlined, letting the compiler produce and optimize large blocks of code that
+resemble what you might have written in a low-level, &amp;ldquo;hand-rolled&amp;rdquo; style.&lt;/p&gt;
+
+&lt;p&gt;Closures in Rust work the same way—in fact, they&amp;rsquo;re just traits. That means, in
+particular, that creating a closure does not entail heap allocation, and calling
+a closure can be statically-dispatched, just like the &lt;code&gt;hash&lt;/code&gt; method above.&lt;/p&gt;
+
+&lt;p&gt;Finally, traits can &lt;em&gt;also&lt;/em&gt; be used as &amp;ldquo;objects&amp;rdquo;, which cause the trait methods
+to be &lt;em&gt;dynamically&lt;/em&gt; dispatched (so the compiler doesn&amp;rsquo;t immediately know what
+implementation a call will use). The benefit to trait objects is for
+&lt;em&gt;heterogeneous collections&lt;/em&gt;, where you need to group together a number of
+objects which may have different underlying types but all implement the same
+trait. Trait objects must always be behind a pointer, which in practice usually
+requires heap allocation.&lt;/p&gt;
+
+&lt;h2 id=&quot;defining-futures&quot;&gt;Defining futures&lt;/h2&gt;
+
+&lt;p&gt;Now, let&amp;rsquo;s turn to futures. The
+&lt;a href=&quot;http://aturon.github.io/blog/2016/08/11/futures/&quot;&gt;earlier post&lt;/a&gt; gave an
+informal definition of a future:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;In essence, a future represents a value that might not be ready yet. Usually,
+the future becomes &lt;em&gt;complete&lt;/em&gt; (the value is ready) due to an event happening
+somewhere else.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Clearly, we&amp;rsquo;ll want futures to be some kind of trait, since there will be many
+different kinds of &amp;ldquo;values that aren&amp;rsquo;t ready yet&amp;rdquo; (e.g. data on a socket, the
+return value from an RPC call, etc.). But how do we represent the &amp;ldquo;not ready
+yet&amp;rdquo; part?&lt;/p&gt;
+
+&lt;h3 id=&quot;false-start-the-callback-aka-completion-based-approach&quot;&gt;False start: the callback (aka completion-based) approach&lt;/h3&gt;
+
+&lt;p&gt;There&amp;rsquo;s a very standard way to describe futures, which we found in every
+existing futures implementation we inspected: as a function that subscribes a
+&lt;em&gt;callback&lt;/em&gt; for notification that the future is complete.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Note&lt;/strong&gt;: In the async I/O world, this kind of interface is sometimes referred
+to as &lt;em&gt;completion-based&lt;/em&gt;, because events are signaled on completion of
+operations;
+&lt;a href=&quot;https://msdn.microsoft.com/en-us/library/windows/desktop/aa365198(v=vs.85).aspx&quot;&gt;Windows&amp;rsquo;s IOCP&lt;/a&gt;
+is based on this model.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In Rust terms, the callback model leads to a trait like the following:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// The type of value produced by the future&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// Tell the future to invoke the given callback on completion&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;schedule&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FnOnce&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The &lt;code&gt;FnOnce&lt;/code&gt; here is a trait for closures that will be invoked at most
+once. Because &lt;code&gt;schedule&lt;/code&gt; is using generics, it will statically dispatch any
+calls to that closure.&lt;/p&gt;
+
+&lt;p&gt;Unfortunately, &lt;strong&gt;this approach nevertheless forces allocation at almost every
+point of future composition, and often imposes dynamic dispatch&lt;/strong&gt;, despite our
+best efforts to avoid such overhead.&lt;/p&gt;
+
+&lt;p&gt;To see why, let&amp;rsquo;s consider a basic way of combining two futures:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;G&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;G&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Item&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;G&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;G&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This function takes two futures, &lt;code&gt;f&lt;/code&gt; and &lt;code&gt;g&lt;/code&gt;, and returns a new future that
+yields a pair with results from both. The &lt;code&gt;join&lt;/code&gt;ed future completes only when
+&lt;em&gt;both&lt;/em&gt; of the underlying futures complete, but allows the underlying futures to
+execute concurrently until then.&lt;/p&gt;
+
+&lt;p&gt;How would we implement &lt;code&gt;join&lt;/code&gt; using the above definition of &lt;code&gt;Future&lt;/code&gt;? The
+&lt;code&gt;join&lt;/code&gt;ed future will be given a single callback &lt;code&gt;both_done&lt;/code&gt; which expects a
+pair. But the underlying futures each want their own callbacks &lt;code&gt;f_done&lt;/code&gt; and
+&lt;code&gt;g_done&lt;/code&gt;, taking just their own results. Clearly, we need some kind of &lt;em&gt;sharing&lt;/em&gt;
+here: we need to construct &lt;code&gt;f_done&lt;/code&gt; and &lt;code&gt;g_done&lt;/code&gt; so that either can invoke
+&lt;code&gt;both_done&lt;/code&gt;, and make sure to include appropriate synchronization as well. Given
+the type signatures involved, there&amp;rsquo;s simply no way to do this without
+allocating (in Rust, we&amp;rsquo;d use an &lt;code&gt;Arc&lt;/code&gt; here).&lt;/p&gt;
+
+&lt;p&gt;This kind of problem was repeated in many of the future combinators.&lt;/p&gt;
+
+&lt;p&gt;Another problem is that event sources like event loops need to invoke callbacks
+of arbitrary, different types—a case of the heterogeneity mentioned above. As a
+concrete example, when a socket is ready for reading, that event will need to be
+dispatched to &lt;em&gt;some&lt;/em&gt; callback, and in general you&amp;rsquo;ll need a mix of different
+futures to be in play with different sockets. To make this work, you end up
+needing to heap-allocate callbacks for the event loop &lt;em&gt;at every point the future
+wants to listen for an event&lt;/em&gt;, and dynamically dispatch notifications to those
+callbacks.&lt;/p&gt;
+
+&lt;p&gt;TL;DR, we were unable to make the &amp;ldquo;standard&amp;rdquo; future abstraction provide
+zero-cost composition of futures, and we know of no &amp;ldquo;standard&amp;rdquo; implementation
+that does so.&lt;/p&gt;
+
+&lt;h3 id=&quot;what-worked-the-demand-driven-aka-readiness-based-approach&quot;&gt;What worked: the demand-driven (aka readiness-based) approach&lt;/h3&gt;
+
+&lt;p&gt;After much soul-searching, we arrived at a new &amp;ldquo;demand-driven&amp;rdquo; definition of
+futures. Here&amp;rsquo;s a &lt;strong&gt;simplified&lt;/strong&gt; version that ignores the error handling of
+&lt;a href=&quot;http://alexcrichton.com/futures-rs/futures/trait.Future.html&quot;&gt;the real trait&lt;/a&gt;:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;c1&quot;&gt;// A *simplified* version of the trait, without error-handling&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// The type of value produced on success&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// Polls the future, resolving to a value if possible&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Async&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Item&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;enum&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Async&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c-Doc&quot;&gt;/// Represents that a value is immediately ready.&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Ready&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+
+    &lt;span class=&quot;c-Doc&quot;&gt;/// Represents that a value is not ready yet, but may be so later.&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;NotReady&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The API shift here is straightforward: rather than the future proactively
+invoking a callback on completion, an external party must &lt;em&gt;poll&lt;/em&gt; the future to
+drive it to completion. The future can signal that it&amp;rsquo;s not yet ready and must
+be polled again at some later point by returning &lt;code&gt;Async::NotReady&lt;/code&gt; (an
+abstraction of &lt;code&gt;EWOULDBLOCK&lt;/code&gt;).&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Note&lt;/strong&gt;: In the async I/O world, this kind of interface is sometimes referred
+to as &lt;em&gt;readiness-based&lt;/em&gt;, because events are signaled based on &amp;ldquo;readiness&amp;rdquo; of
+operations (e.g. bytes on a socket being ready) followed by an attempt to
+complete an operation;
+&lt;a href=&quot;http://man7.org/linux/man-pages/man7/epoll.7.html&quot;&gt;Linux&amp;rsquo;s epoll&lt;/a&gt; is based on
+this model. (This model can also express completion, by treating the
+completion of an operation as the signal that the future is ready for
+polling.)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;By eliminating all the intermediate callbacks, we&amp;rsquo;ve addressed some of the key
+problems of the previous version of the trait. But we&amp;rsquo;ve introduced a new one:
+after &lt;code&gt;NotReady&lt;/code&gt; is returned, who polls the future, and when do they do so?&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s take a concrete example. If a future is attempting to read bytes from a
+socket, that socket may not be ready for reading, in which case the future can
+return &lt;code&gt;NotReady&lt;/code&gt;. &lt;em&gt;Somehow&lt;/em&gt;, we must arrange for the future to later be &amp;ldquo;woken
+up&amp;rdquo; (by calling &lt;code&gt;poll&lt;/code&gt;) once the socket becomes ready. That kind of wakeup is
+the job of the event loop. But now we need some way to connect the signal at the
+event loop back to continuing to poll the future.&lt;/p&gt;
+
+&lt;p&gt;The solution forms the other main component of the design: tasks.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-cornerstone-tasks&quot;&gt;The cornerstone: tasks&lt;/h3&gt;
+
+&lt;p&gt;&lt;strong&gt;A &lt;em&gt;task&lt;/em&gt; is a future that is being executed&lt;/strong&gt;. That future is almost always
+made up of a chain of other futures, as in the example from the original post:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;n&quot;&gt;id_rpc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;my_server&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;and_then&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;get_row&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;row&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;json&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;encode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;row&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;and_then&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;encoded&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;write_string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;my_socket&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;encoded&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The key point is that there&amp;rsquo;s a difference between functions like &lt;code&gt;and_then&lt;/code&gt;,
+&lt;code&gt;map&lt;/code&gt; and &lt;code&gt;join&lt;/code&gt;, which combine futures into bigger futures, and functions that
+&lt;em&gt;execute&lt;/em&gt; futures, like:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;The &lt;code&gt;wait&lt;/code&gt; method, which simply runs the future as a task pinned to the
+current thread, blocking that thread until a result is produced and returned.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;The &lt;code&gt;spawn&lt;/code&gt; method on a thread pool, which launches a future as an independent
+task on the pool.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;These &lt;em&gt;execution&lt;/em&gt; functions create a task that contains the future and is
+responsible for polling it. In the case of &lt;code&gt;wait&lt;/code&gt;, polling takes place
+immediately; for &lt;code&gt;spawn&lt;/code&gt;, polling happens once the task is &lt;em&gt;scheduled&lt;/em&gt; onto a
+worker thread.&lt;/p&gt;
+
+&lt;p&gt;However polling begins, if any of the interior futures produced a &lt;code&gt;NotReady&lt;/code&gt;
+result, it can grind the whole task to a halt—the task may need to wait for
+some event to occur before it can continue. In synchronous I/O, this is where a
+thread would block. Tasks provide an equivalent to this model: the task &amp;ldquo;blocks&amp;rdquo;
+by yielding back to its executor, &lt;strong&gt;after installing itself as a callback for
+the events it&amp;rsquo;s waiting on&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;Returning to the example of reading from a socket, on a &lt;code&gt;NotReady&lt;/code&gt; result the
+task can be added to the event loop&amp;rsquo;s dispatch table, so that it will be woken
+up when the socket becomes ready, at which point it will re-&lt;code&gt;poll&lt;/code&gt; its future.
+Crucially, though, the task instance stays fixed for the lifetime of the future
+it is executing—&lt;strong&gt;so no allocation is needed to create or install this callback&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;Completing the analogy with threads, tasks provide a &lt;code&gt;park&lt;/code&gt;/&lt;code&gt;unpark&lt;/code&gt; API for
+&amp;ldquo;blocking&amp;rdquo; and wakeup:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;c-Doc&quot;&gt;/// Returns a handle to the current task to call unpark at a later date.&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;park&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Task&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Task&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c-Doc&quot;&gt;/// Indicate that the task should attempt to poll its future in a timely fashion.&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unpark&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Blocking a future is a matter of using &lt;code&gt;park&lt;/code&gt; to get a handle to its task,
+putting the resulting &lt;code&gt;Task&lt;/code&gt; in some wakeup queue for the event of interest, and
+returning &lt;code&gt;NotReady&lt;/code&gt;. When the event of interest occurs, the &lt;code&gt;Task&lt;/code&gt; handle can
+be used to wake back up the task, e.g. by rescheduling it for execution on a
+thread pool. The precise mechanics of &lt;code&gt;park&lt;/code&gt;/&lt;code&gt;unpark&lt;/code&gt; vary by task executor.&lt;/p&gt;
+
+&lt;p&gt;In a way, the task model is an instance of &amp;ldquo;green&amp;rdquo; (aka lightweight) threading:
+we schedule a potentially large number of asynchronous tasks onto a much smaller
+number of real OS threads, and most of those tasks are blocked on some event
+most of the time. There&amp;rsquo;s an essential difference from Rust&amp;rsquo;s
+&lt;a href=&quot;https://github.com/aturon/rfcs/blob/remove-runtime/active/0000-remove-runtime.md&quot;&gt;old green threading model&lt;/a&gt;,
+however: &lt;strong&gt;tasks do not require their own stack&lt;/strong&gt;. In fact, all of the data
+needed by a task is contained within its future. That means we can neatly
+sidestep problems of dynamic stack growth and stack swapping, giving us truly
+lightweight tasks without any runtime system implications.&lt;/p&gt;
+
+&lt;p&gt;Perhaps surprisingly, &lt;strong&gt;the future within a task compiles down to a state
+machine&lt;/strong&gt;, so that every time the task wakes up to continue polling, it
+continues execution from the current state—working just like hand-rolled code
+based on &lt;a href=&quot;http://github.com/carllerche/mio&quot;&gt;mio&lt;/a&gt;. This point is most easily seen
+by example, so let&amp;rsquo;s revisit &lt;code&gt;join&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;example-join-in-the-demand-driven-model&quot;&gt;Example: &lt;code&gt;join&lt;/code&gt; in the demand-driven model&lt;/h3&gt;
+
+&lt;p&gt;To implement the &lt;code&gt;join&lt;/code&gt; function, we&amp;rsquo;ll introduce a new concrete type, &lt;code&gt;Join&lt;/code&gt;,
+that tracks the necessary state:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;G&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;G&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Join&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;G&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Join&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;BothRunning&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;enum&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Join&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;G&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;BothRunning&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;G&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;FirstDone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;G&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;SecondDone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;G&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Done&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;G&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Join&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;G&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;G&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Item&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;G&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Async&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Item&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;// navigate the state machine&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The first thing to notice is that &lt;code&gt;Join&lt;/code&gt; is an &lt;em&gt;enum&lt;/em&gt;, whose variants represent
+states in the &amp;ldquo;join state machine&amp;rdquo;:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;BothRunning&lt;/code&gt;: the two underlying futures are both still executing.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;FirstDone&lt;/code&gt;: the first future has yielded a value, but the second is still executing.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;SecondDone&lt;/code&gt;: the second future has yielded a value, but the first is still executing.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Done&lt;/code&gt;: both futures completed, and their values have been returned.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Enums in Rust are represented without requiring any pointers or heap allocation;
+instead, the size of the enum is the size of the largest variant. That&amp;rsquo;s exactly
+what we want—that size represents the &amp;ldquo;high water mark&amp;rdquo; of this little state
+machine.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;poll&lt;/code&gt; method here will attempt to make progress through the state machine
+by &lt;code&gt;poll&lt;/code&gt;ing the underlying futures as appropriate.&lt;/p&gt;
+
+&lt;p&gt;Recall that the aim of &lt;code&gt;join&lt;/code&gt; is to allow its two futures to proceed
+concurrently, racing to finish. For example, the two futures might each
+represent subtasks running in parallel on a thread pool. When those subtasks are
+still running, &lt;code&gt;poll&lt;/code&gt;ing their futures will return &lt;code&gt;NotReady&lt;/code&gt;, effectively
+&amp;ldquo;blocking&amp;rdquo; the &lt;code&gt;Join&lt;/code&gt; future, while stashing a handle to the ambient &lt;code&gt;Task&lt;/code&gt; for
+waking it back up when they finish. The two subtasks can then race to &lt;em&gt;wake up&lt;/em&gt;
+the &lt;code&gt;Task&lt;/code&gt;, but that&amp;rsquo;s fine: &lt;strong&gt;the &lt;code&gt;unpark&lt;/code&gt; method for waking a task is
+threadsafe, and guarantees that the task will &lt;code&gt;poll&lt;/code&gt; its future at least once
+after any &lt;code&gt;unpark&lt;/code&gt; call&lt;/strong&gt;. Thus, synchronization is handled once and for all at
+the task level, without requiring combinators like &lt;code&gt;join&lt;/code&gt; to allocate or handle
+synchronization themselves.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;You may have noticed that &lt;code&gt;poll&lt;/code&gt; takes &lt;code&gt;&amp;amp;mut self&lt;/code&gt;, which means that a given
+future cannot be &lt;code&gt;poll&lt;/code&gt;ed concurrently—the future has unique access to its
+contents while polling. The &lt;code&gt;unpark&lt;/code&gt; synchronization guarantees it.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;One final point. Combinators like &lt;code&gt;join&lt;/code&gt; embody &amp;ldquo;small&amp;rdquo; state machines, but
+because some of those states involve additional futures, they allow additional
+state machines to be &lt;em&gt;nested&lt;/em&gt;. In other words, &lt;code&gt;poll&lt;/code&gt;ing one of the underlying
+futures for &lt;code&gt;join&lt;/code&gt; may involve stepping through &lt;em&gt;its&lt;/em&gt; state machine, before
+taking steps in the &lt;code&gt;Join&lt;/code&gt; state machine. &lt;strong&gt;The fact that the use of the
+&lt;code&gt;Future&lt;/code&gt; trait does not entail heap allocation or dynamic dispatch is key to
+making this work efficiently.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;In general, the &amp;ldquo;big&amp;rdquo; future being run by a task—made up of a large chain of
+futures connected by combinators—embodies a &amp;ldquo;big&amp;rdquo; nested state machine in just
+this way. Once more, Rust&amp;rsquo;s enum representation means that the space required is
+the size of the state in the &amp;ldquo;big&amp;rdquo; machine with the largest footprint. The space
+for this &amp;ldquo;big&amp;rdquo; future is allocated in &lt;em&gt;one shot&lt;/em&gt; by the task, either on the
+stack (for the &lt;code&gt;wait&lt;/code&gt; executor) or on the heap (for &lt;code&gt;spawn&lt;/code&gt;). After all, the
+data has to live &lt;em&gt;somewhere&lt;/em&gt;—but the key is to avoid constant allocations as
+the state machine progresses, by instead making space for the entire thing up
+front.&lt;/p&gt;
+
+&lt;h2 id=&quot;futures-at-scale&quot;&gt;Futures at scale&lt;/h2&gt;
+
+&lt;p&gt;We&amp;rsquo;ve seen the basics of demand-driven futures, but there are a number of
+concerns about &lt;em&gt;robustness&lt;/em&gt; that we also want to cover. It turns out that these
+concerns are addressed naturally by the demand-driven model. Let&amp;rsquo;s take a look
+at a few of the most important.&lt;/p&gt;
+
+&lt;h3 id=&quot;cancellation&quot;&gt;Cancellation&lt;/h3&gt;
+
+&lt;p&gt;Futures are often used to represent substantial work that is running
+concurrently. Sometimes it will become clear that this work is no longer
+needed, perhaps because a timeout occurred, or the client closed a connection,
+or the needed answer was found in some other way.&lt;/p&gt;
+
+&lt;p&gt;In situations like these, you want some form of &lt;em&gt;cancellation&lt;/em&gt;: the ability to
+tell a future to stop executing because you&amp;rsquo;re no longer interested in its
+result.&lt;/p&gt;
+
+&lt;p&gt;In the demand-driven model, cancellation largely &amp;ldquo;falls out&amp;rdquo;. All you have to do
+is stop polling the future, instead &amp;ldquo;dropping&amp;rdquo; it (Rust&amp;rsquo;s term for destroying
+the data). And doing so is usually a natural consequence of nested state
+machines like &lt;code&gt;Join&lt;/code&gt;. Futures whose computation requires some special effort to
+cancel (such as canceling an RPC call) can provide this logic as part of their
+&lt;code&gt;Drop&lt;/code&gt; implementation.&lt;/p&gt;
+
+&lt;h3 id=&quot;backpressure&quot;&gt;Backpressure&lt;/h3&gt;
+
+&lt;p&gt;Another essential aspect of at-scale use of futures (and their close relative,
+streams) is &lt;em&gt;backpressure&lt;/em&gt;: the ability of an overloaded component in one part
+of a system to slow down input from other components. For example, if a server
+has a backlog of database transactions for servicing outstanding requests, it
+should slow down taking new requests.&lt;/p&gt;
+
+&lt;p&gt;Like cancellation, backpressure largely falls out of our model for futures and
+streams. That&amp;rsquo;s because tasks can be indefinitely &amp;ldquo;blocked&amp;rdquo; by a future/stream
+returning &lt;code&gt;NotReady&lt;/code&gt;, and notified to continue polling at a later time. For the
+example of database transactions, if enqueuing a transaction is itself
+represented as a future, the database service can return &lt;code&gt;NotReady&lt;/code&gt; to slow down
+requests. Often, such &lt;code&gt;NotReady&lt;/code&gt; results cascade backward through a system,
+e.g. allowing backpressure to flow from the database service back to a
+particular client connection then back to the overall connection manager. Such
+cascades are a natural consequence of the demand-driven model.&lt;/p&gt;
+
+&lt;h3 id=&quot;communicating-the-cause-of-a-wakeup&quot;&gt;Communicating the cause of a wakeup&lt;/h3&gt;
+
+&lt;p&gt;If you&amp;rsquo;re familiar with interfaces like
+&lt;a href=&quot;http://man7.org/linux/man-pages/man7/epoll.7.html&quot;&gt;epoll&lt;/a&gt;, you may have noticed
+something missing from the &lt;code&gt;park&lt;/code&gt;/&lt;code&gt;unpark&lt;/code&gt; model: it provides no way for a task
+to know &lt;em&gt;why&lt;/em&gt; it was woken up.&lt;/p&gt;
+
+&lt;p&gt;That can be a problem for certain kinds futures that involve polling a large
+number of other futures concurrently—you don&amp;rsquo;t want to have to re-poll
+&lt;em&gt;everything&lt;/em&gt; to discover which sub-future is actually able to make progress.&lt;/p&gt;
+
+&lt;p&gt;To deal with this problem, the library offers a kind of &amp;ldquo;epoll for everyone&amp;rdquo;:
+the ability to associate &amp;ldquo;unpark events&amp;rdquo; with a given &lt;code&gt;Task&lt;/code&gt; handle. That is,
+there may be various handles to the same task floating around, all of which can
+be used to wake the task up, but each of which carries different unpark events.
+When woken, the future within the task can inspect these unpark events to
+determine what happened. See
+&lt;a href=&quot;http://alexcrichton.com/futures-rs/futures/task/fn.with_unpark_event.html&quot;&gt;the docs&lt;/a&gt;
+for more detail.&lt;/p&gt;
+
+&lt;h2 id=&quot;wrapping-up&quot;&gt;Wrapping up&lt;/h2&gt;
+
+&lt;p&gt;We&amp;rsquo;ve now seen the core design principles behind the Rust futures and streams
+library. To recap, it boils down to a few key ideas:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Encapsulate running futures into &lt;em&gt;tasks&lt;/em&gt;, which serve as a single, permanent
+&amp;ldquo;callback&amp;rdquo; for the future.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Implement futures in a demand-driven, rather than callback-oriented, style.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Use Rust&amp;rsquo;s trait system to allow composed futures to flatten into big state
+machines.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Together, these ideas yield a robust, ergonomic, zero cost futures library.&lt;/p&gt;
+
+&lt;p&gt;As I mentioned at the outset of the post, we&amp;rsquo;re very actively working on the
+layers above the basic futures library—layers that incorporate particular I/O
+models (like &lt;a href=&quot;http://github.com/carllerche/mio&quot;&gt;mio&lt;/a&gt;) and also provide
+yet-higher-level tools for building servers. These layers are part of the Tokio
+project, and you can read more about the overall vision in
+&lt;a href=&quot;http://aturon.github.io/blog/2016/08/26/tokio/&quot;&gt;my earlier post&lt;/a&gt;. As those APIs
+stabilize, expect to see more posts describing them!&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Expanding the Tokio project</title>
@@ -30,40 +528,45 @@ consists of Carl Lerche, Alex Crichton, and myself; more on that below.&lt;/p&gt
 
 &lt;p&gt;There are three primary levels of abstraction in Tokio:&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;At the highest level is a &lt;em&gt;service&lt;/em&gt;, which is where you write a server
-application. Following the &lt;a href=&quot;http://finagle.github.io/&quot;&gt;Finagle&lt;/a&gt; model, a service is a simple thing: it&amp;rsquo;s
-a function from requests to &lt;em&gt;futures&lt;/em&gt; of responses. This simple model is
-incredibly powerful: it separates the implementation of request processing
-from the implementation of the underlying protocol, and makes it possible to
-factor out an ecosystem of &lt;em&gt;middleware&lt;/em&gt;. All of this seamlessly support async
-I/O via futures. Middleware runs the gamut from connection pooling to
-retry/timeout logic to logging to load balancing &amp;ndash; all of which can be
-written independently from any particular service or protocol. Read
-&lt;a href=&quot;https://monkey.org/%7Emarius/funsrv.pdf&quot;&gt;Your Server as a Function&lt;/a&gt; for the inspiration.&lt;/li&gt;
-&lt;/ul&gt;
+&lt;h3 id=&quot;services&quot;&gt;Services&lt;/h3&gt;
+
+&lt;p&gt;At the highest level is a &lt;em&gt;service&lt;/em&gt;, which is where you write a server
+  application. Following the &lt;a href=&quot;http://finagle.github.io/&quot;&gt;Finagle&lt;/a&gt; model, a service is a simple thing: it&amp;rsquo;s
+  a function from requests to &lt;em&gt;futures&lt;/em&gt; of responses. This simple model is
+  incredibly powerful: it separates the implementation of request processing
+  from the implementation of the underlying protocol, and makes it possible to
+  factor out an ecosystem of &lt;em&gt;middleware&lt;/em&gt;. All of this seamlessly support async
+  I/O via futures. Middleware runs the gamut from connection pooling to
+  retry/timeout logic to logging to load balancing &amp;ndash; all of which can be
+  written independently from any particular service or protocol. Read
+  &lt;a href=&quot;https://monkey.org/%7Emarius/funsrv.pdf&quot;&gt;Your Server as a Function&lt;/a&gt; for the inspiration.&lt;/p&gt;
 
 &lt;p&gt;The &lt;a href=&quot;https://github.com/tokio-rs/tokio-service&quot;&gt;tokio-service&lt;/a&gt; crate provides core trait definitions for
   services. Servers that can process particular request/response types (like
-  HTTP) are offered as standalone crates. &lt;strong&gt;Building an http server is just a
+  HTTP) are offered as standalone crates. Building an http server is just a
   matter of writing a function from http requests to futures of http
-  responses.&lt;/strong&gt;&lt;/p&gt;
+  responses.&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;In the middle are &lt;em&gt;protocols&lt;/em&gt;, like HTTP or Mux. Here, too, there is a lot of
-complexity worth factoring out, both at the transport layer and in the
-protocol &amp;ldquo;dispatch&amp;rdquo; layer. &lt;strong&gt;The &lt;a href=&quot;https://github.com/tokio-rs/tokio-proto&quot;&gt;tokio-proto&lt;/a&gt; crate provides re-usable
-components for building new protocol implementations&lt;/strong&gt;. We expect for there to
-be a similar kind of &amp;ldquo;middleware&amp;rdquo; ecosystem at these lower levels.&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;At the lowest level is the &lt;em&gt;event loop&lt;/em&gt;, which is where we bridge the OS&amp;rsquo;s I/O
-facilities into the world of futures. &lt;strong&gt;The &lt;a href=&quot;https://github.com/tokio-rs/tokio-core&quot;&gt;tokio-core&lt;/a&gt; crate provides a
-generic event loop for doing async I/O with futures&lt;/strong&gt;. If you want complete
-control, that&amp;rsquo;s the entry point for you; it&amp;rsquo;s particularly useful for cases
-that don&amp;rsquo;t fit so nicely into the service model, such as proxy servers.&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
+&lt;h3 id=&quot;protocols&quot;&gt;Protocols&lt;/h3&gt;
 
-&lt;p&gt;&lt;strong&gt;In short, we want the Tokio project to be a &amp;ldquo;one stop shop&amp;rdquo; for doing
-futures-based I/O&lt;/strong&gt;, whether at the highest level of prebuilt protocols, or
+&lt;p&gt;In the middle are &lt;em&gt;protocols&lt;/em&gt;, like HTTP or Mux. Here, too, there is a lot of
+  complexity worth factoring out, both at the transport layer and in the
+  protocol &amp;ldquo;dispatch&amp;rdquo; layer. The &lt;a href=&quot;https://github.com/tokio-rs/tokio-proto&quot;&gt;tokio-proto&lt;/a&gt; crate provides re-usable
+  components for building new protocol implementations. We expect for there to
+  be a similar kind of &amp;ldquo;middleware&amp;rdquo; ecosystem at these lower levels.&lt;/p&gt;
+
+&lt;h3 id=&quot;event-loop&quot;&gt;Event loop&lt;/h3&gt;
+
+&lt;p&gt;At the lowest level is the &lt;em&gt;event loop&lt;/em&gt;, which is where we bridge the OS&amp;rsquo;s I/O
+  facilities into the world of futures. The &lt;a href=&quot;https://github.com/tokio-rs/tokio-core&quot;&gt;tokio-core&lt;/a&gt; crate provides a
+  generic event loop for doing async I/O with futures. If you want complete
+  control, that&amp;rsquo;s the entry point for you; it&amp;rsquo;s particularly useful for cases
+  that don&amp;rsquo;t fit so nicely into the service model, such as proxy servers.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-stack-as-a-whole&quot;&gt;The stack as a whole&lt;/h3&gt;
+
+&lt;p&gt;In short, we want the Tokio project to be a &amp;ldquo;one stop shop&amp;rdquo; for doing
+futures-based I/O, whether at the highest level of prebuilt protocols, or
 the lowest level of the core event loop.&lt;/p&gt;
 
 &lt;p&gt;In our view, the lowest layers should strive to be zero cost and fully general,
