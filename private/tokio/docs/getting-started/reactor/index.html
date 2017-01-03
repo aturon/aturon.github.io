@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    
+    <link rel="stylesheet" href="/css/bootstrap-reboot.css">
+    <link rel="stylesheet" href="/css/bootstrap.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/tokio.css">
+
+    <title>Understanding event loops</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-light bg-faded">
+      <ul class="nav navbar-nav">
+        <li class="nav-item">
+          <a class="navbar-brand" href="/"><img src="/img/logo.png" width="44"
+            height="40" class="align-middle" alt=""></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="http://tokio.rs.s3-website-us-east-1.amazonaws.com/docs/getting-started/tokio/">Documentation</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="http://tokio.rs.s3-website-us-east-1.amazonaws.com/community/">Community</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="http://tokio.rs.s3-website-us-east-1.amazonaws.com/blog/tokio-0/">Blog</a>
+        </li>
+      </ul>
+    </nav>
+
+
+<div class="tk-pageheader">
+  <div class="container">
+    <h1 class="display-4">Understanding event loops</h1>
+    <p class="lead">The heart of asynchronous processing</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-3">
+
+      <nav class="leftnav">
+        <div class="" id="">
+          <h5>Getting started</h5>
+          <hr/>
+
+          <div class="" id="">
+            <ul class="nav">
+              
+              <li class="active">
+                <a href="/docs/getting-started/tokio/" class="text-muted">What is Tokio?</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/simple-server/" class="text-muted">Example: an echo server using proto</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/futures/" class="text-muted">Futures</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/db/" class="text-muted">Example: serving database content using proto</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/streams-and-sinks/" class="text-muted">Streams and sinks</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/reactor/" class="text-muted">Understanding event loops</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/core/" class="text-muted">High-level I/O using core</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/pipeline-server/" class="text-muted">Example: a simple pipelined server using core</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/tls/" class="text-muted">Example: a toy HTTP&#43;TLS client using core</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/simple-client/" class="text-muted">Example: a client with proto</a>
+              </li>
+              
+            </ul>
+          </div>
+
+          <br/>
+          <h5>Going deeper</h5>
+          <hr/>
+
+          <div class="" id="">
+            <ul class="nav">
+              
+              <li class="active">
+                <a href="/docs/going-deeper/futures-mechanics/" class="text-muted">Essential combinators</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/returning/" class="text-muted">Returning futures</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/futures-model/" class="text-muted">The futures-rs model in depth</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/synchronization/" class="text-muted">Synchronization</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/core-low-level/" class="text-muted">Low-level I/O using core</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/multiplex/" class="text-muted">Multiplexed protocols</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/streaming/" class="text-muted">Streaming protocols</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/tasks/" class="text-muted">Tasks and executors</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/examples/" class="text-muted">Larger examples</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/third-party/" class="text-muted">Third-party crates</a>
+              </li>
+              
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+    </div>
+    <div class="col-md-9">
+      <div class="tk-content">
+        
+
+<p>Now we&rsquo;ll take a bit more of a dive into <code>tokio-core</code>. Keep in mind that this
+layer of the stack is intended mainly for lower-level async programming;
+<code>tokio-proto</code> is generally nicer to work with when it meets your needs. Still,
+it can be helpful to understand how <code>tokio-core</code> works whether or not you use it
+directly.</p>
+
+<p>Almost all asynchronous libraries are powered in one form or another by an
+<strong>event loop</strong>. That&rsquo;s just a fancy term for code like this executing
+on a thread:</p>
+
+<pre><code class="language-rust">loop {
+    // Learn what the next &quot;event&quot; was, blocking if none available
+    let event = next_event();
+
+    // Dispatch this event, following it through to completion
+    dispatch(event);
+}
+</code></pre>
+
+<p>So an event loop is literally a <code>loop</code> that blocks, waiting for the next &ldquo;event&rdquo;
+in an asynchronous system, and then acts on the event appropriately. Events
+cover a wide spectrum:</p>
+
+<ul>
+<li>A socket is now readable</li>
+<li>An I/O write has finished</li>
+<li>External work for a future has completed, and it can make progress</li>
+<li>A timeout fired</li>
+</ul>
+
+<p>The &ldquo;dispatch&rdquo; above is also very general; it just means &ldquo;taking appropriate
+action&rdquo; to respond to an event, for example, by scheduling a write after a read
+is finished, attempting to complete a future&rsquo;s state machine, or starting
+handling timeout logic for a timeout which fired.</p>
+
+<h2 id="the-event-loop-of-tokio-core">The event loop of <code>tokio-core</code></h2>
+
+<p>The heart of the <code>tokio-core</code> library is the <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/index.html"><code>tokio_core::reactor</code></a> module;
+&ldquo;reactor&rdquo; is a common synonym for &ldquo;event loop&rdquo;. The module contains the <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Core.html"><code>Core</code></a>
+type, which is the actual event loop, as well as the <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Handle.html"><code>Handle</code></a> and <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Remote.html"><code>Remote</code></a>
+types, which are used to send messages and interact with the event loop without
+holding the <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Core.html"><code>Core</code></a> itself.</p>
+
+<h3 id="core"><code>Core</code></h3>
+
+<p>The <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Core.html"><code>Core</code></a> type has a relatively small API surface area; the main item of
+interest is the <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Core.html#method.run"><code>run</code></a> method. This method takes a future, <code>F</code>,
+and starts executing an event loop on the current thread until the future <code>F</code> is
+completed. While this may look similar to <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.wait"><code>Future::wait</code></a>, there&rsquo;s a crucial
+difference: while its waiting for the future to resolve it executes other work
+on the event loop rather than just blocking the thread. As we saw in the
+<a href="../streams-and-sinks">previous section</a>, that other work includes tasks that
+were spawned onto the event loop.</p>
+
+<p>Most servers consist of some setup, followed by running the event loop with a
+connection-handling future, as we also saw before. To recap, the basic structure
+looks as follows:</p>
+
+<pre><code class="language-rust">extern crate futures;
+extern crate tokio_core;
+
+use futures::Stream;
+use tokio_core::net::TcpListener;
+use tokio_core::reactor::Core;
+
+fn main() {
+    let mut core = Core::new().unwrap();
+    let listener = TcpListener::bind(&amp;&quot;127.0.0.1:8080&quot;.parse().unwrap(),
+                                     &amp;core.handle()).unwrap();
+
+    let server = listener.incoming().for_each(|(client, client_addr)| {
+        // process `client` by spawning a new task ...
+
+        Ok(()) // keep accepting connections
+    });
+
+    core.run(server).unwrap();
+}
+</code></pre>
+
+<p>For clients, however, you can use the <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Core.html#method.run"><code>run</code></a> method for one-off
+futures or otherwise one-off tasks. Some pseudo-code for this could look like:</p>
+
+<pre><code class="language-rust">let my_request = http::get(&quot;https://www.rust-lang.org&quot;);
+let my_response = my_context.core.run(my_request).unwrap();
+</code></pre>
+
+<p>The <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Core.html"><code>Core</code></a> could be stashed in a local context which is used whenever
+executing a future, but is otherwise idle while the client is processing other
+tasks. Alternatively a thread could be spawned on a client running a <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Core.html"><code>Core</code></a>
+and work could be shipped over to it whenever necessary and returned later;
+we&rsquo;ll see how to do that with <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Remote.html"><code>Remote</code></a> in just a moment.</p>
+
+<h3 id="handle"><code>Handle</code></h3>
+
+<p>In general, the code being run by the event loop needs the ability to make
+additional requests of the event loop, and thus needs some way to access the
+loop. Consequently, the <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Core.html"><code>Core</code></a> type provides the ability to acquire an owned
+<em>handle</em> to itself through the <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Handle.html"><code>Handle</code></a> type created through the
+<a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Core.html#method.handle"><code>Core::handle</code></a> method.</p>
+
+<p>Let&rsquo;s first take a look at the <code>Handle</code>&rsquo;s <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Handle.html#method.spawn"><code>spawn</code></a> method. Like
+<a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Core.html#method.run"><code>Core::run</code></a>, <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Handle.html#method.spawn"><code>spawn</code></a> will ensure the provided future run to
+completion. Unlike <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Core.html#method.run"><code>Core::run</code></a>, however, spawning requires the item/error type
+of a future to be <code>()</code> and also requires the <code>'static</code> bound. The requirement of
+<code>()</code> signifies that future is executed in the background of the event loop to
+completion and must have its own error handling.</p>
+
+<p>As we saw in the last section, the <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Handle.html#method.spawn"><code>spawn</code></a> method is useful
+for spawning off work dynamically onto an event loop. All spawned work <em>is
+executed concurrently</em> on the event loop thread, which is typically ideal, for
+example, when handling TCP connections. Taking our <code>run</code> example from before, we
+could enhance it by handling all clients concurrently by adding:</p>
+
+<pre><code class="language-rust">// Acquire a `Handle` and then use that to spawn work for each client as
+// they're accepted from the TCP socket.
+let handle = core.handle();
+let server = listener.incoming().for_each(|(client, _client_addr)| {
+    handle.spawn(process(client));
+
+    Ok(()) // keep accepting connections
+});
+</code></pre>
+
+<p>and add a <code>process</code> function for handling a client:</p>
+
+<pre><code class="language-rust">// Here we'll express the handling of `client` and return it as a future
+// to be spawned onto the event loop.
+fn process(client: TcpStream) -&gt; Box&lt;Future&lt;Item = (), Error = ()&gt;&gt; {
+    // ...
+}
+</code></pre>
+
+<p>Beyond spawning threads, a <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Handle.html"><code>Handle</code></a> is also use for constructing objects
+associated with the event loop. For example the <a href="https://docs.rs/tokio-core/0.1/tokio_core/net/struct.TcpListener.html#method.bind"><code>TcpListener::bind</code></a> method
+that we&rsquo;ve been using takes <code>&amp;Handle</code> as its second argument.</p>
+
+<h3 id="remote"><code>Remote</code></h3>
+
+<p>With <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Handle.html"><code>Handle</code></a> we&rsquo;re now able to retain a reference to the event loop without
+holding a <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Core.html"><code>Core</code></a> itself. The <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Handle.html"><code>Handle</code></a> type itself, however, is not sendable
+across threads; it is only usable on the event loop thread itself, which gives
+substantial performance benefits. If you need to communicate with the event loop
+from a different thread, you can use the <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Remote.html"><code>Remote</code></a> type as a form of
+&ldquo;downgraded&rdquo; handle. You can get a <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Remote.html"><code>Remote</code></a> by calling the <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Remote.html"><code>remote</code></a> method
+on a <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Handle.html"><code>Handle</code></a>.</p>
+
+<p>A <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Remote.html"><code>Remote</code></a>, like <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Handle.html"><code>Handle</code></a> is associated with an event loop (e.g. it&rsquo;s
+another kind of handle to <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Core.html"><code>Core</code></a>). <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Remote.html"><code>Remote</code></a>, however, can be sent across
+threads. The <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Remote.html"><code>Remote</code></a> type also currently only has a
+<a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Remote.html#method.spawn"><code>spawn</code></a> function. This <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Remote.html#method.spawn"><code>spawn</code></a> is
+importantly different from <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Handle.html#method.spawn"><code>Handle::spawn</code></a> in that it takes a <em>closure</em> which
+is <code>Send</code> (can be sent across threads) which crates a future. The created future
+is then spawned onto the event loop to be executed locally.</p>
+
+<p>The closure provided, when run, is yielded a <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Handle.html"><code>Handle</code></a> as proof that it&rsquo;s
+running on the same thread as the event loop. This handle can then be used to
+create and work with I/O objects. Like <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Handle.html#method.spawn"><code>Handle::spawn</code></a> the <a href="https://docs.rs/tokio-core/0.1/tokio_core/reactor/struct.Remote.html#method.spawn"><code>Remote::spawn</code></a>
+method requires the item/error types of the future to be <code>()</code> as it&rsquo;s run
+concurrently.</p>
+
+        
+        <div class="tk-next"><b>Next up</b>: <a href = /docs/getting-started/core/>
+         High-level I/O using core</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <footer class="tk-footer">
+      <div class="container text-muted">
+        <div class="col-md-6">
+          Copyright © 2016 Tokio Project
+        </div>
+        <div class="col-md-6">
+          <div class="pull-right">
+            <a href="https://twitter.com/tokio_rs" class="text-muted"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+            <a href="https://github.com/tokio-rs/tokio" class="text-muted"><i class="fa fa-github" aria-hidden="true"></i></a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js" integrity="sha384-XTs3FgkjiBgo8qjEjBk0tGmf3wPrWtA6coPfQDfFEY8AnYJwjalXCiosYRBIBZX8" crossorigin="anonymous"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/highlight.js"></script>
+    <script>
+      $(function () {
+        $("pre code").each(function(i, block) {
+          
+          hljs.highlightBlock(block);
+        });
+      });
+    </script>
+  </body>
+</html>
+

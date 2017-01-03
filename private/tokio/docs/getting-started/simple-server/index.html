@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    
+    <link rel="stylesheet" href="/css/bootstrap-reboot.css">
+    <link rel="stylesheet" href="/css/bootstrap.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/tokio.css">
+
+    <title>Example: an echo server using proto</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-light bg-faded">
+      <ul class="nav navbar-nav">
+        <li class="nav-item">
+          <a class="navbar-brand" href="/"><img src="/img/logo.png" width="44"
+            height="40" class="align-middle" alt=""></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="http://tokio.rs.s3-website-us-east-1.amazonaws.com/docs/getting-started/tokio/">Documentation</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="http://tokio.rs.s3-website-us-east-1.amazonaws.com/community/">Community</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="http://tokio.rs.s3-website-us-east-1.amazonaws.com/blog/tokio-0/">Blog</a>
+        </li>
+      </ul>
+    </nav>
+
+
+<div class="tk-pageheader">
+  <div class="container">
+    <h1 class="display-4">Example: an echo server using proto</h1>
+    <p class="lead"></p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-3">
+
+      <nav class="leftnav">
+        <div class="" id="">
+          <h5>Getting started</h5>
+          <hr/>
+
+          <div class="" id="">
+            <ul class="nav">
+              
+              <li class="active">
+                <a href="/docs/getting-started/tokio/" class="text-muted">What is Tokio?</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/simple-server/" class="text-muted">Example: an echo server using proto</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/futures/" class="text-muted">Futures</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/db/" class="text-muted">Example: serving database content using proto</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/streams-and-sinks/" class="text-muted">Streams and sinks</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/reactor/" class="text-muted">Understanding event loops</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/core/" class="text-muted">High-level I/O using core</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/pipeline-server/" class="text-muted">Example: a simple pipelined server using core</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/tls/" class="text-muted">Example: a toy HTTP&#43;TLS client using core</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/simple-client/" class="text-muted">Example: a client with proto</a>
+              </li>
+              
+            </ul>
+          </div>
+
+          <br/>
+          <h5>Going deeper</h5>
+          <hr/>
+
+          <div class="" id="">
+            <ul class="nav">
+              
+              <li class="active">
+                <a href="/docs/going-deeper/futures-mechanics/" class="text-muted">Essential combinators</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/returning/" class="text-muted">Returning futures</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/futures-model/" class="text-muted">The futures-rs model in depth</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/synchronization/" class="text-muted">Synchronization</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/core-low-level/" class="text-muted">Low-level I/O using core</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/multiplex/" class="text-muted">Multiplexed protocols</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/streaming/" class="text-muted">Streaming protocols</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/tasks/" class="text-muted">Tasks and executors</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/examples/" class="text-muted">Larger examples</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/third-party/" class="text-muted">Third-party crates</a>
+              </li>
+              
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+    </div>
+    <div class="col-md-9">
+      <div class="tk-content">
+        
+
+<p>To kick off our tour of Tokio, we&rsquo;ll build a simple line-based echo server using
+<code>tokio-proto</code>:</p>
+
+<pre><code class="language-shell">$ cargo new --bin echo-proto
+cd echo-proto
+</code></pre>
+
+<p>We&rsquo;ll need to add dependencies on the Tokio stack:</p>
+
+<pre><code class="language-toml">[dependencies]
+futures = &quot;0.1&quot;
+tokio-core = &quot;0.1&quot;
+tokio-service = &quot;0.1&quot;
+tokio-proto = &quot;0.1&quot;
+</code></pre>
+
+<p>and bring them into scope in <code>main.rs</code>:</p>
+
+<pre><code class="language-rust">extern crate futures;
+extern crate tokio_core;
+extern crate tokio_proto;
+extern crate tokio_service;
+</code></pre>
+
+<h2 id="overview">Overview</h2>
+
+<p>A server in <code>tokio-proto</code> is made up of three distinct parts:</p>
+
+<ul>
+<li><p>A <strong>codec</strong>, which manages serialization of Rust request and response
+types a protocol.</p></li>
+
+<li><p>A <strong>protocol specification</strong>, which puts together a codec and some basic
+information about the protocol (is it multiplexed? streaming?).</p></li>
+
+<li><p>A <strong>service</strong>, which says how to produce a response given a request. A
+service is basically an asynchronous function.</p></li>
+</ul>
+
+<p>Each part can vary independently, so once you&rsquo;ve implemented a protocol
+(like HTTP), you can pair it with a number different services.</p>
+
+<p>Let&rsquo;s see how it&rsquo;s done.</p>
+
+<h2 id="step-1-implement-a-codec">Step 1: Implement a codec</h2>
+
+<p>We&rsquo;ll start by implementing a codec for a simple line-based protocol,
+where messages are arbitrary byte sequences delimited by <code>'\n'</code>. To do
+this, we&rsquo;ll need a couple of tools from <code>tokio-core</code>:</p>
+
+<pre><code class="language-rust">use std::io;
+use tokio_core::io::{Codec, EasyBuf};
+</code></pre>
+
+<p>In general, codecs may need local state, for example to record
+information about incomplete decoding. We can get away without it,
+though:</p>
+
+<pre><code class="language-rust">pub struct LineCodec;
+</code></pre>
+
+<p>Codecs in Tokio implement the <a href="TODO"><code>Codec</code> trait</a>, which implements message
+encoding and decoding. To start with, we&rsquo;ll need to specify the message
+type. <code>In</code> gives the types of incoming messages <em>after decoding</em>, while
+<code>Out</code> gives the type of outgoing messages <em>prior to encoding</em>:</p>
+
+<pre><code class="language-rust">impl Codec for LineCodec {
+    type In = EasyBuf;
+    type Out = io::Result&lt;EasyBuf&gt;;
+</code></pre>
+
+<p>The <a href="TODO"><code>EasyBuf</code> type</a> used here provides simple but efficient buffer
+management; you can think of it like <code>Arc&lt;[u8]&gt;</code>, a reference-counted immutable
+slice of bytes, with all the details handled for you. Outgoing messages from the
+server use <code>Result</code> in order to convey service errors on the Rust side.</p>
+
+<p><code>EasyBuf</code> is in fact a <a href="TODO">built-in part of decoding</a>: we are given
+an input <code>EasyBuf</code> that contains a chunk of unprocessed data, and we
+must try to extract the first complete message, if there is one. If the
+buffer doesn&rsquo;t contain a complete message, we return <code>None</code>, and the
+server will automatically fetch more data before trying to decode again.</p>
+
+<p>For our line-based protocol, decoding is straightforward:</p>
+
+<pre><code class="language-rust">fn decode(&amp;mut self, buf: &amp;mut EasyBuf) -&gt; io::Result&lt;Option&lt;Self::In&gt;&gt; {
+    if let Some(i) = buf.as_slice().iter().position(|&amp;b| b == b'\n') {
+        // remove the line, including the '\n', from the buffer
+        let mut full_line = buf.drain_to(i + 1);
+
+        // strip the `\n` from the returned buffer
+        Ok(Some(full_line.drain_to(i)))
+    } else {
+        Ok(None)
+    }
+}
+</code></pre>
+
+<p>The <a href="TODO"><code>drain</code> method</a> on <code>EasyBuf</code> splits the buffer in two at the
+given index, returning a new <code>EasyBuf</code> instance corresponding to the
+prefix ending at the index, and updating the existing <code>EasyBuf</code> to
+contain only the suffix. It&rsquo;s the typical way to remove one complete
+message from the input buffer.</p>
+
+<p>Encoding is even easier: you&rsquo;re given mutable access to a <code>Vec&lt;u8&gt;</code>,
+into which you serialize your output data. To keep things simple,
+we won&rsquo;t provide support for error responses:</p>
+
+<pre><code class="language-rust">fn encode(&amp;mut self, item: io::Result&lt;EasyBuf&gt;, into: &amp;mut Vec&lt;u8&gt;)
+         -&gt; io::Result&lt;()&gt;
+{
+    let item = item.expect(&quot;Errors are not supported by this protocol&quot;);
+    into.extend(item.as_slice());
+    into.push(b'\n');
+    Ok(())
+}
+</code></pre>
+
+<p>And that&rsquo;s it for our codec.</p>
+
+<h2 id="step-2-specify-the-protocol">Step 2: Specify the protocol</h2>
+
+<p>Next, we turn the codec into a full-blown protocol. The <code>tokio-proto</code> crate is
+equipped to deal with a variety of protocol styles, including multiplexed and
+streaming protocols. For our line-based protocol, though, we&rsquo;ll use the simplest
+style: a pipelined, non-streaming protocol:</p>
+
+<pre><code class="language-rust">use tokio_proto::pipeline::ServerProto;
+</code></pre>
+
+<p>As with codecs, protocols can carry state, typically used for configuration. We
+don&rsquo;t need any configuration, so we&rsquo;ll make another unit struct:</p>
+
+<pre><code class="language-rust">pub struct LineProto;
+</code></pre>
+
+<p>Setting up a protocol requires just a bit of boilerplate, tying together our
+chosen protocol style with the codec that we&rsquo;ve built:</p>
+
+<pre><code class="language-rust">use tokio_core::io::{Io, Framed};
+
+impl&lt;T: Io + 'static&gt; ServerProto&lt;T&gt; for LineProto {
+    /// For this protocol style, `Request` matches the codec `In` type
+    type Request = EasyBuf;
+
+    /// For this protocol style, `Response` matches the successful arm of
+    /// the codec `Out` type
+    type Response = EasyBuf;
+
+    /// For this protocol style, `Error` matches the erroneous arm of the
+    /// codec `Out` type.
+    type Error = io::Error;
+
+    /// A bit of boilerplate to hook in the codec:
+    type Transport = Framed&lt;T, LineCodec&gt;;
+    type BindTransport = Result&lt;Self::Transport, io::Error&gt;;
+    fn bind_transport(&amp;self, io: T) -&gt; Self::BindTransport {
+        Ok(io.framed(LineCodec))
+    }
+}
+</code></pre>
+
+<h2 id="step-3-implement-a-service">Step 3: Implement a service</h2>
+
+<p>At this point, we&rsquo;ve built a generic line-based protocol. To actually <em>use</em> this
+protocol, we need to pair it with a <em>service</em> that says how to respond to requests.
+The <code>tokio-service</code> crate provides a <code>Service</code> trait for just this purpose:</p>
+
+<pre><code class="language-rust">use tokio_service::Service;
+</code></pre>
+
+<p>As with the other components we&rsquo;ve built, in general a service may have data
+associated with it. The service we want for this example just echos its input,
+so no additional data is needed:</p>
+
+<pre><code class="language-rust">pub struct Echo;
+</code></pre>
+
+<p>At its core, a service is an <em>asynchronous (non-blocking) function</em> from
+requests to responses.  We&rsquo;ll have more to say about asynchronous programming in
+the next guide; the only thing to know right now is that Tokio uses <em>futures</em>
+for asynchronous code, through the <code>Future</code> trait. You can think of a future as
+an asynchronous version of <code>Result</code>. Let&rsquo;s bring the basics into scope:</p>
+
+<pre><code class="language-rust">use futures::{future, Future, BoxFuture};
+</code></pre>
+
+<p>For our echo service, we don&rsquo;t need to do any I/O to produce a response for a
+request. So we use <code>future::ok</code> to make a future that immediately returns a
+value&mdash;in this case, returning the request immediately back as a successful
+response. To keep things simple, we&rsquo;ll also box the future into a trait object,
+which allows us to use the <code>BoxFuture</code> trait to define our service, no matter
+what future we actually use inside&mdash;more on those tradeoffs later!</p>
+
+<pre><code class="language-rust">impl Service for Echo {
+    // These types must match the corresponding protocol types:
+    type Request = EasyBuf;
+    type Response = EasyBuf;
+    type Error = io::Error;
+
+    // The future for computing the response; box it for simplicity.
+    type Future = BoxFuture&lt;Self::Response, Self::Error&gt;;
+
+    // Produce a future for computing a response from a request.
+    fn call(&amp;mut self, req: Self::Request) -&gt; Self::Future {
+        // In this case, the response is immediate.
+        future::ok(req).boxed()
+    }
+}
+</code></pre>
+
+<h2 id="we-re-done-now-configure-and-run">We&rsquo;re done&mdash;now configure and run!</h2>
+
+<p>With that, we have the ingredients necessary for a full-blown server: a general
+protocol, and a particular service to provide on it. All that remains is to
+actually configure and launch the server, which we&rsquo;ll do using the <code>TcpServer</code>
+builder:</p>
+
+<pre><code class="language-rust">use tokio_proto::TcpServer;
+
+fn main() {
+    // Specify the localhost address
+    let addr = &quot;0.0.0.0:12345&quot;.parse().unwrap();
+
+    // The builder requires a protocol and an address
+    let server = TcpServer::new(LineProto, addr);
+
+    // We provide a way to *instantiate* the service for each new
+    // connection; here, we just immediately return a new instance.
+    server.serve(|| Ok(Echo));
+}
+</code></pre>
+
+<p>You can run this code and connect locally to try it out:</p>
+
+<pre><code class="language-shell">~ $ telnet localhost 12345
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+hello, world!
+hello, world!
+echo
+echo
+</code></pre>
+
+<h2 id="pairing-with-another-service">Pairing with another service</h2>
+
+<p>That was a fair amount of ceremony for a simple echo server. But most of what we
+did&mdash;the protocol specification&mdash;is reusable. To prove it, let&rsquo;s build a
+service that echos its input in reverse:</p>
+
+<pre><code class="language-rust">struct EchoRev;
+
+impl Service for EchoRev {
+    type Request = EasyBuf;
+    type Response = EasyBuf;
+    type Error = io::Error;
+    type Future = BoxFuture&lt;Self::Response, Self::Error&gt;;
+
+    fn call(&amp;mut self, req: Self::Request) -&gt; Self::Future {
+        let rev: Vec&lt;u8&gt; = req.as_slice().iter()
+            .rev()
+            .cloned()
+            .collect();
+        let resp = EasyBuf::from(rev);
+        future::ok(resp).boxed()
+    }
+}
+</code></pre>
+
+<p>Not too shabby. And now, if we serve <code>EchoRev</code> instead of <code>Echo</code>, we&rsquo;ll see:</p>
+
+<pre><code class="language-shell">~ $ telnet localhost 12345
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+hello, world!
+!dlrow ,olleh
+echo
+ohce
+</code></pre>
+
+        
+        <div class="tk-next"><b>Next up</b>: <a href = /docs/getting-started/futures/>
+         Futures</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <footer class="tk-footer">
+      <div class="container text-muted">
+        <div class="col-md-6">
+          Copyright © 2016 Tokio Project
+        </div>
+        <div class="col-md-6">
+          <div class="pull-right">
+            <a href="https://twitter.com/tokio_rs" class="text-muted"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+            <a href="https://github.com/tokio-rs/tokio" class="text-muted"><i class="fa fa-github" aria-hidden="true"></i></a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js" integrity="sha384-XTs3FgkjiBgo8qjEjBk0tGmf3wPrWtA6coPfQDfFEY8AnYJwjalXCiosYRBIBZX8" crossorigin="anonymous"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/highlight.js"></script>
+    <script>
+      $(function () {
+        $("pre code").each(function(i, block) {
+          
+          hljs.highlightBlock(block);
+        });
+      });
+    </script>
+  </body>
+</html>
+

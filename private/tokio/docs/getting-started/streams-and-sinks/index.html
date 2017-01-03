@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    
+    <link rel="stylesheet" href="/css/bootstrap-reboot.css">
+    <link rel="stylesheet" href="/css/bootstrap.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/tokio.css">
+
+    <title>Streams and sinks</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-light bg-faded">
+      <ul class="nav navbar-nav">
+        <li class="nav-item">
+          <a class="navbar-brand" href="/"><img src="/img/logo.png" width="44"
+            height="40" class="align-middle" alt=""></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="http://tokio.rs.s3-website-us-east-1.amazonaws.com/docs/getting-started/tokio/">Documentation</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="http://tokio.rs.s3-website-us-east-1.amazonaws.com/community/">Community</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="http://tokio.rs.s3-website-us-east-1.amazonaws.com/blog/tokio-0/">Blog</a>
+        </li>
+      </ul>
+    </nav>
+
+
+<div class="tk-pageheader">
+  <div class="container">
+    <h1 class="display-4">Streams and sinks</h1>
+    <p class="lead">High-level async programming</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-3">
+
+      <nav class="leftnav">
+        <div class="" id="">
+          <h5>Getting started</h5>
+          <hr/>
+
+          <div class="" id="">
+            <ul class="nav">
+              
+              <li class="active">
+                <a href="/docs/getting-started/tokio/" class="text-muted">What is Tokio?</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/simple-server/" class="text-muted">Example: an echo server using proto</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/futures/" class="text-muted">Futures</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/db/" class="text-muted">Example: serving database content using proto</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/streams-and-sinks/" class="text-muted">Streams and sinks</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/reactor/" class="text-muted">Understanding event loops</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/core/" class="text-muted">High-level I/O using core</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/pipeline-server/" class="text-muted">Example: a simple pipelined server using core</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/tls/" class="text-muted">Example: a toy HTTP&#43;TLS client using core</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/simple-client/" class="text-muted">Example: a client with proto</a>
+              </li>
+              
+            </ul>
+          </div>
+
+          <br/>
+          <h5>Going deeper</h5>
+          <hr/>
+
+          <div class="" id="">
+            <ul class="nav">
+              
+              <li class="active">
+                <a href="/docs/going-deeper/futures-mechanics/" class="text-muted">Essential combinators</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/returning/" class="text-muted">Returning futures</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/futures-model/" class="text-muted">The futures-rs model in depth</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/synchronization/" class="text-muted">Synchronization</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/core-low-level/" class="text-muted">Low-level I/O using core</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/multiplex/" class="text-muted">Multiplexed protocols</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/streaming/" class="text-muted">Streaming protocols</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/tasks/" class="text-muted">Tasks and executors</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/examples/" class="text-muted">Larger examples</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/third-party/" class="text-muted">Third-party crates</a>
+              </li>
+              
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+    </div>
+    <div class="col-md-9">
+      <div class="tk-content">
+        
+
+<p>We&rsquo;ve now seen a few examples of futures, which represent a <em>one-time</em>
+asynchronous event. But there are a lot of cases where you want to deal with a
+<em>series</em> of events:</p>
+
+<ul>
+<li>incoming connections over time,</li>
+<li>incoming or outgoing network packets,</li>
+<li>incoming or outgoing chunks of a streaming protocol,</li>
+<li>repeated timeouts</li>
+</ul>
+
+<p>and so on.</p>
+
+<p>The <code>futures-rs</code> library provides two abstractions that are similar to futures,
+but work with series of events over time: streams and sinks. Streams are for
+incoming events (which are caused by something external happening, like a
+timeout firing) while sinks are for outgoing events (like sending a message
+chunk).</p>
+
+<h2 id="streams">Streams</h2>
+
+<p>Let&rsquo;s see how <a href="https://docs.rs/futures/0.1.7/futures/trait.Future.html"><code>Future</code></a> and <a href="https://docs.rs/futures/0.1.7/futures/stream/trait.Stream.html"><code>Stream</code></a> relate to their synchronous equivalents
+in the standard library:</p>
+
+<table>
+<thead>
+<tr>
+<th># items</th>
+<th>Sync</th>
+<th>Async</th>
+<th>Common operations</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>1</td>
+<td><a href="https://doc.rust-lang.org/std/result/enum.Result.html"><code>Result</code></a></td>
+<td><a href="https://docs.rs/futures/0.1.7/futures/trait.Future.html"><code>Future</code></a></td>
+<td><a href="https://docs.rs/futures/0.1.7/futures/trait.Future.html#method.map"><code>map</code></a>, <a href="https://docs.rs/futures/0.1.7/futures/trait.Future.html#method.and_then"><code>and_then</code></a></td>
+</tr>
+
+<tr>
+<td>∞</td>
+<td><a href="https://doc.rust-lang.org/std/iter/trait.Iterator.html"><code>Iterator</code></a></td>
+<td><a href="https://docs.rs/futures/0.1.7/futures/stream/trait.Stream.html"><code>Stream</code></a></td>
+<td><a href="https://docs.rs/futures/0.1.7/futures/stream/trait.Stream.html#method.map"><code>map</code></a>, <a href="https://docs.rs/futures/0.1.7/futures/stream/trait.Stream.html#method.fold"><code>fold</code></a>, <a href="https://docs.rs/futures/0.1.7/futures/stream/trait.Stream.html#method.collect"><code>collect</code></a></td>
+</tr>
+</tbody>
+</table>
+
+<p>The definition of the <a href="https://docs.rs/futures/0.1.7/futures/stream/trait.Stream.html"><code>Stream</code></a> trait also resembles that of <a href="https://doc.rust-lang.org/std/iter/trait.Iterator.html"><code>Iterator</code></a>:</p>
+
+<pre><code class="language-rust">trait Stream {
+    // The type of item yielded each time the stream's event occurs
+    type Item;
+
+    // The error type; errors terminate the stream.
+    type Error;
+
+    // Try to produce a value.
+    fn poll(&amp;mut self) -&gt; Poll&lt;Option&lt;Self::Item&gt;, Self::Error&gt;;
+
+    // ... and many default methods; we'll see some of them below.
+}
+</code></pre>
+
+<p>The <a href="https://docs.rs/futures/0.1.7/futures/stream/trait.Stream.html"><code>Stream</code></a> trait is very similar to the <a href="https://docs.rs/futures/0.1.7/futures/trait.Future.html"><code>Future</code></a> trait, except that a
+stream&rsquo;s <a href="https://docs.rs/futures/0.1.7/futures/stream/trait.Stream.html#tymethod.poll"><code>poll</code></a> method returns <code>Option&lt;Self::Item&gt;</code> instead of
+<code>Self::Item</code>. The semantics are much like with <a href="https://doc.rust-lang.org/std/iter/trait.Iterator.html"><code>Iterator</code></a>: yielding <code>None</code>
+means that the stream has terminated. Like futures, streams can produce
+errors, which <em>also</em> terminate the stream.</p>
+
+<p>The stream API is easiest to understand by example, so let&rsquo;s write a little
+server that immediately sends &ldquo;Hello, world!&rdquo; to each client that connects, and
+then hangs up. (We&rsquo;ll use <code>tokio-core</code> in this example, which is covered in
+greater depth in the next section.)</p>
+
+<pre><code class="language-rust">extern crate futures;
+extern crate tokio_core;
+
+use futures::stream::Stream;
+use tokio_core::reactor::Core;
+use tokio_core::net::TcpListener;
+
+fn main() {
+    let mut core = Core::new().unwrap();
+    let address = &quot;0.0.0.0:12345&quot;.parse().unwrap();
+    let listener = TcpListener::bind(&amp;address, &amp;core.handle()).unwrap();
+
+    let connections = listener.incoming();
+    let welcomes = connections.and_then(|(socket, _peer_addr)| {
+        tokio_core::io::write_all(socket, b&quot;Hello, world!\n&quot;)
+    });
+    let server = welcomes.for_each(|(_socket, _welcome)| {
+        Ok(())
+    });
+
+    core.run(server).unwrap();
+}
+</code></pre>
+
+<p>That was easy! Let&rsquo;s pick apart a few key lines. First, there&rsquo;s the <em>reactor setup</em>:</p>
+
+<pre><code class="language-rust">let mut core = Core::new().unwrap();
+</code></pre>
+
+<p>We&rsquo;ll cover reactors (aka <em>event loops</em>) in detail in the next section. For now,
+it&rsquo;s enough to know that if you&rsquo;re doing asynchronous I/O, it needs to be
+managed by a reactor. The <code>tokio-proto</code> crate takes care of this for you, but
+here we&rsquo;re working at a lower level.</p>
+
+<p>We then set up an async TCP listener, associated with that reactor:</p>
+
+<pre><code class="language-rust">let listener = TcpListener::bind(&amp;address, &amp;core.handle()).unwrap();
+</code></pre>
+
+<p>Our first encounter with streams is the <code>incoming</code> stream:</p>
+
+<pre><code class="language-rust">let connections = listener.incoming();
+</code></pre>
+
+<p>This is an unending stream of sockets, one for each
+incoming connection. It&rsquo;s an async version of
+<a href="https://static.rust-lang.org/doc/master/std/net/struct.TcpListener.html#method.incoming">the same method</a>
+in the standard library. And just as with iterators, we can use the methods on
+the <a href="https://docs.rs/futures/0.1.7/futures/stream/trait.Stream.html"><code>Stream</code></a> trait to manipulate the stream:</p>
+
+<pre><code class="language-rust">let welcomes = connections.and_then(|(socket, _peer_addr)| {
+    tokio_core::io::write_all(socket, b&quot;Hello, world!\n&quot;)
+});
+</code></pre>
+
+<p>Here we use <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.and_then"><code>and_then</code></a> to perform an action over each item of
+the stream, a bit like <code>and_then</code> on <code>Result</code>, except that the closure we give
+<code>and_then</code> produces a future. We get back a <em>new</em> stream, <code>welcomes</code>. Here&rsquo;s how
+<code>welcome</code> produces its items:</p>
+
+<ul>
+<li>First, get an item from <code>connections</code>.</li>
+<li>Then, map that item through the closure, getting back a future.</li>
+<li>When that future completes, return the item it produced as the next item of
+the <code>welcomes</code> stream.</li>
+</ul>
+
+<p>The future we use is <a href="https://tokio-rs.github.io/tokio-core/tokio_core/io/fn.write_all.html"><code>write_all</code></a> from the <code>tokio-core</code> crate. It
+asynchronously entire buffer to the socket provided, then returns the socket and
+ownership of that buffer. So <code>welcomes</code> is again a stream that includes one
+socket for each connection, with <code>Hello, world!</code> written to them.  We&rsquo;re done
+with the connection at that point.</p>
+
+<p>How do we actually consume this stream? As with iterators, loops are a common
+way to consume streams&mdash;but we use the futures-based <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.for_each"><code>for_each</code></a> method:</p>
+
+<pre><code class="language-rust">let server = welcomes.for_each(|(_socket, _welcome)| {
+    Ok(())
+})
+</code></pre>
+
+<p>Here we take the results of the previous future, <a href="https://tokio-rs.github.io/tokio-core/tokio_core/io/fn.write_all.html"><code>write_all</code></a>, and discard
+them, closing the socket. What we get back is a <em>single future</em>, <code>server</code>, which
+completes with <code>()</code> only when the entire stream has been exhausted (and hence,
+we&rsquo;ve replied to all connections). It&rsquo;s a pretty common pattern, when working
+with streams, to ultimately &ldquo;bottom things out&rdquo; into a single future that
+represents fully processing the stream.</p>
+
+<p>There&rsquo;s one final step: we need to consume the <code>server</code> future, which is
+otherwise inert, to actually trigger all this processing. We also need to start
+up the reactor. We do both in a single step, by using the server as the <em>primary
+future</em> of the reactor:</p>
+
+<pre><code class="language-rust">core.run(server).unwrap();
+</code></pre>
+
+<p>The reactor&rsquo;s event loop will keep running on the current thread until the
+server future completes successfully or with an error.</p>
+
+<h5 id="concurrency">Concurrency</h5>
+
+<p>There&rsquo;s an important point to drive home about the previous example: it has <em>no
+concurrency</em>!  Streams represent in-order processing of data, and in this case
+the order of the original stream is the order in which sockets are received,
+which the <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.and_then"><code>and_then</code></a> and <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.for_each"><code>for_each</code></a> combinators
+preserve. Chaining these combinators therefore has the effect of taking each
+socket from the stream and processing all chained operations on it before taking
+the next socket.</p>
+
+<p>If, instead, we want to handle all clients concurrently, we can use the
+reactor&rsquo;s ability to &ldquo;spawn&rdquo; additional work:</p>
+
+<pre><code class="language-rust">let handle = core.handle();
+let server = connections.for_each(|(socket, _peer_addr)| {
+    let serve_one = tokio_core::io::write_all(socket, b&quot;Hello, world!\n&quot;)
+            .then(|_| Ok(()));
+    handle.spawn(serve_one);
+    Ok(())
+});
+</code></pre>
+
+<p>Note that <a href="https://tokio-rs.github.io/tokio-core/tokio_core/reactor/struct.Handle.html#method.spawn"><code>spawn</code></a> requires a future with <code>()</code> item and error types, since the
+result of the future is not accessible. We use <code>then</code> to explicitly throw away
+the socket returned from <a href="https://tokio-rs.github.io/tokio-core/tokio_core/io/fn.write_all.html"><code>write_all</code></a>.</p>
+
+<p>Unlike with <code>CpuPool</code>, the reactor is always an event loop that runs on a
+<em>single</em> thread (the one that calls <code>run</code>). When we use <a href="https://tokio-rs.github.io/tokio-core/tokio_core/reactor/struct.Handle.html#method.spawn"><code>spawn</code></a> to add work to
+the reactor, we are effectively creating a <em>lightweight thread</em>: we move the
+future itself onto the reactor, and as relevant events arrive, the reactor will
+attempt to run the future to completion. It&rsquo;s important to be clear on the
+mechanics here, so let&rsquo;s work through an example.</p>
+
+<p>After calling <code>core.run</code>, the event loop blocks until a connection
+arrives. Suppose two connections arrive at the same time.  At that point, the
+event loop will emit two sockets on the <code>connections</code> stream, which will result
+in two spawned <code>Hello, world!</code> futures. The event loop will then attempt to
+complete those futures, one at a time.  Each futures will attempt to write to
+its socket. If its socket is not ready to receive data, the future will go into
+a <em>waiting state</em> until the status of the socket changes; the event loop <em>does
+not</em> block. Once the socket <em>is</em> ready, the event loop will again start trying
+to make progress on the future.</p>
+
+<p>So we end up multiplexing all connection handling onto a single event loop
+thread. That thread will make progress on all outstanding futures with I/O ready
+to be performed, and will not be blocked by any future that has stalled waiting
+for a socket. For a server as simple as this one, handling concurrency by
+multiplexing onto a single thread is a performance big win compared to
+coordinating multiple threads. In other cases, we might use a <code>CpuPool</code> for
+CPU-heavy work, and use the event loop primarily for I/O-heavy work, to try to
+maximize locality and parallelism.</p>
+
+<p>All of the multiplexing and dispatch is handled behind the scenes by the reactor
+and futures; we just write code that looks pretty close to synchronous code that
+spawns a thread per connection.</p>
+
+<h2 id="sinks">Sinks</h2>
+
+<p>Sinks are essentially the opposite of streams: they are places that you can
+asynchronously send many values over time. As usual, sinks are types that
+implement the <code>Sink</code> trait:</p>
+
+<pre><code class="language-rust">trait Sink {
+    // The type of value that the sink accepts.
+    type SinkItem;
+
+    // The type of value produced by the sink when an error occurs.
+    type SinkError;
+
+    // The analog to `poll`, used for sending and then flushing items.
+    fn start_send(&amp;mut self, item: Self::SinkItem)
+                  -&gt; StartSend&lt;Self::SinkItem, Self::SinkError&gt;;
+    fn poll_complete(&amp;mut self) -&gt; Poll&lt;(), Self::SinkError&gt;;
+
+    // ... and lots of default methods, as usual
+}
+</code></pre>
+
+<p>We&rsquo;ll see some example uses of sinks in the next section, so for now we&rsquo;ll just
+mention two of the most important methods it offers:</p>
+
+<ul>
+<li><p>The <a href="https://docs.rs/futures/0.1.7/futures/sink/trait.Sink.html#method.send_all"><code>send_all</code></a> method takes a stream with <code>Item</code> the same as <code>SinkItem</code>, and
+gives you back a future that produces <code>()</code>. As the name suggests, this future,
+when executed, will asynchronously send all items from the stream into the
+sink, completing when the stream has been exhausted and all items have been
+<em>flushed</em> through the sink.</p></li>
+
+<li><p>The <a href="https://docs.rs/futures/0.1.7/futures/sink/trait.Sink.html#method.buffer"><code>buffer</code></a> method wraps a sink with a fixed-size buffer, allowing it to
+accept additional items even when the underlying sink is not ready for
+items. That&rsquo;s useful for buffering up responses on a socket, for example.</p></li>
+</ul>
+
+<p>Most of the time, the interesting work happens on the stream and future sides,
+with sinks acting as a final endpoint for pushing data through.</p>
+
+        
+        <div class="tk-next"><b>Next up</b>: <a href = /docs/getting-started/reactor/>
+         Understanding event loops</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <footer class="tk-footer">
+      <div class="container text-muted">
+        <div class="col-md-6">
+          Copyright © 2016 Tokio Project
+        </div>
+        <div class="col-md-6">
+          <div class="pull-right">
+            <a href="https://twitter.com/tokio_rs" class="text-muted"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+            <a href="https://github.com/tokio-rs/tokio" class="text-muted"><i class="fa fa-github" aria-hidden="true"></i></a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js" integrity="sha384-XTs3FgkjiBgo8qjEjBk0tGmf3wPrWtA6coPfQDfFEY8AnYJwjalXCiosYRBIBZX8" crossorigin="anonymous"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/highlight.js"></script>
+    <script>
+      $(function () {
+        $("pre code").each(function(i, block) {
+          
+          hljs.highlightBlock(block);
+        });
+      });
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    
+    <link rel="stylesheet" href="/css/bootstrap-reboot.css">
+    <link rel="stylesheet" href="/css/bootstrap.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/tokio.css">
+
+    <title>Example: a toy HTTP&#43;TLS client using core</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-light bg-faded">
+      <ul class="nav navbar-nav">
+        <li class="nav-item">
+          <a class="navbar-brand" href="/"><img src="/img/logo.png" width="44"
+            height="40" class="align-middle" alt=""></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="http://tokio.rs.s3-website-us-east-1.amazonaws.com/docs/getting-started/tokio/">Documentation</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="http://tokio.rs.s3-website-us-east-1.amazonaws.com/community/">Community</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="http://tokio.rs.s3-website-us-east-1.amazonaws.com/blog/tokio-0/">Blog</a>
+        </li>
+      </ul>
+    </nav>
+
+
+<div class="tk-pageheader">
+  <div class="container">
+    <h1 class="display-4">Example: a toy HTTP&#43;TLS client using core</h1>
+    <p class="lead"></p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-3">
+
+      <nav class="leftnav">
+        <div class="" id="">
+          <h5>Getting started</h5>
+          <hr/>
+
+          <div class="" id="">
+            <ul class="nav">
+              
+              <li class="active">
+                <a href="/docs/getting-started/tokio/" class="text-muted">What is Tokio?</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/simple-server/" class="text-muted">Example: an echo server using proto</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/futures/" class="text-muted">Futures</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/db/" class="text-muted">Example: serving database content using proto</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/streams-and-sinks/" class="text-muted">Streams and sinks</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/reactor/" class="text-muted">Understanding event loops</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/core/" class="text-muted">High-level I/O using core</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/pipeline-server/" class="text-muted">Example: a simple pipelined server using core</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/tls/" class="text-muted">Example: a toy HTTP&#43;TLS client using core</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/getting-started/simple-client/" class="text-muted">Example: a client with proto</a>
+              </li>
+              
+            </ul>
+          </div>
+
+          <br/>
+          <h5>Going deeper</h5>
+          <hr/>
+
+          <div class="" id="">
+            <ul class="nav">
+              
+              <li class="active">
+                <a href="/docs/going-deeper/futures-mechanics/" class="text-muted">Essential combinators</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/returning/" class="text-muted">Returning futures</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/futures-model/" class="text-muted">The futures-rs model in depth</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/synchronization/" class="text-muted">Synchronization</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/core-low-level/" class="text-muted">Low-level I/O using core</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/multiplex/" class="text-muted">Multiplexed protocols</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/streaming/" class="text-muted">Streaming protocols</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/tasks/" class="text-muted">Tasks and executors</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/examples/" class="text-muted">Larger examples</a>
+              </li>
+              
+              <li class="active">
+                <a href="/docs/going-deeper/third-party/" class="text-muted">Third-party crates</a>
+              </li>
+              
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+    </div>
+    <div class="col-md-9">
+      <div class="tk-content">
+        <p>TODO: update this, make it fit in with the rest of the flow</p>
+
+<pre><code class="language-rust">extern crate futures;
+extern crate tokio_core;
+extern crate tokio_tls;
+
+use std::net::ToSocketAddrs;
+
+use futures::Future;
+use tokio_core::reactor::Core;
+use tokio_core::net::TcpStream;
+use tokio_tls::ClientContext;
+
+fn main() {
+    let mut core = Core::new().unwrap();
+    let addr = &quot;www.rust-lang.org:443&quot;.to_socket_addrs().unwrap().next().unwrap();
+
+    let socket = TcpStream::connect(&amp;addr, &amp;core.handle());
+
+    let tls_handshake = socket.and_then(|socket| {
+        let cx = ClientContext::new().unwrap();
+        cx.handshake(&quot;www.rust-lang.org&quot;, socket)
+    });
+    let request = tls_handshake.and_then(|socket| {
+        tokio_core::io::write_all(socket, &quot;\
+            GET / HTTP/1.0\r\n\
+            Host: www.rust-lang.org\r\n\
+            \r\n\
+        &quot;.as_bytes())
+    });
+    let response = request.and_then(|(socket, _)| {
+        tokio_core::io::read_to_end(socket, Vec::new())
+    });
+
+    let (_, data) = core.run(response).unwrap();
+    println!(&quot;{}&quot;, String::from_utf8_lossy(&amp;data));
+}
+</code></pre>
+
+<p>If you place that file in <code>src/main.rs</code>, and then execute <code>cargo run</code>, you
+should see the HTML of the Rust home page!</p>
+
+<p>There&rsquo;s a lot to digest here, though, so let&rsquo;s walk through it
+line-by-line. First up in <code>main()</code>:</p>
+
+<pre><code class="language-rust">let mut core = Core::new().unwrap();
+let addr = &quot;www.rust-lang.org:443&quot;.to_socket_addrs().unwrap().next().unwrap();
+</code></pre>
+
+<p>Here we <a href="https://tokio-rs.github.io/tokio-core/tokio_core/reactor/struct.Core.html#method.new">create an event loop</a> on which we will perform all our
+I/O. Then we resolve the &ldquo;www.rust-lang.org&rdquo; host name by using
+the standard library&rsquo;s <a href="https://doc.rust-lang.org/std/net/trait.ToSocketAddrs.html"><code>to_socket_addrs</code></a> method.</p>
+
+<p>Next up:</p>
+
+<pre><code class="language-rust">let socket = TcpStream::connect(&amp;addr, &amp;core.handle());
+</code></pre>
+
+<p>We <a href="https://tokio-rs.github.io/tokio-core/tokio_core/reactor/struct.Core.html#method.handle">get a handle</a> to our event loop and connect to the host with
+<a href="https://tokio-rs.github.io/tokio-core/tokio_core/net/struct.TcpStream.html#method.connect"><code>TcpStream::connect</code></a>. Note, though, that <a href="https://tokio-rs.github.io/tokio-core/tokio_core/net/struct.TcpStream.html#method.connect"><code>TcpStream::connect</code></a> returns a
+future! This means that we don&rsquo;t actually have the socket yet, but rather it
+will be fully connected at some later point in time.</p>
+
+<p>Once our socket is available we need to perform three tasks to download the
+rust-lang.org home page:</p>
+
+<ol>
+<li>Perform a TLS handshake. The home page is only served over HTTPS, so we had
+to connect to port 443 and we&rsquo;ll have to obey the TLS protocol.</li>
+<li>An HTTP &lsquo;GET&rsquo; request needs to be issued. For the purposes of this tutorial
+we will write the request by hand, though in a serious program you would
+use an HTTP client built on futures.</li>
+<li>Finally, we download the response by reading off all the data on the socket.</li>
+</ol>
+
+<p>Let&rsquo;s take a look at each of these steps in detail, the first being:</p>
+
+<pre><code class="language-rust">let tls_handshake = socket.and_then(|socket| {
+    let cx = ClientContext::new().unwrap();
+    cx.handshake(&quot;www.rust-lang.org&quot;, socket)
+});
+</code></pre>
+
+<p>Here we use the <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.and_then"><code>and_then</code></a> method on the [<code>Future</code>] trait to continue
+building on the future returned by <a href="https://tokio-rs.github.io/tokio-core/tokio_core/net/struct.TcpStream.html#method.connect"><code>TcpStream::connect</code></a>. The <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.and_then"><code>and_then</code></a> method
+takes a closure which receives the resolved value of this previous future. In
+this case <code>socket</code> will have type <a href="https://tokio-rs.github.io/tokio-core/tokio_core/net/struct.TcpStream.html"><code>TcpStream</code></a>. The <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.and_then"><code>and_then</code></a> closure,
+however, will not run if <a href="https://tokio-rs.github.io/tokio-core/tokio_core/net/struct.TcpStream.html#method.connect"><code>TcpStream::connect</code></a> returned an error.</p>
+
+<p>Once we have our <code>socket</code>, we create a client TLS context via
+<a href="https://tokio-rs.github.io/tokio-tls/tokio_tls/struct.ClientContext.html#method.new"><code>ClientContext::new</code></a>. This type from the [<code>tokio-tls</code>] crate
+represents the client half of a TLS connection. Next we call the
+<a href="https://tokio-rs.github.io/tokio-tls/tokio_tls/struct.ClientContext.html#method.handshake"><code>handshake</code></a> method to actually perform the TLS handshake. The first
+argument is the domain name we&rsquo;re connecting to, with the I/O object
+as the second.</p>
+
+<p>Like with <a href="https://tokio-rs.github.io/tokio-core/tokio_core/net/struct.TcpStream.html#method.connect"><code>TcpStream::connect</code></a> from before, the <a href="https://tokio-rs.github.io/tokio-tls/tokio_tls/struct.ClientContext.html#method.handshake"><code>handshake</code></a> method
+returns a future. The actual TLS handshake may take some time as the
+client and server need to perform some I/O, agree on certificates,
+etc. Once resolved, however, the future will become a <a href="https://tokio-rs.github.io/tokio-tls/tokio_tls/struct.TlsStream.html"><code>TlsStream</code></a>,
+similar to our previous <a href="https://tokio-rs.github.io/tokio-core/tokio_core/net/struct.TcpStream.html"><code>TcpStream</code></a></p>
+
+<p>The <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.and_then"><code>and_then</code></a> combinator is doing some heavy lifting behind the
+scenes here by ensuring that it executes futures in the right order
+and keeping track of the futures in flight. Even better, the value
+returned from <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.and_then"><code>and_then</code></a> itself implements [<code>Future</code>], so we can
+keep chaining computation!</p>
+
+<p>Next up, we issue our HTTP request:</p>
+
+<pre><code class="language-rust">let request = tls_handshake.and_then(|socket| {
+    tokio_core::io::write_all(socket, &quot;\
+        GET / HTTP/1.0\r\n\
+        Host: www.rust-lang.org\r\n\
+        \r\n\
+    &quot;.as_bytes())
+});
+</code></pre>
+
+<p>Here we take the future from the previous step, <code>tls_handshake</code>, and
+use <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.and_then"><code>and_then</code></a> again to continue the computation. The <a href="https://tokio-rs.github.io/tokio-core/tokio_core/io/fn.write_all.html"><code>write_all</code></a>
+combinator writes the entirety of our HTTP request, issueing multiple
+writes as necessary. Here we&rsquo;re just doing a simple HTTP/1.0 request,
+so there&rsquo;s not much we need to write.</p>
+
+<p>The future returned by <a href="https://tokio-rs.github.io/tokio-core/tokio_core/io/fn.write_all.html"><code>write_all</code></a> will complete once all the data
+has been written to the socket. Note that behind the scenes the
+<a href="https://tokio-rs.github.io/tokio-tls/tokio_tls/struct.TlsStream.html"><code>TlsStream</code></a> will actually be encrypting all the data we write before
+sending it to the underlying socket.</p>
+
+<p>And the third and final piece of our request looks like:</p>
+
+<pre><code class="language-rust">let response = request.and_then(|(socket, _)| {
+    tokio_core::io::read_to_end(socket, Vec::new())
+});
+</code></pre>
+
+<p>The previous <code>request</code> future is chained again to the final future,
+the <a href="https://tokio-rs.github.io/tokio-core/tokio_core/io/fn.read_to_end.html"><code>read_to_end</code></a> combinator. This future will read all data from the
+<code>socket</code> provided and place it into the buffer provided (in this case an empty
+one), and resolve to the buffer itself once the underlying connection hits EOF.</p>
+
+<p>Like before, though, reads from the <code>socket</code> are actually decrypting data
+received from the server under the covers, so we&rsquo;re just reading the decrypted
+version!</p>
+
+<p>If we were to return at this point in the program, you might be surprised to see
+that nothing happens when it&rsquo;s run! That&rsquo;s because all we&rsquo;ve done so
+far is construct a future-based computation, we haven&rsquo;t actually run it. Up to
+this point in the program we&rsquo;ve done no I/O, issued no HTTP requests, etc.</p>
+
+<p>To actually execute our future and drive it to completion we&rsquo;ll need to run the
+event loop:</p>
+
+<pre><code class="language-rust">let (_, data) = core.run(response).unwrap();
+println!(&quot;{}&quot;, String::from_utf8_lossy(&amp;data));
+</code></pre>
+
+<p>Here we pass our <code>response</code> future, our entire HTTP request, to
+the event loop, <a href="https://tokio-rs.github.io/tokio-core/tokio_core/reactor/struct.Core.html#method.run">asking it to resolve the future</a>. The event loop will
+then run until the future has been resolved, returning the result of the future
+which in this case is <code>io::Result&lt;(TcpStream, Vec&lt;u8&gt;)&gt;</code>.</p>
+
+<p>Note that this <code>core.run(..)</code> call will block the calling thread until the
+future can itself be resolved. This means that <code>data</code> here has type <code>Vec&lt;u8&gt;</code>.
+We then print it out to stdout as usual.</p>
+
+<p>Phew! At this point we&rsquo;ve seen futures <a href="https://tokio-rs.github.io/tokio-core/tokio_core/net/struct.TcpStream.html#method.connect">initiate a TCP
+connection</a> <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.and_then">create a chain of computation</a>,
+and <a href="https://tokio-rs.github.io/tokio-core/tokio_core/io/fn.read_to_end.html">read data from a socket</a>. But this is only a hint of what
+futures can do, so let&rsquo;s dive more into the traits themselves!</p>
+
+        
+        <div class="tk-next"><b>Next up</b>: <a href = /docs/getting-started/simple-client/>
+         Example: a client with proto</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <footer class="tk-footer">
+      <div class="container text-muted">
+        <div class="col-md-6">
+          Copyright © 2016 Tokio Project
+        </div>
+        <div class="col-md-6">
+          <div class="pull-right">
+            <a href="https://twitter.com/tokio_rs" class="text-muted"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+            <a href="https://github.com/tokio-rs/tokio" class="text-muted"><i class="fa fa-github" aria-hidden="true"></i></a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js" integrity="sha384-XTs3FgkjiBgo8qjEjBk0tGmf3wPrWtA6coPfQDfFEY8AnYJwjalXCiosYRBIBZX8" crossorigin="anonymous"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/highlight.js"></script>
+    <script>
+      $(function () {
+        $("pre code").each(function(i, block) {
+          
+          hljs.highlightBlock(block);
+        });
+      });
+    </script>
+  </body>
+</html>
+
