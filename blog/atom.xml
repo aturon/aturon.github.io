@@ -4,13 +4,272 @@
  <title>Aaron Turon</title>
  <link href="http://aturon.github.io/blog/atom.xml" rel="self"/>
  <link href="http://aturon.github.io/blog/"/>
- <updated>2016-09-07T09:26:58-07:00</updated>
+ <updated>2017-02-06T17:32:44-08:00</updated>
  <id>http://aturon.github.io</id>
  <author>
    <name>Aaron Turon</name>
    <email>aturon@mozilla.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Specialization, coherence, and API evolution</title>
+   <link href="http://aturon.github.io/blog/2017/02/06/specialization-and-coherence/"/>
+   <updated>2017-02-06T00:00:00-08:00</updated>
+   <id>http://aturon.github.io/2017/02/06/specialization-and-coherence</id>
+   <content type="html">&lt;p&gt;Specialization has been available in nightly Rust for over a year, and we&amp;rsquo;ve
+recently been thinking about the steps needed to stabilize it.&lt;/p&gt;
+
+&lt;p&gt;There are a couple of implementation issues that are currently blocked on an
+&lt;a href=&quot;https://github.com/rust-lang/rust-roadmap/issues/8&quot;&gt;overhaul of the trait system&lt;/a&gt;
+which should be coming in the next couple of months.&lt;/p&gt;
+
+&lt;p&gt;What I want to talk about, though, is some deeper design questions that need to
+be resolved prior to stabilization, ones involving potential changes to the core
+specialization rules. This is a story that begins with a bold hope, runs
+headlong into a tragic discovery, and ultimately ends up close to where it
+started.&lt;/p&gt;
+
+&lt;h2 id=&quot;a-new-hope&quot;&gt;A New Hope&lt;/h2&gt;
+
+&lt;p&gt;A rite of passage for learning Rust&amp;rsquo;s trait system is first encountering a
+&lt;em&gt;coherence error&lt;/em&gt;. Coherence is a vital but frustrating property; it
+guarantees that there is always a single, unambiguous impl of a trait that is
+used for any given type.&lt;/p&gt;
+
+&lt;p&gt;It&amp;rsquo;s not too hard to see why coherence is vital. Imagine working with a
+&lt;code&gt;HashMap&lt;/code&gt; in which multiple implementations of &lt;code&gt;Hash&lt;/code&gt; applied to the key
+type. If different pieces of code ended up using different impls, map operations
+would return totally bogus results, and it would be very difficult to track down
+why.&lt;/p&gt;
+
+&lt;p&gt;What makes coherence frustrating is that, to enforce it, we must limit the kinds
+of impls you can write in different crates. We do this through a pair of rules:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;The orphan rule&lt;/strong&gt;, which &lt;em&gt;very roughly&lt;/em&gt; says that you can write an impl only
+if either your crate defined the trait or defined one of the types the impl is
+for.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;The overlap rule&lt;/strong&gt;, which says that a given trait cannot have to impls that
+both apply to a single type (which would introduce ambiguity about which impl
+to use), unless one is a specialization of the other.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;These rules work closely together; in particular, the orphan rule ensures that
+sibling crates can&amp;rsquo;t accidentally define overlapping impls for a parent trait,
+since their impls must each involve crate-local types.&lt;/p&gt;
+
+&lt;p&gt;Prior to Rust 1.0, we iterated quite a bit on these rules, and arrived at
+the current design in the &lt;a href=&quot;https://github.com/rust-lang/rfcs/pull/1023&quot;&gt;Rebalancing coherence RFC&lt;/a&gt;. That RFC was predicated
+on a core assumption:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;The problem is that due to coherence, the ability to define impls is a
+zero-sum game: every impl that is legal to add in a child crate is also an
+impl that a parent crate cannot add without fear of breaking downstream
+crates.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;strong&gt;However, with specialization, it seems this assumption may not longer hold!&lt;/strong&gt;
+The point of specialization is to allow for impls to overlap, and then to select
+the &amp;ldquo;most specific&amp;rdquo; impl. That means, in particular, that it&amp;rsquo;s feasible for a
+parent and child crate to safely define overlapping impls. Niko wrote a
+&lt;a href=&quot;http://smallcultfollowing.com/babysteps/blog/2016/10/24/supporting-blanket-impls-in-specialization/&quot;&gt;blog post&lt;/a&gt;
+proposing to leverage specialization in just this way.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-fundamental-attribute&quot;&gt;The &lt;code&gt;fundamental&lt;/code&gt; attribute&lt;/h3&gt;
+
+&lt;p&gt;The existing orphan rule is based on an idea of &amp;ldquo;fundamental&amp;rdquo; types. It&amp;rsquo;s
+easiest to understand how it works through example:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;c-Doc&quot;&gt;//// Parent crate ////&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParentTrait&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c-Doc&quot;&gt;//// Child crate ////&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ChildType&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;..&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParentTrait&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Box&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ChildType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;..&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This example is permitted today, and works fine as written. However, it means
+that adding the following blanket impl to the parent crate is a &lt;em&gt;breaking
+change&lt;/em&gt; (assuming that the new impl is not specializable):&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;c1&quot;&gt;// Add to parent crate&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParentTrait&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Box&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// note: not specializable, since we didn&amp;#39;t write `default`&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;..&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This change would introduce an overlap with the child crate&amp;rsquo;s impl, which
+prevents it from compiling.&lt;/p&gt;
+
+&lt;p&gt;To avoid &lt;em&gt;all&lt;/em&gt; such new parent crate impls being breaking changes, the
+&lt;a href=&quot;https://github.com/rust-lang/rfcs/pull/1023&quot;&gt;Rebalancing coherence RFC&lt;/a&gt; introduced a restriction on child crates: roughly
+speaking, their impls of parent traits much either directly reference a type
+defined in the child crate, or reference it within a &amp;ldquo;fundamental&amp;rdquo; type
+constructor (&lt;code&gt;&amp;amp;&lt;/code&gt;, &lt;code&gt;&amp;amp;mut&lt;/code&gt;, &lt;code&gt;Box&lt;/code&gt;). In other words:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;c1&quot;&gt;// These child crate impls are allowed:&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParentTrait&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ChildType&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;..&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParentTrait&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Box&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ChildType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;..&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&amp;#39;a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParentTrait&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;&amp;#39;a&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ChildType&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;..&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// ... but these impls are NOT allowed:&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParentTrait&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Vec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ChildType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;..&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParentTrait&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ChildType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ChildType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;..&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The idea is to strike a balance between the impls that child crates can have,
+and the ones that parent crates can add over time. If a parent crate adds a
+blanket impl involving a fundamental type constructor, that&amp;rsquo;s a breaking change
+(since it could overlap with a child crate). But if it adds one for
+e.g. &lt;code&gt;Vec&amp;lt;T&amp;gt;&lt;/code&gt;, that&amp;rsquo;s fine, because no child crate could have an impl involving
+that type.&lt;/p&gt;
+
+&lt;p&gt;This &amp;ldquo;fundamental&amp;rdquo; restriction is an arbitrary line drawn as part of the
+&amp;ldquo;zero-sum game&amp;rdquo; of writing non-overlapping impls. It&amp;rsquo;s applied using an unstable
+attribute, &lt;code&gt;#[fundamental]&lt;/code&gt;, which is difficult to understand and has had no
+clear path toward stabilization.&lt;/p&gt;
+
+&lt;h3 id=&quot;a-positive-sum-game&quot;&gt;A positive-sum game?&lt;/h3&gt;
+
+&lt;p&gt;But wait. When we introduced specialization, we relaxed the overlap rule to
+allow for overlap, &lt;em&gt;as long as one impl specialized the other&lt;/em&gt;. Since the orphan
+rule is ultimately about preventing overlap from arising between multiple
+crates, maybe there&amp;rsquo;s a way to leverage specialization there as well?&lt;/p&gt;
+
+&lt;p&gt;If we revisit the above example, but make the new parent crate impl
+specializable (by using &lt;code&gt;default&lt;/code&gt;), &lt;strong&gt;it no longer breaks the child crate&lt;/strong&gt;. In
+other words, the following impls can all safely coexist:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;c-Doc&quot;&gt;//// Parent crate ////&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParentTrait&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParentTrait&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Box&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;default&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;..&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c-Doc&quot;&gt;//// Child crate ////&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ChildType&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;..&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Now specializes the blanket impl from the parent crate&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ParentTrait&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Box&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ChildType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;..&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Is this always the case? In other words, if you add a new impl in the parent
+crate and mark it specializable, are you guaranteed not to break any child
+crates? That would allow us to get rid of &lt;code&gt;fundamental&lt;/code&gt;, allowing both parent
+and client crates to add more kinds of impls than they can today, without
+breakage!&lt;/p&gt;
+
+&lt;p&gt;To make this idea work, you&amp;rsquo;d need to expand the specialization rules a bit, as
+Niko explains in
+&lt;a href=&quot;http://smallcultfollowing.com/babysteps/blog/2016/10/24/supporting-blanket-impls-in-specialization/&quot;&gt;his post&lt;/a&gt;. But
+those details won&amp;rsquo;t be too relevant to the core point of this post.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-trait-system-strikes-back&quot;&gt;The Trait System Strikes Back&lt;/h2&gt;
+
+&lt;p&gt;Half way toward writing up an RFC with the above ideas, trying to prove to
+myself that they worked, I started to get worried. And then I started trying to
+prove that they didn&amp;rsquo;t work. And it turns out they don&amp;rsquo;t.&lt;/p&gt;
+
+&lt;p&gt;The crux of the problem is that the trait system is just too powerful; as we&amp;rsquo;ve
+learned over and over again, the trait system can be used to draw sneaky
+connections that are hard to defend against. Let me show you what I mean.&lt;/p&gt;
+
+&lt;p&gt;Imagine we have three crates, arranged in the following way:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;c-Doc&quot;&gt;//// Crate A ////&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;A&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Line we want to add:&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// impl&amp;lt;T&amp;gt; A for T {}&lt;/span&gt;
+
+
+&lt;span class=&quot;c-Doc&quot;&gt;//// Crate B ////&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;B&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;B&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;A&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// Note: not specializable&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Out&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+
+&lt;span class=&quot;c-Doc&quot;&gt;//// Crate C ////&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;C&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;B&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;C&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Out&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Here, we have &lt;em&gt;two&lt;/em&gt; traits in action, linked by the impl in crate B. The problem
+is that, because the traits are connected in this way, adding the impl in crate
+A for trait A creates overlap for trait &lt;em&gt;B&lt;/em&gt;. And crucially, it&amp;rsquo;s not enough to
+require that the impl we &lt;em&gt;added&lt;/em&gt; be specializable; the problem is that the
+existing impl in crate B, which crate A doesn&amp;rsquo;t even know about, is not
+specializable.&lt;/p&gt;
+
+&lt;p&gt;Like all of our problems around API evolution, this problem boils down to
+&lt;em&gt;negative reasoning&lt;/em&gt;. In particular, crate C is initially allowed to write its
+impl because it knows, locally, that &lt;code&gt;C&lt;/code&gt; does not implement &lt;code&gt;A&lt;/code&gt; (and thus the
+blanket impl in crate B doesn&amp;rsquo;t apply). The problem is that crate C isn&amp;rsquo;t the
+only crate that gets to decide whether it&amp;rsquo;s type implements &lt;code&gt;A&lt;/code&gt;. So it&amp;rsquo;s a
+zero-sum game after all, and something like &lt;code&gt;fundemantal&lt;/code&gt; is needed to
+adjudicate between different crates.&lt;/p&gt;
+
+&lt;p&gt;You might ask: is it really essential to make specialization opt-in? And indeed,
+if &lt;em&gt;all&lt;/em&gt; impls were specializable, the idea would&amp;rsquo;ve worked out.&lt;/p&gt;
+
+&lt;p&gt;However, it&amp;rsquo;s not a tenable option. Associated types, in particular,
+&lt;a href=&quot;https://github.com/rust-lang/rfcs/blob/master/text/1210-impl-specialization.md#hazard-interactions-with-type-checking&quot;&gt;need to opt in to specialization&lt;/a&gt;,
+and these days every method has an implicit associated type.&lt;/p&gt;
+
+&lt;h2 id=&quot;return-of-the-subset-rule&quot;&gt;Return of the Subset Rule&lt;/h2&gt;
+
+&lt;p&gt;So where does that lead us?&lt;/p&gt;
+
+&lt;p&gt;In the short term, it means that we should stick with the
+&lt;a href=&quot;https://github.com/rust-lang/rfcs/blob/master/text/1210-impl-specialization.md#permitting-overlap&quot;&gt;subset rule&lt;/a&gt;
+as-is. (I didn&amp;rsquo;t go into detail here, but Niko, Withoutboats and I had been
+playing with some changes to support the idea of getting rid of fundamental,
+which would also be breaking changes to the specialization rule; we&amp;rsquo;re backing
+off on that).&lt;/p&gt;
+
+&lt;p&gt;In the long term, there are several extensions we&amp;rsquo;d like to explore for
+specialization. While these extensions won&amp;rsquo;t let us relax the orphan rule, they
+will allow for more kinds of overlap, thereby making specialization usable in
+more contexts.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&quot;http://smallcultfollowing.com/babysteps/blog/2016/09/24/intersection-impls/&quot;&gt;&lt;strong&gt;Intersection impls&lt;/strong&gt;&lt;/a&gt;,
+which allow arbitrary partial overlap between impls as long as there&amp;rsquo;s an
+additional impl that covers precisely the area of overlap (thereby avoiding
+any ambiguity).&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&quot;http://smallcultfollowing.com/babysteps/blog/2016/10/24/supporting-blanket-impls-in-specialization/&quot;&gt;&lt;strong&gt;Type structure precedence&lt;/strong&gt;&lt;/a&gt;,
+which considers more specific &lt;em&gt;type structure&lt;/em&gt; before considering where
+clauses. While the idea was originally motivated by relaxing the orphan rules,
+which we can&amp;rsquo;t do, it is still a potentially useful expansion of specialization.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Child trumps parent&lt;/strong&gt;, in which a child crate impl always specializes any
+parent crate impl it overlaps with. This rule is particularly simple and is
+usually what you want when such overlap arises.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The good news is that:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;The current subset rule is forwards-compatible with &lt;em&gt;all&lt;/em&gt; of these extensions.&lt;/li&gt;
+&lt;li&gt;Moreover, these extensions are compatible with each other!&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I think it&amp;rsquo;s probably worth ultimately landing all three extensions under
+separate feature gates, to gain experience and determine which ones are most
+useful. They are all pretty straightforward to implement.&lt;/p&gt;
+
+&lt;p&gt;In the meantime, though, we can press forward with stabilization of today&amp;rsquo;s
+specialization, as soon as the remaining implementation issues are resolved.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Designing futures for Rust</title>
