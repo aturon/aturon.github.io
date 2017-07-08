@@ -95,8 +95,7 @@ to result in confusion and bugs.</p></li>
 </ul>
 
 <p>Unfortunately, specialization makes the story more difficult:</p>
-<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="c1">// Specialization cannot work: trans doesn&#39;t know if T: &#39;static:</span>
-<span class="k">trait</span><span class="w"> </span><span class="n">Bad1</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">trait</span><span class="w"> </span><span class="n">Bad1</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="k">fn</span> <span class="nf">bad1</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">);</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 
@@ -106,6 +105,7 @@ to result in confusion and bugs.</p></li>
 <span class="w">    </span><span class="p">}</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 
+<span class="c1">// Specialization cannot work: trans doesn&#39;t know if T: &#39;static</span>
 <span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">:</span><span class="w"> </span><span class="nb">&#39;static</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Bad1</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="k">fn</span> <span class="nf">bad1</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;specialized&quot;</span><span class="p">);</span><span class="w"></span>
@@ -123,9 +123,11 @@ perspective of trans this type will look like <code>&amp;&#39;erased str</code>,
 impossible to know whether the more specialized <code>impl</code> can safely be used.</p>
 
 <p>Here&rsquo;s another, less obvious example:</p>
-<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="c1">// Specialization cannot work: trans doesn&#39;t know if two refs have equal lifetimes:</span>
-<span class="k">trait</span><span class="w"> </span><span class="n">Bad2</span><span class="o">&lt;</span><span class="n">U</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">trait</span><span class="w"> </span><span class="n">Bad2</span><span class="o">&lt;</span><span class="n">U</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+
 <span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="w"> </span><span class="n">U</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Bad2</span><span class="o">&lt;</span><span class="n">U</span><span class="o">&gt;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+
+<span class="c1">// Specialization cannot work: trans doesn&#39;t know if two refs have equal lifetimes</span>
 <span class="k">impl</span><span class="o">&lt;</span><span class="na">&#39;a</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="p">,</span><span class="w"> </span><span class="n">U</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Bad2</span><span class="o">&lt;&amp;</span><span class="na">&#39;a</span><span class="w"> </span><span class="n">U</span><span class="o">&gt;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="o">&amp;</span><span class="na">&#39;a</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
 </code></pre></div>
 <p>Here, the second <code>impl</code> is requiring that two lifetimes are the same, and once
@@ -133,17 +135,21 @@ more for trans we can&rsquo;t tell whether the <code>impl</code> safely applies.
 
 <p>On the other hand, simply <em>naming</em> a lifetime that must exist, without
 <em>constraining</em> it, is fine:</p>
-<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="c1">// Fine: specializes based on being *any* reference, regardless of lifetime</span>
-<span class="k">trait</span><span class="w"> </span><span class="n">Good</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">trait</span><span class="w"> </span><span class="n">Good</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+
 <span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Good</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+
+<span class="c1">// Fine: specializes based on being *any* reference, regardless of lifetime</span>
 <span class="k">impl</span><span class="o">&lt;</span><span class="na">&#39;a</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Good</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="o">&amp;</span><span class="na">&#39;a</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
 </code></pre></div>
 <p>In addition, it&rsquo;s in principle okay for lifetime constraints to show up as long
 as they don&rsquo;t influence specialization:</p>
-<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="c1">// Potentially fine: *all* impls impose the &#39;static requirement; the dispatch is</span>
-<span class="c1">// happening purely based on `Clone`</span>
-<span class="k">trait</span><span class="w"> </span><span class="n">MustBeStatic</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">trait</span><span class="w"> </span><span class="n">MustBeStatic</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+
 <span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">:</span><span class="w"> </span><span class="nb">&#39;static</span><span class="o">&gt;</span><span class="w"> </span><span class="n">MustBeStatic</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+
+<span class="c1">// Potentially fine: *all* impls impose the &#39;static requirement; the dispatch is</span>
+<span class="c1">// happening purely based on `Clone`</span>
 <span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">:</span><span class="w"> </span><span class="nb">&#39;static</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">Clone</span><span class="o">&gt;</span><span class="w"> </span><span class="n">MustBeStatic</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
 </code></pre></div>
 <h3 id="why-does-this-lead-to-unsoundness">Why does this lead to unsoundness?</h3>
@@ -624,15 +630,6 @@ you prove me wrong).</p>
     
       <li>
         <h3>
-          <a href="/blog/2017/05/05/libz-blitz/">
-            Libz Blitz
-            <small><time datetime="2017-05-05T00:00:00-07:00">05 May 2017</time></small>
-          </a>
-        </h3>
-      </li>
-    
-      <li>
-        <h3>
           <a href="/blog/2017/04/24/negative-chalk/">
             Negative reasoning in Chalk
             <small><time datetime="2017-04-24T00:00:00-07:00">24 Apr 2017</time></small>
@@ -649,6 +646,15 @@ you prove me wrong).</p>
         </h3>
       </li>
     
+      <li>
+        <h3>
+          <a href="/blog/2016/09/07/futures-design/">
+            Designing futures for Rust
+            <small><time datetime="2016-09-07T00:00:00-07:00">07 Sep 2016</time></small>
+          </a>
+        </h3>
+      </li>
+    
   </ul>
 </aside>
 
@@ -657,7 +663,7 @@ you prove me wrong).</p>
 
       <footer class="footer">
         <small>
-          &copy; <time datetime="2017-07-08T11:53:03-07:00">2017</time>. All rights reserved.
+          &copy; <time datetime="2017-07-08T12:02:17-07:00">2017</time>. All rights reserved.
         </small>
       </footer>
     </div>
