@@ -4,13 +4,365 @@
  <title>Aaron Turon</title>
  <link href="http://aturon.github.io/blog/atom.xml" rel="self"/>
  <link href="http://aturon.github.io/blog/"/>
- <updated>2017-07-08T11:56:21-07:00</updated>
+ <updated>2017-07-26T18:38:22-07:00</updated>
  <id>http://aturon.github.io</id>
  <author>
    <name>Aaron Turon</name>
    <email>aturon@mozilla.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Revisiting Rust’s modules</title>
+   <link href="http://aturon.github.io/blog/2017/07/26/revisiting-rusts-modules/"/>
+   <updated>2017-07-26T00:00:00-07:00</updated>
+   <id>http://aturon.github.io/2017/07/26/revisiting-rusts-modules</id>
+   <content type="html">&lt;p&gt;As part of the &lt;a href=&quot;https://blog.rust-lang.org/2017/03/02/lang-ergonomics.html&quot;&gt;Ergonomics Initiative&lt;/a&gt;, I and several others on the Rust language team have been taking a hard look at Rust’s module system. There are two related perspectives for improvement here: learnability and productivity.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Modules are not a place that Rust was trying to innovate at 1.0, but they are nevertheless often reported as one of the major stumbling blocks to learning Rust. We should fix that.&lt;/li&gt;
+&lt;li&gt;Even for seasoned Rustaceans, the module system has several deficiencies, as we’ll dig into below. Ideally, we can solve these problems while &lt;em&gt;also&lt;/em&gt; making modules easier to learn.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This post is going to explore some of the known problems, give a few insights, and then explore the design space afresh. It does &lt;em&gt;not&lt;/em&gt; contain a specific favored proposal, but rather a collection of ideas with various tradeoffs.&lt;/p&gt;
+
+&lt;p&gt;I want to say at the outset that, for this post, &lt;strong&gt;I’m going to completely ignore backwards-compatibility&lt;/strong&gt;. Not for lack of importance, but rather because I think it’s a useful exercise to explore the full design space in an unconstrained way, and then separately to see how best to fit those lessons back into today’s Rust.&lt;/p&gt;
+
+&lt;h2 id=&quot;learnability-issues&quot;&gt;Learnability issues&lt;/h2&gt;
+
+&lt;p&gt;It’s hard to nail down the precise blockers to learnability, but here are a few of the obstacles we’ve heard repeatedly in feedback from a variety of venues:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Too many declaration forms&lt;/strong&gt;. Module-related declarations include &lt;code&gt;extern crate&lt;/code&gt;, &lt;code&gt;mod foo;&lt;/code&gt;, &lt;code&gt;use&lt;/code&gt;, &lt;code&gt;pub use&lt;/code&gt;, &lt;code&gt;mod { }&lt;/code&gt; and more, and each one has somewhat subtle effects on what is in scope where. For someone just starting out, this array of choices can be bewildering and stand in the way of writing “actual code” to feel out the language.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Path confusion&lt;/strong&gt;. The fact that &lt;code&gt;use&lt;/code&gt; declarations work with absolute paths while other items do not is confusing, and even experienced Rust programmers (myself included) often confuse the two. To make matters worse, the top-level namespace contains all of the external &lt;em&gt;crates&lt;/em&gt;, but also the &lt;em&gt;contents&lt;/em&gt; of the current crate. Unless, of course, you’re writing an external test or binary. And finally, when you’re working at the top level, the absolute/relative distinction doesn’t matter, which means that you can have the wrong mental model and only find it when trying to expand out into submodules.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Filesystem organization&lt;/strong&gt;. The &lt;code&gt;foo.rs&lt;/code&gt; versus &lt;code&gt;foo/mod.rs&lt;/code&gt; distinction, together with &lt;code&gt;mod foo;&lt;/code&gt;, can be an intimidating amount of machinery just to incorporate a file into your project.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Privacy&lt;/strong&gt;. A module’s private items are always visible to its submodules. But private items &lt;em&gt;within&lt;/em&gt; its submodules aren’t visible to each other. Moreover, it’s an error to expose a private item in a public interface, but it’s common to define public items within a private module and re-export them elsewhere. Learning the ropes of the privacy system is not easy, and even experienced Rust programmers sometimes grate against it.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;It can be hard, when more experienced with Rust, to empathize with these concerns—we suffer from the “Curse of Knowledge” here. But it’s important to recognize that all of these distinctions that are hard to learn in the first place also impose a small, but non-trivial mental tax even when you know them well. So the goal is not to make things easier for newcomers &lt;em&gt;at the expense&lt;/em&gt; of those with more experience, but rather to make things easier for everyone.&lt;/p&gt;
+
+&lt;h2 id=&quot;productivity-issues&quot;&gt;Productivity issues&lt;/h2&gt;
+
+&lt;p&gt;Once you’ve gotten the hang of the module system, there are still annoyances, ranging in importance from code readability concerns to minor papercuts.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Who can see this item? And how?&lt;/strong&gt; It’s pretty common to find items within modules that are marked &lt;code&gt;pub&lt;/code&gt;, but are not in fact visible through the module defining them—or even visible outside the crate at all! This tends to happen when you want to organize code within the file system differently from the API hierarchy you expose to the rest of the crate or to the outside world. It generally means you have to look at several files to figure out how to access an item (or even whether you can).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;**pub use**&lt;/code&gt; &lt;strong&gt;abuse&lt;/strong&gt;. More generally, re-exports are ubiquitous in idiomatic Rust code. The result is that the “apparent” module hierarchy (as seen from the file system) often tells you very little about the &lt;em&gt;actual&lt;/em&gt; module hierarchy, as seen from inside or outside the crate. This can make it difficult to jump into a new code base, or back into one you haven’t worked on in a while.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Repetition&lt;/strong&gt;. The module system often requires two steps to do something, when a single step would suffice to convey all the necessary information:
+
+&lt;ul&gt;
+&lt;li&gt;When you add a dependency to &lt;code&gt;Cargo.toml&lt;/code&gt;, you also need to add an &lt;code&gt;extern crate&lt;/code&gt; declaration.&lt;/li&gt;
+&lt;li&gt;When you add a new &lt;code&gt;.rs&lt;/code&gt; file, you also need to write a corresponding &lt;code&gt;mod&lt;/code&gt; declaration.&lt;/li&gt;
+&lt;li&gt;When you have a file that exists solely for organization and you add a &lt;code&gt;pub&lt;/code&gt; item to it, you also have to &lt;code&gt;pub use&lt;/code&gt; that item elsewhere in the hierarchy.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;These issues may not seem like a big deal at first, but at least in my experience, after thinking deeply about modules and surfacing these problems, I find myself noticing them &lt;em&gt;all the time&lt;/em&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;what-is-a-module-system-anyway&quot;&gt;What is a module system, anyway?&lt;/h2&gt;
+
+&lt;p&gt;With the critique of today’s module system out of the way, I want to talk a bit about the core concerns of a module system, at least from Rust’s perspective:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Bringing names into scope, including from external crates&lt;/li&gt;
+&lt;li&gt;Defining the crate’s internal namespace hierarchy&lt;/li&gt;
+&lt;li&gt;Defining the crate’s external namespace hierarchy&lt;/li&gt;
+&lt;li&gt;Determining how code is arranged in the file system&lt;/li&gt;
+&lt;li&gt;Visibility (aka privacy)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Things seem to work most smoothly when these concerns are closely aligned. Conversely, the places where the module system becomes hard to work with and reason about tend to be misalignments.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;An example of misalignment: facades in&lt;/strong&gt; &lt;code&gt;**futures**&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Let’s take a concrete example from the &lt;code&gt;futures&lt;/code&gt; crate. Futures, like iterators, have a large number of methods that produce “adapters”, i.e. concrete types that are also futures:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;w&quot;&gt;    &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;w&quot;&gt;    &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;w&quot;&gt;    &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;poll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Poll&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Error&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+
+&lt;span class=&quot;w&quot;&gt;    &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;w&quot;&gt;    &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;then&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;B&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Then&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;B&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;w&quot;&gt;    &lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;// etc&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Each of these concrete types (&lt;code&gt;Map&lt;/code&gt;, &lt;code&gt;Then&lt;/code&gt; and so on) involve a page or so of code, often with some helper functions. Thus, there was a strong desire to define each in a separate file, with the helper functions private to that file.&lt;/p&gt;
+
+&lt;p&gt;However, in Rust each file is a distinct module, and it was &lt;em&gt;not&lt;/em&gt; desirable to have a large number of submodules each defining a single type. So, instead, the &lt;code&gt;future&lt;/code&gt; module has code like this:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mod&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;and_then&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;mod&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;flatten&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;mod&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;flatten_stream&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;mod&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;fuse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;mod&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;into_stream&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;mod&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;mod&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;mod&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;map_err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;mod&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;from_err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;mod&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;or_else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;mod&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;mod&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;select2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;mod&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;then&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;mod&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;either&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;and_then&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;AndThen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;flatten&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Flatten&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;flatten_stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FlattenStream&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fuse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Fuse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;into_stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IntoStream&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Join&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Join3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Join4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Join5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map_err&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MapErr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;from_err&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FromErr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;or_else&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;OrElse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SelectNext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;select2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Select2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;then&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Then&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;either&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Either&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This kind of setup is known generally as the &lt;em&gt;facade pattern&lt;/em&gt;, and it’s pretty ubiquitous in Rust code.&lt;/p&gt;
+
+&lt;p&gt;The facade boilerplate is needed to deal with a misalignment: each adapter is defined in its own file with its own privacy boundary, but we don’t actually want that to entail a distinct &lt;em&gt;module&lt;/em&gt; for each (in the internal or external namespace hierarchy). That means we have to do two things:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Make the modules private, despite that they contain public items&lt;/li&gt;
+&lt;li&gt;Manually re-export each of the public items at a higher level&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;When first trying to navigate the &lt;code&gt;futures&lt;/code&gt; codebase, you have to read the &lt;code&gt;future&lt;/code&gt; module to understand how its submodules are being used, due to these re-exports. For the &lt;code&gt;futures&lt;/code&gt; crate, this is a relatively small annoyance. But it can be a real source of confusion for crates that have more of a &lt;em&gt;mixture&lt;/em&gt; of submodules, some of which are significant for the namespace hierarchy, other of which are hidden away.&lt;/p&gt;
+
+&lt;p&gt;Another common confusion: items defined as &lt;code&gt;pub&lt;/code&gt; within a private module which are not, in fact, exported from the crate, but which may be re-exported in another crate-internal module. In this case, &lt;code&gt;pub(crate)&lt;/code&gt; would better convey intent, but today’s module system makes &lt;code&gt;pub&lt;/code&gt; the path of least resistance. That means, in turn, that an item definition alone doesn’t tell you the fully visibility story (though it does give you an &lt;em&gt;upper bound&lt;/em&gt; on visibility); in general you have to crawl through the rest of the code to figure out where the item is ultimately visible.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Expressiveness and the common case&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Rust’s module system, through things like the facade pattern, gives you a lot of expressiveness: you’re not forced to keep the various concerns of the module system in alignment, and are thus free to craft the organization that you deem best.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;The concern isn’t so much having this freedom, but rather how often you must wield it&lt;/strong&gt;. How often does the facade pattern show up in your code? How often do you use re-exports? How often does the directory structure of your crate bear little resemblance to the intended module hierarchy?&lt;/p&gt;
+
+&lt;p&gt;I spent some time &lt;a href=&quot;https://paper.dropbox.com/doc/Module-system-examples-AA2Gj3010ce7XwxHfOAfs&quot;&gt;surveying&lt;/a&gt; some of the most popular and most respected crates to get a qualitative feel for this question, including: &lt;code&gt;futures&lt;/code&gt;, &lt;code&gt;regex&lt;/code&gt;, &lt;code&gt;rayon&lt;/code&gt;, &lt;code&gt;log&lt;/code&gt;, &lt;code&gt;openssl&lt;/code&gt;, &lt;code&gt;flate2&lt;/code&gt;, &lt;code&gt;bytes&lt;/code&gt;, &lt;code&gt;irc&lt;/code&gt;, &lt;code&gt;clap&lt;/code&gt;, &lt;code&gt;url&lt;/code&gt;, &lt;code&gt;serde&lt;/code&gt;, &lt;code&gt;chalk&lt;/code&gt; , &lt;code&gt;std&lt;/code&gt; and &lt;code&gt;chrono&lt;/code&gt;. Virtually every crate had something “unique” about its organization, and almost all of them used the facade pattern somewhere. In general, &lt;strong&gt;it was impossible to predict anything about the public API surface just by looking at the file system organization; you have to trace re-exports&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;In short, in the vast majority of cases the module system necessitated boilerplate and a disconnect between its various concerns, impairing both write- and read-ability.&lt;/p&gt;
+
+&lt;h2 id=&quot;increasing-alignment&quot;&gt;Increasing alignment&lt;/h2&gt;
+
+&lt;p&gt;The question I want to pose now is: can we make the module system work more smoothly for the common case, decreasing boilerplate and increasing predictability/readability? This is a more narrow question than “how do we lower the learning curve”, but I believe that a good answer will help learnability as well.&lt;/p&gt;
+
+&lt;p&gt;A basic strategy is to try to make the various uses of facades more “first class”, i.e. expressed in a more explicit and clear way, rather than encoded via a particular pattern of usage. Let’s take a deeper look at the ways in which facades are commonly used in the examples mentioned above:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;To allow breaking code into files&lt;/strong&gt;, with file-private definitions. This is the &lt;code&gt;futures&lt;/code&gt; example discussed above: you’re forced to create submodules in order to split things into files, but you try to “hide” the submodules as much as possible using a facade, and other than the facade definition you never refer to them by name.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;To allow for&lt;/strong&gt; &lt;code&gt;**cfg**&lt;/code&gt;&lt;strong&gt;-specific implementations&lt;/strong&gt;. For example, the standard library uses a facade-like pattern to have two side-by-side implementation of its core system primitives, for &lt;code&gt;cfg(unix)&lt;/code&gt; and &lt;code&gt;cfg(windows)&lt;/code&gt;. This is set up so that there is no visible impact on the module hierarchy, but there &lt;em&gt;is&lt;/em&gt; an impact on the filesystem hierarchy.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;For crate-internal organization&lt;/strong&gt;, where you &lt;em&gt;do&lt;/em&gt; want a module hierarchy (for privacy or namespacing purposes), but you don’t want to reveal it to the outside world (or, in some cases, even to other modules in the crate).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;How can we make these use cases more explicit, clear, and streamlined?&lt;/p&gt;
+
+&lt;h2 id=&quot;proposal-directories-determine-modules&quot;&gt;Proposal: directories determine modules&lt;/h2&gt;
+
+&lt;p&gt;The central idea in this post is to &lt;strong&gt;make intent more explicit in the file system&lt;/strong&gt; than we do today, while streamlining common facade patterns. Here’s one way we might do it:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Deprecate &lt;code&gt;mod foo;&lt;/code&gt; declarations, instead determining module directly from directory structure.&lt;/li&gt;
+&lt;li&gt;Directories (not files!) determine the module hierarchy.
+
+&lt;ul&gt;
+&lt;li&gt;A directory with a leading &lt;code&gt;_&lt;/code&gt; gives you a &lt;code&gt;pub(crate)&lt;/code&gt; module.&lt;/li&gt;
+&lt;li&gt;All other directories give you &lt;code&gt;pub&lt;/code&gt; modules.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;The &lt;code&gt;.rs&lt;/code&gt; files in a directory &lt;em&gt;collectively&lt;/em&gt; determine the contents of the corresponding module.
+
+&lt;ul&gt;
+&lt;li&gt;Private items are private &lt;em&gt;to the file in which they are defined.&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;Items with &lt;code&gt;pub(self)&lt;/code&gt; or greater visibility are, in particular, visible to sibling files that are part of the module’s definition.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;A basic example&lt;/strong&gt;
+Let’s start with an example just showing the mechanics. First, the directory structure:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&lt;span&gt;&lt;/span&gt;src/
+  foo/
+    these.rs
+    names.rs
+    do_not_matter.rs
+    _infer/
+      instantiate.rs
+      unify.rs
+  bar/
+    mod.rs // this is fine, but has no special status
+    impls.rs
+    tests.rs
+  baz.rs
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;From the directory structure alone, we know the precise module structure (modulo any inline modules; more on that later):&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mod&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;w&quot;&gt;  &lt;/span&gt;&lt;span class=&quot;cm&quot;&gt;/* scoped contents of `these.rs`, `names.rs`, `do_not_matter.rs` */&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+
+&lt;span class=&quot;w&quot;&gt;  &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;crate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mod&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;infer&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;w&quot;&gt;    &lt;/span&gt;&lt;span class=&quot;cm&quot;&gt;/* scoped contents of `instantiate.rs` and `unify.rs` */&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;w&quot;&gt;  &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mod&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;bar&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;w&quot;&gt;  &lt;/span&gt;&lt;span class=&quot;cm&quot;&gt;/* scoped contents of `mod.rs`, `impls.rs` and `tests.rs` */&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+
+&lt;span class=&quot;cm&quot;&gt;/* scoped contents of `baz.rs` */&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;What do I mean by “scoped contents”? To reiterate from above, fully private definitions are private &lt;em&gt;to that file&lt;/em&gt;, while &lt;code&gt;pub(self)&lt;/code&gt; means private to the current module. To illustrate, imagine we have the following for &lt;code&gt;instantiate.rs&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;// private to this file&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Instantiator&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;some_helper&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// private to this module, i.e. visible to all files within `_infer`, i.e.&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// `instantiate.rs` and `unify.rs`&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;instantiate&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Fold&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;table&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;InfTable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;arg&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;and then, in &lt;code&gt;unify.rs&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;// private to this file&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Unifier&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;&amp;#39;a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// note: this private definition does *not* clash with the private definition&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// in `instantiate.rs`&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;some_helper&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// visible to the whole crate at `foo::infer::UnificationResult`&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;crate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;UnificationResult&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;crate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;unify&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Zip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;table&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mut&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;InfTable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;UnificationResult&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;w&quot;&gt;  &lt;/span&gt;&lt;span class=&quot;cm&quot;&gt;/* may invoke `instantiate` */&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Thus, visibility annotations give you fine-grained control ranging from current file (private) to world-public (&lt;code&gt;pub&lt;/code&gt;) and every module in the hierarchy in between.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Breaking code into files without module structure: the futures example&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Having seen the basics, let’s put this proposal to use in expressing the futures example described above:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&lt;span&gt;&lt;/span&gt;src/
+  future/
+    mod.rs
+    and_then.rs
+    flatten.rs
+    fuse.rs
+    // etc
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;These files would have exactly the same contents as today, except that we would be able to delete most of &lt;code&gt;mod.rs&lt;/code&gt;. That is, none of the following boilerplate is needed:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;// these can go!&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;mod&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;and_then&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;mod&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;flatten&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;mod&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;fuse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// etc&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// these too!&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;and_then&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;AndThen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;flatten&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Flatten&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fuse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Fuse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// etc&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Thus, this proposal works particularly smoothly when you want to break a module into multiple files, with potentially file-private items—because that’s exactly how modules work in the proposal! No facade necessary, and the intended (flat) module structure is made clear and explicit via the file system structure.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Platform-specific implementations&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;What if you want to provide distinct implementations by platform? Again, you no longer need a facade:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&lt;span&gt;&lt;/span&gt;src/
+  foo/
+    unix.rs
+    windows.rs
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Where &lt;code&gt;unix.rs&lt;/code&gt; starts with &lt;code&gt;#![cfg(unix)]&lt;/code&gt; and similarly for windows. Both files are considered part of the &lt;code&gt;foo&lt;/code&gt; module’s definition, but depending on the platform one of the files will appear to be empty. (Today this pattern is implemented using submodules tagged with &lt;code&gt;cfg&lt;/code&gt;, together with re-exports.)&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Internal module structure&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;The final mis-alignment was cases where you want a module hierarchy internally, but want to expose some collapsed version of it externally. This is the one place where you still need to use &lt;code&gt;pub(use)&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&lt;span&gt;&lt;/span&gt;// excerpted from `clap`
+
+src/
+  _app/
+    help.rs
+    macros.rs
+    mod.rs
+    parser.rs
+    usage.rs
+  _args/
+    arg.rs
+    arg_matcher.rs
+    arg_matches.rs
+    macros.rs
+    settings.rs
+  errors.rs
+  fmt.rs
+  suggestions.rs
+  lib.rs
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This directory structure is excepted from &lt;code&gt;clap&lt;/code&gt;, which currently has &lt;code&gt;app&lt;/code&gt; and &lt;code&gt;args&lt;/code&gt; subdirectories but does not export any submodules; these modules are used purely for internal organization and namespacing.&lt;/p&gt;
+
+&lt;p&gt;In &lt;code&gt;_app/mod.rs&lt;/code&gt; you might have a definition like:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;// note that this is `pub`!&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;App&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;&amp;#39;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;na&quot;&gt;&amp;#39;b&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The reader can immediately see something interesting happening: this item is defined within an “internal” (&lt;code&gt;pub(crate)&lt;/code&gt;) module, since &lt;code&gt;_app&lt;/code&gt; begins with an underscore. But it has a &lt;em&gt;larger&lt;/em&gt;, world-public visibility. This is an indication that the item will be re-exported somewhere else (and in fact, we could lint against this &lt;em&gt;not&lt;/em&gt; being the case).&lt;/p&gt;
+
+&lt;p&gt;Accordingly, in &lt;code&gt;lib.rs&lt;/code&gt;, we might have:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;App&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;In short, re-exports are still needed, but the directory structure and item visibility give the reader a strong, localized indication of what’s going on.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Fine details&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;I’m glossing over a &lt;em&gt;lot&lt;/em&gt; of fine details here, including:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;How do you provide module docs? One appealing possibility: via a &lt;code&gt;README.md&lt;/code&gt; file, which would have several benefits — most importantly, moving the often very large module-level docs out of band.&lt;/li&gt;
+&lt;li&gt;Similarly, what’s the story for module-level attributes in general?&lt;/li&gt;
+&lt;li&gt;What about inline modules?&lt;/li&gt;
+&lt;li&gt;Backward-compatibility concerns?&lt;/li&gt;
+&lt;li&gt;And many more.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;For the moment, I’m going to ask that we avoid getting bogged down in these questions (which are ultimately important), so that we can focus first on whether the &lt;em&gt;broad&lt;/em&gt; direction here is a good one.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Tradeoffs&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Speaking of evaluation: there are some tradeoffs we can see even at this level of detail.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Primary Upsides:&lt;/em&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Learning the basics of the module system is really easy: each directory defines a module name in the module hierarchy; the &lt;code&gt;.rs&lt;/code&gt; files within that directory collectively define the contents of that module. The end.&lt;/li&gt;
+&lt;li&gt;The file system organization gives you a very clear, explicit view into the module structure and programmer intent. Compared to dropping into a random crate’s source code today (an exercise I &lt;a href=&quot;https://paper.dropbox.com/doc/Module-system-examples-AA2Gj3010ce7XwxHfOAfs&quot;&gt;performed repeatedly&lt;/a&gt;, I believe this approach will make it much easier to understand a crate’s overall structure with a quick run of &lt;code&gt;tree&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Fewer imports are needed, because module-visible items defined in sibling files are automatically in scope (but see the downside below).&lt;/li&gt;
+&lt;li&gt;Most of the common uses of facades (breaking into files/privacy boundaries, platform-specific modules) no longer require any facading, or indeed any boilerplate at all.&lt;/li&gt;
+&lt;li&gt;Cases where you want some crate-internal module namespacing are expressed in a natural, obvious way (via the &lt;code&gt;_&lt;/code&gt; prefix), and one that makes it easier for readers to see that a given item will be re-exported elsewhere.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;em&gt;Primary downsides:&lt;/em&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Bringing module-visible items into scope from sibling files means that one may have to search in multiple files to discover the definition of some item. In contrast, today every item you can mention in a file is brought into scope somewhere in &lt;em&gt;that&lt;/em&gt; file—assuming you don’t use globs.
+
+&lt;ul&gt;
+&lt;li&gt;On the other hand, this proposal eliminates boilerplate &lt;code&gt;use&lt;/code&gt; declarations for definitions that are conceptually part of the same module. And in particular, the fact that such declarations would often be relative (e.g. &lt;code&gt;use self::item;&lt;/code&gt;) may help mitigate confusion around the absolute/relative path issue.&lt;/li&gt;
+&lt;li&gt;A variant of this proposal would not bring these items into scope by default, but instead allow you to do so via &lt;code&gt;use self::item;&lt;/code&gt; However, having to use &lt;code&gt;self&lt;/code&gt; here is awkward, and the definition is not helpful—it only serves to tell you that another file in the directory defines &lt;code&gt;item&lt;/code&gt;, which is something you can already determine if the binding isn’t located in the current file. (In contrast, today the required import also gives you a hint as to which file to look at).&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Determining module structure from file system structure is problematic for some, due either to stashing stray &lt;code&gt;.rs&lt;/code&gt; files in the project directory, or due to potentially laggy network file access.
+
+&lt;ul&gt;
+&lt;li&gt;If this proves to be a problem in practice, we could provide an optional way to specify the desired file list. But in the vast majority of cases today the file system and module hierarchy are aligned.&lt;/li&gt;
+&lt;li&gt;Some have also argued that leveraging the file system is too “implicit”, but I don’t think that argument holds water; the file system arrangement itself is a perfectly “explicit” way of providing information, and there’s no particular reason to distinguish that from &lt;code&gt;mod&lt;/code&gt; statements in code. I rather see it as the current setup forcing repetition of information. (I would also &lt;a href=&quot;https://blog.rust-lang.org/2017/03/02/lang-ergonomics.html&quot;&gt;urge&lt;/a&gt; a focus on concrete instances of &lt;em&gt;reasoning about code&lt;/em&gt; in judging this kind of question.)&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;wrapping-up&quot;&gt;Wrapping up&lt;/h2&gt;
+
+&lt;p&gt;There’s a &lt;em&gt;lot&lt;/em&gt; more to say about modules, and this proposal is just one variant of probably a dozen that the language team has been exploring. But I wanted to take the time to at least spike out one plausible option, and see what people think. As I asked above: I strongly urge people to focus only on the big-picture question of whether this avenue is appealing &lt;em&gt;at all&lt;/em&gt;, and not get too bogged down in finer details until later in the process.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;A bit of editorializing&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;What I like about this proposal is that it’s &lt;em&gt;dirt simple&lt;/em&gt;: the correspondence between file system and module hierarchies is very easy to describe, and today’s patterns fall out naturally, usually with significant boilerplate reduction. I think there’s a very real chance that, with this proposal, people will view Rust’s module system as easy to learn. Finally, and most subjectively, compared to some of the other ideas we’ve been exploring, there’s a certain &lt;em&gt;elegance&lt;/em&gt; to this set up; nothing feels bolted on, and the examples drawn from real-world code have a quite pleasing expression.&lt;/p&gt;
+
+&lt;p&gt;I do worry about the sibling scoping question. I know I, for one, often track down bindings by searching purely within the current file. With this proposal, I’d have to change that workflow to &lt;code&gt;grep&lt;/code&gt;ing within the current directory, or using tags more consistently, etc. Yet, I suspect that in the end, these other workflows are an &lt;em&gt;improvement —&lt;/em&gt; e.g., tags allow a more direct jump to definition regardless of where that definition lives, whereas my current workflow often requires following a chain of imports.&lt;/p&gt;
+
+&lt;p&gt;In any case, I think this potential workflow shift is more than made up for by the greater clarity about module structure, which makes it much easier to find your way around a project in the first place.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Shipping specialization: a story of soundness</title>
@@ -64,8 +416,7 @@ to result in confusion and bugs.&lt;/p&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;p&gt;Unfortunately, specialization makes the story more difficult:&lt;/p&gt;
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;// Specialization cannot work: trans doesn&amp;#39;t know if T: &amp;#39;static:&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Bad1&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Bad1&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
 &lt;span class=&quot;w&quot;&gt;    &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;bad1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
 
@@ -75,6 +426,7 @@ to result in confusion and bugs.&lt;/p&gt;&lt;/li&gt;
 &lt;span class=&quot;w&quot;&gt;    &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
 
+&lt;span class=&quot;c1&quot;&gt;// Specialization cannot work: trans doesn&amp;#39;t know if T: &amp;#39;static&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;&amp;#39;static&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Bad1&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
 &lt;span class=&quot;w&quot;&gt;    &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;bad1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
 &lt;span class=&quot;w&quot;&gt;        &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;println&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;specialized&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
@@ -92,9 +444,11 @@ perspective of trans this type will look like &lt;code&gt;&amp;amp;&amp;#39;eras
 impossible to know whether the more specialized &lt;code&gt;impl&lt;/code&gt; can safely be used.&lt;/p&gt;
 
 &lt;p&gt;Here&amp;rsquo;s another, less obvious example:&lt;/p&gt;
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;// Specialization cannot work: trans doesn&amp;#39;t know if two refs have equal lifetimes:&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Bad2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Bad2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+
 &lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Bad2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Specialization cannot work: trans doesn&amp;#39;t know if two refs have equal lifetimes&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;&amp;#39;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Bad2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;&amp;#39;a&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;&amp;#39;a&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Here, the second &lt;code&gt;impl&lt;/code&gt; is requiring that two lifetimes are the same, and once
@@ -102,17 +456,21 @@ more for trans we can&amp;rsquo;t tell whether the &lt;code&gt;impl&lt;/code&gt;
 
 &lt;p&gt;On the other hand, simply &lt;em&gt;naming&lt;/em&gt; a lifetime that must exist, without
 &lt;em&gt;constraining&lt;/em&gt; it, is fine:&lt;/p&gt;
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;// Fine: specializes based on being *any* reference, regardless of lifetime&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Good&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Good&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+
 &lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Good&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Fine: specializes based on being *any* reference, regardless of lifetime&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;&amp;#39;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Good&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;&amp;#39;a&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;In addition, it&amp;rsquo;s in principle okay for lifetime constraints to show up as long
 as they don&amp;rsquo;t influence specialization:&lt;/p&gt;
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;// Potentially fine: *all* impls impose the &amp;#39;static requirement; the dispatch is&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;// happening purely based on `Clone`&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MustBeStatic&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MustBeStatic&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+
 &lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;&amp;#39;static&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MustBeStatic&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Potentially fine: *all* impls impose the &amp;#39;static requirement; the dispatch is&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// happening purely based on `Clone`&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;impl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;&amp;#39;static&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;Clone&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MustBeStatic&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;h3 id=&quot;why-does-this-lead-to-unsoundness&quot;&gt;Why does this lead to unsoundness?&lt;/h3&gt;
