@@ -78,7 +78,7 @@
 
 <ul>
 <li><strong>Who can see this item? And how?</strong> It’s pretty common to find items within modules that are marked <code>pub</code>, but are not in fact visible through the module defining them—or even visible outside the crate at all! This tends to happen when you want to organize code within the file system differently from the API hierarchy you expose to the rest of the crate or to the outside world. It generally means you have to look at several files to figure out how to access an item (or even whether you can).</li>
-<li><code>**pub use**</code> <strong>abuse</strong>. More generally, re-exports are ubiquitous in idiomatic Rust code. The result is that the “apparent” module hierarchy (as seen from the file system) often tells you very little about the <em>actual</em> module hierarchy, as seen from inside or outside the crate. This can make it difficult to jump into a new code base, or back into one you haven’t worked on in a while.</li>
+<li><code>pub use</code> <strong>abuse</strong>. More generally, re-exports are ubiquitous in idiomatic Rust code. The result is that the “apparent” module hierarchy (as seen from the file system) often tells you very little about the <em>actual</em> module hierarchy, as seen from inside or outside the crate. This can make it difficult to jump into a new code base, or back into one you haven’t worked on in a while.</li>
 <li><strong>Repetition</strong>. The module system often requires two steps to do something, when a single step would suffice to convey all the necessary information:
 
 <ul>
@@ -104,7 +104,7 @@
 
 <p>Things seem to work most smoothly when these concerns are closely aligned. Conversely, the places where the module system becomes hard to work with and reason about tend to be misalignments.</p>
 
-<p><strong>An example of misalignment: facades in</strong> <code>**futures**</code></p>
+<p><strong>An example of misalignment: facades in <code>futures</code></strong></p>
 
 <p>Let’s take a concrete example from the <code>futures</code> crate. Futures, like iterators, have a large number of methods that produce “adapters”, i.e. concrete types that are also futures:</p>
 <div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">trait</span><span class="w"> </span><span class="n">Future</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -181,7 +181,7 @@
 
 <ul>
 <li><strong>To allow breaking code into files</strong>, with file-private definitions. This is the <code>futures</code> example discussed above: you’re forced to create submodules in order to split things into files, but you try to “hide” the submodules as much as possible using a facade, and other than the facade definition you never refer to them by name.</li>
-<li><strong>To allow for</strong> <code>**cfg**</code><strong>-specific implementations</strong>. For example, the standard library uses a facade-like pattern to have two side-by-side implementation of its core system primitives, for <code>cfg(unix)</code> and <code>cfg(windows)</code>. This is set up so that there is no visible impact on the module hierarchy, but there <em>is</em> an impact on the filesystem hierarchy.</li>
+<li><strong>To allow for <code>cfg</code>-specific implementations</strong>. For example, the standard library uses a facade-like pattern to have two side-by-side implementation of its core system primitives, for <code>cfg(unix)</code> and <code>cfg(windows)</code>. This is set up so that there is no visible impact on the module hierarchy, but there <em>is</em> an impact on the filesystem hierarchy.</li>
 <li><strong>For crate-internal organization</strong>, where you <em>do</em> want a module hierarchy (for privacy or namespacing purposes), but you don’t want to reveal it to the outside world (or, in some cases, even to other modules in the crate).</li>
 </ul>
 
@@ -358,7 +358,7 @@ src/
 
 <ul>
 <li>Learning the basics of the module system is really easy: each directory defines a module name in the module hierarchy; the <code>.rs</code> files within that directory collectively define the contents of that module. The end.</li>
-<li>The file system organization gives you a very clear, explicit view into the module structure and programmer intent. Compared to dropping into a random crate’s source code today (an exercise I <a href="https://paper.dropbox.com/doc/Module-system-examples-AA2Gj3010ce7XwxHfOAfs">performed repeatedly</a>, I believe this approach will make it much easier to understand a crate’s overall structure with a quick run of <code>tree</code>.</li>
+<li>The file system organization gives you a very clear, explicit view into the module structure and programmer intent. Compared to dropping into a random crate’s source code today (an exercise I <a href="https://paper.dropbox.com/doc/Module-system-examples-AA2Gj3010ce7XwxHfOAfs">performed repeatedly</a>), I believe this approach will make it much easier to understand a crate’s overall structure with a quick run of <code>tree</code>.</li>
 <li>Fewer imports are needed, because module-visible items defined in sibling files are automatically in scope (but see the downside below).</li>
 <li>Most of the common uses of facades (breaking into files/privacy boundaries, platform-specific modules) no longer require any facading, or indeed any boilerplate at all.</li>
 <li>Cases where you want some crate-internal module namespacing are expressed in a natural, obvious way (via the <code>_</code> prefix), and one that makes it easier for readers to see that a given item will be re-exported elsewhere.</li>
@@ -435,7 +435,7 @@ src/
 
       <footer class="footer">
         <small>
-          &copy; <time datetime="2017-07-26T18:38:22-07:00">2017</time>. All rights reserved.
+          &copy; <time datetime="2017-07-26T19:47:11-07:00">2017</time>. All rights reserved.
         </small>
       </footer>
     </div>

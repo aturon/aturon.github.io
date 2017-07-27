@@ -4,7 +4,7 @@
  <title>Aaron Turon</title>
  <link href="http://aturon.github.io/blog/atom.xml" rel="self"/>
  <link href="http://aturon.github.io/blog/"/>
- <updated>2017-07-26T18:38:22-07:00</updated>
+ <updated>2017-07-26T19:47:11-07:00</updated>
  <id>http://aturon.github.io</id>
  <author>
    <name>Aaron Turon</name>
@@ -47,7 +47,7 @@
 
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;Who can see this item? And how?&lt;/strong&gt; It’s pretty common to find items within modules that are marked &lt;code&gt;pub&lt;/code&gt;, but are not in fact visible through the module defining them—or even visible outside the crate at all! This tends to happen when you want to organize code within the file system differently from the API hierarchy you expose to the rest of the crate or to the outside world. It generally means you have to look at several files to figure out how to access an item (or even whether you can).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;**pub use**&lt;/code&gt; &lt;strong&gt;abuse&lt;/strong&gt;. More generally, re-exports are ubiquitous in idiomatic Rust code. The result is that the “apparent” module hierarchy (as seen from the file system) often tells you very little about the &lt;em&gt;actual&lt;/em&gt; module hierarchy, as seen from inside or outside the crate. This can make it difficult to jump into a new code base, or back into one you haven’t worked on in a while.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;pub use&lt;/code&gt; &lt;strong&gt;abuse&lt;/strong&gt;. More generally, re-exports are ubiquitous in idiomatic Rust code. The result is that the “apparent” module hierarchy (as seen from the file system) often tells you very little about the &lt;em&gt;actual&lt;/em&gt; module hierarchy, as seen from inside or outside the crate. This can make it difficult to jump into a new code base, or back into one you haven’t worked on in a while.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Repetition&lt;/strong&gt;. The module system often requires two steps to do something, when a single step would suffice to convey all the necessary information:
 
 &lt;ul&gt;
@@ -73,7 +73,7 @@
 
 &lt;p&gt;Things seem to work most smoothly when these concerns are closely aligned. Conversely, the places where the module system becomes hard to work with and reason about tend to be misalignments.&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;An example of misalignment: facades in&lt;/strong&gt; &lt;code&gt;**futures**&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;An example of misalignment: facades in &lt;code&gt;futures&lt;/code&gt;&lt;/strong&gt;&lt;/p&gt;
 
 &lt;p&gt;Let’s take a concrete example from the &lt;code&gt;futures&lt;/code&gt; crate. Futures, like iterators, have a large number of methods that produce “adapters”, i.e. concrete types that are also futures:&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;trait&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Future&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
@@ -150,7 +150,7 @@
 
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;To allow breaking code into files&lt;/strong&gt;, with file-private definitions. This is the &lt;code&gt;futures&lt;/code&gt; example discussed above: you’re forced to create submodules in order to split things into files, but you try to “hide” the submodules as much as possible using a facade, and other than the facade definition you never refer to them by name.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;To allow for&lt;/strong&gt; &lt;code&gt;**cfg**&lt;/code&gt;&lt;strong&gt;-specific implementations&lt;/strong&gt;. For example, the standard library uses a facade-like pattern to have two side-by-side implementation of its core system primitives, for &lt;code&gt;cfg(unix)&lt;/code&gt; and &lt;code&gt;cfg(windows)&lt;/code&gt;. This is set up so that there is no visible impact on the module hierarchy, but there &lt;em&gt;is&lt;/em&gt; an impact on the filesystem hierarchy.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;To allow for &lt;code&gt;cfg&lt;/code&gt;-specific implementations&lt;/strong&gt;. For example, the standard library uses a facade-like pattern to have two side-by-side implementation of its core system primitives, for &lt;code&gt;cfg(unix)&lt;/code&gt; and &lt;code&gt;cfg(windows)&lt;/code&gt;. This is set up so that there is no visible impact on the module hierarchy, but there &lt;em&gt;is&lt;/em&gt; an impact on the filesystem hierarchy.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;For crate-internal organization&lt;/strong&gt;, where you &lt;em&gt;do&lt;/em&gt; want a module hierarchy (for privacy or namespacing purposes), but you don’t want to reveal it to the outside world (or, in some cases, even to other modules in the crate).&lt;/li&gt;
 &lt;/ul&gt;
 
@@ -327,7 +327,7 @@ src/
 
 &lt;ul&gt;
 &lt;li&gt;Learning the basics of the module system is really easy: each directory defines a module name in the module hierarchy; the &lt;code&gt;.rs&lt;/code&gt; files within that directory collectively define the contents of that module. The end.&lt;/li&gt;
-&lt;li&gt;The file system organization gives you a very clear, explicit view into the module structure and programmer intent. Compared to dropping into a random crate’s source code today (an exercise I &lt;a href=&quot;https://paper.dropbox.com/doc/Module-system-examples-AA2Gj3010ce7XwxHfOAfs&quot;&gt;performed repeatedly&lt;/a&gt;, I believe this approach will make it much easier to understand a crate’s overall structure with a quick run of &lt;code&gt;tree&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;The file system organization gives you a very clear, explicit view into the module structure and programmer intent. Compared to dropping into a random crate’s source code today (an exercise I &lt;a href=&quot;https://paper.dropbox.com/doc/Module-system-examples-AA2Gj3010ce7XwxHfOAfs&quot;&gt;performed repeatedly&lt;/a&gt;), I believe this approach will make it much easier to understand a crate’s overall structure with a quick run of &lt;code&gt;tree&lt;/code&gt;.&lt;/li&gt;
 &lt;li&gt;Fewer imports are needed, because module-visible items defined in sibling files are automatically in scope (but see the downside below).&lt;/li&gt;
 &lt;li&gt;Most of the common uses of facades (breaking into files/privacy boundaries, platform-specific modules) no longer require any facading, or indeed any boilerplate at all.&lt;/li&gt;
 &lt;li&gt;Cases where you want some crate-internal module namespacing are expressed in a natural, obvious way (via the &lt;code&gt;_&lt;/code&gt; prefix), and one that makes it easier for readers to see that a given item will be re-exported elsewhere.&lt;/li&gt;
