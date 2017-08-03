@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="UTF-8">
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>
+    
+      Revisiting Rust’s modules, part 2 &middot; Aaron Turon
+    
+  </title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/blog/styles.css">
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/blog/public/apple-touch-icon-precomposed.png">
+  <link rel="shortcut icon" href="/blog/public/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/atom+xml" title="Aaron Turon" href="/blog/atom.xml">
+</head>
+
+
+  <body>
+
+    <div class="container content">
+      <header class="masthead">
+        <h3 class="masthead-title">
+          <a href="/blog/" title="Home">Aaron Turon</a>
+          <small></small>
+
+          
+          &nbsp;&nbsp;&nbsp;
+          <small><a href="/blog/archive">Archive</a></small>
+          
+          &nbsp;&nbsp;&nbsp;
+          <small><a href="/blog/atom.xml">Feed</a></small>
+          
+        </h3>
+      </header>
+
+      <main>
+        <article class="post">
+  <h1 class="post-title">Revisiting Rust’s modules, part 2</h1>
+  <time datetime="2017-08-02T00:00:00-07:00" class="post-date">02 Aug 2017</time>
+  <p>It&rsquo;s been a week since my <a href="http://aturon.github.io/blog/2017/07/26/revisiting-rusts-modules/">last post</a> on Rust&rsquo;s module system. Unsurprisingly,
+the strawman proposal in that post garnered a lot of commentary&ndash;174 comments in
+one week!&ndash;with sentiments ranging from</p>
+
+<blockquote>
+<p>Now <em>this</em> is a proposal I can get behind</p>
+</blockquote>
+
+<p>to</p>
+
+<blockquote>
+<p>I&rsquo;ve rarely hated anything as much as I hate the module system proposal</p>
+</blockquote>
+
+<p>and everything in between :-)</p>
+
+<p>The <a href="https://internals.rust-lang.org/t/revisiting-rusts-modules/5628/">discussion</a> has raised a number of very interesting points; thanks to
+everyone who has participated so far!. I won&rsquo;t try to give a comprehensive
+summary here. What I want to do instead is focus on one particular critique of
+the earlier proposal, and present a quite different strawman design that
+embraces a different set of priorities.</p>
+
+<p>For ease of discussion:</p>
+
+<ul>
+<li>I&rsquo;ll call the strawman in my <a href="http://aturon.github.io/blog/2017/07/26/revisiting-rusts-modules/">last post</a> the &ldquo;directories-as-modules&rdquo; proposal.</li>
+<li>I&rsquo;ll call the strawman in this post the &ldquo;use-uber-alles&rdquo; proposal.</li>
+</ul>
+
+<h2 id="a-critique-of-the-directories-as-modules-proposal">A critique of the directories-as-modules proposal</h2>
+
+<p>There were a number of concerns about the directories-as-modules proposal
+(including its fairly radical nature), but the one that struck me was that the
+proposal was very heavily weighted toward a particular subset of the problems
+the original post raised, and didn&rsquo;t help much with some of the others.</p>
+
+<p>To recap briefly: the original post talked about obstacles both for learning the
+module system, and for using it at scale. It ultimately focused a lot on the
+issue of how much we have to employ <code>pub use</code> (aka the &ldquo;facade pattern&rdquo;) when
+setting things up today, and I think the proposal clearly streamlines that
+story. (There are also variants like &ldquo;inline&rdquo; aka &ldquo;anonymous&rdquo; modules that bring
+in just part of the proposal).</p>
+
+<p>On the other hand, the proposal didn&rsquo;t do much to help with issues around &ldquo;path
+confusion&rdquo;:</p>
+
+<blockquote>
+<p>The fact that <code>use</code> declarations work with absolute paths while other items do not is confusing, and even experienced Rust programmers (myself included) often confuse the two. To make matters worse, the top-level namespace contains all of the external <em>crates</em>, but also the <em>contents</em> of the current crate. Unless, of course, you’re writing an external test or binary. And finally, when you’re working at the top level, the absolute/relative distinction doesn’t matter, which means that you can have the wrong mental model and only find it when trying to expand out into submodules.</p>
+</blockquote>
+
+<p>Many on the thread cited <em>this</em> as the core problematic issue with the module
+system; I&rsquo;ve collected <a href="https://gist.github.com/aturon/2f10f19f084f39330cfe2ee028b2ea0c">some data</a> about confusion around Rust modules which
+also supports that to a degree.</p>
+
+<p>My goal in this post is to float a quite different proposal that emphasizes
+these issues, de-emphasizes the facading issues, and overall is more
+conservative. Similarly to last time, the idea here is to present a coherent,
+plausible &ldquo;spike&rdquo; with ideas that could be useful, and seek feedback on the
+broad direction without getting too bogged down in the fine details.</p>
+
+<h2 id="one-other-bit-of-framing">One other bit of framing</h2>
+
+<p>Before giving the proposal, though, I want to record one other insight I&rsquo;ve had
+along the way, in terms of where people sometimes go wrong when learning the
+module system.</p>
+
+<p>Coming from other languages, there&rsquo;s often an expectation that adding a <code>.rs</code>
+file to the source tree, or a dependency to <code>Cargo.toml</code>, should be all that&rsquo;s
+needed to set up the naming hierarchy. From that perspective, you&rsquo;d expect to be
+able to use <code>use</code> to pull items out of any of these. Instead, you <em>sometimes</em>
+can, but need to write the correct incantation (<code>extern crate</code> or <code>mod</code>) in the
+right place first. It requires a shift in mental model. And the fact that <code>use</code>
+is much more common than <code>mod</code> can make this all the more confusing.</p>
+
+<p>@kornel put together a <a href="https://gist.github.com/pornel/0f7ebcec230117ab52c959fe0b090335">really great chart comparing module systems</a> that makes
+this point quite strongly.</p>
+
+<p>Part of the reason I&rsquo;m labeling this proposal as &ldquo;use-uber-alles&rdquo; is that it
+sets up <code>use</code> declarations as the <em>only</em> thing you need to write in your Rust
+source to bring items into scope. The items that are <em>available</em>, by contrast,
+are determined by Cargo (or another build system), together with your file
+system. This is one aspect that mirrors the earlier proposal, part of which is
+now <a href="https://github.com/rust-lang/rfcs/pull/2088">an RFC</a>.</p>
+
+<h2 id="the-basic-ingredients">The basic ingredients</h2>
+
+<p>Here&rsquo;s a quick summary of the proposal:</p>
+
+<ul>
+<li>Start with today&rsquo;s module system.</li>
+<li>Deprecate <code>extern crate</code>, along the lines of
+the <a href="(https://github.com/rust-lang/rfcs/pull/2088)">in-progress RFC</a>.</li>
+<li>Deprecate <code>mod foo;</code> and instead determine module structure from the file system.
+
+<ul>
+<li>However, unlike the previous proposal, this determination is the same as
+today, i.e. files are modules, and directories are used to introduce nested
+modules.</li>
+</ul></li>
+<li>Improve <code>use</code> for greater clarity around paths, which I&rsquo;ll explain below.</li>
+<li>Modules are <code>pub(crate)</code> unless they are <code>pub use</code>d (so <code>pub mod foo;</code> becomes
+<code>pub use foo;</code> &ndash; note that this is using <em>relative</em> paths, as I&rsquo;ll explain next).</li>
+</ul>
+
+<p>The meat is in making two adjustments for <code>use</code> declarations:</p>
+
+<ol>
+<li>Introduce a <code>from &lt;crate_name&gt; use &lt;path&gt;;</code> form for importing items from
+external crates.</li>
+<li>Change <code>use &lt;path&gt;;</code> to treat the path as <em>relative to the current module</em>
+(i.e. as if it started with <code>self::</code>).
+
+<ul>
+<li>A leading <code>::</code> takes you to the root <em>of the current crate</em>, but is <em>not</em> a
+way to reference items from other crates.</li>
+</ul></li>
+</ol>
+
+<p>(Similar adjustments are needed for referencing paths in function signatures
+etc., which I&rsquo;ll elide here.)</p>
+
+<p>This is, of course, a breaking change. However, it has some properties that make
+it a reasonable fit for the <a href="https://github.com/rust-lang/rfcs/pull/2052">checkpoint</a> model:</p>
+
+<ul>
+<li>It&rsquo;s trivial to write a <code>rustfix</code> tool that mechanically switches today&rsquo;s
+<code>use</code> declarations to this new setup, and likewise deals with <code>mod</code> and
+<code>extern crate</code>.</li>
+<li>We could introduce and stabilize the <code>from/use</code> syntax, then deprecate use of
+absolute paths in <code>use</code> (without a leading <code>::</code>), and employ <code>rustfix</code> at that
+point &ndash; all before a new checkpoint is needed.</li>
+</ul>
+
+<p>Of course, the full migration story needs to be significantly fleshed out, but
+this is just meant to sketch plausibility.</p>
+
+<h3 id="what-does-it-look-like">What does it look like?</h3>
+
+<p>Before talking about the rationale, I want to show an example for
+clarity. First, the parts that don&rsquo;t change.</p>
+
+<p>Here&rsquo;s a <code>Cargo.toml</code> excerpt:</p>
+<div class="highlight"><pre><code class="language-toml" data-lang="toml"><span></span><span class="p">[</span><span class="n">dependencies</span><span class="p">]</span>
+<span class="n">petgraph</span> <span class="o">=</span> <span class="s">&quot;0.4.5&quot;</span>
+</code></pre></div>
+<p>A directory structure excerpt:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text"><span></span>src/
+  lib.rs
+  coherence/
+    mod.rs
+    solve.rs
+</code></pre></div>
+<h4 id="code-in-todays-module-system">Code in today&rsquo;s module system</h4>
+
+<p>In <code>lib.rs</code>:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">extern</span><span class="w"> </span><span class="k">crate</span><span class="w"> </span><span class="n">petgraph</span><span class="p">;</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">coherence</span><span class="p">;</span><span class="w"></span>
+</code></pre></div>
+<p>In <code>mod.rs</code>:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">use</span><span class="w"> </span><span class="n">petgraph</span><span class="o">::</span><span class="n">prelude</span><span class="o">::*</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">use</span><span class="w"> </span><span class="n">errors</span><span class="o">::</span><span class="nb">Result</span><span class="p">;</span><span class="w"></span>
+<span class="k">use</span><span class="w"> </span><span class="n">ir</span><span class="o">::</span><span class="p">{</span><span class="n">Program</span><span class="p">,</span><span class="w"> </span><span class="n">ItemId</span><span class="p">};</span><span class="w"></span>
+
+<span class="k">mod</span> <span class="nn">solve</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">pub</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="bp">self</span><span class="o">::</span><span class="n">solve</span><span class="o">::</span><span class="n">Solver</span><span class="p">;</span><span class="w"></span>
+</code></pre></div>
+<p>In <code>solve.rs</code>:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">use</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">sync</span><span class="o">::</span><span class="n">Arc</span><span class="p">;</span><span class="w"></span>
+<span class="k">use</span><span class="w"> </span><span class="n">itertools</span><span class="o">::</span><span class="n">Itertools</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">use</span><span class="w"> </span><span class="n">errors</span><span class="o">::*</span><span class="p">;</span><span class="w"></span>
+<span class="k">use</span><span class="w"> </span><span class="n">ir</span><span class="o">::*</span><span class="p">;</span><span class="w"></span>
+</code></pre></div>
+<h4 id="code-in-the-proposed-system">Code in the proposed system:</h4>
+
+<p>In <code>lib.rs</code>:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">pub</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="n">coherence</span><span class="p">;</span><span class="w"> </span><span class="c1">// note relative path; this makes `coherence` pub</span>
+</code></pre></div>
+<p>In <code>mod.rs</code>:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="n">from</span><span class="w"> </span><span class="n">petgraph</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="n">prelude</span><span class="o">::*</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">use</span><span class="w"> </span><span class="o">::</span><span class="n">errors</span><span class="o">::</span><span class="nb">Result</span><span class="p">;</span><span class="w"></span>
+<span class="k">use</span><span class="w"> </span><span class="o">::</span><span class="n">ir</span><span class="o">::</span><span class="p">{</span><span class="n">Program</span><span class="p">,</span><span class="w"> </span><span class="n">ItemId</span><span class="p">};</span><span class="w"></span>
+
+<span class="k">pub</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="n">solve</span><span class="o">::</span><span class="n">Solver</span><span class="p">;</span><span class="w"> </span><span class="c1">// note use of relative path</span>
+</code></pre></div>
+<p>In <code>solve.rs</code>:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="n">from</span><span class="w"> </span><span class="n">std</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="n">sync</span><span class="o">::</span><span class="n">Arc</span><span class="p">;</span><span class="w"></span>
+<span class="n">from</span><span class="w"> </span><span class="n">itertools</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="n">Itertools</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">use</span><span class="w"> </span><span class="o">::</span><span class="n">errors</span><span class="o">::*</span><span class="p">;</span><span class="w"></span>
+<span class="k">use</span><span class="w"> </span><span class="o">::</span><span class="n">ir</span><span class="o">::*</span><span class="p">;</span><span class="w"></span>
+</code></pre></div>
+<h3 id="rationale">Rationale</h3>
+
+<p>Each piece of this proposal has a rationale, but in some cases they&rsquo;re tied
+together:</p>
+
+<ul>
+<li><p><strong>Introducing <code>from</code>/<code>use</code></strong>. This form provides a much more clear distinction
+between imports from external crates and those from the local crate, which can
+be helpful when exploring a codebase. Splitting out this form also means we
+eliminate the very confusing issue that extern crates are &ldquo;mounted&rdquo; in the
+current crate&rsquo;s module hierarchy, usually at root. (In this analogy, the
+<code>from</code> form is more like addressing an entirely separate volume.)
+Incidentally, grepping for this declaration will tell you which external
+crates are in use.</p></li>
+<li><p><strong>Changing <code>use</code> to take paths relative to the current module</strong>. There are two
+main reasons to do this.</p>
+
+<ul>
+<li>If submodules are always in scope for their parent module, things like
+function signatures <em>feel</em> like they are taking relative paths. (In actuality,
+they are resolving names based on what&rsquo;s in scope). In any case, making paths
+everywhere relative to the current module reduces confusion.</li>
+<li>We want to use <code>pub use</code> to export submodules publicly, but with absolute
+paths this would be <code>pub use self::my_submodule</code> which is awkward and
+confusing; people are almost certain to forget <code>self</code> much of the time.</li>
+<li>Note that there are often arguments that <code>use</code>-like mechanisms should employ
+absolute paths by default because that&rsquo;s the common case. However, for Rust
+I think that&rsquo;s at least partly based on the current use for pulling in items
+from external crates, and would be more evenly split in this new setup.</li>
+</ul></li>
+<li><p><strong>Using <code>pub use</code> for exporting modules</strong>. If the module hierarchy is
+determined from the file system, we need <em>some</em> way to say whether a module is
+public. While we could say this in the module itself, doing so is
+syntactically awkward, and also means that a module&rsquo;s exports are spread over
+multiple files. At the same time, <code>pub use</code> still exists as a form you need to
+use for re-exporting items, and it provides a reasonable mental model when using
+it to export your child module.</p></li>
+<li><p><strong>The general privacy setup</strong>. A basic premise is that the visibility of a
+module <em>name</em> is not terribly important by itself; what really matters is the
+visibility of <em>items</em> within the module. Thus we simplify matters by making
+<em>all</em> modules have at least crate visibility&mdash;though this does mean that
+marking an item <code>pub</code> in a module means it, in reality, has <em>at least</em>
+<code>pub(crate)</code> visibility (and perhaps more, if it&rsquo;s exported in a public
+module). This is arguably a good thing; today, the fact that you can write
+<code>pub</code> but the <em>actual</em> visibility is determined by a complex nest of
+re-exports and module visibilities can make it quite hard to reason about
+unfamiliar code. As has been argued on thread, the vast majority of the time
+you only need visibility at one of three levels: the current module, the
+crate, or the world. This proposal makes those cases all easy to express, and
+requires a more explicit <code>pub(super)</code> etc to get other privacy granularities.</p>
+
+<ul>
+<li>TL;DR: writing <code>pub</code> on an item means <code>pub(crate)</code> unless (re)exported in a
+public module (which itself is done via re-exporting).</li>
+</ul></li>
+<li><p><strong>Deprecating <code>mod</code>/<code>extern crate</code></strong>. This was already explained
+above. There&rsquo;s already been some discussion around the downsides (and ways to
+mitigate them), so I&rsquo;m not going to spend time on that here.</p>
+
+<ul>
+<li>Note, however, that one of the alternatives below may help further mitigate
+these concerns.</li>
+</ul></li>
+</ul>
+
+<h2 id="alternatives">Alternatives</h2>
+
+<p>This design pulls together choices I believe cohere well, but there are many
+possible variations that are also quite plausible. These can be broken down into
+<em>largely</em> orthogonal knobs. I&rsquo;ll take a brief look at each, and the tradeoffs as
+I see them.</p>
+
+<h3 id="knob-from-use-ordering">Knob: <code>from</code>/<code>use</code> ordering</h3>
+
+<p>The <code>from</code>/<code>use</code> syntax follows precedent from Python, but we could instead use the
+<code>use</code>/<code>from</code> ordering from JS.</p>
+
+<p>Possible benefits of <code>use</code>/<code>from</code>:</p>
+
+<ul>
+<li>Makes it easier to read at a glance, when the item name makes obvious what the
+crate is.</li>
+<li>Avoids &ldquo;jagged edges&rdquo; of imported names.</li>
+<li>Arguably more &ldquo;natural&rdquo; reading (as a sentence).</li>
+</ul>
+
+<p>Possible benefits of <code>from</code>/<code>use</code>:</p>
+
+<ul>
+<li>More natural for autocomplete in Ides.</li>
+<li>Gives you the crate name first when reading left-to-right (better if you often
+need that information to understand the import)</li>
+</ul>
+
+<p>It&rsquo;s interesting to consider the choices when it comes to multi-line imports:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="n">from</span><span class="w"> </span><span class="n">std</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">io</span><span class="o">::</span><span class="p">{</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">Read</span><span class="p">,</span><span class="w"> </span><span class="n">Write</span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="n">collections</span><span class="o">::</span><span class="p">{</span><span class="n">HashMap</span><span class="p">,</span><span class="w"> </span><span class="n">HashSet</span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="n">rc</span><span class="o">::</span><span class="n">Rc</span><span class="p">,</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="c1">// versus</span>
+<span class="k">use</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">io</span><span class="o">::</span><span class="p">{</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">Read</span><span class="p">,</span><span class="w"> </span><span class="n">Write</span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="n">collections</span><span class="o">::</span><span class="p">{</span><span class="n">HashMap</span><span class="p">,</span><span class="w"> </span><span class="n">HashSet</span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="n">rc</span><span class="o">::</span><span class="n">Rc</span><span class="p">,</span><span class="w"></span>
+<span class="p">}</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">std</span><span class="p">;</span><span class="w"></span>
+</code></pre></div>
+<p>There are of course plenty of other possible syntactic choices, but these are
+relatively intuitive and descend from very commonly-used languages.</p>
+
+<h3 id="knob-pub-use-foo-vs-pub-mod-foo">Knob: <code>pub use foo</code> vs <code>pub mod foo</code></h3>
+
+<p>Rather than using re-exports to make a module public, we could say that the file
+system determines module structure, but you use <code>pub mod foo;</code> to make a child
+module <code>foo</code> public.</p>
+
+<p>The main advantage would be that it&rsquo;s more plausible to continue to make <code>use</code>
+take absolute paths, which reduces breakage. On the other hand, it seems to
+double down on some aspects of &ldquo;path confusion&rdquo;, and doesn&rsquo;t achieve the
+unification around <code>use</code> that the main proposal does.</p>
+
+<h3 id="knob-absolute-vs-relative-paths">Knob: absolute vs relative paths</h3>
+
+<p>We could keep other elements of this proposal, but have <code>use</code> continue to use
+absolute paths. (We could then, for example, only allow you to reference
+external crates that were brought in through <code>extern crate</code> in <code>use</code>, but ones
+implied from <code>Cargo.toml</code> would go through <code>from</code>/<code>use</code>, potentially making the
+whole system backwards compatible).</p>
+
+<p>If we go that route, then to make a module public we&rsquo;d most likely wind up with
+one of the following:</p>
+
+<ul>
+<li><code>pub use self::my_submodule;</code></li>
+<li><code>pub mod my_submodule;</code></li>
+</ul>
+
+<p>And again, as above, some path confusion issues remain.</p>
+
+<h3 id="knob-include-on-use">Knob: include on <code>use</code></h3>
+
+<p>Rather than determining the module hierarchy from the file system immediately,
+we could follow many other languages which add modules to the name hierarchy
+only if they are in some way referenced (e.g. via <code>use</code>); only at that point
+would we examine the file system for resolution.</p>
+
+<p>Such an approach makes the Rust source somewhat more independent of the precise
+state of the file system, and may thereby address some of the concerns people
+have raised about previous proposals.</p>
+
+<p>A downside, though: sometimes modules contain nothing but <code>impl</code> blocks, in
+which case they are not naturally referenced elsewhere. You&rsquo;d have to explicitly
+<code>use</code> such modules, and forgetting to do so could lead to some head-scratching
+errors. (That said, we could generate a warning if the directory contains unused
+<code>.rs</code> files).</p>
+
+<h3 id="knob-useing-submodules">Knob: <code>use</code>ing submodules</h3>
+
+<p>The proposal assumes that submodules are <em>always</em> in scope for their parents. We
+could instead require you to <code>use</code> them before referring to them. I can&rsquo;t see a
+lot of advantage to doing that, though.</p>
+
+<h2 id="extensions">Extensions</h2>
+
+<p>Finally, while the proposal as-is only marginally helps with facades (by
+removing the need for <code>self::</code> that&rsquo;s currently common when facading), it&rsquo;s
+compatible with future extensions that do more.</p>
+
+<p>For example, we could draw from earlier proposals involving &ldquo;anonymous modules&rdquo;
+(aka &ldquo;inline modules&rdquo;) &ndash; say, files beginning with a leading <code>_</code> &ndash; which do
+not affect the module hierarchy, and where all non-private items are
+automatically re-exported by the parent module. This has some of the flavor of
+the previous proposal, but with a more opt-in form.</p>
+
+<h2 id="wrapping-up">Wrapping up</h2>
+
+<p>Just like last time around, please take this proposal as charting out one more
+plausible point in the design space, and see whether there are big-picture
+aspects to like or dislike, or ideas that might have promise. I&rsquo;m looking
+forward to your feedback!</p>
+
+</article>
+
+
+<aside class="related">
+  <h2>Related Posts</h2>
+  <ul class="related-posts">
+    
+      <li>
+        <h3>
+          <a href="/blog/2017/07/29/rust-platform-follow-up/">
+            Follow up to the Rust Platform
+            <small><time datetime="2017-07-29T00:00:00-07:00">29 Jul 2017</time></small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/blog/2017/07/26/revisiting-rusts-modules/">
+            Revisiting Rust’s modules
+            <small><time datetime="2017-07-26T00:00:00-07:00">26 Jul 2017</time></small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/blog/2017/07/08/lifetime-dispatch/">
+            Shipping specialization: a story of soundness
+            <small><time datetime="2017-07-08T00:00:00-07:00">08 Jul 2017</time></small>
+          </a>
+        </h3>
+      </li>
+    
+  </ul>
+</aside>
+
+
+      </main>
+
+      <footer class="footer">
+        <small>
+          &copy; <time datetime="2017-08-02T20:33:02-07:00">2017</time>. All rights reserved.
+        </small>
+      </footer>
+    </div>
+
+  </body>
+</html>

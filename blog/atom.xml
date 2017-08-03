@@ -4,13 +4,491 @@
  <title>Aaron Turon</title>
  <link href="http://aturon.github.io/blog/atom.xml" rel="self"/>
  <link href="http://aturon.github.io/blog/"/>
- <updated>2017-07-27T08:35:26-07:00</updated>
+ <updated>2017-08-02T20:33:02-07:00</updated>
  <id>http://aturon.github.io</id>
  <author>
    <name>Aaron Turon</name>
    <email>aturon@mozilla.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Revisiting Rust’s modules, part 2</title>
+   <link href="http://aturon.github.io/blog/2017/08/02/modules-part-2/"/>
+   <updated>2017-08-02T00:00:00-07:00</updated>
+   <id>http://aturon.github.io/2017/08/02/modules-part-2</id>
+   <content type="html">&lt;p&gt;It&amp;rsquo;s been a week since my &lt;a href=&quot;http://aturon.github.io/blog/2017/07/26/revisiting-rusts-modules/&quot;&gt;last post&lt;/a&gt; on Rust&amp;rsquo;s module system. Unsurprisingly,
+the strawman proposal in that post garnered a lot of commentary&amp;ndash;174 comments in
+one week!&amp;ndash;with sentiments ranging from&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Now &lt;em&gt;this&lt;/em&gt; is a proposal I can get behind&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;to&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;I&amp;rsquo;ve rarely hated anything as much as I hate the module system proposal&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;and everything in between :-)&lt;/p&gt;
+
+&lt;p&gt;The &lt;a href=&quot;https://internals.rust-lang.org/t/revisiting-rusts-modules/5628/&quot;&gt;discussion&lt;/a&gt; has raised a number of very interesting points; thanks to
+everyone who has participated so far!. I won&amp;rsquo;t try to give a comprehensive
+summary here. What I want to do instead is focus on one particular critique of
+the earlier proposal, and present a quite different strawman design that
+embraces a different set of priorities.&lt;/p&gt;
+
+&lt;p&gt;For ease of discussion:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;I&amp;rsquo;ll call the strawman in my &lt;a href=&quot;http://aturon.github.io/blog/2017/07/26/revisiting-rusts-modules/&quot;&gt;last post&lt;/a&gt; the &amp;ldquo;directories-as-modules&amp;rdquo; proposal.&lt;/li&gt;
+&lt;li&gt;I&amp;rsquo;ll call the strawman in this post the &amp;ldquo;use-uber-alles&amp;rdquo; proposal.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;a-critique-of-the-directories-as-modules-proposal&quot;&gt;A critique of the directories-as-modules proposal&lt;/h2&gt;
+
+&lt;p&gt;There were a number of concerns about the directories-as-modules proposal
+(including its fairly radical nature), but the one that struck me was that the
+proposal was very heavily weighted toward a particular subset of the problems
+the original post raised, and didn&amp;rsquo;t help much with some of the others.&lt;/p&gt;
+
+&lt;p&gt;To recap briefly: the original post talked about obstacles both for learning the
+module system, and for using it at scale. It ultimately focused a lot on the
+issue of how much we have to employ &lt;code&gt;pub use&lt;/code&gt; (aka the &amp;ldquo;facade pattern&amp;rdquo;) when
+setting things up today, and I think the proposal clearly streamlines that
+story. (There are also variants like &amp;ldquo;inline&amp;rdquo; aka &amp;ldquo;anonymous&amp;rdquo; modules that bring
+in just part of the proposal).&lt;/p&gt;
+
+&lt;p&gt;On the other hand, the proposal didn&amp;rsquo;t do much to help with issues around &amp;ldquo;path
+confusion&amp;rdquo;:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;The fact that &lt;code&gt;use&lt;/code&gt; declarations work with absolute paths while other items do not is confusing, and even experienced Rust programmers (myself included) often confuse the two. To make matters worse, the top-level namespace contains all of the external &lt;em&gt;crates&lt;/em&gt;, but also the &lt;em&gt;contents&lt;/em&gt; of the current crate. Unless, of course, you’re writing an external test or binary. And finally, when you’re working at the top level, the absolute/relative distinction doesn’t matter, which means that you can have the wrong mental model and only find it when trying to expand out into submodules.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Many on the thread cited &lt;em&gt;this&lt;/em&gt; as the core problematic issue with the module
+system; I&amp;rsquo;ve collected &lt;a href=&quot;https://gist.github.com/aturon/2f10f19f084f39330cfe2ee028b2ea0c&quot;&gt;some data&lt;/a&gt; about confusion around Rust modules which
+also supports that to a degree.&lt;/p&gt;
+
+&lt;p&gt;My goal in this post is to float a quite different proposal that emphasizes
+these issues, de-emphasizes the facading issues, and overall is more
+conservative. Similarly to last time, the idea here is to present a coherent,
+plausible &amp;ldquo;spike&amp;rdquo; with ideas that could be useful, and seek feedback on the
+broad direction without getting too bogged down in the fine details.&lt;/p&gt;
+
+&lt;h2 id=&quot;one-other-bit-of-framing&quot;&gt;One other bit of framing&lt;/h2&gt;
+
+&lt;p&gt;Before giving the proposal, though, I want to record one other insight I&amp;rsquo;ve had
+along the way, in terms of where people sometimes go wrong when learning the
+module system.&lt;/p&gt;
+
+&lt;p&gt;Coming from other languages, there&amp;rsquo;s often an expectation that adding a &lt;code&gt;.rs&lt;/code&gt;
+file to the source tree, or a dependency to &lt;code&gt;Cargo.toml&lt;/code&gt;, should be all that&amp;rsquo;s
+needed to set up the naming hierarchy. From that perspective, you&amp;rsquo;d expect to be
+able to use &lt;code&gt;use&lt;/code&gt; to pull items out of any of these. Instead, you &lt;em&gt;sometimes&lt;/em&gt;
+can, but need to write the correct incantation (&lt;code&gt;extern crate&lt;/code&gt; or &lt;code&gt;mod&lt;/code&gt;) in the
+right place first. It requires a shift in mental model. And the fact that &lt;code&gt;use&lt;/code&gt;
+is much more common than &lt;code&gt;mod&lt;/code&gt; can make this all the more confusing.&lt;/p&gt;
+
+&lt;p&gt;@kornel put together a &lt;a href=&quot;https://gist.github.com/pornel/0f7ebcec230117ab52c959fe0b090335&quot;&gt;really great chart comparing module systems&lt;/a&gt; that makes
+this point quite strongly.&lt;/p&gt;
+
+&lt;p&gt;Part of the reason I&amp;rsquo;m labeling this proposal as &amp;ldquo;use-uber-alles&amp;rdquo; is that it
+sets up &lt;code&gt;use&lt;/code&gt; declarations as the &lt;em&gt;only&lt;/em&gt; thing you need to write in your Rust
+source to bring items into scope. The items that are &lt;em&gt;available&lt;/em&gt;, by contrast,
+are determined by Cargo (or another build system), together with your file
+system. This is one aspect that mirrors the earlier proposal, part of which is
+now &lt;a href=&quot;https://github.com/rust-lang/rfcs/pull/2088&quot;&gt;an RFC&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-basic-ingredients&quot;&gt;The basic ingredients&lt;/h2&gt;
+
+&lt;p&gt;Here&amp;rsquo;s a quick summary of the proposal:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Start with today&amp;rsquo;s module system.&lt;/li&gt;
+&lt;li&gt;Deprecate &lt;code&gt;extern crate&lt;/code&gt;, along the lines of
+the &lt;a href=&quot;(https://github.com/rust-lang/rfcs/pull/2088)&quot;&gt;in-progress RFC&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Deprecate &lt;code&gt;mod foo;&lt;/code&gt; and instead determine module structure from the file system.
+
+&lt;ul&gt;
+&lt;li&gt;However, unlike the previous proposal, this determination is the same as
+today, i.e. files are modules, and directories are used to introduce nested
+modules.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Improve &lt;code&gt;use&lt;/code&gt; for greater clarity around paths, which I&amp;rsquo;ll explain below.&lt;/li&gt;
+&lt;li&gt;Modules are &lt;code&gt;pub(crate)&lt;/code&gt; unless they are &lt;code&gt;pub use&lt;/code&gt;d (so &lt;code&gt;pub mod foo;&lt;/code&gt; becomes
+&lt;code&gt;pub use foo;&lt;/code&gt; &amp;ndash; note that this is using &lt;em&gt;relative&lt;/em&gt; paths, as I&amp;rsquo;ll explain next).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The meat is in making two adjustments for &lt;code&gt;use&lt;/code&gt; declarations:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Introduce a &lt;code&gt;from &amp;lt;crate_name&amp;gt; use &amp;lt;path&amp;gt;;&lt;/code&gt; form for importing items from
+external crates.&lt;/li&gt;
+&lt;li&gt;Change &lt;code&gt;use &amp;lt;path&amp;gt;;&lt;/code&gt; to treat the path as &lt;em&gt;relative to the current module&lt;/em&gt;
+(i.e. as if it started with &lt;code&gt;self::&lt;/code&gt;).
+
+&lt;ul&gt;
+&lt;li&gt;A leading &lt;code&gt;::&lt;/code&gt; takes you to the root &lt;em&gt;of the current crate&lt;/em&gt;, but is &lt;em&gt;not&lt;/em&gt; a
+way to reference items from other crates.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;(Similar adjustments are needed for referencing paths in function signatures
+etc., which I&amp;rsquo;ll elide here.)&lt;/p&gt;
+
+&lt;p&gt;This is, of course, a breaking change. However, it has some properties that make
+it a reasonable fit for the &lt;a href=&quot;https://github.com/rust-lang/rfcs/pull/2052&quot;&gt;checkpoint&lt;/a&gt; model:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;It&amp;rsquo;s trivial to write a &lt;code&gt;rustfix&lt;/code&gt; tool that mechanically switches today&amp;rsquo;s
+&lt;code&gt;use&lt;/code&gt; declarations to this new setup, and likewise deals with &lt;code&gt;mod&lt;/code&gt; and
+&lt;code&gt;extern crate&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;We could introduce and stabilize the &lt;code&gt;from/use&lt;/code&gt; syntax, then deprecate use of
+absolute paths in &lt;code&gt;use&lt;/code&gt; (without a leading &lt;code&gt;::&lt;/code&gt;), and employ &lt;code&gt;rustfix&lt;/code&gt; at that
+point &amp;ndash; all before a new checkpoint is needed.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Of course, the full migration story needs to be significantly fleshed out, but
+this is just meant to sketch plausibility.&lt;/p&gt;
+
+&lt;h3 id=&quot;what-does-it-look-like&quot;&gt;What does it look like?&lt;/h3&gt;
+
+&lt;p&gt;Before talking about the rationale, I want to show an example for
+clarity. First, the parts that don&amp;rsquo;t change.&lt;/p&gt;
+
+&lt;p&gt;Here&amp;rsquo;s a &lt;code&gt;Cargo.toml&lt;/code&gt; excerpt:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-toml&quot; data-lang=&quot;toml&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dependencies&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;petgraph&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;0.4.5&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;A directory structure excerpt:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&lt;span&gt;&lt;/span&gt;src/
+  lib.rs
+  coherence/
+    mod.rs
+    solve.rs
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h4 id=&quot;code-in-todays-module-system&quot;&gt;Code in today&amp;rsquo;s module system&lt;/h4&gt;
+
+&lt;p&gt;In &lt;code&gt;lib.rs&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;extern&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;crate&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;petgraph&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;mod&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;coherence&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;In &lt;code&gt;mod.rs&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;petgraph&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;prelude&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;errors&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;Result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ir&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Program&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ItemId&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;mod&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;solve&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;solve&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Solver&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;In &lt;code&gt;solve.rs&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sync&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Arc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;itertools&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Itertools&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;errors&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ir&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h4 id=&quot;code-in-the-proposed-system&quot;&gt;Code in the proposed system:&lt;/h4&gt;
+
+&lt;p&gt;In &lt;code&gt;lib.rs&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;coherence&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;// note relative path; this makes `coherence` pub&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;In &lt;code&gt;mod.rs&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;petgraph&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;prelude&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;errors&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;Result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ir&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Program&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ItemId&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;pub&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;solve&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Solver&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;// note use of relative path&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;In &lt;code&gt;solve.rs&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sync&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Arc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;itertools&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Itertools&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;errors&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ir&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&quot;rationale&quot;&gt;Rationale&lt;/h3&gt;
+
+&lt;p&gt;Each piece of this proposal has a rationale, but in some cases they&amp;rsquo;re tied
+together:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Introducing &lt;code&gt;from&lt;/code&gt;/&lt;code&gt;use&lt;/code&gt;&lt;/strong&gt;. This form provides a much more clear distinction
+between imports from external crates and those from the local crate, which can
+be helpful when exploring a codebase. Splitting out this form also means we
+eliminate the very confusing issue that extern crates are &amp;ldquo;mounted&amp;rdquo; in the
+current crate&amp;rsquo;s module hierarchy, usually at root. (In this analogy, the
+&lt;code&gt;from&lt;/code&gt; form is more like addressing an entirely separate volume.)
+Incidentally, grepping for this declaration will tell you which external
+crates are in use.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Changing &lt;code&gt;use&lt;/code&gt; to take paths relative to the current module&lt;/strong&gt;. There are two
+main reasons to do this.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;If submodules are always in scope for their parent module, things like
+function signatures &lt;em&gt;feel&lt;/em&gt; like they are taking relative paths. (In actuality,
+they are resolving names based on what&amp;rsquo;s in scope). In any case, making paths
+everywhere relative to the current module reduces confusion.&lt;/li&gt;
+&lt;li&gt;We want to use &lt;code&gt;pub use&lt;/code&gt; to export submodules publicly, but with absolute
+paths this would be &lt;code&gt;pub use self::my_submodule&lt;/code&gt; which is awkward and
+confusing; people are almost certain to forget &lt;code&gt;self&lt;/code&gt; much of the time.&lt;/li&gt;
+&lt;li&gt;Note that there are often arguments that &lt;code&gt;use&lt;/code&gt;-like mechanisms should employ
+absolute paths by default because that&amp;rsquo;s the common case. However, for Rust
+I think that&amp;rsquo;s at least partly based on the current use for pulling in items
+from external crates, and would be more evenly split in this new setup.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Using &lt;code&gt;pub use&lt;/code&gt; for exporting modules&lt;/strong&gt;. If the module hierarchy is
+determined from the file system, we need &lt;em&gt;some&lt;/em&gt; way to say whether a module is
+public. While we could say this in the module itself, doing so is
+syntactically awkward, and also means that a module&amp;rsquo;s exports are spread over
+multiple files. At the same time, &lt;code&gt;pub use&lt;/code&gt; still exists as a form you need to
+use for re-exporting items, and it provides a reasonable mental model when using
+it to export your child module.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;The general privacy setup&lt;/strong&gt;. A basic premise is that the visibility of a
+module &lt;em&gt;name&lt;/em&gt; is not terribly important by itself; what really matters is the
+visibility of &lt;em&gt;items&lt;/em&gt; within the module. Thus we simplify matters by making
+&lt;em&gt;all&lt;/em&gt; modules have at least crate visibility&amp;mdash;though this does mean that
+marking an item &lt;code&gt;pub&lt;/code&gt; in a module means it, in reality, has &lt;em&gt;at least&lt;/em&gt;
+&lt;code&gt;pub(crate)&lt;/code&gt; visibility (and perhaps more, if it&amp;rsquo;s exported in a public
+module). This is arguably a good thing; today, the fact that you can write
+&lt;code&gt;pub&lt;/code&gt; but the &lt;em&gt;actual&lt;/em&gt; visibility is determined by a complex nest of
+re-exports and module visibilities can make it quite hard to reason about
+unfamiliar code. As has been argued on thread, the vast majority of the time
+you only need visibility at one of three levels: the current module, the
+crate, or the world. This proposal makes those cases all easy to express, and
+requires a more explicit &lt;code&gt;pub(super)&lt;/code&gt; etc to get other privacy granularities.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;TL;DR: writing &lt;code&gt;pub&lt;/code&gt; on an item means &lt;code&gt;pub(crate)&lt;/code&gt; unless (re)exported in a
+public module (which itself is done via re-exporting).&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Deprecating &lt;code&gt;mod&lt;/code&gt;/&lt;code&gt;extern crate&lt;/code&gt;&lt;/strong&gt;. This was already explained
+above. There&amp;rsquo;s already been some discussion around the downsides (and ways to
+mitigate them), so I&amp;rsquo;m not going to spend time on that here.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Note, however, that one of the alternatives below may help further mitigate
+these concerns.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;alternatives&quot;&gt;Alternatives&lt;/h2&gt;
+
+&lt;p&gt;This design pulls together choices I believe cohere well, but there are many
+possible variations that are also quite plausible. These can be broken down into
+&lt;em&gt;largely&lt;/em&gt; orthogonal knobs. I&amp;rsquo;ll take a brief look at each, and the tradeoffs as
+I see them.&lt;/p&gt;
+
+&lt;h3 id=&quot;knob-from-use-ordering&quot;&gt;Knob: &lt;code&gt;from&lt;/code&gt;/&lt;code&gt;use&lt;/code&gt; ordering&lt;/h3&gt;
+
+&lt;p&gt;The &lt;code&gt;from&lt;/code&gt;/&lt;code&gt;use&lt;/code&gt; syntax follows precedent from Python, but we could instead use the
+&lt;code&gt;use&lt;/code&gt;/&lt;code&gt;from&lt;/code&gt; ordering from JS.&lt;/p&gt;
+
+&lt;p&gt;Possible benefits of &lt;code&gt;use&lt;/code&gt;/&lt;code&gt;from&lt;/code&gt;:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Makes it easier to read at a glance, when the item name makes obvious what the
+crate is.&lt;/li&gt;
+&lt;li&gt;Avoids &amp;ldquo;jagged edges&amp;rdquo; of imported names.&lt;/li&gt;
+&lt;li&gt;Arguably more &amp;ldquo;natural&amp;rdquo; reading (as a sentence).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Possible benefits of &lt;code&gt;from&lt;/code&gt;/&lt;code&gt;use&lt;/code&gt;:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;More natural for autocomplete in Ides.&lt;/li&gt;
+&lt;li&gt;Gives you the crate name first when reading left-to-right (better if you often
+need that information to understand the import)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;It&amp;rsquo;s interesting to consider the choices when it comes to multi-line imports:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;w&quot;&gt;    &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;io&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Read&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Write&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;w&quot;&gt;    &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;collections&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HashMap&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HashSet&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;w&quot;&gt;    &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Rc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// versus&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;w&quot;&gt;    &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;io&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Read&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Write&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;w&quot;&gt;    &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;collections&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HashMap&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HashSet&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;w&quot;&gt;    &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Rc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;There are of course plenty of other possible syntactic choices, but these are
+relatively intuitive and descend from very commonly-used languages.&lt;/p&gt;
+
+&lt;h3 id=&quot;knob-pub-use-foo-vs-pub-mod-foo&quot;&gt;Knob: &lt;code&gt;pub use foo&lt;/code&gt; vs &lt;code&gt;pub mod foo&lt;/code&gt;&lt;/h3&gt;
+
+&lt;p&gt;Rather than using re-exports to make a module public, we could say that the file
+system determines module structure, but you use &lt;code&gt;pub mod foo;&lt;/code&gt; to make a child
+module &lt;code&gt;foo&lt;/code&gt; public.&lt;/p&gt;
+
+&lt;p&gt;The main advantage would be that it&amp;rsquo;s more plausible to continue to make &lt;code&gt;use&lt;/code&gt;
+take absolute paths, which reduces breakage. On the other hand, it seems to
+double down on some aspects of &amp;ldquo;path confusion&amp;rdquo;, and doesn&amp;rsquo;t achieve the
+unification around &lt;code&gt;use&lt;/code&gt; that the main proposal does.&lt;/p&gt;
+
+&lt;h3 id=&quot;knob-absolute-vs-relative-paths&quot;&gt;Knob: absolute vs relative paths&lt;/h3&gt;
+
+&lt;p&gt;We could keep other elements of this proposal, but have &lt;code&gt;use&lt;/code&gt; continue to use
+absolute paths. (We could then, for example, only allow you to reference
+external crates that were brought in through &lt;code&gt;extern crate&lt;/code&gt; in &lt;code&gt;use&lt;/code&gt;, but ones
+implied from &lt;code&gt;Cargo.toml&lt;/code&gt; would go through &lt;code&gt;from&lt;/code&gt;/&lt;code&gt;use&lt;/code&gt;, potentially making the
+whole system backwards compatible).&lt;/p&gt;
+
+&lt;p&gt;If we go that route, then to make a module public we&amp;rsquo;d most likely wind up with
+one of the following:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;pub use self::my_submodule;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;pub mod my_submodule;&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;And again, as above, some path confusion issues remain.&lt;/p&gt;
+
+&lt;h3 id=&quot;knob-include-on-use&quot;&gt;Knob: include on &lt;code&gt;use&lt;/code&gt;&lt;/h3&gt;
+
+&lt;p&gt;Rather than determining the module hierarchy from the file system immediately,
+we could follow many other languages which add modules to the name hierarchy
+only if they are in some way referenced (e.g. via &lt;code&gt;use&lt;/code&gt;); only at that point
+would we examine the file system for resolution.&lt;/p&gt;
+
+&lt;p&gt;Such an approach makes the Rust source somewhat more independent of the precise
+state of the file system, and may thereby address some of the concerns people
+have raised about previous proposals.&lt;/p&gt;
+
+&lt;p&gt;A downside, though: sometimes modules contain nothing but &lt;code&gt;impl&lt;/code&gt; blocks, in
+which case they are not naturally referenced elsewhere. You&amp;rsquo;d have to explicitly
+&lt;code&gt;use&lt;/code&gt; such modules, and forgetting to do so could lead to some head-scratching
+errors. (That said, we could generate a warning if the directory contains unused
+&lt;code&gt;.rs&lt;/code&gt; files).&lt;/p&gt;
+
+&lt;h3 id=&quot;knob-useing-submodules&quot;&gt;Knob: &lt;code&gt;use&lt;/code&gt;ing submodules&lt;/h3&gt;
+
+&lt;p&gt;The proposal assumes that submodules are &lt;em&gt;always&lt;/em&gt; in scope for their parents. We
+could instead require you to &lt;code&gt;use&lt;/code&gt; them before referring to them. I can&amp;rsquo;t see a
+lot of advantage to doing that, though.&lt;/p&gt;
+
+&lt;h2 id=&quot;extensions&quot;&gt;Extensions&lt;/h2&gt;
+
+&lt;p&gt;Finally, while the proposal as-is only marginally helps with facades (by
+removing the need for &lt;code&gt;self::&lt;/code&gt; that&amp;rsquo;s currently common when facading), it&amp;rsquo;s
+compatible with future extensions that do more.&lt;/p&gt;
+
+&lt;p&gt;For example, we could draw from earlier proposals involving &amp;ldquo;anonymous modules&amp;rdquo;
+(aka &amp;ldquo;inline modules&amp;rdquo;) &amp;ndash; say, files beginning with a leading &lt;code&gt;_&lt;/code&gt; &amp;ndash; which do
+not affect the module hierarchy, and where all non-private items are
+automatically re-exported by the parent module. This has some of the flavor of
+the previous proposal, but with a more opt-in form.&lt;/p&gt;
+
+&lt;h2 id=&quot;wrapping-up&quot;&gt;Wrapping up&lt;/h2&gt;
+
+&lt;p&gt;Just like last time around, please take this proposal as charting out one more
+plausible point in the design space, and see whether there are big-picture
+aspects to like or dislike, or ideas that might have promise. I&amp;rsquo;m looking
+forward to your feedback!&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Follow up to the Rust Platform</title>
+   <link href="http://aturon.github.io/blog/2017/07/29/rust-platform-follow-up/"/>
+   <updated>2017-07-29T00:00:00-07:00</updated>
+   <id>http://aturon.github.io/2017/07/29/rust-platform-follow-up</id>
+   <content type="html">&lt;p&gt;My &lt;a href=&quot;http://aturon.github.io/blog/2016/07/27/rust-platform/&quot;&gt;post earlier this week&lt;/a&gt; generated a lot of feedback, much of it negative. I really appreciate the detailed thoughts that people gave, which drew out many drawbacks and outlined some simpler alternatives. I want to summarize some of that feedback, then revisit what I see as the core goals. I&amp;rsquo;ll catalog some of the alternative ideas that people have proposed, as well as a couple I&amp;rsquo;ve been mulling over.&lt;/p&gt;
+
+&lt;p&gt;First, to recap the original proposal: the main thrust was to develop a kind of &amp;ldquo;extended standard library&amp;rdquo; made up of curated crates from the ecosystem. The platform would be available as a single &amp;ldquo;Cargo metapackage&amp;rdquo; snapshotting a collection of compatible versions, enabling integration testing and documentation cross-referencing. The hope was to provide the experience of a large standard library, without the pitfalls that tend to accompany it.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-feedback&quot;&gt;The feedback&lt;/h2&gt;
+
+&lt;p&gt;Here are some of the concerns people raised:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Let&amp;rsquo;s start with lower-hanging fruit&lt;/strong&gt;. A common refrain from the Rust community was: we &lt;em&gt;love&lt;/em&gt; the combination of Rust&amp;rsquo;s minimal core, plus incredibly easy access to the ecosystem through Cargo. If discoverability, integration, or quality are issues, let&amp;rsquo;s address them by making our existing tools better, e.g. by improving search or ranking within crates.io.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Picking winners has significant downsides&lt;/strong&gt;. The platform would introduce a sharp cliff between the crates it includes and the rest of the ecosystem. That introduces several risks. First, in precisely the cases where it&amp;rsquo;s most valuable &amp;ndash; where there is no clear &amp;ldquo;winner&amp;rdquo; in an area &amp;ndash; it risks ratcheting up the pressure and contention by trying to centrally decide on one. Second, it reinforces first-mover advantage, which could lead to the same kind of stagnation one sees in large standard libraries. Finally, it&amp;rsquo;s time consuming, and that time might be better spent working to improve the libraries themselves.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;The similar Haskell platform is not a rousing success&lt;/strong&gt;. Many from the Haskell community brought up the recent transition toward &lt;a href=&quot;https://www.stackage.org/&quot;&gt;Stackage&lt;/a&gt; and general feeling that the Haskell Platform had a lot of significant problems. However, there are fundamental differences in the way that Rust&amp;rsquo;s dependency management works that make it hard to know what lessons to draw. As one Haskell user &lt;a href=&quot;https://www.reddit.com/r/haskell/comments/4uxgbl/the_rust_platform/d5txk0z&quot;&gt;wrote&lt;/a&gt;: &amp;ldquo;the problem that Haskell Platform &lt;em&gt;created&lt;/em&gt; was that only a single version of critical packages could exist in the central store at a time.&amp;rdquo; Cargo doesn&amp;rsquo;t impose any such restrictions, and indeed a lot of the details of my original post were precisely about the ability to easily juggle versions. Regardless of what direction we take, though, we should learn where we can from Haskell&amp;rsquo;s experience.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;With those concerns in mind, I want to revisit what we&amp;rsquo;re trying to achieve, and
+think broadly about how we get there.&lt;/p&gt;
+
+&lt;h2 id=&quot;revisiting-the-goals&quot;&gt;Revisiting the goals&lt;/h2&gt;
+
+&lt;p&gt;Starting at a high level, the goal in my mind is for the Rust community to:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Provide commonly-desired libraries and tools;&lt;/li&gt;
+&lt;li&gt;Make them easy to find, acquire, and use;&lt;/li&gt;
+&lt;li&gt;Make them high quality;&lt;/li&gt;
+&lt;li&gt;Make them work well together.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;These are all fairly obvious things to work toward, but I want to underscore that lack of maturity in these areas was a major theme in the &lt;a href=&quot;https://blog.rust-lang.org/2016/06/30/State-of-Rust-Survey-2016.html&quot;&gt;2016 Survey&lt;/a&gt;, and is also something the core team hears constantly when talking to existing and potential Rust users.&lt;/p&gt;
+
+&lt;p&gt;Now, work toward this goal is and will continue to happen organically over time. Maturity takes time, and it&amp;rsquo;s still early days.&lt;/p&gt;
+
+&lt;p&gt;But I think it&amp;rsquo;s worth looking at the big picture to see how we can rally as a community around these goals, both in terms of building global infrastructure, and in terms of lending muscle to particular tools/libraries. The platform proposal was one attempt to do this, but perhaps an over-reaching one.&lt;/p&gt;
+
+&lt;p&gt;So I want to try to focus in on three important things that the platform proposal was trying to do, to look at how else we might get there.&lt;/p&gt;
+
+&lt;h3 id=&quot;improving-discoverability&quot;&gt;Improving discoverability&lt;/h3&gt;
+
+&lt;p&gt;&amp;ldquo;Discoverability&amp;rdquo; is not just about finding &lt;em&gt;any&lt;/em&gt; crate that covers a need. You want to be reasonably confident that the crate is robust, maintained, documented, and that it will work well with the rest of the ecosystem. &amp;ldquo;Blessing&amp;rdquo; a small set of crates with these attributes is one way to provide such confidence, but by no means the only one.&lt;/p&gt;
+
+&lt;p&gt;Many people responding to the original post proposed improving discoverability on crates.io (or some other site) by providing clearer &lt;em&gt;ranking&lt;/em&gt;, and better &lt;em&gt;categorization&lt;/em&gt; and &lt;em&gt;search&lt;/em&gt;. An example site that already does this for Rust is &lt;a href=&quot;http://rust.libhunt.com/&quot;&gt;Awesome Rust&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Of course, finding good heuristics for ranking is a hard problem, and risks cementing first movers. The number of github stars on a project doesn&amp;rsquo;t necessarily tell you whether it plays well with the ecosystem or is well-maintained. But it&amp;rsquo;s also conceivable to include a lot of information about a package, e.g. in the form of badges for platform compatibility, or even information about compatibility with other libraries. There&amp;rsquo;s a spectrum between fully automatic ranking and pure curation, and we can iterate until we find the right balance. &lt;a href=&quot;https://emberobserver.com/&quot;&gt;Ember Observer&lt;/a&gt; was &lt;a href=&quot;https://internals.rust-lang.org/t/proposal-the-rust-platform/3745/64?u=aturon&quot;&gt;raised&lt;/a&gt; as a good example of this kind of mix &amp;ndash; though it&amp;rsquo;s worth noting that the project is an &lt;em&gt;enormous&lt;/em&gt; effort.&lt;/p&gt;
+
+&lt;p&gt;Improving discoverability on crates.io is forward-compatible with having a small set of &amp;ldquo;blessed crates&amp;rdquo; should we decide to go in that direction later on. But it&amp;rsquo;s a more conservative place to start, and one that benefits the whole ecosystem right away. I think we should do it!&lt;/p&gt;
+
+&lt;h3 id=&quot;improving-quality&quot;&gt;Improving quality&lt;/h3&gt;
+
+&lt;p&gt;Another aspect of the platform idea was improving quality by focusing attention on a small number of core crates, for which we can provide integration testing, integrated documentation, standardization, and a high level of review/scrutiny.&lt;/p&gt;
+
+&lt;p&gt;In at least some of these cases, we might take steps in this direction in an ecosystem-wide way:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;chriskrycho &lt;a href=&quot;https://internals.rust-lang.org/t/proposal-the-rust-platform/3745/64?u=aturon&quot;&gt;points out&lt;/a&gt; that ongoing work to globally host documentation for crates.io has the potential to provide an integrated docs experience, ecosystem-wide. Ideally, when an API in one crate uses a type from another, the documentation makes that type a link to the other crate. More generally, highest leverage comes from focusing on tools that improve quality across the board.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;For basic quality measures, like having docs, cross-platform compatbility, CI, and so on, we can use badges or some other way of flagging quality within a crate discovery system, much like &lt;a href=&quot;https://emberobserver.com/&quot;&gt;Ember Observer&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;There&amp;rsquo;s a lot we can do to standardize things like API conventions, documentation, or even the use of Cargo feature flags for crate integration. We did a lot of this kind of work when stabilizing the standard library for 1.0, but there&amp;rsquo;s no reason we can&amp;rsquo;t continue to push on it in a more global way. And in fact, there have been &lt;a href=&quot;https://github.com/rust-lang/rfcs/pull/1687&quot;&gt;recent RFCs&lt;/a&gt; doing exactly that for crate documentation. We should be on the lookout for emerging idioms that need standardization, and we should revive efforts to gather guidelines in a central place.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;the-rust-ecosystem-as-a-product&quot;&gt;The Rust Ecosystem as a product&lt;/h3&gt;
+
+&lt;p&gt;One goal of the platform idea was to emphasize that Rust is much more than rustc, Cargo and &lt;code&gt;std&lt;/code&gt;. The arrival of a new async IO library can have as much impact as shipping a new language feature. As a community, we need to make sure we&amp;rsquo;re thinking clearly about this bigger picture, and organizing our efforts accordingly.&lt;/p&gt;
+
+&lt;p&gt;The platform proposal emphasized this bigger picture in a particularly concrete way: by tying together work in many areas into a single &lt;em&gt;deliverable&lt;/em&gt;, making the core Rust ecosystem into a coherent product.&lt;/p&gt;
+
+&lt;p&gt;Why is that important? As I argued in the original post, planning for the next major release of the platform could serve as a North Star for our work. Articulating what we want the &amp;ldquo;Rust experience&amp;rdquo; to be 18 months from now sharpens our focus, and gives us clear rallying points (and a quasi-deadline) for shipping and polishing. It&amp;rsquo;s what should be informing our &lt;a href=&quot;http://aturon.github.io/blog/2016/07/05/rfc-refinement/&quot;&gt;roadmap&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Having a concrete &amp;ldquo;deliverable&amp;rdquo; seems key, though, for a couple reasons:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;It makes shipping, and a timeline, much more meaningful, which in turn is a great aid to organizing and focusing our work.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;It provides a discrete moment in time to gather the &amp;ldquo;Rust experience&amp;rdquo; into something coherent, concrete, and polished that we can talk to the world about. It can be very difficult to follow the evolution in dribs and drabs as it happens. Telling our story in coherent, big steps can make a clarifying impact.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;These were key aspects of what it meant to ship Rust 1.0, and I think there&amp;rsquo;s room to find such a rhythm in a repeatable way, establishing a clear narrative about where Rust is going.&lt;/p&gt;
+
+&lt;p&gt;The Rust Platform deliverable would include the code/metapackage, of course. But ideally at release, we could point to a set of major library improvements, each of which is accompanied with code samples and/or tutorials &amp;ndash; essentially answering the question &amp;ldquo;What does this release mean for me, in concrete terms?&amp;rdquo;&lt;/p&gt;
+
+&lt;p&gt;Maybe we can turn this on its head: &lt;strong&gt;think of the code samples and tutorials that a release enables as being the deliverable we&amp;rsquo;re aiming at&lt;/strong&gt;. Rather than being part of a metapackage, the samples can just tell you what to add to your Cargo.toml.  In this model, we could set out a vision for Rust and its ecosystem a regular cadence (say, a year), and at the end of that period ship such a &amp;ldquo;Report on Rust&amp;rdquo;, announcing what was accomplished with links to samples and HOWTOs. That gives us a clear rallying point as a community, something to work toward all year, and a way to meaningfully showcase Rust&amp;rsquo;s evolution in big, discrete steps. But it&amp;rsquo;s more open-ended, less heavy-handed than curating and packaging particular crates.&lt;/p&gt;
+
+&lt;p&gt;To be really concrete, I could imagine setting out as part of the vision for a year to &amp;ldquo;advance Rust&amp;rsquo;s HTTP sever story&amp;rdquo;, with that concretely turning into a community-wide push to help get Hyper to 1.0, to generate good samples and tutorials for it, and to build a larger ecosystem around it &amp;ndash; all in time for the next &amp;ldquo;Report on Rust&amp;rdquo;.&lt;/p&gt;
+
+&lt;p&gt;I&amp;rsquo;ve been working with &lt;a href=&quot;https://github.com/brson&quot;&gt;@brson&lt;/a&gt; on the &lt;a href=&quot;https://internals.rust-lang.org/t/refining-rfcs-part-1-roadmap/3656/&quot;&gt;roadmap&lt;/a&gt; proposal, and some of these ideas are present in his recent &lt;a href=&quot;https://internals.rust-lang.org/t/refining-rfcs-part-1-roadmap/3656/18?u=aturon&quot;&gt;post&lt;/a&gt;. This thinking is at a pretty early stage, but I&amp;rsquo;m hoping we can iterate on it on discuss and, if successful, include it in the forthcoming RFC establishing the roadmap process.&lt;/p&gt;
+
+&lt;h2 id=&quot;where-to-go-from-here&quot;&gt;Where to go from here?&lt;/h2&gt;
+
+&lt;p&gt;This post was mainly meant to recognize the negative reception, and go back and look at the goals/constraints, exploring some other ideas. I&amp;rsquo;m hoping we can continue iterating in this design space; I continue to think there&amp;rsquo;s really important work to be done here.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Revisiting Rust’s modules</title>
