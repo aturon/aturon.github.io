@@ -4,7 +4,7 @@
  <title>Aaron Turon</title>
  <link href="http://aturon.github.io/blog/atom.xml" rel="self"/>
  <link href="http://aturon.github.io/blog/"/>
- <updated>2017-08-02T20:33:02-07:00</updated>
+ <updated>2017-08-02T23:19:40-07:00</updated>
  <id>http://aturon.github.io</id>
  <author>
    <name>Aaron Turon</name>
@@ -393,100 +393,6 @@ the previous proposal, but with a more opt-in form.&lt;/p&gt;
 plausible point in the design space, and see whether there are big-picture
 aspects to like or dislike, or ideas that might have promise. I&amp;rsquo;m looking
 forward to your feedback!&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Follow up to the Rust Platform</title>
-   <link href="http://aturon.github.io/blog/2017/07/29/rust-platform-follow-up/"/>
-   <updated>2017-07-29T00:00:00-07:00</updated>
-   <id>http://aturon.github.io/2017/07/29/rust-platform-follow-up</id>
-   <content type="html">&lt;p&gt;My &lt;a href=&quot;http://aturon.github.io/blog/2016/07/27/rust-platform/&quot;&gt;post earlier this week&lt;/a&gt; generated a lot of feedback, much of it negative. I really appreciate the detailed thoughts that people gave, which drew out many drawbacks and outlined some simpler alternatives. I want to summarize some of that feedback, then revisit what I see as the core goals. I&amp;rsquo;ll catalog some of the alternative ideas that people have proposed, as well as a couple I&amp;rsquo;ve been mulling over.&lt;/p&gt;
-
-&lt;p&gt;First, to recap the original proposal: the main thrust was to develop a kind of &amp;ldquo;extended standard library&amp;rdquo; made up of curated crates from the ecosystem. The platform would be available as a single &amp;ldquo;Cargo metapackage&amp;rdquo; snapshotting a collection of compatible versions, enabling integration testing and documentation cross-referencing. The hope was to provide the experience of a large standard library, without the pitfalls that tend to accompany it.&lt;/p&gt;
-
-&lt;h2 id=&quot;the-feedback&quot;&gt;The feedback&lt;/h2&gt;
-
-&lt;p&gt;Here are some of the concerns people raised:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;&lt;strong&gt;Let&amp;rsquo;s start with lower-hanging fruit&lt;/strong&gt;. A common refrain from the Rust community was: we &lt;em&gt;love&lt;/em&gt; the combination of Rust&amp;rsquo;s minimal core, plus incredibly easy access to the ecosystem through Cargo. If discoverability, integration, or quality are issues, let&amp;rsquo;s address them by making our existing tools better, e.g. by improving search or ranking within crates.io.&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;&lt;strong&gt;Picking winners has significant downsides&lt;/strong&gt;. The platform would introduce a sharp cliff between the crates it includes and the rest of the ecosystem. That introduces several risks. First, in precisely the cases where it&amp;rsquo;s most valuable &amp;ndash; where there is no clear &amp;ldquo;winner&amp;rdquo; in an area &amp;ndash; it risks ratcheting up the pressure and contention by trying to centrally decide on one. Second, it reinforces first-mover advantage, which could lead to the same kind of stagnation one sees in large standard libraries. Finally, it&amp;rsquo;s time consuming, and that time might be better spent working to improve the libraries themselves.&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;&lt;strong&gt;The similar Haskell platform is not a rousing success&lt;/strong&gt;. Many from the Haskell community brought up the recent transition toward &lt;a href=&quot;https://www.stackage.org/&quot;&gt;Stackage&lt;/a&gt; and general feeling that the Haskell Platform had a lot of significant problems. However, there are fundamental differences in the way that Rust&amp;rsquo;s dependency management works that make it hard to know what lessons to draw. As one Haskell user &lt;a href=&quot;https://www.reddit.com/r/haskell/comments/4uxgbl/the_rust_platform/d5txk0z&quot;&gt;wrote&lt;/a&gt;: &amp;ldquo;the problem that Haskell Platform &lt;em&gt;created&lt;/em&gt; was that only a single version of critical packages could exist in the central store at a time.&amp;rdquo; Cargo doesn&amp;rsquo;t impose any such restrictions, and indeed a lot of the details of my original post were precisely about the ability to easily juggle versions. Regardless of what direction we take, though, we should learn where we can from Haskell&amp;rsquo;s experience.&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;With those concerns in mind, I want to revisit what we&amp;rsquo;re trying to achieve, and
-think broadly about how we get there.&lt;/p&gt;
-
-&lt;h2 id=&quot;revisiting-the-goals&quot;&gt;Revisiting the goals&lt;/h2&gt;
-
-&lt;p&gt;Starting at a high level, the goal in my mind is for the Rust community to:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Provide commonly-desired libraries and tools;&lt;/li&gt;
-&lt;li&gt;Make them easy to find, acquire, and use;&lt;/li&gt;
-&lt;li&gt;Make them high quality;&lt;/li&gt;
-&lt;li&gt;Make them work well together.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;These are all fairly obvious things to work toward, but I want to underscore that lack of maturity in these areas was a major theme in the &lt;a href=&quot;https://blog.rust-lang.org/2016/06/30/State-of-Rust-Survey-2016.html&quot;&gt;2016 Survey&lt;/a&gt;, and is also something the core team hears constantly when talking to existing and potential Rust users.&lt;/p&gt;
-
-&lt;p&gt;Now, work toward this goal is and will continue to happen organically over time. Maturity takes time, and it&amp;rsquo;s still early days.&lt;/p&gt;
-
-&lt;p&gt;But I think it&amp;rsquo;s worth looking at the big picture to see how we can rally as a community around these goals, both in terms of building global infrastructure, and in terms of lending muscle to particular tools/libraries. The platform proposal was one attempt to do this, but perhaps an over-reaching one.&lt;/p&gt;
-
-&lt;p&gt;So I want to try to focus in on three important things that the platform proposal was trying to do, to look at how else we might get there.&lt;/p&gt;
-
-&lt;h3 id=&quot;improving-discoverability&quot;&gt;Improving discoverability&lt;/h3&gt;
-
-&lt;p&gt;&amp;ldquo;Discoverability&amp;rdquo; is not just about finding &lt;em&gt;any&lt;/em&gt; crate that covers a need. You want to be reasonably confident that the crate is robust, maintained, documented, and that it will work well with the rest of the ecosystem. &amp;ldquo;Blessing&amp;rdquo; a small set of crates with these attributes is one way to provide such confidence, but by no means the only one.&lt;/p&gt;
-
-&lt;p&gt;Many people responding to the original post proposed improving discoverability on crates.io (or some other site) by providing clearer &lt;em&gt;ranking&lt;/em&gt;, and better &lt;em&gt;categorization&lt;/em&gt; and &lt;em&gt;search&lt;/em&gt;. An example site that already does this for Rust is &lt;a href=&quot;http://rust.libhunt.com/&quot;&gt;Awesome Rust&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Of course, finding good heuristics for ranking is a hard problem, and risks cementing first movers. The number of github stars on a project doesn&amp;rsquo;t necessarily tell you whether it plays well with the ecosystem or is well-maintained. But it&amp;rsquo;s also conceivable to include a lot of information about a package, e.g. in the form of badges for platform compatibility, or even information about compatibility with other libraries. There&amp;rsquo;s a spectrum between fully automatic ranking and pure curation, and we can iterate until we find the right balance. &lt;a href=&quot;https://emberobserver.com/&quot;&gt;Ember Observer&lt;/a&gt; was &lt;a href=&quot;https://internals.rust-lang.org/t/proposal-the-rust-platform/3745/64?u=aturon&quot;&gt;raised&lt;/a&gt; as a good example of this kind of mix &amp;ndash; though it&amp;rsquo;s worth noting that the project is an &lt;em&gt;enormous&lt;/em&gt; effort.&lt;/p&gt;
-
-&lt;p&gt;Improving discoverability on crates.io is forward-compatible with having a small set of &amp;ldquo;blessed crates&amp;rdquo; should we decide to go in that direction later on. But it&amp;rsquo;s a more conservative place to start, and one that benefits the whole ecosystem right away. I think we should do it!&lt;/p&gt;
-
-&lt;h3 id=&quot;improving-quality&quot;&gt;Improving quality&lt;/h3&gt;
-
-&lt;p&gt;Another aspect of the platform idea was improving quality by focusing attention on a small number of core crates, for which we can provide integration testing, integrated documentation, standardization, and a high level of review/scrutiny.&lt;/p&gt;
-
-&lt;p&gt;In at least some of these cases, we might take steps in this direction in an ecosystem-wide way:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;chriskrycho &lt;a href=&quot;https://internals.rust-lang.org/t/proposal-the-rust-platform/3745/64?u=aturon&quot;&gt;points out&lt;/a&gt; that ongoing work to globally host documentation for crates.io has the potential to provide an integrated docs experience, ecosystem-wide. Ideally, when an API in one crate uses a type from another, the documentation makes that type a link to the other crate. More generally, highest leverage comes from focusing on tools that improve quality across the board.&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;For basic quality measures, like having docs, cross-platform compatbility, CI, and so on, we can use badges or some other way of flagging quality within a crate discovery system, much like &lt;a href=&quot;https://emberobserver.com/&quot;&gt;Ember Observer&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;There&amp;rsquo;s a lot we can do to standardize things like API conventions, documentation, or even the use of Cargo feature flags for crate integration. We did a lot of this kind of work when stabilizing the standard library for 1.0, but there&amp;rsquo;s no reason we can&amp;rsquo;t continue to push on it in a more global way. And in fact, there have been &lt;a href=&quot;https://github.com/rust-lang/rfcs/pull/1687&quot;&gt;recent RFCs&lt;/a&gt; doing exactly that for crate documentation. We should be on the lookout for emerging idioms that need standardization, and we should revive efforts to gather guidelines in a central place.&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;the-rust-ecosystem-as-a-product&quot;&gt;The Rust Ecosystem as a product&lt;/h3&gt;
-
-&lt;p&gt;One goal of the platform idea was to emphasize that Rust is much more than rustc, Cargo and &lt;code&gt;std&lt;/code&gt;. The arrival of a new async IO library can have as much impact as shipping a new language feature. As a community, we need to make sure we&amp;rsquo;re thinking clearly about this bigger picture, and organizing our efforts accordingly.&lt;/p&gt;
-
-&lt;p&gt;The platform proposal emphasized this bigger picture in a particularly concrete way: by tying together work in many areas into a single &lt;em&gt;deliverable&lt;/em&gt;, making the core Rust ecosystem into a coherent product.&lt;/p&gt;
-
-&lt;p&gt;Why is that important? As I argued in the original post, planning for the next major release of the platform could serve as a North Star for our work. Articulating what we want the &amp;ldquo;Rust experience&amp;rdquo; to be 18 months from now sharpens our focus, and gives us clear rallying points (and a quasi-deadline) for shipping and polishing. It&amp;rsquo;s what should be informing our &lt;a href=&quot;http://aturon.github.io/blog/2016/07/05/rfc-refinement/&quot;&gt;roadmap&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Having a concrete &amp;ldquo;deliverable&amp;rdquo; seems key, though, for a couple reasons:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;It makes shipping, and a timeline, much more meaningful, which in turn is a great aid to organizing and focusing our work.&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;It provides a discrete moment in time to gather the &amp;ldquo;Rust experience&amp;rdquo; into something coherent, concrete, and polished that we can talk to the world about. It can be very difficult to follow the evolution in dribs and drabs as it happens. Telling our story in coherent, big steps can make a clarifying impact.&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;These were key aspects of what it meant to ship Rust 1.0, and I think there&amp;rsquo;s room to find such a rhythm in a repeatable way, establishing a clear narrative about where Rust is going.&lt;/p&gt;
-
-&lt;p&gt;The Rust Platform deliverable would include the code/metapackage, of course. But ideally at release, we could point to a set of major library improvements, each of which is accompanied with code samples and/or tutorials &amp;ndash; essentially answering the question &amp;ldquo;What does this release mean for me, in concrete terms?&amp;rdquo;&lt;/p&gt;
-
-&lt;p&gt;Maybe we can turn this on its head: &lt;strong&gt;think of the code samples and tutorials that a release enables as being the deliverable we&amp;rsquo;re aiming at&lt;/strong&gt;. Rather than being part of a metapackage, the samples can just tell you what to add to your Cargo.toml.  In this model, we could set out a vision for Rust and its ecosystem a regular cadence (say, a year), and at the end of that period ship such a &amp;ldquo;Report on Rust&amp;rdquo;, announcing what was accomplished with links to samples and HOWTOs. That gives us a clear rallying point as a community, something to work toward all year, and a way to meaningfully showcase Rust&amp;rsquo;s evolution in big, discrete steps. But it&amp;rsquo;s more open-ended, less heavy-handed than curating and packaging particular crates.&lt;/p&gt;
-
-&lt;p&gt;To be really concrete, I could imagine setting out as part of the vision for a year to &amp;ldquo;advance Rust&amp;rsquo;s HTTP sever story&amp;rdquo;, with that concretely turning into a community-wide push to help get Hyper to 1.0, to generate good samples and tutorials for it, and to build a larger ecosystem around it &amp;ndash; all in time for the next &amp;ldquo;Report on Rust&amp;rdquo;.&lt;/p&gt;
-
-&lt;p&gt;I&amp;rsquo;ve been working with &lt;a href=&quot;https://github.com/brson&quot;&gt;@brson&lt;/a&gt; on the &lt;a href=&quot;https://internals.rust-lang.org/t/refining-rfcs-part-1-roadmap/3656/&quot;&gt;roadmap&lt;/a&gt; proposal, and some of these ideas are present in his recent &lt;a href=&quot;https://internals.rust-lang.org/t/refining-rfcs-part-1-roadmap/3656/18?u=aturon&quot;&gt;post&lt;/a&gt;. This thinking is at a pretty early stage, but I&amp;rsquo;m hoping we can iterate on it on discuss and, if successful, include it in the forthcoming RFC establishing the roadmap process.&lt;/p&gt;
-
-&lt;h2 id=&quot;where-to-go-from-here&quot;&gt;Where to go from here?&lt;/h2&gt;
-
-&lt;p&gt;This post was mainly meant to recognize the negative reception, and go back and look at the goals/constraints, exploring some other ideas. I&amp;rsquo;m hoping we can continue iterating in this design space; I continue to think there&amp;rsquo;s really important work to be done here.&lt;/p&gt;
 </content>
  </entry>
  
