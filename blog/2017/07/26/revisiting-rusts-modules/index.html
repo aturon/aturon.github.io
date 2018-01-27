@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="UTF-8">
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>
+    
+      Revisiting Rust’s modules &middot; Aaron Turon
+    
+  </title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/blog/styles.css">
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/blog/public/apple-touch-icon-precomposed.png">
+  <link rel="shortcut icon" href="/blog/public/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/atom+xml" title="Aaron Turon" href="/blog/atom.xml">
+</head>
+
+
+  <body>
+
+    <div class="container content">
+      <header class="masthead">
+        <h3 class="masthead-title">
+          <a href="/blog/" title="Home">Aaron Turon</a>
+          <small></small>
+
+          
+          &nbsp;&nbsp;&nbsp;
+          <small><a href="/blog/archive">Archive</a></small>
+          
+          &nbsp;&nbsp;&nbsp;
+          <small><a href="/blog/atom.xml">Feed</a></small>
+          
+        </h3>
+      </header>
+
+      <main>
+        <article class="post">
+  <h1 class="post-title">Revisiting Rust’s modules</h1>
+  <time datetime="2017-07-26T00:00:00-07:00" class="post-date">26 Jul 2017</time>
+  <p>As part of the <a href="https://blog.rust-lang.org/2017/03/02/lang-ergonomics.html">Ergonomics Initiative</a>, I, @withoutboats and several others on the Rust language team have been taking a hard look at Rust’s module system; you can see some earlier thoughts <a href="https://withoutboats.github.io/blog/rust/2017/01/04/the-rust-module-system-is-too-confusing.html">here</a> and discussion <a href="https://internals.rust-lang.org/t/lang-team-minutes-the-module-system-and-inverting-the-meaning-of-public/4804/66">here</a>.</p>
+
+<p>There are two related perspectives for improvement here: learnability and productivity.</p>
+
+<ul>
+<li>Modules are not a place that Rust was trying to innovate at 1.0, but they are nevertheless often reported as one of the major stumbling blocks to learning Rust. We should fix that.</li>
+<li>Even for seasoned Rustaceans, the module system has several deficiencies, as we’ll dig into below. Ideally, we can solve these problems while <em>also</em> making modules easier to learn.</li>
+</ul>
+
+<p>This post is going to explore some of the known problems, give a few insights, and then explore the design space afresh. It does <em>not</em> contain a specific favored proposal, but rather a collection of ideas with various tradeoffs.</p>
+
+<p>I want to say at the outset that, for this post, <strong>I’m going to completely ignore backwards-compatibility</strong>. Not for lack of importance, but rather because I think it’s a useful exercise to explore the full design space in an unconstrained way, and then separately to see how best to fit those lessons back into today’s Rust.</p>
+
+<h2 id="learnability-issues">Learnability issues</h2>
+
+<p>It’s hard to nail down the precise blockers to learnability, but here are a few of the obstacles we’ve heard repeatedly in feedback from a variety of venues:</p>
+
+<ul>
+<li><strong>Too many declaration forms</strong>. Module-related declarations include <code>extern crate</code>, <code>mod foo;</code>, <code>use</code>, <code>pub use</code>, <code>mod { }</code> and more, and each one has somewhat subtle effects on what is in scope where. For someone just starting out, this array of choices can be bewildering and stand in the way of writing “actual code” to feel out the language.</li>
+<li><strong>Path confusion</strong>. The fact that <code>use</code> declarations work with absolute paths while other items do not is confusing, and even experienced Rust programmers (myself included) often confuse the two. To make matters worse, the top-level namespace contains all of the external <em>crates</em>, but also the <em>contents</em> of the current crate. Unless, of course, you’re writing an external test or binary. And finally, when you’re working at the top level, the absolute/relative distinction doesn’t matter, which means that you can have the wrong mental model and only find it when trying to expand out into submodules.</li>
+<li><strong>Filesystem organization</strong>. The <code>foo.rs</code> versus <code>foo/mod.rs</code> distinction, together with <code>mod foo;</code>, can be an intimidating amount of machinery just to incorporate a file into your project.</li>
+<li><strong>Privacy</strong>. A module’s private items are always visible to its submodules. But private items <em>within</em> its submodules aren’t visible to each other. Moreover, it’s an error to expose a private item in a public interface, but it’s common to define public items within a private module and re-export them elsewhere. Learning the ropes of the privacy system is not easy, and even experienced Rust programmers sometimes grate against it.</li>
+</ul>
+
+<p>It can be hard, when more experienced with Rust, to empathize with these concerns—we suffer from the “Curse of Knowledge” here. But it’s important to recognize that all of these distinctions that are hard to learn in the first place also impose a small, but non-trivial mental tax even when you know them well. So the goal is not to make things easier for newcomers <em>at the expense</em> of those with more experience, but rather to make things easier for everyone.</p>
+
+<h2 id="productivity-issues">Productivity issues</h2>
+
+<p>Once you’ve gotten the hang of the module system, there are still annoyances, ranging in importance from code readability concerns to minor papercuts.</p>
+
+<ul>
+<li><strong>Who can see this item? And how?</strong> It’s pretty common to find items within modules that are marked <code>pub</code>, but are not in fact visible through the module defining them—or even visible outside the crate at all! This tends to happen when you want to organize code within the file system differently from the API hierarchy you expose to the rest of the crate or to the outside world. It generally means you have to look at several files to figure out how to access an item (or even whether you can).</li>
+<li><code>pub use</code> <strong>abuse</strong>. More generally, re-exports are ubiquitous in idiomatic Rust code. The result is that the “apparent” module hierarchy (as seen from the file system) often tells you very little about the <em>actual</em> module hierarchy, as seen from inside or outside the crate. This can make it difficult to jump into a new code base, or back into one you haven’t worked on in a while.</li>
+<li><strong>Repetition</strong>. The module system often requires two steps to do something, when a single step would suffice to convey all the necessary information:
+
+<ul>
+<li>When you add a dependency to <code>Cargo.toml</code>, you also need to add an <code>extern crate</code> declaration.</li>
+<li>When you add a new <code>.rs</code> file, you also need to write a corresponding <code>mod</code> declaration.</li>
+<li>When you have a file that exists solely for organization and you add a <code>pub</code> item to it, you also have to <code>pub use</code> that item elsewhere in the hierarchy.</li>
+</ul></li>
+</ul>
+
+<p>These issues may not seem like a big deal at first, but at least in my experience, after thinking deeply about modules and surfacing these problems, I find myself noticing them <em>all the time</em>.</p>
+
+<h2 id="what-is-a-module-system-anyway">What is a module system, anyway?</h2>
+
+<p>With the critique of today’s module system out of the way, I want to talk a bit about the core concerns of a module system, at least from Rust’s perspective:</p>
+
+<ul>
+<li>Bringing names into scope, including from external crates</li>
+<li>Defining the crate’s internal namespace hierarchy</li>
+<li>Defining the crate’s external namespace hierarchy</li>
+<li>Determining how code is arranged in the file system</li>
+<li>Visibility (aka privacy)</li>
+</ul>
+
+<p>Things seem to work most smoothly when these concerns are closely aligned. Conversely, the places where the module system becomes hard to work with and reason about tend to be misalignments.</p>
+
+<p><strong>An example of misalignment: facades in <code>futures</code></strong></p>
+
+<p>Let’s take a concrete example from the <code>futures</code> crate. Futures, like iterators, have a large number of methods that produce “adapters”, i.e. concrete types that are also futures:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">trait</span><span class="w"> </span><span class="n">Future</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">type</span> <span class="nc">Item</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">type</span> <span class="nc">Error</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">poll</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">Poll</span><span class="o">&lt;</span><span class="n">Self</span>::<span class="n">Item</span><span class="p">,</span><span class="w"> </span><span class="n">Self</span>::<span class="n">Error</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">fn</span> <span class="nf">map</span><span class="o">&lt;</span><span class="n">F</span><span class="p">,</span><span class="w"> </span><span class="n">U</span><span class="o">&gt;</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">f</span>: <span class="nc">F</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">Map</span><span class="o">&lt;</span><span class="n">Self</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">then</span><span class="o">&lt;</span><span class="n">F</span><span class="p">,</span><span class="w"> </span><span class="n">B</span><span class="o">&gt;</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">f</span>: <span class="nc">F</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">Then</span><span class="o">&lt;</span><span class="n">Self</span><span class="p">,</span><span class="w"> </span><span class="n">B</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// etc</span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>Each of these concrete types (<code>Map</code>, <code>Then</code> and so on) involve a page or so of code, often with some helper functions. Thus, there was a strong desire to define each in a separate file, with the helper functions private to that file.</p>
+
+<p>However, in Rust each file is a distinct module, and it was <em>not</em> desirable to have a large number of submodules each defining a single type. So, instead, the <code>future</code> module has code like this:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">mod</span> <span class="nn">and_then</span><span class="p">;</span><span class="w"></span>
+<span class="k">mod</span> <span class="nn">flatten</span><span class="p">;</span><span class="w"></span>
+<span class="k">mod</span> <span class="nn">flatten_stream</span><span class="p">;</span><span class="w"></span>
+<span class="k">mod</span> <span class="nn">fuse</span><span class="p">;</span><span class="w"></span>
+<span class="k">mod</span> <span class="nn">into_stream</span><span class="p">;</span><span class="w"></span>
+<span class="k">mod</span> <span class="nn">join</span><span class="p">;</span><span class="w"></span>
+<span class="k">mod</span> <span class="nn">map</span><span class="p">;</span><span class="w"></span>
+<span class="k">mod</span> <span class="nn">map_err</span><span class="p">;</span><span class="w"></span>
+<span class="k">mod</span> <span class="nn">from_err</span><span class="p">;</span><span class="w"></span>
+<span class="k">mod</span> <span class="nn">or_else</span><span class="p">;</span><span class="w"></span>
+<span class="k">mod</span> <span class="nn">select</span><span class="p">;</span><span class="w"></span>
+<span class="k">mod</span> <span class="nn">select2</span><span class="p">;</span><span class="w"></span>
+<span class="k">mod</span> <span class="nn">then</span><span class="p">;</span><span class="w"></span>
+<span class="k">mod</span> <span class="nn">either</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">pub</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="bp">self</span>::<span class="n">and_then</span>::<span class="n">AndThen</span><span class="p">;</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="bp">self</span>::<span class="n">flatten</span>::<span class="n">Flatten</span><span class="p">;</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="bp">self</span>::<span class="n">flatten_stream</span>::<span class="n">FlattenStream</span><span class="p">;</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="bp">self</span>::<span class="n">fuse</span>::<span class="n">Fuse</span><span class="p">;</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="bp">self</span>::<span class="n">into_stream</span>::<span class="n">IntoStream</span><span class="p">;</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="bp">self</span>::<span class="n">join</span>::<span class="p">{</span><span class="n">Join</span><span class="p">,</span><span class="w"> </span><span class="n">Join3</span><span class="p">,</span><span class="w"> </span><span class="n">Join4</span><span class="p">,</span><span class="w"> </span><span class="n">Join5</span><span class="p">};</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="bp">self</span>::<span class="n">map</span>::<span class="n">Map</span><span class="p">;</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="bp">self</span>::<span class="n">map_err</span>::<span class="n">MapErr</span><span class="p">;</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="bp">self</span>::<span class="n">from_err</span>::<span class="n">FromErr</span><span class="p">;</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="bp">self</span>::<span class="n">or_else</span>::<span class="n">OrElse</span><span class="p">;</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="bp">self</span>::<span class="n">select</span>::<span class="p">{</span><span class="n">Select</span><span class="p">,</span><span class="w"> </span><span class="n">SelectNext</span><span class="p">};</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="bp">self</span>::<span class="n">select2</span>::<span class="n">Select2</span><span class="p">;</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="bp">self</span>::<span class="n">then</span>::<span class="n">Then</span><span class="p">;</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="bp">self</span>::<span class="n">either</span>::<span class="n">Either</span><span class="p">;</span><span class="w"></span>
+</code></pre></div>
+<p>This kind of setup is known generally as the <em>facade pattern</em>, and it’s pretty ubiquitous in Rust code.</p>
+
+<p>The facade boilerplate is needed to deal with a misalignment: each adapter is defined in its own file with its own privacy boundary, but we don’t actually want that to entail a distinct <em>module</em> for each (in the internal or external namespace hierarchy). That means we have to do two things:</p>
+
+<ul>
+<li>Make the modules private, despite that they contain public items</li>
+<li>Manually re-export each of the public items at a higher level</li>
+</ul>
+
+<p>When first trying to navigate the <code>futures</code> codebase, you have to read the <code>future</code> module to understand how its submodules are being used, due to these re-exports. For the <code>futures</code> crate, this is a relatively small annoyance. But it can be a real source of confusion for crates that have more of a <em>mixture</em> of submodules, some of which are significant for the namespace hierarchy, other of which are hidden away.</p>
+
+<p>Another common confusion: items defined as <code>pub</code> within a private module which are not, in fact, exported from the crate, but which may be re-exported in another crate-internal module. In this case, <code>pub(crate)</code> would better convey intent, but today’s module system makes <code>pub</code> the path of least resistance. That means, in turn, that an item definition alone doesn’t tell you the fully visibility story (though it does give you an <em>upper bound</em> on visibility); in general you have to crawl through the rest of the code to figure out where the item is ultimately visible.</p>
+
+<p><strong>Expressiveness and the common case</strong></p>
+
+<p>Rust’s module system, through things like the facade pattern, gives you a lot of expressiveness: you’re not forced to keep the various concerns of the module system in alignment, and are thus free to craft the organization that you deem best.</p>
+
+<p><strong>The concern isn’t so much having this freedom, but rather how often you must wield it</strong>. How often does the facade pattern show up in your code? How often do you use re-exports? How often does the directory structure of your crate bear little resemblance to the intended module hierarchy?</p>
+
+<p>I spent some time <a href="https://paper.dropbox.com/doc/Module-system-examples-AA2Gj3010ce7XwxHfOAfs">surveying</a> some of the most popular and most respected crates to get a qualitative feel for this question, including: <code>futures</code>, <code>regex</code>, <code>rayon</code>, <code>log</code>, <code>openssl</code>, <code>flate2</code>, <code>bytes</code>, <code>irc</code>, <code>clap</code>, <code>url</code>, <code>serde</code>, <code>chalk</code> , <code>std</code> and <code>chrono</code>. Virtually every crate had something “unique” about its organization, and almost all of them used the facade pattern somewhere. In general, <strong>it was impossible to predict anything about the public API surface just by looking at the file system organization; you have to trace re-exports</strong>.</p>
+
+<p>In short, in the vast majority of cases the module system necessitated boilerplate and a disconnect between its various concerns, impairing both write- and read-ability.</p>
+
+<h2 id="increasing-alignment">Increasing alignment</h2>
+
+<p>The question I want to pose now is: can we make the module system work more smoothly for the common case, decreasing boilerplate and increasing predictability/readability? This is a more narrow question than “how do we lower the learning curve”, but I believe that a good answer will help learnability as well.</p>
+
+<p>A basic strategy is to try to make the various uses of facades more “first class”, i.e. expressed in a more explicit and clear way, rather than encoded via a particular pattern of usage. Let’s take a deeper look at the ways in which facades are commonly used in the examples mentioned above:</p>
+
+<ul>
+<li><strong>To allow breaking code into files</strong>, with file-private definitions. This is the <code>futures</code> example discussed above: you’re forced to create submodules in order to split things into files, but you try to “hide” the submodules as much as possible using a facade, and other than the facade definition you never refer to them by name.</li>
+<li><strong>To allow for <code>cfg</code>-specific implementations</strong>. For example, the standard library uses a facade-like pattern to have two side-by-side implementation of its core system primitives, for <code>cfg(unix)</code> and <code>cfg(windows)</code>. This is set up so that there is no visible impact on the module hierarchy, but there <em>is</em> an impact on the filesystem hierarchy.</li>
+<li><strong>For crate-internal organization</strong>, where you <em>do</em> want a module hierarchy (for privacy or namespacing purposes), but you don’t want to reveal it to the outside world (or, in some cases, even to other modules in the crate).</li>
+</ul>
+
+<p>How can we make these use cases more explicit, clear, and streamlined?</p>
+
+<h2 id="proposal-directories-determine-modules">Proposal: directories determine modules</h2>
+
+<p>The central idea in this post is to <strong>make intent more explicit in the file system</strong> than we do today, while streamlining common facade patterns. Here’s one way we might do it:</p>
+
+<ul>
+<li>Deprecate <code>mod foo;</code> declarations, instead determining module directly from directory structure.</li>
+<li>Directories (not files!) determine the module hierarchy.
+
+<ul>
+<li>A directory with a leading <code>_</code> gives you a <code>pub(crate)</code> module.</li>
+<li>All other directories give you <code>pub</code> modules.</li>
+</ul></li>
+<li>The <code>.rs</code> files in a directory <em>collectively</em> determine the contents of the corresponding module.
+
+<ul>
+<li>Private items are private <em>to the file in which they are defined.</em></li>
+<li>Items with <code>pub(self)</code> or greater visibility are, in particular, visible to sibling files that are part of the module’s definition.</li>
+</ul></li>
+</ul>
+
+<p><strong>A basic example</strong>
+Let’s start with an example just showing the mechanics. First, the directory structure:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text"><span></span>src/
+  foo/
+    these.rs
+    names.rs
+    do_not_matter.rs
+    _infer/
+      instantiate.rs
+      unify.rs
+  bar/
+    mod.rs // this is fine, but has no special status
+    impls.rs
+    tests.rs
+  baz.rs
+</code></pre></div>
+<p>From the directory structure alone, we know the precise module structure (modulo any inline modules; more on that later):</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">foo</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="cm">/* scoped contents of `these.rs`, `names.rs`, `do_not_matter.rs` */</span><span class="w"></span>
+
+<span class="w">  </span><span class="k">pub</span><span class="p">(</span><span class="k">crate</span><span class="p">)</span><span class="w"> </span><span class="k">mod</span> <span class="nn">infer</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="cm">/* scoped contents of `instantiate.rs` and `unify.rs` */</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">bar</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="cm">/* scoped contents of `mod.rs`, `impls.rs` and `tests.rs` */</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="cm">/* scoped contents of `baz.rs` */</span><span class="w"></span>
+</code></pre></div>
+<p>What do I mean by “scoped contents”? To reiterate from above, fully private definitions are private <em>to that file</em>, while <code>pub(self)</code> means private to the current module. To illustrate, imagine we have the following for <code>instantiate.rs</code>:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="c1">// private to this file</span>
+<span class="k">struct</span> <span class="nc">Instantiator</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="k">fn</span> <span class="nf">some_helper</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+
+<span class="c1">// private to this module, i.e. visible to all files within `_infer`, i.e.</span>
+<span class="c1">// `instantiate.rs` and `unify.rs`</span>
+<span class="k">pub</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="k">fn</span> <span class="nf">instantiate</span><span class="o">&lt;</span><span class="n">T</span>: <span class="nc">Fold</span><span class="o">&gt;</span><span class="p">(</span><span class="n">table</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">InfTable</span><span class="p">,</span><span class="w"> </span><span class="n">arg</span>: <span class="kp">&amp;</span><span class="nc">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>and then, in <code>unify.rs</code>:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="c1">// private to this file</span>
+<span class="k">struct</span> <span class="nc">Unifier</span><span class="o">&lt;</span><span class="na">&#39;a</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+
+<span class="c1">// note: this private definition does *not* clash with the private definition</span>
+<span class="c1">// in `instantiate.rs`</span>
+<span class="k">fn</span> <span class="nf">some_helper</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+
+<span class="c1">// visible to the whole crate at `foo::infer::UnificationResult`</span>
+<span class="k">pub</span><span class="p">(</span><span class="k">crate</span><span class="p">)</span><span class="w"> </span><span class="k">struct</span> <span class="nc">UnificationResult</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+
+<span class="k">pub</span><span class="p">(</span><span class="k">crate</span><span class="p">)</span><span class="w"> </span><span class="k">fn</span> <span class="nf">unify</span><span class="o">&lt;</span><span class="n">T</span>: <span class="nc">Zip</span><span class="o">&gt;</span><span class="p">(</span><span class="n">table</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">InfTable</span><span class="p">,</span><span class="w"> </span><span class="n">a</span>: <span class="kp">&amp;</span><span class="nc">T</span><span class="p">,</span><span class="w"> </span><span class="n">b</span>: <span class="kp">&amp;</span><span class="nc">T</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">UnificationResult</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="cm">/* may invoke `instantiate` */</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>Thus, visibility annotations give you fine-grained control ranging from current file (private) to world-public (<code>pub</code>) and every module in the hierarchy in between.</p>
+
+<p><strong>Breaking code into files without module structure: the futures example</strong></p>
+
+<p>Having seen the basics, let’s put this proposal to use in expressing the futures example described above:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text"><span></span>src/
+  future/
+    mod.rs
+    and_then.rs
+    flatten.rs
+    fuse.rs
+    // etc
+</code></pre></div>
+<p>These files would have exactly the same contents as today, except that we would be able to delete most of <code>mod.rs</code>. That is, none of the following boilerplate is needed:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="c1">// these can go!</span>
+<span class="k">mod</span> <span class="nn">and_then</span><span class="p">;</span><span class="w"></span>
+<span class="k">mod</span> <span class="nn">flatten</span><span class="p">;</span><span class="w"></span>
+<span class="k">mod</span> <span class="nn">fuse</span><span class="p">;</span><span class="w"></span>
+<span class="c1">// etc</span>
+
+<span class="c1">// these too!</span>
+<span class="k">pub</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="bp">self</span>::<span class="n">and_then</span>::<span class="n">AndThen</span><span class="p">;</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="bp">self</span>::<span class="n">flatten</span>::<span class="n">Flatten</span><span class="p">;</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="bp">self</span>::<span class="n">fuse</span>::<span class="n">Fuse</span><span class="p">;</span><span class="w"></span>
+<span class="c1">// etc</span>
+</code></pre></div>
+<p>Thus, this proposal works particularly smoothly when you want to break a module into multiple files, with potentially file-private items—because that’s exactly how modules work in the proposal! No facade necessary, and the intended (flat) module structure is made clear and explicit via the file system structure.</p>
+
+<p><strong>Platform-specific implementations</strong></p>
+
+<p>What if you want to provide distinct implementations by platform? Again, you no longer need a facade:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text"><span></span>src/
+  foo/
+    unix.rs
+    windows.rs
+</code></pre></div>
+<p>Where <code>unix.rs</code> starts with <code>#![cfg(unix)]</code> and similarly for windows. Both files are considered part of the <code>foo</code> module’s definition, but depending on the platform one of the files will appear to be empty. (Today this pattern is implemented using submodules tagged with <code>cfg</code>, together with re-exports.)</p>
+
+<p><strong>Internal module structure</strong></p>
+
+<p>The final mis-alignment was cases where you want a module hierarchy internally, but want to expose some collapsed version of it externally. This is the one place where you still need to use <code>pub(use)</code>:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text"><span></span>// excerpted from `clap`
+
+src/
+  _app/
+    help.rs
+    macros.rs
+    mod.rs
+    parser.rs
+    usage.rs
+  _args/
+    arg.rs
+    arg_matcher.rs
+    arg_matches.rs
+    macros.rs
+    settings.rs
+  errors.rs
+  fmt.rs
+  suggestions.rs
+  lib.rs
+</code></pre></div>
+<p>This directory structure is excepted from <code>clap</code>, which currently has <code>app</code> and <code>args</code> subdirectories but does not export any submodules; these modules are used purely for internal organization and namespacing.</p>
+
+<p>In <code>_app/mod.rs</code> you might have a definition like:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="c1">// note that this is `pub`!</span>
+<span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">App</span><span class="o">&lt;</span><span class="na">&#39;a</span><span class="p">,</span><span class="w"> </span><span class="na">&#39;b</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>The reader can immediately see something interesting happening: this item is defined within an “internal” (<code>pub(crate)</code>) module, since <code>_app</code> begins with an underscore. But it has a <em>larger</em>, world-public visibility. This is an indication that the item will be re-exported somewhere else (and in fact, we could lint against this <em>not</em> being the case).</p>
+
+<p>Accordingly, in <code>lib.rs</code>, we might have:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">pub</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="n">app</span>::<span class="n">App</span><span class="p">;</span><span class="w"></span>
+</code></pre></div>
+<p>In short, re-exports are still needed, but the directory structure and item visibility give the reader a strong, localized indication of what’s going on.</p>
+
+<p><strong>Fine details</strong></p>
+
+<p>I’m glossing over a <em>lot</em> of fine details here, including:</p>
+
+<ul>
+<li>How do you provide module docs? One appealing possibility: via a <code>README.md</code> file, which would have several benefits — most importantly, moving the often very large module-level docs out of band.</li>
+<li>Similarly, what’s the story for module-level attributes in general?</li>
+<li>What about inline modules?</li>
+<li>Backward-compatibility concerns?</li>
+<li>And many more.</li>
+</ul>
+
+<p>For the moment, I’m going to ask that we avoid getting bogged down in these questions (which are ultimately important), so that we can focus first on whether the <em>broad</em> direction here is a good one.</p>
+
+<p><strong>Tradeoffs</strong></p>
+
+<p>Speaking of evaluation: there are some tradeoffs we can see even at this level of detail.</p>
+
+<p><em>Primary Upsides:</em></p>
+
+<ul>
+<li>Learning the basics of the module system is really easy: each directory defines a module name in the module hierarchy; the <code>.rs</code> files within that directory collectively define the contents of that module. The end.</li>
+<li>The file system organization gives you a very clear, explicit view into the module structure and programmer intent. Compared to dropping into a random crate’s source code today (an exercise I <a href="https://paper.dropbox.com/doc/Module-system-examples-AA2Gj3010ce7XwxHfOAfs">performed repeatedly</a>), I believe this approach will make it much easier to understand a crate’s overall structure with a quick run of <code>tree</code>.</li>
+<li>Fewer imports are needed, because module-visible items defined in sibling files are automatically in scope (but see the downside below).</li>
+<li>Most of the common uses of facades (breaking into files/privacy boundaries, platform-specific modules) no longer require any facading, or indeed any boilerplate at all.</li>
+<li>Cases where you want some crate-internal module namespacing are expressed in a natural, obvious way (via the <code>_</code> prefix), and one that makes it easier for readers to see that a given item will be re-exported elsewhere.</li>
+</ul>
+
+<p><em>Primary downsides:</em></p>
+
+<ul>
+<li>Bringing module-visible items into scope from sibling files means that one may have to search in multiple files to discover the definition of some item. In contrast, today every item you can mention in a file is brought into scope somewhere in <em>that</em> file—assuming you don’t use globs.
+
+<ul>
+<li>On the other hand, this proposal eliminates boilerplate <code>use</code> declarations for definitions that are conceptually part of the same module. And in particular, the fact that such declarations would often be relative (e.g. <code>use self::item;</code>) may help mitigate confusion around the absolute/relative path issue.</li>
+<li>A variant of this proposal would not bring these items into scope by default, but instead allow you to do so via <code>use self::item;</code> However, having to use <code>self</code> here is awkward, and the definition is not helpful—it only serves to tell you that another file in the directory defines <code>item</code>, which is something you can already determine if the binding isn’t located in the current file. (In contrast, today the required import also gives you a hint as to which file to look at).</li>
+</ul></li>
+<li>Determining module structure from file system structure is problematic for some, due either to stashing stray <code>.rs</code> files in the project directory, or due to potentially laggy network file access.
+
+<ul>
+<li>If this proves to be a problem in practice, we could provide an optional way to specify the desired file list. But in the vast majority of cases today the file system and module hierarchy are aligned.</li>
+<li>Some have also argued that leveraging the file system is too “implicit”, but I don’t think that argument holds water; the file system arrangement itself is a perfectly “explicit” way of providing information, and there’s no particular reason to distinguish that from <code>mod</code> statements in code. I rather see it as the current setup forcing repetition of information. (I would also <a href="https://blog.rust-lang.org/2017/03/02/lang-ergonomics.html">urge</a> a focus on concrete instances of <em>reasoning about code</em> in judging this kind of question.)</li>
+</ul></li>
+</ul>
+
+<h2 id="wrapping-up">Wrapping up</h2>
+
+<p>There’s a <em>lot</em> more to say about modules, and this proposal is just one variant of probably a dozen that the language team has been exploring. But I wanted to take the time to at least spike out one plausible option, and see what people think. As I asked above: I strongly urge people to focus only on the big-picture question of whether this avenue is appealing <em>at all</em>, and not get too bogged down in finer details until later in the process.</p>
+
+<p><strong>A bit of editorializing</strong></p>
+
+<p>What I like about this proposal is that it’s <em>dirt simple</em>: the correspondence between file system and module hierarchies is very easy to describe, and today’s patterns fall out naturally, usually with significant boilerplate reduction. I think there’s a very real chance that, with this proposal, people will view Rust’s module system as easy to learn. Finally, and most subjectively, compared to some of the other ideas we’ve been exploring, there’s a certain <em>elegance</em> to this set up; nothing feels bolted on, and the examples drawn from real-world code have a quite pleasing expression.</p>
+
+<p>I do worry about the sibling scoping question. I know I, for one, often track down bindings by searching purely within the current file. With this proposal, I’d have to change that workflow to <code>grep</code>ing within the current directory, or using tags more consistently, etc. Yet, I suspect that in the end, these other workflows are an <em>improvement —</em> e.g., tags allow a more direct jump to definition regardless of where that definition lives, whereas my current workflow often requires following a chain of imports.</p>
+
+<p>In any case, I think this potential workflow shift is more than made up for by the greater clarity about module structure, which makes it much easier to find your way around a project in the first place.</p>
+
+</article>
+
+
+<aside class="related">
+  <h2>Related Posts</h2>
+  <ul class="related-posts">
+    
+      <li>
+        <h3>
+          <a href="/blog/2018/01/16/libs-mission/">
+            Retooling the Rust Libs Team team for 2018
+            <small><time datetime="2018-01-16T00:00:00-08:00">16 Jan 2018</time></small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/blog/2018/01/09/rust-2018/">
+            Rust in 2018: a people perspective
+            <small><time datetime="2018-01-09T00:00:00-08:00">09 Jan 2018</time></small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/blog/2017/08/02/modules-part-2/">
+            Revisiting Rust’s modules, part 2
+            <small><time datetime="2017-08-02T00:00:00-07:00">02 Aug 2017</time></small>
+          </a>
+        </h3>
+      </li>
+    
+  </ul>
+</aside>
+
+
+      </main>
+
+      <footer class="footer">
+        <small>
+          &copy; <time datetime="2018-01-16T16:56:58-08:00">2018</time>. All rights reserved.
+        </small>
+      </footer>
+    </div>
+
+  </body>
+</html>

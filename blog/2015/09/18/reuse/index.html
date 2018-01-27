@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="UTF-8">
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>
+    
+      Specialize to reuse &middot; Aaron Turon
+    
+  </title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/blog/styles.css">
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/blog/public/apple-touch-icon-precomposed.png">
+  <link rel="shortcut icon" href="/blog/public/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/atom+xml" title="Aaron Turon" href="/blog/atom.xml">
+</head>
+
+
+  <body>
+
+    <div class="container content">
+      <header class="masthead">
+        <h3 class="masthead-title">
+          <a href="/blog/" title="Home">Aaron Turon</a>
+          <small></small>
+
+          
+          &nbsp;&nbsp;&nbsp;
+          <small><a href="/blog/archive">Archive</a></small>
+          
+          &nbsp;&nbsp;&nbsp;
+          <small><a href="/blog/atom.xml">Feed</a></small>
+          
+        </h3>
+      </header>
+
+      <main>
+        <article class="post">
+  <h1 class="post-title">Specialize to reuse</h1>
+  <time datetime="2015-09-18T00:00:00-07:00" class="post-date">18 Sep 2015</time>
+  <p><strong>TL;DR</strong>: <a href="https://github.com/rust-lang/rfcs/pull/1210">specialization</a> supports clean, inheritance-like patterns
+out of the box. This post explains how, and discusses the interaction with the
+&ldquo;virtual structs&rdquo; saga.</p>
+
+<h2 id="table-of-contents">Table of contents</h2>
+
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#specialization-as-proposed">Specialization as proposed</a>
+
+<ul>
+<li><a href="#a-small-addendum">A small addendum</a></li>
+</ul></li>
+<li><a href="#ending-1:-the-trait-based-approach">Ending 1: the trait-based approach</a>
+
+<ul>
+<li><a href="#thin-pointers">Thin pointers</a></li>
+<li><a href="#incorporating-fields">Incorporating fields</a>
+
+<ul>
+<li><a href="#struct-composition">Struct composition</a></li>
+<li><a href="#struct-inheritance">Struct inheritance</a></li>
+<li><a href="#trait-fields">Trait fields</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#ending-2:-the-enum-based-approach">Ending 2: the enum-based approach</a></li>
+<li><a href="#getting-opinionated">Getting opinionated</a></li>
+</ul>
+
+<h2 id="overview">Overview</h2>
+
+<p>I&rsquo;ve been working for a while with Niko Matsakis and Nick Cameron on another
+round of design for handling type hierarchies like those found in the DOM, in
+GUI frameworks, and even the compiler&rsquo;s AST. The Rust community has gone through
+<a href="https://github.com/rust-lang/rfcs/issues/349">many iterations</a> of design in
+this space, having identified the following goals for a type hierarchy design:</p>
+
+<ul>
+<li>cheap field access from internal methods;</li>
+<li>cheap dynamic dispatch of methods;</li>
+<li>cheap downcasting;</li>
+<li>thin pointers;</li>
+<li>sharing of fields and methods between definitions;</li>
+<li>safe, i.e., doesn&rsquo;t require a bunch of transmutes or other unsafe code to be usable;</li>
+<li>syntactically lightweight or implicit upcasting;</li>
+<li>calling functions through smart pointers, e.g. <code>fn foo(JSRef&lt;T&gt;, ...)</code>;</li>
+<li>static dispatch of methods.</li>
+</ul>
+
+<p>Two important constraints are missing from this prior list, one technical and
+one philosophical:</p>
+
+<ul>
+<li>reusable constructor code at every level of the hierarchy;</li>
+<li>fits well into the language, either by smoothly extending existing features,
+or by adding orthogonal concepts.</li>
+</ul>
+
+<p>In the design I&rsquo;ve been pursuing, <a href="https://github.com/rust-lang/rfcs/pull/1210"><code>impl</code> specialization</a> plays a key
+role. That&rsquo;s appealing because specialization is something we&rsquo;ve long wanted for
+other reasons, and is a natural deepening of our trait system. But it&rsquo;s not
+quite enough, by itself, to meet all of the constraints above.</p>
+
+<p>I&rsquo;m going to start by recapping the specialization design. Then I&rsquo;ll explore two
+competing avenues for building on specialization to meet the design constraints,
+choose-your-own-adventure style. At the end, I&rsquo;ll give my current opinions on
+where we ought to go.</p>
+
+<h2 id="specialization-as-proposed">Specialization as proposed</h2>
+
+<p><a href="https://github.com/rust-lang/rfcs/pull/1210">Specialization</a> allows overlapping trait (and inherent) impls, so long
+as there is always a &ldquo;most specific&rdquo; impl that applies to a given concrete type.
+The more general impl uses <code>default</code> to signal which items can be specialized &ndash;
+sort of the opposite of <code>final</code> in Java, or a bit like <code>virtual</code> in C++.</p>
+
+<p>One of the major intended uses is to support true zero-cost abstraction, by
+allowing you to customize the impl for specific cases to match performance of
+non-abstract impls, while maintaining the abstraction for clients. To quote from
+the RFC:</p>
+
+<blockquote>
+<p>Traits today can provide static dispatch in Rust, but they can
+still impose an abstraction tax. For example, consider the <code>Extend</code> trait:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">pub</span><span class="w"> </span><span class="k">trait</span><span class="w"> </span><span class="nb">Extend</span><span class="o">&lt;</span><span class="n">A</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">extend</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">iterable</span>: <span class="nc">T</span><span class="p">)</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">T</span>: <span class="nb">IntoIterator</span><span class="o">&lt;</span><span class="n">Item</span><span class="o">=</span><span class="n">A</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>Collections that implement the trait are able to insert data from arbitrary
+iterators. Today, that means that the implementation can assume nothing about
+the argument <code>iterable</code> that it&rsquo;s given except that it can be transformed into
+an iterator. That means the code must work by repeatedly calling <code>next</code> and
+inserting elements one at a time.</p>
+
+<p>But in specific cases, like extending a vector with a slice, a much more
+efficient implementation is possible &ndash; and the optimizer isn&rsquo;t always capable
+of producing it automatically. In such cases, specialization can be used to get
+the best of both worlds: retaining the abstraction of <code>extend</code> while providing
+custom code for specific cases.</p>
+
+<p>The design in this RFC relies on multiple, overlapping trait impls, so to take
+advantage for <code>Extend</code> we need to refactor a bit:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">pub</span><span class="w"> </span><span class="k">trait</span><span class="w"> </span><span class="nb">Extend</span><span class="o">&lt;</span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">T</span>: <span class="nb">IntoIterator</span><span class="o">&lt;</span><span class="n">Item</span><span class="o">=</span><span class="n">A</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">extend</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">iterable</span>: <span class="nc">T</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="c1">// The generic implementation</span>
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="nb">Extend</span><span class="o">&lt;</span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">A</span><span class="o">&gt;</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">T</span>: <span class="nb">IntoIterator</span><span class="o">&lt;</span><span class="n">Item</span><span class="o">=</span><span class="n">A</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// the `default` qualifier allows this method to be specialized below</span>
+<span class="w">    </span><span class="k">default</span> <span class="k">fn</span><span class="w"> </span><span class="n">extend</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">iterable</span>: <span class="nc">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="p">...</span><span class="w"> </span><span class="c1">// implementation using push (like today&#39;s extend)</span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="c1">// A specialized implementation for slices</span>
+<span class="k">impl</span><span class="o">&lt;</span><span class="na">&#39;a</span><span class="p">,</span><span class="w"> </span><span class="n">A</span><span class="o">&gt;</span><span class="w"> </span><span class="nb">Extend</span><span class="o">&lt;</span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="na">&#39;a</span><span class="w"> </span><span class="p">[</span><span class="n">A</span><span class="p">]</span><span class="o">&gt;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">A</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">extend</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">iterable</span>: <span class="kp">&amp;</span><span class="na">&#39;a</span><span class="w"> </span><span class="p">[</span><span class="n">A</span><span class="p">])</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="p">...</span><span class="w"> </span><span class="c1">// implementation using ptr::write (like push_all)</span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></blockquote>
+
+<p>Because the generic impl uses <code>default</code> for its implementation of <code>extend</code>, it&rsquo;s
+permitted to give a more specialized impl block that overrides it. (The block is
+more specialized because it applies to a subset of the types the generic one
+applies to.)</p>
+
+<p>A specialized impl doesn&rsquo;t have to provide all the items for a trait; whatever
+it doesn&rsquo;t provide is automatically inherited from the generic impl it&rsquo;s
+specializing. And conversely, it can <em>only</em> override items marked <code>default</code>.</p>
+
+<p>Going a bit farther, it&rsquo;s possible to specialize not just impls for a trait, but
+also <em>defaults</em> for a trait. This is done via <code>partial impl</code> blocks, which are
+impls that provide some, but not all, of the items required by a trait. Again
+quoting the RFC:</p>
+
+<blockquote>
+<p>For example, consider a design for overloading <code>+</code> and <code>+=</code>, such that
+they are always overloaded together:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">trait</span><span class="w"> </span><span class="n">Add</span><span class="o">&lt;</span><span class="n">Rhs</span><span class="o">=</span><span class="n">Self</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">type</span> <span class="nc">Output</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">rhs</span>: <span class="nc">Rhs</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">Self</span>::<span class="n">Output</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">add_assign</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">Rhs</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>In this case, there&rsquo;s no natural way to provide a default implementation of
+<code>add_assign</code>, since we do not want to restrict the <code>Add</code> trait to <code>Clone</code> data.</p>
+
+<p>The specialization design in this RFC also allows for <em>partial</em> implementations,
+which can provide specialized defaults without actually providing a full trait
+implementation:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="n">partial</span><span class="w"> </span><span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span>: <span class="nb">Clone</span><span class="p">,</span><span class="w"> </span><span class="n">Rhs</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Add</span><span class="o">&lt;</span><span class="n">Rhs</span><span class="o">&gt;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// the `default` qualifier allows further specialization</span>
+<span class="w">    </span><span class="k">default</span> <span class="k">fn</span><span class="w"> </span><span class="n">add_assign</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">rhs</span>: <span class="nc">R</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">tmp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">clone</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">rhs</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="o">*</span><span class="bp">self</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>This partial impl does <em>not</em> mean that <code>Add</code> is implemented for all <code>Clone</code>
+data, but jut that when you do impl <code>Add</code> and <code>Self: Clone</code>, you can leave off
+<code>add_assign</code>:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="cp">#[derive(Copy, Clone)]</span><span class="w"></span>
+<span class="k">struct</span> <span class="nc">Complex</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">impl</span><span class="w"> </span><span class="n">Add</span><span class="o">&lt;</span><span class="n">Complex</span><span class="o">&gt;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">Complex</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">type</span> <span class="nc">Output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Complex</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">rhs</span>: <span class="nc">Complex</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="c1">// ...</span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// no fn add_assign necessary</span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></blockquote>
+
+<h3 id="a-small-addendum">A small addendum</h3>
+
+<p>The specialization RFC touches on, but doesn&rsquo;t actually specify, a way to
+&ldquo;access&rdquo; the implementation you&rsquo;re overriding (akin to <code>super</code> in the OO world).</p>
+
+<p>For the sake of this post, I&rsquo;ll assume we&rsquo;ve added such a mechanism by way of a
+UFCS-like use of <code>default</code>:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">trait</span><span class="w"> </span><span class="n">Foo</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">foo</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Foo</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">default</span> <span class="k">fn</span><span class="w"> </span><span class="n">foo</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="c1">// do some complicated stuff</span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span>: <span class="nc">Debug</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Foo</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">foo</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;About to `foo` on {:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="bp">self</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">default</span>::<span class="n">foo</span><span class="p">(</span><span class="bp">self</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>The idea is that the <code>default::</code> prefix accessing the generic impl that&rsquo;s being
+overridden, and works like UFCS (in that methods become functions taking <code>self</code>
+explicitly).</p>
+
+<p>The details here aren&rsquo;t so important, as long as specialization supports <em>some</em>
+mechanism like this (which was always the intent).</p>
+
+<h2 id="ending-1-the-trait-based-approach">Ending 1: the trait-based approach</h2>
+
+<p>It should already be clear that specialization has a connection to inheritance,
+because items left off of a specialized impl are inherited from the impl
+(partial or otherwise) it is specializing. As it turns out, that&rsquo;s already
+enough to code up something like traditional type hierarchies in OO
+languages. You can get pretty far!</p>
+
+<blockquote>
+<p>This general approach is, in some ways, inspired by
+<a href="https://github.com/rust-lang/rfcs/pull/250">eddyb and Kimundi&rsquo;s proposal</a>
+from last time around, but using specialization rather than a targeted feature
+for default refinement. And of course many of the fine points of the design
+here have been explored by others in the community as well.</p>
+</blockquote>
+
+<p>Here&rsquo;s an example, using a lightly simplified extract from Servo&rsquo;s DOM
+implementation.</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="c1">// Node ////////////////////////////////////////////////////////////////////////</span>
+
+<span class="k">trait</span><span class="w"> </span><span class="n">Node</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">parse_plain_attribute</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span>: <span class="kp">&amp;</span><span class="nc">Atom</span><span class="p">,</span><span class="w"> </span><span class="n">value</span>: <span class="nc">DomString</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">AttrValue</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">AttrValue</span>::<span class="nb">String</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// additional virtual methods for Node</span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="c1">// non-virtual methods for Node</span>
+<span class="k">impl</span><span class="w"> </span><span class="n">Node</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">is_parent_of</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">child</span>: <span class="kp">&amp;</span><span class="nc">Node</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">bool</span> <span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="c1">// ...</span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// additional methods here</span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="c1">// Element /////////////////////////////////////////////////////////////////////</span>
+
+<span class="k">trait</span><span class="w"> </span><span class="n">Element</span>: <span class="nc">Node</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">as_activatable</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Option</span><span class="o">&lt;&amp;</span><span class="n">Activatable</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nb">None</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// additional Element methods</span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="c1">// non-virtual methods for Element</span>
+<span class="k">impl</span><span class="w"> </span><span class="n">Element</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">nearest_activable_element</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Option</span><span class="o">&lt;&amp;</span><span class="n">Element</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="c1">// ...</span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="n">partial</span><span class="w"> </span><span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span>: <span class="nc">Element</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Node</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">default</span> <span class="k">fn</span><span class="w"> </span><span class="n">parse_plain_attribute</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span>: <span class="kp">&amp;</span><span class="nc">Atom</span><span class="p">,</span><span class="w"> </span><span class="n">value</span>: <span class="nc">DomString</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">AttrValue</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">match</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="o">&amp;</span><span class="n">atom</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">AttrValue</span>::<span class="n">from_atomic</span><span class="p">(</span><span class="n">value</span><span class="p">),</span><span class="w"></span>
+<span class="w">            </span><span class="o">&amp;</span><span class="n">atom</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;class&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">AttrValue</span>::<span class="n">from_serialized_tokenlist</span><span class="p">(</span><span class="n">value</span><span class="p">),</span><span class="w"></span>
+<span class="w">            </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">default</span>::<span class="n">parse_plain_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">),</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="c1">// Activatable /////////////////////////////////////////////////////////////////</span>
+
+<span class="k">trait</span><span class="w"> </span><span class="n">Activatable</span>: <span class="nc">Element</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// moar methods</span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="n">partial</span><span class="w"> </span><span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span>: <span class="nc">Activatable</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Element</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">as_activatable</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Option</span><span class="o">&lt;&amp;</span><span class="n">Activatable</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nb">Some</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="c1">// HtmlAnchorElement ///////////////////////////////////////////////////////////</span>
+
+<span class="k">struct</span> <span class="nc">HtmlAnchorElement</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">rel_list</span>: <span class="nc">DomTokenList</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// moar fields</span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">impl</span><span class="w"> </span><span class="n">Node</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">HtmlAnchorElement</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">parse_plain_attribute</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span>: <span class="kp">&amp;</span><span class="nc">Atom</span><span class="p">,</span><span class="w"> </span><span class="n">value</span>: <span class="nc">DOMString</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">AttrValue</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">match</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="o">&amp;</span><span class="n">atom</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;rel&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">AttrValue</span>::<span class="n">from_serialized_tokenlist</span><span class="p">(</span><span class="n">value</span><span class="p">),</span><span class="w"></span>
+<span class="w">            </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">default</span>::<span class="n">parse_plain_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">),</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">impl</span><span class="w"> </span><span class="n">Element</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">HtmlAnchorElement</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">impl</span><span class="w"> </span><span class="n">Activatable</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">HtmlAnchorElement</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="c1">// HtmlImageElement ////////////////////////////////////////////////////////////</span>
+
+<span class="k">struct</span> <span class="nc">HtmlImageElement</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">url</span>: <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Url</span><span class="o">&gt;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">image</span>: <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Arc</span><span class="o">&lt;</span><span class="n">Image</span><span class="o">&gt;&gt;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// moar fields</span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">impl</span><span class="w"> </span><span class="n">Node</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">HtmlImageElement</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">parse_plain_attribute</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span>: <span class="kp">&amp;</span><span class="nc">Atom</span><span class="p">,</span><span class="w"> </span><span class="n">value</span>: <span class="nc">DOMString</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">AttrValue</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">match</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="o">&amp;</span><span class="n">atom</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">AttrValue</span>::<span class="n">from_atomic</span><span class="p">(</span><span class="n">value</span><span class="p">),</span><span class="w"></span>
+<span class="w">            </span><span class="o">&amp;</span><span class="n">atom</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;width&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="o">&amp;</span><span class="n">atom</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;height&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"></span>
+<span class="w">            </span><span class="o">&amp;</span><span class="n">atom</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;hspace&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="o">&amp;</span><span class="n">atom</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;vspace&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">AttrValue</span>::<span class="n">from_u32</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span><span class="w"></span>
+<span class="w">            </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">default</span>::<span class="n">parse_plain_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">),</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">impl</span><span class="w"> </span><span class="n">Element</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">HtmlImageElement</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>This example is following a basic pattern:</p>
+
+<p><strong>&ldquo;Abstract base classes&rdquo; turn into traits</strong>.</p>
+
+<ul>
+<li><p>Their virtual methods become methods in the traits (e.g. <code>parse_plain_attribute</code>).</p>
+
+<ul>
+<li>They will be virtually dispatched when using trait objects, and statically
+dispatched when used directly on a type implementing the trait (as usual).
+In practice that means that after the first virtual call, additional calls
+on <code>self</code> are statically-dispatched.</li>
+</ul></li>
+<li><p>Their non-virtual methods become inherent methods for the trait, DST style
+(e.g. <code>is_parent_of</code>). These are always statically-dispatched. (Note: it may
+be preferable to write these as extension traits with blanket impls, to gain
+further static dispatch through monomorphization, at a cost in code size.)</p></li>
+<li><p>Default implementations of methods can be done via &hellip; defaulted methods!</p></li>
+</ul>
+
+<p><strong>&ldquo;Concrete classes&rdquo; turn into structs.</strong></p>
+
+<ul>
+<li><p>The structs implement all of the traits for the abstract base classes above them.</p></li>
+<li><p>In this case, &ldquo;overriding&rdquo; generally just means supplying an impl when a
+default was available.</p></li>
+</ul>
+
+<p><strong>Methods can be overridden at any point in the hierarchy.</strong></p>
+
+<ul>
+<li><p>This is done via a blanket (partial) impl, like <code>partial impl&lt;T: Element&gt; Node for T</code>.</p></li>
+<li><p>When one abstract base class overrides its parent, it generally uses
+<code>partial impl</code>. This is because there are usually still some &ldquo;abstract&rdquo; aka
+&ldquo;pure virtual&rdquo; methods for the parent (which are just required methods on
+the trait).</p></li>
+<li><p>If further overriding should be allowed, these (partial) impls should use
+<code>default</code>.</p>
+
+<ul>
+<li>For example, the <code>as_activatable</code> method is overridden for <code>T:
+Activatable</code> with a &ldquo;final&rdquo; version that cannot be further overridden.</li>
+</ul></li>
+</ul>
+
+<p>And that&rsquo;s it. This entire vision of OO-ish programming rests on using the
+existing system of dynamic dispatch through traits, and gets reuse/inheritance
+via specialization.</p>
+
+<p>Let&rsquo;s take stock of the design constraints:</p>
+
+<ul>
+<li>cheap field access from internal methods;
+
+<ul>
+<li><strong>No</strong>: traits have no way to talk about fields directly, and
+accessors require virtual dispatch (much more expensive than a fixed offset).</li>
+</ul></li>
+<li>cheap dynamic dispatch of methods;
+
+<ul>
+<li><strong>Yes</strong>: covered via the trait system.</li>
+</ul></li>
+<li>cheap downcasting;
+
+<ul>
+<li><strong>Sort of</strong>: see the <code>as_activatable</code> pattern. But not as fast as a type tag
+check. (The latter can be encoded if we have fields, however.)</li>
+</ul></li>
+<li>thin pointers;
+
+<ul>
+<li><strong>No</strong>: trait objects use fat pointers.</li>
+</ul></li>
+<li>sharing of fields and methods between definitions;
+
+<ul>
+<li><strong>Yes</strong> for methods (via specialization), <strong>No</strong> for fields.</li>
+</ul></li>
+<li>safe, i.e., doesn&rsquo;t require a bunch of transmutes or other unsafe code to be usable;
+
+<ul>
+<li><strong>Yes</strong>.</li>
+</ul></li>
+<li>syntactically lightweight or implicit upcasting;
+
+<ul>
+<li><strong>Yes</strong>, once we have it for super-traits in general (an already-slated,
+highly desired, simple feature).</li>
+</ul></li>
+<li>calling functions through smart pointers, e.g. <code>fn foo(JSRef&lt;T&gt;, ...)</code>;
+
+<ul>
+<li><strong>Yes</strong>, via existing coercion/Deref mechanisms.</li>
+</ul></li>
+<li>static dispatch of methods;
+
+<ul>
+<li><strong>Yes</strong>, as discussed avove.</li>
+</ul></li>
+<li>reusable constructor code at every level of the hierarchy;
+
+<ul>
+<li><strong>No</strong>, because fields are not addressed.</li>
+</ul></li>
+<li>fits well into the language, either by smoothly extending existing features,
+or by adding orthogonal concepts.
+
+<ul>
+<li><strong>Yes</strong>: we didn&rsquo;t have to add anything beyond specialization (which we&rsquo;re
+taking for granted here).</li>
+</ul></li>
+</ul>
+
+<p>So, we essentially met all but two requirements: thin pointers, and field
+access/inheritance. What&rsquo;s the simplest way we could accommodate those?</p>
+
+<h3 id="thin-pointers">Thin pointers</h3>
+
+<p>Recall that today, trait objects are &ldquo;fat pointers&rdquo;: a pointer to some data, and
+a pointer to a vtable containing methods for operating on that data.</p>
+
+<p>This representation is not an arbitrary choice. It goes hand-in-hand with an
+important aspect of traits: you can implement a new trait for an already-defined
+type. This makes traits quite unlike interfaces in languages like Java, C#, or
+Scala, which have to be applied when you define a type. Traits are flexible bits
+of glue that can be applied after the fact. But the tradeoff is that the vtable
+cannot be part of the <code>Self</code> type, at least not if you want separate
+compilation. After all, the crate defining a <code>struct</code> simply <em>does not know</em>
+what traits might eventually be applied.</p>
+
+<p>On the other hand, these fat pointers have a drawback: space overhead. In
+particular, if you have a dense graph of trait objects that are pointing to each
+other, <em>each pointer&rsquo;s size is doubled</em>, but the information being stored is
+often redundant (and the relevant traits are often implemented up front). For
+serious object graphs, this is a non-starter.</p>
+
+<p>In Rust, when faced with representation tradeoffs, we have a simple tool: the
+<code>repr</code> attribute. So we can address the desire for thin pointers to traits by
+introducing <code>#[repr(thin)]</code>:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="cp">#[repr(thin)]</span><span class="w"></span>
+<span class="k">trait</span><span class="w"> </span><span class="n">MyThinTrait</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">doit</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">struct</span> <span class="nc">MyType</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">impl</span><span class="w"> </span><span class="n">MyThinTrait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">MyType</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">doit</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* ... */</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">fn</span> <span class="nf">take_thin</span><span class="p">(</span><span class="n">t</span>: <span class="kp">&amp;</span><span class="nc">MyThinTrait</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">t</span><span class="p">.</span><span class="n">doit</span><span class="p">()</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>Applying <code>#[repr(thin)]</code> to a trait like <code>MyThinTrait</code> has a few implications:</p>
+
+<ul>
+<li><p>The representation of types like <code>&amp;MyThinTrait</code> (used in <code>take_thin</code>) is a
+single pointer, which points to a vtable followed by the data.</p></li>
+<li><p>You can only implement a thin trait for types you define in your crate.</p></li>
+<li><p>If you implement multiple thin traits for a given type, they must form a
+hierarchy. That ensures consistent layout of the vtable.</p></li>
+</ul>
+
+<p>Thin traits are a useful representation for Rust to offer regardless of any
+notion of &ldquo;inheritance&rdquo;.</p>
+
+<h3 id="incorporating-fields">Incorporating fields</h3>
+
+<p>Now all that&rsquo;s left to handle is fields. To get maximal performance, we need
+some way for a trait to require that <code>Self</code> provides specific fields at
+<em>statically-known locations</em> (which is true for genuine inheritance hierarchies
+as one gets in languages like C++). In particular, accessing such fields through
+a trait is no more expensive than accessing them directly through a known
+struct: you just load the offset. But unlike a full struct definition, this only
+requires the existence of a specific field at a specific location; it doesn&rsquo;t
+constrain other fields that might be available.</p>
+
+<p>(<em>Note</em>: it may also be desirable to support fields in traits at dynamic
+offsets, which is still faster than a full dynamic dispatch, but that&rsquo;s distinct
+from the requirements set out at the beginning of the post.)</p>
+
+<p>In addition, it would be ideal if field definitions only have to be mentioned
+once, not repeated in every trait and struct definition that is talking about them.</p>
+
+<p>There are likely a lot of ways we could accomplish these goals, but I&rsquo;ll
+highlight a few promising ones, in order of increasing complexity: struct
+composition, struct inheritance, and trait fields.</p>
+
+<h4 id="struct-composition">Struct composition</h4>
+
+<p>There&rsquo;s a very simple way, in today&rsquo;s Rust, for one struct to contain all of the
+information of another struct: simply include the other struct as a field!</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">struct</span> <span class="nc">NodeFields</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">event_target</span>: <span class="nc">EventTarget</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">parent_node</span>: <span class="nc">Arc</span><span class="o">&lt;</span><span class="n">Node</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Note: this refers to the Node *trait*! see below.</span>
+<span class="w">    </span><span class="n">first_child</span>: <span class="nc">Arc</span><span class="o">&lt;</span><span class="n">Node</span><span class="o">&gt;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">last_child</span>: <span class="nc">Arc</span><span class="o">&lt;</span><span class="n">Node</span><span class="o">&gt;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">next_sibling</span>: <span class="nc">Arc</span><span class="o">&lt;</span><span class="n">Node</span><span class="o">&gt;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">prev_sibling</span>: <span class="nc">Arc</span><span class="o">&lt;</span><span class="n">Node</span><span class="o">&gt;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">struct</span> <span class="nc">ElementFields</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">node_fields</span>: <span class="nc">NodeFields</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">local_name</span>: <span class="nc">Atom</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">namespace</span>: <span class="nc">Namespace</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>In this example, <code>Element</code> &ldquo;inherits&rdquo; the fields of <code>Node</code> simply by embedding
+them. This approach also neatly solves the problem of reusing constructors
+across the hierarchy: a <code>Node</code> here is already a partly-constructed <code>Element</code>.</p>
+
+<p>So the remaining question is how to gain access to these fields in a
+trait. Here&rsquo;s one possibility:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">trait</span><span class="w"> </span><span class="n">Node</span>: <span class="nc">NodeFields</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* ... */</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="k">trait</span><span class="w"> </span><span class="n">Element</span>: <span class="nc">Node</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">ElementFields</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* ... */</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>The idea is that a trait can list any number of super-structs (including
+indirectly through super-traits), so long as those structs form a <em>composition
+hierarchy</em>: they must form a chain where each struct contains a leading field
+whose type is the next struct (like with <code>ElementFields</code> and <code>NodeFields</code>
+above). The chain then ends in the <code>Self</code> type implementing the trait.</p>
+
+<p>So, to complete the DOM example, we&rsquo;d have:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">struct</span> <span class="nc">HtmlAnchorElement</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">element_fields</span>: <span class="nc">ElementFields</span><span class="p">,</span><span class="w"> </span><span class="c1">// internally, contains a leading NodeFields</span>
+<span class="w">    </span><span class="n">rel_list</span>: <span class="nc">DomTokenList</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// moar fields</span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">impl</span><span class="w"> </span><span class="n">Node</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">HtmlAnchorElement</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* ... */</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="k">impl</span><span class="w"> </span><span class="n">Element</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">HtmlAnchorElement</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* ... */</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>When the trait is in scope, it allows direct access to the fields as if they had
+been flattened into the struct:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">fn</span> <span class="nf">parent_node_via_element</span><span class="p">(</span><span class="n">e</span>: <span class="kp">&amp;</span><span class="nc">Element</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">Arc</span><span class="o">&lt;</span><span class="n">node</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">e</span><span class="p">.</span><span class="n">parent_node</span><span class="p">.</span><span class="n">clone</span><span class="p">()</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>(A more verbose alternative might be some UFCS-style <code>&lt;self as
+NodeFields&gt;::parent_node.clone()</code>.)</p>
+
+<p>Of course, this proposal assumes that structs beginning with the same leading
+field always lay that field out in the same way &ndash; in particular, this rules out
+reordering of the field. If we don&rsquo;t want to make such a guarantee, we could
+limit use of struct bounds to thin traits. Since thin traits are implemented for
+structs in the same crate defining those structs, they can impose additional
+representation constraints.</p>
+
+<h4 id="struct-inheritance">Struct inheritance</h4>
+
+<p>The above struct composition approach is, in some ways, pretty simple. It builds
+directly on current patterns for building hierarchies of structs. But it is
+perhaps <em>too</em> targeted and narrow.</p>
+
+<p>A more expansive alternative is explicit struct inheritance. The basic idea here
+is very simple:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">struct</span> <span class="nc">NodeFields</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">event_target</span>: <span class="nc">EventTarget</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">parent_node</span>: <span class="nc">Arc</span><span class="o">&lt;</span><span class="n">Node</span><span class="o">&gt;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="c1">// implicitly contains all of NodeFields fields</span>
+<span class="k">struct</span> <span class="nc">ElementFields</span>: <span class="nc">NodeFields</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">local_name</span>: <span class="nc">Atom</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">namespace</span>: <span class="nc">Namespace</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>The initializer sytax for child structs would then permit either providing all
+field explicitly, or extending from an instance of the parent structure:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="c1">// Style 1: all fields</span>
+<span class="kd">let</span><span class="w"> </span><span class="n">e1</span>: <span class="nc">ElementFields</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ElementFields</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">event_target</span>: <span class="cm">/* ... */</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">parent_node</span>: <span class="cm">/* ... */</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// more NodeFields fields</span>
+<span class="w">    </span><span class="n">local_name</span>: <span class="cm">/* ... */</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">namespace</span>: <span class="cm">/* ... */</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// more ElementFields fields</span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="c1">// Style 2: using parent struct</span>
+<span class="kd">let</span><span class="w"> </span><span class="n">n</span>: <span class="nc">NodeFields</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">NodeFields</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">event_target</span>: <span class="cm">/* ... */</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">parent_node</span>: <span class="cm">/* ... */</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// more NodeFields fields</span>
+<span class="p">};</span><span class="w"></span>
+<span class="kd">let</span><span class="w"> </span><span class="n">e2</span>: <span class="nc">ElementFields</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ElementFields</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">local_name</span>: <span class="cm">/* ... */</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">namespace</span>: <span class="cm">/* ... */</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// more ElementFields fields</span>
+<span class="w">    </span><span class="p">..</span><span class="n">n</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+</code></pre></div>
+<p>This covers the need for constructors at each level of the hierarchy. But what
+about hooking into traits?</p>
+
+<p>With struct inheritance, we can treat structs <em>in general</em> as something you can write in a bound, e.g.:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">fn</span> <span class="nf">take_node_descendant</span><span class="o">&lt;</span><span class="n">T</span>: <span class="nc">NodeFields</span><span class="o">&gt;</span><span class="p">(</span><span class="n">t</span>: <span class="kp">&amp;</span><span class="nc">T</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">Arc</span><span class="o">&lt;</span><span class="n">Node</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">t</span><span class="p">.</span><span class="n">parent_node</span><span class="p">.</span><span class="n">clone</span><span class="p">()</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="c1">// same as writing `trait Node where Self: NodeFields`</span>
+<span class="k">trait</span><span class="w"> </span><span class="n">Node</span>: <span class="nc">NodeFields</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* ... */</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>In all cases, using a struct as a bound like <code>T: NodeFields</code> means that <code>T</code>
+<em>must inherit from</em> <code>NodeFields</code>. For traits, that would immediately give you
+access to the fields, and would impose the fixed static offset requirement
+(giving maximal performance when accessing those fields). That is, given the
+definition of <code>Node</code> above, if we have <code>n: &amp;Node</code>, we could write
+<code>n.parent_node</code> and that would compile as if we had <code>n: NodeFields</code> instead.
+Because inheritance is explicit at the point of struct definition, we don&rsquo;t have
+the layout worries we had with struct composition; we can lay out child structs
+so that their parents are always consistent prefixes.</p>
+
+<p>It&rsquo;s plausible that struct inheritance is generally useful outside of OO-like
+hierarchies; certainly it avoids long chains like
+<code>my_struct.parent1.parent2.actual_field</code> one gets when using struct composition
+at scale, although the previous proposal does that as well.</p>
+
+<blockquote>
+<p>While it&rsquo;s not necessary to address our goals here, you could also imagine
+adding coercions from <code>&amp;ElementFields</code> to <code>&amp;NodeFields</code>.</p>
+</blockquote>
+
+<h4 id="trait-fields">Trait fields</h4>
+
+<p>Finally, we could imagine instead adding fields directly to traits:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">trait</span><span class="w"> </span><span class="n">Node</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">parent_node</span>: <span class="nc">Arc</span><span class="o">&lt;</span><span class="n">Node</span><span class="o">&gt;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>This raises a few questions:</p>
+
+<ul>
+<li>What do you have to say in an <code>impl</code>?</li>
+<li>Can the fields be hooked up arbitrarily to <code>Self</code>, or must they form a prefix?</li>
+<li>Can you avoid writing out copies of the field definitions in every struct in
+the hierarchy?</li>
+</ul>
+
+<p>There are many ways we might answer these questions, and I won&rsquo;t try to fully
+explore the space here. But a simple option is to say that the fields must form
+a prefix of the fields of <code>Self</code>, and you don&rsquo;t have to say anything in an
+impl. Furthermore, if you write:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">struct</span> <span class="nc">HtmlAnchorElement</span>: <span class="nc">Element</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">rel_list</span>: <span class="nc">DomTokenList</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// moar fields</span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>you automatically include the fields mentioned in the <code>Element</code> trait (including
+those from its super-trait <code>Node</code>) as leading fields in the struct.</p>
+
+<p>If we furthermore want to provide reusable constructors at every level of the
+hierarchy, we have to <em>also</em> include some way of naming these intermediate
+structs and using them in initaializers, e.g.:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="kd">let</span><span class="w"> </span><span class="n">n</span>: <span class="nc">Node</span>::<span class="k">struct</span> <span class="o">=</span><span class="w"> </span><span class="n">Node</span>::<span class="k">struct</span> <span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">event_target</span>: <span class="cm">/* ... */</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">parent_node</span>: <span class="cm">/* ... */</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// more Node fields</span>
+<span class="p">};</span><span class="w"></span>
+<span class="kd">let</span><span class="w"> </span><span class="n">e</span>: <span class="nc">Element</span>::<span class="k">struct</span> <span class="o">=</span><span class="w"> </span><span class="n">Element</span>::<span class="k">struct</span> <span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">local_name</span>: <span class="cm">/* ... */</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">namespace</span>: <span class="cm">/* ... */</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// more Element fields</span>
+<span class="w">    </span><span class="p">..</span><span class="n">n</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+<span class="kd">let</span><span class="w"> </span><span class="n">h</span>: <span class="nc">HtmlAnchorElement</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">HtmlAnchorElement</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">rel_list</span>: <span class="cm">/* ... */</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// more HtmlAnchorElement fields</span>
+<span class="w">    </span><span class="p">..</span><span class="n">e</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>The main advantage of this approach over the previous ones is that you avoid the
+need to explicitly name structs corresponding to &ldquo;abstract base classes&rdquo; (like
+<code>NodeFields</code> and <code>ElementFields</code>); instead, these are implicit via the
+<code>::struct</code> associated type. But there remain questions about using this syntax
+more flexibly, for mapping trait fields in more arbitrary ways to struct fields,
+without giving up performance in the fixed-offset case.</p>
+
+<p>A downside is the question of <em>visibility</em>: currently all items in a trait are
+considered public, but this is not necessarily desirable for fields, so we&rsquo;d
+likely need some way to express visibility choices. Fitting that into the
+existing syntax is not going to be easy. Whereas with struct composition or
+inheritance, it just &ldquo;falls out&rdquo; of the struct definitions.</p>
+
+<h2 id="ending-2-the-enum-based-approach">Ending 2: the enum-based approach</h2>
+
+<p>Whew! So all of the proposals we just saw took traits as the sole source of
+dynamic dispatch and tried to close remaining gaps through slight enrichments of
+traits and structs.</p>
+
+<p>A radically different approach takes the perspective that Rust already has <em>two</em>
+forms of dynamic dispatch today &ndash; traits and <em>match expressions</em> &ndash;
+corresponding to &ldquo;open&rdquo; (extensible) and closed sets of types respectively.</p>
+
+<p>Niko Matsakis outlined a substantial expansion to enums in
+<a href="http://smallcultfollowing.com/babysteps/blog/2015/08/20/virtual-structs-part-3-bringing-enums-and-structs-together/">his recent post</a>,
+which is part of the original design he, Nick Cameron, and I had been working
+on. The missing piece in that post is how to tie it together with specialization
+and thereby get something more like inheritance.</p>
+
+<p>I won&rsquo;t recap the whole proposal here (it&rsquo;s worth a read in full!), but in short
+it makes enums into full-blown hierarchies, defining types at every level (and
+structs at the leaves):</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">enum</span> <span class="nc">Node</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="c1">// where this node is positioned after layout</span>
+<span class="w">  </span><span class="n">position</span>: <span class="nc">Rectangle</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="p">...</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">enum</span> <span class="nc">Element</span>: <span class="nc">Node</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="p">...</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">struct</span> <span class="nc">TextElement</span>: <span class="nc">Element</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="p">...</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">struct</span> <span class="nc">ParagraphElement</span>: <span class="nc">Element</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="p">...</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="p">...</span><span class="w"></span>
+</code></pre></div>
+<p>Given such a hierarchy, you can write:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">fn</span> <span class="nf">takes_any_node</span><span class="o">&lt;</span><span class="n">T</span>: <span class="nc">Node</span><span class="o">&gt;</span><span class="p">(</span><span class="n">n</span>: <span class="kp">&amp;</span><span class="nc">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>That is, you can use an enum as a <em>bound</em>, which stands for &ldquo;any type under this
+point in the hierarchy&rdquo;, but will be statically resolved via monomorphization.</p>
+
+<p>This immediately opens the door to specialization for reuse:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">trait</span><span class="w"> </span><span class="n">ParsePlainAttribute</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">parse_plain_attribute</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span>: <span class="kp">&amp;</span><span class="nc">Atom</span><span class="p">,</span><span class="w"> </span><span class="n">value</span>: <span class="nc">DomString</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">AttrValue</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span>: <span class="nc">Node</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ParsePlainAttribute</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">default</span> <span class="k">fn</span><span class="w"> </span><span class="n">parse_plain_attribute</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span>: <span class="kp">&amp;</span><span class="nc">Atom</span><span class="p">,</span><span class="w"> </span><span class="n">value</span>: <span class="nc">DomString</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">AttrValue</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">AttrValue</span>::<span class="nb">String</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span>: <span class="nc">Element</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ParsePlainAttribute</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">default</span> <span class="k">fn</span><span class="w"> </span><span class="n">parse_plain_attribute</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span>: <span class="kp">&amp;</span><span class="nc">Atom</span><span class="p">,</span><span class="w"> </span><span class="n">value</span>: <span class="nc">DomString</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">AttrValue</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">match</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="o">&amp;</span><span class="n">atom</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">AttrValue</span>::<span class="n">from_atomic</span><span class="p">(</span><span class="n">value</span><span class="p">),</span><span class="w"></span>
+<span class="w">            </span><span class="o">&amp;</span><span class="n">atom</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;class&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">AttrValue</span>::<span class="n">from_serialized_tokenlist</span><span class="p">(</span><span class="n">value</span><span class="p">),</span><span class="w"></span>
+<span class="w">            </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">default</span>::<span class="n">parse_plain_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">),</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">impl</span><span class="w"> </span><span class="n">ParsePlainAttribute</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">HtmlAnchorElement</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">parse_plain_attribute</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span>: <span class="kp">&amp;</span><span class="nc">Atom</span><span class="p">,</span><span class="w"> </span><span class="n">value</span>: <span class="nc">DOMString</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">AttrValue</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">match</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="o">&amp;</span><span class="n">atom</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;rel&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">AttrValue</span>::<span class="n">from_serialized_tokenlist</span><span class="p">(</span><span class="n">value</span><span class="p">),</span><span class="w"></span>
+<span class="w">            </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">default</span>::<span class="n">parse_plain_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">),</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>This pattern of specialization, trying to match the example at the beginning of
+the post, <em>almost</em> works: if you call <code>parse_plain_attribute</code> on an
+<code>HtmlAnchorElement</code>, you&rsquo;ll get the correct behavior.</p>
+
+<p>But if you&rsquo;ve upcasted to an <code>Element</code> or <code>Node</code>, <em>the behavior will revert to
+the defaults for those types</em>! That&rsquo;s because you&rsquo;re not getting dynamic
+dispatch here, which for enums we said should go through <code>match</code>.</p>
+
+<p>The solution is to instead write the code as follows:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="k">impl</span><span class="w"> </span><span class="n">ParsePlainAttribute</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">Node</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">default</span> <span class="k">fn</span><span class="w"> </span><span class="n">parse_plain_attribute</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span>: <span class="kp">&amp;</span><span class="nc">Atom</span><span class="p">,</span><span class="w"> </span><span class="n">value</span>: <span class="nc">DomString</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">AttrValue</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">AttrValue</span>::<span class="nb">String</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">impl</span><span class="w"> </span><span class="n">ParsePlainAttribute</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">Element</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">default</span> <span class="k">fn</span><span class="w"> </span><span class="n">parse_plain_attribute</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span>: <span class="kp">&amp;</span><span class="nc">Atom</span><span class="p">,</span><span class="w"> </span><span class="n">value</span>: <span class="nc">DomString</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">AttrValue</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">match</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="o">&amp;</span><span class="n">atom</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">AttrValue</span>::<span class="n">from_atomic</span><span class="p">(</span><span class="n">value</span><span class="p">),</span><span class="w"></span>
+<span class="w">            </span><span class="o">&amp;</span><span class="n">atom</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;class&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">AttrValue</span>::<span class="n">from_serialized_tokenlist</span><span class="p">(</span><span class="n">value</span><span class="p">),</span><span class="w"></span>
+<span class="w">            </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">default</span>::<span class="n">parse_plain_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">),</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">impl</span><span class="w"> </span><span class="n">ParsePlainAttribute</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">HtmlAnchorElement</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">parse_plain_attribute</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span>: <span class="kp">&amp;</span><span class="nc">Atom</span><span class="p">,</span><span class="w"> </span><span class="n">value</span>: <span class="nc">DOMString</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">AttrValue</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">match</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="o">&amp;</span><span class="n">atom</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;rel&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">AttrValue</span>::<span class="n">from_serialized_tokenlist</span><span class="p">(</span><span class="n">value</span><span class="p">),</span><span class="w"></span>
+<span class="w">            </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">default</span>::<span class="n">parse_plain_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">),</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>Note that we&rsquo;re now using specialization <em>without any explicit blanket
+impls</em>. In this proposal, when the <code>Self</code> type is an enum, it&rsquo;s <em>as if</em> you had
+written a blanket impl like the ones above, except that when the function is
+invoked on the enum type, it will use a <code>match</code> to dispatch to most specialized
+implementation. That is, it&rsquo;s as if we&rsquo;d written the following for <code>Node</code>:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span></span><span class="c1">// Fully generic *default* impl</span>
+<span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span>: <span class="nc">Node</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ParsePlainAttribute</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">default</span> <span class="k">fn</span><span class="w"> </span><span class="n">parse_plain_attribute</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span>: <span class="kp">&amp;</span><span class="nc">Atom</span><span class="p">,</span><span class="w"> </span><span class="n">value</span>: <span class="nc">DomString</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">AttrValue</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">AttrValue</span>::<span class="nb">String</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="c1">// Specialized impl for the `Node` type itself</span>
+<span class="k">impl</span><span class="w"> </span><span class="n">ParsePlainAttribute</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">Node</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">parse_plain_attribute</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span>: <span class="kp">&amp;</span><span class="nc">Atom</span><span class="p">,</span><span class="w"> </span><span class="n">value</span>: <span class="nc">DomString</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">AttrValue</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">match</span><span class="w"> </span><span class="o">*</span><span class="bp">self</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="c1">// NOTE: `this` has a different type in each arm!</span>
+<span class="w">            </span><span class="k">ref</span><span class="w"> </span><span class="n">this</span><span class="o">@</span><span class="n">Node</span>::<span class="n">HtmlAnchorElement</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">this</span><span class="p">.</span><span class="n">parse_plain_attribute</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">),</span><span class="w"></span>
+<span class="w">            </span><span class="k">ref</span><span class="w"> </span><span class="n">this</span><span class="o">@</span><span class="n">Node</span>::<span class="n">HtmlImageElement</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">this</span><span class="p">.</span><span class="n">parse_plain_attribute</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">),</span><span class="w"></span>
+<span class="w">            </span><span class="c1">// ...</span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>And of course:</p>
+
+<ul>
+<li>It&rsquo;s nicer to write the impls directly against the enum type than using an explicit blanket;</li>
+<li>This is also almost certainly the behavior you wanted anyway: you always get
+the most specific impl, whether dynamically or statically dispatched.</li>
+</ul>
+
+<p>But the desugaring <em>only</em> triggers when <code>Self</code> is a direct enum type.</p>
+
+<h2 id="getting-opinionated">Getting opinionated</h2>
+
+<p>If you&rsquo;ve stuck with me until this point, first of all: thanks! That was a long
+haul.</p>
+
+<p>So, what should we do? To recap, we have two major routes, both of which start
+with specialization.</p>
+
+<ul>
+<li><p>The first takes a minimalistic approach, adding a couple of minor
+(and independently motivated) features to traits and structs to get to
+our goal. There are a few options for dealing with fields, in
+particular.</p></li>
+<li><p>The second combines specialization with another major set of enhancements to
+enums, which are also independently motivated, but are much more complex. It
+then adds a bit of sugar on top to tie the two together.</p></li>
+</ul>
+
+<p>The trait approach allows for open-ended hierarchies (extensible by downstream
+crates), while the enum approach is closed. On the flip side, that means that
+downcasting can be somewhat more awkward (and is a code smell) for the trait
+approach, while it&rsquo;s completely natural (just a <code>match</code>) for the enum approach.</p>
+
+<p>Initially, I was very excited about the latter, enum-centric approach, because
+the work on enum hierarchies seems like such a natural extension to Rust. But I
+am worried about a few things. First of all, getting the proposal that Niko laid
+out to work will require substantially reworking our type inference to account
+for subtyping. Making this happen <em>backwards-compatibly</em> with our existing enums
+is not going to be easy, and may not even be possible. It also makes subtyping
+much more important in Rust, which is likely to be a <em>complexity multiplier</em> as
+it interacts with every other aspect of the type system.  There are also various
+dark syntactic corners that come out of the partial unification of enums and
+structs (e.g., how do you specify visibility of shared fields in an in-line
+enum?)  Finally, the key bit of sugar at the apex that ties enum hierarchies and
+specialization together is a bit subtle, and only covers the most obvious cases
+of <code>Self</code>.</p>
+
+<p>In short, I see a lot of known risks, and worry about unknown risks, with the
+enum hierarchy route.</p>
+
+<p>In contrast, the struct/trait-centric proposals feel much less risky; they don&rsquo;t
+introduce fundamental new complexity that interacts with the rest of the type
+system, and they have a smaller overall footprint. I also like the way that
+specialization is used very explicitly to get inheritance, rather than through
+a layer of sugar on top.</p>
+
+<p>And of the struct proposals, I think that struct inheritance strikes the best
+balance between minimalism, flexibility, and &ldquo;fit&rdquo; with the existing language.</p>
+
+<p>The main downside of my preferred struct/trait approach is that there&rsquo;s some
+amount of boilerplate: &ldquo;abstract base classes&rdquo; like <code>Node</code> turn into a <code>Node</code>
+trait and a <code>NodeFields</code> struct. That detail could easily be hidden behind a
+macro, but it might also argue in favor of the more complex traits-with-fields
+variant.</p>
+
+<p>(I should mention: it&rsquo;s possible that in the long run, we&rsquo;ll want subtyping and
+not just coercions with any approach we take. But still, enum hierarchies want
+this to happen for our existing enums in a way that may require breakage.)</p>
+
+<p>If we <em>do</em> go with a struct/trait approach, I think we should carefully check
+that the design is compatible with a future expansion of enums along the lines
+Niko laid out in his post, since we may still want enum hierarchies in the long
+run. I&rsquo;ve given this a fair amount of thought, and likewise think that struct
+inheritance is the best fit. In particular, it could replace the somewhat
+magical proposal for &ldquo;common fields&rdquo; (which included an associated
+<code>MyEnum::struct</code> type).</p>
+
+</article>
+
+
+<aside class="related">
+  <h2>Related Posts</h2>
+  <ul class="related-posts">
+    
+      <li>
+        <h3>
+          <a href="/blog/2018/01/16/libs-mission/">
+            Retooling the Rust Libs Team team for 2018
+            <small><time datetime="2018-01-16T00:00:00-08:00">16 Jan 2018</time></small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/blog/2018/01/09/rust-2018/">
+            Rust in 2018: a people perspective
+            <small><time datetime="2018-01-09T00:00:00-08:00">09 Jan 2018</time></small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/blog/2017/08/02/modules-part-2/">
+            Revisiting Rust’s modules, part 2
+            <small><time datetime="2017-08-02T00:00:00-07:00">02 Aug 2017</time></small>
+          </a>
+        </h3>
+      </li>
+    
+  </ul>
+</aside>
+
+
+      </main>
+
+      <footer class="footer">
+        <small>
+          &copy; <time datetime="2018-01-16T16:56:58-08:00">2018</time>. All rights reserved.
+        </small>
+      </footer>
+    </div>
+
+  </body>
+</html>

@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="UTF-8">
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>
+    
+      Refining Rust's RFCs &middot; Aaron Turon
+    
+  </title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/blog/styles.css">
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/blog/public/apple-touch-icon-precomposed.png">
+  <link rel="shortcut icon" href="/blog/public/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/atom+xml" title="Aaron Turon" href="/blog/atom.xml">
+</head>
+
+
+  <body>
+
+    <div class="container content">
+      <header class="masthead">
+        <h3 class="masthead-title">
+          <a href="/blog/" title="Home">Aaron Turon</a>
+          <small></small>
+
+          
+          &nbsp;&nbsp;&nbsp;
+          <small><a href="/blog/archive">Archive</a></small>
+          
+          &nbsp;&nbsp;&nbsp;
+          <small><a href="/blog/atom.xml">Feed</a></small>
+          
+        </h3>
+      </header>
+
+      <main>
+        <article class="post">
+  <h1 class="post-title">Refining Rust's RFCs</h1>
+  <time datetime="2016-07-05T00:00:00-07:00" class="post-date">05 Jul 2016</time>
+  <p>At the heart of Rust&rsquo;s open development is the <strong>RFC process</strong>. Every major
+change to the language, compiler, core libraries, tooling, and policy go through
+an RFC writeup and consensus-building process. The process served us incredibly
+well in clarifying our technical direction on the road to 1.0, and has continued
+to be highly active since then, with on average about 2 RFCs merged every week.</p>
+
+<p>But it&rsquo;s not all roses. There&rsquo;s been a growing sense among both Rust leadership
+and the broader community that the RFC process needs some further refinement as
+we continue to grow the community. I want to lay out my view of the problems and
+sketch some possible solutions, based on extensive discussion and brainstorming
+with many others on the team.</p>
+
+<p>Each idea operates at a different scale (from big-picture to low-level
+mechanics), but they are intended to fit together into a whole; each one
+supports the others. Ultimately, these should result in a single RFC, but in the
+meantime I&rsquo;ll start a discuss thread for each proposal.</p>
+
+<p>There is a clear common theme to all of the problems I want to raise:
+<strong>communication</strong>. We need to find ways to better scale up lines of
+communication around the RFC process, and for Rust core development in general.
+There is also a cross-cutting concern: a need to increase our focus
+on <strong>mentoring</strong> and <strong>the path to team membership</strong>. @wycats has a great saying
+about measuring the health of the team structure:</p>
+
+<blockquote>
+<p>Being a very active contributor who is not yet on a subteam should feel very
+close to actually being on that subteam.</p>
+</blockquote>
+
+<p>Shooting for such a state of affairs has many benefits, not least of which
+is increasing the scalability of our community.</p>
+
+<h2 id="proposal-roadmap">Proposal: Roadmap</h2>
+
+<p><a href="https://internals.rust-lang.org/t/refining-rfcs-part-1-roadmap/3656/1">Discuss link</a>.</p>
+
+<h3 id="the-problem">The problem</h3>
+
+<p><strong>Lack of clear rallying points</strong>. One thing that made the run-up to the 1.0
+release so exhilarating was the way the release focused our effort: there was a
+big overarching goal we were all working toward, which led to a number of fairly
+clear-cut subgoals that everyone could pitch in on.</p>
+
+<p>Since then, though, we&rsquo;ve never had quite as clear of a &ldquo;north star&rdquo;. We&rsquo;ve
+communicated some
+<a href="http://blog.rust-lang.org/2015/08/14/Next-year.html">very high-level plans</a>,
+and had success rallying efforts around self-contained projects like
+<a href="http://blog.rust-lang.org/2016/04/19/MIR.html">MIR</a>. But we don&rsquo;t have a
+systematic way of rallying our efforts around important goals on a regular
+basis. This gap is a shame, because there are many people eager to contribute,
+who we should be directing toward common, important goals with good mentoring
+opportunities. Likewise, there are lots of people who could provide useful
+perspective on goals, or even provide leadership on initiatives, who don&rsquo;t have
+an outlet today.</p>
+
+<p>Relatedly, it can be difficult to contribute at the RFC level. Is the problem
+you want to solve a priority for the relevant team or wider community? When it
+comes to the core language, there is only so much design work that can be in
+flight at once (since it all needs to fit together), so <strong>greater clarity on
+priorities and motivations is essential</strong>.</p>
+
+<h3 id="the-proposal">The proposal</h3>
+
+<p><strong>Idea</strong>: publish a <em>roadmap</em> on a regular cadence, e.g. every two release
+  cycles (12 weeks).</p>
+
+<p>The roadmap would contain, at a minimum, a <em>small</em> set of &ldquo;major initiatives&rdquo; for
+that period. An initiative might cover any phase of development, e.g.:</p>
+
+<ul>
+<li><em>Early investigation</em>: For example,
+<a href="http://blog.rust-lang.org/2016/05/13/rustup.html">building out NDK support in rustup</a>
+or exploring implications of various memory model choices.</li>
+<li><em>Design</em>: For example, working out a revised design for <code>rand</code> or const generics.</li>
+<li><em>Implementation</em>: For example, the
+<a href="http://blog.rust-lang.org/2016/04/19/MIR.html">MIR initiative</a> or
+<a href="https://internals.rust-lang.org/t/the-rustbuild-feature-thread/3643/">rustbuild</a>.</li>
+<li><em>Documentation</em>: For example, focused effort on updating API docs in a portion
+of the standard library.</li>
+<li><em>Community</em>: For example, launching
+<a href="https://github.com/rust-community/rustbridge">RustBridge</a>.</li>
+</ul>
+
+<p>And potentially many other categories as well.</p>
+
+<p><strong>Initiatives are intended to be a primary rallying point for the community</strong>,
+  and thus should share some basic traits:</p>
+
+<ul>
+<li><strong>Clear scope</strong>: an initiative should have clear-cut goals that can actually
+be <em>finished</em>. So, an open-ended goal like &ldquo;MIR&rdquo; doesn&rsquo;t fly, but &ldquo;Get
+MIR-trans working on all of crates.io&rdquo; does.</li>
+<li><strong>Timeboxed</strong>: relatedly, an initiative should realistically last at most,
+say, 24 weeks (two roadmaps).</li>
+<li><strong>Commitment</strong>: There should be some level of commitment from multiple people
+to actually work on the initiative. In particular, the initiative should list
+some primary points of contact, and ideally mentors.</li>
+</ul>
+
+<p>Each initiative would have a dedicated status page with this information, links
+to issues or other materials, and potentially a FAQ. We&rsquo;ve often found that
+there are recurring questions (&ldquo;When is MIR going to be turned on by default?&rdquo;)
+about big, ongoing work. The roadmap and status pages give us a highly visible,
+central and curated place to put this information.</p>
+
+<p>The roadmap should be set via an open consensus process in which anyone can
+propose or influence initiatives. The initiatives should fit criteria like those
+listed above, and should also fit into an overall vision for Rust&rsquo;s evolution
+over a longer period.</p>
+
+<p><em>Details to be worked out</em>:</p>
+
+<ul>
+<li>Cadence</li>
+<li>Can initiatives be added mid-stream?</li>
+<li>Full guidelines for initiatives; how many should be in flight at once? Needs
+to be a small number to make this practical and useful (it&rsquo;s a form of
+curation/rallying).</li>
+<li>What is the process for deciding on the initiatives?</li>
+<li>Do we divvy things up by subteam? That would make the discussion easier, but
+doesn&rsquo;t allow for cross-cutting initiatives very easily.</li>
+<li>Can we find less boring terms than &ldquo;Roadmap&rdquo; and &ldquo;Initiative&rdquo;?</li>
+<li>Can we also include the &ldquo;feature pipeline&rdquo; and other long-running concerns
+into a roadmap somehow?</li>
+</ul>
+
+<h2 id="proposal-rfc-staging">Proposal: RFC staging</h2>
+
+<p><a href="https://internals.rust-lang.org/t/refining-rfcs-part-2-rfc-staging/3657/1">Discuss link</a>.</p>
+
+<h3 id="the-problem">The problem</h3>
+
+<p>RFCs are hard to keep up with in part because reading a full design &ndash; and all
+the commentary around it &ndash; can be a lot of work, and there tend to be a large
+number of active RFCs in flight at any time. <strong>RFC discussions are often hard to
+follow, due to the overwhelming number of comments, sometimes stretching over
+multiple forums.</strong> Naturally, this problem is exacerbated by &ldquo;controversial&rdquo;
+RFCs, which is where we most need broad input and careful discussion. It can
+also be hard to track RFCs that are in some sense &ldquo;competing&rdquo; (offering
+alternative proposals for a common problem), or to correlate discussion between
+the discuss forum and github.</p>
+
+<p>It&rsquo;s also problematic to start off with a full proposal. What we really want is
+to get the community on the same page first about the importance of the problem
+being solved, and <em>then</em> to proceed to the design phase, perhaps considering
+multiple competing designs.</p>
+
+<p>Finally, RFCs are sometimes closed as &ldquo;postponed&rdquo;, but ideally that should not
+simply <em>terminate</em> the discussion; instead, the discussion should simply
+continue elsewhere, or somehow be marked as being at a different stage.</p>
+
+<h3 id="the-proposal">The proposal</h3>
+
+<p><strong>Idea</strong>: introduce stages into the RFC process, including one for reaching
+  consensus on <em>motivation</em> prior to considering a design.</p>
+
+<p><strong>Idea</strong>: move the focus away from an RFC PR as the primary venue for RFC
+  discussion.</p>
+
+<p>Put differently, the idea is to orient the RFC process around <em>problems</em> first,
+and solutions second.</p>
+
+<p>The rough phases I have in mind are:</p>
+
+<ol>
+<li>Problem consensus</li>
+<li>RFC drafting</li>
+<li>RFC PR(s)</li>
+<li>FCP</li>
+<li>RFC merged</li>
+</ol>
+
+<p>Concretely, what this would look like is having some venue for tracking the
+problems we might want to solve, perhaps a revamped version of the RFC issue
+tracker. Whatever this venue is, it would track the progression through all of
+the phases. Let&rsquo;s call this venue the &ldquo;Problem Tracker&rdquo;.</p>
+
+<ul>
+<li><p><em>Phase 1: Problem consensus</em>. The initial discussion is essentially about
+<strong>reaching consensus on the motivation section of an RFC</strong>, which should include
+examples and make a compelling case that solving the problem is important enough
+to warrant expending energy and potential complexity. The subteam would sign off
+on that motivation, at which point there is some level of commitment to solve
+the problem. That puts the focus where it should be &ndash; solving problems &ndash; and
+should make it much easier for subteam members to engage early on in the RFC
+lifecycle.</p></li>
+<li><p><em>Phase 2: RFC drafting</em>. This phase can proceed in parallel with the previous
+one. During this phase, people sketch designs and work toward one or more full
+RFC drafts. Brainstorming and discussion on specific drafts would happen
+within dedicated &ldquo;pre-RFC&rdquo; <a href="http://internals.rust-lang.org/">discuss posts</a>,
+which are linked from the Problem Tracker. In particular, newly-opened RFC PRs
+today often get an avalanche of comments and early revisions, making it very
+hard to join the discussion even a week later. Pushing early feedback to our
+forum instead will make the eventual RFC PR discussion more focused and easier
+to participate in.</p></li>
+<li><p><em>Phase 3: RFC PR(s)</em>. At some point, a <em>shepherd</em> (see below) can determine
+that an RFC draft is of sufficiently high quality and steady state that a PR
+should be opened, at which point discussion proceeds as it does
+today. Multiple RFC PRs might be open for the same basic problem &ndash; and
+indeed, this is a good way to take the &ldquo;Alternatives&rdquo; section more
+seriously. All open PRs would be linked from the Problem Tracker.</p></li>
+<li><p>Phases 4 and 5 work just as today.</p></li>
+</ul>
+
+<p>One interesting aspect of this phasing: it&rsquo;s possible to approve a Motivation
+section, then get all the way to RFC PR, only to close out the PR for one reason
+or another. In such cases, it should be possible to go back to the Problem
+Tracker and build a new, alternative RFC draft with the same Motivation section.</p>
+
+<p>Note that, in this regime, you don&rsquo;t ever open an RFC PR out of hand &ndash; it must
+go through the earlier phases, including the pre-RFC discuss post. While this
+may feel like more process, I think that globally it will make the whole thing
+more efficient, by weeding out poorly motivated RFCs earlier, by focusing
+attention on the problem, by producing higher quality RFC PRs, and (as we&rsquo;ll
+see) by decentralizing the process a bit more. In addition, it makes it easier
+to cope with the problem of &ldquo;Does this need an RFC?&rdquo;</p>
+
+<p>As part of this proposal, <strong>I think we should &ldquo;reboot&rdquo; the notion of a
+<em>shepherd</em>.</strong> The idea would be to create a broader network of people around a
+subteam who are empowered to help move the RFC process along in various ways,
+but aren&rsquo;t necessarily responsible for the final decision. So, for example, we
+would have a larger set of &ldquo;lang shepherds&rdquo; who help lang RFCs progress. The
+powers and responsibilities of shepherds would include:</p>
+
+<ul>
+<li><p>&ldquo;Calling to question&rdquo; &ndash; that is, proposing that the subteam move to make a
+decision on problem consensus or moving to FCP.</p></li>
+<li><p>Working with the community to help brainstorm, draft, and revise pre-RFCs.</p></li>
+<li><p>Moving to from pre-RFC to RFC PR phase.</p></li>
+<li><p>Acting as the &ldquo;scribe&rdquo; for the RFC process, by keeping the Problem Tracker up
+to date. In particular, the subteams currently attempt to provide &ldquo;summary&rdquo;
+comments for contentious RFCs, to help people track the discussion. This
+proposal would give those comments more formal status, as something that would
+go directly on the Problem Tracker, and that any shepherd could provide at any
+point.</p></li>
+</ul>
+
+<p>All subteam members can act as shepherds as well.</p>
+
+<p>In general, I envision the Problem Tracker as the go-to place to see where
+things stand for a given problem/set of proposals, including summarization of
+discussion and pros/cons for the proposals. The shepherds would play a special
+role in establishing that official record.</p>
+
+<p>I think these changes make the RFC process both more accessible and more
+scalable. More accessible because it&rsquo;s easier to get involved and get quick
+feedback in lightweight ways (before writing up an entire design). More scalable
+because of increased parallelism, and because the big decision points happen at
+either an easier stage (establishing motivation) or with many fewer proposals in
+flight (the RFC PR stage).</p>
+
+<p><em>Details to be worked out</em>:</p>
+
+<ul>
+<li>What happens to current RFC PRs? Are they grandfathered in, or moved into this
+new process?</li>
+<li>Where does the &ldquo;problem tracker&rdquo; live?</li>
+<li>What are good guidelines around an initial &ldquo;motivation&rdquo;?</li>
+<li>How and where can we keep an &ldquo;official record&rdquo; of the progression of a
+problem, including links to (and summaries of) pre-RFC and RFC PR threads?</li>
+</ul>
+
+<h2 id="proposal-async-decisions">Proposal: Async decisions</h2>
+
+<p><a href="https://internals.rust-lang.org/t/refining-rfcs-part-3-async-decisions/3658/1">Discuss link</a>.</p>
+
+<h3 id="the-problem">The problem</h3>
+
+<p>There is room for improvement around the way that the subteams themselves
+work. Today, subteams reach decisions on RFCs and other issues in (bi)weekly
+meetings. There are at least two problems with doing so. First, since the
+meetings have a limited duration, <strong>we often run out of time without finishing
+the active business, introducing delays</strong>; similarly, because of the high amount
+of RFC activity, <strong>the subteams often operate in &ldquo;reactive&rdquo; mode, more than
+actively leading</strong>.</p>
+
+<p>Another issue is that meetings provide, in some sense, the &ldquo;wrong defaults&rdquo; for
+making decisions. We have to be careful to ensure that all the rationale for a
+decision is present in the online discussion thread, and that any new rationale
+that came up during a meeting means that the decision is delayed, to give the
+full community a chance to respond. The point is that, <strong>while we work hard to
+provide this transparency, it requires that extra work</strong>. At the same time,
+there is often good discussion in meetings wherein the subteam members build up
+a set of shared values &ndash; thereby missing the opportunity to argue for those
+values to the wider community. Finding a way to move decision-making to a more
+public, asynchronous system seems ideal, though meetings <em>do</em> have the benefit
+of providing a steady cadence to ensure that business is getting done.</p>
+
+<h3 id="the-proposal">The proposal</h3>
+
+<p><strong>Idea</strong>: move away from video meetings for decision-making, instead reaching
+  decisions entirely in the associated comment threads.</p>
+
+<p>By moving the decision-making process fully online, we make it transparent by
+default. That is not to say that subteam members &ndash; or anyone else &ndash; will never
+have private conversation, of course. Just that this particular bit of business
+is better conducted online.</p>
+
+<p>The key to making this work is automation. Right now, the meetings provide a
+convenient &ldquo;forcing function&rdquo; to ensure that decisions are being reached in a
+somewhat timely fashion. To ensure that we still make steady progress, we need a
+<em>dashboard</em> for every subteam member, showing them precisely what outstanding
+items they need to weigh in on &ndash; and that list needs to be kept manageably
+short.</p>
+
+<p>We&rsquo;ll need a dashboard tool that can pick up on special text from subteam
+members for:</p>
+
+<ul>
+<li>Calling an RFC/issue into FCP
+
+<ul>
+<li>&ldquo;process: fcp&rdquo;</li>
+</ul></li>
+<li>Approving/disapproving FCP
+
+<ul>
+<li>&ldquo;process: fcp r+&rdquo;</li>
+<li>&ldquo;process: fcp r-&rdquo;</li>
+</ul></li>
+<li>Extending FCP
+
+<ul>
+<li>&ldquo;process: fcp extend&rdquo; (for one more week by default; possibly give parameter?)</li>
+</ul></li>
+<li>Approving stabilization/RFC merging
+
+<ul>
+<li>&ldquo;process: r+&rdquo; (ideally followed up by some commentary)</li>
+</ul></li>
+<li>Weakly objecting
+
+<ul>
+<li>Just leave a comment, followed by a &ldquo;process: r+&rdquo; once you are satisfied
+that the objection is addressed or that it&rsquo;s OK not to address it.</li>
+</ul></li>
+<li>Strongly objecting (i.e. blocking acceptance)
+
+<ul>
+<li>&ldquo;process: r-&rdquo; (followed up with objection)</li>
+</ul></li>
+<li>Abstaining (possibly?)
+
+<ul>
+<li>&ldquo;process: ack&rdquo;</li>
+</ul></li>
+</ul>
+
+<p>The dashboard tool would track the current status of RFCs/issues facing a
+decision, and would track the various timelines involved, e.g. that RFC FCP
+lasts for one week.</p>
+
+<p>We can and should continue to hold video subteam meetings (they&rsquo;re high
+bandwidth!), but for more forward-looking purposes: discussing specific
+early-stage RFCs, brainstorming, and prioritization. We can explore recording
+these meetings, and potentially opening them up to additional stakeholders who
+are not part of the subteam.</p>
+
+<p><em>Details to be worked out</em>:</p>
+
+<ul>
+<li>A plausible story for automation that retains the consensus process and is
+likely to keep things moving.</li>
+<li>Can the automation itself be responsible for moving to FCP/merging? Or at
+least provide a pushbutton way for doing so?</li>
+</ul>
+
+</article>
+
+
+<aside class="related">
+  <h2>Related Posts</h2>
+  <ul class="related-posts">
+    
+      <li>
+        <h3>
+          <a href="/blog/2018/01/16/libs-mission/">
+            Retooling the Rust Libs Team team for 2018
+            <small><time datetime="2018-01-16T00:00:00-08:00">16 Jan 2018</time></small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/blog/2018/01/09/rust-2018/">
+            Rust in 2018: a people perspective
+            <small><time datetime="2018-01-09T00:00:00-08:00">09 Jan 2018</time></small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/blog/2017/08/02/modules-part-2/">
+            Revisiting Rust’s modules, part 2
+            <small><time datetime="2017-08-02T00:00:00-07:00">02 Aug 2017</time></small>
+          </a>
+        </h3>
+      </li>
+    
+  </ul>
+</aside>
+
+
+      </main>
+
+      <footer class="footer">
+        <small>
+          &copy; <time datetime="2018-01-16T16:56:58-08:00">2018</time>. All rights reserved.
+        </small>
+      </footer>
+    </div>
+
+  </body>
+</html>
