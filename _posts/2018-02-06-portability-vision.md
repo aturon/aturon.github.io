@@ -87,7 +87,7 @@ bump" for venturing out of guaranteed mainstream platform portability.
 #### Problems with environment-specific extensions
 
 - The `std::os` module has submodules that correspond to a hierarchy of OS
-  types. Butit's not at all clear how to use the module hierarchy to organize
+  types. But it's not at all clear how to use the module hierarchy to organize
   features like [fixed-size atomic types][more-atomics], where the types
   available vary in a fine-grained way based on the CPU family; [SIMD] is even
   worse. And even the OS story is ultimately not such a simple hierarchy.
