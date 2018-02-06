@@ -112,7 +112,7 @@ following consolidated story:
 - You can use the [portability lint] to check for compatibility with arbitrary
   platform assumptions.
 
-[portability lint](https://github.com/rust-lang/rfcs/pull/1868)
+[portability lint]: https://github.com/rust-lang/rfcs/pull/1868
 
 In short, I propose that we move away from the facade, the `std::os` model, and
 runtime failure, and instead embrace target- and capability-based `cfg`s as the
