@@ -5,7 +5,7 @@ title:  "A vision for portability in Rust"
 
 **TL;DR**: This post proposes to deprecate the `std` facade, instead having a
 unified `std` that uses target- and capability-based `cfg`s to control API
-availability.
+availability. [Leave comments on internals!](https://internals.rust-lang.org/t/a-vision-for-portability-in-rust/6719)
 
 Portability is extremely important for Rust, in two distinct (and sometimes
 competing!) ways:
@@ -170,3 +170,5 @@ I propose that the Rust project spin up a dedicated Portability Working Group
 devoted to this work. The group will need a strong leader who can take a
 holistic, design-focused view of things. If you're interested in leading or
 participating in such a group, please leave a comment on [the internals thread]!
+
+[the internals thread]: https://internals.rust-lang.org/t/a-vision-for-portability-in-rust/6719
