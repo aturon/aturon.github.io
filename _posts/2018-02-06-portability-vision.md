@@ -92,6 +92,9 @@ bump" for venturing out of guaranteed mainstream platform portability.
   available vary in a fine-grained way based on the CPU family; [SIMD] is even
   worse. And even the OS story is ultimately not such a simple hierarchy.
 
+[more-atomics]: https://github.com/rust-lang/rfcs/pull/1543
+[SIMD]: https://github.com/rust-lang/rfcs/pull/1199
+
 - The "speed bump" for using `std::os` is minimal and easy to miss; it's just an
   import that looks the same as any other.
 
