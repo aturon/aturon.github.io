@@ -14,7 +14,7 @@ quick list of *some* of what went down in *one week*:
 - **Breakthrough #2**: @nikomatsakis had a eureka moment and figured out a path
   to make specialization sound, while still supporting its most important use
   cases (blog post forthcoming!). Again, this suddenly puts specialization on
-  the map for Rust Epoch 2018.
+  the map for Rust Epoch 2018. **Update**: the post is [here](http://smallcultfollowing.com/babysteps/blog/2018/02/09/maximally-minimal-specialization-always-applicable-impls/)!
 
 - **Breakthrough #3**: @seanmonstar came up with [a brilliant way to make
   "context arguments" more ergonomic], which lets us make a long-desired
