@@ -8,7 +8,7 @@ quick list of *some* of what went down in *one week*:
 
 - **Breakthrough #1**: @withoutboats and @eddyb tag-teamed to develop a *safe*,
   *library*-based [foundation for borrowing in async blocks]. It's suddenly
-  seaming plausible to ship async/await notation *with borrowing* as part of
+  seeming plausible to ship async/await notation *with borrowing* as part of
   Rust Epoch 2018.
 
 - **Breakthrough #2**: @nikomatsakis had a eureka moment and figured out a path
@@ -17,7 +17,7 @@ quick list of *some* of what went down in *one week*:
   the map for Rust Epoch 2018.
 
 - **Breakthrough #3**: @seanmonstar came up with [a brilliant way to make
-  "context arguments" more ergonomic], which lets us to make a long-desired
+  "context arguments" more ergonomic], which lets us make a long-desired
   change to the futures crate without regressing ergonomics.
 
 - **Tokio reform**: @carllerche shipped the [newly reformed Tokio crate], with a
