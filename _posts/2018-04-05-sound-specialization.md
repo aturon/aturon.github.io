@@ -114,7 +114,7 @@ impl<T: Iterator> SomeTrait for T { .. }
 impl<T: Iterator + TrustedLen> SomeTrait for T { .. }
 ```
 
-According to the definition above, this is only allowed if `SomeTrait` is marked
+According to the definition above, this is only allowed if `TrustedLen` is marked
 with `#[specialization_predicate]`. But nothing prevents there from being impls
 like the following today:
 
