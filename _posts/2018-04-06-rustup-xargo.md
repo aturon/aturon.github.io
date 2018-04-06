@@ -21,7 +21,9 @@ to build a Rust package.
 
 Given all that context, we've talked at various junctures about simply
 integrating *all* of the above functionality into Cargo. We had another such
-discussion at the All Hands, which I'll summarize below.
+discussion at the All Hands, which I'll summarize below. **Note**: as always,
+this summary covers *preliminary* thoughts; all changes will go through the
+usual RFC process.
 
 ## Xargo integration
 
