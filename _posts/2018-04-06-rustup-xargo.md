@@ -36,9 +36,11 @@ since the ability to specify details for the standard library is closely related
 to specifying details about the compiler version and release channel as well.
 
 The upshot, though, is that once we have this integration the concept of
-"target" within Rustup can disappear entirely. Rather than manually installing a
-list of targets per toolchain, Cargo will automatically set up targets as
-needed, either building them or downloading cached binaries when available.
+"target" within *Rustup* can disappear entirely (though, of course, the target
+must be specified at some point in the build process). Rather than manually
+installing a list of targets per toolchain, Cargo will automatically set up
+targets as needed, either building them or downloading cached binaries when
+available.
 
 [std-aware Cargo RFC]: https://github.com/rust-lang/rfcs/pull/1133
 
