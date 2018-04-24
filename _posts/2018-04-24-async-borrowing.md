@@ -5,7 +5,7 @@ title:  "Borrowing in async code"
 
 The
 [networking working group](https://internals.rust-lang.org/t/announcing-the-network-services-working-group-wg-net/7354) is
-pushing hard on async/await notation for Rust, and @withoutbloats in particular
+pushing hard on async/await notation for Rust, and @withoutboats in particular
 wrote a fantastic blog series working through the design space (final
 post [here](https://boats.gitlab.io/blog/post/2018-04-06-async-await-final/)).
 
