@@ -39,7 +39,7 @@ let mut buf = [0; 1024];
 let mut cursor = 0;
 
 while cursor < 1024 {
-    cursor += socket.read(&mut buf)?;
+    cursor += socket.read(&mut buf[cursor..])?;
 }
 ```
 
@@ -65,15 +65,30 @@ Not only is the signature more complicated: it's also unwieldy to use, even if
 we employ async/await notation:
 
 ```rust
-let mut buf = Box::new([0; 1024]); // box this up so we're not moving it around
-let mut cursor = 0;
+struct Buf {
+    // box this up so we're not moving it around
+    data: Box<[u8, 1024]>,
 
-while cursor < 1024 {
+    cursor: usize,
+}
+
+impl AsMut<[u8]> for Buf {
+    fn as_mut(&mut self) -> &mut [u8] {
+        &mut self.data[self.cursor..]
+    }
+}
+
+let mut buf = Buf {
+    data: Box::new([0; 1024]),
+    cursor: 0,
+};
+
+while buf.cursor < 1024 {
     match await!(socket.read(buf)) {
         Ok((new_socket, new_buf, n)) => {
             socket = new_socket;
             buf = new_buf;
-            cursor += n;
+            buf.cursor += n;
         }
         Err((new_socket, new_buf, e)) => {
             socket = new_socket;
@@ -117,7 +132,7 @@ async {
     let mut cursor = 0;
 
     while cursor < 1024 {
-        cursor += await!(socket.read(&mut buf))?;
+        cursor += await!(socket.read(&mut buf[cursor..]))?;
     };
 
     buf
