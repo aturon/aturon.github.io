@@ -5,7 +5,7 @@ title:  "aturon.log: listening and trust, part 1"
 
 For me, most weeks working on Rust are fun — [exhilarating, even](http://aturon.github.io/2018/02/09/amazing-week/). But, just like with anything else, some weeks are hard.
 
-As this week draws to a close, I feel troubled. On the one hand, things are looking strong for the 2018 Edition (which I want to write more about soon). But on the other had, this week I locked two RFC threads, flagged a bunch of comments for moderation, and generally absorbed a lot of emotion from a lot of different quarters of the community. There’s a sense of simmering distrust.
+As this week draws to a close, I feel troubled. On the one hand, things are looking strong for the 2018 Edition (which I want to write more about soon). But on the other hand, this week I locked two RFC threads, flagged a bunch of comments for moderation, and generally absorbed a lot of emotion from a lot of different quarters of the community. There’s a sense of simmering distrust.
 
 I worry sometimes about becoming a victim of our own success: if our community grows more quickly than we can establish shared values/norms/culture, we could so easily descend into acrimony and tribalism. I’ve seen other language communities go through very painful periods, and I’m eager to try to steer Rust’s community around them if we can.
 
