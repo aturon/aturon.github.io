@@ -67,7 +67,7 @@ step:
 Of course, such reconciliations are not always possible, and certainly aren’t
 easy. It’s an aspiration, not an edict. **But Rust’s culture and design process
 is engineered to produce such outcomes**, by embracing pluralism and
-positive-sum thinking.
+positive-sum thinking:
 
 - **Pluralism** is about who we target: Rust seeks to simultaneously appeal to
   die-hard C++ programmers and to empower dyed-in-the-wool JS devs, and to reach
