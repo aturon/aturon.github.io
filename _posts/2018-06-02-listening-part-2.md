@@ -159,7 +159,7 @@ requires significant vulnerability and emotional labor:
 - Empathy, in order to genuinely "put on" someone else's perspective, needs and
   values as if they were your own.
 
-- Introspection, in order to reach a deeper understanding of one's own impulses and values.
+- Introspection, in order to reach a deeper understanding of your own impulses and values.
 
 We look for these skills when selecting people to join the Rust teams, and we
 expect them to do this kind of work when exploring a design space. But this is
