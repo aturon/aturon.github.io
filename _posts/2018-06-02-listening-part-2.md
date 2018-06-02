@@ -96,8 +96,8 @@ it" as a goal for our designs, nor do we "take the average" between opposed
 priorities (and please no one). Ultimately, we have to make hard decisions.
 
 It's the formal Rust teams, the people who make the final decisions, who are
-tasked to take in and care about a plurality of perspectives, but ultimately put
-forth a singular, coherent vision. They are the keepers of the vision, the
+tasked to take in and care about a plurality of *perspectives*, but ultimately put
+forth a singular, coherent *vision*. They are the keepers of the vision, the
 counterbalance to the process of exploration and give-and-take.
 
 ## Fear and power
