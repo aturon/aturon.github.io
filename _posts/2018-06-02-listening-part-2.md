@@ -15,13 +15,13 @@ listening and trust when doing design in the open.
 > because people won't listen. I say "On the internet, nobody can hear you being
 > subtle", and I mean it.
 
-That’s Linus Torvalds
+That’s Linus
+Torvalds
 [on talking and listening in OSS](https://marc.info/?l=linux-kernel&m=137391223711946&w=2).
-There is, of course, a long and continuing battle in the OSS world around codes of
-conduct, and Linus is often cited in these debates (by both sides). Given that
-the Rust community is firmly in the pro-CoC camp, it’s tempting to think that
-the kind of commentary Linus is describing here is simply not relevant in the
-Rust world.
+There is, of course, a long and continuing battle in the OSS world around codes
+of conduct, and Linus is often cited in these debates (by both sides). Given
+that the Rust community is firmly in the pro-CoC camp, it’s tempting to think
+that what Linus is describing here is simply not relevant in the Rust world.
 
 But notice that Linus talks about two things here: being subtle, and being
 nice. The “being nice” part is indeed covered by codes of conduct, and is by and
