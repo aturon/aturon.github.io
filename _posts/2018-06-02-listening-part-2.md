@@ -79,7 +79,7 @@ positive-sum thinking:
   coherent vision and set of values for the language. A zero-sum view would
   assume that apparent oppositions are fundamental, e.g., that appealing to the
   JS crowd inherently hurts the C++ one. A positive-sum view starts by seeing
-  different perspectives and priorities as *legitimate* and *worthwhile*, and a
+  different perspectives and priorities as *legitimate* and *worthwhile*, with a
   faith that **by respecting each other in this way, we can find strictly better
   solutions than had we optimized solely for one perspective.**
 
