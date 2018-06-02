@@ -171,9 +171,9 @@ What we need is to work against the vicious circle of escalation by creating a
 virtuous circle instead, based on humility and trust. **If we can trust each
 other to listen and take concerns seriously, we free ourselves to be uncertain
 about those concerns, and open to possibilities that superficially work against
-them**. In other words, we free ourselves to communicate with subtlety and
-nuance. Trust and humility go hand-in-hand. And they are the key to finding
-positive-sum outcomes.
+them**. In other words, we free ourselves to communicate and explore with
+subtlety and nuance. Trust and humility go hand-in-hand. And they are the key to
+finding positive-sum outcomes.
 
 This is why I feel distraught when I see accusations of bad faith, of the teams
 having an "agenda" and the "listening" done in the RFC process being a charade
