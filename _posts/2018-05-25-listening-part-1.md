@@ -65,4 +65,4 @@ So with all of that, why am I troubled? Because I’m seeing increasing signs of
 
 The Rust community prides itself on being a friendly and welcoming place, but it’s going to take constant, explicit work to keep it that way — and part of that work is being forthright about the cases where things have gotten less than friendly, pausing and working together to figure out why.
 
-In the next post on this topic, I plan to focus on the kinds of breakdown I’ve been seeing, and some of my hypotheses about the underlying causes.
+In the [next post](http://aturon.github.io/2018/06/02/listening-part-2/) on this topic, I plan to focus on the kinds of breakdown I’ve been seeing, and some of my hypotheses about the underlying causes.
