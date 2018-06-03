@@ -167,6 +167,14 @@ delicate work, and we do it best when the work is shared by the *whole*
 community, not just team members. And, in particular, "unsubtle" shouting driven
 by fear makes this work so, so much harder.
 
+This is why I feel distraught when I see accusations of bad faith, of people
+having an "agenda" and the "listening" done in the RFC process being a charade
+to avoid revolt. Or the sense of "luckily enough of us yelled to stop the
+terrifying original proposal from happening; the moment we stop speaking up,
+Those People will start pushing in that direction again". All of these
+sentiments indicate a rising distrust, a zero-sum power-focused framing, with
+a dose of tribalism to boot.
+
 What we need is to work against the vicious circle of escalation by creating a
 virtuous circle instead, based on humility and trust. **If we can trust each
 other to listen and take concerns seriously, we free ourselves to be uncertain
@@ -174,16 +182,6 @@ about those concerns, and open to possibilities that superficially work against
 them**. In other words, we free ourselves to communicate and explore with
 subtlety and nuance. Trust and humility go hand-in-hand. And they are the key to
 finding positive-sum outcomes.
-
-This is why I feel distraught when I see accusations of bad faith, of the teams
-having an "agenda" and the "listening" done in the RFC process being a charade
-to avoid revolt. Or the sense of "luckily enough of us yelled to stop the
-terrifying original proposal from happening; the moment we stop speaking up,
-Those People will start pushing in that direction again". All of these
-sentiments come from a place of distrust, a zero-sum power-focused framing, with
-a dose of tribalism to boot. It's corrosive to the process, to our goals and
-methodology -- and most importantly, to the people who are genuinely performing
-the work of listening, who make themselves vulnerable and then get burned.
 
 ---
 
