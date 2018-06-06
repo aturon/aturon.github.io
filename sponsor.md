@@ -44,7 +44,7 @@ If you're interested in being vetted for this list, please reach out.
 ## Interests: rustc (trait system), community work
 
 - [Patreon](https://www.patreon.com/leodasvacas)
-- [Github](https://github.com/leodasvacas/), [email](leoyvens@gmail.com)
+- [GitHub](https://github.com/leodasvacas/), [email](mailto:leoyvens@gmail.com)
 - Open to direct contract work
 
 ### Details
@@ -61,7 +61,7 @@ If you're interested in being vetted for this list, please reach out.
 ## Interests: IDEs, Cargo, rustc
 
 - [Patreon](https://www.patreon.com/matklad)
-- [Github](https://github.com/matklad), [email](aleksey.kladov@gmail.com)
+- [GitHub](https://github.com/matklad), [email](mailto:aleksey.kladov@gmail.com)
 - Open to direct contract work
 
 ### Details
@@ -78,7 +78,7 @@ If you're interested in being vetted for this list, please reach out.
 ## Interests: rustdoc, documentation
 
 - [Patreon](https://www.patreon.com/QuietMisdreavus)
-- [Github](https://github.com/QuietMisdreavus), [email](grey@quietmisdreavus.net)
+- [GitHub](https://github.com/QuietMisdreavus), [email](mailto:grey@quietmisdreavus.net)
 
 ### Details
 
@@ -92,7 +92,7 @@ If you're interested in being vetted for this list, please reach out.
 ## Interests: RLS and other dev tools
 
 - [Patreon](https://www.patreon.com/xanewok)
-- [Github](https://github.com/xanewok), [email](xanewok@gmail.com)
+- [GitHub](https://github.com/xanewok), [email](mailto:xanewok@gmail.com)
 - Open to direct contract work
 
 ### Details
@@ -107,7 +107,7 @@ If you're interested in being vetted for this list, please reach out.
 ## Interests: crossbeam, all things Rust concurrency
 
 - [Patreon](https://www.patreon.com/stjepang)
-- [Github](https://github.com/stjepang), [email](stjepang@gmail.com)
+- [GitHub](https://github.com/stjepang), [email](mailto:stjepang@gmail.com)
 - Open to direct contract work
 
 ### Details
@@ -126,7 +126,7 @@ If you're interested in being vetted for this list, please reach out.
 ## Interests: Rust on embedded devices
 
 - [Patreon](https://www.patreon.com/japaric/)
-- [Github](https://github.com/japaric), [email](jorge@japaric.io)
+- [GitHub](https://github.com/japaric), [email](mailto:jorge@japaric.io)
 - Open to direct contract work
 
 ### Details
@@ -147,7 +147,7 @@ I want Rust to become a major player in the field of embedded systems as I belie
 ## Interests: New Rustacean podcast
 
 - [Patreon](https://www.patreon.com/newrustacean/)
-- [Github](https://github.com/chriskrycho), [email](chris@chriskrycho.com)
+- [GitHub](https://github.com/chriskrycho), [email](mailto:chris@chriskrycho.com)
 
 ### Details
 
@@ -162,7 +162,7 @@ overviews, and more.
 ## Interests: Hello Rust! live-coding show
 
 - [Patreon](https://www.patreon.com/hellorust/)
-- [Github](https://github.com/mre)
+- [GitHub](https://github.com/mre)
 
 ### Details
 
