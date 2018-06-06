@@ -29,8 +29,8 @@ more visible.
 
 This page is a first attempt at facilitating sponsorship. **This is not an
 officially endorsed list**, but it is a list of Rustaceans that I have
-personally vetted and encourage you to support. Each of them has a long, public
-history of impactful work in the community.
+personally vetted and sponsored, and encourage you to support. Each of them has
+a long, public history of impactful work in the community.
 
 Use the Patreon links to sponsor individuals, contact them directly for contract
 work, or write me at aturon@mozilla.com to find another arrangement.
