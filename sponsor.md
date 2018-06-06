@@ -179,6 +179,7 @@ advanced patterns and tricks as well as how to write ergonomic code in Rust.
 
 - [Patreon](https://www.patreon.com/retep998)
 - [GitHub](https://github.com/retep998)
+- Open to direct contract work
 
 ### Details
 
