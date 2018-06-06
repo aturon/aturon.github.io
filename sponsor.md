@@ -69,7 +69,6 @@ If you're interested in being vetted for this list, please reach out.
 ### Details
 
 - **RLS**: as an original developer of the [Rust plugin](http://github.com/intellij-rust/intellij-rust) for JetBrains IDEs, I have a deep understanding of challenges and specifics of a good IDE backend. While I believe that writing a Rust compiler frontend from scratch in Kotlin was the best choice for IntelliJ, it is also important that the official Rust toolchain has all important IDE features as well. I've made a [few contributions](https://github.com/rust-lang-nursery/rls/commits?author=matklad) to RLS so far, because I was busy with IntelliJ Rust, but now I want to transfer more of my experience to this project.
-
 - Making `rustc` a better fit for IDEs: there are [big differences](https://www.reddit.com/r/rust/comments/5rhqj0/) in how command line compiler and IDE should process code for the best user experience. Incremental on-demand compilation is a great step towards making `rustc` more suited for IDEs, but there are more things that should be done. In particular, I would like to lay a solid foundation for IDEs by starting from the lowest level -- lexer and parser. The plan is outlined in the [libsyntax2 RFC](https://github.com/rust-lang/rfcs/pull/2256).
 - **Cargo**: I've working on Cargo for a long time. Apart from the usual maintenance work, I am especially interested in integration with IDEs and build systems.
 
