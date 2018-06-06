@@ -35,6 +35,8 @@ history of impactful work in the community.
 Use the Patreon links to sponsor individuals, contact them directly for contract
 work, or write me at aturon@mozilla.com to find another arrangement.
 
+If you're interested in being vetted for this list, please reach out.
+
 ---
 
 # Leonardo Yvens (@leodasvacas)
