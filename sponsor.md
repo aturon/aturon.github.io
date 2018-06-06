@@ -15,6 +15,8 @@ title: Sponsor work on Rust!
 | [Jorge Aparicio](https://www.patreon.com/japaric/) | [@japaric](https://github.com/japaric) | [Rust on embedded devices](#jorge-aparicio-japaric) |
 | [Chris Krycho](https://www.patreon.com/newrustacean/) | [@chriskrycho](https://github.com/chriskrycho) | [New Rustacean podcast](#chris-krycho-chriskrycho) |
 | [Matthias Endler](https://www.patreon.com/hellorust/) | [@mre](https://github.com/mre) | [Hello Rust! live-coding show](#matthias-endler-mre) |
+| [Peter Atashian](https://www.patreon.com/retep998) | [@retep998](https://github.com/retep998) | [winapi](https://github.com/retep998/winapi-rs) |
+| [Pierre Krieger](https://www.patreon.com/tomaka) | [@tomaka](https://github.com/tomaka) | [graphics APIs, audio APIs, Android packaging](#pierre-krieger-tomaka) |
 
 Rust and its ecosystem is developed by a diverse mix of staff (from a variety of
 companies) and volunteers, from all over the world and with a range of
@@ -169,3 +171,41 @@ overviews, and more.
 [A live-coding show](https://hello-rust.show/) about Rust, targeted towards
 intermediate Rust programmers who have already read the Rust book and want to learn
 advanced patterns and tricks as well as how to write ergonomic code in Rust.
+
+---
+
+# Peter Atashian (@retep998)
+
+## Interests: winapi
+
+- [Patreon](https://www.patreon.com/retep998)
+- [GitHub](https://github.com/retep998)
+
+### Details
+
+The [winapi crate](https://github.com/retep998/winapi-rs) provides raw FFI
+bindings to all of Windows API. They are gathered by hand using the Windows 10
+SDK from Microsoft
+
+---
+
+# Pierre Krieger (@tomaka)
+
+## Interests: graphics APIs, audio APIs, Android packaging
+
+- [Patreon](https://www.patreon.com/tomaka)
+- [GitHub](https://github.com/tomaka), [email](mailto:pierre.krieger1708@gmail.com)
+
+### Details
+
+- [Vulkano](http://vulkano.rs/) (~45k lines of code) is a safe wrapper around the Vulkan API. It is a low-level brick that allows you to interact with your GPU and execute graphical or compute (GPGPU) operations. Vulkano aims to be very explicit and predictable especially if you are familiar with the Vulkan API, but at the same time provide some high-level functionnalities. Ideal for building a game, a game engine, or a GPGPU application when performances and explicitness matter.
+
+- [Glium](https://github.com/glium/glium) (~33k lines of code, unmaintained) is a safe wrapper around OpenGL and OpenGL ES. It aims to provide an easy-to-use high-level API while still remaining predictable and not hiding what it does. Even though many people have liked glium, its main goal of being safe was determined to be too difficult because of the many problems with OpenGL itself.
+
+- [Android-rs-glue](https://github.com/tomaka/android-rs-glue) allows you to easily turn your Rust code into an Android package. After installing the Android SDK and NDK, run the `cargo apk` command and you will get an .apk file which you can then install on your device. Works out of the box with vulkano, glium, winit and glutin. Also provides a docker image.
+
+- [Winit](https://github.com/tomaka/winit) (~10k lines of code) is a cross-platform window creation library. It allows you to create a basic window on Windows, Linux, MacOS and Android, then lets you handle the events received by this window. In order to show something on the window, you are supposed to create an OpenGL, Vulkan, or DirectX context on top of it, but this is not covered by winit itself.
+
+- [Glutin](https://github.com/tomaka/glutin) (~7k lines of code) does the same as winit, but creates an OpenGL context in a cross-platform way on top of the window. The servo project from Mozilla uses a fork of glutin for its own windowing.
+
+(more projects detailed in the [Patreon page](https://www.patreon.com/tomaka))
