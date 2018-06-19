@@ -208,12 +208,12 @@ needed to uncover the right set of ideas.
 
 [twitter]: https://twitter.com/aaron_turon/status/1008153135515222017
 
-I don't think it's the job of the Rust Teams to seek *compromise*, which is a
-recipe for design by committee; we need a strong, coherent vision at the end of
-the day. I think we should be *convinced*, at least enough to see the margin of
-difference as small. And thus the role of the RFC process is precisely to
-facilitate deep digging, to explore ideas, tradeoffs and constraints and look
-for the option that genuinely seems best.
+I don't think it's the job of the Rust Teams to seek a *compromise solution*,
+which is a recipe for design by committee; we need a strong, coherent final
+design. I think we should be *convinced* that the solution is within striking
+distance of the best for our [plural community][last post]. And thus the role of
+the RFC process is precisely to facilitate deep digging, to explore ideas,
+tradeoffs and constraints and look for the option that genuinely seems best.
 
 ## Lived experience; active listening
 
