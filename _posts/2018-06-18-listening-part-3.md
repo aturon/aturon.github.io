@@ -5,11 +5,11 @@ title:  "aturon.log: listening and trust, part 3"
 
 [ergonomics initiative]: https://blog.rust-lang.org/2017/03/02/lang-ergonomics.html
 [2017 roadmap]: https://github.com/rust-lang/rfcs/pull/1774
-[confusing]: https://withoutboats.github.io/blog/rust/2017/01/04/the-rust-module-system-is-too-confusing.HTML
+[confusing]: https://withoutboats.github.io/blog/rust/2017/01/04/the-rust-module-system-is-too-confusing.html
 [inverting]: https://internals.rust-lang.org/t/lang-team-minutes-the-module-system-and-inverting-the-meaning-of-public/4804/
 [series]: http://aturon.github.io/2018/05/25/listening-part-1/
 
-In this this post in the [listening and trust series][series],
+In this third post in the [listening and trust series][series],
 I'm going to talk through one of the most intense discussions the Rust community has had:
 the module system changes that were part of last year's [ergonomics initiative].
 
