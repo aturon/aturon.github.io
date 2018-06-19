@@ -75,7 +75,7 @@ for further feedback.)
 [revised further]: https://internals.rust-lang.org/t/revisiting-modules-take-3/5715
 [initial RFC]: https://github.com/rust-lang/rfcs/pull/2108
 [second]: https://github.com/rust-lang/rfcs/pull/2121
-[third]: https://github.com/rust-lang/rfcs/pull/1774
+[third]: https://github.com/rust-lang/rfcs/pull/2126
 [is ongoing]: https://internals.rust-lang.org/t/the-great-module-adventure-continues/6678
 
 With that basic background in place, I want to examine some of the social
