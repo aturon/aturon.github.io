@@ -193,7 +193,7 @@ the above elements were at play**. Let me explain.
 It was not until very late in the process that we stopped proposing to drop
 `mod` statements, and there's no question that, had it not been for the
 persistence of a few people, it wouldn't've happened. Power was, indeed,
-wielded. But the reason changing the proposal wasn't simply "well, we can't get
+wielded. But the reason for changing the proposal wasn't simply "well, we can't get
 this through, so let's scale back". Rather, those lengthy comment threads and
 disagreements forced us all to dig deeper into the problem space. And we
 eventually learned that our original analysis of the core problem was just
