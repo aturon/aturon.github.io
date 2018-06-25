@@ -17,6 +17,7 @@ title: Sponsor work on Rust!
 | [Matthias Endler](https://www.patreon.com/hellorust/) | [@mre](https://github.com/mre) | [Hello Rust! live-coding show](#matthias-endler-mre) |
 | [Peter Atashian](https://www.patreon.com/retep998) | [@retep998](https://github.com/retep998) | [winapi](https://github.com/retep998/winapi-rs) |
 | [Pierre Krieger](https://www.patreon.com/tomaka) | [@tomaka](https://github.com/tomaka) | [graphics APIs, audio APIs, Android packaging](#pierre-krieger-tomaka) |
+| [Florian Gilcher](https://yakshav.es/sponsor-florian) | [@skade](https://github.com/skade) | [RustFest conferences, Community team, Events team lead](https://blog.rustfest.eu/past_events/) |
 
 Rust and its ecosystem is developed by a diverse mix of staff (from a variety of
 companies) and volunteers, from all over the world and with a range of
