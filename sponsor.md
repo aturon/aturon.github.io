@@ -129,18 +129,27 @@ If you're interested in being vetted for this list, please reach out.
 
 - [Patreon](https://www.patreon.com/japaric/)
 - [GitHub](https://github.com/japaric), [email](mailto:jorge@japaric.io)
-- Open to direct contract work
 
 ### Details
 
 I want Rust to become a major player in the field of embedded systems as I believe it holds so much potential to improve the status quo. To that effect, I have been doing a bunch of groundwork in this area. Here's some of my recent work:
 
-- [Xargo](https://github.com/japaric/xargo), a Cargo wrapper for `no-std` development.
+- Lead of the [embedded devices WG](https://github.com/rust-lang-nursery/embedded-wg). This WG is an official part of the Rust project and we are working towards making embedded Rust a first class citizen. Check our [goals for the 2018 edition](https://github.com/rust-lang-nursery/embedded-wg/issues?q=is%3Aopen+is%3Aissue+milestone%3A%222018+edition%22).
+- [Embedded Rust on stable](https://github.com/rust-lang-nursery/embedded-wg/issues/42)
+- [Xargo](https://github.com/japaric/xargo), a Cargo wrapper for `no-std` development. Used for embedded, OS and game development! Notable users: [Baidu](https://github.com/baidu/rust-sgx-sdk), [Chucklefish](https://www.reddit.com/r/rust/comments/78bowa/hey_this_is_kyren_from_chucklefish_we_make_and/) and [Redox OS](https://www.redox-os.org/).
+- [Cross](https://github.com/japaric/cross#cross), a Cargo wrapper that eases cross compiling Rust programs to tons of different architectures (ARM, MIPS, PowerPC, System Z, etc.). Used by Microsoft in their [Azure IoT Edge project](https://github.com/Azure/iotedge/tree/master/edgelet) build system.
 - [`svd2rust`](https://docs.rs/svd2rust), a Rust code generator that produces an API to access a device's peripherals from SVD files.
-- A bunch of crates: [`cortex-m`](https://docs.rs/cortex-m) for access to common Cortex-M functionality, device crates like the [`stm32f30x`](https://docs.rs/stm32f30x), Board Support Package (BSP) crates like the [`f3`](https://docs.rs/f3) and miscellaneous `no-std` crates like [`fpa`](https://docs.rs/fpa) for fast Fixed Point Arithmetic.
-- Compiler hacking: [`-Z linker-flavor`](https://github.com/rust-lang/rust/pull/40018), [`#[used]`](https://github.com/rust-lang/rust/pull/39987), [MSP430 support](https://github.com/rust-lang/rust/pull/37672), etc.
+- A bunch of `no_std` crates: [`cortex-m`](https://docs.rs/cortex-m) for access to common Cortex-M functionality, device crates like the [`stm32f30x`](https://docs.rs/stm32f30x), Board Support Package (BSP) crates like the [`f3`](https://docs.rs/f3) and miscellaneous `no-std` crates like [`fpa`](https://docs.rs/fpa) for fast Fixed Point Arithmetic.
+- [Compiler hacking](https://github.com/rust-lang/rust/pulls?q=is%3Apr+author%3Ajaparic+is%3Aclosed): [`-Z linker-flavor`](https://github.com/rust-lang/rust/pull/40018), [`#[used]`](https://github.com/rust-lang/rust/pull/39987), [MSP430 support](https://github.com/rust-lang/rust/pull/37672), [llvm-tools component](https://github.com/rust-lang/rust/pull/50336), etc.
 - [The Discovery book](https://japaric.github.io/discovery/), a beginner friendly text about programming microcontrollers in Rust. And,
 - [The Real Time for The Masses framework](https://docs.rs/cortex-m-rtfm/) for embedded concurrent programming.
+
+But there's still lots of ecosystem and tooling work to do! Among my ongoing work you'll find:
+
+- Pushing embedded Rust on stable [over the finish line](https://github.com/rust-lang/rust/pull/51366).
+- Embedded Rust documentation: writing the [embedded Rust book](https://github.com/rust-lang-nursery/embedded-wg/issues/56), finishing the [embedonomicon](https://github.com/rust-lang-nursery/embedded-wg/issues/59), updating the [Discovery](https://japaric.github.io/discovery/) book
+- Expanding the members of the rust-embedded org to have more people maintain the embedded Rust / Cortex-M ecosystem
+- Making the Real Time for The Masses framework work in a future stable release
 
 ---
 
