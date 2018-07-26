@@ -162,7 +162,7 @@ Proposals for addressing this problem fall into basically two camps:
 
 - **Stated toolchain**. There have been several RFCs proposing to
   specify toolchain requirements as part of Cargo.toml, *and have those
-  requirements effect dependency resolution*;
+  requirements affect dependency resolution*;
   the [latest such RFC][mv] is
   currently open. In this model, crates could freely bump the minimum compiler
   version needed, and Cargo would only resolve to a version of the crate that
