@@ -191,6 +191,6 @@ strong belief that doing so will lead to strictly better ideas and decisions**,
 enabling us to find positive-sum outcomes. But I also think it's vital for
 keeping our plural community whole and inclusive.
 
-In the next post in this series, I'll present some concrete case studies from
-Rust's past and present, examining how the discussions functioned and what we
-might learn from them.
+In the [next post](http://aturon.github.io/2018/06/18/listening-part-3/) in 
+this series, I'll present some concrete case studies from Rust's past and present,
+examining how the discussions functioned and what we might learn from them.
