@@ -7,7 +7,7 @@ title:  "aturon.log: listening and trust, part 3"
 [2017 roadmap]: https://github.com/rust-lang/rfcs/pull/1774
 [confusing]: https://withoutboats.github.io/blog/rust/2017/01/04/the-rust-module-system-is-too-confusing.html
 [inverting]: https://internals.rust-lang.org/t/lang-team-minutes-the-module-system-and-inverting-the-meaning-of-public/4804/
-[series]: http://aturon.github.io/2018/05/25/listening-part-1/
+[series]: http://aturon.github.io/tech/2018/05/25/listening-part-1/
 
 In this third post in the [listening and trust series][series],
 I'm going to talk through one of the most intense discussions the Rust community has had:
@@ -261,7 +261,7 @@ dialogue above. But even better if we can each do some of that work privately
 rather "I'm concerned about refactoring workflows; here's what my personal one
 looks like..."
 
-[last post]: http://aturon.github.io/2018/06/02/listening-part-2/
+[last post]: http://aturon.github.io/tech/2018/06/02/listening-part-2/
 
 ---
 

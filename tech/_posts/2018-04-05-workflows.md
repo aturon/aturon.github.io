@@ -73,7 +73,7 @@ metapackages could more generally be a way of *abstracting a chunk of
 `Cargo.toml`*, including not just normal dependencies, but also tasks, build
 scripts, and more.
 
-[metapackages]: http://aturon.github.io/2016/07/27/rust-platform/
+[metapackages]: http://aturon.github.io/tech/2016/07/27/rust-platform/
 
 In this brave new world, a single dependency entry in `Cargo.toml` is generally
 all that is ever needed to bring in a conceptual package.

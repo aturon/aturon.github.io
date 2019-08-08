@@ -3,7 +3,7 @@ layout: post
 title:  "aturon.log: listening and trust, part 1"
 ---
 
-For me, most weeks working on Rust are fun — [exhilarating, even](http://aturon.github.io/2018/02/09/amazing-week/). But, just like with anything else, some weeks are hard.
+For me, most weeks working on Rust are fun — [exhilarating, even](http://aturon.github.io/tech/2018/02/09/amazing-week/). But, just like with anything else, some weeks are hard.
 
 As this week draws to a close, I feel troubled. On the one hand, things are looking strong for the 2018 Edition (which I want to write more about soon). But on the other hand, this week I locked two RFC threads, flagged a bunch of comments for moderation, and generally absorbed a lot of emotion from a lot of different quarters of the community. There’s a sense of simmering distrust.
 
@@ -65,4 +65,4 @@ So with all of that, why am I troubled? Because I’m seeing increasing signs of
 
 The Rust community prides itself on being a friendly and welcoming place, but it’s going to take constant, explicit work to keep it that way — and part of that work is being forthright about the cases where things have gotten less than friendly, pausing and working together to figure out why.
 
-In the [next post](http://aturon.github.io/2018/06/02/listening-part-2/) on this topic, I plan to focus on the kinds of breakdown I’ve been seeing, and some of my hypotheses about the underlying causes.
+In the [next post](http://aturon.github.io/tech/2018/06/02/listening-part-2/) on this topic, I plan to focus on the kinds of breakdown I’ve been seeing, and some of my hypotheses about the underlying causes.
