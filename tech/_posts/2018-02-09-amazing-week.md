@@ -53,4 +53,4 @@ like the list above, can blow you away.
 [a brilliant way to make "context arguments" more ergonomic]: https://github.com/rust-lang-nursery/futures-rfcs/pull/2#issuecomment-363923477
 [0.2 branch]: https://github.com/rust-lang-nursery/futures-rs/tree/0.2
 [leading the 2018 Domain Working Groups]: https://internals.rust-lang.org/t/announcing-the-2018-domain-working-groups/6737
-[the vision we've been working toward]: http://aturon.github.io/2018/02/06/portability-vision/
+[the vision we've been working toward]: http://aturon.github.io/tech/2018/02/06/portability-vision/

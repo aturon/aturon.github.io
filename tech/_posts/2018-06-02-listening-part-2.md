@@ -3,7 +3,7 @@ layout: post
 title:  "aturon.log: listening and trust, part 2"
 ---
 
-In [the previous post](http://aturon.github.io/2018/05/25/listening-part-1/) in
+In [the previous post](http://aturon.github.io/tech/2018/05/25/listening-part-1/) in
 this series, I recounted an early lesson for the Rust Core Team about working in
 the open. In this post, I want to talk about the delicate interplay between
 listening and trust when doing design in the open.
@@ -191,6 +191,6 @@ strong belief that doing so will lead to strictly better ideas and decisions**,
 enabling us to find positive-sum outcomes. But I also think it's vital for
 keeping our plural community whole and inclusive.
 
-In the [next post](http://aturon.github.io/2018/06/18/listening-part-3/) in 
+In the [next post](http://aturon.github.io/tech/2018/06/18/listening-part-3/) in
 this series, I'll present some concrete case studies from Rust's past and present,
 examining how the discussions functioned and what we might learn from them.

@@ -217,7 +217,7 @@ solution would have to be "obviously" sound -- no clever tricks. The
 `specialize` modality has a very natural interpretation in Chalk, where we are
 already juggling [other modalities related to crate-local reasoning][negative].
 
-[negative]: https://aturon.github.io/2017/04/24/negative-chalk/
+[negative]: https://aturon.github.io/tech/2017/04/24/negative-chalk/
 
 Finally, it's worth saying that the particular mechanism here is orthogonal to
 the many other design questions around specialization, including things like
