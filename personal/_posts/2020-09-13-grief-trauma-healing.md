@@ -1,0 +1,36 @@
+---
+layout: post
+title:  "To heal, first feel your wounds"
+---
+
+Grief has been in my life for two years. It took me by surprise, and it changed everything.
+
+There are some Big Words that we reserve for Big Circumstances. “Grief”, we see as a sacred process surrounding a Big Loss. “Trauma”, we see as a wound from a Big Event, like a war or imminent physical threat. In therapy, I’m learning about the urge to draw lines, making binaries saying “that’s grief, that’s trauma, that’s not”. I’m learning that while there is a place for binaries, they often lead us astray, keeping us pinned to an unhelpful story, or preventing us from accepting a helpful one.
+
+It was easier for me to admit to grief than to trauma, because the evidence was unmistakeable, even if the causes were less familiar.
+
+My first bout of grief, like most that followed, came on the heels of an intensely positive moment. I felt safe, loved, held. I was a little high. And suddenly, without warning, a shocking sentence formed on my lips, a total non-sequitur: “there’s a hole where my dad should be”. What followed was one of the most animalistic moments I have ever experienced. I sobbed, screamed, moved around on all fours, and felt as if I were vomiting. It was completely instinctual. Throughout, a parade of memories marched in my mind, memories of childhood and beyond, supplemented by new feelings and new understanding.
+
+For the first time, I let myself see and feel my experience of emotional neglect. I saw my years of longing, my failed attempts at connection. I felt what I had unconsciously held at bay throughout my life: the pain of not being understood, loved, and attended to in the ways I needed at the time. After three decades, I let go of the story of my father’s perfection, the impossibility of him hurting me. I let myself see and feel my wounds, and I grieved.
+
+I think we fear grief because it seems immensely painful. But these days I welcome grief, because it is me admitting to the pain that is already there, and allowing that pain to move through me and be released. It is a letting go of resistance to reality, feeling the feelings that are appropriate to a new admission. Grief is reconciliation to a world that differs from the story we have clung to. The bigger the story, the bigger the grief.
+
+When someone important to us dies, we grieve the story we’ve clung to that tells us they will always be in our life, the story of our plans and hopes and dreams with them. We’ve organized ourselves around that story, made it load bearing in the meaning of our life. That is as it should be. And in proportion, when we grieve we adjust our assumptions, and feel the pain of doing so.
+
+If grief is relinquishing load-bearing assumptions, trauma is experiencing something beyond our ability to cope -- an overwhelming experience that cannot be metabolized head-on. We have to shut it down somehow, which often means telling ourselves a story that denies part of what happened, because the associated feelings are just too much.
+
+As a child, abuse and neglect are overwhelming, especially at the hands of the adults we’re programmed to see as our perfect caretakers. We invent a story that maintains their perfection, either denying what we experienced, or finding a way to take the blame for it -- anything to keep the horror of the truth at bay. But the mind is not entirely fooled, and the exiled horror and pain remain, locked away behind a story that requires increasing distortion to cling to, lest some of the pain leak out.
+
+After that first session of grief around my childhood, something even more surprising happened. I found that my typical social anxiety just... disappeared. I stopped shrinking from strangers; I didn’t feel I was an imposition. I ceased thinking that I needed to know all the rules and expectations; I was simply present, in myself, and confident that that was enough. While that magical period lasted for only a couple of weeks at first, it provided a glimpse into what healing could mean for me. It showed me that so much of what I had taken for granted about myself was, in fact, changeable. And in the two years since then, this kind of change has begun to take deeper root -- always punctuated by the release of grief.
+
+I have C-PTSD. The “C” stands for “complex”, which means that the traumas I experienced were not isolated events (like witnessing horrible violence), but rather ongoing situations. The coping strategies are likewise complex. I weaved stories hewing to key binaries, like the “perfection” of my father. I began to assume there was something innately undesirable about me, that I needed to carefully attend to the expectations of everyone around me and make sure I followed their rules, lest I be seen as a burden. Social anxiety was an inevitable result -- especially around strangers, where I would do the work of discovering rules and expectations in real time. There was no room for my actual self. I was too busy protecting myself from further trauma.
+
+PTSD has to do with exactly this: the felt, ongoing threat that past unprocessed trauma could resurface. With “simple” PTSD trauma recurs via explicit flashbacks, where something in the present sends you completely back to a specific event in the past. With C-PTSD, the flashbacks are more subtle; they are termed “emotional flashbacks”, meaning that you begin _feeling_ the way you did for in the past, even though you have a cognitive grasp of the present. Either way you re-expereince what you’ve work so hard to contain, which often leads to a redoubling of your coping strategies.
+
+With C-PTSD, it’s possible to live in a state of perpetual flashback, where every present experience is colored by unresolved past trauma and the ways you tried to deal with it. You can become a servant of your coping strategies. Gradually, the color and meaning and feeling of your life fade. Everything becomes a disconnected game of self-protection against the trauma you’ve never fully faced.
+
+Grief is a way through. Grieving is a process of overcoming denial and other old coping strategies, and making your way toward acceptance of what really happened. It metabolizes those experiences that were originally too overwhelming to handle. When you begin to see and feel the fuller truth of what happened, you are released from your strategies and the beliefs they encompassed. Radical change is possible. Anxiety can melt away. All because you can see the past for what it is, and the present for what it is, too.
+
+I’ve now grieved aspects of every major relationship of my life. When I slowly realize that I’ve been dwelling in flashback, I know that eventually grief will break through. Each time around the cycle, I feel freer for longer, letting go of another layer of rigid belief and behavior meant to keep the trauma away. I’ve been able to feel and process a bit more trauma, integrating it into a more whole life story. And I find myself fully in my story in the present, empowered to take it in new directions, at last.
+
+If you want to learn more about trauma, C-PTSD, and grief, I recommend Pete Walker’s “Complex PTSD: From Surviving to Thriving”, a book that helped me understand my experiences and empowered me with tools to navigate them.
